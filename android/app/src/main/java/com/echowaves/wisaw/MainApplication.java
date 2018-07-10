@@ -1,7 +1,8 @@
-package com.wisaw;
+package com.echowaves.wisaw;
 
 import android.app.Application;
 
+import com.echowaves.wisaw.BuildConfig;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;

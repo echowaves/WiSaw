@@ -1,4 +1,4 @@
-package com.wisaw;
+package com.echowaves.wisaw;
 
 import com.facebook.react.ReactActivity;
 
