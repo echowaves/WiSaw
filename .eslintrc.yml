@@ -1,8 +1,0 @@
-extends: airbnb
-plugins:
-  - react
-rules:
-  no-console: off
-  semi: off
-env:
-  jasmine: true
