@@ -2,7 +2,32 @@ extends: airbnb
 plugins:
   - react
 rules:
+  # no-use-before-define:
+  #   - 0
+  #   -
+  #     functions: true
+  #     classes: true
+
   no-console: off
   semi: off
+  react/jsx-filename-extension:
+    - 1
+    - extensions:
+      - '.js'
+      - '.jsx'
+  # react/prefer-stateless-function:
+  #   - 0
+  #   - ignorePureComponents: true
+
+  # react/destructuring-assignment: 0
+
+  # react/prop-types:
+  #   - 0
+  #   -
+  #     ignore:
+  #       -
+  #     customValidators:
+  #       -
+
 env:
   jasmine: true
