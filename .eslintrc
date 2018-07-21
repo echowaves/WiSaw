@@ -27,7 +27,7 @@
 		"arrow-body-style": [1, "as-needed"],
 		"arrow-parens": [1, "as-needed"],
 		"class-methods-use-this": 0,
-		"comma-dangle": [1, "never"],
+		"comma-dangle": [1, "always"],
 		"consistent-return": 0,
 		"eol-last": 0,
 		"func-names": 0,
@@ -98,7 +98,7 @@
 		"react/require-extension": 0,
 		"react/self-closing-comp": 1,
 		"react/sort-comp": 1,
-		"semi": [1, "always"]
+		"semi": [1, "never"]
 	},
 	"settings": {
 		"react": {
