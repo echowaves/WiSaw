@@ -1,7 +1,11 @@
-import React, { Component } from 'react'
-import { View, Text } from 'react-native'
+import React, { Component, } from 'react'
+import { View, Text, } from 'react-native'
 
 class HomeScreen extends Component {
+	static navigationOptions = {
+		title: 'hear&now',
+	}
+
 	render() {
 		return (
 			<View>
