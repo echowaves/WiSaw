@@ -3,18 +3,21 @@ import { View, Text, } from 'react-native'
 import { Icon, } from 'react-native-elements'
 
 class HomeScreen extends Component {
-	static navigationOptions = {
-		headerTitle: 'hear&now',
-		headerRight: (
-			<Icon
-				onPress={() => alert('This is a button!')}
-				name="feedback"
-				raised
-				reverse
-				color='#00aced'
-			/>
-		),
-	}
+	static navigationOptions = ({ navigation, }) => {
+     return {
+       headerTitle: 'hear&now',
+       headerRight: (
+				 <Icon
+ 						onPress={() => navigation.navigate('Feedback')}
+ 						name="feedback"
+ 						raised
+ 						reverse
+ 						color="#00aced"
+ 					/>
+       ),
+     }
+   }
+
 
 	render() {
 		return (
