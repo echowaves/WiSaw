@@ -9,11 +9,11 @@ class HomeScreen extends Component {
 			<Icon
 				onPress={() => navigation.navigate('Feedback')}
 				name="feedback"
-				raised
-				reverse
 				color="#00aced"
+				containerStyle={{ marginRight: 10, }}
 			/>
 		),
+		headerBackTitle: null,
 	})
 
 

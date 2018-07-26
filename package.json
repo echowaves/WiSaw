@@ -12,6 +12,7 @@
     "preset": "react-native"
   },
   "dependencies": {
+    "ajv": "6.5.2",
     "react": "16.4.1",
     "react-native": "^0.56.0",
     "react-native-elements": "^0.19.1",
