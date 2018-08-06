@@ -1,8 +1,17 @@
 import React, { Component, } from 'react'
-import { View, Text, } from 'react-native'
+import {
+	View,
+	Text,
+	FlatList,
+	StyleSheet,
+} from 'react-native'
+import { connect, } from 'react-redux'
 import { Icon, } from 'react-native-elements'
 
-class HomeScreen extends Component {
+import { listPhotos, } from './reducer'
+
+
+class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
 		headerTitle: 'hear&now',
 		headerRight: (
@@ -21,11 +30,11 @@ class HomeScreen extends Component {
 		return (
 			<View>
 				<Text>
-					HomeScreen 2
+					Photos List
 				</Text>
 			</View>
 		)
 	}
 }
 
-export default HomeScreen
+export default PhotosList
