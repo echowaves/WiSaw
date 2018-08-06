@@ -1,8 +1,8 @@
 import React, { Component, } from 'react'
 import { createStackNavigator, } from 'react-navigation'
 
-import HomeScreen from './src/screens/HomeScreen'
-import FeedbackScreen from './src/screens/FeedbackScreen'
+import HomeScreen from './src/components/home'
+import FeedbackScreen from './src/components/feedback'
 
 const RootStack = createStackNavigator({
 	Home: {

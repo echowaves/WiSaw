@@ -21,7 +21,7 @@ class HomeScreen extends Component {
 		return (
 			<View>
 				<Text>
-					HomeScreen
+					HomeScreen 2
 				</Text>
 			</View>
 		)
