@@ -1,8 +1,8 @@
 import { combineReducers, } from 'redux'
-import photosListReducers from './screens/PhotosList/reducer'
+import photosList from './screens/PhotosList/reducer'
 
 const reducers = combineReducers({
-	photosListReducers,
+	photosList,
 })
 
 export default reducers

@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
 
 
 const mapStateToProps = state => {
-	const storedPhotos = [] // state.photos.map(photo => ({ key: photo.id, ...photo, }))
+	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, }))
 	return {
 		photos: storedPhotos,
 	}
