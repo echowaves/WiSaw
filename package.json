@@ -12,8 +12,6 @@
     "preset": "react-native"
   },
   "dependencies": {
-    "ajv": "6.5.2",
-    "axios": "0.18.0",
     "react": "16.4.2",
     "react-native": "0.56.0",
     "react-native-elements": "0.19.1",
@@ -21,7 +19,7 @@
     "react-navigation": "2.11.2",
     "react-redux": "5.0.7",
     "redux": "4.0.0",
-    "redux-axios-middleware": "4.0.0"
+    "redux-thunk": "2.3.0"
   },
   "devDependencies": {
     "babel-eslint": "8.2.6",

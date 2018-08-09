@@ -1,11 +1,11 @@
 import React, { Component, } from 'react'
+import { StyleSheet, View, } from 'react-native'
 import { createStackNavigator, } from 'react-navigation'
-import { createStore, applyMiddleware, } from 'redux'
+import { createStore, applyMiddleware, compose, } from 'redux'
 import { Provider, } from 'react-redux'
-import axios from 'axios'
-import axiosMiddleware from 'redux-axios-middleware'
+import ReduxThunk from 'redux-thunk'
 
-import wisawApp from './src'
+import reducers from './src'
 
 import PhotosList from './src/screens/PhotosList'
 import FeedbackScreen from './src/screens/Feedback'
@@ -22,19 +22,28 @@ const RootStack = createStackNavigator({
 	initialRouteName: 'PhotosList',
 })
 
-const client = axios.create({
-	baseURL: 'https://api.github.com',
-	responseType: 'json',
-})
-
-const store = createStore(wisawApp, applyMiddleware(axiosMiddleware(client)))
+let composeEnhancers = compose
+/* eslint no-undef: */
+if (__DEV__) {
+	composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+}
+const store = createStore(reducers, composeEnhancers(), applyMiddleware(ReduxThunk))
 
 export default class App extends Component {
 	render() {
 		return (
 			<Provider store={store}>
-				<RootStack />
+				<View style={styles.container}>
+					<RootStack />
+				</View>
 			</Provider>
 		)
 	}
 }
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		backgroundColor: '#fff',
+	},
+})

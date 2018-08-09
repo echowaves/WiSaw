@@ -25,6 +25,7 @@ class PhotosList extends Component {
 		headerBackTitle: null,
 	})
 
+	// state = { photos: [], }
 
 	componentDidMount() {
 		const { listPhotos, } = this.props
@@ -41,11 +42,11 @@ class PhotosList extends Component {
 	)
 
 	render() {
-		const { repos, } = this.props
+		const { photos, } = this.props
 		return (
 			<FlatList
 				styles={styles.container}
-				data={repos}
+				data={photos}
 				renderItem={this.renderItem}
 			/>
 		)
@@ -65,9 +66,9 @@ const styles = StyleSheet.create({
 
 
 const mapStateToProps = state => {
-	const storedPhotos = state.photos.map(photo => ({ key: photo.id, ...photo, }))
+	const storedPhotos = [] // state.photos.map(photo => ({ key: photo.id, ...photo, }))
 	return {
-		repos: storedPhotos,
+		photos: storedPhotos,
 	}
 }
 
