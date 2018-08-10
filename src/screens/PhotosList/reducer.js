@@ -5,7 +5,6 @@ export const GET_PHOTOS_FAIL = 'wisaw/photos/LOAD_FAIL'
 const initialState = { photos: [], }
 
 export default function reducer(state = initialState, action) {
-	console.log({ action,	})
 	switch (action.type) {
 		case GET_PHOTOS:
 			return {
@@ -17,7 +16,7 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				loading: false,
-				photos: [], // action.payload,
+				photos: action.payload,
 				error: null,
 			}
 		case GET_PHOTOS_FAIL:
@@ -33,7 +32,6 @@ export default function reducer(state = initialState, action) {
 }
 
 export function listPhotos() {
-	console.log('list photos called')
 	return async dispatch => {
 		try {
 			const response = await fetch('https://api.wisaw.com/photos/feed', {
@@ -52,10 +50,10 @@ export function listPhotos() {
 					},
 				}),
 			})
-			console.log(response)
+			const responseJson = await response.json()
 			dispatch({
 				type: GET_PHOTOS_SUCCESS,
-				payload: response.body.photos,
+				payload: responseJson.photos,
 			})
 		} catch (err) {
 			dispatch({

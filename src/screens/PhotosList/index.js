@@ -25,8 +25,6 @@ class PhotosList extends Component {
 		headerBackTitle: null,
 	})
 
-	// state = { photos: [], }
-
 	componentDidMount() {
 		const { listPhotos, } = this.props
 		listPhotos()
