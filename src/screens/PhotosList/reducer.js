@@ -50,6 +50,7 @@ export function listPhotos() {
 					},
 				}),
 			})
+			// await new Promise(resolve => setTimeout(resolve, 3000)); // 3 sec
 			const responseJson = await response.json()
 			dispatch({
 				type: GET_PHOTOS_SUCCESS,

@@ -1,5 +1,17 @@
 import React, { Component, } from 'react'
 import {
+	BallIndicator,
+	BarIndicator,
+	DotIndicator,
+	MaterialIndicator,
+	PacmanIndicator,
+	PulseIndicator,
+	SkypeIndicator,
+	UIActivityIndicator,
+	WaveIndicator,
+} from 'react-native-indicators'
+
+import {
 	Text,
 	TouchableOpacity,
 	FlatList,
@@ -41,6 +53,10 @@ class PhotosList extends Component {
 
 	render() {
 		const { photos, } = this.props
+		if (photos.length === 0) {
+			// return (<Text styles={styles.container}>No Photos Loaded yet.</Text>)
+			return (<DotIndicator color="#00aced" />)
+		}
 		return (
 			<FlatList
 				styles={styles.container}
