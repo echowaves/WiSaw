@@ -1,21 +1,12 @@
 import React, { Component, } from 'react'
-import {
-	BallIndicator,
-	BarIndicator,
-	DotIndicator,
-	MaterialIndicator,
-	PacmanIndicator,
-	PulseIndicator,
-	SkypeIndicator,
-	UIActivityIndicator,
-	WaveIndicator,
-} from 'react-native-indicators'
 
 import {
 	Text,
 	TouchableOpacity,
 	FlatList,
 	StyleSheet,
+	ActivityIndicator,
+	View,
 } from 'react-native'
 import { connect, } from 'react-redux'
 import { Icon, } from 'react-native-elements'
@@ -54,15 +45,32 @@ class PhotosList extends Component {
 	render() {
 		const { photos, } = this.props
 		if (photos.length === 0) {
-			// return (<Text styles={styles.container}>No Photos Loaded yet.</Text>)
-			return (<DotIndicator color="#00aced" />)
+			// return ()
+			return (
+				<View>
+					<ActivityIndicator
+						size="large"
+						color="#00aced"
+						style={{
+							position: 'absolute',
+							left: 0,
+							right: 0,
+							bottom: 0,
+							top: 20,
+						}}
+					/>
+					<Text styles={styles.container}>No Photos.</Text>
+				</View>
+			)
 		}
 		return (
-			<FlatList
-				styles={styles.container}
-				data={photos}
-				renderItem={this.renderItem}
-			/>
+			<View>
+				<FlatList
+					styles={styles.container}
+					data={photos}
+					renderItem={this.renderItem}
+				/>
+			</View>
 		)
 	}
 }
