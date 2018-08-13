@@ -93,6 +93,9 @@ class PhotosList extends Component {
 					renderItem={this.renderItem}
 					keyExtractor={(item, index) => index.toString()}
 					removeClippedSubviews
+					showsVerticalScrollIndicator={false}
+					horizontal={false}
+					numColumns={3}
 				/>
 			</View>
 		)
