@@ -38,7 +38,7 @@ class PhotosList extends Component {
 			style={styles.item}
 			onPress={() => navigation.navigate('Detail', { name: item.name, })
 			}>
-			<Text>{item.name}</Text>
+			<Text>{item.id}</Text>
 		</TouchableOpacity>
 	)
 
@@ -69,6 +69,7 @@ class PhotosList extends Component {
 					styles={styles.container}
 					data={photos}
 					renderItem={this.renderItem}
+					keyExtractor={(item, index) => index.toString()}
 				/>
 			</View>
 		)
