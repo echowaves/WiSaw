@@ -2,17 +2,22 @@ import React, { Component, } from 'react'
 
 import {
 	Text,
-	TouchableOpacity,
 	FlatList,
 	StyleSheet,
 	ActivityIndicator,
 	View,
+	Dimensions,
 } from 'react-native'
+
 import { connect, } from 'react-redux'
 import { Icon, } from 'react-native-elements'
 
+import { Button, } from 'native-base'
+import { Image, } from 'react-native-animatable'
+
 import { listPhotos, } from './reducer'
 
+const WIDTH = Dimensions.get('window').width
 
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -34,12 +39,29 @@ class PhotosList extends Component {
 	}
 
 	renderItem = ({ item, navigation, }) => (
-		<TouchableOpacity
-			style={styles.item}
-			onPress={() => navigation.navigate('Detail', { name: item.name, })
-			}>
-			<Text>{item.id}</Text>
-		</TouchableOpacity>
+		<Button
+			onPress={() => (item.id)}
+			style={{
+				backgroundColor: 'transparent',
+				borderRadius: 0,
+				height: 80,
+				width: WIDTH / 3,
+			}}>
+			<Image
+				animation="bounceIn"
+				delay={100}
+				duration={500}
+				source={{ uri: item.getThumbUrl, }}
+				style={{
+					height: 80,
+					left: 0,
+					position: 'absolute',
+					resizeMode: 'cover',
+					top: 0,
+					width: WIDTH / 3,
+				}}
+			/>
+		</Button>
 	)
 
 	render() {
@@ -70,6 +92,7 @@ class PhotosList extends Component {
 					data={photos}
 					renderItem={this.renderItem}
 					keyExtractor={(item, index) => index.toString()}
+					removeClippedSubviews
 				/>
 			</View>
 		)
