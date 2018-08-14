@@ -7,13 +7,14 @@ import {
 	ActivityIndicator,
 	View,
 	Dimensions,
+	Image,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
 import { Icon, } from 'react-native-elements'
 
 import { Button, } from 'native-base'
-import { Image, } from 'react-native-animatable'
+// import { Image, } from 'react-native-animatable'
 
 import { listPhotos, } from './reducer'
 
@@ -48,9 +49,9 @@ class PhotosList extends Component {
 				width: WIDTH / 3,
 			}}>
 			<Image
-				animation="bounceIn"
-				delay={100}
-				duration={500}
+				// animation="bounceIn"
+				// delay={100}
+				// duration={500}
 				source={{ uri: item.getThumbUrl, }}
 				style={{
 					height: 80,
