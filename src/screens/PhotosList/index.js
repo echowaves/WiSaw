@@ -1,19 +1,25 @@
 import React, { Component, } from 'react'
 
 import {
-	Text,
-	FlatList,
 	StyleSheet,
 	ActivityIndicator,
 	View,
 	Dimensions,
 	Image,
+	FlatList,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
 import { Icon, } from 'react-native-elements'
 
-import { Button, } from 'native-base'
+import {
+	List,
+	ListItem,
+	Thumbnail,
+	Text,
+	Button,
+} from 'native-base'
+
 // import { Image, } from 'react-native-animatable'
 
 import { listPhotos, } from './reducer'
@@ -40,29 +46,10 @@ class PhotosList extends Component {
 	}
 
 	renderItem = ({ item, navigation, }) => (
-		<Button
-			onPress={() => (item.id)}
-			style={{
-				backgroundColor: 'transparent',
-				borderRadius: 0,
-				height: 80,
-				width: WIDTH / 3,
-			}}>
-			<Image
-				// animation="bounceIn"
-				// delay={100}
-				// duration={500}
-				source={{ uri: item.getThumbUrl, }}
-				style={{
-					height: 80,
-					left: 0,
-					position: 'absolute',
-					resizeMode: 'cover',
-					top: 0,
-					width: WIDTH / 3,
-				}}
-			/>
-		</Button>
+		<Image
+			style={styles.image}
+			source={{ uri: item.getThumbUrl, }}
+		/>
 	)
 
 	render() {
@@ -82,7 +69,6 @@ class PhotosList extends Component {
 							top: 20,
 						}}
 					/>
-					<Text styles={styles.container}>No Photos.</Text>
 				</View>
 			)
 		}
@@ -107,13 +93,14 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	item: {
-		padding: 16,
-		borderBottomWidth: 1,
-		borderBottomColor: '#ccc',
+	image: {
+		width: WIDTH / 3,
+		height: WIDTH / 3,
+		resizeMode: 'cover',
+		borderWidth: 3,
+		borderColor: '#ffffff',
 	},
 })
-
 
 const mapStateToProps = state => {
 	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, }))
