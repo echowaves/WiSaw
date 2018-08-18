@@ -36,6 +36,7 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				thumbnailMode: !state.thumbnailMode,
+				currentPhotoId: action.currentPhotoId,
 			}
 		default:
 			return state
@@ -72,5 +73,13 @@ export function listPhotos() {
 				type: GET_PHOTOS_FAIL,
 			})
 		}
+	}
+}
+
+
+export function switchPhotosPresentationMode(currentPhotoId) {
+	return {
+		type: SWITCH_PHOTOS_PRESENTATION_MODE,
+		currentPhotoId,
 	}
 }

@@ -45,10 +45,16 @@ class PhotosList extends Component {
 	static propTypes = {
 		listPhotos: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
+		loading: PropTypes.bool.isRequired,
+		error: PropTypes.string.isRequired,
+		thumbnailMode: PropTypes.bool.isRequired,
 	}
 
 	componentDidMount() {
-		const { listPhotos, } = this.props
+		const {
+			listPhotos,
+			switchPhotosPresentationMode,
+		} = this.props
 		listPhotos()
 	}
 
@@ -60,7 +66,12 @@ class PhotosList extends Component {
 	)
 
 	render() {
-		const { photos, } = this.props
+		const {
+			photos,
+			loading,
+			error,
+			thumbnailMode,
+		} = this.props
 		if (photos.length === 0) {
 			// return ()
 			return (
