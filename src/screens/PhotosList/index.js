@@ -11,17 +11,21 @@ import {
 } from 'react-native'
 
 import { connect, } from 'react-redux'
-import { Icon, } from 'react-native-elements'
 
-// import {
-// 	List,
-// 	ListItem,
-// 	Thumbnail,
-// 	Text,
-// 	Button,
-// } from 'native-base'
-
-// import { Image, } from 'react-native-animatable'
+import {
+	Container,
+	Header,
+	Title,
+	Content,
+	Footer,
+	FooterTab,
+	Button,
+	Left,
+	Right,
+	Icon,
+	Body,
+	Text,
+} from 'native-base'
 
 import { listPhotos, } from './reducer'
 
@@ -35,8 +39,8 @@ class PhotosList extends Component {
 			<Icon
 				onPress={() => navigation.navigate('Feedback')}
 				name="feedback"
-				color="#00aced"
-				containerStyle={{ marginRight: 10, }}
+				type="MaterialIcons"
+				style={{ marginRight: 10, color: "#00aced", }}
 			/>
 		),
 		headerBackTitle: null,
