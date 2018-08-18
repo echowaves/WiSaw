@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 
 import {
 	StyleSheet,
-	ActivityIndicator,
-	View,
 	Dimensions,
 	Image,
 	FlatList,
@@ -23,8 +21,10 @@ import {
 	Left,
 	Right,
 	Icon,
+	Spinner,
 	Body,
 	Text,
+	Thumbnail,
 } from 'native-base'
 
 import { listPhotos, } from './reducer'
@@ -63,8 +63,9 @@ class PhotosList extends Component {
 	}
 
 	renderItem = ({ item, navigation, }) => (
-		<Image
-			style={styles.image}
+		<Thumbnail
+			square
+			style={styles.thumbnail}
 			source={{ uri: item.getThumbUrl, }}
 		/>
 	)
@@ -79,23 +80,15 @@ class PhotosList extends Component {
 		if (photos.length === 0) {
 			// return ()
 			return (
-				<View>
-					<ActivityIndicator
-						size="large"
+				<Content>
+					<Spinner
 						color="#00aced"
-						style={{
-							position: 'absolute',
-							left: 0,
-							right: 0,
-							bottom: 0,
-							top: 20,
-						}}
 					/>
-				</View>
+				</Content>
 			)
 		}
 		return (
-			<View>
+			<Content>
 				<FlatList
 					styles={styles.container}
 					data={photos}
@@ -106,7 +99,7 @@ class PhotosList extends Component {
 					horizontal={false}
 					numColumns={3}
 				/>
-			</View>
+			</Content>
 		)
 	}
 }
@@ -115,12 +108,12 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	image: {
+	thumbnail: {
 		width: WIDTH / 3,
 		height: WIDTH / 3,
 		resizeMode: 'cover',
 		borderWidth: 3,
-		borderColor: '#ffffff',
+		borderColor: '#777777',
 	},
 })
 
