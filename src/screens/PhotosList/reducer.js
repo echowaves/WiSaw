@@ -1,8 +1,14 @@
 export const GET_PHOTOS = 'wisaw/photos/LOAD'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/LOAD_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photos/LOAD_FAIL'
+export const SWITCH_PHOTOS_PRESENTATION_MODE = 'wisaw/photos/SWITCH_PHOTOS_PRESENTATION_MODE'
 
-const initialState = { photos: [], }
+const initialState = {
+	photos: [],
+	loading: false,
+	error: null,
+	thumbnailMode: true,
+}
 
 export default function reducer(state = initialState, action) {
 	switch (action.type) {
@@ -25,6 +31,11 @@ export default function reducer(state = initialState, action) {
 				loading: false,
 				photos: [],
 				error: 'Error while fetching photos',
+			}
+		case SWITCH_PHOTOS_PRESENTATION_MODE:
+			return {
+				...state,
+				thumbnailMode: !state.thumbnailMode,
 			}
 		default:
 			return state
