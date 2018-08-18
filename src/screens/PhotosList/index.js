@@ -1,4 +1,5 @@
 import React, { Component, } from 'react'
+import PropTypes from 'prop-types'
 
 import {
 	StyleSheet,
@@ -12,19 +13,20 @@ import {
 import { connect, } from 'react-redux'
 import { Icon, } from 'react-native-elements'
 
-import {
-	List,
-	ListItem,
-	Thumbnail,
-	Text,
-	Button,
-} from 'native-base'
+// import {
+// 	List,
+// 	ListItem,
+// 	Thumbnail,
+// 	Text,
+// 	Button,
+// } from 'native-base'
 
 // import { Image, } from 'react-native-animatable'
 
 import { listPhotos, } from './reducer'
 
 const WIDTH = Dimensions.get('window').width
+// const HEIGHT = Dimensions.get('window').height
 
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -39,6 +41,11 @@ class PhotosList extends Component {
 		),
 		headerBackTitle: null,
 	})
+
+	static propTypes = {
+		listPhotos: PropTypes.func.isRequired,
+		photos: PropTypes.array.isRequired,
+	}
 
 	componentDidMount() {
 		const { listPhotos, } = this.props
