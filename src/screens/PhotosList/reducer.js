@@ -6,7 +6,7 @@ export const SWITCH_PHOTOS_PRESENTATION_MODE = 'wisaw/photos/SWITCH_PHOTOS_PRESE
 const initialState = {
 	photos: [],
 	loading: false,
-	error: null,
+	error: '',
 	thumbnailMode: true,
 }
 
@@ -16,14 +16,14 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				loading: true,
-				error: null,
+				error: '',
 			}
 		case GET_PHOTOS_SUCCESS:
 			return {
 				...state,
 				loading: false,
 				photos: action.payload,
-				error: null,
+				error: '',
 			}
 		case GET_PHOTOS_FAIL:
 			return {

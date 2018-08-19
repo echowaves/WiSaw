@@ -113,14 +113,18 @@ const styles = StyleSheet.create({
 		height: WIDTH / 3,
 		resizeMode: 'cover',
 		borderWidth: 3,
-		borderColor: '#777777',
+		borderColor: '#000000',
 	},
 })
 
 const mapStateToProps = state => {
 	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, }))
+
 	return {
 		photos: storedPhotos,
+		thumbnailMode: state.photosList.thumbnailMode,
+		error: state.photosList.error,
+		loading: state.photosList.loading,
 	}
 }
 
