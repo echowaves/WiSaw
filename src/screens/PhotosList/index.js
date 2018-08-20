@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import {
 	StyleSheet,
 	Dimensions,
-	Image,
 	FlatList,
 } from 'react-native'
 
@@ -12,17 +11,11 @@ import { connect, } from 'react-redux'
 
 import {
 	Container,
-	Header,
-	Title,
+	Card,
+	CardItem,
 	Content,
-	Footer,
-	FooterTab,
-	Button,
-	Left,
-	Right,
 	Icon,
 	Spinner,
-	Body,
 	Text,
 	Thumbnail,
 } from 'native-base'
@@ -50,7 +43,7 @@ class PhotosList extends Component {
 		listPhotos: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,
-		error: PropTypes.string.isRequired,
+		errorMessage: PropTypes.string.isRequired,
 		thumbnailMode: PropTypes.bool.isRequired,
 	}
 
@@ -74,32 +67,50 @@ class PhotosList extends Component {
 		const {
 			photos,
 			loading,
-			error,
+			errorMessage,
 			thumbnailMode,
 		} = this.props
-		if (photos.length === 0) {
+
+		if (loading === true) {
 			// return ()
 			return (
-				<Content>
-					<Spinner
-						color="#00aced"
-					/>
-				</Content>
+				<Container>
+					<Content>
+						<Spinner
+							color="#00aced"
+						/>
+					</Content>
+				</Container>
+			)
+		}
+		if (errorMessage.length > 0) {
+			return (
+				<Container>
+					<Content>
+						<Card>
+							<CardItem header bordered>
+								<Text>No Photos Loaded.</Text>
+							</CardItem>
+						</Card>
+					</Content>
+				</Container>
 			)
 		}
 		return (
-			<Content>
-				<FlatList
-					styles={styles.container}
-					data={photos}
-					renderItem={this.renderItem}
-					keyExtractor={(item, index) => index.toString()}
-					removeClippedSubviews
-					showsVerticalScrollIndicator={false}
-					horizontal={false}
-					numColumns={3}
-				/>
-			</Content>
+			<Container>
+				<Content>
+					<FlatList
+						styles={styles.container}
+						data={photos}
+						renderItem={this.renderItem}
+						keyExtractor={(item, index) => index.toString()}
+						removeClippedSubviews
+						showsVerticalScrollIndicator={false}
+						horizontal={false}
+						numColumns={3}
+					/>
+				</Content>
+			</Container>
 		)
 	}
 }
@@ -119,11 +130,10 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
 	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, }))
-
 	return {
 		photos: storedPhotos,
 		thumbnailMode: state.photosList.thumbnailMode,
-		error: state.photosList.error,
+		errorMessage: state.photosList.errorMessage,
 		loading: state.photosList.loading,
 	}
 }

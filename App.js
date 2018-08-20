@@ -1,3 +1,4 @@
+import { Root, } from 'native-base'
 import React, { Component, } from 'react'
 import { StyleSheet, View, } from 'react-native'
 import { createStackNavigator, } from 'react-navigation'
@@ -34,7 +35,9 @@ export default class App extends Component {
 		return (
 			<Provider store={store}>
 				<View style={styles.container}>
-					<RootStack />
+					<Root>
+						<RootStack />
+					</Root>
 				</View>
 			</Provider>
 		)

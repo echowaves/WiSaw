@@ -1,3 +1,8 @@
+import {
+	Toast,
+} from 'native-base'
+
+
 export const GET_PHOTOS = 'wisaw/photos/LOAD'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/LOAD_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photos/LOAD_FAIL'
@@ -6,7 +11,7 @@ export const SWITCH_PHOTOS_PRESENTATION_MODE = 'wisaw/photos/SWITCH_PHOTOS_PRESE
 const initialState = {
 	photos: [],
 	loading: false,
-	error: '',
+	errorMessage: '',
 	thumbnailMode: true,
 }
 
@@ -16,21 +21,21 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				loading: true,
-				error: '',
+				errorMessage: '',
 			}
 		case GET_PHOTOS_SUCCESS:
 			return {
 				...state,
 				loading: false,
 				photos: action.payload,
-				error: '',
+				errorMessage: '',
 			}
 		case GET_PHOTOS_FAIL:
 			return {
 				...state,
 				loading: false,
 				photos: [],
-				error: 'Error while fetching photos',
+				errorMessage: action.errorMessage,
 			}
 		case SWITCH_PHOTOS_PRESENTATION_MODE:
 			return {
@@ -45,6 +50,9 @@ export default function reducer(state = initialState, action) {
 
 export function listPhotos() {
 	return async dispatch => {
+		dispatch({
+			type: GET_PHOTOS,
+		})
 		try {
 			const response = await fetch('https://api.wisaw.com/photos/feed', {
 				method: 'POST',
@@ -64,13 +72,27 @@ export function listPhotos() {
 			})
 			// await new Promise(resolve => setTimeout(resolve, 3000)); // 3 sec
 			const responseJson = await response.json()
-			dispatch({
-				type: GET_PHOTOS_SUCCESS,
-				payload: responseJson.photos,
-			})
+			if (responseJson.photos) {
+				dispatch({
+					type: GET_PHOTOS_SUCCESS,
+					payload: responseJson.photos,
+				})
+			} else {
+				dispatch({
+					type: GET_PHOTOS_FAIL,
+					errorMessage: 'Failed to load photos',
+				})
+				Toast.show({
+					text: 'Failed to load photos',
+				})
+			}
 		} catch (err) {
 			dispatch({
 				type: GET_PHOTOS_FAIL,
+				errorMessage: err.toString(),
+			})
+			Toast.show({
+				text: err.toString(),
 			})
 		}
 	}
