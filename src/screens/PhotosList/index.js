@@ -56,11 +56,18 @@ class PhotosList extends Component {
 	}
 
 	renderItem = ({ item, navigation, }) => (
-		<Thumbnail
-			square
-			style={styles.thumbnail}
-			source={{ uri: item.getThumbUrl, }}
-		/>
+		<Card>
+			<CardItem
+				cardBody
+				button
+				onPress={() => alert("This is Card Header")}>
+				<Thumbnail
+					square
+					style={styles.thumbnail}
+					source={{ uri: item.getThumbUrl, }}
+				/>
+			</CardItem>
+		</Card>
 	)
 
 	render() {
@@ -123,8 +130,6 @@ const styles = StyleSheet.create({
 		width: WIDTH / 3,
 		height: WIDTH / 3,
 		resizeMode: 'cover',
-		borderWidth: 3,
-		borderColor: '#000000',
 	},
 })
 
