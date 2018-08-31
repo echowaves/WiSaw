@@ -1,4 +1,3 @@
-
 import { Reducer, } from 'redux-testkit'
 import uut from './reducer'
 
