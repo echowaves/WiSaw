@@ -1,9 +1,9 @@
 import { Reducer, } from 'redux-testkit'
-import uut from './reducer'
+import * as reducer from './reducer'
 
 describe('photosList reducer', () => {
 	it('should have initial state', () => {
-		expect(uut()).toEqual({
+		expect(reducer.initialState).toEqual({
 			photos: [],
 			loading: false,
 			errorMessage: '',
