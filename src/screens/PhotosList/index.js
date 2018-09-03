@@ -18,9 +18,10 @@ import {
 	Spinner,
 	Text,
 	Thumbnail,
+	Image,
 } from 'native-base'
 
-import { listPhotos, } from './reducer'
+import { listPhotos, switchPhotosPresentationMode, } from './reducer'
 
 const WIDTH = Dimensions.get('window').width
 // const HEIGHT = Dimensions.get('window').height
@@ -41,6 +42,7 @@ class PhotosList extends Component {
 
 	static propTypes = {
 		listPhotos: PropTypes.func.isRequired,
+		switchPhotosPresentationMode: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,
 		errorMessage: PropTypes.string.isRequired,
@@ -50,21 +52,41 @@ class PhotosList extends Component {
 	componentDidMount() {
 		const {
 			listPhotos,
-			switchPhotosPresentationMode,
 		} = this.props
 		listPhotos()
 	}
 
-	renderItem = ({ item, navigation, }) => (
+	onPhotoPress(item) {
+		const {
+			switchPhotosPresentationMode,
+		} = this.props
+		switchPhotosPresentationMode(item.id)
+	}
+
+	renderThumbnail = ({ item, navigation, }) => (
 		<Card>
 			<CardItem
 				cardBody
 				button
-				onPress={() => alert("This is Card Header")}>
+				onPress={() => this.onPhotoPress(item)}>
 				<Thumbnail
 					square
 					style={styles.thumbnail}
 					source={{ uri: item.getThumbUrl, }}
+				/>
+			</CardItem>
+		</Card>
+	)
+
+	renderFullSize = ({ item, navigation, }) => (
+		<Card>
+			<CardItem
+				cardBody
+				button
+				onPress={() => this.onPhotoPress(item)}>
+				<Image
+					style={styles.fullSizeImage}
+					source={{ uri: item.getImgUrl, }}
 				/>
 			</CardItem>
 		</Card>
@@ -103,18 +125,37 @@ class PhotosList extends Component {
 				</Container>
 			)
 		}
+
+		if (thumbnailMode) {
+			return (
+				<Container>
+					<Content>
+						<FlatList
+							styles={styles.container}
+							data={photos}
+							renderItem={this.renderThumbnail}
+							keyExtractor={(item, index) => index.toString()}
+							removeClippedSubviews
+							showsVerticalScrollIndicator={false}
+							horizontal={false}
+							numColumns={3}
+						/>
+					</Content>
+				</Container>
+			)
+		}
 		return (
 			<Container>
 				<Content>
 					<FlatList
 						styles={styles.container}
 						data={photos}
-						renderItem={this.renderItem}
+						renderItem={this.renderFullSize}
 						keyExtractor={(item, index) => index.toString()}
 						removeClippedSubviews
 						showsVerticalScrollIndicator={false}
 						horizontal={false}
-						numColumns={3}
+						numColumns={1}
 					/>
 				</Content>
 			</Container>
@@ -131,6 +172,11 @@ const styles = StyleSheet.create({
 		height: WIDTH / 3,
 		resizeMode: 'cover',
 	},
+	fullSizeImage: {
+		width: WIDTH,
+		height: null,
+		resizeMode: 'contain',
+	},
 })
 
 const mapStateToProps = state => {
@@ -144,7 +190,9 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-	listPhotos,
+	listPhotos, // will be wrapped into a dispatch call
+	switchPhotosPresentationMode, // will be wrapped into a dispatch call
 }
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
