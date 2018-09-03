@@ -5,6 +5,7 @@ import {
 	StyleSheet,
 	Dimensions,
 	FlatList,
+	Image,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
@@ -18,7 +19,6 @@ import {
 	Spinner,
 	Text,
 	Thumbnail,
-	Image,
 } from 'native-base'
 
 import { listPhotos, switchPhotosPresentationMode, } from './reducer'
@@ -131,6 +131,7 @@ class PhotosList extends Component {
 				<Container>
 					<Content>
 						<FlatList
+							key='thumbnail'
 							styles={styles.container}
 							data={photos}
 							renderItem={this.renderThumbnail}
@@ -148,6 +149,7 @@ class PhotosList extends Component {
 			<Container>
 				<Content>
 					<FlatList
+						key='fullsize'
 						styles={styles.container}
 						data={photos}
 						renderItem={this.renderFullSize}
