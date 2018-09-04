@@ -13,6 +13,7 @@ export const initialState = {
 	loading: false,
 	errorMessage: '',
 	thumbnailMode: true,
+	currentPhoto: {},
 }
 
 export default function reducer(state = initialState, action) {
@@ -41,7 +42,7 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				thumbnailMode: !state.thumbnailMode,
-				currentPhotoId: action.currentPhotoId,
+				currentPhoto: action.currentPhoto,
 			}
 		default:
 			return state
@@ -99,9 +100,9 @@ export function listPhotos() {
 }
 
 
-export function switchPhotosPresentationMode(currentPhotoId) {
+export function switchPhotosPresentationMode(currentPhoto) {
 	return {
 		type: SWITCH_PHOTOS_PRESENTATION_MODE,
-		currentPhotoId,
+		currentPhoto,
 	}
 }

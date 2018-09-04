@@ -24,7 +24,7 @@ import {
 import { listPhotos, switchPhotosPresentationMode, } from './reducer'
 
 const WIDTH = Dimensions.get('window').width
-// const HEIGHT = Dimensions.get('window').height
+const HEIGHT = Dimensions.get('window').height
 
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -47,6 +47,7 @@ class PhotosList extends Component {
 		loading: PropTypes.bool.isRequired,
 		errorMessage: PropTypes.string.isRequired,
 		thumbnailMode: PropTypes.bool.isRequired,
+		currentPhoto: PropTypes.object.isRequired,
 	}
 
 	componentDidMount() {
@@ -60,7 +61,7 @@ class PhotosList extends Component {
 		const {
 			switchPhotosPresentationMode,
 		} = this.props
-		switchPhotosPresentationMode(item.id)
+		switchPhotosPresentationMode(item)
 	}
 
 	renderThumbnail = ({ item, navigation, }) => (
@@ -98,6 +99,7 @@ class PhotosList extends Component {
 			loading,
 			errorMessage,
 			thumbnailMode,
+			currentPhoto,
 		} = this.props
 
 		if (loading === true) {
@@ -126,20 +128,22 @@ class PhotosList extends Component {
 			)
 		}
 
+		const tmpScrollIndex = photos.findIndex(x => x.id === currentPhoto.id)
+		const initialScrollIndex = tmpScrollIndex === -1 ? 0 : tmpScrollIndex
+		// const initialScrollIndex = photos.findIndex(x => x.id === currentPhoto.id)
 		if (thumbnailMode) {
 			return (
 				<Container>
 					<Content>
 						<FlatList
-							key='thumbnail'
+							key="thumbnail"
 							styles={styles.container}
 							data={photos}
 							renderItem={this.renderThumbnail}
-							keyExtractor={(item, index) => index.toString()}
-							removeClippedSubviews
 							showsVerticalScrollIndicator={false}
 							horizontal={false}
 							numColumns={3}
+							initialScrollIndex={initialScrollIndex}
 						/>
 					</Content>
 				</Container>
@@ -149,15 +153,14 @@ class PhotosList extends Component {
 			<Container>
 				<Content>
 					<FlatList
-						key='fullsize'
+						key="fullsize"
 						styles={styles.container}
 						data={photos}
 						renderItem={this.renderFullSize}
-						keyExtractor={(item, index) => index.toString()}
-						removeClippedSubviews
 						showsVerticalScrollIndicator={false}
 						horizontal={false}
 						numColumns={1}
+						initialScrollIndex={initialScrollIndex}
 					/>
 				</Content>
 			</Container>
@@ -175,19 +178,20 @@ const styles = StyleSheet.create({
 		resizeMode: 'cover',
 	},
 	fullSizeImage: {
-		width: WIDTH,
-		height: null,
+		width: "100%",
+		height: HEIGHT,
 		resizeMode: 'contain',
 	},
 })
 
 const mapStateToProps = state => {
-	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, }))
+	const storedPhotos = state.photosList.photos.map(photo => ({ ...photo, key: photo.id.toString(), }))
 	return {
 		photos: storedPhotos,
 		thumbnailMode: state.photosList.thumbnailMode,
 		errorMessage: state.photosList.errorMessage,
 		loading: state.photosList.loading,
+		currentPhoto: state.photosList.currentPhoto,
 	}
 }
 
