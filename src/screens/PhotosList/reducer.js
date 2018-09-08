@@ -6,14 +6,11 @@ import {
 export const GET_PHOTOS = 'wisaw/photos/LOAD'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/LOAD_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photos/LOAD_FAIL'
-export const SWITCH_PHOTOS_PRESENTATION_MODE = 'wisaw/photos/SWITCH_PHOTOS_PRESENTATION_MODE'
 
 export const initialState = {
 	photos: [],
 	loading: false,
 	errorMessage: '',
-	thumbnailMode: true,
-	currentPhoto: {},
 }
 
 export default function reducer(state = initialState, action) {
@@ -37,12 +34,6 @@ export default function reducer(state = initialState, action) {
 				loading: false,
 				photos: [],
 				errorMessage: action.errorMessage,
-			}
-		case SWITCH_PHOTOS_PRESENTATION_MODE:
-			return {
-				...state,
-				thumbnailMode: !state.thumbnailMode,
-				currentPhoto: action.currentPhoto,
 			}
 		default:
 			return state
@@ -96,13 +87,5 @@ export function listPhotos() {
 				text: err.toString(),
 			})
 		}
-	}
-}
-
-
-export function switchPhotosPresentationMode(currentPhoto) {
-	return {
-		type: SWITCH_PHOTOS_PRESENTATION_MODE,
-		currentPhoto,
 	}
 }
