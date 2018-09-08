@@ -4,8 +4,8 @@ import PropTypes from 'prop-types'
 import {
 	StyleSheet,
 	Dimensions,
-	FlatList,
 	Image,
+	FlatList,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
