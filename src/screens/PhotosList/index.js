@@ -17,8 +17,7 @@ import {
 	Text,
 } from 'native-base'
 
-import ImageBrowser from 'react-native-interactive-image-gallery'
-
+import ImageBrowser from '../../components/ImageBrowser/ImageBrowser'
 
 import { listPhotos, } from './reducer'
 
