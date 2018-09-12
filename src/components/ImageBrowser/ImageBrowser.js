@@ -22,12 +22,12 @@ export type ImageSource = {
 
 type Props = {
   images: Array<ImageSource>,
-  onPressImage?: Function,
-  topMargin?: number,
-  closeText?: string,
-  infoTitleStyles?: Animated.View.style,
-  infoDescriptionStyles?: Animated.View.style,
-  enableTilt?: boolean
+  onPressImage: Function,
+  topMargin: number,
+  closeText: string,
+  infoTitleStyles: Animated.View.style,
+  infoDescriptionStyles: Animated.View.style,
+  enableTilt: boolean
 }
 type State = {
   displayImageViewer: boolean,
@@ -35,20 +35,16 @@ type State = {
 }
 
 class ImageBrowser extends React.Component<Props, State> {
-  _imageMeasurers: { [imageId: string]: () => void }
-  _imageSizeMeasurers: { [imageId: string]: () => void }
-
   static propTypes = {
-    images: PropTypes.array.isRequired,
-    onPressImage: PropTypes.func
+  	images: PropTypes.array.isRequired,
+  	onPressImage: PropTypes.func.isRequired,
   }
 
   static defaultProps = {
-    topMargin: 0,
   }
 
   static childContextTypes = {
-    onSourceContext: PropTypes.func.isRequired
+  	onSourceContext: PropTypes.func.isRequired,
   }
 
   constructor(props: Props) {
@@ -96,6 +92,10 @@ class ImageBrowser extends React.Component<Props, State> {
     this.setState({ imageId })
   }
 
+  _imageMeasurers: { [imageId: string]: () => void }
+
+  _imageSizeMeasurers: { [imageId: string]: () => void }
+
   render() {
     return (
       <SafeAreaView style={styles.container}>
@@ -127,14 +127,14 @@ class ImageBrowser extends React.Component<Props, State> {
             </Modal>
           )}
       </SafeAreaView>
-    )
+  	)
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  }
+	container: {
+		flex: 1,
+	},
 })
 
 export default ImageBrowser
