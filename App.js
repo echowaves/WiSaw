@@ -1,7 +1,7 @@
 import { Root, } from 'native-base'
 import React, { Component, } from 'react'
 import { StyleSheet, View, } from 'react-native'
-import { createStackNavigator, } from 'react-navigation'
+import { createStackNavigator, createAppContainer, } from "react-navigation"
 import { createStore, applyMiddleware, compose, } from 'redux'
 import { Provider, } from 'react-redux'
 import ReduxThunk from 'redux-thunk'
@@ -11,7 +11,7 @@ import reducers from './src'
 import PhotosList from './src/screens/PhotosList'
 import FeedbackScreen from './src/screens/Feedback'
 
-const RootStack = createStackNavigator({
+const AppNavigator = createStackNavigator({
 	PhotosList: {
 		screen: PhotosList,
 	},
@@ -22,6 +22,8 @@ const RootStack = createStackNavigator({
 {
 	initialRouteName: 'PhotosList',
 })
+
+const AppContainer = createAppContainer(AppNavigator)
 
 let composeEnhancers = compose
 /* eslint no-undef: */
@@ -36,7 +38,7 @@ export default class App extends Component {
 			<Provider store={store}>
 				<View style={styles.container}>
 					<Root>
-						<RootStack />
+						<AppContainer />
 					</Root>
 				</View>
 			</Provider>

@@ -45,12 +45,12 @@ android_library(
 
 android_build_config(
     name = "build_config",
-    package = "com.wisaw",
+    package = "com.echowaves.wisaw",
 )
 
 android_resource(
     name = "res",
-    package = "com.wisaw",
+    package = "com.echowaves.wisaw",
     res = "src/main/res",
 )
 
