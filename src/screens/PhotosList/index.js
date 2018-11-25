@@ -21,7 +21,9 @@ import {
 	Thumbnail,
 } from 'native-base'
 
-import { listPhotos, switchPhotosPresentationMode, } from './reducer'
+import { listPhotos } from './reducer'
+
+import { Photo, } from '../../components/Photo'
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -42,12 +44,9 @@ class PhotosList extends Component {
 
 	static propTypes = {
 		listPhotos: PropTypes.func.isRequired,
-		switchPhotosPresentationMode: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,
 		errorMessage: PropTypes.string.isRequired,
-		thumbnailMode: PropTypes.bool.isRequired,
-		currentPhoto: PropTypes.object.isRequired,
 	}
 
 	componentDidMount() {
@@ -59,12 +58,12 @@ class PhotosList extends Component {
 
 	onPhotoPress(item) {
 		const {
-			switchPhotosPresentationMode,
+			this.setState({isEdit:true}),
 		} = this.props
 		switchPhotosPresentationMode(item)
 	}
 
-	renderThumbnail = ({ item, navigation, }) => (
+	renderPhoto = ({ item, navigation, }) => (
 		<Card>
 			<CardItem
 				cardBody
@@ -79,27 +78,11 @@ class PhotosList extends Component {
 		</Card>
 	)
 
-	renderFullSize = ({ item, navigation, }) => (
-		<Card>
-			<CardItem
-				cardBody
-				button
-				onPress={() => this.onPhotoPress(item)}>
-				<Image
-					style={styles.fullSizeImage}
-					source={{ uri: item.getImgUrl, }}
-				/>
-			</CardItem>
-		</Card>
-	)
-
 	render() {
 		const {
 			photos,
 			loading,
 			errorMessage,
-			thumbnailMode,
-			currentPhoto,
 		} = this.props
 
 		if (loading === true) {
@@ -128,39 +111,17 @@ class PhotosList extends Component {
 			)
 		}
 
-		const tmpScrollIndex = photos.findIndex(x => x.id === currentPhoto.id)
-		const initialScrollIndex = tmpScrollIndex === -1 ? 0 : tmpScrollIndex
-		// const initialScrollIndex = photos.findIndex(x => x.id === currentPhoto.id)
-		if (thumbnailMode) {
-			return (
-				<Container>
-					<Content>
-						<FlatList
-							key="thumbnail"
-							styles={styles.container}
-							data={photos}
-							renderItem={this.renderThumbnail}
-							showsVerticalScrollIndicator={false}
-							horizontal={false}
-							numColumns={3}
-							initialScrollIndex={initialScrollIndex}
-						/>
-					</Content>
-				</Container>
-			)
-		}
 		return (
 			<Container>
 				<Content>
 					<FlatList
-						key="fullsize"
+						key="thumbnail"
 						styles={styles.container}
 						data={photos}
-						renderItem={this.renderFullSize}
+						renderItem={this.renderPhoto}
 						showsVerticalScrollIndicator={false}
 						horizontal={false}
-						numColumns={1}
-						initialScrollIndex={initialScrollIndex}
+						numColumns={3}
 					/>
 				</Content>
 			</Container>
@@ -188,16 +149,13 @@ const mapStateToProps = state => {
 	const storedPhotos = state.photosList.photos.map(photo => ({ ...photo, key: photo.id.toString(), }))
 	return {
 		photos: storedPhotos,
-		thumbnailMode: state.photosList.thumbnailMode,
 		errorMessage: state.photosList.errorMessage,
 		loading: state.photosList.loading,
-		currentPhoto: state.photosList.currentPhoto,
 	}
 }
 
 const mapDispatchToProps = {
 	listPhotos, // will be wrapped into a dispatch call
-	switchPhotosPresentationMode, // will be wrapped into a dispatch call
 }
 
 
