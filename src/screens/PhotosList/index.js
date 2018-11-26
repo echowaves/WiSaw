@@ -3,9 +3,7 @@ import PropTypes from 'prop-types'
 
 import {
 	StyleSheet,
-	Dimensions,
 	FlatList,
-	Image,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
@@ -18,15 +16,11 @@ import {
 	Icon,
 	Spinner,
 	Text,
-	Thumbnail,
 } from 'native-base'
 
-import { listPhotos } from './reducer'
+import { listPhotos, } from './reducer'
 
-import { Photo, } from '../../components/Photo'
-
-const WIDTH = Dimensions.get('window').width
-const HEIGHT = Dimensions.get('window').height
+import Photo from '../../components/Photo'
 
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -55,28 +49,6 @@ class PhotosList extends Component {
 		} = this.props
 		listPhotos()
 	}
-
-	onPhotoPress(item) {
-		const {
-			this.setState({isEdit:true}),
-		} = this.props
-		switchPhotosPresentationMode(item)
-	}
-
-	renderPhoto = ({ item, navigation, }) => (
-		<Card>
-			<CardItem
-				cardBody
-				button
-				onPress={() => this.onPhotoPress(item)}>
-				<Thumbnail
-					square
-					style={styles.thumbnail}
-					source={{ uri: item.getThumbUrl, }}
-				/>
-			</CardItem>
-		</Card>
-	)
 
 	render() {
 		const {
@@ -116,9 +88,10 @@ class PhotosList extends Component {
 				<Content>
 					<FlatList
 						key="thumbnail"
+						keyExtractor={item => item.id}
 						styles={styles.container}
 						data={photos}
-						renderItem={this.renderPhoto}
+						renderItem={item => <Photo item={item} />}
 						showsVerticalScrollIndicator={false}
 						horizontal={false}
 						numColumns={3}
@@ -133,30 +106,16 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	thumbnail: {
-		width: WIDTH / 3,
-		height: WIDTH / 3,
-		resizeMode: 'cover',
-	},
-	fullSizeImage: {
-		width: "100%",
-		height: HEIGHT,
-		resizeMode: 'contain',
-	},
 })
 
-const mapStateToProps = state => {
-	const storedPhotos = state.photosList.photos.map(photo => ({ ...photo, key: photo.id.toString(), }))
-	return {
-		photos: storedPhotos,
-		errorMessage: state.photosList.errorMessage,
-		loading: state.photosList.loading,
-	}
-}
+const mapStateToProps = state => ({
+	photos: state.photosList.photos,
+	errorMessage: state.photosList.errorMessage,
+	loading: state.photosList.loading,
+})
 
 const mapDispatchToProps = {
 	listPhotos, // will be wrapped into a dispatch call
 }
-
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
