@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import {
 	StyleSheet,
 	Dimensions,
+	LayoutAnimation,
 } from 'react-native'
 
 import {
@@ -20,11 +21,41 @@ class Photo extends Component {
 		item: PropTypes.object.isRequired,
 	}
 
+	constructor(props) {
+		super(props)
+		this.state = { isExpanded: false, }
+	}
+
+	componentWillUpdate() {
+		LayoutAnimation.spring()
+	}
+
 	onPhotoPress(item) {
+		this.setState(previousState => (
+			{ isExpanded: !previousState.isExpanded, }
+		))
 	}
 
 	render() {
 		const { item, } = this.props
+		const { isExpanded, } = this.state
+
+		if (!isExpanded) {
+			return (
+				<Card>
+					<CardItem
+						cardBody
+						button
+						onPress={() => this.onPhotoPress(item.item)}>
+						<Thumbnail
+							square
+							style={styles.thumbnail}
+							source={{ uri: item.item.getThumbUrl, }}
+						/>
+					</CardItem>
+				</Card>
+			)
+		}
 
 		return (
 			<Card>
@@ -34,7 +65,7 @@ class Photo extends Component {
 					onPress={() => this.onPhotoPress(item.item)}>
 					<Thumbnail
 						square
-						style={styles.thumbnail}
+						style={styles.fullSizeImage}
 						source={{ uri: item.item.getThumbUrl, }}
 					/>
 				</CardItem>
