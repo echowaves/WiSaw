@@ -26,9 +26,9 @@ class Photo extends Component {
 		this.state = { isExpanded: false, }
 	}
 
-	componentWillUpdate() {
-		LayoutAnimation.spring()
-	}
+	// componentWillUpdate() {
+	// 	LayoutAnimation.spring()
+	// }
 
 	onPhotoPress(item) {
 		this.setState(previousState => (
@@ -66,7 +66,7 @@ class Photo extends Component {
 					<Thumbnail
 						square
 						style={styles.fullSizeImage}
-						source={{ uri: item.item.getThumbUrl, }}
+						source={{ uri: item.item.getImgUrl, }}
 					/>
 				</CardItem>
 			</Card>
