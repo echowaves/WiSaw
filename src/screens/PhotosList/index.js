@@ -1,9 +1,10 @@
 import React, { Component, } from 'react'
+import GridView from 'react-native-super-grid'
+
 import PropTypes from 'prop-types'
 
 import {
 	StyleSheet,
-	FlatList,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
@@ -20,7 +21,7 @@ import {
 
 import { listPhotos, } from './reducer'
 
-import Photo from '../../components/Photo'
+import Thumb from '../../components/Thumb'
 
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -86,15 +87,13 @@ class PhotosList extends Component {
 		return (
 			<Container>
 				<Content>
-					<FlatList
-						key="thumbnail"
-						keyExtractor={item => item.id}
-						styles={styles.container}
-						data={photos}
-						renderItem={item => <Photo item={item} />}
+					<GridView
+						itemDimension={100}
+						items={photos}
+						renderItem={item => <Thumb item={item} />}
+						style={styles.container}
 						showsVerticalScrollIndicator={false}
 						horizontal={false}
-						numColumns={3}
 					/>
 				</Content>
 			</Container>
@@ -108,11 +107,14 @@ const styles = StyleSheet.create({
 	},
 })
 
-const mapStateToProps = state => ({
-	photos: state.photosList.photos,
-	errorMessage: state.photosList.errorMessage,
-	loading: state.photosList.loading,
-})
+const mapStateToProps = state => {
+	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, }))
+	return {
+		photos: storedPhotos,
+		errorMessage: state.photosList.errorMessage,
+		loading: state.photosList.loading,
+	}
+}
 
 const mapDispatchToProps = {
 	listPhotos, // will be wrapped into a dispatch call
