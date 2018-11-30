@@ -1,5 +1,4 @@
 import React, { Component, } from 'react'
-import PropTypes from 'prop-types'
 
 import {
 	StyleSheet,
@@ -11,8 +10,9 @@ import {
 	Thumbnail,
 } from 'native-base'
 
+import PropTypes from 'prop-types'
 
-class Photo extends Component {
+class Thumb extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
 	}
@@ -20,10 +20,6 @@ class Photo extends Component {
 	constructor(props) {
 		super(props)
 	}
-
-	// componentWillUpdate() {
-	// 	LayoutAnimation.spring()
-	// }
 
 	onPhotoPress(item) {
 		this.setState(previousState => (
@@ -57,4 +53,4 @@ const styles = StyleSheet.create({
 	},
 })
 
-export default Photo
+export default Thumb
