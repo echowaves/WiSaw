@@ -12,6 +12,8 @@ import {
 
 import PropTypes from 'prop-types'
 
+import { StackActions, } from 'react-navigation'
+
 class Thumb extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
@@ -21,10 +23,15 @@ class Thumb extends Component {
 		super(props)
 	}
 
-	onPhotoPress(item) {
-		this.setState(previousState => (
-			{ isExpanded: !previousState.isExpanded, }
-		))
+	onThumbPress(item) {
+		// const photosDetailsNavigateAction = StackActions.navigate({
+		// 	routeName: 'PhotosDetails',
+		// 	params: {},
+		// 	action: StackActions.push({ routeName: 'PhotosDetails', }),
+		// })
+		//
+		const { navigation, } = 	this.props
+		navigation.navigate('PhotosDetails')
 	}
 
 	render() {
@@ -34,7 +41,7 @@ class Thumb extends Component {
 				<CardItem
 					cardBody
 					button
-					onPress={() => this.onPhotoPress(item)}>
+					onPress={() => this.onThumbPress(item)}>
 					<Thumbnail
 						square
 						style={styles.thumbnail}

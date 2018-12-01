@@ -9,11 +9,15 @@ import ReduxThunk from 'redux-thunk'
 import reducers from './src'
 
 import PhotosList from './src/screens/PhotosList'
+import PhotosDetails from './src/screens/PhotosDetails'
 import FeedbackScreen from './src/screens/Feedback'
 
 const AppNavigator = createStackNavigator({
 	PhotosList: {
 		screen: PhotosList,
+	},
+	PhotosDetails: {
+		screen: PhotosDetails,
 	},
 	Feedback: {
 		screen: FeedbackScreen,

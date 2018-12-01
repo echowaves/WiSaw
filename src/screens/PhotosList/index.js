@@ -28,7 +28,7 @@ class PhotosList extends Component {
 		headerTitle: 'hear&now',
 		headerRight: (
 			<Icon
-				onPress={() => navigation.navigate('Feedback')}
+				onPress={() => navigation.push('Feedback')}
 				name="feedback"
 				type="MaterialIcons"
 				style={{ marginRight: 10, color: "#00aced", }}
@@ -84,13 +84,14 @@ class PhotosList extends Component {
 			)
 		}
 
+		const { navigation, } = this.props
 		return (
 			<Container>
 				<Content>
 					<GridView
 						itemDimension={100}
 						items={photos}
-						renderItem={item => <Thumb item={item} />}
+						renderItem={item => <Thumb item={item} navigation={navigation} />}
 						style={styles.container}
 						showsVerticalScrollIndicator={false}
 						horizontal={false}

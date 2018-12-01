@@ -6,7 +6,6 @@ import {
 export const GET_PHOTOS = 'wisaw/photos/LOAD'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/LOAD_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photos/LOAD_FAIL'
-export const SWITCH_PHOTOS_PRESENTATION_MODE = 'wisaw/photos/SWITCH_PHOTOS_PRESENTATION_MODE'
 
 export const initialState = {
 	photos: [],
