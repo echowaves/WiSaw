@@ -10,13 +10,14 @@ import { connect, } from 'react-redux'
 
 import {
 	Container,
-	Content,
 	Icon,
 } from 'native-base'
 
 import Swiper from 'react-native-deck-swiper'
 
 import Photo from '../../components/Photo'
+
+import * as CONST from '../../consts.js'
 
 class PhotosDetails extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -26,7 +27,7 @@ class PhotosDetails extends Component {
 				onPress={() => navigation.navigate('Feedback')}
 				name="feedback"
 				type="MaterialIcons"
-				style={{ marginRight: 10, color: "#00aced", }}
+				style={{ marginRight: 10, color: CONST.MAIN_COLOR, }}
 			/>
 		),
 		headerBackTitle: null,
@@ -56,7 +57,7 @@ class PhotosDetails extends Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#F5FCFF",
+		backgroundColor: CONST.SECONDARY_COLOR,
 	},
 })
 

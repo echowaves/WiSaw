@@ -23,6 +23,8 @@ import { listPhotos, } from './reducer'
 
 import Thumb from '../../components/Thumb'
 
+import * as CONST from '../../consts.js'
+
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
 		headerTitle: 'hear&now',
@@ -31,7 +33,7 @@ class PhotosList extends Component {
 				onPress={() => navigation.push('Feedback')}
 				name="feedback"
 				type="MaterialIcons"
-				style={{ marginRight: 10, color: "#00aced", }}
+				style={{ marginRight: 10, color: CONST.MAIN_COLOR, }}
 			/>
 		),
 		headerBackTitle: null,
@@ -64,7 +66,7 @@ class PhotosList extends Component {
 				<Container>
 					<Content>
 						<Spinner
-							color="#00aced"
+							color={CONST.MAIN_COLOR}
 						/>
 					</Content>
 				</Container>

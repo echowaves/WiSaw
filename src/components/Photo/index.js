@@ -15,6 +15,8 @@ import Progress from 'react-native-progress/Bar'
 
 import PropTypes from 'prop-types'
 
+import * as CONST from '../../consts.js'
+
 class Photo extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
@@ -39,8 +41,8 @@ class Photo extends Component {
 						source={{ uri: item.getImgUrl, }}
 						indicator={Progress}
 						indicatorProps={{
-							color: '#00aced',
-							unfilledColor: 'rgba(200, 200, 200, 0.2)'
+							color: CONST.MAIN_COLOR,
+							unfilledColor: CONST.UNFILLED_COLOR,
 						}}
 						style={{
 							width: 320,
