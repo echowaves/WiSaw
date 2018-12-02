@@ -2,20 +2,16 @@ import React, { Component, } from 'react'
 
 import PropTypes from 'prop-types'
 
-// import {
-// 	StyleSheet,
-// } from 'react-native'
+import {
+	StyleSheet,
+} from 'react-native'
 
 import { connect, } from 'react-redux'
 
 import {
 	Container,
-	Card,
-	CardItem,
 	Content,
 	Icon,
-	Spinner,
-	Text,
 } from 'native-base'
 
 import Swiper from 'react-native-deck-swiper'
@@ -47,28 +43,29 @@ class PhotosDetails extends Component {
 
 		return (
 			<Container>
-				<Content>
-					<Swiper
-						cards={photos}
-						renderCard={item => <Photo item={item} />}
-					/>
-				</Content>
+				<Swiper
+					cards={photos}
+					renderCard={item => <Photo item={item} />}
+					containerStyle={styles.container}
+				/>
 			</Container>
 		)
 	}
 }
 
-// const styles = StyleSheet.create({
-// 	container: {
-// 		flex: 1,
-// 	},
-// })
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		backgroundColor: "#F5FCFF",
+	},
+})
 
-const mapStateToProps = state => {
-	return {
+const mapStateToProps = state => (
+	{
 		photos: state.photosList.photos,
 	}
-}
+)
+
 
 const mapDispatchToProps = {
 	// listPhotos, // will be wrapped into a dispatch call

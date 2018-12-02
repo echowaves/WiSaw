@@ -39,8 +39,6 @@ class Photo extends Component {
 						source={{ uri: item.getImgUrl, }}
 						indicator={Progress}
 						indicatorProps={{
-							size: 80,
-							borderWidth: 0,
 							color: '#00aced',
 							unfilledColor: 'rgba(200, 200, 200, 0.2)'
 						}}
