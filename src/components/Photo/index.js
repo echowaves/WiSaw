@@ -1,11 +1,6 @@
 import React, { Component, } from 'react'
 
 import {
-	StyleSheet,
-	Dimensions,
-} from 'react-native'
-
-import {
 	Card,
 	CardItem,
 } from 'native-base'
@@ -54,31 +49,5 @@ class Photo extends Component {
 		)
 	}
 }
-
-
-// <ImageZoomable
-// 	uri={item.getThumbUrl}
-// 	uriHD={item.getImgUrl}
-// />
-
-
-// <ImageZoom
-// 	cropWidth={Dimensions.get('window').width}
-// 	cropHeight={Dimensions.get('window').height / 2}
-// 	imageWidth={200}
-// 	imageHeight={200}>
-// 	<Image
-// 		style={{ width: 200, height: 200, }}
-// 		source={{ uri: item.getImgUrl, }}
-// 	/>
-// </ImageZoom>
-
-const styles = StyleSheet.create({
-	photo: {
-		height: 400,
-		width: null,
-
-	},
-})
 
 export default Photo

@@ -48,6 +48,12 @@ class PhotosDetails extends Component {
 					cards={photos}
 					renderCard={item => <Photo item={item} />}
 					containerStyle={styles.container}
+					horizontalSwipe
+					verticalSwipe={false}
+					showSecondCard
+					stackSize={1}
+					goBackToPreviousCardOnSwipeRight
+					infinite
 				/>
 			</Container>
 		)
