@@ -34,11 +34,13 @@ class PhotosDetails extends Component {
 
 	static propTypes = {
 		photos: PropTypes.array.isRequired,
+		currentPhotoIndex: PropTypes.number.isRequired,
 	}
 
 	render() {
 		const {
 			photos,
+			currentPhotoIndex,
 		} = this.props
 
 		return (
@@ -53,7 +55,7 @@ class PhotosDetails extends Component {
 				stackSeparation={0}
 				goBackToPreviousCardOnSwipeRight
 				infinite
-				cardIndex={10}
+				cardIndex={currentPhotoIndex}
 			/>
 		)
 	}
@@ -69,6 +71,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => (
 	{
 		photos: state.photosList.photos,
+		currentPhotoIndex: state.thumb.currentPhotoIndex,
 	}
 )
 
