@@ -43,19 +43,17 @@ class PhotosDetails extends Component {
 		} = this.props
 
 		return (
-			<Container>
 				<Swiper
 					cards={photos}
 					renderCard={item => <Photo item={item} />}
 					containerStyle={styles.container}
 					horizontalSwipe
 					verticalSwipe={false}
-					showSecondCard
+					showSecondCard={false}
 					stackSize={1}
 					goBackToPreviousCardOnSwipeRight
 					infinite
 				/>
-			</Container>
 		)
 	}
 }
