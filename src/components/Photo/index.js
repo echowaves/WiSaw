@@ -32,39 +32,38 @@ class Photo extends Component {
 		const { item, } = this.props
 		return (
 			<Container>
-			<Card style={{ elevation: 3, }}>
-				<CardItem cardBody>
-					<Image
-						source={{ uri: item.getThumbUrl, }}
-						indicator={Progress}
-						indicatorProps={{
-							color: CONST.MAIN_COLOR,
-							unfilledColor: CONST.UNFILLED_COLOR,
-						}}
-						style={{
-							position: 'absolute',
-							width: 320,
-							height: 240,
-						}}
-					/>
-				</CardItem>
-				<CardItem cardBody>
-					<Image
-						source={{ uri: item.getImgUrl, }}
-						indicator={Progress}
-						indicatorProps={{
-							color: CONST.MAIN_COLOR,
-							unfilledColor: CONST.UNFILLED_COLOR,
-						}}
-						style={{
-							position: 'absolute',
-							width: 320,
-							height: 240,
-						}}
-					/>
-				</CardItem>
-
-			</Card>
+				<Card style={{ elevation: 3, }}>
+					<CardItem cardBody>
+						<Image
+							source={{ uri: item.getThumbUrl, }}
+							indicator={Progress}
+							indicatorProps={{
+								color: CONST.MAIN_COLOR,
+								unfilledColor: CONST.UNFILLED_COLOR,
+							}}
+							style={{
+								position: 'absolute',
+								width: 320,
+								height: 240,
+							}}
+						/>
+					</CardItem>
+					<CardItem cardBody>
+						<Image
+							source={{ uri: item.getImgUrl, }}
+							indicator={Progress}
+							indicatorProps={{
+								color: CONST.MAIN_COLOR,
+								unfilledColor: CONST.UNFILLED_COLOR,
+							}}
+							style={{
+								position: 'absolute',
+								width: 320,
+								height: 240,
+							}}
+						/>
+					</CardItem>
+				</Card>
 			</Container>
 
 		)

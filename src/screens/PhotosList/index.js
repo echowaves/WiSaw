@@ -40,6 +40,7 @@ class PhotosList extends Component {
 	})
 
 	static propTypes = {
+		navigation: PropTypes.object.isRequired,
 		listPhotos: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,

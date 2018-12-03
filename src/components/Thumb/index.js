@@ -12,10 +12,9 @@ import {
 
 import PropTypes from 'prop-types'
 
-import { StackActions, } from 'react-navigation'
-
 class Thumb extends Component {
 	static propTypes = {
+		navigation: PropTypes.object.isRequired,
 		item: PropTypes.object.isRequired,
 	}
 
@@ -24,12 +23,6 @@ class Thumb extends Component {
 	}
 
 	onThumbPress(item) {
-		// const photosDetailsNavigateAction = StackActions.navigate({
-		// 	routeName: 'PhotosDetails',
-		// 	params: {},
-		// 	action: StackActions.push({ routeName: 'PhotosDetails', }),
-		// })
-		//
 		const { navigation, } = 	this.props
 		navigation.navigate('PhotosDetails')
 	}

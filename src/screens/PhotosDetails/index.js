@@ -9,7 +9,6 @@ import {
 import { connect, } from 'react-redux'
 
 import {
-	Container,
 	Icon,
 } from 'native-base'
 
@@ -43,17 +42,19 @@ class PhotosDetails extends Component {
 		} = this.props
 
 		return (
-				<Swiper
-					cards={photos}
-					renderCard={item => <Photo item={item} />}
-					containerStyle={styles.container}
-					horizontalSwipe
-					verticalSwipe={false}
-					showSecondCard={false}
-					stackSize={1}
-					goBackToPreviousCardOnSwipeRight
-					infinite
-				/>
+			<Swiper
+				cards={photos}
+				renderCard={item => <Photo item={item} />}
+				containerStyle={styles.container}
+				horizontalSwipe
+				verticalSwipe={false}
+				showSecondCard={false}
+				stackSize={0}
+				stackSeparation={0}
+				goBackToPreviousCardOnSwipeRight
+				infinite
+				cardIndex={10}
+			/>
 		)
 	}
 }
