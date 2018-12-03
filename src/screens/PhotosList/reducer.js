@@ -3,9 +3,9 @@ import {
 } from 'native-base'
 
 
-export const GET_PHOTOS = 'wisaw/photos/LOAD'
-export const GET_PHOTOS_SUCCESS = 'wisaw/photos/LOAD_SUCCESS'
-export const GET_PHOTOS_FAIL = 'wisaw/photos/LOAD_FAIL'
+export const GET_PHOTOS = 'wisaw/photos/GET_PHOTOS'
+export const GET_PHOTOS_SUCCESS = 'wisaw/photos/GET_PHOTOS_SUCCESS'
+export const GET_PHOTOS_FAIL = 'wisaw/photos/GET_PHOTOS_FAIL'
 
 export const initialState = {
 	photos: [],

@@ -1,4 +1,5 @@
 import React, { Component, } from 'react'
+import { connect, } from 'react-redux'
 
 import {
 	StyleSheet,
@@ -11,11 +12,14 @@ import {
 } from 'native-base'
 
 import PropTypes from 'prop-types'
+import { setCurrentPhotoIndex, } from './reducer'
 
 class Thumb extends Component {
 	static propTypes = {
 		navigation: PropTypes.object.isRequired,
+		setCurrentPhotoIndex: PropTypes.func.isRequired,
 		item: PropTypes.object.isRequired,
+		index: PropTypes.number.isRequired,
 	}
 
 	constructor(props) {
@@ -23,7 +27,8 @@ class Thumb extends Component {
 	}
 
 	onThumbPress(item) {
-		const { navigation, } = 	this.props
+		const { navigation, index, setCurrentPhotoIndex, } = this.props
+		setCurrentPhotoIndex(index)
 		navigation.navigate('PhotosDetails')
 	}
 
@@ -53,4 +58,10 @@ const styles = StyleSheet.create({
 	},
 })
 
-export default Thumb
+const mapStateToProps = null
+
+const mapDispatchToProps = {
+	setCurrentPhotoIndex, // will be wrapped into a dispatch call
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Thumb)

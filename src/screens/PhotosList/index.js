@@ -1,4 +1,6 @@
 import React, { Component, } from 'react'
+import { connect, } from 'react-redux'
+
 import GridView from 'react-native-super-grid'
 
 import PropTypes from 'prop-types'
@@ -7,7 +9,6 @@ import {
 	StyleSheet,
 } from 'react-native'
 
-import { connect, } from 'react-redux'
 
 import {
 	Container,
@@ -94,7 +95,7 @@ class PhotosList extends Component {
 					<GridView
 						itemDimension={100}
 						items={photos}
-						renderItem={item => <Thumb item={item} navigation={navigation} />}
+						renderItem={(item, index) => <Thumb item={item} index={index} navigation={navigation} />}
 						style={styles.container}
 						showsVerticalScrollIndicator={false}
 						horizontal={false}
