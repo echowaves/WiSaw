@@ -103,7 +103,7 @@ class PhotosList extends Component {
 				showsVerticalScrollIndicator={false}
 				horizontal={false}
 				onEndReached={() => (listPhotos(daysAgo))}
-				onEndReachedThreshold={1}
+				onEndReachedThreshold={5}
 				// refreshing={false}
 				// onRefresh={() => (listPhotos(daysAgo))}
 			/>
