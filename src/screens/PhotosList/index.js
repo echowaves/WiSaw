@@ -43,6 +43,7 @@ class PhotosList extends Component {
 	static propTypes = {
 		navigation: PropTypes.object.isRequired,
 		listPhotos: PropTypes.func.isRequired,
+		daysAgo: PropTypes.number.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,
 		errorMessage: PropTypes.string.isRequired,
@@ -51,8 +52,9 @@ class PhotosList extends Component {
 	componentDidMount() {
 		const {
 			listPhotos,
+			daysAgo,
 		} = this.props
-		listPhotos()
+		listPhotos(daysAgo)
 	}
 
 	render() {
@@ -60,6 +62,8 @@ class PhotosList extends Component {
 			photos,
 			loading,
 			errorMessage,
+			listPhotos,
+			daysAgo,
 		} = this.props
 
 		if (loading === true) {
@@ -90,18 +94,19 @@ class PhotosList extends Component {
 
 		const { navigation, } = this.props
 		return (
-			<Container>
-				<Content>
-					<GridView
-						itemDimension={100}
-						items={photos}
-						renderItem={(item, index) => <Thumb item={item} index={index} navigation={navigation} />}
-						style={styles.container}
-						showsVerticalScrollIndicator={false}
-						horizontal={false}
-					/>
-				</Content>
-			</Container>
+			<GridView
+				// extraData={this.state}
+				itemDimension={100}
+				items={photos}
+				renderItem={(item, index) => <Thumb item={item} index={index} navigation={navigation} />}
+				style={styles.container}
+				showsVerticalScrollIndicator={false}
+				horizontal={false}
+				onEndReached={() => (listPhotos(daysAgo))}
+				onEndReachedThreshold={1}
+				// refreshing={false}
+				// onRefresh={() => (listPhotos(daysAgo))}
+			/>
 		)
 	}
 }
@@ -113,11 +118,13 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = state => {
-	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, }))
+	const storedPhotos = state.photosList.photos.map(photo => ({ key: photo.id, ...photo, })) // add key to photos
 	return {
 		photos: storedPhotos,
 		errorMessage: state.photosList.errorMessage,
 		loading: state.photosList.loading,
+		paging: state.photosList.paging,
+		daysAgo: state.photosList.daysAgo,
 	}
 }
 

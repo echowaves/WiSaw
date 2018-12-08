@@ -6,11 +6,13 @@ import {
 export const GET_PHOTOS = 'wisaw/photos/GET_PHOTOS'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/GET_PHOTOS_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photos/GET_PHOTOS_FAIL'
+export const RESET_STATE = 'wisaw/photos/RESET_STATE'
 
 export const initialState = {
 	photos: [],
 	loading: false,
 	errorMessage: '',
+	daysAgo: 1,
 }
 
 export default function reducer(state = initialState, action) {
@@ -18,14 +20,15 @@ export default function reducer(state = initialState, action) {
 		case GET_PHOTOS:
 			return {
 				...state,
-				loading: true,
+				loading: state.daysAgo === 0,
 				errorMessage: '',
+				daysAgo: state.daysAgo + 1,
 			}
 		case GET_PHOTOS_SUCCESS:
 			return {
 				...state,
+				photos: state.photos.concat(action.payload),
 				loading: false,
-				photos: action.payload,
 				errorMessage: '',
 			}
 		case GET_PHOTOS_FAIL:
@@ -35,18 +38,20 @@ export default function reducer(state = initialState, action) {
 				photos: [],
 				errorMessage: action.errorMessage,
 			}
+		case RESET_STATE:
+			return initialState
 		default:
 			return state
 	}
 }
 
-export function listPhotos() {
+export function listPhotos(daysAgo) {
 	return async dispatch => {
 		dispatch({
 			type: GET_PHOTOS,
 		})
 		try {
-			const response = await fetch('https://api.wisaw.com/photos/feed', {
+			const response = await fetch('https://api.wisaw.com/photos/feedByDate', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -60,9 +65,10 @@ export function listPhotos() {
 							-77.98,
 						],
 					},
+					daysAgo,
+					timeZoneShiftHours: new Date().getTimezoneOffset() / 60,
 				}),
 			})
-			// await new Promise(resolve => setTimeout(resolve, 3000)); // 3 sec
 			const responseJson = await response.json()
 			if (responseJson.photos) {
 				dispatch({
