@@ -2,6 +2,7 @@ import {
 	Toast,
 } from 'native-base'
 
+import { store, } from '../../../App'
 
 export const GET_PHOTOS = 'wisaw/photos/GET_PHOTOS'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/GET_PHOTOS_SUCCESS'
@@ -20,23 +21,24 @@ export default function reducer(state = initialState, action) {
 		case GET_PHOTOS:
 			return {
 				...state,
-				loading: state.daysAgo === 0,
+				loading: true,
 				errorMessage: '',
-				daysAgo: state.daysAgo + 1,
 			}
 		case GET_PHOTOS_SUCCESS:
 			return {
 				...state,
-				photos: state.photos.concat(action.payload),
+				photos: state.photos.concat(action.photos),
 				loading: false,
 				errorMessage: '',
+				daysAgo: state.daysAgo + 1,
 			}
 		case GET_PHOTOS_FAIL:
 			return {
 				...state,
 				loading: false,
-				photos: [],
+				// photos: [],
 				errorMessage: action.errorMessage,
+				daysAgo: state.daysAgo + 1,
 			}
 		case RESET_STATE:
 			return initialState
@@ -45,7 +47,15 @@ export default function reducer(state = initialState, action) {
 	}
 }
 
-export function listPhotos(daysAgo) {
+export function resetState() {
+	return {
+		type: RESET_STATE,
+	}
+}
+
+export function getPhotos() {
+	const { daysAgo, } = store.getState().photosList
+
 	return async dispatch => {
 		dispatch({
 			type: GET_PHOTOS,
@@ -70,18 +80,15 @@ export function listPhotos(daysAgo) {
 				}),
 			})
 			const responseJson = await response.json()
-			if (responseJson.photos) {
+			if (responseJson.photos && responseJson.photos.length > 0) {
 				dispatch({
 					type: GET_PHOTOS_SUCCESS,
-					payload: responseJson.photos,
+					photos: responseJson.photos,
 				})
 			} else {
 				dispatch({
 					type: GET_PHOTOS_FAIL,
-					errorMessage: 'Failed to load photos',
-				})
-				Toast.show({
-					text: 'Failed to load photos',
+					errorMessage: '0 photos loaded',
 				})
 			}
 		} catch (err) {

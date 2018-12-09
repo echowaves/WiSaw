@@ -11,16 +11,10 @@ import {
 
 
 import {
-	Container,
-	Card,
-	CardItem,
-	Content,
 	Icon,
-	Spinner,
-	Text,
 } from 'native-base'
 
-import { listPhotos, } from './reducer'
+import { getPhotos, resetState, } from './reducer'
 
 import Thumb from '../../components/Thumb'
 
@@ -42,57 +36,29 @@ class PhotosList extends Component {
 
 	static propTypes = {
 		navigation: PropTypes.object.isRequired,
-		listPhotos: PropTypes.func.isRequired,
-		daysAgo: PropTypes.number.isRequired,
+		getPhotos: PropTypes.func.isRequired,
+		resetState: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,
-		errorMessage: PropTypes.string.isRequired,
 	}
 
 	componentDidMount() {
 		const {
-			listPhotos,
-			daysAgo,
+			getPhotos,
+			resetState,
 		} = this.props
-		listPhotos(daysAgo)
+		resetState()
+		getPhotos()
 	}
 
 	render() {
 		const {
 			photos,
 			loading,
-			errorMessage,
-			listPhotos,
-			daysAgo,
+			getPhotos,
+			navigation,
 		} = this.props
 
-		if (loading === true) {
-			// return ()
-			return (
-				<Container>
-					<Content>
-						<Spinner
-							color={CONST.MAIN_COLOR}
-						/>
-					</Content>
-				</Container>
-			)
-		}
-		if (errorMessage.length > 0) {
-			return (
-				<Container>
-					<Content>
-						<Card>
-							<CardItem header bordered>
-								<Text>No Photos Loaded.</Text>
-							</CardItem>
-						</Card>
-					</Content>
-				</Container>
-			)
-		}
-
-		const { navigation, } = this.props
 		return (
 			<GridView
 				// extraData={this.state}
@@ -102,10 +68,16 @@ class PhotosList extends Component {
 				style={styles.container}
 				showsVerticalScrollIndicator={false}
 				horizontal={false}
-				onEndReached={() => (listPhotos(daysAgo))}
-				onEndReachedThreshold={5}
-				// refreshing={false}
-				// onRefresh={() => (listPhotos(daysAgo))}
+				onEndReached={() => {
+					if (loading === false) {
+						getPhotos()
+					}
+				}
+				}
+				onEndReachedThreshold={3}
+				refreshing={false}
+				onRefresh={() => (this.componentDidMount())
+				}
 			/>
 		)
 	}
@@ -124,12 +96,11 @@ const mapStateToProps = state => {
 		errorMessage: state.photosList.errorMessage,
 		loading: state.photosList.loading,
 		paging: state.photosList.paging,
-		daysAgo: state.photosList.daysAgo,
 	}
 }
 
 const mapDispatchToProps = {
-	listPhotos, // will be wrapped into a dispatch call
+	getPhotos, resetState, // will be wrapped into a dispatch call
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
