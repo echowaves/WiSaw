@@ -12,6 +12,10 @@ import {
 
 import {
 	Icon,
+	Container,
+	Content,
+	Body,
+	Spinner,
 } from 'native-base'
 
 import { getPhotos, resetState, } from './reducer'
@@ -58,6 +62,18 @@ class PhotosList extends Component {
 			getPhotos,
 			navigation,
 		} = this.props
+
+		if (photos.length === 0) {
+			return (
+				<Container>
+					<Content padder>
+						<Body>
+							<Spinner color={CONST.MAIN_COLOR} />
+						</Body>
+					</Content>
+				</Container>
+			)
+		}
 
 		return (
 			<GridView
