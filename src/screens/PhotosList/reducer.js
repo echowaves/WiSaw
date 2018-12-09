@@ -7,6 +7,7 @@ import { store, } from '../../../App'
 export const GET_PHOTOS = 'wisaw/photos/GET_PHOTOS'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/GET_PHOTOS_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photos/GET_PHOTOS_FAIL'
+export const GET_PHOTOS_FINISHED = 'wisaw/photos/GET_PHOTOS_FINISHED'
 export const RESET_STATE = 'wisaw/photos/RESET_STATE'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
@@ -15,7 +16,7 @@ export const initialState = {
 	photos: [],
 	loading: false,
 	errorMessage: '',
-	daysAgo: 0,
+	daysAgo: 1,
 }
 
 export default function reducer(state = initialState, action) {
@@ -30,17 +31,19 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				photos: state.photos.concat(action.photos),
-				loading: false,
-				errorMessage: '',
 				daysAgo: state.daysAgo + 1,
+				errorMessage: '',
 			}
 		case GET_PHOTOS_FAIL:
 			return {
 				...state,
-				loading: false,
-				// photos: [],
-				errorMessage: action.errorMessage,
 				daysAgo: state.daysAgo + 1,
+				errorMessage: action.errorMessage,
+			}
+		case GET_PHOTOS_FINISHED:
+			return {
+				...state,
+				loading: false,
 			}
 		case RESET_STATE:
 			return initialState
@@ -81,8 +84,6 @@ async function _requestPhotos() {
 
 
 export function getPhotos() {
-	const { daysAgo, } = store.getState().photosList
-
 	return async dispatch => {
 		dispatch({
 			type: GET_PHOTOS,
@@ -103,7 +104,10 @@ export function getPhotos() {
 						errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
 					})
 				}
-			} while (responseJson.photos.length === 0 && daysAgo < 1000)
+			} while (
+				(responseJson.photos.length === 0 && store.getState().photosList.daysAgo < 1000)
+				|| (responseJson.photos.length > 0 && store.getState().photosList.daysAgo < 10)
+			)
 		} catch (err) {
 			dispatch({
 				type: GET_PHOTOS_FAIL,
@@ -113,5 +117,8 @@ export function getPhotos() {
 				text: err.toString(),
 			})
 		}
+		dispatch({
+			type: GET_PHOTOS_FINISHED,
+		})
 	}
 }
