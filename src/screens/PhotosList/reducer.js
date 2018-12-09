@@ -105,7 +105,7 @@ export function getPhotos() {
 					})
 				}
 			} while (
-				(responseJson.photos.length === 0 && store.getState().photosList.daysAgo < 1000)
+				(responseJson.photos.length === 0 && store.getState().photosList.daysAgo < 3000)
 				|| (responseJson.photos.length > 0 && store.getState().photosList.daysAgo < 10)
 			)
 		} catch (err) {
