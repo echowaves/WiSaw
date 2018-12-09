@@ -16,7 +16,7 @@ export const initialState = {
 	photos: [],
 	loading: false,
 	errorMessage: '',
-	daysAgo: 1,
+	daysAgo: 0,
 }
 
 export default function reducer(state = initialState, action) {
