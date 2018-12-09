@@ -4,7 +4,7 @@ import {
 
 import { store, } from '../../../App'
 
-export const GET_PHOTOS = 'wisaw/photos/GET_PHOTOS'
+export const GET_PHOTOS_STARTED = 'wisaw/photos/GET_PHOTOS'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photos/GET_PHOTOS_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photos/GET_PHOTOS_FAIL'
 export const GET_PHOTOS_FINISHED = 'wisaw/photos/GET_PHOTOS_FINISHED'
@@ -21,7 +21,7 @@ export const initialState = {
 
 export default function reducer(state = initialState, action) {
 	switch (action.type) {
-		case GET_PHOTOS:
+		case GET_PHOTOS_STARTED:
 			return {
 				...state,
 				loading: true,
@@ -86,7 +86,7 @@ async function _requestPhotos() {
 export function getPhotos() {
 	return async dispatch => {
 		dispatch({
-			type: GET_PHOTOS,
+			type: GET_PHOTOS_STARTED,
 		})
 		try {
 			let responseJson
