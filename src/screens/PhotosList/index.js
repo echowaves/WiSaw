@@ -74,7 +74,7 @@ class PhotosList extends Component {
 					}
 				}
 				}
-				onEndReachedThreshold={3}
+				onEndReachedThreshold={5}
 				refreshing={false}
 				onRefresh={() => (this.componentDidMount())
 				}
