@@ -137,6 +137,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-secure-key-store')
     implementation project(':react-native-screens')
     implementation project(':react-native-gesture-handler')
     implementation fileTree(dir: "libs", include: ["*.jar"])
