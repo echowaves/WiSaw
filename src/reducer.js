@@ -1,5 +1,16 @@
+import { uuidv4, } from 'uuid/v4'
+import RNSecureKeyStore, { ACCESSIBLE, } from 'react-native-secure-key-store'
+import {
+	Toast,
+} from 'native-base'
+
+import { store, } from '../App'
+
 export const SET_UUID = 'wisaw/globals/SET_UUID'
 export const ACCEPT_TNC = 'wisaw/globals/ACCEPT_TNC'
+
+const UUID_KEY = 'wisaw_device_uuid_123'
+const IS_TANDC_ACCEPTED_KEY = 'wisaw/is_tandc_accepted_on_this_device_123'
 
 export const initialState = {
 	uuid: '',
@@ -23,8 +34,43 @@ export default function reducer(state = initialState, action) {
 	}
 }
 
-export function getUUID() {
+export async function getUUID() {
+	let { uuid, } = store.getState().globals
+	if (uuid !== '') return uuid // if uuid is in the store -- just return it
 
+	// try to retreive from secure store
+	try {
+		uuid = await RNSecureKeyStore.get(UUID_KEY)
+	} catch (err) {
+		Toast.show({
+			text: err.toString(),
+			buttonText: "OK",
+			duration: 15000,
+		})
+	}
+	// no uuid in the store, generate a new one and store
+	if (uuid === '') {
+		uuid = uuidv4()
+		try {
+			await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+		} catch (err) {
+			Toast.show({
+				text: err.toString(),
+				buttonText: "OK",
+				duration: 15000,
+			})
+		}
+		store.dispatch({
+			type: SET_UUID,
+			uuid,
+		})
+	}
+	Toast.show({
+		text: `UUID: ${uuid}`,
+		buttonText: "OK",
+		duration: 15000,
+	})
+	return uuid
 }
 
 export function isTandcAccepted() {

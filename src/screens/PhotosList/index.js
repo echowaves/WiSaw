@@ -1,4 +1,4 @@
-import React, { Component, } from 'react'
+import React, { Component, View, } from 'react'
 import { connect, } from 'react-redux'
 
 import GridView from 'react-native-super-grid'
@@ -23,6 +23,8 @@ import { getPhotos, resetState, } from './reducer'
 import Thumb from '../../components/Thumb'
 
 import * as CONST from '../../consts.js'
+
+import { getUUID, } from '../../reducer'
 
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -51,6 +53,7 @@ class PhotosList extends Component {
 			getPhotos,
 			resetState,
 		} = this.props
+		getUUID()
 		resetState()
 		getPhotos()
 	}
