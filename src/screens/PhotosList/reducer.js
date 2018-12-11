@@ -4,11 +4,11 @@ import {
 
 import { store, } from '../../../App'
 
-export const GET_PHOTOS_STARTED = 'wisaw/photos/GET_PHOTOS'
-export const GET_PHOTOS_SUCCESS = 'wisaw/photos/GET_PHOTOS_SUCCESS'
-export const GET_PHOTOS_FAIL = 'wisaw/photos/GET_PHOTOS_FAIL'
-export const GET_PHOTOS_FINISHED = 'wisaw/photos/GET_PHOTOS_FINISHED'
-export const RESET_STATE = 'wisaw/photos/RESET_STATE'
+export const GET_PHOTOS_STARTED = 'wisaw/photosList/GET_PHOTOS'
+export const GET_PHOTOS_SUCCESS = 'wisaw/photosList/GET_PHOTOS_SUCCESS'
+export const GET_PHOTOS_FAIL = 'wisaw/photosList/GET_PHOTOS_FAIL'
+export const GET_PHOTOS_FINISHED = 'wisaw/photosList/GET_PHOTOS_FINISHED'
+export const RESET_STATE = 'wisaw/photosList/RESET_STATE'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
