@@ -9,8 +9,8 @@ import { store, } from '../App'
 export const SET_UUID = 'wisaw/globals/SET_UUID'
 export const ACCEPT_TNC = 'wisaw/globals/ACCEPT_TNC'
 
-const UUID_KEY = 'wisaw_device_uuid_123'
-const IS_TANDC_ACCEPTED_KEY = 'wisaw/is_tandc_accepted_on_this_device_123'
+const UUID_KEY = 'wisaw_device_uuid'
+const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 export const initialState = {
 	uuid: '',
@@ -73,6 +73,37 @@ export async function getUUID() {
 	return uuid
 }
 
-export function isTandcAccepted() {
+export async function isTandcAccepted() {
+	let { isTandcAccepted, } = store.getState().globals
+	if (isTandcAccepted === true) return true
 
+	// try to retreive from secure store
+	try {
+		isTandcAccepted = await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY)
+	} catch (err) {
+		// Toast.show({
+		// 	text: err.toString(),
+		// 	buttonText: "OK",
+		// 	duration: 15000,
+		// })
+	}
+	// no uuid in the store, generate a new one and store
+	if (isTandcAccepted === false || isTandcAccepted === null) {
+		return false
+	}
+}
+
+export async function acceptTandC() {
+	try {
+		await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, true, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+	} catch (err) {
+		Toast.show({
+			text: err.toString(),
+			buttonText: "OK",
+			duration: 15000,
+		})
+	}
+	store.dispatch({
+		type: ACCEPT_TNC,
+	})
 }

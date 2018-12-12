@@ -30,7 +30,8 @@
     "redux": "4.0.1",
     "redux-thunk": "2.3.0",
     "uuid": "3.3.2",
-    "react-native-secure-key-store": "2.0.0"
+    "react-native-secure-key-store": "2.0.0",
+    "react-native-modal": "7.0.2"
   },
   "devDependencies": {
     "babel-eslint": "10.0.1",
