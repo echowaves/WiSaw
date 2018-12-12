@@ -1,4 +1,4 @@
-import { uuidv4, } from 'uuid/v4'
+import v4 from 'uuid/v4'
 import RNSecureKeyStore, { ACCESSIBLE, } from 'react-native-secure-key-store'
 import {
 	Toast,
@@ -42,15 +42,15 @@ export async function getUUID() {
 	try {
 		uuid = await RNSecureKeyStore.get(UUID_KEY)
 	} catch (err) {
-		Toast.show({
-			text: err.toString(),
-			buttonText: "OK",
-			duration: 15000,
-		})
+		// Toast.show({
+		// 	text: err.toString(),
+		// 	buttonText: "OK",
+		// 	duration: 15000,
+		// })
 	}
 	// no uuid in the store, generate a new one and store
-	if (uuid === '') {
-		uuid = uuidv4()
+	if (uuid === '' || uuid === null) {
+		uuid = v4()
 		try {
 			await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
 		} catch (err) {
@@ -60,16 +60,16 @@ export async function getUUID() {
 				duration: 15000,
 			})
 		}
-		store.dispatch({
-			type: SET_UUID,
-			uuid,
-		})
 	}
-	Toast.show({
-		text: `UUID: ${uuid}`,
-		buttonText: "OK",
-		duration: 15000,
+	store.dispatch({
+		type: SET_UUID,
+		uuid,
 	})
+	// Toast.show({
+	// 	text: `UUID: ${uuid}`,
+	// 	buttonText: "OK",
+	// 	duration: 15000,
+	// })
 	return uuid
 }
 
