@@ -18,6 +18,7 @@ import {
 	Left,
 	Right,
 	Title,
+	Footer,
 } from 'native-base'
 
 import { connect, } from 'react-redux'
@@ -145,10 +146,12 @@ class PhotosList extends Component {
 								<Text>* By using WiSaw I agree to Terms and Conditions.</Text>
 							</CardItem>
 							<CardItem footer>
+								<Left />
 								<Button block bordered success><Text> I Agree </Text></Button>
+								<Right />
 							</CardItem>
-
 						</Card>
+
 					</Content>
 				</Modal>
 			</Container>
