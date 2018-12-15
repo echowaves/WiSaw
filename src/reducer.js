@@ -34,33 +34,37 @@ export default function reducer(state = initialState, action) {
 	}
 }
 
-export async function getUUID() {
+export function getUUID() {
 	let { uuid, } = store.getState().globals
-	if (uuid !== '') return uuid // if uuid is in the store -- just return it
+	if (uuid !== '') return uuid; // if uuid is in the store -- just return it
 
-	// try to retreive from secure store
-	try {
-		uuid = await RNSecureKeyStore.get(UUID_KEY)
-	} catch (err) {
-		// Toast.show({
-		// 	text: err.toString(),
-		// 	buttonText: "OK",
-		// 	duration: 15000,
-		// })
-	}
-	// no uuid in the store, generate a new one and store
-	if (uuid === '' || uuid === null) {
-		uuid = v4()
+	(async () => {
+		// try to retreive from secure store
 		try {
-			await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+			uuid = await RNSecureKeyStore.get(UUID_KEY)
 		} catch (err) {
-			Toast.show({
-				text: err.toString(),
-				buttonText: "OK",
-				duration: 15000,
-			})
+			// Toast.show({
+			// 	text: err.toString(),
+			// 	buttonText: "OK",
+			// 	duration: 15000,
+			// })
 		}
-	}
+
+		// no uuid in the store, generate a new one and store
+		if (uuid === '' || uuid === null) {
+			uuid = v4()
+			try {
+				await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+			} catch (err) {
+				Toast.show({
+					text: err.toString(),
+					buttonText: "OK",
+					duration: 15000,
+				})
+			}
+		}
+	})()
+
 	store.dispatch({
 		type: SET_UUID,
 		uuid,
@@ -73,24 +77,31 @@ export async function getUUID() {
 	return uuid
 }
 
-export async function isTandcAccepted() {
+export function isTandcAccepted() {
 	let { isTandcAccepted, } = store.getState().globals
-	if (isTandcAccepted === true) return true
 
-	// try to retreive from secure store
-	try {
-		isTandcAccepted = await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY)
-	} catch (err) {
-		// Toast.show({
-		// 	text: err.toString(),
-		// 	buttonText: "OK",
-		// 	duration: 15000,
-		// })
+	if (isTandcAccepted === true) {
+		return true
 	}
+
+	(async () => {
+		// try to retreive from secure store
+		try {
+			isTandcAccepted = await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY)
+		} catch (err) {
+			// Toast.show({
+			// 	text: err.toString(),
+			// 	buttonText: "OK",
+			// 	duration: 15000,
+			// })
+		}
+	})()
+
 	// no uuid in the store, generate a new one and store
-	if (isTandcAccepted === false || isTandcAccepted === null) {
-		return false
+	if (isTandcAccepted === null) {
+		isTandcAccepted = false
 	}
+	return isTandcAccepted
 }
 
 export async function acceptTandC() {

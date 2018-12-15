@@ -3,7 +3,6 @@ import React, { Component, } from 'react'
 import {
 	StyleSheet,
 	Text,
-	TouchableOpacity,
 } from 'react-native'
 
 import {
@@ -17,8 +16,7 @@ import {
 	Button,
 	Left,
 	Right,
-	Title,
-	Footer,
+	Toast,
 } from 'native-base'
 
 import { connect, } from 'react-redux'
@@ -30,7 +28,10 @@ import PropTypes from 'prop-types'
 
 import Modal from "react-native-modal"
 
-import { getPhotos, resetState, } from './reducer'
+import {
+	getPhotos,
+	resetState,
+} from './reducer'
 
 import Thumb from '../../components/Thumb'
 
@@ -69,14 +70,17 @@ class PhotosList extends Component {
 			getPhotos,
 			resetState,
 		} = this.props
-		getUUID()
 		resetState()
 		getPhotos()
 		if (isTandcAccepted() === false) {
 			alert('tnc is not accepted')
 		}
-
-		// alert('tnc is not accepted123')
+		const uuid = getUUID()
+		// Toast.show({
+		// 	text: `UUID: ${uuid}`,
+		// 	buttonText: "OK",
+		// 	duration: 15000,
+		// })
 	}
 
 	render() {
@@ -99,7 +103,6 @@ class PhotosList extends Component {
 			)
 		}
 
-
 		return (
 			<Container>
 				<GridView
@@ -121,7 +124,7 @@ class PhotosList extends Component {
 					onRefresh={() => (this.componentDidMount())
 					}
 				/>
-				<Modal isVisible={true}>
+				<Modal isVisible={isTandcAccepted()}>
 					<Content padder>
 						<Card transparent>
 							<CardItem>
@@ -175,7 +178,9 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-	getPhotos, resetState, // will be wrapped into a dispatch call
+	// will be wrapped into a dispatch call
+	getPhotos,
+	resetState,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
