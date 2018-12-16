@@ -16,7 +16,7 @@ import {
 	Button,
 	Left,
 	Right,
-	Toast,
+	// Toast,
 } from 'native-base'
 
 import { connect, } from 'react-redux'
@@ -39,7 +39,7 @@ import * as CONST from '../../consts.js'
 
 import {
 	getUUID,
-	isTandcAccepted,
+	getTancAccepted,
 	acceptTandC,
 } from '../../reducer'
 
@@ -63,24 +63,29 @@ class PhotosList extends Component {
 		resetState: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,
+		isTandcAccepted: PropTypes.bool.isRequired,
+		getTancAccepted: PropTypes.func.isRequired,
+		acceptTandC: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
 		const {
 			getPhotos,
+			getTancAccepted,
 			resetState,
 		} = this.props
-		resetState()
-		getPhotos()
-		if (isTandcAccepted() === false) {
-			alert('tnc is not accepted')
-		}
+
 		const uuid = getUUID()
+		// alert(uuid)
 		// Toast.show({
 		// 	text: `UUID: ${uuid}`,
 		// 	buttonText: "OK",
 		// 	duration: 15000,
 		// })
+
+		resetState()
+		getPhotos()
+		getTancAccepted()
 	}
 
 	render() {
@@ -89,6 +94,8 @@ class PhotosList extends Component {
 			loading,
 			getPhotos,
 			navigation,
+			isTandcAccepted,
+			acceptTandC,
 		} = this.props
 
 		if (photos.length === 0) {
@@ -124,7 +131,8 @@ class PhotosList extends Component {
 					onRefresh={() => (this.componentDidMount())
 					}
 				/>
-				<Modal isVisible={isTandcAccepted()}>
+				<Modal
+					isVisible={!isTandcAccepted}>
 					<Content padder>
 						<Card transparent>
 							<CardItem>
@@ -146,21 +154,32 @@ class PhotosList extends Component {
 								<Text>* The abusive users will be banned from WiSaw by other users.</Text>
 							</CardItem>
 							<CardItem>
-								<Text>* By using WiSaw I agree to Terms and Conditions.</Text>
+								<Text>
+									* By using WiSaw I agree to Terms and Conditions.
+								</Text>
 							</CardItem>
 							<CardItem footer>
 								<Left />
-								<Button block bordered success><Text> I Agree </Text></Button>
+								<Button
+									block
+									bordered
+									success
+									small
+									onPress={() => {
+										acceptTandC()
+									}}>
+									<Text>  Agree  </Text>
+								</Button>
 								<Right />
 							</CardItem>
 						</Card>
-
 					</Content>
 				</Modal>
 			</Container>
 		)
 	}
 }
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
@@ -174,13 +193,16 @@ const mapStateToProps = state => {
 		errorMessage: state.photosList.errorMessage,
 		loading: state.photosList.loading,
 		paging: state.photosList.paging,
+		isTandcAccepted: state.globals.isTandcAccepted,
 	}
 }
 
 const mapDispatchToProps = {
 	// will be wrapped into a dispatch call
 	getPhotos,
+	getTancAccepted,
 	resetState,
+	acceptTandC,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
