@@ -10,10 +10,11 @@ export const SET_IS_TANDC_ACCEPTED = 'wisaw/globals/SET_IS_TANDC_ACCEPTED'
 export const SET_UUID = 'wisaw/globals/SET_UUID'
 
 const UUID_KEY = 'wisaw_device_uuid'
+//  date '+%Y%m%d%H%M%S'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 export const initialState = {
-	isTandcAccepted: true,
+	isTandcAccepted: false,
 	uuid: null,
 }
 
@@ -62,16 +63,22 @@ export function getUUID() {
 					// })
 				}
 			}
-			Toast.show({
-				text: uuid,
-				buttonText: "OK",
-				duration: 15000,
-			})
+			// Toast.show({
+			// 	text: uuid,
+			// 	buttonText: "OK",
+			// 	duration: 15000,
+			// })
 			dispatch({
 				type: SET_UUID,
 				uuid,
 			})
 		}
+	}
+	return async dispatch => {
+		dispatch({
+			type: SET_UUID,
+			uuid,
+		})
 	}
 }
 
@@ -99,18 +106,26 @@ export function acceptTandC() {
 
 export function getTancAccepted() {
 	let { isTandcAccepted, } = store.getState().globals
-	return async dispatch => {
-		try {
-			isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
-			dispatch({
-				type: SET_IS_TANDC_ACCEPTED,
-				isTandcAccepted,
-			})
-		} catch (err) {
-			dispatch({
-				type: SET_IS_TANDC_ACCEPTED,
-				isTandcAccepted: false,
-			})
+	if (isTandcAccepted == null || isTandcAccepted === false) {
+		return async dispatch => {
+			try {
+				isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
+				dispatch({
+					type: SET_IS_TANDC_ACCEPTED,
+					isTandcAccepted,
+				})
+			} catch (err) {
+				dispatch({
+					type: SET_IS_TANDC_ACCEPTED,
+					isTandcAccepted: false,
+				})
+			}
 		}
+	}
+	return async dispatch => {
+		dispatch({
+			type: SET_IS_TANDC_ACCEPTED,
+			isTandcAccepted,
+		})
 	}
 }
