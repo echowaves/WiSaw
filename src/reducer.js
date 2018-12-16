@@ -4,15 +4,17 @@ import {
 	Toast,
 } from 'native-base'
 
-// import { store, } from '../App'
+import { store, } from '../App'
 
 export const SET_IS_TANDC_ACCEPTED = 'wisaw/globals/SET_IS_TANDC_ACCEPTED'
+export const SET_UUID = 'wisaw/globals/SET_UUID'
 
 const UUID_KEY = 'wisaw_device_uuid'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 export const initialState = {
 	isTandcAccepted: true,
+	uuid: null,
 }
 
 export default function reducer(state = initialState, action) {
@@ -22,41 +24,55 @@ export default function reducer(state = initialState, action) {
 				...state,
 				isTandcAccepted: action.isTandcAccepted,
 			}
+		case SET_UUID:
+			return {
+				...state,
+				uuid: action.uuid,
+			}
 		default:
 			return state
 	}
 }
 
 export function getUUID() {
-	let uuid = null
-	if (uuid === null) { uuid = null } // stupid smelly parsing fixing
-	(async () => {
+	let { uuid, } = store.getState().globals
+	if (uuid == null) {
+		return async dispatch => {
 		// try to retreive from secure store
-		try {
-			uuid = await RNSecureKeyStore.get(UUID_KEY)
-		} catch (err) {
-			// Toast.show({
-			// 	text: err.toString(),
-			// 	buttonText: "OK23",
-			// 	duration: 15000,
-			// })
-		}
-		// no uuid in the store, generate a new one and store
-		// alert(uuid)
-		if (uuid === '' || uuid === null) {
-			uuid = v4()
 			try {
-				await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+				uuid = await RNSecureKeyStore.get(UUID_KEY)
 			} catch (err) {
 				// Toast.show({
 				// 	text: err.toString(),
-				// 	buttonText: "OK",
+				// 	buttonText: "OK23",
 				// 	duration: 15000,
 				// })
 			}
+			// no uuid in the store, generate a new one and store
+			// alert(uuid)
+			if (uuid === '' || uuid === null) {
+				uuid = v4()
+				try {
+					await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+				} catch (err) {
+					// Toast.show({
+					// 	text: err.toString(),
+					// 	buttonText: "OK",
+					// 	duration: 15000,
+					// })
+				}
+			}
+			Toast.show({
+				text: uuid,
+				buttonText: "OK",
+				duration: 15000,
+			})
+			dispatch({
+				type: SET_UUID,
+				uuid,
+			})
 		}
-	})()
-	return uuid
+	}
 }
 
 export function acceptTandC() {
@@ -82,9 +98,10 @@ export function acceptTandC() {
 }
 
 export function getTancAccepted() {
+	let { isTandcAccepted, } = store.getState().globals
 	return async dispatch => {
 		try {
-			const isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
+			isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
 			dispatch({
 				type: SET_IS_TANDC_ACCEPTED,
 				isTandcAccepted,

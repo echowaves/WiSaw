@@ -38,7 +38,7 @@ import Thumb from '../../components/Thumb'
 import * as CONST from '../../consts.js'
 
 import {
-	getUUID,
+	// getUUID,
 	getTancAccepted,
 	acceptTandC,
 } from '../../reducer'
@@ -66,6 +66,7 @@ class PhotosList extends Component {
 		isTandcAccepted: PropTypes.bool.isRequired,
 		getTancAccepted: PropTypes.func.isRequired,
 		acceptTandC: PropTypes.func.isRequired,
+		// getUUID: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -73,16 +74,10 @@ class PhotosList extends Component {
 			getPhotos,
 			getTancAccepted,
 			resetState,
+			// getUUID,
 		} = this.props
 
-		const uuid = getUUID()
-		// alert(uuid)
-		// Toast.show({
-		// 	text: `UUID: ${uuid}`,
-		// 	buttonText: "OK",
-		// 	duration: 15000,
-		// })
-
+		// getUUID()
 		resetState()
 		getPhotos()
 		getTancAccepted()
@@ -203,6 +198,7 @@ const mapDispatchToProps = {
 	getTancAccepted,
 	resetState,
 	acceptTandC,
+	// getUUID,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
