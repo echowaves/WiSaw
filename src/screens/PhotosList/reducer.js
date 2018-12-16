@@ -122,3 +122,5 @@ export function getPhotos() {
 		})
 	}
 }
+
+// https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux
