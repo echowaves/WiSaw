@@ -9,7 +9,7 @@ import {
 export const SET_IS_TANDC_ACCEPTED = 'wisaw/globals/SET_IS_TANDC_ACCEPTED'
 
 const UUID_KEY = 'wisaw_device_uuid'
-const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device1'
+const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 export const initialState = {
 	isTandcAccepted: true,
@@ -35,11 +35,11 @@ export function getUUID() {
 		try {
 			uuid = await RNSecureKeyStore.get(UUID_KEY)
 		} catch (err) {
-			Toast.show({
-				text: err.toString(),
-				buttonText: "OK",
-				duration: 15000,
-			})
+			// Toast.show({
+			// 	text: err.toString(),
+			// 	buttonText: "OK23",
+			// 	duration: 15000,
+			// })
 		}
 		// no uuid in the store, generate a new one and store
 		// alert(uuid)
@@ -74,6 +74,8 @@ export function acceptTandC() {
 			})
 			Toast.show({
 				text: err.toString(),
+				buttonText: "OK",
+				duration: 15000,
 			})
 		}
 	}
@@ -91,9 +93,6 @@ export function getTancAccepted() {
 			dispatch({
 				type: SET_IS_TANDC_ACCEPTED,
 				isTandcAccepted: false,
-			})
-			Toast.show({
-				text: err.toString(),
 			})
 		}
 	}
