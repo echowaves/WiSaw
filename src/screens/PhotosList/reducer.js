@@ -60,13 +60,18 @@ export function resetState() {
 
 async function _requestPhotos() {
 	const { daysAgo, } = store.getState().photosList
+	let { uuid, } = store.getState().globals
+	if (uuid == null) {
+		uuid = 'initializing'
+	}
+	
 	const response = await fetch('https://api.wisaw.com/photos/feedByDate', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-			uuid: '123123123',
+			uuid,
 			location: {
 				type: 'Point',
 				coordinates: [
@@ -79,6 +84,11 @@ async function _requestPhotos() {
 		}),
 	})
 	const responseJson = await response.json()
+	// Toast.show({
+	// 	text: `uuid: ${uuid}`,
+	// 	buttonText: "OK",
+	// 	duration: 15000,
+	// })
 	return responseJson
 }
 
