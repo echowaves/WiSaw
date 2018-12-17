@@ -64,7 +64,7 @@ async function _requestPhotos() {
 	if (uuid == null) {
 		uuid = 'initializing'
 	}
-	
+
 	const response = await fetch('https://api.wisaw.com/photos/feedByDate', {
 		method: 'POST',
 		headers: {
