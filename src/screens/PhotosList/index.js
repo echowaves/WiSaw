@@ -16,7 +16,6 @@ import {
 	Button,
 	Left,
 	Right,
-	// Toast,
 } from 'native-base'
 
 import { connect, } from 'react-redux'
@@ -29,19 +28,14 @@ import PropTypes from 'prop-types'
 import Modal from "react-native-modal"
 
 import {
-	getPhotos,
 	resetState,
+	getPhotos,
+	acceptTandC,
 } from './reducer'
 
 import Thumb from '../../components/Thumb'
 
 import * as CONST from '../../consts.js'
-
-import {
-	getUUID,
-	getTancAccepted,
-	acceptTandC,
-} from '../../reducer'
 
 class PhotosList extends Component {
 	static navigationOptions = ({ navigation, }) => ({
@@ -59,28 +53,25 @@ class PhotosList extends Component {
 
 	static propTypes = {
 		navigation: PropTypes.object.isRequired,
-		getPhotos: PropTypes.func.isRequired,
 		resetState: PropTypes.func.isRequired,
+		getPhotos: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
 		loading: PropTypes.bool.isRequired,
 		isTandcAccepted: PropTypes.bool.isRequired,
-		getTancAccepted: PropTypes.func.isRequired,
 		acceptTandC: PropTypes.func.isRequired,
-		getUUID: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
-		const {
-			getPhotos,
-			getTancAccepted,
-			resetState,
-			getUUID,
-		} = this.props
+		this.reload()
+	}
 
-		getUUID()
-		resetState()
+	async reload() {
+		const {
+			resetState,
+			getPhotos,
+		} = this.props
+		await resetState()
 		getPhotos()
-		getTancAccepted()
 	}
 
 	render() {
@@ -123,7 +114,7 @@ class PhotosList extends Component {
 					}
 					onEndReachedThreshold={5}
 					refreshing={false}
-					onRefresh={() => (this.componentDidMount())
+					onRefresh={() => (this.reload())
 					}
 				/>
 				<Modal
@@ -188,17 +179,15 @@ const mapStateToProps = state => {
 		errorMessage: state.photosList.errorMessage,
 		loading: state.photosList.loading,
 		paging: state.photosList.paging,
-		isTandcAccepted: state.globals.isTandcAccepted,
+		isTandcAccepted: state.photosList.isTandcAccepted,
 	}
 }
 
 const mapDispatchToProps = {
 	// will be wrapped into a dispatch call
-	getPhotos,
-	getTancAccepted,
 	resetState,
+	getPhotos,
 	acceptTandC,
-	getUUID,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)

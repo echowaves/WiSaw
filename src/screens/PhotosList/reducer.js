@@ -1,18 +1,29 @@
+import v4 from 'uuid/v4'
+import RNSecureKeyStore, { ACCESSIBLE, } from 'react-native-secure-key-store'
 import {
 	Toast,
 } from 'native-base'
-
-import { store, } from '../../../App'
 
 export const GET_PHOTOS_STARTED = 'wisaw/photosList/GET_PHOTOS'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photosList/GET_PHOTOS_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photosList/GET_PHOTOS_FAIL'
 export const GET_PHOTOS_FINISHED = 'wisaw/photosList/GET_PHOTOS_FINISHED'
 export const RESET_STATE = 'wisaw/photosList/RESET_STATE'
+export const SET_IS_TANDC_ACCEPTED = 'wisaw/photosList/SET_IS_TANDC_ACCEPTED'
+export const SET_UUID = 'wisaw/photosList/SET_UUID'
+export const SET_LOCATION = 'wisaw/photosList/SET_LOCATION'
+export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
+
+const UUID_KEY = 'wisaw_device_uuid'
+//  date '+%Y%m%d%H%M%S'
+const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
+	isTandcAccepted: false,
+	uuid: null,
+	location: null,
 	photos: [],
 	loading: false,
 	errorMessage: '',
@@ -39,6 +50,7 @@ export default function reducer(state = initialState, action) {
 				...state,
 				daysAgo: state.daysAgo + 1,
 				errorMessage: action.errorMessage,
+				loading: false,
 			}
 		case GET_PHOTOS_FINISHED:
 			return {
@@ -47,20 +59,60 @@ export default function reducer(state = initialState, action) {
 			}
 		case RESET_STATE:
 			return initialState
+		case SET_IS_TANDC_ACCEPTED:
+			return {
+				...state,
+				isTandcAccepted: action.isTandcAccepted,
+			}
+		case SET_UUID:
+			return {
+				...state,
+				uuid: action.uuid,
+			}
+		case SET_LOCATION:
+			return {
+				...state,
+				location: action.location,
+			}
+		case SET_ERROR:
+			return {
+				...state,
+				error: action.error,
+			}
 		default:
 			return state
 	}
 }
 
 export function resetState() {
-	return {
-		type: RESET_STATE,
+	return async (dispatch, getState) => {
+		dispatch({
+			type: RESET_STATE,
+		})
+
+		const uuid = await getUUID(getState)
+		dispatch({
+			type: SET_UUID,
+			uuid,
+		})
+
+		const isTandcAccepted = await getTancAccepted(getState)
+		dispatch({
+			type: SET_IS_TANDC_ACCEPTED,
+			isTandcAccepted,
+		})
+
+		const location = await getLocation()
+		dispatch({
+			type: SET_LOCATION,
+			location,
+		})
 	}
 }
 
-async function _requestPhotos() {
-	const { daysAgo, } = store.getState().photosList
-	let { uuid, } = store.getState().globals
+async function _requestPhotos(getState, lat, long) {
+	const { daysAgo, } = getState().photosList
+	let { uuid, } = getState().photosList
 	if (uuid == null) {
 		uuid = 'initializing'
 	}
@@ -75,8 +127,8 @@ async function _requestPhotos() {
 			location: {
 				type: 'Point',
 				coordinates: [
-					38.80,
-					-77.98,
+					lat,
+					long,
 				],
 			},
 			daysAgo,
@@ -94,7 +146,11 @@ async function _requestPhotos() {
 
 
 export function getPhotos() {
-	return async dispatch => {
+	return async (dispatch, getState) => {
+		if (!getState().photosList.location) {
+			return Promise.resolve()
+		}
+		const { latitude, longitude, } = getState().photosList.location.coords
 		dispatch({
 			type: GET_PHOTOS_STARTED,
 		})
@@ -102,7 +158,7 @@ export function getPhotos() {
 			let responseJson
 			do {
 				/* eslint-disable no-await-in-loop */
-				responseJson = await _requestPhotos()
+				responseJson = await _requestPhotos(getState, latitude, longitude)
 				if (responseJson.photos && responseJson.photos.length > 0) {
 					dispatch({
 						type: GET_PHOTOS_SUCCESS,
@@ -115,8 +171,8 @@ export function getPhotos() {
 					})
 				}
 			} while (
-				(responseJson.photos.length === 0 && store.getState().photosList.daysAgo < 3000)
-				|| (responseJson.photos.length > 0 && store.getState().photosList.daysAgo < 10)
+				(responseJson.photos.length === 0 && getState().photosList.daysAgo < 3000)
+				|| (responseJson.photos.length > 0 && getState().photosList.daysAgo < 10)
 			)
 		} catch (err) {
 			dispatch({
@@ -133,4 +189,104 @@ export function getPhotos() {
 	}
 }
 
+export function acceptTandC() {
+	return async dispatch => {
+		try {
+			await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "true", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+			dispatch({
+				type: SET_IS_TANDC_ACCEPTED,
+				isTandcAccepted: true,
+			})
+		} catch (err) {
+			dispatch({
+				type: SET_IS_TANDC_ACCEPTED,
+				isTandcAccepted: false,
+			})
+			Toast.show({
+				text: err.toString(),
+				buttonText: "OK",
+				duration: 15000,
+			})
+		}
+	}
+}
+
+async function getUUID(getState) {
+	let { uuid, } = getState().photosList
+	if (uuid == null) {
+	// try to retreive from secure store
+		try {
+			uuid = await RNSecureKeyStore.get(UUID_KEY)
+		} catch (err) {
+			// Toast.show({
+			// 	text: err.toString(),
+			// 	buttonText: "OK23",
+			// 	duration: 15000,
+			// })
+		}
+		// no uuid in the store, generate a new one and store
+		// alert(uuid)
+		if (uuid === '' || uuid === null) {
+			uuid = v4()
+			try {
+				await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
+			} catch (err) {
+				// Toast.show({
+				// 	text: err.toString(),
+				// 	buttonText: "OK",
+				// 	duration: 15000,
+				// })
+			}
+		}
+	}
+	return uuid
+}
+
+async function getTancAccepted(getState) {
+	let { isTandcAccepted, } = getState().photosList
+	if (isTandcAccepted == null || isTandcAccepted === false) {
+		try {
+			isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
+		} catch (err) {
+			isTandcAccepted = false
+		}
+	}
+	return isTandcAccepted
+}
+
+async function getLocation() {
+	let position = null
+	try {
+		position = await _getCurrentPosition({
+			enableHighAccuracy: false,
+			timeout: 20000,
+			maximumAge: 1000,
+		})
+	} catch (error) {
+		position = null
+		console.log(error)
+	}
+	return position
+}
+
+function _getCurrentPosition(options = {}) {
+	return new Promise((resolve, reject) => {
+		navigator.geolocation.getCurrentPosition(resolve, reject, options)
+	})
+}
+
+
+// getUUID()
+// getTancAccepted()
+// getLocation()
+
 // https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux
+// https://hackernoon.com/react-native-basics-geolocation-adf3c0d10112
+
+// https://medium.com/@stowball/a-dummys-guide-to-redux-and-thunk-in-react-d8904a7005d3
+
+// https://stackoverflow.com/questions/41200649/chaining-redux-actions
+// https://medium.freecodecamp.org/scaling-your-redux-app-with-ducks-6115955638be
+
+// https://blog.usejournal.com/understanding-react-native-component-lifecycle-api-d78e06870c6d
+// https://medium.com/@talkol/redux-thunks-dispatching-other-thunks-discussion-and-best-practices-dd6c2b695ecf
