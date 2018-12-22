@@ -3,6 +3,7 @@ import React, { Component, } from 'react'
 import {
 	StyleSheet,
 	Text,
+	Alert,
 } from 'react-native'
 
 import {
@@ -18,12 +19,14 @@ import {
 	Right,
 } from 'native-base'
 
+import Permissions from 'react-native-permissions'
+import DeviceSettings from 'react-native-device-settings'
+
 import { connect, } from 'react-redux'
 
 import GridView from 'react-native-super-grid'
 
 import PropTypes from 'prop-types'
-
 
 import Modal from "react-native-modal"
 
@@ -65,11 +68,31 @@ class PhotosList extends Component {
 		this.reload()
 	}
 
+	_alertForPermission(header, message) {
+		Alert.alert(
+			header,
+			message,
+			[
+				{ text: 'No Way', style: 'cancel', },
+				{ text: 'Open Settings', onPress: () => { DeviceSettings.app() }, },
+			],
+		)
+	}
+
 	async reload() {
 		const {
 			resetState,
 			getPhotos,
 		} = this.props
+		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
+		const permission = await Permissions.check('location')
+		// alert(permission)
+		if (permission !== 'authorized') {
+			this._alertForPermission(
+				'How am I supposed to show you the near-by photos?',
+				'Why don\'t you enable Location in Settings and try again?'
+			)
+		}
 		await resetState()
 		getPhotos()
 	}
