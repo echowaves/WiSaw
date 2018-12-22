@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+		"start-iphone": "react-native run-ios --simulator \"iPhone 8 Plus\"",
+    "start-ipad": "react-native run-ios --simulator \"iPad Pro (12.9-inch) (2nd generation)\"",
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "clean": "react-native-clean-project",
     "test": "jest"
