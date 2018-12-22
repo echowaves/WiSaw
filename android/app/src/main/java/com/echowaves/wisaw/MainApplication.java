@@ -3,6 +3,7 @@ package com.echowaves.wisaw;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.rjblopes.opensettings.OpenSettingsPackage;
 import com.reactlibrary.securekeystore.RNSecureKeyStorePackage;
 import com.swmansion.rnscreens.RNScreensPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
@@ -26,6 +27,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new OpenSettingsPackage(),
             new RNSecureKeyStorePackage(),
             new RNScreensPackage(),
             new RNGestureHandlerPackage()

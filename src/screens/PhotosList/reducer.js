@@ -4,6 +4,9 @@ import {
 	Toast,
 } from 'native-base'
 
+import Permissions from 'react-native-permissions'
+import DeviceSettings from 'react-native-device-settings'
+
 export const GET_PHOTOS_STARTED = 'wisaw/photosList/GET_PHOTOS'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photosList/GET_PHOTOS_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photosList/GET_PHOTOS_FAIL'
@@ -257,6 +260,13 @@ async function getTancAccepted(getState) {
 async function getLocation() {
 	let position = null
 	try {
+		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
+		const permission = await Permissions.check('location')
+
+		alert(permission)
+		// Open app settings menu
+		DeviceSettings.app()
+
 		position = await _getCurrentPosition({
 			enableHighAccuracy: true,
 			timeout: 20000,
@@ -273,11 +283,6 @@ function _getCurrentPosition(options = {}) {
 		navigator.geolocation.getCurrentPosition(resolve, reject, options)
 	})
 }
-
-
-// getUUID()
-// getTancAccepted()
-// getLocation()
 
 // https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux
 // https://hackernoon.com/react-native-basics-geolocation-adf3c0d10112
