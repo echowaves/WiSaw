@@ -258,13 +258,12 @@ async function getLocation() {
 	let position = null
 	try {
 		position = await _getCurrentPosition({
-			enableHighAccuracy: false,
+			enableHighAccuracy: true,
 			timeout: 20000,
 			maximumAge: 1000,
 		})
 	} catch (error) {
 		position = null
-		console.log(error)
 	}
 	return position
 }
