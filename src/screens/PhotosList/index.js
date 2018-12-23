@@ -3,6 +3,7 @@ import React, { Component, } from 'react'
 import {
 	StyleSheet,
 	Text,
+	View,
 } from 'react-native'
 
 import {
@@ -225,6 +226,34 @@ class PhotosList extends Component {
 						</Card>
 					</Content>
 				</Modal>
+				<View style={
+					{
+						position: 'absolute',
+						alignSelf: 'center',
+						bottom: 20,
+					}}>
+					<Button
+						rounded
+						light
+						transparent
+						bordered
+						style={
+							{
+								height: 100,
+							}
+						}>
+						<Icon
+							type="FontAwesome"
+							name="camera"
+							style={
+								{
+									fontSize: 60,
+									color: 'red',
+								}
+							}
+						/>
+					</Button>
+				</View>
 			</Container>
 		)
 	}
