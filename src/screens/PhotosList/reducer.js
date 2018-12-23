@@ -12,6 +12,7 @@ export const RESET_STATE = 'wisaw/photosList/RESET_STATE'
 export const SET_IS_TANDC_ACCEPTED = 'wisaw/photosList/SET_IS_TANDC_ACCEPTED'
 export const SET_UUID = 'wisaw/photosList/SET_UUID'
 export const SET_LOCATION = 'wisaw/photosList/SET_LOCATION'
+export const SET_LOCATION_PERMISSION = 'wisaw/photosList/SET_LOCATION_PERMISSION'
 export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
 
 const UUID_KEY = 'wisaw_device_uuid'
@@ -28,6 +29,7 @@ export const initialState = {
 	loading: false,
 	errorMessage: '',
 	daysAgo: 0,
+	locationPermission: null,
 }
 
 export default function reducer(state = initialState, action) {
@@ -73,6 +75,11 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				location: action.location,
+			}
+		case SET_LOCATION_PERMISSION:
+			return {
+				...state,
+				locationPermission: action.locationPermission,
 			}
 		case SET_ERROR:
 			return {
@@ -211,6 +218,13 @@ export function acceptTandC() {
 	}
 }
 
+export function setLocationPermission(locationPermission) {
+	return {
+		type: SET_LOCATION_PERMISSION,
+		locationPermission,
+	}
+}
+
 async function getUUID(getState) {
 	let { uuid, } = getState().photosList
 	if (uuid == null) {
@@ -277,8 +291,8 @@ function _getCurrentPosition(options = {}) {
 // https://hackernoon.com/react-native-basics-geolocation-adf3c0d10112
 
 // https://medium.com/@stowball/a-dummys-guide-to-redux-and-thunk-in-react-d8904a7005d3
+// https://medium.freecodecamp.org/avoiding-the-async-await-hell-c77a0fb71c4c
 
-// https://stackoverflow.com/questions/41200649/chaining-redux-actions
 // https://medium.freecodecamp.org/scaling-your-redux-app-with-ducks-6115955638be
 
 // https://blog.usejournal.com/understanding-react-native-component-lifecycle-api-d78e06870c6d

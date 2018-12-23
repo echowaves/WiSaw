@@ -3,7 +3,6 @@ import React, { Component, } from 'react'
 import {
 	StyleSheet,
 	Text,
-	Alert,
 } from 'react-native'
 
 import {
@@ -34,6 +33,7 @@ import {
 	resetState,
 	getPhotos,
 	acceptTandC,
+	setLocationPermission,
 } from './reducer'
 
 import Thumb from '../../components/Thumb'
@@ -54,6 +54,10 @@ class PhotosList extends Component {
 		headerBackTitle: null,
 	})
 
+	static defaultProps = {
+		locationPermission: null,
+	}
+
 	static propTypes = {
 		navigation: PropTypes.object.isRequired,
 		resetState: PropTypes.func.isRequired,
@@ -62,38 +66,24 @@ class PhotosList extends Component {
 		loading: PropTypes.bool.isRequired,
 		isTandcAccepted: PropTypes.bool.isRequired,
 		acceptTandC: PropTypes.func.isRequired,
+		locationPermission: PropTypes.string,
+		setLocationPermission: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
 		this.reload()
 	}
 
-	_alertForPermission(header, message) {
-		Alert.alert(
-			header,
-			message,
-			[
-				{ text: 'No Way', style: 'cancel', },
-				{ text: 'Open Settings', onPress: () => { DeviceSettings.app() }, },
-			],
-		)
-	}
-
 	async reload() {
 		const {
 			resetState,
 			getPhotos,
+			setLocationPermission,
 		} = this.props
+		await resetState()
 		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
 		const permission = await Permissions.check('location')
-		// alert(permission)
-		if (permission !== 'authorized') {
-			this._alertForPermission(
-				'How am I supposed to show you the near-by photos?',
-				'Why don\'t you enable Location in Settings and try again?'
-			)
-		}
-		await resetState()
+		setLocationPermission(permission)
 		getPhotos()
 	}
 
@@ -105,7 +95,58 @@ class PhotosList extends Component {
 			navigation,
 			isTandcAccepted,
 			acceptTandC,
+			locationPermission,
 		} = this.props
+
+		if (locationPermission !== 'authorized' && locationPermission !== null) {
+			return (
+				<Container>
+					<Content padder>
+						<Body>
+							<Modal
+								isVisible>
+								<Content padder>
+									<Card transparent>
+										<CardItem>
+											<Text>How am I supposed to show you the near-by photos?</Text>
+										</CardItem>
+										<CardItem>
+											<Text>Why don&#39;t you enable Location in Settings and try again?</Text>
+										</CardItem>
+										<CardItem footer>
+											<Left>
+												<Button
+													block
+													bordered
+													warning
+													small
+													onPress={() => {
+														this.reload()
+													}}>
+													<Text>  Try Again  </Text>
+												</Button>
+											</Left>
+											<Right>
+												<Button
+													block
+													bordered
+													success
+													small
+													onPress={() => {
+														DeviceSettings.app()
+													}}>
+													<Text>  Open Settings  </Text>
+												</Button>
+											</Right>
+										</CardItem>
+									</Card>
+								</Content>
+							</Modal>
+						</Body>
+					</Content>
+				</Container>
+			)
+		}
 
 		if (photos.length === 0) {
 			return (
@@ -203,6 +244,7 @@ const mapStateToProps = state => {
 		loading: state.photosList.loading,
 		paging: state.photosList.paging,
 		isTandcAccepted: state.photosList.isTandcAccepted,
+		locationPermission: state.photosList.locationPermission,
 	}
 }
 
@@ -211,6 +253,7 @@ const mapDispatchToProps = {
 	resetState,
 	getPhotos,
 	acceptTandC,
+	setLocationPermission,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
