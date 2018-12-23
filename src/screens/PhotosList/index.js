@@ -98,7 +98,8 @@ class PhotosList extends Component {
 			locationPermission,
 		} = this.props
 
-		if (locationPermission !== 'authorized' && locationPermission !== null) {
+// alert(locationPermission)
+		if (locationPermission === null || locationPermission !== 'authorized') {
 			return (
 				<Container>
 					<Content padder>
@@ -111,14 +112,14 @@ class PhotosList extends Component {
 											<Text>How am I supposed to show you the near-by photos?</Text>
 										</CardItem>
 										<CardItem>
-											<Text>Why don&#39;t you enable Location in Settings and try again?</Text>
+											<Text>Why don&#39;t you enable Location in Settings and Try Again?</Text>
 										</CardItem>
 										<CardItem footer>
 											<Left>
 												<Button
 													block
 													bordered
-													warning
+													success
 													small
 													onPress={() => {
 														this.reload()
@@ -130,7 +131,7 @@ class PhotosList extends Component {
 												<Button
 													block
 													bordered
-													success
+													warning
 													small
 													onPress={() => {
 														DeviceSettings.app()
