@@ -60,7 +60,14 @@ export default function reducer(state = initialState, action) {
 				loading: false,
 			}
 		case RESET_STATE:
-			return initialState
+			return {
+				...state,
+				location: null,
+				photos: [],
+				loading: false,
+				errorMessage: '',
+				daysAgo: 0,
+			}
 		case SET_IS_TANDC_ACCEPTED:
 			return {
 				...state,

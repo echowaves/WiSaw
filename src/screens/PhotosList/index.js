@@ -98,7 +98,6 @@ class PhotosList extends Component {
 			locationPermission,
 		} = this.props
 
-// alert(locationPermission)
 		if (locationPermission === null || locationPermission !== 'authorized') {
 			return (
 				<Container>
