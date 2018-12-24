@@ -38,7 +38,11 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Want to see cool things around you? Why don&apos;t you enable your location?</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Want to take a photo? Why don&apos;t you enable camera?</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Entypo.ttf</string>

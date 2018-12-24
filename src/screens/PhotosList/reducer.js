@@ -13,6 +13,8 @@ export const SET_IS_TANDC_ACCEPTED = 'wisaw/photosList/SET_IS_TANDC_ACCEPTED'
 export const SET_UUID = 'wisaw/photosList/SET_UUID'
 export const SET_LOCATION = 'wisaw/photosList/SET_LOCATION'
 export const SET_LOCATION_PERMISSION = 'wisaw/photosList/SET_LOCATION_PERMISSION'
+export const SET_CAMERA_PERMISSION = 'wisaw/photosList/SET_CAMERA_PERMISSION'
+export const SET_PHOTO_PERMISSION = 'wisaw/photosList/SET_PHOTO_PERMISSION'
 export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
 
 const UUID_KEY = 'wisaw_device_uuid'
@@ -30,6 +32,8 @@ export const initialState = {
 	errorMessage: '',
 	daysAgo: 0,
 	locationPermission: null,
+	cameraPermission: null,
+	photoPermission: null,
 }
 
 export default function reducer(state = initialState, action) {
@@ -87,6 +91,16 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				locationPermission: action.locationPermission,
+			}
+		case SET_CAMERA_PERMISSION:
+			return {
+				...state,
+				cameraPermission: action.cameraPermission,
+			}
+		case SET_PHOTO_PERMISSION:
+			return {
+				...state,
+				photoPermission: action.photoPermission,
 			}
 		case SET_ERROR:
 			return {
@@ -229,6 +243,20 @@ export function setLocationPermission(locationPermission) {
 	return {
 		type: SET_LOCATION_PERMISSION,
 		locationPermission,
+	}
+}
+
+export function setCameraPermission(cameraPermission) {
+	return {
+		type: SET_CAMERA_PERMISSION,
+		cameraPermission,
+	}
+}
+
+export function setPhotoPermission(photoPermission) {
+	return {
+		type: SET_PHOTO_PERMISSION,
+		photoPermission,
 	}
 }
 
