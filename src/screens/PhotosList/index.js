@@ -107,6 +107,28 @@ class PhotosList extends Component {
 		}
 	}
 
+	// Request permission to access photos
+	async requestPermission(persmissionType) {
+		const {
+			setCameraPermission,
+			setPhotoPermission,
+		} = this.props
+		const response = await Permissions.request(persmissionType)
+
+		// Returns once the user has chosen to 'allow' or to 'not allow' access
+		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
+		switch (persmissionType) {
+			case 'photo':
+				setPhotoPermission(response)
+				return response
+			case 'camera':
+				setCameraPermission(response)
+				return response
+			default:
+				return response
+		}
+	}
+
 	async reload() {
 		const {
 			resetState,
@@ -116,75 +138,62 @@ class PhotosList extends Component {
 		getPhotos()
 	}
 
-
-	// // Request permission to access photos
-	// _requestPermission = () => {
-	// 	Permissions.request('photo').then(response => {
-	// 		// Returns once the user has chosen to 'allow' or to 'not allow' access
-	// 		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-	// 		this.setState({
-	// 			photoPermission: response,
-	// 		})
-	// 	})
-	// }
-	//
-	// // Check the status of multiple permissions
-	// async _checkCameraAndPhotos() {
-	// 	const permissions = await Permissions.checkMultiple(['camera', 'photo', ])
-	// 	setCameraPermission(permissions.camera)
-	// 	setPhotoPermission(permissions.photo)
-	// }
-	//
 	// // This is a common pattern when asking for permissions.
 	// // iOS only gives you once chance to show the permission dialog,
 	// // after which the user needs to manually enable them from settings.
 	// // The idea here is to explain why we need access and determine if
 	// // the user will say no, so that we don't blow our one chance.
 	// // If the user already denied access, we can ask them to enable it from settings.
-	// _alertForPhotosPermission() {
-	// 	Alert.alert(
-	// 		'Can we access your photos?',
-	// 		'We need access so you can set your profile pic',
-	// 		[{
-	// 			text: 'No way',
-	// 			onPress: () => console.log('Permission denied'),
-	// 			style: 'cancel',
-	// 		},
-	// 		this.state.photoPermission == 'undetermined' ? {
-	// 			text: 'OK',
-	// 			onPress: this._requestPermission,
-	// 		} : {
-	// 			text: 'Open Settings',
-	// 			onPress: Permissions.openSettings,
-	// 		},
-	// 		],
-	// 	)
-	// }
-	//
-	//
-	// async takePhoto() {
-	// 	const {
-	// 		resetState,
-	// 		cameraPermission,
-	// 		photoPermission,
-	// 		setCameraPermission,
-	// 		setPhotoPermission,
-	// 	} = this.props
-	// 	await resetState()
-	// 	// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-	// 	if (cameraPermission !== 'authorized') {
-	// 		const camPermission = Permissions.request('camera')
-	// 	}
-	// 	if (photoPermission !== 'authorized') {
-	// 		const phoPermission = Permissions.request('photo')
-	// 	}
-	//
-	// 	// const permissions = await Permissions.checkMultiple(['camera', 'photo'])
-	// 	alert(`${cameraPermission}:${photoPermission}`)
-	//
-	// 	// setLocationPermission(permission)
-	// 	// getPhotos()
-	// }
+	async alertForCameraPermission() {
+		const {
+			cameraPermission,
+		} = this.props
+		Alert.alert(
+			'Can we access your camera?',
+			'How else would you be able to take photos?',
+			[{
+				text: 'No way',
+				// onPress: () => console.log('Permission denied'),
+				style: 'cancel',
+			},
+			cameraPermission === 'undetermined' || cameraPermission === null ? {
+				text: 'OK',
+				onPress: () => {
+					this.requestPermission('camera').then(response => {
+						if (response === 'authorized') {
+							alert('camera authorized')
+						}
+					})
+				},
+			} : {
+				text: 'Open Settings',
+				onPress: () => DeviceSettings.app(),
+			},
+			],
+		)
+	}
+
+
+	async takePhoto() {
+		const {
+			cameraPermission,
+			photoPermission,
+		} = this.props
+		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
+		if (cameraPermission !== 'authorized') {
+			this.alertForCameraPermission()
+		}
+
+		// if (photoPermission !== 'authorized') {
+		// 	const phoPermission = Permissions.request('photo')
+		// }
+
+		// const permissions = await Permissions.checkMultiple(['camera', 'photo'])
+		// alert(`${cameraPermission}:${photoPermission}`)
+
+		// setLocationPermission(permission)
+		// getPhotos()
+	}
 
 	render() {
 		const {
