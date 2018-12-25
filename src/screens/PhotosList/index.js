@@ -97,7 +97,17 @@ class PhotosList extends Component {
 		const {
 			locationPermission,
 			setLocationPermission,
+			setCameraPermission,
+			setPhotoPermission,
 		} = this.props
+		// set initial permissions for camera and photos
+		Permissions.check('camera').then(cameraresponse => {
+			setCameraPermission(cameraresponse)
+		})
+		Permissions.check('photo').then(photoresponse => {
+			setPhotoPermission(photoresponse)
+		})
+
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
 			Permissions.request('location', { type: 'whenInUse', }).then(permissionResponse => {
@@ -148,51 +158,83 @@ class PhotosList extends Component {
 		const {
 			cameraPermission,
 		} = this.props
-		Alert.alert(
-			'Can we access your camera?',
-			'How else would you be able to take photos?',
-			[{
-				text: 'No way',
-				// onPress: () => console.log('Permission denied'),
-				style: 'cancel',
-			},
-			cameraPermission === 'undetermined' || cameraPermission === null ? {
-				text: 'OK',
-				onPress: () => {
-					this.requestPermission('camera').then(response => {
-						if (response === 'authorized') {
-							alert('camera authorized')
-						}
-					})
+		return new Promise((resolve, reject) => {
+			Alert.alert(
+				'Can we access your camera?',
+				'How else would you be able to take photos?',
+				[{
+					text: 'No way',
+					onPress: () => reject,
+					style: 'cancel',
 				},
-			} : {
-				text: 'Open Settings',
-				onPress: () => DeviceSettings.app(),
-			},
-			],
-		)
+				cameraPermission === 'undetermined' || cameraPermission === null ? {
+					text: 'OK',
+					onPress: () => {
+						this.requestPermission('camera').then(response => resolve(response))
+					},
+				} : {
+					text: 'Open Settings',
+					onPress: () => DeviceSettings.app(),
+				},
+				],
+			)
+		})
+	}
+
+	async alertForPhotoPermission() {
+		const {
+			photoPermission,
+		} = this.props
+		return new Promise((resolve, reject) => {
+			Alert.alert(
+				'Can we access your photos?',
+				'How else would you be able to save the photo you take on your device?',
+				[{
+					text: 'No way',
+					onPress: () => reject,
+					style: 'cancel',
+				},
+				photoPermission === 'undetermined' || photoPermission === null ? {
+					text: 'OK',
+					onPress: () => {
+						this.requestPermission('photo').then(response => resolve(response))
+					},
+				} : {
+					text: 'Open Settings',
+					onPress: () => DeviceSettings.app(),
+				},
+				],
+			)
+		})
 	}
 
 
-	async takePhoto() {
+	async checkPermissionsForPhotoTaking() {
 		const {
 			cameraPermission,
 			photoPermission,
 		} = this.props
 		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-		if (cameraPermission !== 'authorized') {
-			this.alertForCameraPermission()
+		if (cameraPermission === 'authorized' && photoPermission === 'authorized') {
+			this.takePhoto()
+			return
 		}
 
-		// if (photoPermission !== 'authorized') {
-		// 	const phoPermission = Permissions.request('photo')
-		// }
+		if (cameraPermission !== 'authorized') {
+			await this.alertForCameraPermission()
+		}
 
-		// const permissions = await Permissions.checkMultiple(['camera', 'photo'])
-		// alert(`${cameraPermission}:${photoPermission}`)
+		if (photoPermission !== 'authorized') {
+			await this.alertForPhotoPermission()
+		}
+	}
 
-		// setLocationPermission(permission)
-		// getPhotos()
+	takePhoto() {
+		const {
+			cameraPermission,
+			photoPermission,
+		} = this.props
+		alert(JSON.stringify({ cameraPermission, photoPermission, }))
 	}
 
 	render() {
@@ -344,7 +386,7 @@ class PhotosList extends Component {
 							}
 							onPress={
 								() => {
-									this.takePhoto()
+									this.checkPermissionsForPhotoTaking()
 								}
 							}>
 							<Icon

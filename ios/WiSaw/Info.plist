@@ -43,6 +43,18 @@
 	<string>Want to take a photo? Why don&apos;t you enable camera?</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Want to see photos stored on your device? Why don&apos;t you enable it?</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Some description</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Some description</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Some description</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Some description</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Some description</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Entypo.ttf</string>
