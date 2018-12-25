@@ -15,8 +15,8 @@ import moment from 'moment'
 import { dirPicutures, } from './dirStorage'
 
 
-let { height, width, } = Dimensions.get('window')
-let orientation = height > width ? 'Portrait' : 'Landscape'
+const { height, width, } = Dimensions.get('window')
+const orientation = height > width ? 'Portrait' : 'Landscape'
 
 // move the attachment to app folder
 const moveAttachment = async (filePath, newFilepath) => new Promise((resolve, reject) => {
@@ -54,95 +54,92 @@ class CameraScreen extends Component {
 		Dimensions.removeEventListener('change', this.handleOrientationChange)
 	}
 
-  handleOrientationChange = dimensions => {
-  	(
-  		{
-  			height,
-  			width,
-		 } =		 dimensions.window
-	 )
-  	orientation = height > width ? 'Portrait' : 'Landscape'
-  	this.setState({ orientation, })
-  };
+	// ************************** Captur and Save Image *************************
+	async saveImage(filePath) {
+		try {
+			// set new image name and filepath
+			const newImageName = `${moment().format('DDMMYY_HHmmSSS')}.jpg`
+			const newFilepath = `${dirPicutures}/${newImageName}`
+			// move and save image to new filepath
+			const imageMoved = await moveAttachment(filePath, newFilepath)
+			console.log('image moved', imageMoved)
+		} catch (error) {
+			console.log(error)
+		}
+	}
 
-  // ************************** Captur and Save Image *************************
-  saveImage = async filePath => {
-  	try {
-  		// set new image name and filepath
-  		const newImageName = `${moment().format('DDMMYY_HHmmSSS')}.jpg`
-  		const newFilepath = `${dirPicutures}/${newImageName}`
-  		// move and save image to new filepath
-  		const imageMoved = await moveAttachment(filePath, newFilepath)
-  		console.log('image moved', imageMoved)
-  	} catch (error) {
-  		console.log(error)
-  	}
-  };
 
-  takePicture() {
-  	this.camera
-  		.capture()
-  		.then(data => {
-  			// data is an object with the file path
-  			// save the file to app  folder
-  			this.saveImage(data.path)
-  		})
-  		.catch(err => {
-  			console.error('capture picture error', err)
-  		})
-  }
+	handleOrientationChange(dimensions) {
+		const { height, width, } = dimensions.window
+		const orientation = height > width ? 'Portrait' : 'Landscape'
+		this.setState({ orientation, })
+	}
 
-  render() {
-  	return (
-	<View style={{ flex: 1, }}>
-  			<StatusBar barStyle="light-content" translucent />
 
-	<Camera
-  				captureTarget={Camera.constants.CaptureTarget.disk}
-  				ref={cam => {
-  					this.camera = cam
-  				}}
-  				style={styles.container}
-  				aspect={Camera.constants.Aspect.fill}
-  				orientation="auto">
-			<View
-  					style={
-  						this.state.orientation === 'Portrait' ? (
-  							styles.buttonContainerPortrait
-  						) : (
-  							styles.buttonContainerLandscape
-  						)
-  					}>
-  					<TouchableOpacity
-  						onPress={() => this.takePicture()}
-  						style={
-  							this.state.orientation === 'Portrait' ? (
-  								styles.buttonPortrait
-  							) : (
-  								styles.buttonLandscape
-  							)
-  						}>
-					<Icon name="camera" style={{ fontSize: 40, color: 'white', }} />
-    </TouchableOpacity>
-  					<TouchableOpacity
-  						onPress={() => this.props.navigation.goBack()}
-  						style={
-  							this.state.orientation === 'Portrait' ? (
-  								styles.buttonPortrait
-  							) : (
-  								styles.buttonLandscape
-  							)
-  						}>
-  						<Icon
-  							name="close-circle"
-  							style={{ fontSize: 40, color: 'white', }}
-	/>
-    </TouchableOpacity>
-  				</View>
-  			</Camera>
-  		</View>
-  	)
-  }
+	takePicture() {
+		this.camera
+			.capture()
+			.then(data => {
+			// data is an object with the file path
+			// save the file to app  folder
+				this.saveImage(data.path)
+			})
+			.catch(err => {
+				console.error('capture picture error', err)
+			})
+	}
+
+	render() {
+		return (
+			<View style={{ flex: 1, }}>
+				<StatusBar barStyle="light-content" translucent />
+
+				<Camera
+					captureTarget={Camera.constants.CaptureTarget.disk}
+					ref={cam => {
+						this.camera = cam
+					}}
+					style={styles.container}
+					aspect={Camera.constants.Aspect.fill}
+					orientation="auto">
+					<View
+						style={
+							this.state.orientation === 'Portrait' ? (
+								styles.buttonContainerPortrait
+							) : (
+								styles.buttonContainerLandscape
+							)
+						}>
+						<TouchableOpacity
+							onPress={() => this.takePicture()}
+							style={
+								this.state.orientation === 'Portrait' ? (
+									styles.buttonPortrait
+								) : (
+									styles.buttonLandscape
+								)
+							}>
+							<Icon name="camera" style={{ fontSize: 40, color: 'white', }} />
+						</TouchableOpacity>
+						<TouchableOpacity
+							onPress={() => this.props.navigation.goBack()}
+							style={
+								this.state.orientation === 'Portrait' ? (
+									styles.buttonPortrait
+								) : (
+									styles.buttonLandscape
+								)
+							}>
+							<Icon
+								name="close-circle"
+								style={{ fontSize: 40, color: 'white', }}
+							/>
+						</TouchableOpacity>
+					</View>
+				</Camera>
+			</View>
+		)
+	}
 }
 
 const styles = StyleSheet.create({
