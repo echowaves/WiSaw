@@ -231,10 +231,9 @@ class PhotosList extends Component {
 
 	takePhoto() {
 		const {
-			cameraPermission,
-			photoPermission,
+			navigation,
 		} = this.props
-		alert(JSON.stringify({ cameraPermission, photoPermission, }))
+		navigation.push('Camera')
 	}
 
 	render() {
