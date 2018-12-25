@@ -40,8 +40,6 @@ import {
 	getPhotos,
 	acceptTandC,
 	setLocationPermission,
-	setCameraPermission,
-	setPhotoPermission,
 } from './reducer'
 
 import Thumb from '../../components/Thumb'
@@ -73,8 +71,6 @@ class PhotosList extends Component {
 
 	static defaultProps = {
 		locationPermission: null,
-		cameraPermission: null,
-		photoPermission: null,
 	}
 
 	static propTypes = {
@@ -86,27 +82,14 @@ class PhotosList extends Component {
 		isTandcAccepted: PropTypes.bool.isRequired,
 		acceptTandC: PropTypes.func.isRequired,
 		locationPermission: PropTypes.string,
-		cameraPermission: PropTypes.string,
-		photoPermission: PropTypes.string,
 		setLocationPermission: PropTypes.func.isRequired,
-		setCameraPermission: PropTypes.func.isRequired,
-		setPhotoPermission: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
 		const {
 			locationPermission,
 			setLocationPermission,
-			setCameraPermission,
-			setPhotoPermission,
 		} = this.props
-		// set initial permissions for camera and photos
-		Permissions.check('camera').then(cameraresponse => {
-			setCameraPermission(cameraresponse)
-		})
-		Permissions.check('photo').then(photoresponse => {
-			setPhotoPermission(photoresponse)
-		})
 
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
@@ -114,28 +97,6 @@ class PhotosList extends Component {
 				setLocationPermission(permissionResponse)
 				this.reload()
 			})
-		}
-	}
-
-	// Request permission to access photos
-	async requestPermission(persmissionType) {
-		const {
-			setCameraPermission,
-			setPhotoPermission,
-		} = this.props
-		const response = await Permissions.request(persmissionType)
-
-		// Returns once the user has chosen to 'allow' or to 'not allow' access
-		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-		switch (persmissionType) {
-			case 'photo':
-				setPhotoPermission(response)
-				return response
-			case 'camera':
-				setCameraPermission(response)
-				return response
-			default:
-				return response
 		}
 	}
 
@@ -148,31 +109,17 @@ class PhotosList extends Component {
 		getPhotos()
 	}
 
-	// // This is a common pattern when asking for permissions.
-	// // iOS only gives you once chance to show the permission dialog,
-	// // after which the user needs to manually enable them from settings.
-	// // The idea here is to explain why we need access and determine if
-	// // the user will say no, so that we don't blow our one chance.
-	// // If the user already denied access, we can ask them to enable it from settings.
-	async alertForCameraPermission() {
-		const {
-			cameraPermission,
-		} = this.props
+	async alertForPermission(headerText, bodyText) {
 		return new Promise((resolve, reject) => {
 			Alert.alert(
-				'Can we access your camera?',
-				'How else would you be able to take photos?',
+				headerText,
+				bodyText,
 				[{
-					text: 'No way',
+					text: 'Try Again',
 					onPress: () => reject,
 					style: 'cancel',
 				},
-				cameraPermission === 'undetermined' || cameraPermission === null ? {
-					text: 'OK',
-					onPress: () => {
-						this.requestPermission('camera').then(response => resolve(response))
-					},
-				} : {
+				{
 					text: 'Open Settings',
 					onPress: () => DeviceSettings.app(),
 				},
@@ -180,52 +127,28 @@ class PhotosList extends Component {
 			)
 		})
 	}
-
-	async alertForPhotoPermission() {
-		const {
-			photoPermission,
-		} = this.props
-		return new Promise((resolve, reject) => {
-			Alert.alert(
-				'Can we access your photos?',
-				'How else would you be able to save the photo you take on your device?',
-				[{
-					text: 'No way',
-					onPress: () => reject,
-					style: 'cancel',
-				},
-				photoPermission === 'undetermined' || photoPermission === null ? {
-					text: 'OK',
-					onPress: () => {
-						this.requestPermission('photo').then(response => resolve(response))
-					},
-				} : {
-					text: 'Open Settings',
-					onPress: () => DeviceSettings.app(),
-				},
-				],
-			)
-		})
-	}
-
 
 	async checkPermissionsForPhotoTaking() {
-		const {
-			cameraPermission,
-			photoPermission,
-		} = this.props
+		let cameraPermission = await Permissions.check('camera')
+		let photoPermission = await Permissions.check('photo')
+		// alert(`${cameraPermission}, ${photoPermission}`)
 		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
+
+		if (cameraPermission === 'denied') {
+			await this.alertForPermission('Can we access your camera?', 'How else would you be able to take a photo?')
+		} else if (cameraPermission !== 'authorized') {
+			cameraPermission = await Permissions.request('camera')
+		}
+
+		if (photoPermission === 'denied') {
+			await this.alertForPermission('Can we access your photos?', 'How else would you be able to save the photo you take on your device?')
+		} else if (photoPermission !== 'authorized') {
+			photoPermission = await Permissions.request('photo')
+		}
+
+
 		if (cameraPermission === 'authorized' && photoPermission === 'authorized') {
 			this.takePhoto()
-			return
-		}
-
-		if (cameraPermission !== 'authorized') {
-			await this.alertForCameraPermission()
-		}
-
-		if (photoPermission !== 'authorized') {
-			await this.alertForPhotoPermission()
 		}
 	}
 
@@ -473,8 +396,6 @@ const mapStateToProps = state => {
 		paging: state.photosList.paging,
 		isTandcAccepted: state.photosList.isTandcAccepted,
 		locationPermission: state.photosList.locationPermission,
-		cameraPermission: state.photosList.cameraPermission,
-		photoPermission: state.photosList.photoPermission,
 	}
 }
 
@@ -484,8 +405,6 @@ const mapDispatchToProps = {
 	getPhotos,
 	acceptTandC,
 	setLocationPermission,
-	setCameraPermission,
-	setPhotoPermission,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
