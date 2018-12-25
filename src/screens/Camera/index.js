@@ -39,12 +39,17 @@ const moveAttachment = async (filePath, newFilepath) => new Promise((resolve, re
 })
 
 class CameraScreen extends Component {
+	static navigationOptions = {
+		header: null,
+	}
+
 	constructor(props) {
 		super(props)
 		this.state = {
 			orientation,
 		}
 	}
+
 
 	componentWillMount() {
 		Dimensions.addEventListener('change', this.handleOrientationChange)
