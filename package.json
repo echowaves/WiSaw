@@ -35,7 +35,8 @@
     "uuid": "3.3.2",
     "react-native-secure-key-store": "2.0.0",
     "react-native-modal": "7.0.2",
-    "react-native-device-settings": "1.2.0"
+    "react-native-device-settings": "1.2.0",
+		"react-native-camera": "1.6.4"
   },
   "devDependencies": {
     "babel-eslint": "10.0.1",
