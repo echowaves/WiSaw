@@ -2,22 +2,30 @@
 import React, { Component, } from 'react'
 import {
 	StyleSheet,
-	Text,
 	TouchableOpacity,
 	View,
 	CameraRoll,
 } from 'react-native'
 import { RNCamera, } from 'react-native-camera'
+import { Icon, } from 'native-base'
 
 // const moment = require('moment')
 
 export default class CameraScreen extends Component {
+	static navigationOptions = {
+		headerTintColor: '#ffffff',
+		headerStyle: {
+			backgroundColor: '#000',
+			borderBottomColor: 'black',
+			borderBottomWidth: 0,
+		},
+	}
+
 	takePicture = async function () {
 		if (this.camera) {
-			const options = { quality: 0.5, base64: true, }
+			const options = { base64: true, }
 			const data = await this.camera.takePictureAsync(options)
 			CameraRoll.saveToCameraRoll(data.uri)
-			console.log(data.uri)
 		}
 	}
 
@@ -36,8 +44,10 @@ export default class CameraScreen extends Component {
 					<TouchableOpacity
 						onPress={this.takePicture.bind(this)}
 						style={styles.capture}>
-						<Text style={{ fontSize: 14, }}> SNAP </Text>
+						<Icon name="camera" style={{ fontSize: 40, color: 'white', }} />
 					</TouchableOpacity>
+
+
 				</View>
 			</View>
 		)
@@ -57,7 +67,8 @@ const styles = StyleSheet.create({
 	},
 	capture: {
 		flex: 0,
-		backgroundColor: '#fff',
+		backgroundColor: '#000',
+		color: '#fff',
 		borderRadius: 5,
 		padding: 15,
 		paddingHorizontal: 20,
