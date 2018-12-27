@@ -59,8 +59,15 @@ class CameraScreen extends Component {
 		Dimensions.removeEventListener('change', this.handleOrientationChange)
 	}
 
+	handleOrientationChange = dimensions => {
+		const { height, width, } = dimensions.window
+		const orientation = height > width ? 'Portrait' : 'Landscape'
+		this.setState({ orientation, })
+	}
+
+
 	// ************************** Captur and Save Image *************************
-	async saveImage(filePath) {
+	saveImage = async filePath => {
 		try {
 			// set new image name and filepath
 			const newImageName = `${moment().format('DDMMYY_HHmmSSS')}.jpg`
@@ -72,14 +79,6 @@ class CameraScreen extends Component {
 			console.log(error)
 		}
 	}
-
-
-	handleOrientationChange(dimensions) {
-		const { height, width, } = dimensions.window
-		const orientation = height > width ? 'Portrait' : 'Landscape'
-		this.setState({ orientation, })
-	}
-
 
 	takePicture() {
 		this.camera
