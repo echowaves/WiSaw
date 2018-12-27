@@ -1,3 +1,7 @@
+/* eslint-disable no-console */
+/* eslint-disable react/destructuring-assignment */
+import PropTypes from 'prop-types'
+
 import React, { Component, } from 'react'
 import {
 	StyleSheet,
@@ -39,6 +43,10 @@ const moveAttachment = async (filePath, newFilepath) => new Promise((resolve, re
 })
 
 class CameraScreen extends Component {
+	static propTypes = {
+		navigation: PropTypes.object.isRequired,
+	}
+
 	static navigationOptions = {
 		header: null,
 	}
