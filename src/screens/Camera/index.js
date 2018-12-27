@@ -23,7 +23,12 @@ export default class CameraScreen extends Component {
 
 	takePicture = async function () {
 		if (this.camera) {
-			const options = { base64: true, }
+			const options = {
+				base64: true,
+				fixOrientation: true,
+				exif: false,
+				pauseAfterCapture: false,
+			}
 			const data = await this.camera.takePictureAsync(options)
 			CameraRoll.saveToCameraRoll(data.uri)
 		}
@@ -39,6 +44,11 @@ export default class CameraScreen extends Component {
 					style={styles.preview}
 					type={RNCamera.Constants.Type.back}
 					flashMode={RNCamera.Constants.FlashMode.off}
+					orientation={RNCamera.Constants.Orientation.auto}
+					onFaceDetected={null}
+					onGoogleVisionBarcodesDetected={null}
+					onTextRecognized={null}
+					onBarCodeRead={null}
 				/>
 				<View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center', }}>
 					<TouchableOpacity
@@ -67,7 +77,7 @@ const styles = StyleSheet.create({
 	},
 	capture: {
 		flex: 0,
-		backgroundColor: '#000',
+		backgroundColor: 'rgba(0,0,0,.0)',
 		color: '#fff',
 		borderRadius: 5,
 		padding: 15,
