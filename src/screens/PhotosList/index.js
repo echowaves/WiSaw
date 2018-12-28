@@ -317,7 +317,7 @@ class PhotosList extends Component {
 								style={
 									{
 										fontSize: 60,
-										color: 'red',
+										color: CONST.MAIN_COLOR,
 									}
 								}
 							/>

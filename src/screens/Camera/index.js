@@ -2,12 +2,14 @@
 import React, { Component, } from 'react'
 import {
 	StyleSheet,
-	TouchableOpacity,
 	View,
 	CameraRoll,
 } from 'react-native'
 import { RNCamera, } from 'react-native-camera'
-import { Icon, } from 'native-base'
+import {
+	Icon,
+	Button,
+} from 'native-base'
 
 // const moment = require('moment')
 
@@ -24,8 +26,11 @@ export default class CameraScreen extends Component {
 	takePicture = async function () {
 		if (this.camera) {
 			const options = {
-				base64: true,
+				quality: 1,
+				// orientation: "auto",
+				base64: false,
 				fixOrientation: true,
+				forceUpOrientation: true,
 				exif: false,
 				pauseAfterCapture: false,
 			}
@@ -51,13 +56,29 @@ export default class CameraScreen extends Component {
 					onBarCodeRead={null}
 				/>
 				<View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center', }}>
-					<TouchableOpacity
-						onPress={this.takePicture.bind(this)}
-						style={styles.capture}>
-						<Icon name="camera" style={{ fontSize: 40, color: 'white', }} />
-					</TouchableOpacity>
-
-
+					<Button
+						rounded
+						light
+						transparent
+						bordered
+						style={
+							{
+								height: 100,
+								backgroundColor: 'rgba(10,10,10,.1)',
+							}
+						}
+						onPress={this.takePicture.bind(this)}>
+						<Icon
+							type="FontAwesome"
+							name="camera"
+							style={
+								{
+									fontSize: 60,
+									color: 'red',
+								}
+							}
+						/>
+					</Button>
 				</View>
 			</View>
 		)
@@ -74,15 +95,5 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'flex-end',
 		alignItems: 'center',
-	},
-	capture: {
-		flex: 0,
-		backgroundColor: 'rgba(0,0,0,.0)',
-		color: '#fff',
-		borderRadius: 5,
-		padding: 15,
-		paddingHorizontal: 20,
-		alignSelf: 'center',
-		margin: 20,
 	},
 })
