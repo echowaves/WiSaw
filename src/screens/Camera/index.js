@@ -46,7 +46,7 @@ export default class CameraScreen extends Component {
 					ref={ref => {
 						this.camera = ref
 					}}
-					style={styles.preview}
+					style={styles.camera}
 					type={RNCamera.Constants.Type.back}
 					flashMode={RNCamera.Constants.FlashMode.off}
 					orientation={RNCamera.Constants.Orientation.auto}
@@ -55,7 +55,13 @@ export default class CameraScreen extends Component {
 					onTextRecognized={null}
 					onBarCodeRead={null}
 				/>
-				<View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center', }}>
+				<View style={
+					{
+						position: 'absolute',
+						alignSelf: 'center',
+						bottom: 20,
+					}
+				}>
 					<Button
 						rounded
 						light
@@ -88,12 +94,9 @@ export default class CameraScreen extends Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		flexDirection: 'column',
-		backgroundColor: 'black',
 	},
-	preview: {
+	camera: {
 		flex: 1,
-		justifyContent: 'flex-end',
 		alignItems: 'center',
 	},
 })
