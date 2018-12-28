@@ -1,15 +1,18 @@
-
 import React, { Component, } from 'react'
 import {
 	StyleSheet,
 	View,
 	CameraRoll,
 } from 'react-native'
-import { RNCamera, } from 'react-native-camera'
+
 import {
 	Icon,
 	Button,
 } from 'native-base'
+
+import { RNCamera, } from 'react-native-camera'
+
+import * as Animatable from 'react-native-animatable'
 
 // const moment = require('moment')
 
@@ -21,6 +24,13 @@ export default class CameraScreen extends Component {
 			borderBottomColor: 'black',
 			borderBottomWidth: 0,
 		},
+	}
+
+	constructor(props) {
+		super(props)
+		this.state = {
+			previewData: null,
+		}
 	}
 
 	takePicture = async function () {
@@ -35,11 +45,22 @@ export default class CameraScreen extends Component {
 				pauseAfterCapture: false,
 			}
 			const data = await this.camera.takePictureAsync(options)
+
+			this.setState({
+				previewData: data,
+			})
+			this.previewView.stopAnimation()
+			setTimeout(() => {
+				this.previewView.fadeOut()
+			}, 3000)
+
 			CameraRoll.saveToCameraRoll(data.uri)
 		}
 	}
 
 	render() {
+		const { previewData, } = this.state
+
 		return (
 			<View style={styles.container}>
 				<RNCamera
@@ -86,6 +107,31 @@ export default class CameraScreen extends Component {
 						/>
 					</Button>
 				</View>
+				{
+					previewData !== null
+						&& (
+							<Animatable.Image
+								ref={ref => {
+									this.previewView = ref
+								}}
+								source={{ uri: previewData.uri, }}
+								style={
+									{
+										position: 'absolute',
+										alignSelf: 'auto',
+										bottom: 20,
+										left: 20,
+										height: 100,
+										width: 100,
+										borderRadius: 10,
+										borderWidth: 1,
+										borderColor: '#fff',
+									}
+								}
+
+							/>
+						)
+				}
 			</View>
 		)
 	}
