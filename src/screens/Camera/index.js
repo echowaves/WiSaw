@@ -55,7 +55,9 @@ export default class CameraScreen extends Component {
 				clearTimeout(this.timeOutJob)
 			}
 			this.timeOutJob = setTimeout(() => {
-				this.previewView.fadeOut()
+				if (this.previewView) {
+					this.previewView.fadeOut()
+				}
 			}, 3000)
 
 			CameraRoll.saveToCameraRoll(data.uri)
