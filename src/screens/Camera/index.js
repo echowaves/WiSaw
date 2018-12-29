@@ -10,13 +10,23 @@ import {
 	Button,
 } from 'native-base'
 
+import PropTypes from 'prop-types'
+
+import {
+	connect,
+} from 'react-redux'
+
 import { RNCamera, } from 'react-native-camera'
 
 import * as Animatable from 'react-native-animatable'
 
 // const moment = require('moment')
 
-export default class CameraScreen extends Component {
+import {
+	setPreviewUri,
+} from './reducer'
+
+class Camera extends Component {
 	static navigationOptions = {
 		headerTintColor: '#ffffff',
 		headerStyle: {
@@ -26,15 +36,21 @@ export default class CameraScreen extends Component {
 		},
 	}
 
+	static defaultProps = {
+		previewUri: null,
+	}
 
-	constructor(props) {
-		super(props)
-		this.state = {
-			previewData: null,
-		}
+	static propTypes = {
+		// navigation: PropTypes.object.isRequired,
+		previewUri: PropTypes.string,
+		setPreviewUri: PropTypes.func.isRequired,
 	}
 
 	takePicture = async function () {
+		const {
+			setPreviewUri,
+		} = this.props
+
 		if (this.camera) {
 			const options = {
 				quality: 1,
@@ -46,29 +62,63 @@ export default class CameraScreen extends Component {
 				pauseAfterCapture: false,
 			}
 			const data = await this.camera.takePictureAsync(options)
+			setPreviewUri(data.uri)
 
-			this.setState({
-				previewData: data,
-			})
-			this.previewView.stopAnimation()
-			if (this.timeOutJob) {
-				clearTimeout(this.timeOutJob)
-			}
-			this.timeOutJob = setTimeout(() => {
-				if (this.previewView) {
-					this.previewView.fadeOut()
+			if (this.animatableImage) {
+				this.animatableImage.stopAnimation()
+				if (this.timeOutJob) {
+					clearTimeout(this.timeOutJob)
 				}
-			}, 3000)
+				this.timeOutJob = setTimeout(() => {
+					if (this.animatableImage) {
+						this.animatableImage.fadeOut()
+					}
+				}, 3000)
+			}
 
-			CameraRoll.saveToCameraRoll(data.uri)
+			const cameraRollUri = await CameraRoll.saveToCameraRoll(data.uri)
 		}
 	}
 
+	animatableImage
+
 	timeOutJob
 
-	render() {
-		const { previewData, } = this.state
+	renderPreviewImage(imageUri) {
+		if (imageUri) {
+			// alert(imageUri)
+			return (
+				<Animatable.Image
+					ref={ref => {
+						this.animatableImage = ref
+					}}
+					source={{ uri: imageUri, }}
+					animation="fadeOut"
+					delay={3000}
+					style={
+						{
+							position: 'absolute',
+							alignSelf: 'auto',
+							bottom: 20,
+							left: 20,
+							height: 100,
+							width: 100,
+							borderRadius: 10,
+							borderWidth: 1,
+							borderColor: '#fff',
+						}
+					}
+				/>
+			)
+		}
+		return (<View />)
+		// return previewView
+	}
 
+	render() {
+		const {
+			previewUri,
+		} = this.props
 		return (
 			<View style={styles.container}>
 				<RNCamera
@@ -115,31 +165,7 @@ export default class CameraScreen extends Component {
 						/>
 					</Button>
 				</View>
-				{
-					previewData !== null
-						&& (
-							<Animatable.Image
-								ref={ref => {
-									this.previewView = ref
-								}}
-								source={{ uri: previewData.uri, }}
-								style={
-									{
-										position: 'absolute',
-										alignSelf: 'auto',
-										bottom: 20,
-										left: 20,
-										height: 100,
-										width: 100,
-										borderRadius: 10,
-										borderWidth: 1,
-										borderColor: '#fff',
-									}
-								}
-
-							/>
-						)
-				}
+				{ this.renderPreviewImage(previewUri) }
 			</View>
 		)
 	}
@@ -154,3 +180,15 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 })
+
+
+const mapStateToProps = state => ({
+	previewUri: state.camera.previewUri,
+})
+
+const mapDispatchToProps = {
+	// will be wrapped into a dispatch call
+	setPreviewUri,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Camera)

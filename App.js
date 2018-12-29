@@ -11,7 +11,7 @@ import reducers from './src'
 import PhotosList from './src/screens/PhotosList'
 import PhotosDetails from './src/screens/PhotosDetails'
 import FeedbackScreen from './src/screens/Feedback'
-import CameraScreen from './src/screens/Camera'
+import Camera from './src/screens/Camera'
 
 const AppNavigator = createStackNavigator({
 	PhotosList: {
@@ -24,7 +24,7 @@ const AppNavigator = createStackNavigator({
 		screen: FeedbackScreen,
 	},
 	Camera: {
-		screen: CameraScreen,
+		screen: Camera,
 	},
 },
 {
