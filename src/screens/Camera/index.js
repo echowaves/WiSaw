@@ -86,7 +86,6 @@ class Camera extends Component {
 
 	renderPreviewImage(imageUri) {
 		if (imageUri) {
-			// alert(imageUri)
 			return (
 				<Animatable.Image
 					ref={ref => {
@@ -112,7 +111,6 @@ class Camera extends Component {
 			)
 		}
 		return (<View />)
-		// return previewView
 	}
 
 	render() {
