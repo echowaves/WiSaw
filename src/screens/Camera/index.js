@@ -26,6 +26,7 @@ export default class CameraScreen extends Component {
 		},
 	}
 
+
 	constructor(props) {
 		super(props)
 		this.state = {
@@ -50,13 +51,18 @@ export default class CameraScreen extends Component {
 				previewData: data,
 			})
 			this.previewView.stopAnimation()
-			setTimeout(() => {
+			if (this.timeOutJob) {
+				clearTimeout(this.timeOutJob)
+			}
+			this.timeOutJob = setTimeout(() => {
 				this.previewView.fadeOut()
 			}, 3000)
 
 			CameraRoll.saveToCameraRoll(data.uri)
 		}
 	}
+
+	timeOutJob
 
 	render() {
 		const { previewData, } = this.state
