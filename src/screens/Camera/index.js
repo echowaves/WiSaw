@@ -89,7 +89,6 @@ class Camera extends Component {
 
 	async uploadFile(uri) {
 		const { uuid, location, } = store.getState().photosList
-
 		const response = await fetch(`${CONST.HOST}/photos`, {
 			method: 'POST',
 			headers: {
@@ -114,31 +113,12 @@ class Camera extends Component {
 		if (response.status === 201) {
 			const { uploadURL, } = responseJson
 
-			const ifstream = await RNFetchBlob.fs.readStream(
-				// file path
-				uri,
-				// encoding, should be one of `base64`, `utf8`, `ascii`
-				'BASE64'
-				// (optional) buffer size, default to 4096 (4095 for BASE64 encoded data)
-				// when reading file in BASE64 encoding, buffer size must be multiples of 3.
-			)
-			let imageData = ''
+			const responseData = await RNFetchBlob.fetch('PUT', uploadURL, {
+				"Content-Type": "image/jpeg",
+			}, RNFetchBlob.wrap(uri))
 
-			ifstream.open()
-			ifstream.onData(chunk => {
-				imageData += chunk
-			})
-
-			// alert(imageData)
-
-			const responseData = await fetch(uploadURL, { // Your POST endpoint
-				method: 'PUT',
-				headers: {
-					"Content-Type": "image/jpeg",
-				},
-				body: imageData, // This is your file object
-			})
-			alert(JSON.stringify(responseData))
+			// alert(body.length)
+			// alert(JSON.stringify(responseData))
 		}
 	}
 
