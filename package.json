@@ -8,7 +8,8 @@
     "start-android": "react-native run-android",
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "clean": "react-native-clean-project",
-    "test": "jest"
+    "test": "jest",
+    "bundle-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios"
   },
   "dependencies": {
     "@babel/core": "7.2.2",
