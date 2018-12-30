@@ -20,11 +20,17 @@ import { RNCamera, } from 'react-native-camera'
 
 import * as Animatable from 'react-native-animatable'
 
+import RNFetchBlob from 'rn-fetch-blob'
+
 // const moment = require('moment')
+
+import * as CONST from '../../consts'
+import { store, } from '../../../App'
 
 import {
 	setPreviewUri,
 } from './reducer'
+
 
 class Camera extends Component {
 	static navigationOptions = {
@@ -77,6 +83,62 @@ class Camera extends Component {
 			}
 
 			const cameraRollUri = await CameraRoll.saveToCameraRoll(data.uri)
+			this.uploadFile(cameraRollUri)
+		}
+	}
+
+	async uploadFile(uri) {
+		const { uuid, location, } = store.getState().photosList
+
+		const response = await fetch(`${CONST.HOST}/photos`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				uuid,
+				location: {
+					type: 'Point',
+					coordinates: [
+						location.coords.latitude,
+						location.coords.longitude,
+					],
+				},
+			}),
+		})
+
+		const responseJson = await response.json()
+		if (response.status === 401) {
+			alert("Sorry, looks like you are banned from WiSaw.")
+		}
+		if (response.status === 201) {
+			const { uploadURL, } = responseJson
+
+			const ifstream = await RNFetchBlob.fs.readStream(
+				// file path
+				uri,
+				// encoding, should be one of `base64`, `utf8`, `ascii`
+				'BASE64'
+				// (optional) buffer size, default to 4096 (4095 for BASE64 encoded data)
+				// when reading file in BASE64 encoding, buffer size must be multiples of 3.
+			)
+			let imageData = ''
+
+			ifstream.open()
+			ifstream.onData(chunk => {
+				imageData += chunk
+			})
+
+			// alert(imageData)
+
+			const responseData = await fetch(uploadURL, { // Your POST endpoint
+				method: 'PUT',
+				headers: {
+					"Content-Type": "image/jpeg",
+				},
+				body: imageData, // This is your file object
+			})
+			alert(JSON.stringify(responseData))
 		}
 	}
 

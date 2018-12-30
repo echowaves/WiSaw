@@ -3,7 +3,7 @@ package com.echowaves.wisaw;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.rnfs.RNFSPackage;
+import com.RNFetchBlob.RNFetchBlobPackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.rjblopes.opensettings.OpenSettingsPackage;
 import com.reactlibrary.securekeystore.RNSecureKeyStorePackage;
@@ -29,7 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new RNFSPackage(),
+            new RNFetchBlobPackage(),
             new RNCameraPackage(),
             new OpenSettingsPackage(),
             new RNSecureKeyStorePackage(),

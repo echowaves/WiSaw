@@ -137,7 +137,7 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-fs')
+    compile project(':rn-fetch-blob')
     compile project(':react-native-camera')
     compile project(':react-native-device-settings')
     compile project(':react-native-secure-key-store')

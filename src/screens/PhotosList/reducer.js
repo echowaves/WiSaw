@@ -4,6 +4,8 @@ import {
 	Toast,
 } from 'native-base'
 
+import * as CONST from '../../consts.js'
+
 export const GET_PHOTOS_STARTED = 'wisaw/photosList/GET_PHOTOS'
 export const GET_PHOTOS_SUCCESS = 'wisaw/photosList/GET_PHOTOS_SUCCESS'
 export const GET_PHOTOS_FAIL = 'wisaw/photosList/GET_PHOTOS_FAIL'
@@ -131,7 +133,7 @@ async function _requestPhotos(getState, lat, long) {
 		uuid = 'initializing'
 	}
 
-	const response = await fetch('https://api.wisaw.com/photos/feedByDate', {
+	const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
