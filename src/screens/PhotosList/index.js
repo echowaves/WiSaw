@@ -92,9 +92,7 @@ class PhotosList extends Component {
 		const {
 			locationPermission,
 			setLocationPermission,
-			uploadPendingPhotos,
 		} = this.props
-		uploadPendingPhotos()
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
 			Permissions.request('location', { type: 'whenInUse', }).then(permissionResponse => {
@@ -108,9 +106,11 @@ class PhotosList extends Component {
 		const {
 			resetState,
 			getPhotos,
+			uploadPendingPhotos,
 		} = this.props
 		await resetState()
 		getPhotos()
+		uploadPendingPhotos()
 	}
 
 	async alertForPermission(headerText, bodyText) {
