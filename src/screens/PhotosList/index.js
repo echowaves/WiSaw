@@ -83,6 +83,8 @@ class PhotosList extends Component {
 		acceptTandC: PropTypes.func.isRequired,
 		locationPermission: PropTypes.string,
 		setLocationPermission: PropTypes.func.isRequired,
+		pendingUploads: PropTypes.number.isRequired,
+
 	}
 
 	componentDidMount() {
@@ -168,6 +170,8 @@ class PhotosList extends Component {
 			isTandcAccepted,
 			acceptTandC,
 			locationPermission,
+			pendingUploads,
+
 		} = this.props
 
 		if (locationPermission === 'authorized') {
@@ -322,6 +326,19 @@ class PhotosList extends Component {
 								}
 							/>
 						</Button>
+						{pendingUploads > 0 && (
+							<Text
+								style={
+									{
+										position: 'absolute',
+										alignSelf: 'center',
+										color: 'white',
+										backgroundColor: 'rgba(10,10,10,.5)',
+									}
+								}>
+								{pendingUploads}
+							</Text>
+						)}
 					</View>
 				</Container>
 			)
@@ -396,6 +413,8 @@ const mapStateToProps = state => {
 		paging: state.photosList.paging,
 		isTandcAccepted: state.photosList.isTandcAccepted,
 		locationPermission: state.photosList.locationPermission,
+		pendingUploads: state.camera.pendingUploads,
+
 	}
 }
 

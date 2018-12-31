@@ -3,6 +3,8 @@ import {
 	StyleSheet,
 	View,
 	CameraRoll,
+	AsyncStorage,
+	Text,
 } from 'react-native'
 
 import {
@@ -20,17 +22,15 @@ import { RNCamera, } from 'react-native-camera'
 
 import * as Animatable from 'react-native-animatable'
 
-import RNFetchBlob from 'rn-fetch-blob'
-
-// const moment = require('moment')
-
-import * as CONST from '../../consts'
-import { store, } from '../../../App'
+import moment from 'moment'
 
 import {
 	setPreviewUri,
+	uploadPendingPhotos,
 } from './reducer'
 
+// import * as CONST from '../../consts'
+import { store, } from '../../../App'
 
 class Camera extends Component {
 	static navigationOptions = {
@@ -50,14 +50,24 @@ class Camera extends Component {
 		// navigation: PropTypes.object.isRequired,
 		previewUri: PropTypes.string,
 		setPreviewUri: PropTypes.func.isRequired,
+		uploadPendingPhotos: PropTypes.func.isRequired,
+		pendingUploads: PropTypes.number.isRequired,
+	}
+
+	componentDidMount() {
+		const {
+			setPreviewUri,
+		} = this.props
+		setPreviewUri(null)
 	}
 
 	takePicture = async function () {
 		const {
 			setPreviewUri,
+			uploadPendingPhotos,
 		} = this.props
 
-		if (this.camera) {
+		if (this.cameraView) {
 			const options = {
 				quality: 1,
 				// orientation: "auto",
@@ -67,103 +77,80 @@ class Camera extends Component {
 				exif: false,
 				pauseAfterCapture: false,
 			}
-			const data = await this.camera.takePictureAsync(options)
-			setPreviewUri(data.uri)
+			const data = await this.cameraView.takePictureAsync(options)
 
 			if (this.animatableImage) {
 				this.animatableImage.stopAnimation()
-				if (this.timeOutJob) {
-					clearTimeout(this.timeOutJob)
-				}
-				this.timeOutJob = setTimeout(() => {
-					if (this.animatableImage) {
-						this.animatableImage.fadeOut()
-					}
-				}, 3000)
+				this.animatableImage.fadeOut()
 			}
 
 			const cameraRollUri = await CameraRoll.saveToCameraRoll(data.uri)
-			this.uploadFile(cameraRollUri)
+
+			setPreviewUri(data.uri)
+
+			const now = moment().format()
+			const { uuid, location, } = store.getState().photosList
+
+
+			await AsyncStorage.setItem(`wisaw-${now}`,
+				JSON.stringify(
+					{
+						time: now,
+						uri: cameraRollUri,
+						uuid,
+						location: {
+							type: 'Point',
+							coordinates: [
+								location.coords.latitude,
+								location.coords.longitude,
+							],
+						},
+					}
+				))
+			uploadPendingPhotos()
 		}
 	}
-
-	async uploadFile(uri) {
-		const { uuid, location, } = store.getState().photosList
-		const response = await fetch(`${CONST.HOST}/photos`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				uuid,
-				location: {
-					type: 'Point',
-					coordinates: [
-						location.coords.latitude,
-						location.coords.longitude,
-					],
-				},
-			}),
-		})
-
-		const responseJson = await response.json()
-		if (response.status === 401) {
-			alert("Sorry, looks like you are banned from WiSaw.")
-		}
-		if (response.status === 201) {
-			const { uploadURL, } = responseJson
-
-			const responseData = await RNFetchBlob.fetch('PUT', uploadURL, {
-				"Content-Type": "image/jpeg",
-			}, RNFetchBlob.wrap(uri))
-
-			// alert(body.length)
-			// alert(JSON.stringify(responseData))
-		}
-	}
-
-	animatableImage
-
-	timeOutJob
 
 	renderPreviewImage(imageUri) {
-		if (imageUri) {
-			return (
-				<Animatable.Image
-					ref={ref => {
-						this.animatableImage = ref
-					}}
-					source={{ uri: imageUri, }}
-					animation="fadeOut"
-					delay={3000}
-					style={
-						{
-							position: 'absolute',
-							alignSelf: 'auto',
-							bottom: 20,
-							left: 20,
-							height: 100,
-							width: 100,
-							borderRadius: 10,
-							borderWidth: 1,
-							borderColor: '#fff',
-						}
+		const {
+			setPreviewUri,
+		} = this.props
+		return (
+			<Animatable.Image
+				ref={ref => {
+					this.animatableImage = ref
+				}}
+				source={imageUri ? { uri: imageUri, } : {}}
+				animation="fadeOut"
+				duration={10000}
+				style={
+					{
+						position: 'absolute',
+						alignSelf: 'auto',
+						bottom: 20,
+						left: 20,
+						height: 100,
+						width: 100,
+						borderRadius: 10,
+						borderWidth: imageUri ? 1 : 0,
+						borderColor: '#fff',
 					}
-				/>
-			)
-		}
-		return (<View />)
+				}
+				onAnimationEnd={() => setPreviewUri(null)}
+			/>
+		)
 	}
 
 	render() {
 		const {
 			previewUri,
+			pendingUploads,
 		} = this.props
 		return (
 			<View style={styles.container}>
 				<RNCamera
 					ref={ref => {
-						this.camera = ref
+						this.cameraView = ref
 					}}
 					style={styles.camera}
 					type={RNCamera.Constants.Type.back}
@@ -204,6 +191,19 @@ class Camera extends Component {
 							}
 						/>
 					</Button>
+					{pendingUploads > 0 && (
+						<Text
+							style={
+								{
+									position: 'absolute',
+									alignSelf: 'center',
+									color: 'white',
+									backgroundColor: 'rgba(10,10,10,.5)',
+								}
+							}>
+							{pendingUploads}
+						</Text>
+					)}
 				</View>
 				{ this.renderPreviewImage(previewUri) }
 			</View>
@@ -224,11 +224,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
 	previewUri: state.camera.previewUri,
+	pendingUploads: state.camera.pendingUploads,
 })
 
 const mapDispatchToProps = {
 	// will be wrapped into a dispatch call
 	setPreviewUri,
+	uploadPendingPhotos,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Camera)
