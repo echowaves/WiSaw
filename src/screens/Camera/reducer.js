@@ -3,7 +3,6 @@ import { AsyncStorage, } from "react-native"
 import RNFetchBlob from 'rn-fetch-blob'
 
 import * as CONST from '../../consts'
-import { store, } from '../../../App'
 
 export const SET_PREVIEW_URI = 'wisaw/camera/SET_PREVIEW_URI'
 export const START_PHOTO_UPLOADING = 'wisaw/camera/START_PHOTO_UPLOADING'
@@ -32,7 +31,7 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				uploadingPhoto: false,
-				// pendingUploads: 0,
+				pendingUploads: 0,
 			}
 		case UPDATE_PHOTOS_PENDING_UPLOAD:
 			return {
@@ -69,7 +68,27 @@ export function uploadPendingPhotos() {
 			type: START_PHOTO_UPLOADING,
 		})
 
+		let i = 0
 		// here let's iterate over the items to upload and upload one file at a time
+		for (; i < keys.length; i += 1) {
+			// eslint-disable-next-line no-await-in-loop
+			const fileJson = JSON.parse(await AsyncStorage.getItem(keys[i]))
+			// eslint-disable-next-line no-await-in-loop
+			const responseData = await uploadFile(fileJson)
+			if (responseData.respInfo.status === 200) {
+			// eslint-disable-next-line no-await-in-loop
+				await AsyncStorage.removeItem(keys[i])
+				// eslint-disable-next-line no-await-in-loop
+				const pendingUploads = await AsyncStorage.getAllKeys().length
+				dispatch({
+					type: UPDATE_PHOTOS_PENDING_UPLOAD,
+					// eslint-disable-next-line no-await-in-loop
+					pendingUploads: pendingUploads || 0,
+				})
+			} else {
+				alert("Error uploading file, try again.")
+			}
+		}
 
 		dispatch({
 			type: FINISH_PHOTO_UPLOADING,
@@ -79,8 +98,8 @@ export function uploadPendingPhotos() {
 }
 
 
-async function uploadFile(uri) {
-	const { uuid, location, } = store.getState().photosList
+async function uploadFile(fileJson) {
+	const { uuid, location, uri, } = fileJson
 	const response = await fetch(`${CONST.HOST}/photos`, {
 		method: 'POST',
 		headers: {
@@ -88,16 +107,11 @@ async function uploadFile(uri) {
 		},
 		body: JSON.stringify({
 			uuid,
-			location: {
-				type: 'Point',
-				coordinates: [
-					location.coords.latitude,
-					location.coords.longitude,
-				],
-			},
+			location,
 		}),
 	})
 	const responseJson = await response.json()
+
 	if (response.status === 401) {
 		alert("Sorry, looks like you are banned from WiSaw.")
 		return
@@ -108,7 +122,6 @@ async function uploadFile(uri) {
 		const responseData = await RNFetchBlob.fetch('PUT', uploadURL, {
 			"Content-Type": "image/jpeg",
 		}, await RNFetchBlob.wrap(uri))
-
-		// alert(JSON.stringify(responseData))
+		return responseData
 	}
 }
