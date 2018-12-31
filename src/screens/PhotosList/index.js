@@ -43,6 +43,7 @@ import {
 } from './reducer'
 
 import Thumb from '../../components/Thumb'
+import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 
@@ -84,15 +85,16 @@ class PhotosList extends Component {
 		locationPermission: PropTypes.string,
 		setLocationPermission: PropTypes.func.isRequired,
 		pendingUploads: PropTypes.number.isRequired,
-
+		uploadPendingPhotos: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
 		const {
 			locationPermission,
 			setLocationPermission,
+			uploadPendingPhotos,
 		} = this.props
-
+		uploadPendingPhotos()
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
 			Permissions.request('location', { type: 'whenInUse', }).then(permissionResponse => {
@@ -414,7 +416,6 @@ const mapStateToProps = state => {
 		isTandcAccepted: state.photosList.isTandcAccepted,
 		locationPermission: state.photosList.locationPermission,
 		pendingUploads: state.camera.pendingUploads,
-
 	}
 }
 
@@ -424,6 +425,7 @@ const mapDispatchToProps = {
 	getPhotos,
 	acceptTandC,
 	setLocationPermission,
+	uploadPendingPhotos,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)

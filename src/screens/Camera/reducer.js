@@ -32,7 +32,7 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				uploadingPhoto: false,
-				pendingUploads: 0,
+				// pendingUploads: 0,
 			}
 		case UPDATE_PHOTOS_PENDING_UPLOAD:
 			return {

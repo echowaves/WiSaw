@@ -112,9 +112,6 @@ class Camera extends Component {
 	}
 
 	renderPreviewImage(imageUri) {
-		const {
-			setPreviewUri,
-		} = this.props
 		return (
 			<Animatable.Image
 				ref={ref => {
@@ -122,7 +119,8 @@ class Camera extends Component {
 				}}
 				source={imageUri ? { uri: imageUri, } : {}}
 				animation="fadeOut"
-				duration={10000}
+				duration={5000}
+				delay={5000}
 				style={
 					{
 						position: 'absolute',
@@ -136,7 +134,6 @@ class Camera extends Component {
 						borderColor: '#fff',
 					}
 				}
-				onAnimationEnd={() => setPreviewUri(null)}
 			/>
 		)
 	}
@@ -186,7 +183,7 @@ class Camera extends Component {
 							style={
 								{
 									fontSize: 60,
-									color: 'red',
+									color: '#FF4136',
 								}
 							}
 						/>
