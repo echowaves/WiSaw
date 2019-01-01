@@ -31,10 +31,11 @@ import {
 
 // import * as CONST from '../../consts'
 import { store, } from '../../../App'
+import * as CONST from '../../consts.js'
 
 class Camera extends Component {
 	static navigationOptions = {
-		headerTintColor: '#ffffff',
+		headerTintColor: CONST.MAIN_COLOR,
 		headerStyle: {
 			backgroundColor: '#000',
 			borderBottomColor: 'black',

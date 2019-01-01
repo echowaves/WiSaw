@@ -51,25 +51,45 @@ import Thumb from '../../components/Thumb'
 class PhotosList extends Component {
 	static navigationOptions = ({
 		navigation,
-	}) => ({
-		headerTitle: 'hear&now',
-		headerRight: (
-			<Icon
-				onPress={
-					() => navigation.push('Feedback')
-				}
-				name="feedback"
-				type="MaterialIcons"
-				style={
-					{
-						marginRight: 10,
-						color: CONST.MAIN_COLOR,
+	}) => {
+		const { params = {}, } = navigation.state
+		return ({
+			headerTitle: 'hear&now',
+			headerTintColor: CONST.MAIN_COLOR,
+			headerRight: (
+				<Icon
+					onPress={
+						() => navigation.push('Feedback')
 					}
-				}
-			/>
-		),
-		headerBackTitle: null,
-	})
+					name="feedback"
+					type="MaterialIcons"
+					style={
+						{
+							marginRight: 10,
+							color: CONST.MAIN_COLOR,
+						}
+					}
+				/>
+			),
+			headerLeft: (
+				<Icon
+					onPress={
+						() => params.handleRefresh()
+					}
+					name="sync"
+					type="MaterialIcons"
+					style={
+						{
+							marginLeft: 10,
+							color: CONST.MAIN_COLOR,
+						}
+					}
+				/>
+			),
+			headerBackTitle: null,
+		})
+	}
+
 
 	static defaultProps = {
 		locationPermission: null,
@@ -91,9 +111,11 @@ class PhotosList extends Component {
 
 	componentDidMount() {
 		const {
+			navigation,
 			locationPermission,
 			setLocationPermission,
 		} = this.props
+		navigation.setParams({ handleRefresh: () => (this.reload()), })
 
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'

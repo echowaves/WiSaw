@@ -21,6 +21,7 @@ import * as CONST from '../../consts.js'
 class PhotosDetails extends Component {
 	static navigationOptions = ({ navigation, }) => ({
 		headerTitle: 'hear&now',
+		headerTintColor: CONST.MAIN_COLOR,
 		headerRight: (
 			<Icon
 				onPress={() => navigation.navigate('Feedback')}
