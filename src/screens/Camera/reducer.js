@@ -64,30 +64,37 @@ export function uploadPendingPhotos() {
 			return Promise.resolve()
 		}
 
-		dispatch({
-			type: START_PHOTO_UPLOADING,
-		})
+		try {
+			dispatch({
+				type: START_PHOTO_UPLOADING,
+			})
 
-		let i = 0
-		// here let's iterate over the items to upload and upload one file at a time
-		for (; i < keys.length; i += 1) {
+			let i = 0
+			// here let's iterate over the items to upload and upload one file at a time
+			for (; i < keys.length; i += 1) {
 			// eslint-disable-next-line no-await-in-loop
-			const fileJson = JSON.parse(await AsyncStorage.getItem(keys[i]))
-			// eslint-disable-next-line no-await-in-loop
-			const responseData = await uploadFile(fileJson)
-			if (responseData.respInfo.status === 200) {
-			// eslint-disable-next-line no-await-in-loop
-				await AsyncStorage.removeItem(keys[i])
+				const fileJson = JSON.parse(await AsyncStorage.getItem(keys[i]))
 				// eslint-disable-next-line no-await-in-loop
-				const pendingUploads = await AsyncStorage.getAllKeys().length
-				dispatch({
-					type: UPDATE_PHOTOS_PENDING_UPLOAD,
+				const responseData = await uploadFile(fileJson)
+				if (responseData.respInfo.status === 200) {
 					// eslint-disable-next-line no-await-in-loop
-					pendingUploads: pendingUploads || 0,
-				})
-			} else {
-				alert("Error uploading file, try again.")
+					await AsyncStorage.removeItem(keys[i])
+					// eslint-disable-next-line no-await-in-loop
+					const pendingUploads = await AsyncStorage.getAllKeys().length
+					dispatch({
+						type: UPDATE_PHOTOS_PENDING_UPLOAD,
+						// eslint-disable-next-line no-await-in-loop
+						pendingUploads: pendingUploads || 0,
+					})
+				} else {
+					alert("Error uploading file, try again.")
+				}
 			}
+		} catch (error) {
+			dispatch({
+				type: FINISH_PHOTO_UPLOADING,
+			})
+			uploadPendingPhotos()
 		}
 
 		dispatch({
