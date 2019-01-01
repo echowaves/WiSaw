@@ -3,13 +3,9 @@ import { connect, } from 'react-redux'
 
 import {
 	StyleSheet,
+	Image,
+	TouchableHighlight,
 } from 'react-native'
-
-import {
-	Card,
-	CardItem,
-	Thumbnail,
-} from 'native-base'
 
 import PropTypes from 'prop-types'
 import { setCurrentPhotoIndex, } from './reducer'
@@ -20,6 +16,11 @@ class Thumb extends Component {
 		setCurrentPhotoIndex: PropTypes.func.isRequired,
 		item: PropTypes.object.isRequired,
 		index: PropTypes.number.isRequired,
+		thumbWidth: PropTypes.number,
+	}
+
+	static defaultProps = {
+		thumbWidth: 100,
 	}
 
 	constructor(props) {
@@ -33,28 +34,43 @@ class Thumb extends Component {
 	}
 
 	render() {
-		const { item, } = this.props
+		const { item, thumbWidth, } = this.props
+
+		// alert(this.thumbD)
+		const thumbWidthStyles = {
+			width: thumbWidth,
+			height: thumbWidth,
+		}
+
 		return (
-			<Card>
-				<CardItem
-					cardBody
-					button
-					onPress={() => this.onThumbPress(item)}>
-					<Thumbnail
-						square
-						style={styles.thumbnail}
-						source={{ uri: item.getThumbUrl, }}
-					/>
-				</CardItem>
-			</Card>
+			<TouchableHighlight
+				onPress={() => this.onThumbPress(item)}
+				style={[
+					styles.container,
+					thumbWidthStyles,
+				]}>
+				<Image
+					source={{ uri: item.getThumbUrl, }}
+					style={styles.thumbnail}
+				/>
+			</TouchableHighlight>
 		)
 	}
 }
 
 const styles = StyleSheet.create({
+	container: {
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: 'rgba(100,100,100,0.1)',
+	},
 	thumbnail: {
-		width: 100,
-		height: 100,
+		flex: 1,
+		alignSelf: 'stretch',
+		width: '100%',
+		height: '100%',
+		borderRadius: 10,
+		// resizeMode: 'contain',
 	},
 })
 

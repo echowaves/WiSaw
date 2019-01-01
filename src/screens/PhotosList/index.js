@@ -7,6 +7,7 @@ import {
 	Text,
 	View,
 	Alert,
+	Dimensions,
 } from 'react-native'
 
 import {
@@ -42,10 +43,10 @@ import {
 	setLocationPermission,
 } from './reducer'
 
-import Thumb from '../../components/Thumb'
 import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
+import Thumb from '../../components/Thumb'
 
 class PhotosList extends Component {
 	static navigationOptions = ({
@@ -93,6 +94,7 @@ class PhotosList extends Component {
 			locationPermission,
 			setLocationPermission,
 		} = this.props
+
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
 			Permissions.request('location', { type: 'whenInUse', }).then(permissionResponse => {
@@ -100,6 +102,18 @@ class PhotosList extends Component {
 				this.reload()
 			})
 		}
+	}
+
+	onLayout() {
+		this.forceUpdate()
+	}
+
+	thumbWidth
+
+	calculateThumbWidth() {
+		const { width, } = Dimensions.get('window')
+		const thumbsCount = Math.floor(width / 100)
+		this.thumbWidth = Math.floor((width - thumbsCount * 3 * 2) / thumbsCount)
 	}
 
 	async reload() {
@@ -173,7 +187,6 @@ class PhotosList extends Component {
 			acceptTandC,
 			locationPermission,
 			pendingUploads,
-
 		} = this.props
 
 		if (locationPermission === 'authorized') {
@@ -192,13 +205,15 @@ class PhotosList extends Component {
 				)
 			}
 
+			this.calculateThumbWidth()
 			return (
 				<Container>
 					<GridView
 						// extraData={this.state}
 						itemDimension={
-							100
+							this.thumbWidth
 						}
+						spacing={3}
 						items={
 							photos
 						}
@@ -214,6 +229,7 @@ class PhotosList extends Component {
 									navigation={
 										navigation
 									}
+									thumbWidth={this.thumbWidth}
 								/>
 							)}
 						style={
