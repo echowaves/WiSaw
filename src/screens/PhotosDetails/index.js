@@ -13,7 +13,7 @@ import {
 	Icon,
 } from 'native-base'
 
-import Swiper from 'react-native-deck-swiper'
+import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'
 
@@ -48,21 +48,19 @@ class PhotosDetails extends Component {
 		return (
 			<View style={styles.container}>
 				<Swiper
-					cards={photos}
-					renderCard={item => (
-						<Photo item={item} />
-					)}
-					horizontalSwipe
-					verticalSwipe={false}
-					showSecondCard={false}
-					stackSize={0}
-					stackSeparation={0}
-					goBackToPreviousCardOnSwipeRight
-					cardIndex={currentPhotoIndex}
-					cardVerticalMargin={0}
-					cardHorizontalMargin={0}
-					backgroundColor={CONST.SECONDARY_COLOR}
-				/>
+					autoplay={false}
+					horizontal
+					loop
+					showsButtons
+					index={currentPhotoIndex}
+					loadMinimal
+					loadMinimalSize={1}
+					showsPagination={false}
+					pagingEnabled>
+					{photos.map((item, key) => (
+						<Photo item={item} key={key} />
+					))}
+				</Swiper>
 			</View>
 		)
 	}
