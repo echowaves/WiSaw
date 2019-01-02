@@ -1,25 +1,42 @@
-import React, { Component, } from 'react'
+import React, {
+	Component,
+} from 'react'
 
 import {
-	Container,
-	Card,
-	CardItem,
-} from 'native-base'
+	Dimensions,
+	View,
+} from 'react-native'
 
 import Image from 'react-native-image-progress'
+
 import Progress from 'react-native-progress/Bar'
 
 import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts.js'
 
+
 class Photo extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
 	}
 
-	constructor(props) {
-		super(props)
+	state = {
+		imgWidth: 0,
+		imgHeight: 0,
+	}
+
+	componentDidMount() {
+		const { item, } = this.props
+
+		Image.getSize(item.getImgUrl, (width, height) => {
+			// calculate image width and height
+			const screenWidth = Dimensions.get('window').width
+			const scaleFactor = width / screenWidth
+			const imageHeight = height / scaleFactor
+
+			this.setState({ imgWidth: screenWidth, imgHeight: imageHeight, })
+		})
 	}
 
 	onPhotoPress(item) {
@@ -30,42 +47,36 @@ class Photo extends Component {
 
 	render() {
 		const { item, } = this.props
-		return (
-			<Container>
-				<Card style={{ elevation: 3, }}>
-					<CardItem cardBody>
-						<Image
-							source={{ uri: item.getThumbUrl, }}
-							indicator={Progress}
-							indicatorProps={{
-								color: CONST.MAIN_COLOR,
-								unfilledColor: CONST.UNFILLED_COLOR,
-							}}
-							style={{
-								position: 'absolute',
-								width: 320,
-								height: 240,
-							}}
-						/>
-					</CardItem>
-					<CardItem cardBody>
-						<Image
-							source={{ uri: item.getImgUrl, }}
-							indicator={Progress}
-							indicatorProps={{
-								color: CONST.MAIN_COLOR,
-								unfilledColor: CONST.UNFILLED_COLOR,
-							}}
-							style={{
-								position: 'absolute',
-								width: 320,
-								height: 240,
-							}}
-						/>
-					</CardItem>
-				</Card>
-			</Container>
+		const { imgWidth, imgHeight, } = this.state
 
+		return (
+			<View>
+				<Image
+					source={{ uri: item.getThumbUrl, }}
+					indicator={Progress}
+					indicatorProps={{
+						color: CONST.MAIN_COLOR,
+						unfilledColor: CONST.UNFILLED_COLOR,
+					}}
+					style={{
+						position: 'absolute',
+						width: imgWidth,
+						height: imgHeight,
+					}}
+				/>
+				<Image
+					source={{ uri: item.getImgUrl, }}
+					indicator={Progress}
+					indicatorProps={{
+						color: CONST.MAIN_COLOR,
+						unfilledColor: CONST.UNFILLED_COLOR,
+					}}
+					style={{
+						width: imgWidth,
+						height: imgHeight,
+					}}
+				/>
+			</View>
 		)
 	}
 }

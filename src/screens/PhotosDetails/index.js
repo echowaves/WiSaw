@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 
 import {
 	StyleSheet,
+	View,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
@@ -45,19 +46,24 @@ class PhotosDetails extends Component {
 		} = this.props
 
 		return (
-			<Swiper
-				cards={photos}
-				renderCard={item => <Photo item={item} />}
-				containerStyle={styles.container}
-				horizontalSwipe
-				verticalSwipe={false}
-				showSecondCard={false}
-				stackSize={0}
-				stackSeparation={0}
-				goBackToPreviousCardOnSwipeRight
-				infinite
-				cardIndex={currentPhotoIndex}
-			/>
+			<View style={styles.container}>
+				<Swiper
+					cards={photos}
+					renderCard={item => (
+						<Photo item={item} />
+					)}
+					horizontalSwipe
+					verticalSwipe={false}
+					showSecondCard={false}
+					stackSize={0}
+					stackSeparation={0}
+					goBackToPreviousCardOnSwipeRight
+					cardIndex={currentPhotoIndex}
+					cardVerticalMargin={0}
+					cardHorizontalMargin={0}
+					backgroundColor={CONST.SECONDARY_COLOR}
+				/>
+			</View>
 		)
 	}
 }
@@ -65,7 +71,6 @@ class PhotosDetails extends Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: CONST.SECONDARY_COLOR,
 	},
 })
 
