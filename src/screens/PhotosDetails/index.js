@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 import {
 	StyleSheet,
 	View,
+	Text,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
@@ -52,6 +53,8 @@ class PhotosDetails extends Component {
 					horizontal
 					loop
 					showsButtons
+					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
+					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
 					index={currentPhotoIndex}
 					loadMinimal
 					loadMinimalSize={1}
