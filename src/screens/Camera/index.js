@@ -93,7 +93,7 @@ class Camera extends Component {
 			const { uuid, location, } = store.getState().photosList
 
 
-			await AsyncStorage.setItem(`wisaw-${now}`,
+			await AsyncStorage.setItem(`wisaw-pending-${now}`,
 				JSON.stringify(
 					{
 						time: now,

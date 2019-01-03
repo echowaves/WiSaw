@@ -50,10 +50,15 @@ export function setPreviewUri(previewUri) {
 	}
 }
 
+async function getMyKeys() {
+	const keys = await AsyncStorage.getAllKeys()
+	const myKeys = keys.filter(key => key.startsWith("wisaw-pending-"))
+	return myKeys
+}
 
 export function uploadPendingPhotos() {
 	return async (dispatch, getState) => {
-		const keys = await AsyncStorage.getAllKeys()
+		const keys = await getMyKeys()
 		dispatch({
 			type: UPDATE_PHOTOS_PENDING_UPLOAD,
 			pendingUploads: keys.length,
@@ -80,7 +85,7 @@ export function uploadPendingPhotos() {
 					// eslint-disable-next-line no-await-in-loop
 					await AsyncStorage.removeItem(keys[i])
 					// eslint-disable-next-line no-await-in-loop
-					const pendingUploads = await AsyncStorage.getAllKeys().length
+					const pendingUploads = await getMyKeys().length
 					dispatch({
 						type: UPDATE_PHOTOS_PENDING_UPLOAD,
 						// eslint-disable-next-line no-await-in-loop
