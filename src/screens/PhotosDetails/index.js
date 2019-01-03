@@ -51,7 +51,7 @@ class PhotosDetails extends Component {
 				<Swiper
 					autoplay={false}
 					horizontal
-					loop
+					loop={false}
 					showsButtons
 					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
 					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}

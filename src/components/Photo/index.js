@@ -7,7 +7,8 @@ import {
 	View,
 } from 'react-native'
 
-import Image from 'react-native-image-progress'
+// import Image from 'react-native-image-progress'
+import PhotoView from 'react-native-photo-view'
 
 import Progress from 'react-native-progress/Bar'
 
@@ -22,60 +23,47 @@ class Photo extends Component {
 	}
 
 	state = {
-		imgWidth: 0,
-		imgHeight: 0,
-	}
-
-	componentDidMount() {
-		const { item, } = this.props
-
-		Image.getSize(item.getImgUrl, (width, height) => {
-			// calculate image width and height
-			const screenWidth = Dimensions.get('window').width
-			const scaleFactor = width / screenWidth
-			const imageHeight = height / scaleFactor
-
-			this.setState({ imgWidth: screenWidth, imgHeight: imageHeight, })
-		})
-	}
-
-	onPhotoPress(item) {
-		this.setState(previousState => (
-			{ isExpanded: !previousState.isExpanded, }
-		))
+		loaded: false,
 	}
 
 	render() {
 		const { item, } = this.props
-		const { imgWidth, imgHeight, } = this.state
+		const { width, height, } = Dimensions.get('window')
+
 
 		return (
 			<View>
-				<Image
-					source={{ uri: item.getThumbUrl, }}
-					indicator={Progress}
-					indicatorProps={{
-						color: CONST.MAIN_COLOR,
-						unfilledColor: CONST.UNFILLED_COLOR,
+				<PhotoView
+					source={{
+						uri: item.getImgUrl,
 					}}
+					onLoadEnd={() => this.setState({ loaded: true, })}
+
+					minimumZoomScale={1}
+					maximumZoomScale={5}
+					androidScaleType="fitCenter"
 					style={{
-						position: 'absolute',
-						width: imgWidth,
-						height: imgHeight,
+						width,
+						height,
 					}}
+					backgroundColor="transparent"
 				/>
-				<Image
-					source={{ uri: item.getImgUrl, }}
-					indicator={Progress}
-					indicatorProps={{
-						color: CONST.MAIN_COLOR,
-						unfilledColor: CONST.UNFILLED_COLOR,
-					}}
-					style={{
-						width: imgWidth,
-						height: imgHeight,
-					}}
-				/>
+				{!this.state.loaded && ( // eslint-disable-line react/destructuring-assignment
+					<PhotoView
+						source={{
+							uri: item.getThumbUrl,
+						}}
+						minimumZoomScale={1}
+						maximumZoomScale={5}
+						androidScaleType="fitCenter"
+						style={{
+							width,
+							height,
+							position: 'absolute',
+						}}
+						backgroundColor="transparent"
+					/>
+				)}
 			</View>
 		)
 	}
