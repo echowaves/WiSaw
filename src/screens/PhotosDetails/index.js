@@ -60,8 +60,8 @@ class PhotosDetails extends Component {
 					loadMinimalSize={1}
 					showsPagination={false}
 					pagingEnabled>
-					{photos.map((item, key) => (
-						<Photo item={item} key={key} />
+					{photos.map(item => (
+						<Photo item={item} key={item.key} />
 					))}
 				</Swiper>
 			</View>

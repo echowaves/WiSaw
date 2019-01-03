@@ -7,15 +7,9 @@ import {
 	View,
 } from 'react-native'
 
-// import Image from 'react-native-image-progress'
-import PhotoView from 'react-native-photo-view'
-
-import Progress from 'react-native-progress/Bar'
+import PhotoView from 'react-native-photo-view-ex'
 
 import PropTypes from 'prop-types'
-
-import * as CONST from '../../consts.js'
-
 
 class Photo extends Component {
 	static propTypes = {
