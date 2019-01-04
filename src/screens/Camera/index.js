@@ -37,10 +37,10 @@ class Camera extends Component {
 	static navigationOptions = {
 		headerTintColor: CONST.MAIN_COLOR,
 		headerStyle: {
-			backgroundColor: '#000',
 			borderBottomColor: 'black',
 			borderBottomWidth: 0,
 		},
+		headerTransparent: true,
 	}
 
 	static defaultProps = {
