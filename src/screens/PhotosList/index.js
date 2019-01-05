@@ -8,6 +8,7 @@ import {
 	View,
 	Alert,
 	Dimensions,
+	DeviceEventEmitter,
 } from 'react-native'
 
 import {
@@ -47,6 +48,7 @@ import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
+
 
 class PhotosList extends Component {
 	static navigationOptions = ({
@@ -117,6 +119,8 @@ class PhotosList extends Component {
 		} = this.props
 		navigation.setParams({ handleRefresh: () => (this.reload()), })
 
+		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange)
+
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
 			Permissions.request('location', { type: 'whenInUse', }).then(permissionResponse => {
@@ -126,8 +130,16 @@ class PhotosList extends Component {
 		}
 	}
 
-	onLayout() {
+	componentWillUnmount() {
+		DeviceEventEmitter.removeListener('namedOrientationDidChange', this.handleOrientationDidChange)
+	}
+
+	onLayout(e) {
 		this.forceUpdate()
+	}
+
+	handleOrientationDidChange(data) {
+		alert(`orientation changed, data: ${JSON.stringify(data)}`)
 	}
 
 	thumbWidth
@@ -229,7 +241,7 @@ class PhotosList extends Component {
 
 			this.calculateThumbWidth()
 			return (
-				<Container>
+				<Container onLayout={this.onLayout.bind(this)}>
 					<GridView
 						// extraData={this.state}
 						itemDimension={
