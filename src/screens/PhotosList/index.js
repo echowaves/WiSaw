@@ -375,7 +375,7 @@ class PhotosList extends Component {
 							style={
 								{
 									height: 100,
-									backgroundColor: 'rgba(10,10,10,.1)',
+									backgroundColor: 'rgba(10,10,10,.5)',
 								}
 							}
 							onPress={

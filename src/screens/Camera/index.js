@@ -120,8 +120,7 @@ class Camera extends Component {
 				}}
 				source={imageUri ? { uri: imageUri, } : {}}
 				animation="fadeOut"
-				duration={5000}
-				delay={5000}
+				duration={30000}
 				style={
 					{
 						position: 'absolute',
@@ -174,7 +173,7 @@ class Camera extends Component {
 						style={
 							{
 								height: 100,
-								backgroundColor: 'rgba(10,10,10,.1)',
+								backgroundColor: 'rgba(10,10,10,.5)',
 							}
 						}
 						onPress={this.takePicture.bind(this)}>
