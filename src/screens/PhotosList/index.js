@@ -9,6 +9,7 @@ import {
 	Alert,
 	Dimensions,
 	DeviceEventEmitter,
+	Platform,
 } from 'react-native'
 
 import {
@@ -42,6 +43,7 @@ import {
 	getPhotos,
 	acceptTandC,
 	setLocationPermission,
+	setOrientation,
 } from './reducer'
 
 import { uploadPendingPhotos, } from '../Camera/reducer'
@@ -92,7 +94,6 @@ class PhotosList extends Component {
 		})
 	}
 
-
 	static defaultProps = {
 		locationPermission: null,
 	}
@@ -109,6 +110,8 @@ class PhotosList extends Component {
 		setLocationPermission: PropTypes.func.isRequired,
 		pendingUploads: PropTypes.number.isRequired,
 		uploadPendingPhotos: PropTypes.func.isRequired,
+		orientation: PropTypes.string.isRequired,
+		setOrientation: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -119,7 +122,7 @@ class PhotosList extends Component {
 		} = this.props
 		navigation.setParams({ handleRefresh: () => (this.reload()), })
 
-		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange)
+		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
 
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
@@ -131,7 +134,7 @@ class PhotosList extends Component {
 	}
 
 	componentWillUnmount() {
-		DeviceEventEmitter.removeListener('namedOrientationDidChange', this.handleOrientationDidChange)
+		DeviceEventEmitter.removeListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
 	}
 
 	onLayout(e) {
@@ -139,7 +142,19 @@ class PhotosList extends Component {
 	}
 
 	handleOrientationDidChange(data) {
-		// alert(`orientation changed, data: ${JSON.stringify(data)}`)
+		const {
+			setOrientation,
+		} = this.props
+		let { name, } = data
+		// this weird logic is necessary due to a bug in iOS which swaps portrair primary and secondary
+		if (Platform.OS === 'ios') {
+			if (name === 'landscape-primary') {
+				name = 'landscape-secondary'
+			} else if (name === 'landscape-secondary') {
+				name = 'landscape-primary'
+			}
+		}
+		setOrientation(name)
 	}
 
 	thumbWidth
@@ -221,6 +236,7 @@ class PhotosList extends Component {
 			acceptTandC,
 			locationPermission,
 			pendingUploads,
+			orientation,
 		} = this.props
 
 		if (locationPermission === 'authorized') {
@@ -466,6 +482,7 @@ const mapStateToProps = state => {
 		isTandcAccepted: state.photosList.isTandcAccepted,
 		locationPermission: state.photosList.locationPermission,
 		pendingUploads: state.camera.pendingUploads,
+		orientation: state.photosList.orientation,
 	}
 }
 
@@ -476,6 +493,7 @@ const mapDispatchToProps = {
 	acceptTandC,
 	setLocationPermission,
 	uploadPendingPhotos,
+	setOrientation,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)

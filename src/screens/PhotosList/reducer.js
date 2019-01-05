@@ -16,6 +16,8 @@ export const SET_UUID = 'wisaw/photosList/SET_UUID'
 export const SET_LOCATION = 'wisaw/photosList/SET_LOCATION'
 export const SET_LOCATION_PERMISSION = 'wisaw/photosList/SET_LOCATION_PERMISSION'
 export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
+export const SET_ORIENTATION = 'wisaw/photosList/SET_ORIENTATION'
+
 
 const UUID_KEY = 'wisaw_device_uuid'
 //  date '+%Y%m%d%H%M%S'
@@ -32,6 +34,7 @@ export const initialState = {
 	errorMessage: '',
 	daysAgo: 0,
 	locationPermission: null,
+	orientation: 'portrait-primary',
 }
 
 export default function reducer(state = initialState, action) {
@@ -94,6 +97,11 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				error: action.error,
+			}
+		case SET_ORIENTATION:
+			return {
+				...state,
+				orientation: action.orientation,
 			}
 		default:
 			return state
@@ -231,6 +239,13 @@ export function setLocationPermission(locationPermission) {
 	return {
 		type: SET_LOCATION_PERMISSION,
 		locationPermission,
+	}
+}
+
+export function setOrientation(orientation) {
+	return {
+		type: SET_ORIENTATION,
+		orientation,
 	}
 }
 
