@@ -139,7 +139,7 @@ class PhotosList extends Component {
 	}
 
 	handleOrientationDidChange(data) {
-		alert(`orientation changed, data: ${JSON.stringify(data)}`)
+		// alert(`orientation changed, data: ${JSON.stringify(data)}`)
 	}
 
 	thumbWidth
