@@ -125,7 +125,7 @@ class Camera extends Component {
 					{
 						position: 'absolute',
 						alignSelf: 'auto',
-						bottom: 20,
+						top: 20,
 						left: 20,
 						height: 100,
 						width: 100,
