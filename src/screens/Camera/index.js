@@ -13,6 +13,8 @@ import {
 	Button,
 } from 'native-base'
 
+import Slider from 'react-native-slider'
+
 import PropTypes from 'prop-types'
 
 import {
@@ -151,7 +153,7 @@ class Camera extends Component {
 					ref={ref => {
 						this.cameraView = ref
 					}}
-					style={styles.camera}
+					style={styles.cameraView}
 					type={RNCamera.Constants.Type.back}
 					flashMode={RNCamera.Constants.FlashMode.off}
 					orientation={RNCamera.Constants.Orientation.auto}
@@ -168,43 +170,120 @@ class Camera extends Component {
 						orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
 					]
 				}>
-					<View>
-						<Button
-							rounded
-							light
-							transparent
-							bordered
-							style={
+					<View style={{ flex: 2, }}>
+						<Slider
+							maximumValue={10}
+							minimumValue={0}
+							step={1}
+							value={0}
+							style={[
 								{
-									height: 100,
-									backgroundColor: 'rgba(10,10,10,.5)',
-								}
+									flex: 1,
+									width: '80%',
+									height: '80%',
+									justifyContent: 'center',
+									alignSelf: 'center',
+								},
+								orientation === 'portrait-primary' && { },
+								orientation === 'portrait-secondary' && { },
+								orientation === 'landscape-primary'
+								&& {
+									transform: [
+										{ rotate: '270deg', },
+									],
+								},
+								orientation === 'landscape-secondary' 	&& {
+									transform: [
+										{ rotate: '270deg', },
+									],
+								},
+							]
 							}
-							onPress={this.takePicture.bind(this)}>
-							<Icon
-								type="FontAwesome"
-								name="camera"
+							maximumTrackTintColor={CONST.MAIN_COLOR}
+							minimumTrackTintColor={CONST.MAIN_COLOR}
+							thumbTintColor={CONST.MAIN_COLOR}
+						/>
+					</View>
+					<View style={
+						[
+							{
+								flex: 2,
+							},
+							orientation === 'portrait-primary' && { flexDirection: 'row', justifyContent: 'center', },
+							orientation === 'portrait-secondary' && { flexDirection: 'row', justifyContent: 'center', },
+							orientation === 'landscape-primary' && { flexDirection: 'column', justifyContent: 'center', },
+							orientation === 'landscape-secondary' && { flexDirection: 'column', justifyContent: 'center', },
+						]
+					}>
+						<View>
+							<Button
+								rounded
+								light
+								transparent
+								bordered
 								style={
 									{
-										fontSize: 60,
-										color: '#FF4136',
-									}
-								}
-							/>
-						</Button>
-						{pendingUploads > 0 && (
-							<Text
-								style={
-									{
-										position: 'absolute',
-										alignSelf: 'center',
-										color: 'white',
+										flex: 1,
+										height: 100,
+										width: 100,
 										backgroundColor: 'rgba(10,10,10,.5)',
 									}
-								}>
-								{pendingUploads}
-							</Text>
-						)}
+								}
+								onPress={this.takePicture.bind(this)}>
+								<Icon
+									type="FontAwesome"
+									name="camera"
+									style={
+										{
+											fontSize: 60,
+											color: '#FF4136',
+										}
+									}
+								/>
+							</Button>
+							{pendingUploads > 0 && (
+								<Text
+									style={
+										{
+											position: 'absolute',
+											alignSelf: 'center',
+											color: 'white',
+											backgroundColor: 'rgba(10,10,10,.5)',
+										}
+									}>
+									{pendingUploads}
+								</Text>
+							)}
+						</View>
+					</View>
+					<View style={
+						[
+							{
+								flex: 2,
+								justifyContent: 'space-evenly',
+							},
+							orientation === 'portrait-primary' && { flexDirection: 'row', },
+							orientation === 'portrait-secondary' && { flexDirection: 'row', },
+							orientation === 'landscape-primary' && { flexDirection: 'column', },
+							orientation === 'landscape-secondary' && { flexDirection: 'column', },
+						]
+					}>
+						<Icon
+							type="MaterialIcons" name="camera-rear"
+							style={{
+								flex: 0,
+								alignSelf: 'center',
+								color: CONST.MAIN_COLOR,
+							}}
+						/>
+						<Icon
+							type="MaterialIcons" name="flash-on"
+							style={{
+								flex: 0,
+								alignSelf: 'center',
+								color: CONST.MAIN_COLOR,
+							}}
+						/>
 					</View>
 				</View>
 				{ this.renderPreviewImage(previewUri) }
@@ -217,7 +296,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
-	camera: {
+	cameraView: {
 		flex: 1,
 		alignItems: 'center',
 	},
@@ -225,18 +304,21 @@ const styles = StyleSheet.create({
 	cameraButtonPortraitPrimary: {
 		position: 'absolute',
 		flex: 1,
-		flexDirection: 'column',
+		flexDirection: 'row',
 		width: Dimensions.get('window').width,
 		bottom: 20,
-		alignItems: 'center',
+		alignItems: 'stretch',
+		justifyContent: 'center',
+
 	},
 	cameraButtonPortraitSecondary: {
 		position: 'absolute',
 		flex: 1,
-		flexDirection: 'column',
+		flexDirection: 'row',
 		width: Dimensions.get('window').width,
 		bottom: 20,
-		alignItems: 'center',
+		alignItems: 'stretch',
+		justifyContent: 'center',
 	},
 	cameraButtonLandscapePrimary: {
 		position: 'absolute',
@@ -245,7 +327,7 @@ const styles = StyleSheet.create({
 		top: 0,
 		right: 20,
 		height: Dimensions.get('window').width,
-		justifyContent: 'center',
+		justifyContent: 'space-between',
 	},
 	cameraButtonLandscapeSecondary: {
 		position: 'absolute',
@@ -254,7 +336,7 @@ const styles = StyleSheet.create({
 		top: 0,
 		left: 20,
 		height: Dimensions.get('window').width,
-		justifyContent: 'center',
+		justifyContent: 'space-between',
 	},
 
 })

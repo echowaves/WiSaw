@@ -158,6 +158,9 @@ class PhotosList extends Component {
 		}
 		// alert(upperFirst(camelCase(name)))
 		// setOrientation(upperFirst(camelCase(name)))
+		if (name === 'portrait-secondary') {
+			return
+		}
 		setOrientation(name)
 	}
 
@@ -366,13 +369,16 @@ class PhotosList extends Component {
 
 					<View style={
 						[
+							{ flex: 1, },
 							orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
 							orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
 							orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
 							orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
 						]
 					}>
-						<View>
+						<View style={{
+							flex: 0,
+						}}>
 							<Button
 								rounded
 								light
@@ -381,6 +387,7 @@ class PhotosList extends Component {
 								style={
 									{
 										height: 100,
+										width: 100,
 										backgroundColor: 'rgba(10,10,10,.5)',
 									}
 								}
@@ -477,18 +484,20 @@ const styles = StyleSheet.create({
 	cameraButtonPortraitPrimary: {
 		position: 'absolute',
 		flex: 1,
-		flexDirection: 'column',
+		flexDirection: 'row',
 		width: Dimensions.get('window').width,
 		bottom: 20,
 		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	cameraButtonPortraitSecondary: {
 		position: 'absolute',
 		flex: 1,
-		flexDirection: 'column',
+		flexDirection: 'row',
 		width: Dimensions.get('window').width,
 		bottom: 20,
 		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	cameraButtonLandscapePrimary: {
 		position: 'absolute',
