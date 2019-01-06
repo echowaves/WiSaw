@@ -176,28 +176,14 @@ class Camera extends Component {
 							minimumValue={0}
 							step={1}
 							value={0}
-							style={[
+							style={
 								{
 									flex: 1,
 									width: '80%',
 									height: '80%',
 									justifyContent: 'center',
 									alignSelf: 'center',
-								},
-								orientation === 'portrait-primary' && { },
-								orientation === 'portrait-secondary' && { },
-								orientation === 'landscape-primary'
-								&& {
-									transform: [
-										{ rotate: '270deg', },
-									],
-								},
-								orientation === 'landscape-secondary' 	&& {
-									transform: [
-										{ rotate: '270deg', },
-									],
-								},
-							]
+								}
 							}
 							maximumTrackTintColor={CONST.MAIN_COLOR}
 							minimumTrackTintColor={CONST.MAIN_COLOR}
