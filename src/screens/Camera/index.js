@@ -5,6 +5,7 @@ import {
 	CameraRoll,
 	AsyncStorage,
 	Text,
+	Dimensions,
 } from 'react-native'
 
 import {
@@ -53,6 +54,7 @@ class Camera extends Component {
 		setPreviewUri: PropTypes.func.isRequired,
 		uploadPendingPhotos: PropTypes.func.isRequired,
 		pendingUploads: PropTypes.number.isRequired,
+		orientation: PropTypes.string.isRequired,
 	}
 
 	componentDidMount() {
@@ -142,6 +144,7 @@ class Camera extends Component {
 		const {
 			previewUri,
 			pendingUploads,
+			orientation,
 		} = this.props
 		return (
 			<View style={styles.container}>
@@ -159,48 +162,51 @@ class Camera extends Component {
 					onBarCodeRead={null}
 				/>
 				<View style={
-					{
-						position: 'absolute',
-						alignSelf: 'center',
-						bottom: 20,
-					}
+					[
+						orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
+						orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
+						orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
+						orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
+					]
 				}>
-					<Button
-						rounded
-						light
-						transparent
-						bordered
-						style={
-							{
-								height: 100,
-								backgroundColor: 'rgba(10,10,10,.5)',
-							}
-						}
-						onPress={this.takePicture.bind(this)}>
-						<Icon
-							type="FontAwesome"
-							name="camera"
+					<View>
+						<Button
+							rounded
+							light
+							transparent
+							bordered
 							style={
 								{
-									fontSize: 60,
-									color: '#FF4136',
-								}
-							}
-						/>
-					</Button>
-					{pendingUploads > 0 && (
-						<Text
-							style={
-								{
-									position: 'absolute',
-									alignSelf: 'center',
-									color: 'white',
+									height: 100,
 									backgroundColor: 'rgba(10,10,10,.5)',
 								}
-							}>
-							{pendingUploads}
-						</Text>
-					)}
+							}
+							onPress={this.takePicture.bind(this)}>
+							<Icon
+								type="FontAwesome"
+								name="camera"
+								style={
+									{
+										fontSize: 60,
+										color: '#FF4136',
+									}
+								}
+							/>
+						</Button>
+						{pendingUploads > 0 && (
+							<Text
+								style={
+									{
+										position: 'absolute',
+										alignSelf: 'center',
+										color: 'white',
+										backgroundColor: 'rgba(10,10,10,.5)',
+									}
+								}>
+								{pendingUploads}
+							</Text>
+						)}
+					</View>
 				</View>
 				{ this.renderPreviewImage(previewUri) }
 			</View>
@@ -216,12 +222,49 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: 'center',
 	},
+
+	cameraButtonPortraitPrimary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		width: Dimensions.get('window').width,
+		bottom: 20,
+		alignItems: 'center',
+	},
+	cameraButtonPortraitSecondary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		width: Dimensions.get('window').width,
+		bottom: 20,
+		alignItems: 'center',
+	},
+	cameraButtonLandscapePrimary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		top: 0,
+		right: 20,
+		height: Dimensions.get('window').width,
+		justifyContent: 'center',
+	},
+	cameraButtonLandscapeSecondary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		top: 0,
+		left: 20,
+		height: Dimensions.get('window').width,
+		justifyContent: 'center',
+	},
+
 })
 
 
 const mapStateToProps = state => ({
 	previewUri: state.camera.previewUri,
 	pendingUploads: state.camera.pendingUploads,
+	orientation: state.photosList.orientation,
 })
 
 const mapDispatchToProps = {
