@@ -8,11 +8,17 @@ export const SET_PREVIEW_URI = 'wisaw/camera/SET_PREVIEW_URI'
 export const START_PHOTO_UPLOADING = 'wisaw/camera/START_PHOTO_UPLOADING'
 export const FINISH_PHOTO_UPLOADING = 'wisaw/camera/FINISH_PHOTO_UPLOADING'
 export const UPDATE_PHOTOS_PENDING_UPLOAD = 'wisaw/camera/UPDATE_PHOTOS_PENDING_UPLOAD'
+export const SET_FLASH = 'wisaw/camera/SET_FLASH'
+export const SET_FRONT_CAM = 'wisaw/camera/SET_FRONT_CAM'
+export const SET_ZOOM = 'wisaw/camera/SET_ZOOM'
 
 export const initialState = {
 	previewUri: null,
 	uploadingPhoto: false,
 	pendingUploads: 0,
+	flashMode: false,
+	frontCam: false,
+	zoom: 0,
 }
 
 export default function reducer(state = initialState, action) {
@@ -38,6 +44,22 @@ export default function reducer(state = initialState, action) {
 				...state,
 				pendingUploads: action.pendingUploads,
 			}
+		case SET_FLASH:
+			return {
+				...state,
+				flashMode: action.flashMode,
+			}
+		case SET_FRONT_CAM:
+			return {
+				...state,
+				frontCam: action.frontCam,
+			}
+		case SET_ZOOM:
+			return {
+				...state,
+				zoom: action.zoom,
+			}
+
 		default:
 			return state
 	}
@@ -47,6 +69,27 @@ export function setPreviewUri(previewUri) {
 	return {
 		type: SET_PREVIEW_URI,
 		previewUri,
+	}
+}
+
+export function setFlashMode(flashMode) {
+	return {
+		type: SET_FLASH,
+		flashMode,
+	}
+}
+
+export function setFrontCam(frontCam) {
+	return {
+		type: SET_FRONT_CAM,
+		frontCam,
+	}
+}
+
+export function setZoom(zoom) {
+	return {
+		type: SET_ZOOM,
+		zoom,
 	}
 }
 

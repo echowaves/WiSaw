@@ -6,6 +6,8 @@ import {
 	AsyncStorage,
 	Text,
 	Dimensions,
+	Platform,
+	TouchableOpacity,
 } from 'react-native'
 
 import {
@@ -30,6 +32,9 @@ import moment from 'moment'
 import {
 	setPreviewUri,
 	uploadPendingPhotos,
+	setFlashMode,
+	setFrontCam,
+	setZoom,
 } from './reducer'
 
 // import * as CONST from '../../consts'
@@ -57,6 +62,12 @@ class Camera extends Component {
 		uploadPendingPhotos: PropTypes.func.isRequired,
 		pendingUploads: PropTypes.number.isRequired,
 		orientation: PropTypes.string.isRequired,
+		flashMode: PropTypes.bool.isRequired,
+		setFlashMode: PropTypes.func.isRequired,
+		frontCam: PropTypes.bool.isRequired,
+		setFrontCam: PropTypes.func.isRequired,
+		zoom: PropTypes.number.isRequired,
+		setZoom: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -146,6 +157,12 @@ class Camera extends Component {
 			previewUri,
 			pendingUploads,
 			orientation,
+			flashMode,
+			frontCam,
+			zoom,
+			setFlashMode,
+			setFrontCam,
+			setZoom,
 		} = this.props
 		return (
 			<View style={styles.container}>
@@ -154,13 +171,14 @@ class Camera extends Component {
 						this.cameraView = ref
 					}}
 					style={styles.cameraView}
-					type={RNCamera.Constants.Type.back}
-					flashMode={RNCamera.Constants.FlashMode.off}
 					orientation={RNCamera.Constants.Orientation.auto}
 					onFaceDetected={null}
 					onGoogleVisionBarcodesDetected={null}
 					onTextRecognized={null}
 					onBarCodeRead={null}
+					flashMode={flashMode ? RNCamera.Constants.FlashMode.on : RNCamera.Constants.FlashMode.off}
+					type={frontCam ? RNCamera.Constants.Type.front : RNCamera.Constants.Type.back}
+					zoom={zoom}
 				/>
 				<View style={
 					[
@@ -175,7 +193,12 @@ class Camera extends Component {
 							maximumValue={10}
 							minimumValue={0}
 							step={1}
-							value={0}
+							value={zoom}
+							onValueChange={
+								val => {
+									setZoom(Platform.OS === 'ios' ? (val / 200) : (val / 10)) // this is to address iOS bug
+								}
+							}
 							style={
 								{
 									flex: 1,
@@ -247,6 +270,7 @@ class Camera extends Component {
 							{
 								flex: 2,
 								justifyContent: 'space-evenly',
+								alignSelf: 'center',
 							},
 							orientation === 'portrait-primary' && { flexDirection: 'row', },
 							orientation === 'portrait-secondary' && { flexDirection: 'row', },
@@ -254,22 +278,37 @@ class Camera extends Component {
 							orientation === 'landscape-secondary' && { flexDirection: 'column', },
 						]
 					}>
-						<Icon
-							type="MaterialIcons" name="camera-rear"
-							style={{
-								flex: 0,
-								alignSelf: 'center',
-								color: CONST.MAIN_COLOR,
-							}}
-						/>
-						<Icon
-							type="MaterialIcons" name="flash-on"
-							style={{
-								flex: 0,
-								alignSelf: 'center',
-								color: CONST.MAIN_COLOR,
-							}}
-						/>
+						<TouchableOpacity
+							onPress={
+								val => {
+									setFrontCam(!frontCam)
+								}
+							}>
+							<Icon
+								type="MaterialIcons"
+								name={frontCam ? "camera-front" : "camera-rear"}
+								style={{
+									flex: 0,
+									alignSelf: 'center',
+									color: CONST.MAIN_COLOR,
+								}}
+							/>
+						</TouchableOpacity>
+						<TouchableOpacity
+							onPress={
+								val => {
+									setFlashMode(!flashMode)
+								}
+							}>
+							<Icon
+								type="MaterialIcons" name={flashMode ? "flash-on" : "flash-off"}
+								style={{
+									flex: 0,
+									alignSelf: 'center',
+									color: CONST.MAIN_COLOR,
+								}}
+							/>
+						</TouchableOpacity>
 					</View>
 				</View>
 				{ this.renderPreviewImage(previewUri) }
@@ -332,12 +371,18 @@ const mapStateToProps = state => ({
 	previewUri: state.camera.previewUri,
 	pendingUploads: state.camera.pendingUploads,
 	orientation: state.photosList.orientation,
+	flashMode: state.camera.flashMode,
+	frontCam: state.camera.frontCam,
+	zoom: state.camera.zoom,
 })
 
 const mapDispatchToProps = {
 	// will be wrapped into a dispatch call
 	setPreviewUri,
 	uploadPendingPhotos,
+	setFlashMode,
+	setFrontCam,
+	setZoom,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Camera)
