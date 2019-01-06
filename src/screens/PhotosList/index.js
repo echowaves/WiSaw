@@ -369,16 +369,17 @@ class PhotosList extends Component {
 
 					<View style={
 						[
-							{ flex: 1, },
+							{
+								flex: 1,
+								position: 'absolute',
+							},
 							orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
 							orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
 							orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
 							orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
 						]
 					}>
-						<View style={{
-							flex: 0,
-						}}>
+						<View>
 							<Button
 								rounded
 								light
@@ -477,45 +478,33 @@ class PhotosList extends Component {
 	}
 }
 
+const { width, height, } = Dimensions.get('window')
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
 	cameraButtonPortraitPrimary: {
-		position: 'absolute',
-		flex: 1,
 		flexDirection: 'row',
-		width: Dimensions.get('window').width,
 		bottom: 20,
-		alignItems: 'center',
+		alignSelf: 'center',
 		justifyContent: 'center',
 	},
 	cameraButtonPortraitSecondary: {
-		position: 'absolute',
-		flex: 1,
 		flexDirection: 'row',
-		width: Dimensions.get('window').width,
 		bottom: 20,
-		alignItems: 'center',
+		alignSelf: 'center',
 		justifyContent: 'center',
 	},
 	cameraButtonLandscapePrimary: {
-		position: 'absolute',
-		flex: 1,
 		flexDirection: 'column',
-		top: -32,
 		right: 20,
-		height: Dimensions.get('window').width,
-		justifyContent: 'center',
+		top: width < height ? width * 0.5 - 50 - 32 : height * 0.5 - 50 - 32,
 	},
 	cameraButtonLandscapeSecondary: {
-		position: 'absolute',
-		flex: 1,
 		flexDirection: 'column',
-		top: -32,
 		left: 20,
-		height: Dimensions.get('window').width,
-		justifyContent: 'center',
+		top: width < height ? width * 0.5 - 50 - 32 : height * 0.5 - 50 - 32,
 	},
 })
 
