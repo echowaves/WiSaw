@@ -38,6 +38,8 @@ import PropTypes from 'prop-types'
 
 import Modal from "react-native-modal"
 
+// import { camelCase, upperFirst, } from 'lodash'
+
 import {
 	resetState,
 	getPhotos,
@@ -154,6 +156,8 @@ class PhotosList extends Component {
 				name = 'landscape-primary'
 			}
 		}
+		// alert(upperFirst(camelCase(name)))
+		// setOrientation(upperFirst(camelCase(name)))
 		setOrientation(name)
 	}
 
@@ -361,52 +365,55 @@ class PhotosList extends Component {
 					</Modal>
 
 					<View style={
-						{
-							position: 'absolute',
-							alignSelf: 'center',
-							bottom: 20,
-						}
+						[
+							orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
+							orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
+							orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
+							orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
+						]
 					}>
-						<Button
-							rounded
-							light
-							transparent
-							bordered
-							style={
-								{
-									height: 100,
-									backgroundColor: 'rgba(10,10,10,.5)',
-								}
-							}
-							onPress={
-								() => {
-									this.checkPermissionsForPhotoTaking()
-								}
-							}>
-							<Icon
-								type="FontAwesome"
-								name="camera"
+						<View>
+							<Button
+								rounded
+								light
+								transparent
+								bordered
 								style={
 									{
-										fontSize: 60,
-										color: CONST.MAIN_COLOR,
-									}
-								}
-							/>
-						</Button>
-						{pendingUploads > 0 && (
-							<Text
-								style={
-									{
-										position: 'absolute',
-										alignSelf: 'center',
-										color: 'white',
+										height: 100,
 										backgroundColor: 'rgba(10,10,10,.5)',
 									}
+								}
+								onPress={
+									() => {
+										this.checkPermissionsForPhotoTaking()
+									}
 								}>
-								{pendingUploads}
-							</Text>
-						)}
+								<Icon
+									type="FontAwesome"
+									name="camera"
+									style={
+										{
+											fontSize: 60,
+											color: CONST.MAIN_COLOR,
+										}
+									}
+								/>
+							</Button>
+							{pendingUploads > 0 && (
+								<Text
+									style={
+										{
+											position: 'absolute',
+											alignSelf: 'center',
+											color: 'white',
+											backgroundColor: 'rgba(10,10,10,.5)',
+										}
+									}>
+									{pendingUploads}
+								</Text>
+							)}
+						</View>
 					</View>
 				</Container>
 			)
@@ -466,6 +473,40 @@ class PhotosList extends Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+	},
+	cameraButtonPortraitPrimary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		width: Dimensions.get('window').width,
+		bottom: 20,
+		alignItems: 'center',
+	},
+	cameraButtonPortraitSecondary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		width: Dimensions.get('window').width,
+		bottom: 20,
+		alignItems: 'center',
+	},
+	cameraButtonLandscapePrimary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		top: -32,
+		right: 20,
+		height: Dimensions.get('window').width,
+		justifyContent: 'center',
+	},
+	cameraButtonLandscapeSecondary: {
+		position: 'absolute',
+		flex: 1,
+		flexDirection: 'column',
+		top: -32,
+		left: 20,
+		height: Dimensions.get('window').width,
+		justifyContent: 'center',
 	},
 })
 
