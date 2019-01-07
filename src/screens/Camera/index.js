@@ -37,7 +37,6 @@ import {
 	setZoom,
 } from './reducer'
 
-// import * as CONST from '../../consts'
 import { store, } from '../../../App'
 import * as CONST from '../../consts.js'
 

@@ -2,13 +2,21 @@ import React, { Component, } from 'react'
 import { connect, } from 'react-redux'
 
 import {
+	View,
 	StyleSheet,
 	Image,
 	TouchableHighlight,
+	Text,
 } from 'react-native'
+
+import {
+	Icon,
+} from 'native-base'
 
 import PropTypes from 'prop-types'
 import { setCurrentPhotoIndex, } from './reducer'
+
+import * as CONST from '../../consts.js'
 
 class Thumb extends Component {
 	static propTypes = {
@@ -43,17 +51,54 @@ class Thumb extends Component {
 		}
 
 		return (
-			<TouchableHighlight
-				onPress={() => this.onThumbPress(item)}
-				style={[
-					styles.container,
-					thumbWidthStyles,
-				]}>
-				<Image
-					source={{ uri: item.getThumbUrl, }}
-					style={styles.thumbnail}
-				/>
-			</TouchableHighlight>
+			<View>
+				<TouchableHighlight
+					onPress={() => this.onThumbPress(item)}
+					style={[
+						styles.container,
+						thumbWidthStyles,
+					]}>
+					<Image
+						source={{ uri: item.getThumbUrl, }}
+						style={styles.thumbnail}
+					/>
+				</TouchableHighlight>
+				{ item.likes > 0 && (
+					<View
+						style={
+							{
+								fontSize: 30,
+								color: CONST.MAIN_COLOR,
+								position: 'absolute',
+								bottom: 2,
+								right: 5,
+							}
+						}>
+						<Icon
+							type="FontAwesome"
+							name="thumbs-up"
+							style={
+								{
+									fontSize: 30,
+									color: CONST.MAIN_COLOR,
+								}
+							}
+						/>
+						<Text
+							style={
+								{
+									fontSize: 10,
+									color: CONST.SECONDARY_COLOR,
+									position: 'absolute',
+									right: 5,
+									top: 12,
+								}
+							}>
+							{item.likes > 99 ? '+ 99' : item.likes}
+						</Text>
+					</View>
+				)}
+			</View>
 		)
 	}
 }
