@@ -156,8 +156,7 @@ class PhotosList extends Component {
 				name = 'landscape-primary'
 			}
 		}
-		// alert(upperFirst(camelCase(name)))
-		// setOrientation(upperFirst(camelCase(name)))
+
 		if (name === 'portrait-secondary') {
 			return
 		}
@@ -478,7 +477,7 @@ class PhotosList extends Component {
 	}
 }
 
-const { width, height, } = Dimensions.get('window')
+const { width, height, } = Dimensions.get('screen')
 
 const styles = StyleSheet.create({
 	container: {

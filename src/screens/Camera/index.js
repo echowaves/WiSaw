@@ -224,7 +224,14 @@ class Camera extends Component {
 							orientation === 'landscape-secondary' && { flexDirection: 'column', justifyContent: 'center', },
 						]
 					}>
-						<View>
+						<View
+							style={
+								{
+									alignSelf: 'center',
+									height: 100,
+									width: 100,
+								}
+							}>
 							<Button
 								rounded
 								light
@@ -330,7 +337,7 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		flex: 1,
 		flexDirection: 'row',
-		width: Dimensions.get('window').width,
+		width: Dimensions.get('screen').width < Dimensions.get('screen').height ? Dimensions.get('screen').width : Dimensions.get('screen').height,
 		bottom: 20,
 		alignItems: 'stretch',
 		justifyContent: 'center',
@@ -340,7 +347,7 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		flex: 1,
 		flexDirection: 'row',
-		width: Dimensions.get('window').width,
+		width: Dimensions.get('screen').width < Dimensions.get('screen').height ? Dimensions.get('screen').width : Dimensions.get('screen').height,
 		bottom: 20,
 		alignItems: 'stretch',
 		justifyContent: 'center',
@@ -351,7 +358,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 		top: 0,
 		right: 20,
-		height: Dimensions.get('window').width,
+		height: Dimensions.get('screen').width < Dimensions.get('screen').height ? Dimensions.get('screen').width : Dimensions.get('screen').height,
 		justifyContent: 'space-between',
 	},
 	cameraButtonLandscapeSecondary: {
@@ -360,7 +367,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 		top: 0,
 		left: 20,
-		height: Dimensions.get('window').width,
+		height: Dimensions.get('screen').width < Dimensions.get('screen').height ? Dimensions.get('screen').width : Dimensions.get('screen').height,
 		justifyContent: 'space-between',
 	},
 
