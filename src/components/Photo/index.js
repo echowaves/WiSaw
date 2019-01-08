@@ -7,6 +7,7 @@ import {
 	View,
 	TouchableOpacity,
 	Image,
+	Text,
 } from 'react-native'
 
 import {
@@ -89,6 +90,65 @@ class Photo extends Component {
 						/>
 					</View>
 				)}
+
+				<View style={{
+					flex: 2,
+					flexDirection: 'row',
+					justifyContent: 'space-around',
+					width,
+					hieght: 100,
+					position: 'absolute',
+					bottom: 20,
+
+				}}>
+					<View
+						style={
+							{
+								color: CONST.MAIN_COLOR,
+							}
+						}>
+						<Icon
+							type="FontAwesome"
+							name="thumbs-up"
+							style={
+								{
+									fontSize: 50,
+									color: CONST.MAIN_COLOR,
+								}
+							}
+						/>
+						<Text
+							style={
+								{
+									fontSize: 12,
+									color: CONST.SECONDARY_COLOR,
+									position: 'absolute',
+									right: "20%",
+									top: 23,
+								}
+							}>
+							{item.likes}
+						</Text>
+					</View>
+					<View
+						style={
+							{
+								color: CONST.MAIN_COLOR,
+							}
+						}>
+						<Icon
+							type="FontAwesome"
+							name="share"
+							style={
+								{
+									fontSize: 50,
+									color: CONST.MAIN_COLOR,
+								}
+							}
+						/>
+					</View>
+
+				</View>
 			</View>
 		)
 	}
