@@ -232,6 +232,72 @@ class PhotosList extends Component {
 		navigation.push('Camera')
 	}
 
+
+	photoButton() {
+		const {
+			pendingUploads,
+			orientation,
+		} = this.props
+		return (
+			<View style={
+				[
+					{
+						flex: 1,
+						position: 'absolute',
+					},
+					orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
+					orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
+					orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
+					orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
+				]
+			}>
+				<View>
+					<Button
+						rounded
+						light
+						transparent
+						bordered
+						style={
+							{
+								height: 100,
+								width: 100,
+								backgroundColor: 'rgba(10,10,10,.5)',
+							}
+						}
+						onPress={
+							() => {
+								this.checkPermissionsForPhotoTaking()
+							}
+						}>
+						<Icon
+							type="FontAwesome"
+							name="camera"
+							style={
+								{
+									fontSize: 60,
+									color: CONST.MAIN_COLOR,
+								}
+							}
+						/>
+					</Button>
+					{pendingUploads > 0 && (
+						<Text
+							style={
+								{
+									position: 'absolute',
+									alignSelf: 'center',
+									color: 'white',
+									backgroundColor: 'rgba(10,10,10,.5)',
+								}
+							}>
+							{pendingUploads}
+						</Text>
+					)}
+				</View>
+			</View>
+		)
+	}
+
 	render() {
 		const {
 			photos,
@@ -241,8 +307,6 @@ class PhotosList extends Component {
 			isTandcAccepted,
 			acceptTandC,
 			locationPermission,
-			pendingUploads,
-			orientation,
 		} = this.props
 
 		if (locationPermission === 'authorized') {
@@ -257,6 +321,7 @@ class PhotosList extends Component {
 								/>
 							</Body>
 						</Content>
+						{this.photoButton()}
 					</Container>
 				)
 			}
@@ -365,63 +430,7 @@ class PhotosList extends Component {
 							</Card>
 						</Content>
 					</Modal>
-
-					<View style={
-						[
-							{
-								flex: 1,
-								position: 'absolute',
-							},
-							orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
-							orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
-							orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
-							orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
-						]
-					}>
-						<View>
-							<Button
-								rounded
-								light
-								transparent
-								bordered
-								style={
-									{
-										height: 100,
-										width: 100,
-										backgroundColor: 'rgba(10,10,10,.5)',
-									}
-								}
-								onPress={
-									() => {
-										this.checkPermissionsForPhotoTaking()
-									}
-								}>
-								<Icon
-									type="FontAwesome"
-									name="camera"
-									style={
-										{
-											fontSize: 60,
-											color: CONST.MAIN_COLOR,
-										}
-									}
-								/>
-							</Button>
-							{pendingUploads > 0 && (
-								<Text
-									style={
-										{
-											position: 'absolute',
-											alignSelf: 'center',
-											color: 'white',
-											backgroundColor: 'rgba(10,10,10,.5)',
-										}
-									}>
-									{pendingUploads}
-								</Text>
-							)}
-						</View>
-					</View>
+					{this.photoButton()}
 				</Container>
 			)
 		} // if (locationPermission === 'authorized')

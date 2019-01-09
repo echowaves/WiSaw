@@ -6,7 +6,6 @@ import {
 	Dimensions,
 	View,
 	TouchableOpacity,
-	Image,
 	Text,
 } from 'react-native'
 
@@ -101,7 +100,7 @@ class Photo extends Component {
 					bottom: 20,
 
 				}}>
-					<View
+					<TouchableOpacity
 						style={
 							{
 								color: CONST.MAIN_COLOR,
@@ -129,8 +128,8 @@ class Photo extends Component {
 							}>
 							{item.likes}
 						</Text>
-					</View>
-					<View
+					</TouchableOpacity>
+					<TouchableOpacity
 						style={
 							{
 								color: CONST.MAIN_COLOR,
@@ -146,8 +145,7 @@ class Photo extends Component {
 								}
 							}
 						/>
-					</View>
-
+					</TouchableOpacity>
 				</View>
 			</View>
 		)
