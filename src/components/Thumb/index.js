@@ -80,7 +80,7 @@ class Thumb extends Component {
 							style={
 								{
 									fontSize: 30,
-									color: CONST.MAIN_COLOR,
+									color: CONST.SECONDARY_COLOR,
 								}
 							}
 						/>
@@ -88,7 +88,7 @@ class Thumb extends Component {
 							style={
 								{
 									fontSize: 10,
-									color: CONST.SECONDARY_COLOR,
+									color: CONST.TEXT_COLOR,
 									position: 'absolute',
 									right: 5,
 									top: 12,
