@@ -386,32 +386,32 @@ class PhotosList extends Component {
 						}>
 						<Content padder>
 							<Card transparent>
-								<CardItem>
+								<CardItem style={{ borderRadius: 10, }}>
 									<Text> * When you take a photo with WiSaw app,
 								it will be added to a Photo Album on your phone,
 								as well as posted to global feed in the cloud.
 									</Text>
 								</CardItem>
-								<CardItem>
-									<Text> * People close - by can see your photos.</Text>
+								<CardItem style={{ borderRadius: 10, }}>
+									<Text> * People close-by can see your photos.</Text>
 								</CardItem>
-								<CardItem>
-									<Text> * You can see other people & #39;s photos too.
+								<CardItem style={{ borderRadius: 10, }}>
+									<Text> * You can see other people&#39;s photos too.
 									</Text>
 								</CardItem>
-								<CardItem>
+								<CardItem style={{ borderRadius: 10, }}>
 									<Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
 								</CardItem>
-								<CardItem>
+								<CardItem style={{ borderRadius: 10, }}>
 									<Text>* No one will tolerate objectionable content or abusive users.</Text>
 								</CardItem>
-								<CardItem>
+								<CardItem style={{ borderRadius: 10, }}>
 									<Text>* The abusive users will be banned from WiSaw by other users.</Text>
 								</CardItem>
-								<CardItem>
+								<CardItem style={{ borderRadius: 10, }}>
 									<Text>* By using WiSaw I agree to Terms and Conditions.</Text>
 								</CardItem>
-								<CardItem footer>
+								<CardItem footer style={{ borderRadius: 10, }}>
 									<Left />
 									<Button
 										block
