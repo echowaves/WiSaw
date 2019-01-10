@@ -437,15 +437,15 @@ class PhotosList extends Component {
 						<Modal isVisible>
 							<Content padder>
 								<Card transparent>
-									<CardItem>
-										<Text> How am I supposed to show you the near - by photos ?
+									<CardItem style={{ borderRadius: 10, }}>
+										<Text> How am I supposed to show you the near-by photos ?
 										</Text>
 									</CardItem>
-									<CardItem>
+									<CardItem style={{ borderRadius: 10, }}>
 										<Text> Why don &#39;t you enable Location in Settings and Try Again?
 										</Text>
 									</CardItem>
-									<CardItem footer>
+									<CardItem footer style={{ borderRadius: 10, }}>
 										<Left>
 											<Button
 												block

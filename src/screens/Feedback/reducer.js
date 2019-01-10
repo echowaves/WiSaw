@@ -13,6 +13,7 @@ export const initialState = {
 	feedbackText: '',
 	loading: false,
 	errorMessage: '',
+	finished: false,
 }
 
 export default function reducer(state = initialState, action) {
@@ -27,17 +28,20 @@ export default function reducer(state = initialState, action) {
 				...state,
 				loading: true,
 				errorMessage: '',
+				finished: false,
 			}
 		case SUBMIT_FEEDBACK_FAIL:
 			return {
 				...state,
 				errorMessage: action.errorMessage,
 				loading: false,
+				finished: true,
 			}
 		case SUBMIT_FEEDBACK_FINISHED:
 			return {
 				...state,
 				loading: false,
+				finished: true,
 			}
 		default:
 			return state
@@ -68,9 +72,10 @@ export function submitFeedback({ feedbackText, }) {
 					description: feedbackText,
 				}),
 			})
-			const responseJson = await response.json()
 
-			if (responseJson.status === 201) {
+			// const responseJson = await response.json()
+
+			if (response.status === 201) {
 				dispatch({
 					type: SUBMIT_FEEDBACK_FINISHED,
 				})

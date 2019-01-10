@@ -11,7 +11,13 @@ import {
 	Form,
 	Textarea,
 	Item,
+	Body,
+	Card,
+	CardItem,
+	Button,
 } from 'native-base'
+
+import Modal from "react-native-modal"
 
 import PropTypes from 'prop-types'
 
@@ -59,6 +65,7 @@ class FeedbackScreen extends Component {
 		feedbackText: PropTypes.string.isRequired,
 		errorMessage: PropTypes.string.isRequired,
 		loading: PropTypes.bool.isRequired,
+		finished: PropTypes.bool.isRequired,
 		submitFeedback: PropTypes.func.isRequired,
 		setFeedbackText: PropTypes.func.isRequired,
 	}
@@ -80,11 +87,49 @@ class FeedbackScreen extends Component {
 
 	render() {
 		const {
+			navigation,
 			setFeedbackText,
 			loading,
 			errorMessage,
+			finished,
 		} = this.props
 
+		if (finished && errorMessage.length === 0) {
+			return (
+				<Container>
+					<Content padder>
+						<Body>
+							<Modal isVisible>
+								<Content padder>
+									<Card transparent>
+										<CardItem style={{ borderRadius: 10, }}>
+											<Text>Thank you for submitting your feedback.
+											</Text>
+										</CardItem>
+										<CardItem footer style={{ borderRadius: 10, }}>
+											<Body>
+												<Button
+													block
+													bordered
+													success
+													small
+													onPress={
+														() => {
+															navigation.goBack()
+														}
+													}>
+													<Text> You are Welcome! </Text>
+												</Button>
+											</Body>
+										</CardItem>
+									</Card>
+								</Content>
+							</Modal>
+						</Body>
+					</Content>
+				</Container>
+			)
+		}
 		return (
 			<Container>
 				<Content padder>
@@ -119,6 +164,7 @@ const mapStateToProps = state => ({
 	feedbackText: state.feedback.feedbackText,
 	loading: state.feedback.loading,
 	errorMessage: state.feedback.errorMessage,
+	finished: state.feedback.finished,
 })
 
 const mapDispatchToProps = {
