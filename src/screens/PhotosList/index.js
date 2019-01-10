@@ -38,8 +38,6 @@ import PropTypes from 'prop-types'
 
 import Modal from "react-native-modal"
 
-// import { camelCase, upperFirst, } from 'lodash'
-
 import {
 	resetState,
 	getPhotos,
@@ -52,7 +50,6 @@ import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
-
 
 class PhotosList extends Component {
 	static navigationOptions = ({
@@ -231,7 +228,6 @@ class PhotosList extends Component {
 		} = this.props
 		navigation.push('Camera')
 	}
-
 
 	photoButton() {
 		const {
