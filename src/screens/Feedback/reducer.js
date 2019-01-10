@@ -4,18 +4,24 @@ import {
 
 import * as CONST from '../../consts.js'
 
+export const SET_FEEDBACK_TEXT = 'wisaw/feedback/SET_FEEDBACK_TEXT'
 export const SUBMIT_FEEDBACK_STARTED = 'wisaw/feedback/SUBMIT_FEEDBACK_STARTED'
 export const SUBMIT_FEEDBACK_FAIL = 'wisaw/feedback/SUBMIT_FEEDBACK_FAIL'
 export const SUBMIT_FEEDBACK_FINISHED = 'wisaw/feedback/SUBMIT_FEEDBACK_FINISHED'
 
 export const initialState = {
-	isTandcAccepted: false,
+	feedbackText: '',
 	loading: false,
 	errorMessage: '',
 }
 
 export default function reducer(state = initialState, action) {
 	switch (action.type) {
+		case SET_FEEDBACK_TEXT:
+			return {
+				...state,
+				feedbackText: action.feedbackText,
+			}
 		case SUBMIT_FEEDBACK_STARTED:
 			return {
 				...state,
@@ -38,7 +44,14 @@ export default function reducer(state = initialState, action) {
 	}
 }
 
-export async function submitFeedback(feedback) {
+export function setFeedbackText({ feedbackText, }) {
+	return {
+		type: SET_FEEDBACK_TEXT,
+		feedbackText,
+	}
+}
+
+export function submitFeedback({ feedbackText, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
 		dispatch({
@@ -52,19 +65,19 @@ export async function submitFeedback(feedback) {
 				},
 				body: JSON.stringify({
 					uuid,
-					description: feedback,
+					description: feedbackText,
 				}),
 			})
 			const responseJson = await response.json()
 
-			if (responseJson.photos && responseJson.photos.length > 0) {
+			if (responseJson.status === 201) {
 				dispatch({
 					type: SUBMIT_FEEDBACK_FINISHED,
 				})
 			} else {
 				dispatch({
 					type: SUBMIT_FEEDBACK_FAIL,
-					errorMessage: 'Something went wrong, possibly network issue. Try again later.',
+					errorMessage: 'Something went wrong. Try again later.',
 				})
 			}
 		} catch (err) {
