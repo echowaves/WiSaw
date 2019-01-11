@@ -241,7 +241,7 @@ class Camera extends Component {
 										flex: 1,
 										height: 100,
 										width: 100,
-										backgroundColor: 'rgba(10,10,10,.5)',
+										backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 									}
 								}
 								onPress={this.takePicture.bind(this)}>
@@ -263,7 +263,7 @@ class Camera extends Component {
 											position: 'absolute',
 											alignSelf: 'center',
 											color: 'white',
-											backgroundColor: 'rgba(10,10,10,.5)',
+											backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 										}
 									}>
 									{pendingUploads}

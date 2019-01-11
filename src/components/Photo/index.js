@@ -5,13 +5,13 @@ import React, {
 import {
 	Dimensions,
 	View,
-	TouchableOpacity,
 	Text,
 } from 'react-native'
 
 import {
 	Icon,
 	Spinner,
+	Button,
 } from 'native-base'
 
 import PhotoView from 'react-native-photo-view-ex'
@@ -100,10 +100,16 @@ class Photo extends Component {
 					bottom: 20,
 
 				}}>
-					<TouchableOpacity
+					<Button
+						rounded
+						light
+						transparent
+						bordered
 						style={
 							{
-								color: CONST.MAIN_COLOR,
+								height: 85,
+								width: 85,
+								backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 							}
 						}>
 						<Icon
@@ -122,17 +128,25 @@ class Photo extends Component {
 									fontSize: 12,
 									color: CONST.SECONDARY_COLOR,
 									position: 'absolute',
-									right: "20%",
-									top: 23,
+									right: 0,
+									top: "55%",
+									textAlign: 'center',
+									width: '100%',
 								}
 							}>
 							{item.likes}
 						</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
+					</Button>
+					<Button
+						rounded
+						light
+						transparent
+						bordered
 						style={
 							{
-								color: CONST.MAIN_COLOR,
+								height: 85,
+								width: 85,
+								backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 							}
 						}>
 						<Icon
@@ -145,7 +159,7 @@ class Photo extends Component {
 								}
 							}
 						/>
-					</TouchableOpacity>
+					</Button>
 				</View>
 			</View>
 		)

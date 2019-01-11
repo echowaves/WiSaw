@@ -257,7 +257,7 @@ class PhotosList extends Component {
 							{
 								height: 100,
 								width: 100,
-								backgroundColor: 'rgba(10,10,10,.5)',
+								backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 							}
 						}
 						onPress={
@@ -283,7 +283,7 @@ class PhotosList extends Component {
 									position: 'absolute',
 									alignSelf: 'center',
 									color: 'white',
-									backgroundColor: 'rgba(10,10,10,.5)',
+									backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 								}
 							}>
 							{pendingUploads}
