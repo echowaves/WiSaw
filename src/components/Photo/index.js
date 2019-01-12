@@ -2,6 +2,8 @@ import React, {
 	Component,
 } from 'react'
 
+import { connect, } from 'react-redux'
+
 import {
 	Dimensions,
 	View,
@@ -18,21 +20,38 @@ import PhotoView from 'react-native-photo-view-ex'
 
 import PropTypes from 'prop-types'
 
+import {
+	likePhoto,
+} from './reducer'
+
 import * as CONST from '../../consts.js'
 
 class Photo extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
+		likes: PropTypes.array.isRequired,
+		likePhoto: PropTypes.func.isRequired,
 	}
+
+	static defaultProps = {}
 
 	state = {
 		loaded: false,
 	}
 
-	render() {
-		const { item, } = this.props
-		const { width, height, } = Dimensions.get('window')
+	isPhotoLikedByMe({ photoId, }) {
+		const {
+			likes,
+		} = this.props
+		return likes.includes(photoId)
+	}
 
+	render() {
+		const {
+			item,
+			likePhoto,
+		} = this.props
+		const { width, height, } = Dimensions.get('window')
 
 		return (
 			<View style={{ flex: 1, }}>
@@ -105,6 +124,12 @@ class Photo extends Component {
 						light
 						transparent
 						bordered
+						disabled={this.isPhotoLikedByMe({ photoId: item.id, })}
+						onPress={
+							() => {
+								likePhoto({ photoId: item.id, })
+							}
+						}
 						style={
 							{
 								height: 85,
@@ -118,7 +143,7 @@ class Photo extends Component {
 							style={
 								{
 									fontSize: 50,
-									color: CONST.MAIN_COLOR,
+									color: (this.isPhotoLikedByMe({ photoId: item.id, }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
 								}
 							}
 						/>
@@ -126,7 +151,7 @@ class Photo extends Component {
 							style={
 								{
 									fontSize: 12,
-									color: CONST.SECONDARY_COLOR,
+									color: (!this.isPhotoLikedByMe({ photoId: item.id, }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
 									position: 'absolute',
 									right: 0,
 									top: "55%",
@@ -166,4 +191,12 @@ class Photo extends Component {
 	}
 }
 
-export default Photo
+
+const mapStateToProps = state => ({
+	likes: state.photo.likes,
+})
+const mapDispatchToProps = {
+	likePhoto, // will be wrapped into a dispatch call
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Photo)

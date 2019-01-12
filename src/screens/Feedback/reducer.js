@@ -72,9 +72,7 @@ export function submitFeedback({ feedbackText, }) {
 					description: feedbackText,
 				}),
 			})
-
 			// const responseJson = await response.json()
-
 			if (response.status === 201) {
 				dispatch({
 					type: SUBMIT_FEEDBACK_FINISHED,
