@@ -8,6 +8,7 @@ export const SET_FEEDBACK_TEXT = 'wisaw/feedback/SET_FEEDBACK_TEXT'
 export const SUBMIT_FEEDBACK_STARTED = 'wisaw/feedback/SUBMIT_FEEDBACK_STARTED'
 export const SUBMIT_FEEDBACK_FAIL = 'wisaw/feedback/SUBMIT_FEEDBACK_FAIL'
 export const SUBMIT_FEEDBACK_FINISHED = 'wisaw/feedback/SUBMIT_FEEDBACK_FINISHED'
+export const RESET_FEEDBACK_FORM = 'wisaw/feedback/RESET_FEEDBACK_FORM'
 
 export const initialState = {
 	feedbackText: '',
@@ -43,6 +44,8 @@ export default function reducer(state = initialState, action) {
 				loading: false,
 				finished: true,
 			}
+		case RESET_FEEDBACK_FORM:
+			return initialState
 		default:
 			return state
 	}
@@ -54,6 +57,13 @@ export function setFeedbackText({ feedbackText, }) {
 		feedbackText,
 	}
 }
+
+export function resetForm() {
+	return {
+		type: RESET_FEEDBACK_FORM,
+	}
+}
+
 
 export function submitFeedback({ feedbackText, }) {
 	return async (dispatch, getState) => {

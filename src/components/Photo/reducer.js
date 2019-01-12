@@ -55,7 +55,7 @@ export function likePhoto({ photoId, }) {
 			}
 		} catch (err) {
 			dispatch({
-				type: LIKE_PHOTO,
+				type: UNLIKE_PHOTO,
 				photoId,
 			})
 		}

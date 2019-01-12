@@ -31,6 +31,7 @@ import * as CONST from '../../consts.js'
 import {
 	submitFeedback,
 	setFeedbackText,
+	resetForm,
 } from './reducer'
 
 class FeedbackScreen extends Component {
@@ -68,6 +69,7 @@ class FeedbackScreen extends Component {
 		finished: PropTypes.bool.isRequired,
 		submitFeedback: PropTypes.func.isRequired,
 		setFeedbackText: PropTypes.func.isRequired,
+		resetForm: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -92,6 +94,7 @@ class FeedbackScreen extends Component {
 			loading,
 			errorMessage,
 			finished,
+			resetForm,
 		} = this.props
 
 		if (finished && errorMessage.length === 0) {
@@ -116,6 +119,7 @@ class FeedbackScreen extends Component {
 													onPress={
 														() => {
 															navigation.goBack()
+															resetForm()
 														}
 													}>
 													<Text> You are Welcome! </Text>
@@ -149,9 +153,20 @@ class FeedbackScreen extends Component {
 					</Form>
 				</Content>
 				{ loading && (
-					<Spinner color={
-						CONST.MAIN_COLOR
-					}
+					<Spinner
+						color={
+							CONST.MAIN_COLOR
+						}
+						style={
+							{
+								flex: 1,
+								position: 'absolute',
+								top: 0,
+								bottom: 0,
+								right: 0,
+								left: 0,
+							}
+						}
 					/>
 				)}
 			</Container>
@@ -171,6 +186,7 @@ const mapDispatchToProps = {
 	// will be wrapped into a dispatch call
 	setFeedbackText,
 	submitFeedback,
+	resetForm,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(FeedbackScreen)
