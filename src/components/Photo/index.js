@@ -33,6 +33,21 @@ class Photo extends Component {
 		likePhoto: PropTypes.func.isRequired,
 	}
 
+	static navigationOptions = {
+		drawerLabel: 'Home',
+		drawerIcon: ({ tintColor, }) => (
+			<Icon
+				type="FontAwesome"
+				name="bars"
+				style={
+					{
+						color: CONST.MAIN_COLOR,
+					}
+				}
+			/>
+		),
+	};
+
 	static defaultProps = {}
 
 	state = {

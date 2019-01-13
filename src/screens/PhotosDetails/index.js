@@ -25,12 +25,23 @@ class PhotosDetails extends Component {
 		headerTitle: 'hear&now',
 		headerTintColor: CONST.MAIN_COLOR,
 		headerRight: (
-			<Icon
-				onPress={() => navigation.navigate('Feedback')}
-				name="feedback"
-				type="MaterialIcons"
-				style={{ marginRight: 10, color: CONST.MAIN_COLOR, }}
-			/>
+			<View style={{
+				flex: 1,
+				flexDirection: "row",
+			}}>
+				<Icon
+					onPress={() => navigation.navigate('Feedback')}
+					name="ban"
+					type="FontAwesome"
+					style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+				/>
+				<Icon
+					onPress={() => navigation.navigate('Feedback')}
+					name="trash"
+					type="FontAwesome"
+					style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+				/>
+			</View>
 		),
 		headerBackTitle: null,
 	})
