@@ -115,12 +115,12 @@ export default function reducer(state = initialState, action) {
 		case PHOTO_BANNED:
 			return {
 				...state,
-				// photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1, } : item)),
+				photos: state.photos.filter(item => (item.id !== action.photoId)),
 			}
 		case PHOTO_DELETED:
 			return {
 				...state,
-				// photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1, } : item)),
+				photos: state.photos.filter(item => (item.id !== action.photoId)),
 			}
 		default:
 			return state

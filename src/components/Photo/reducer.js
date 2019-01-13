@@ -1,3 +1,4 @@
+import { Toast, } from 'react-native'
 import {
 	PHOTO_LIKED,
 	PHOTO_BANNED,
@@ -6,9 +7,10 @@ import {
 
 import * as CONST from '../../consts'
 
+
 export const LIKE_PHOTO = 'wisaw/photo/LIKE_PHOTO'
 export const UNLIKE_PHOTO = 'wisaw/photo/UNLIKE_PHOTO' // in case of network error
-// export const DELETE_PHOTO = 'wisaw/photo/DELETE_PHOTO'
+export const DELETE_PHOTO = 'wisaw/photo/DELETE_PHOTO'
 export const BAN_PHOTO = 'wisaw/photo/BAN_PHOTO'
 export const UNBAN_PHOTO = 'wisaw/photo/UNBAN_PHOTO'// in case of network error
 
@@ -125,8 +127,40 @@ export function banPhoto({ item, }) {
 }
 
 export function deletePhoto({ item, }) {
-	alert(`delete ${item.id}`)
-	return {
-		type: 'RESET_FEEDBACK_FORM',
+	return async (dispatch, getState) => {
+		// const { uuid, } = getState().photosList
+		dispatch({
+			type: DELETE_PHOTO,
+			photoId: item.id,
+		})
+
+		try {
+			const response = await fetch(`${CONST.HOST}/photos/${item.id}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			// const responseJson = await response.json()
+			if (response.status === 200) {
+				// lets update the state in the photos collection so it renders the right number of likes in the list
+				dispatch({
+					type: PHOTO_DELETED,
+					photoId: item.id,
+				})
+			} else {
+				Toast.show({
+					text: `Unable to delete photo, try again later.`,
+					buttonText: "OK",
+					duration: 15000,
+				})
+			}
+		} catch (err) {
+			Toast.show({
+				text: `Unable to delete photo, potential network issue, try again later.`,
+				buttonText: "OK",
+				duration: 15000,
+			})
+		}
 	}
 }

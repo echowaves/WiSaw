@@ -115,7 +115,7 @@ class PhotosDetails extends Component {
 			)
 		} else {
 			Alert.alert(
-				'Report abusive Photo.',
+				'Report abusive Photo?',
 				'The user who posted this photo will be banned. Are you sure?',
 				[
 					{ text: 'No', onPress: () => null, style: 'cancel', },
@@ -128,13 +128,28 @@ class PhotosDetails extends Component {
 
 	handleDelete() {
 		const {
+			navigation,
 			photos,
 			currentPhotoIndex,
 			deletePhoto,
 		} = this.props
 		const item = photos[currentPhotoIndex]
 
-		deletePhoto({ item, })
+		Alert.alert(
+			'Delete Photo?',
+			'The photo will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
+			[
+				{ text: 'No', onPress: () => null, style: 'cancel', },
+				{
+					text: 'Yes',
+					onPress: () => {
+						deletePhoto({ item, })
+						navigation.goBack()
+					},
+				},
+			],
+			{ cancelable: true, }
+		)
 	}
 
 
