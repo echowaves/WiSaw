@@ -18,6 +18,7 @@ import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'
 
+import { setCurrentPhotoIndex, } from '../../components/Thumb/reducer'
 import * as CONST from '../../consts.js'
 
 class PhotosDetails extends Component {
@@ -49,16 +50,22 @@ class PhotosDetails extends Component {
 	static propTypes = {
 		photos: PropTypes.array.isRequired,
 		currentPhotoIndex: PropTypes.number.isRequired,
+		setCurrentPhotoIndex: PropTypes.func.isRequired,
+	}
+
+	onLayout(e) {
+		this.forceUpdate()
 	}
 
 	render() {
 		const {
 			photos,
 			currentPhotoIndex,
+			setCurrentPhotoIndex,
 		} = this.props
 
 		return (
-			<View style={styles.container}>
+			<View style={styles.container} onLayout={this.onLayout.bind(this)}>
 				<Swiper
 					autoplay={false}
 					horizontal
@@ -67,6 +74,7 @@ class PhotosDetails extends Component {
 					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
 					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
 					index={currentPhotoIndex}
+					onIndexChanged={index => (setCurrentPhotoIndex(index))} // otherwise will jump to wrong photo onLayout
 					loadMinimal
 					loadMinimalSize={1}
 					showsPagination={false}
@@ -95,7 +103,7 @@ const mapStateToProps = state => (
 
 
 const mapDispatchToProps = {
-	// listPhotos, // will be wrapped into a dispatch call
+	setCurrentPhotoIndex, // will be wrapped into a dispatch call
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosDetails)

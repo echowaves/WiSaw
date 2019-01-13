@@ -54,6 +54,10 @@ class Photo extends Component {
 		loaded: false,
 	}
 
+	onLayout(e) {
+		this.forceUpdate()
+	}
+
 	isPhotoLikedByMe({ photoId, }) {
 		const {
 			likes,
@@ -69,7 +73,7 @@ class Photo extends Component {
 		const { width, height, } = Dimensions.get('window')
 
 		return (
-			<View style={{ flex: 1, }}>
+			<View style={{ flex: 1, }} onLayout={this.onLayout.bind(this)}>
 				<PhotoView
 					source={{
 						uri: item.getImgUrl,
