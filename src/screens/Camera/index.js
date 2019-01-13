@@ -72,8 +72,10 @@ class Camera extends Component {
 	componentDidMount() {
 		const {
 			setPreviewUri,
+			setZoom,
 		} = this.props
 		setPreviewUri(null)
+		setZoom(0)
 	}
 
 	takePicture = async function () {
