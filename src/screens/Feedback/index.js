@@ -79,7 +79,7 @@ class FeedbackScreen extends Component {
 		navigation.setParams({ handleSubmit: () => (this.handleSubmit()), })
 	}
 
-	async handleSubmit() {
+	handleSubmit() {
 		const {
 			feedbackText,
 			submitFeedback,

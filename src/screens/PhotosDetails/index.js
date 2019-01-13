@@ -22,40 +22,75 @@ import { setCurrentPhotoIndex, } from '../../components/Thumb/reducer'
 import * as CONST from '../../consts.js'
 
 class PhotosDetails extends Component {
-	static navigationOptions = ({ navigation, }) => ({
-		headerTitle: 'hear&now',
-		headerTintColor: CONST.MAIN_COLOR,
-		headerRight: (
-			<View style={{
-				flex: 1,
-				flexDirection: "row",
-			}}>
-				<Icon
-					onPress={() => navigation.navigate('Feedback')}
-					name="ban"
-					type="FontAwesome"
-					style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
-				/>
-				<Icon
-					onPress={() => navigation.navigate('Feedback')}
-					name="trash"
-					type="FontAwesome"
-					style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
-				/>
-			</View>
-		),
-		headerBackTitle: null,
-	})
+	static navigationOptions = ({
+		navigation,
+	}) => {
+		const { params = {}, } = navigation.state
+		return ({
+			headerTitle: 'hear&now',
+			headerTintColor: CONST.MAIN_COLOR,
+			headerRight: (
+				<View style={{
+					flex: 1,
+					flexDirection: "row",
+				}}>
+					<Icon
+						onPress={
+							() => params.handleBan()
+						}
+						name="ban"
+						type="FontAwesome"
+						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+					/>
+					<Icon
+						onPress={
+							() => params.handleDelete()
+						}
+						name="trash"
+						type="FontAwesome"
+						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+					/>
+				</View>
+			),
+			headerBackTitle: null,
+		})
+	}
 
 	static propTypes = {
+		navigation: PropTypes.object.isRequired,
 		photos: PropTypes.array.isRequired,
 		currentPhotoIndex: PropTypes.number.isRequired,
 		setCurrentPhotoIndex: PropTypes.func.isRequired,
 	}
 
+	componentDidMount() {
+		const {
+			navigation,
+		} = this.props
+		navigation.setParams({ handleBan: () => (this.handleBan()), })
+		navigation.setParams({ handleDelete: () => (this.handleDelete()), })
+	}
+
 	onLayout(e) {
 		this.forceUpdate()
 	}
+
+	handleBan() {
+		const {
+			feedbackText,
+			submitFeedback,
+		} = this.props
+		alert("ban")
+	}
+
+	handleDelete() {
+		const {
+			feedbackText,
+			submitFeedback,
+		} = this.props
+		alert("delete")
+	}
+
 
 	render() {
 		const {
