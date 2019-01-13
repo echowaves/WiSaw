@@ -4,6 +4,8 @@ import * as CONST from '../../consts'
 
 export const LIKE_PHOTO = 'wisaw/photo/LIKE_PHOTO'
 export const UNLIKE_PHOTO = 'wisaw/photo/UNLIKE_PHOTO' // in case of network error
+export const DELETE_PHOTO = 'wisaw/photo/DELETE_PHOTO'
+export const BAN_PHOTO = 'wisaw/photo/BAN_PHOTO'
 
 export const initialState = {
 	likes: [],
@@ -59,5 +61,19 @@ export function likePhoto({ photoId, }) {
 				photoId,
 			})
 		}
+	}
+}
+
+export function banPhoto({ item, }) {
+	alert(`ban ${item.id}`)
+	return {
+		type: 'RESET_FEEDBACK_FORM',
+	}
+}
+
+export function deletePhoto({ item, }) {
+	alert(`delete ${item.id}`)
+	return {
+		type: 'RESET_FEEDBACK_FORM',
 	}
 }

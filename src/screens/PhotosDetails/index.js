@@ -18,7 +18,15 @@ import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'
 
-import { setCurrentPhotoIndex, } from '../../components/Thumb/reducer'
+import {
+	setCurrentPhotoIndex,
+} from '../../components/Thumb/reducer'
+
+import {
+	banPhoto,
+	deletePhoto,
+} from '../../components/Photo/reducer'
+
 import * as CONST from '../../consts.js'
 
 class PhotosDetails extends Component {
@@ -61,6 +69,8 @@ class PhotosDetails extends Component {
 		photos: PropTypes.array.isRequired,
 		currentPhotoIndex: PropTypes.number.isRequired,
 		setCurrentPhotoIndex: PropTypes.func.isRequired,
+		banPhoto: PropTypes.func.isRequired,
+		deletePhoto: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -77,18 +87,20 @@ class PhotosDetails extends Component {
 
 	handleBan() {
 		const {
-			feedbackText,
-			submitFeedback,
+			photos,
+			currentPhotoIndex,
+			banPhoto,
 		} = this.props
-		alert("ban")
+		banPhoto({ item: photos[currentPhotoIndex], })
 	}
 
 	handleDelete() {
 		const {
-			feedbackText,
-			submitFeedback,
+			photos,
+			currentPhotoIndex,
+			deletePhoto,
 		} = this.props
-		alert("delete")
+		deletePhoto({ item: photos[currentPhotoIndex], })
 	}
 
 
@@ -139,6 +151,8 @@ const mapStateToProps = state => (
 
 const mapDispatchToProps = {
 	setCurrentPhotoIndex, // will be wrapped into a dispatch call
+	banPhoto,
+	deletePhoto,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosDetails)
