@@ -6,6 +6,7 @@ import {
 	StyleSheet,
 	View,
 	Text,
+	Alert,
 } from 'react-native'
 
 import { connect, } from 'react-redux'
@@ -48,7 +49,10 @@ class PhotosDetails extends Component {
 						}
 						name="ban"
 						type="FontAwesome"
-						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+						style={{
+							marginRight: 20,
+							color: CONST.MAIN_COLOR,
+						}}
 					/>
 					<Icon
 						onPress={
@@ -71,6 +75,7 @@ class PhotosDetails extends Component {
 		setCurrentPhotoIndex: PropTypes.func.isRequired,
 		banPhoto: PropTypes.func.isRequired,
 		deletePhoto: PropTypes.func.isRequired,
+		bans: PropTypes.array.isRequired,
 	}
 
 	componentDidMount() {
@@ -85,13 +90,40 @@ class PhotosDetails extends Component {
 		this.forceUpdate()
 	}
 
+	isPhotoBannedByMe({ photoId, }) {
+		const {
+			bans,
+		} = this.props
+		return bans.includes(photoId)
+	}
+
 	handleBan() {
 		const {
 			photos,
 			currentPhotoIndex,
 			banPhoto,
 		} = this.props
-		banPhoto({ item: photos[currentPhotoIndex], })
+		const item = photos[currentPhotoIndex]
+
+		if (this.isPhotoBannedByMe({ photoId: item.id, })) {
+			Alert.alert(
+				'Looks like you already reported this Photo',
+				'You can only report same Photo once.',
+				[
+					{ text: 'OK', onPress: () => null, },
+				],
+			)
+		} else {
+			Alert.alert(
+				'Report abusive Photo.',
+				'The user who posted this photo will be banned. Are you sure?',
+				[
+					{ text: 'No', onPress: () => null, style: 'cancel', },
+					{ text: 'Yes', onPress: () => banPhoto({ item, }), },
+				],
+				{ cancelable: true, }
+			)
+		}
 	}
 
 	handleDelete() {
@@ -100,7 +132,9 @@ class PhotosDetails extends Component {
 			currentPhotoIndex,
 			deletePhoto,
 		} = this.props
-		deletePhoto({ item: photos[currentPhotoIndex], })
+		const item = photos[currentPhotoIndex]
+
+		deletePhoto({ item, })
 	}
 
 
@@ -145,6 +179,7 @@ const mapStateToProps = state => (
 	{
 		photos: state.photosList.photos,
 		currentPhotoIndex: state.thumb.currentPhotoIndex,
+		bans: state.photo.bans,
 	}
 )
 

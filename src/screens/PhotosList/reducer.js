@@ -18,6 +18,8 @@ export const SET_LOCATION_PERMISSION = 'wisaw/photosList/SET_LOCATION_PERMISSION
 export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
 export const SET_ORIENTATION = 'wisaw/photosList/SET_ORIENTATION'
 export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
+export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
+export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
 
 
 const UUID_KEY = 'wisaw_device_uuid'
@@ -108,6 +110,17 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1, } : item)),
+			}
+
+		case PHOTO_BANNED:
+			return {
+				...state,
+				// photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1, } : item)),
+			}
+		case PHOTO_DELETED:
+			return {
+				...state,
+				// photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1, } : item)),
 			}
 		default:
 			return state
