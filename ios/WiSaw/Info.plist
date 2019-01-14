@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>WiSaw1</string>
+	<string>WiSaw</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -22,6 +22,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>61</string>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -37,23 +39,23 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Want to see cool things around you? Why don&apos;t you enable your location?</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Want to take a photo? Why don&apos;t you enable camera?</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Want to see photos stored on your device? Why don&apos;t you enable it?</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Some description</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Some description</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Some description</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Some description</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Some description</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Want to take a photo? Why don't you enable camera?</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Want to see cool things around you? Why don't you enable your location?</string>
 	<key>NSMotionUsageDescription</key>
+	<string>Some description</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Want to have your photos stored on your device? Why don't you enable Photo Library?</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Want to see photos stored on your device? Why don't you enable it?</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Some description</string>
 	<key>UIAppFonts</key>
 	<array>
@@ -84,8 +86,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>LSApplicationCategoryType</key>
-	<string></string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

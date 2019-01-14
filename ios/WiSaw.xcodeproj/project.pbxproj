@@ -1589,7 +1589,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.echowaves1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.echowaves;
 				PRODUCT_NAME = WiSaw;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -1620,7 +1620,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.echowaves1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.echowaves;
 				PRODUCT_NAME = WiSaw;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
