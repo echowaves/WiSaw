@@ -128,7 +128,7 @@ class PhotosDetails extends Component {
 
 	handleDelete() {
 		const {
-			navigation,
+			// navigation,
 			photos,
 			currentPhotoIndex,
 			deletePhoto,
@@ -144,7 +144,7 @@ class PhotosDetails extends Component {
 					text: 'Yes',
 					onPress: () => {
 						deletePhoto({ item, })
-						navigation.goBack()
+						// navigation.goBack()
 					},
 				},
 			],

@@ -1,4 +1,4 @@
-import { Toast, } from 'react-native'
+import { Alert, } from 'react-native'
 import {
 	PHOTO_LIKED,
 	PHOTO_BANNED,
@@ -6,7 +6,6 @@ import {
 } from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
-
 
 export const LIKE_PHOTO = 'wisaw/photo/LIKE_PHOTO'
 export const UNLIKE_PHOTO = 'wisaw/photo/UNLIKE_PHOTO' // in case of network error
@@ -111,6 +110,13 @@ export function banPhoto({ item, }) {
 					type: PHOTO_BANNED,
 					photoId: item.id,
 				})
+				Alert.alert(
+					'Abusive Photo reported.',
+					'Thank you.',
+					[
+						{ text: 'OK', onPress: () => null, },
+					],
+				)
 			} else {
 				dispatch({
 					type: UNBAN_PHOTO,
@@ -149,18 +155,22 @@ export function deletePhoto({ item, }) {
 					photoId: item.id,
 				})
 			} else {
-				Toast.show({
-					text: `Unable to delete photo, try again later.`,
-					buttonText: "OK",
-					duration: 15000,
-				})
+				Alert.alert(
+					'Unable to delete photo.',
+					'Try again later.',
+					[
+						{ text: 'OK', onPress: () => null, },
+					],
+				)
 			}
 		} catch (err) {
-			Toast.show({
-				text: `Unable to delete photo, potential network issue, try again later.`,
-				buttonText: "OK",
-				duration: 15000,
-			})
+			Alert.alert(
+				'Unable to delete photo.',
+				'Potential Network Issue. Try again later.',
+				[
+					{ text: 'OK', onPress: () => null, },
+				],
+			)
 		}
 	}
 }
