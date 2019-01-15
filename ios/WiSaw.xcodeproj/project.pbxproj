@@ -14,6 +14,7 @@
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
 		00E356F31AD99517003FC87E /* WiSawTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* WiSawTests.m */; };
 		0A08B73021D57FC90009EE88 /* libRCTCameraRoll.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A08B70821D57FBF0009EE88 /* libRCTCameraRoll.a */; };
+		0A70C34A21ED5D8C006B8984 /* WiSaw.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 0A70C34921ED5C9F006B8984 /* WiSaw.entitlements */; };
 		0AEE3BA221A8FDBA00902A31 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0AEE3BA121A8FDBA00902A31 /* Assets.xcassets */; };
 		0AEE3BA421A8FDE200902A31 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0AEE3BA321A8FDE200902A31 /* LaunchScreen.storyboard */; };
 		0E49E519917E4F2984D4C02E /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AD76499C0A7C4D0392F81229 /* Ionicons.ttf */; };
@@ -28,6 +29,7 @@
 		140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		1CBD7EE1C4F24CD0A90F772B /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 87B89B882A7849C4B135A213 /* FontAwesome.ttf */; };
+		2B9459419B1D482C84D34FA8 /* libreact-native-branch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ACA8C50B46E646ECB8090893 /* libreact-native-branch.a */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2D02E4C21E0B4AEC006451C7 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157351DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
@@ -55,6 +57,7 @@
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		B1F97705ACE540F296AD0145 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9223E6D9383B424F80EEFF87 /* MaterialCommunityIcons.ttf */; };
 		B9C630C6D0D64879B60B40F2 /* libRNGestureHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F92C5999D19E4F27A030B1FF /* libRNGestureHandler.a */; };
+		C4517C2E0FC140A19248B7B3 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = BF14F9C34A224F33B93F01F9 /* branch.json */; };
 		C58CE2107AC1458B93B046B5 /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 04502D5852CB42EDAD611075 /* libRNCamera.a */; };
 		C946B0DCB1154D3296774D3A /* libReactNativePermissions.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BAFCF9C5F26449DBBBAE7C6 /* libReactNativePermissions.a */; };
 		F453006417794D9498A00FF1 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8B50827177964DB1B7DB893C /* Entypo.ttf */; };
@@ -139,6 +142,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = A15C300E1CD25C330074CB35;
 			remoteInfo = RNFetchBlob;
+		};
+		0AC43A7E21EC1B02005388C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C259FE38DDE4E7087507B6D /* RNBranch.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B3A3CC361C5B0A070016AC52;
+			remoteInfo = RNBranch;
 		};
 		0AEE3B6321A8FC8900902A31 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -406,6 +416,7 @@
 		00E356F21AD99517003FC87E /* WiSawTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WiSawTests.m; sourceTree = "<group>"; };
 		04502D5852CB42EDAD611075 /* libRNCamera.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNCamera.a; sourceTree = "<group>"; };
 		0A08B6FE21D57FBE0009EE88 /* RCTCameraRoll.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTCameraRoll.xcodeproj; path = "../node_modules/react-native/Libraries/CameraRoll/RCTCameraRoll.xcodeproj"; sourceTree = "<group>"; };
+		0A70C34921ED5C9F006B8984 /* WiSaw.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = WiSaw.entitlements; path = WiSaw/WiSaw.entitlements; sourceTree = "<group>"; };
 		0AEE3BA121A8FDBA00902A31 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0AEE3BA321A8FDE200902A31 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTSettings.xcodeproj; path = "../node_modules/react-native/Libraries/Settings/RCTSettings.xcodeproj"; sourceTree = "<group>"; };
@@ -421,6 +432,7 @@
 		2D02E4901E0B4A5D006451C7 /* WiSaw-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "WiSaw-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		3492DD7424504B4D94A4F720 /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/rn-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
+		3C259FE38DDE4E7087507B6D /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
 		5A91357C9FC84D969FF5CE84 /* libRNPhotoView.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNPhotoView.a; sourceTree = "<group>"; };
 		5CCBFEF48C944368BEBCE9BE /* libRNScreens.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNScreens.a; sourceTree = "<group>"; };
 		5CE17D2D7FB144DA95D6A7F7 /* ReactNativePermissions.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativePermissions.xcodeproj; path = "../node_modules/react-native-permissions/ios/ReactNativePermissions.xcodeproj"; sourceTree = "<group>"; };
@@ -437,12 +449,14 @@
 		8AE753CC3CC2476BA478C02E /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/native-base/Fonts/Feather.ttf"; sourceTree = "<group>"; };
 		8B50827177964DB1B7DB893C /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/native-base/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
 		9223E6D9383B424F80EEFF87 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
+		ACA8C50B46E646ECB8090893 /* libreact-native-branch.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libreact-native-branch.a"; sourceTree = "<group>"; };
 		AD76499C0A7C4D0392F81229 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/native-base/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		B849BB39F5814943BDEF2BB8 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/native-base/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		BA91AED236D44F9D826D0C45 /* Roboto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Roboto.ttf; path = "../node_modules/native-base/Fonts/Roboto.ttf"; sourceTree = "<group>"; };
 		BEBA7957E8BC4170845A539A /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/native-base/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		BEC8F15A8EA34565A474F53E /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
+		BF14F9C34A224F33B93F01F9 /* branch.json */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = branch.json; path = ../branch.json; sourceTree = "<group>"; };
 		C2F8C6B3AB624E589522971C /* libRNFetchBlob.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFetchBlob.a; sourceTree = "<group>"; };
 		C73C4628137F4EE3AB1215D2 /* RNPhotoView.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPhotoView.xcodeproj; path = "../node_modules/react-native-photo-view-ex/ios/RNPhotoView.xcodeproj"; sourceTree = "<group>"; };
 		C8B91A33716741E1B93ACCEB /* RNCamera.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
@@ -486,6 +500,7 @@
 				C58CE2107AC1458B93B046B5 /* libRNCamera.a in Frameworks */,
 				3265BE3115ED4E15B52AED28 /* libRNFetchBlob.a in Frameworks */,
 				AC08A9B085E748DEBDAD33B0 /* libRNPhotoView.a in Frameworks */,
+				2B9459419B1D482C84D34FA8 /* libreact-native-branch.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -614,6 +629,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		0AC43A7B21EC1B02005388C2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0AC43A7F21EC1B02005388C2 /* libreact-native-branch.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		0AEE3B3821A8FC8800902A31 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
@@ -624,6 +647,7 @@
 				04502D5852CB42EDAD611075 /* libRNCamera.a */,
 				C2F8C6B3AB624E589522971C /* libRNFetchBlob.a */,
 				5A91357C9FC84D969FF5CE84 /* libRNPhotoView.a */,
+				ACA8C50B46E646ECB8090893 /* libreact-native-branch.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -675,6 +699,7 @@
 		13B07FAE1A68108700A75B9A /* WiSaw */ = {
 			isa = PBXGroup;
 			children = (
+				0A70C34921ED5C9F006B8984 /* WiSaw.entitlements */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -683,6 +708,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				BF14F9C34A224F33B93F01F9 /* branch.json */,
 			);
 			name = WiSaw;
 			sourceTree = "<group>";
@@ -780,6 +806,7 @@
 				C8B91A33716741E1B93ACCEB /* RNCamera.xcodeproj */,
 				3492DD7424504B4D94A4F720 /* RNFetchBlob.xcodeproj */,
 				C73C4628137F4EE3AB1215D2 /* RNPhotoView.xcodeproj */,
+				3C259FE38DDE4E7087507B6D /* RNBranch.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -920,6 +947,11 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 33P3Q88Y8K;
+						SystemCapabilities = {
+							com.apple.SafariKeychain = {
+								enabled = 1;
+							};
+						};
 					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -999,6 +1031,10 @@
 				{
 					ProductGroup = 0A9229C621BE23E2001D32DA /* Products */;
 					ProjectRef = 5CE17D2D7FB144DA95D6A7F7 /* ReactNativePermissions.xcodeproj */;
+				},
+				{
+					ProductGroup = 0AC43A7B21EC1B02005388C2 /* Products */;
+					ProjectRef = 3C259FE38DDE4E7087507B6D /* RNBranch.xcodeproj */;
 				},
 				{
 					ProductGroup = 0A2C1D0A21D2DC2000EDCFFF /* Products */;
@@ -1104,6 +1140,13 @@
 			fileType = archive.ar;
 			path = libRNFetchBlob.a;
 			remoteRef = 0AA9D2F321D872DF00E9CD67 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0AC43A7F21EC1B02005388C2 /* libreact-native-branch.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libreact-native-branch.a";
+			remoteRef = 0AC43A7E21EC1B02005388C2 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		0AEE3B6421A8FC8900902A31 /* libRNGestureHandler.a */ = {
@@ -1365,6 +1408,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A70C34A21ED5D8C006B8984 /* WiSaw.entitlements in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				F453006417794D9498A00FF1 /* Entypo.ttf in Resources */,
 				A79FB00E5F224776B834FC0B /* EvilIcons.ttf in Resources */,
@@ -1382,6 +1426,7 @@
 				4E785126DA6E47A7B219C9E8 /* rubicon-icon-font.ttf in Resources */,
 				9D108B8BA5DE4722A0D80108 /* SimpleLineIcons.ttf in Resources */,
 				3483B81177D94FF1BBFE4C50 /* Zocial.ttf in Resources */,
+				C4517C2E0FC140A19248B7B3 /* branch.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1513,12 +1558,14 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = WiSawTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1546,12 +1593,14 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = WiSawTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1568,6 +1617,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = WiSaw/WiSaw.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 33P3Q88Y8K;
@@ -1580,6 +1630,7 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = WiSaw/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1600,6 +1651,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = WiSaw/WiSaw.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 33P3Q88Y8K;
 				HEADER_SEARCH_PATHS = (
@@ -1611,6 +1663,7 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = WiSaw/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1648,11 +1701,13 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1688,11 +1743,13 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1727,11 +1784,13 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1766,11 +1825,13 @@
 					"$(SRCROOT)/../node_modules/react-native-camera/ios/**",
 					"$(SRCROOT)/../node_modules/rn-fetch-blob/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-photo-view-ex/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (

@@ -46,15 +46,15 @@
 	<key>NSCalendarsUsageDescription</key>
 	<string>Some description</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Want to take a photo? Why don't you enable camera?</string>
+	<string>Want to take a photo? Why don&apos;t you enable camera?</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Want to see cool things around you? Why don't you enable your location?</string>
+	<string>Want to see cool things around you? Why don&apos;t you enable your location?</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Some description</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Want to have your photos stored on your device? Why don't you enable Photo Library?</string>
+	<string>Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Want to see photos stored on your device? Why don't you enable it?</string>
+	<string>Want to see photos stored on your device? Why don&apos;t you enable it?</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Some description</string>
 	<key>UIAppFonts</key>
@@ -86,6 +86,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>branch_app_domain</key>
+	<string>link.wisaw.com</string>
+	<key>branch_key</key>
+	<string>key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

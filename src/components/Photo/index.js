@@ -22,6 +22,7 @@ import PropTypes from 'prop-types'
 
 import {
 	likePhoto,
+	sharePhoto,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -31,6 +32,7 @@ class Photo extends Component {
 		item: PropTypes.object.isRequired,
 		likes: PropTypes.array.isRequired,
 		likePhoto: PropTypes.func.isRequired,
+		sharePhoto: PropTypes.func.isRequired,
 	}
 
 	static navigationOptions = {
@@ -69,6 +71,7 @@ class Photo extends Component {
 		const {
 			item,
 			likePhoto,
+			sharePhoto,
 		} = this.props
 		const { width, height, } = Dimensions.get('window')
 
@@ -186,6 +189,11 @@ class Photo extends Component {
 						light
 						transparent
 						bordered
+						onPress={
+							() => {
+								sharePhoto({ item, })
+							}
+						}
 						style={
 							{
 								height: 85,
@@ -216,6 +224,7 @@ const mapStateToProps = state => ({
 })
 const mapDispatchToProps = {
 	likePhoto, // will be wrapped into a dispatch call
+	sharePhoto,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)

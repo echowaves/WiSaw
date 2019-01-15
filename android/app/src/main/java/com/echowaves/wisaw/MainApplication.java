@@ -4,6 +4,10 @@ import android.app.Application;
 
 import com.facebook.react.ReactApplication;
 import io.amarcruz.photoview.PhotoViewPackage;
+// import Branch and RNBranch
+import io.branch.rnbranch.RNBranchPackage;
+import io.branch.referral.Branch;
+
 import com.RNFetchBlob.RNFetchBlobPackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.rjblopes.opensettings.OpenSettingsPackage;
@@ -30,6 +34,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNBranchPackage(),
             new PhotoViewPackage(),
             new RNFetchBlobPackage(),
             new RNCameraPackage(),
@@ -54,6 +59,7 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
+    Branch.getAutoInstance(this);
     SoLoader.init(this, /* native exopackage */ false);
   }
 }

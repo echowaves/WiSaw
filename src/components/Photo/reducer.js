@@ -1,4 +1,7 @@
 import { Alert, } from 'react-native'
+
+import branch, { BranchEvent, } from 'react-native-branch'
+
 import {
 	PHOTO_LIKED,
 	PHOTO_BANNED,
@@ -6,6 +9,7 @@ import {
 } from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
+
 
 export const LIKE_PHOTO = 'wisaw/photo/LIKE_PHOTO'
 export const UNLIKE_PHOTO = 'wisaw/photo/UNLIKE_PHOTO' // in case of network error
@@ -167,6 +171,39 @@ export function deletePhoto({ item, }) {
 			Alert.alert(
 				'Unable to delete photo.',
 				'Potential Network Issue. Try again later.',
+				[
+					{ text: 'OK', onPress: () => null, },
+				],
+			)
+		}
+	}
+}
+
+export function sharePhoto({ item, }) {
+	return async (dispatch, getState) => {
+		try {
+			// only canonicalIdentifier is required
+			const branchUniversalObject = await branch.createBranchUniversalObject(
+				`photo/${item.id}`,
+				{
+					canonicalUrl: item.getThumbUrl,
+					title: 'What I saw today:',
+					contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
+					contentImageUrl: item.getImgUrl,
+					publiclyIndex: true,
+					locallyIndex: true,
+				}
+			)
+
+			const shareOptions = { messageHeader: 'Check out what I saw today:', messageBody: 'Check out what I saw today:', }
+			const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing', }
+			const controlParams = { $photo_id: item.id, }
+			// const { channel, completed, error, } =
+			await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
+		} catch (err) {
+			Alert.alert(
+				'Unable to share photo.',
+				'Try again later.',
 				[
 					{ text: 'OK', onPress: () => null, },
 				],

@@ -137,6 +137,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-branch')
     compile project(':react-native-photo-view-ex')
     compile project(':rn-fetch-blob')
     compile project(':react-native-camera')
