@@ -27,7 +27,7 @@ import {
 
 import Permissions from 'react-native-permissions'
 import DeviceSettings from 'react-native-device-settings'
-import branch, { BranchEvent, } from 'react-native-branch'
+import branch from 'react-native-branch'
 
 import {
 	connect,
@@ -143,18 +143,17 @@ class PhotosList extends Component {
 			// Route link based on data in params, e.g.
 
 			// Get title and url for route
-			const title = params.$og_title
-			const url = params.$canonical_url
-			const image = params.$og_image_url
-			const photoId = params.$photo_id
-			alert(JSON.stringify({
-				title,
-				url,
-				image,
-				photoId,
-			}))
-			// Now push the view for this URL
-			// this.navigator.push({ title, url, image, })
+			// const title = params.$og_title
+			// const url = params.$canonical_url
+			// const image = params.$og_image_url
+			// const photoId = params.$photo_id
+			const item = params.$item
+
+			if (item) {
+				// go back to the top screen, just in case
+				navigation.popToTop()
+				navigation.navigate('SharedPhoto', { item, })
+			}
 		})
 	}
 

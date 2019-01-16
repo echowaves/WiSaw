@@ -1,6 +1,6 @@
 import { Alert, } from 'react-native'
 
-import branch, { BranchEvent, } from 'react-native-branch'
+import branch from 'react-native-branch'
 
 import {
 	PHOTO_LIKED,
@@ -197,7 +197,7 @@ export function sharePhoto({ item, }) {
 
 			const shareOptions = { messageHeader: 'Check out what I saw today:', messageBody: 'Check out what I saw today:', }
 			const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing', }
-			const controlParams = { $photo_id: item.id, }
+			const controlParams = { $photo_id: item.id, $item: item, }
 			// const { channel, completed, error, } =
 			await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
 		} catch (err) {

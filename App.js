@@ -10,6 +10,7 @@ import reducers from './src'
 
 import PhotosList from './src/screens/PhotosList'
 import PhotosDetails from './src/screens/PhotosDetails'
+import SharedPhoto from './src/screens/SharedPhoto'
 import FeedbackScreen from './src/screens/Feedback'
 import Camera from './src/screens/Camera'
 
@@ -19,6 +20,9 @@ const AppNavigator = createStackNavigator({
 	},
 	PhotosDetails: {
 		screen: PhotosDetails,
+	},
+	SharedPhoto: {
+		screen: SharedPhoto,
 	},
 	Feedback: {
 		screen: FeedbackScreen,
