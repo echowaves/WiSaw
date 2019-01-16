@@ -27,6 +27,7 @@ import {
 
 import Permissions from 'react-native-permissions'
 import DeviceSettings from 'react-native-device-settings'
+import branch, { BranchEvent, } from 'react-native-branch'
 
 import {
 	connect,
@@ -130,6 +131,31 @@ class PhotosList extends Component {
 				this.reload()
 			})
 		}
+
+		branch.initSessionTtl = 10000 // Set to 10 seconds
+		branch.subscribe(({ error, params, }) => {
+			if (error) {
+				alert(`Error from Branch: ${error}`)
+				return
+			}
+			// params will never be null if error is null
+			// A Branch link was opened.
+			// Route link based on data in params, e.g.
+
+			// Get title and url for route
+			const title = params.$og_title
+			const url = params.$canonical_url
+			const image = params.$og_image_url
+			const photoId = params.$photo_id
+			alert(JSON.stringify({
+				title,
+				url,
+				image,
+				photoId,
+			}))
+			// Now push the view for this URL
+			// this.navigator.push({ title, url, image, })
+		})
 	}
 
 	componentWillUnmount() {
