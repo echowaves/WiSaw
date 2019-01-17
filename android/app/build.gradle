@@ -124,24 +124,35 @@ android {
         applicationId "com.echowaves.wisaw"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 61
+        versionName "5.0.0"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
     }
+    signingConfigs {
+       release {
+           if (project.hasProperty('WISAW_RELEASE_STORE_FILE')) {
+               storeFile file(WISAW_RELEASE_STORE_FILE)
+               storePassword WISAW_RELEASE_STORE_PASSWORD
+               keyAlias WISAW_RELEASE_KEY_ALIAS
+               keyPassword WISAW_RELEASE_KEY_PASSWORD
+           }
+       }
+   }
     splits {
         abi {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
-            universalApk false  // If true, also generate a universal APK
+            universalApk true  // If true, also generate a universal APK
             include "armeabi-v7a", "x86"
         }
     }
     buildTypes {
         release {
             minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+//            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
         }
     }
     // applicationVariants are e.g. debug, release
@@ -160,19 +171,19 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-fabric')
-    compile project(':react-native-branch')
-    compile project(':react-native-photo-view-ex')
-    compile project(':rn-fetch-blob')
-    compile project(':react-native-camera')
-    compile project(':react-native-device-settings')
-    compile project(':react-native-secure-key-store')
-    implementation project(':react-native-screens')
-    implementation project(':react-native-gesture-handler')
+    api project(':react-native-fabric')
+    api project(':react-native-branch')
+    api project(':react-native-photo-view-ex')
+    api project(':rn-fetch-blob')
+    api project(':react-native-camera')
+    api project(':react-native-device-settings')
+    api project(':react-native-secure-key-store')
+    api project(':react-native-screens')
+    api project(':react-native-gesture-handler')
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
-    implementation "com.facebook.react:react-native:+"  // From node_modules
-    compile('com.crashlytics.sdk.android:crashlytics:2.9.8@aar') {
+    api "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+    api "com.facebook.react:react-native:+"  // From node_modules
+    api('com.crashlytics.sdk.android:crashlytics:2.9.8@aar') {
         transitive = true;
     }
 }
