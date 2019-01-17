@@ -31,7 +31,7 @@
     "react-native-modal": "7.0.2",
     "react-native-permissions": "1.1.1",
     "react-native-photo-view": "github:alwx/react-native-photo-view",
-    "react-native-photo-view-ex": "^1.0.4",
+    "react-native-photo-view-ex": "1.0.4",
     "react-native-progress": "3.5.0",
     "react-native-screens": "1.0.0-alpha.19",
     "react-native-secure-key-store": "2.0.0",

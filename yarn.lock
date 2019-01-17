@@ -5282,7 +5282,7 @@ react-native-permissions@1.1.1:
   resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-1.1.1.tgz#4876004681ff8556454613d85249b01baff9b35b"
   integrity sha512-t0Ujm177bagjUOSzhpmkSz+LqFW04HnY9TeZFavDCmV521fQvFz82aD+POXqWsAdsJVOK3umJYBNNqCjC3g0hQ==
 
-react-native-photo-view-ex@^1.0.4:
+react-native-photo-view-ex@1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/react-native-photo-view-ex/-/react-native-photo-view-ex-1.0.4.tgz#d5b26bea1b6d0627d244cce6784bf568de583fc7"
   integrity sha512-DCZi5KFaBxB5fIFxM62gwblK0pW/wDJPg9jvRvoyLfBY/dPq4N+xrV5JHiBkaFT/wH9yHw9+3MoiuAwxUmbUSg==
