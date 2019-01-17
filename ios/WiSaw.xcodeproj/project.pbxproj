@@ -15,6 +15,8 @@
 		00E356F31AD99517003FC87E /* WiSawTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* WiSawTests.m */; };
 		0A08B73021D57FC90009EE88 /* libRCTCameraRoll.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A08B70821D57FBF0009EE88 /* libRCTCameraRoll.a */; };
 		0A70C34A21ED5D8C006B8984 /* WiSaw.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 0A70C34921ED5C9F006B8984 /* WiSaw.entitlements */; };
+		0AD5A1CE21F00BE20056C774 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AD5A19E21F00BE10056C774 /* Crashlytics.framework */; };
+		0AD5A1CF21F00BE20056C774 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AD5A1CD21F00BE20056C774 /* Fabric.framework */; };
 		0AEE3BA221A8FDBA00902A31 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0AEE3BA121A8FDBA00902A31 /* Assets.xcassets */; };
 		0AEE3BA421A8FDE200902A31 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0AEE3BA321A8FDE200902A31 /* LaunchScreen.storyboard */; };
 		0E49E519917E4F2984D4C02E /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AD76499C0A7C4D0392F81229 /* Ionicons.ttf */; };
@@ -417,6 +419,8 @@
 		04502D5852CB42EDAD611075 /* libRNCamera.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNCamera.a; sourceTree = "<group>"; };
 		0A08B6FE21D57FBE0009EE88 /* RCTCameraRoll.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTCameraRoll.xcodeproj; path = "../node_modules/react-native/Libraries/CameraRoll/RCTCameraRoll.xcodeproj"; sourceTree = "<group>"; };
 		0A70C34921ED5C9F006B8984 /* WiSaw.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = WiSaw.entitlements; path = WiSaw/WiSaw.entitlements; sourceTree = "<group>"; };
+		0AD5A19E21F00BE10056C774 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
+		0AD5A1CD21F00BE20056C774 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		0AEE3BA121A8FDBA00902A31 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0AEE3BA321A8FDE200902A31 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTSettings.xcodeproj; path = "../node_modules/react-native/Libraries/Settings/RCTSettings.xcodeproj"; sourceTree = "<group>"; };
@@ -480,6 +484,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0AD5A1CF21F00BE20056C774 /* Fabric.framework in Frameworks */,
 				0A08B73021D57FC90009EE88 /* libRCTCameraRoll.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */,
@@ -490,6 +495,7 @@
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
 				00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */,
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
+				0AD5A1CE21F00BE20056C774 /* Crashlytics.framework in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
@@ -823,6 +829,8 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				0AD5A19E21F00BE10056C774 /* Crashlytics.framework */,
+				0AD5A1CD21F00BE20056C774 /* Fabric.framework */,
 				13B07FAE1A68108700A75B9A /* WiSaw */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* WiSawTests */,
@@ -885,6 +893,7 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				0AD5A1D021F00C130056C774 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -1461,6 +1470,24 @@
 			shellPath = /bin/sh;
 			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
 		};
+		0AD5A1D021F00C130056C774 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${PROJECT_DIR}/Fabric.framework/run\" 87b4cce77e2726175a21523cd45fd311d50ec654 05243f70f4107c37924171430bb29ff49a544a953fdeed36df7340c042f7efc8\n";
+		};
 		2D02E4CB1E0B4B27006451C7 /* Bundle React Native Code And Images */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1621,6 +1648,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 33P3Q88Y8K;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-screens/ios",
@@ -1654,6 +1685,10 @@
 				CODE_SIGN_ENTITLEMENTS = WiSaw/WiSaw.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 33P3Q88Y8K;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/react-native-screens/ios",
