@@ -858,8 +858,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				0AD5A19E21F00BE10056C774 /* Crashlytics.framework */,
-				0AD5A1CD21F00BE20056C774 /* Fabric.framework */,
 				13B07FAE1A68108700A75B9A /* WiSaw */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* WiSawTests */,
@@ -867,6 +865,8 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				6BE642350FAB49A784BC3AB5 /* Resources */,
 				0AEE3B3821A8FC8800902A31 /* Recovered References */,
+				0AD5A19E21F00BE10056C774 /* Crashlytics.framework */,
+				0AD5A1CD21F00BE20056C774 /* Fabric.framework */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";

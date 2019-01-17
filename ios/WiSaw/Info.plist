@@ -31,13 +31,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSExceptionDomains</key>
-		<dict>
-			<key>localhost</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-			</dict>
-		</dict>
+		<dict/>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Some description</string>
@@ -92,19 +86,19 @@
 	<string>key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-  <key>Fabric</key>
-  <dict>
-    <key>APIKey</key>
-    <string>87b4cce77e2726175a21523cd45fd311d50ec654</string>
-    <key>Kits</key>
-    <array>
-      <dict>
-        <key>KitInfo</key>
-        <dict/>
-        <key>KitName</key>
-        <string>Crashlytics</string>
-      </dict>
-    </array>
-  </dict>
+	<key>Fabric</key>
+	<dict>
+		<key>APIKey</key>
+		<string>87b4cce77e2726175a21523cd45fd311d50ec654</string>
+		<key>Kits</key>
+		<array>
+			<dict>
+				<key>KitInfo</key>
+				<dict/>
+				<key>KitName</key>
+				<string>Crashlytics</string>
+			</dict>
+		</array>
+	</dict>
 </dict>
 </plist>
