@@ -36,7 +36,7 @@ class PhotosDetails extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: 'hear&now',
+			headerTitle: '',
 			headerTintColor: CONST.MAIN_COLOR,
 			headerRight: (
 				<View style={{

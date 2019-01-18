@@ -58,7 +58,7 @@ class PhotosList extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: 'hear&now',
+			headerTitle: 'here&now',
 			headerTintColor: CONST.MAIN_COLOR,
 			headerRight: (
 				<Icon
