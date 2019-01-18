@@ -315,11 +315,16 @@ async function getLocation() {
 	try {
 		position = await _getCurrentPosition({
 			enableHighAccuracy: true,
-			timeout: 20000,
-			maximumAge: 1000,
+			timeout: 200000,
+			maximumAge: 200000,
 		})
-	} catch (error) {
+	} catch (err) {
 		position = null
+		Toast.show({
+			text: err.toString(),
+			buttonText: "OK",
+			duration: 15000,
+		})
 	}
 	return position
 }
