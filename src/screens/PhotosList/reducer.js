@@ -314,7 +314,7 @@ async function getLocation() {
 	let position = null
 	try {
 		position = await _getCurrentPosition({
-			enableHighAccuracy: true,
+			enableHighAccuracy: false,
 			timeout: 200000,
 			maximumAge: 200000,
 		})
