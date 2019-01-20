@@ -120,6 +120,7 @@ class PhotosList extends Component {
 			locationPermission,
 			setLocationPermission,
 		} = this.props
+
 		navigation.setParams({ handleRefresh: () => (this.reload()), })
 
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
@@ -130,6 +131,8 @@ class PhotosList extends Component {
 				setLocationPermission(permissionResponse)
 				this.reload()
 			})
+		} else {
+			this.reload()
 		}
 
 		branch.initSessionTtl = 10000 // Set to 10 seconds
@@ -538,10 +541,13 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = state => {
-	const storedPhotos = state.photosList.photos.map(photo => ({
-		key: photo.id,
-		...photo,
-	})) // add key to photos
+	const storedPhotos = state.photosList.photos
+	// fancy way to remove duplicate photos
+		.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos)
+	// .map(photo => ({
+	// 	key: photo.id,
+	// 	...photo,
+	// })) // add key to photos
 	return {
 		photos: storedPhotos,
 		errorMessage: state.photosList.errorMessage,
