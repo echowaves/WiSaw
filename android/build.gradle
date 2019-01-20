@@ -20,6 +20,19 @@ buildscript {
     }
 }
 
+subprojects {
+    afterEvaluate {project ->
+    // force libs to use recent buildtools
+        if (project.hasProperty("android")) {
+            android {
+                compileSdkVersion = 27  // change to match your desired version
+                buildToolsVersion = "28.0.3" // ....
+            }
+        }
+    }
+}
+
+
 allprojects {
     repositories {
         mavenLocal()
