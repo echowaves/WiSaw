@@ -22,3 +22,16 @@ export function setCurrentPhotoIndex(currentPhotoIndex) {
 		currentPhotoIndex,
 	}
 }
+
+
+// export function setCurrentPhotoIndex(currentPhotoIndex) {
+// 	return async (dispatch, getState) => {
+// 		if (currentPhotoIndex === getState.photosList.photos.length + 1) {
+// 			alert(`currentPhotoIndex: ${currentPhotoIndex}`)
+// 		}
+// 		dispatch({
+// 			type: SET_CURRENT_PHOTO_INDEX,
+// 			currentPhotoIndex,
+// 		})
+// 	}
+// }

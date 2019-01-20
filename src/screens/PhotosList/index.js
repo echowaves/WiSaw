@@ -542,8 +542,6 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
 	const storedPhotos = state.photosList.photos
-	// fancy way to remove duplicate photos
-		.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos)
 	// .map(photo => ({
 	// 	key: photo.id,
 	// 	...photo,
