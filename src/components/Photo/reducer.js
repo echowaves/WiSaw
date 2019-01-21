@@ -53,6 +53,8 @@ export default function reducer(state = initialState, action) {
 
 export function likePhoto({ photoId, }) {
 	return async (dispatch, getState) => {
+		const { uuid, } = getState().photosList
+
 		dispatch({
 			type: LIKE_PHOTO,
 			photoId,
@@ -64,6 +66,9 @@ export function likePhoto({ photoId, }) {
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				body: JSON.stringify({
+					uuid,
+				}),
 			})
 			// const responseJson = await response.json()
 			if (response.status === 200) {
@@ -138,6 +143,7 @@ export function banPhoto({ item, }) {
 
 export function deletePhoto({ item, }) {
 	return async (dispatch, getState) => {
+		const { uuid, } = getState().photosList
 		// const { uuid, } = getState().photosList
 		dispatch({
 			type: DELETE_PHOTO,
@@ -150,6 +156,9 @@ export function deletePhoto({ item, }) {
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				body: JSON.stringify({
+					uuid,
+				}),
 			})
 			// const responseJson = await response.json()
 			if (response.status === 200) {

@@ -1,5 +1,3 @@
-import { getPhotos, } from '../../screens/PhotosList/reducer'
-
 export const SET_CURRENT_PHOTO_INDEX = 'wisaw/thumbs/SET_CURRENT_PHOTO_INDEX'
 
 export const initialState = {
@@ -17,15 +15,6 @@ export default function reducer(state = initialState, action) {
 			return state
 	}
 }
-
-// export function setCurrentPhotoIndex(currentPhotoIndex) {
-// 	alert(currentPhotoIndex)
-// 	return {
-// 		type: SET_CURRENT_PHOTO_INDEX,
-// 		currentPhotoIndex,
-// 	}
-// }
-
 
 export function setCurrentPhotoIndex(currentPhotoIndex) {
 	return {
