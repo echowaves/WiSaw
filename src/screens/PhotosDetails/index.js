@@ -28,6 +28,8 @@ import {
 	deletePhoto,
 } from '../../components/Photo/reducer'
 
+import { getPhotos, } from '../PhotosList/reducer'
+
 import * as CONST from '../../consts.js'
 
 class PhotosDetails extends Component {
@@ -76,6 +78,7 @@ class PhotosDetails extends Component {
 		banPhoto: PropTypes.func.isRequired,
 		deletePhoto: PropTypes.func.isRequired,
 		bans: PropTypes.array.isRequired,
+		getPhotos: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -152,14 +155,13 @@ class PhotosDetails extends Component {
 		)
 	}
 
-
 	render() {
 		const {
 			photos,
 			currentPhotoIndex,
 			setCurrentPhotoIndex,
+			getPhotos,
 		} = this.props
-
 		return (
 			<View style={styles.container} onLayout={this.onLayout.bind(this)}>
 				<Swiper
@@ -170,7 +172,12 @@ class PhotosDetails extends Component {
 					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
 					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
 					index={currentPhotoIndex}
-					onIndexChanged={index => (setCurrentPhotoIndex(index))} // otherwise will jump to wrong photo onLayout
+					onIndexChanged={index => {
+						setCurrentPhotoIndex(index)
+						if (currentPhotoIndex > photos.length - 5) {
+							getPhotos() // pre-load more photos when nearing the end
+						}
+					}} // otherwise will jump to wrong photo onLayout
 					loadMinimal
 					loadMinimalSize={1}
 					showsPagination={false}
@@ -198,11 +205,11 @@ const mapStateToProps = state => (
 	}
 )
 
-
 const mapDispatchToProps = {
 	setCurrentPhotoIndex, // will be wrapped into a dispatch call
 	banPhoto,
 	deletePhoto,
+	getPhotos,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosDetails)
