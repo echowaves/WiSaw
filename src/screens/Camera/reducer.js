@@ -4,6 +4,8 @@ import RNFetchBlob from 'rn-fetch-blob'
 
 import * as CONST from '../../consts'
 
+import { PHOTO_UPLOADED_PREPEND, } from '../PhotosList/reducer'
+
 export const SET_PREVIEW_URI = 'wisaw/camera/SET_PREVIEW_URI'
 export const START_PHOTO_UPLOADING = 'wisaw/camera/START_PHOTO_UPLOADING'
 export const FINISH_PHOTO_UPLOADING = 'wisaw/camera/FINISH_PHOTO_UPLOADING'
@@ -123,7 +125,8 @@ export function uploadPendingPhotos() {
 			// eslint-disable-next-line no-await-in-loop
 				const fileJson = JSON.parse(await AsyncStorage.getItem(keys[i]))
 				// eslint-disable-next-line no-await-in-loop
-				const responseData = await uploadFile(fileJson)
+				const { responseData, photo, } = await uploadFile(fileJson)
+
 				if (responseData.respInfo.status === 200) {
 					// eslint-disable-next-line no-await-in-loop
 					await AsyncStorage.removeItem(keys[i])
@@ -133,6 +136,11 @@ export function uploadPendingPhotos() {
 						type: UPDATE_PHOTOS_PENDING_UPLOAD,
 						// eslint-disable-next-line no-await-in-loop
 						pendingUploads: pendingUploads || 0,
+					})
+					// show the photo in the photo list immidiately
+					dispatch({
+						type: PHOTO_UPLOADED_PREPEND,
+						photo,
 					})
 				} else {
 					alert("Error uploading file, try again.")
@@ -165,6 +173,7 @@ async function uploadFile(fileJson) {
 			location,
 		}),
 	})
+
 	const responseJson = await response.json()
 
 	if (response.status === 401) {
@@ -172,11 +181,11 @@ async function uploadFile(fileJson) {
 		return
 	}
 	if (response.status === 201) {
-		const { uploadURL, } = responseJson
+		const { uploadURL, photo, } = responseJson
 
 		const responseData = await RNFetchBlob.fetch('PUT', uploadURL, {
 			"Content-Type": "image/jpeg",
 		}, await RNFetchBlob.wrap(uri))
-		return responseData
+		return { responseData, photo, }
 	}
 }

@@ -21,6 +21,7 @@ export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
 export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
 export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
 
+export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
 const UUID_KEY = 'wisaw_device_uuid'
 //  date '+%Y%m%d%H%M%S'
@@ -122,6 +123,15 @@ export default function reducer(state = initialState, action) {
 				...state,
 				photos: state.photos.filter(item => (item.id !== action.photoId)),
 			}
+		case PHOTO_UPLOADED_PREPEND:
+			return {
+				...state,
+				photos:
+				[action.photo,
+					...state.photos,
+				],
+			}
+
 		default:
 			return state
 	}
