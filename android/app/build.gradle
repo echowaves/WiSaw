@@ -124,8 +124,8 @@ android {
         applicationId "com.echowaves.wisaw"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 62
-        versionName "5.0.1"
+        versionCode 63
+        versionName "5.0.2"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
