@@ -52,7 +52,8 @@ export default function reducer(state = initialState, action) {
 		case GET_PHOTOS_SUCCESS:
 			return {
 				...state,
-				photos: state.photos.concat(action.photos)
+				photos:
+				state.photos.concat(action.photos.sort((a, b) => b.id - a.id))
 					.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
 				daysAgo: state.daysAgo + 1,
 				errorMessage: '',
