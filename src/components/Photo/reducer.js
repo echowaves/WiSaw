@@ -10,18 +10,23 @@ import {
 
 import * as CONST from '../../consts'
 
-
 export const LIKE_PHOTO = 'wisaw/photo/LIKE_PHOTO'
 export const UNLIKE_PHOTO = 'wisaw/photo/UNLIKE_PHOTO' // in case of network error
 export const DELETE_PHOTO = 'wisaw/photo/DELETE_PHOTO'
 export const BAN_PHOTO = 'wisaw/photo/BAN_PHOTO'
 export const UNBAN_PHOTO = 'wisaw/photo/UNBAN_PHOTO'
 export const SET_INPUT_TEXT = 'wisaw/photo/SET_INPUT_TEXT'
+export const SUBMIT_COMMENT_STARTED = 'wisaw/photo/SUBMIT_COMMENT_STARTED'
+export const SUBMIT_COMMENT_FAILED = 'wisaw/photo/SUBMIT_COMMENT_FAILED'
+export const SUBMIT_COMMENT_FINISHED = 'wisaw/photo/SUBMIT_COMMENT_FINISHED'
 
 export const initialState = {
+	photo: {},
 	likes: [],
 	bans: [],
 	inputText: '',
+	commentsSubmitting: false,
+	error: '',
 }
 
 export default function reducer(state = initialState, action) {
@@ -50,6 +55,25 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				inputText: action.inputText,
+			}
+		case SUBMIT_COMMENT_STARTED:
+			return {
+				...state,
+				commentsSubmitting: true,
+				error: '',
+			}
+		case SUBMIT_COMMENT_FAILED:
+			return {
+				...state,
+				commentsSubmitting: false,
+				error: action.error,
+			}
+		case SUBMIT_COMMENT_FINISHED:
+			return {
+				...state,
+				commentsSubmitting: false,
+				inputText: '',
+				error: '',
 			}
 		// case DELETE_PHOTO:
 		// 	return state
@@ -238,5 +262,57 @@ export function setInputText({ inputText, }) {
 	return {
 		type: SET_INPUT_TEXT,
 		inputText: inputText.substring(0, 140),
+	}
+}
+
+export function submitComment({ inputText, item, }) {
+	return async (dispatch, getState) => {
+		const { uuid, } = getState().photosList
+		dispatch({
+			type: SUBMIT_COMMENT_STARTED,
+		})
+		try {
+			const response = await fetch(`${CONST.HOST}/photos/${item.id}/comments`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					uuid,
+					comment: inputText,
+				}),
+			})
+			// const responseJson = await response.json()
+			if (response.status === 201) {
+				// lets update the state in the photos collection so it renders the right number of likes in the list
+				dispatch({
+					type: SUBMIT_COMMENT_FINISHED,
+				})
+			} else {
+				dispatch({
+					type: SUBMIT_COMMENT_FAILED,
+					error: 'failed submitting comment',
+				})
+				Alert.alert(
+					'Unable to submit comment.',
+					'Try again later.',
+					[
+						{ text: 'OK', onPress: () => null, },
+					],
+				)
+			}
+		} catch (err) {
+			dispatch({
+				type: SUBMIT_COMMENT_FAILED,
+				error: JSON.stringify(err),
+			})
+			Alert.alert(
+				'Unable to submit comment.',
+				'Potential Network Issue. Try again later.',
+				[
+					{ text: 'OK', onPress: () => null, },
+				],
+			)
+		}
 	}
 }

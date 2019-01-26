@@ -28,6 +28,7 @@ import {
 	likePhoto,
 	sharePhoto,
 	setInputText,
+	submitComment,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -40,6 +41,9 @@ class Photo extends Component {
 		sharePhoto: PropTypes.func.isRequired,
 		setInputText: PropTypes.func.isRequired,
 		inputText: PropTypes.string.isRequired,
+		submitComment: PropTypes.func.isRequired,
+		commentsSubmitting: PropTypes.bool.isRequired,
+		error: PropTypes.string.isRequired,
 	}
 
 	static navigationOptions = {
@@ -60,15 +64,8 @@ class Photo extends Component {
 	static defaultProps = {}
 
 	state = {
-		loaded: false,
+		loaded: false, // this state is only used for loading photos
 	}
-
-	// componentWillMount() {
-	// 	const {
-	// 		item,
-	// 	} = this.props
-	// 	Image.getSize(item.getImgUrl, (width, height) => { this.setState({ width, height, }) })
-	// }
 
 	componentDidMount() {
 		const {
@@ -95,6 +92,9 @@ class Photo extends Component {
 			sharePhoto,
 			setInputText,
 			inputText,
+			submitComment,
+			commentsSubmitting,
+			error,
 		} = this.props
 		const { width, height, } = Dimensions.get('window')
 
@@ -264,13 +264,14 @@ class Photo extends Component {
 										}
 										onChangeText={inputText => setInputText({ inputText, })}
 										value={inputText}
+										editable={!commentsSubmitting}
 									/>
 								</Item>
 							</Col>
 							<Col style={{ width: 50, }}>
 								<Icon
 									onPress={
-										() => params.handleSubmit()
+										() => submitComment({ inputText, item, })
 									}
 									name="send"
 									type="MaterialIcons"
@@ -290,15 +291,17 @@ class Photo extends Component {
 	}
 }
 
-
 const mapStateToProps = state => ({
 	likes: state.photo.likes,
 	inputText: state.photo.inputText,
+	commentsSubmitting: state.photo.commentsSubmitting,
+	error: state.photo.error,
 })
 const mapDispatchToProps = {
 	likePhoto, // will be wrapped into a dispatch call
 	sharePhoto,
 	setInputText,
+	submitComment,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)
