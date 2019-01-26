@@ -15,11 +15,13 @@ export const LIKE_PHOTO = 'wisaw/photo/LIKE_PHOTO'
 export const UNLIKE_PHOTO = 'wisaw/photo/UNLIKE_PHOTO' // in case of network error
 export const DELETE_PHOTO = 'wisaw/photo/DELETE_PHOTO'
 export const BAN_PHOTO = 'wisaw/photo/BAN_PHOTO'
-export const UNBAN_PHOTO = 'wisaw/photo/UNBAN_PHOTO'// in case of network error
+export const UNBAN_PHOTO = 'wisaw/photo/UNBAN_PHOTO'
+export const SET_INPUT_TEXT = 'wisaw/photo/SET_INPUT_TEXT'
 
 export const initialState = {
 	likes: [],
 	bans: [],
+	inputText: '',
 }
 
 export default function reducer(state = initialState, action) {
@@ -43,6 +45,11 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				bans: state.bans.filter(item => item !== action.photoId),
+			}
+		case SET_INPUT_TEXT:
+			return {
+				...state,
+				inputText: action.inputText,
 			}
 		// case DELETE_PHOTO:
 		// 	return state
@@ -218,5 +225,18 @@ export function sharePhoto({ item, }) {
 				],
 			)
 		}
+	}
+}
+
+export function setInputText({ inputText, }) {
+	if (inputText.length < 140) {
+		return {
+			type: SET_INPUT_TEXT,
+			inputText,
+		}
+	}
+	return {
+		type: SET_INPUT_TEXT,
+		inputText: inputText.substring(0, 140),
 	}
 }

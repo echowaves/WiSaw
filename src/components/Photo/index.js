@@ -27,6 +27,7 @@ import PropTypes from 'prop-types'
 import {
 	likePhoto,
 	sharePhoto,
+	setInputText,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -37,6 +38,8 @@ class Photo extends Component {
 		likes: PropTypes.array.isRequired,
 		likePhoto: PropTypes.func.isRequired,
 		sharePhoto: PropTypes.func.isRequired,
+		setInputText: PropTypes.func.isRequired,
+		inputText: PropTypes.string.isRequired,
 	}
 
 	static navigationOptions = {
@@ -58,8 +61,6 @@ class Photo extends Component {
 
 	state = {
 		loaded: false,
-		width: 0,
-		height: 0,
 	}
 
 	// componentWillMount() {
@@ -68,6 +69,13 @@ class Photo extends Component {
 	// 	} = this.props
 	// 	Image.getSize(item.getImgUrl, (width, height) => { this.setState({ width, height, }) })
 	// }
+
+	componentDidMount() {
+		const {
+			setInputText,
+		} = this.props
+		setInputText({ inputText: '', })
+	}
 
 	onLayout(e) {
 		this.forceUpdate()
@@ -80,14 +88,14 @@ class Photo extends Component {
 		return likes.includes(photoId)
 	}
 
-
 	render() {
 		const {
 			item,
 			likePhoto,
 			sharePhoto,
+			setInputText,
+			inputText,
 		} = this.props
-		// const { width, height, } = this.state
 		const { width, height, } = Dimensions.get('window')
 
 		return (
@@ -240,12 +248,23 @@ class Photo extends Component {
 										color: CONST.MAIN_COLOR,
 										textAlign: 'center',
 									}
-								}>140
+								}>
+									{140 - inputText.length}
 								</Text>
 							</Col>
 							<Col>
 								<Item rounded>
-									<Input placeholder="any thoughts?" />
+									<Input
+										placeholder="any thoughts?"
+										placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+										style={
+											{
+												color: CONST.MAIN_COLOR,
+											}
+										}
+										onChangeText={inputText => setInputText({ inputText, })}
+										value={inputText}
+									/>
 								</Item>
 							</Col>
 							<Col style={{ width: 50, }}>
@@ -274,10 +293,12 @@ class Photo extends Component {
 
 const mapStateToProps = state => ({
 	likes: state.photo.likes,
+	inputText: state.photo.inputText,
 })
 const mapDispatchToProps = {
 	likePhoto, // will be wrapped into a dispatch call
 	sharePhoto,
+	setInputText,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)

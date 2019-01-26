@@ -149,6 +149,12 @@ class FeedbackScreen extends Component {
 							bordered
 							onChangeText={feedbackText => setFeedbackText({ feedbackText, })}
 							placeholder="Type your feedback here and click send."
+							placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+							style={
+								{
+									color: CONST.MAIN_COLOR,
+								}
+							}
 						/>
 					</Form>
 				</Content>
