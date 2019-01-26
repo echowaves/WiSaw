@@ -1,4 +1,6 @@
 export const HOST = "https://api.wisaw.com"
+// export const HOST = "https://testapi.wisaw.com"
+
 export const MAIN_COLOR = "#EA5E3D"
 export const SECONDARY_COLOR = "#e5eCFF"
 export const TEXT_COLOR = "#555f61"
