@@ -8,6 +8,7 @@ import {
 	PHOTO_LIKED,
 	PHOTO_BANNED,
 	PHOTO_DELETED,
+	PHOTO_COMMENTS_LOADED,
 } from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
@@ -26,7 +27,6 @@ export const GET_COMMENTS_FINISHED = 'wisaw/photo/GET_COMMENTS_FINISHED'
 
 export const initialState = {
 	photo: {},
-	comments: [],
 	likes: [],
 	bans: [],
 	inputText: '',
@@ -83,12 +83,10 @@ export default function reducer(state = initialState, action) {
 		case GET_COMMENTS_STARTED:
 			return {
 				...state,
-				comments: [],
 			}
 		case GET_COMMENTS_FINISHED:
 			return {
 				...state,
-				comments: action.comments,
 			}
 		// case DELETE_PHOTO:
 		// 	return state
@@ -343,11 +341,19 @@ export function getComments({ item, }) {
 				// lets update the state in the photos collection so it renders the right number of likes in the list
 				dispatch({
 					type: GET_COMMENTS_FINISHED,
+				})
+				dispatch({
+					type: PHOTO_COMMENTS_LOADED,
+					item,
 					comments: responseJson.comments,
 				})
 			} else {
 				dispatch({
 					type: GET_COMMENTS_FINISHED,
+				})
+				dispatch({
+					type: PHOTO_COMMENTS_LOADED,
+					item,
 					comments: [],
 				})
 				Toast.show({
@@ -359,9 +365,12 @@ export function getComments({ item, }) {
 		} catch (err) {
 			dispatch({
 				type: GET_COMMENTS_FINISHED,
+			})
+			dispatch({
+				type: PHOTO_COMMENTS_LOADED,
+				item,
 				comments: [],
 			})
-
 			Toast.show({
 				text: "Unable to load comments. Potential Network Issue.",
 				buttonText: "OK",

@@ -39,7 +39,6 @@ import * as CONST from '../../consts.js'
 class Photo extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
-		comments: PropTypes.array.isRequired,
 		likes: PropTypes.array.isRequired,
 		likePhoto: PropTypes.func.isRequired,
 		sharePhoto: PropTypes.func.isRequired,
@@ -71,7 +70,7 @@ class Photo extends Component {
 		loaded: false, // this state is only used for loading photos
 	}
 
-	componentDidMount() {
+	componentWillMount() {
 		const {
 			item,
 			setInputText,
@@ -94,27 +93,29 @@ class Photo extends Component {
 
 	renderComments() {
 		const {
-			comments,
+			item,
 		} = this.props
-		return comments.map((comment, i) => (
-			<Card
-				key={comment.id}
-				style={{
-					marginRight: 10,
-					marginLeft: 10,
-					color: CONST.MAIN_COLOR,
-				}}>
-				<CardItem>
-					<Body>
-						<Text
-							style={{
-								color: CONST.MAIN_COLOR,
-							}}>{comment.comment}
-						</Text>
-					</Body>
-				</CardItem>
-			</Card>
-		))
+		if (item.comments) {
+			return item.comments.map((comment, i) => (
+				<Card
+					key={comment.id}
+					style={{
+						marginRight: 10,
+						marginLeft: 10,
+						color: CONST.MAIN_COLOR,
+					}}>
+					<CardItem>
+						<Body>
+							<Text
+								style={{
+									color: CONST.MAIN_COLOR,
+								}}>{comment.comment}
+							</Text>
+						</Body>
+					</CardItem>
+				</Card>
+			))
+		}
 	}
 
 	render() {
@@ -127,6 +128,7 @@ class Photo extends Component {
 			submitComment,
 			commentsSubmitting,
 		} = this.props
+
 		const { width, height, } = Dimensions.get('window')
 
 		return (
@@ -314,7 +316,6 @@ class Photo extends Component {
 
 const mapStateToProps = state => ({
 	likes: state.photo.likes,
-	comments: state.photo.comments,
 	inputText: state.photo.inputText,
 	commentsSubmitting: state.photo.commentsSubmitting,
 	error: state.photo.error,

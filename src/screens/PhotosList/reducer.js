@@ -20,6 +20,7 @@ export const SET_ORIENTATION = 'wisaw/photosList/SET_ORIENTATION'
 export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
 export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
 export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
+export const PHOTO_COMMENTS_LOADED = 'wisaw/photosList/PHOTO_COMMENTS_LOADED'
 
 export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
@@ -123,6 +124,11 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				photos: state.photos.filter(item => (item.id !== action.photoId)),
+			}
+		case PHOTO_COMMENTS_LOADED:
+			return {
+				...state,
+				photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, comments: action.comments, } : item)),
 			}
 		case PHOTO_UPLOADED_PREPEND:
 			return {
