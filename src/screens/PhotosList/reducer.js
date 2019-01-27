@@ -22,6 +22,7 @@ export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
 export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
 export const PHOTO_COMMENTS_LOADED = 'wisaw/photosList/PHOTO_COMMENTS_LOADED'
 export const COMMENT_POSTED = 'wisaw/photosList/COMMENT_POSTED'
+export const TOGGLE_COMMENT_BUTTONS = 'wisaw/photosList/TOGGLE_COMMENT_BUTTONS'
 
 export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
@@ -148,7 +149,10 @@ export default function reducer(state = initialState, action) {
 							...item,
 							comments:
 							[
-								action.comment,
+								{
+									...action.comment,
+									hiddenButtons: true,
+								},
 								...item.comments,
 							],
 							commentsCount: item.comments.length + 1,
@@ -156,6 +160,31 @@ export default function reducer(state = initialState, action) {
 						: item)
 				),
 			}
+		case TOGGLE_COMMENT_BUTTONS:
+			return {
+				...state,
+				photos: state.photos.map(
+					item => ((item.id === action.photoId)
+						? {
+							...item,
+							comments: item.comments.map(
+								comment => ((comment.id === action.commentId)
+									? {
+										...comment,
+										hiddenButtons: !comment.hiddenButtons,
+									}
+									: {
+										...comment,
+										hiddenButtons: true,
+									}
+								)
+							)
+							,
+						}
+						: item)
+				),
+			}
+
 		default:
 			return state
 	}

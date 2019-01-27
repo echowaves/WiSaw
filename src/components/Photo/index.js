@@ -8,6 +8,7 @@ import {
 	Dimensions,
 	View,
 	Image,
+	TouchableOpacity,
 } from 'react-native'
 
 import {
@@ -32,6 +33,7 @@ import {
 	setInputText,
 	submitComment,
 	getComments,
+	toggleCommentButtons,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -47,6 +49,7 @@ class Photo extends Component {
 		submitComment: PropTypes.func.isRequired,
 		commentsSubmitting: PropTypes.bool.isRequired,
 		getComments: PropTypes.func.isRequired,
+		toggleCommentButtons: PropTypes.func.isRequired,
 	}
 
 	static navigationOptions = {
@@ -91,9 +94,48 @@ class Photo extends Component {
 		return likes.includes(photoId)
 	}
 
+	renderCommentButtons({ comment, }) {
+		if (!comment.hiddenButtons) {
+			return (
+				<View style={{
+					flex: 1,
+					flexDirection: 'row',
+					position: 'absolute',
+					bottom: 10,
+					right: 10,
+
+				}}>
+					<Icon
+						onPress={
+							() => params.handleBan()
+						}
+						name="ban"
+						type="FontAwesome"
+						style={{
+							color: CONST.MAIN_COLOR,
+							marginRight: 10,
+						}}
+					/>
+					<Icon
+						onPress={
+							() => params.handleDelete()
+						}
+						name="trash"
+						type="FontAwesome"
+						style={{
+							color: CONST.MAIN_COLOR,
+						}}
+					/>
+				</View>
+			)
+		}
+		return <View />
+	}
+
 	renderComments() {
 		const {
 			item,
+			toggleCommentButtons,
 		} = this.props
 		if (item.comments) {
 			return item.comments.map((comment, i) => (
@@ -103,15 +145,21 @@ class Photo extends Component {
 						marginRight: 10,
 						marginLeft: 10,
 					}}>
-					<CardItem>
-						<Body>
+					<TouchableOpacity
+						onPress={
+							() => {
+								toggleCommentButtons({ photoId: item.id, commentId: comment.id, })
+							}
+						}>
+						<CardItem>
 							<Text
 								style={{
 									color: CONST.TEXT_COLOR,
 								}}>{comment.comment}
 							</Text>
-						</Body>
-					</CardItem>
+							{this.renderCommentButtons({ comment, })}
+						</CardItem>
+					</TouchableOpacity>
 				</Card>
 			))
 		}
@@ -329,6 +377,7 @@ const mapDispatchToProps = {
 	setInputText,
 	submitComment,
 	getComments,
+	toggleCommentButtons,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)

@@ -10,6 +10,7 @@ import {
 	PHOTO_DELETED,
 	PHOTO_COMMENTS_LOADED,
 	COMMENT_POSTED,
+	TOGGLE_COMMENT_BUTTONS,
 } from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
@@ -351,7 +352,12 @@ export function getComments({ item, }) {
 				dispatch({
 					type: PHOTO_COMMENTS_LOADED,
 					item,
-					comments: responseJson.comments,
+					comments: responseJson.comments.map(
+						comment => ({
+							...comment,
+							hiddenButtons: true,
+						})
+					),
 				})
 			} else {
 				dispatch({
@@ -383,5 +389,13 @@ export function getComments({ item, }) {
 				type: "warning",
 			})
 		}
+	}
+}
+
+export function toggleCommentButtons({ photoId, commentId, }) {
+	return {
+		type: TOGGLE_COMMENT_BUTTONS,
+		photoId,
+		commentId,
 	}
 }
