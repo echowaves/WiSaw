@@ -134,7 +134,7 @@ class Photo extends Component {
 			<Container onLayout={this.onLayout.bind(this)}>
 				<Content>
 					<Grid>
-						<Row style={{ height: height - 100, }}>
+						<Row style={{ height: height - 170, }}>
 							<PhotoView
 								source={{
 									uri: item.getImgUrl,
@@ -145,7 +145,7 @@ class Photo extends Component {
 								androidScaleType="fitCenter"
 								style={{
 									width,
-									height: height - 100,
+									height: height - 170,
 								}}
 								backgroundColor="transparent"
 							/>
@@ -167,7 +167,7 @@ class Photo extends Component {
 										androidScaleType="fitCenter"
 										style={{
 											width,
-											height: height - 100,
+											height: height - 170,
 										}}
 										backgroundColor="transparent"
 									/>
@@ -274,7 +274,7 @@ class Photo extends Component {
 						</Row>
 						<Row style={{ height: 10, }} />
 						<Row style={{ marginTop: 10, }}>
-							<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.commentsCount} Comments</Text>
+							<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.commentsCount} Comment{item.commentsCount !== '1' ? 's' : ''}</Text>
 						</Row>
 						<Row style={{ height: 10, }} />
 					</Grid>
