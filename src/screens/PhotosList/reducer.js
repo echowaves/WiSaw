@@ -21,6 +21,7 @@ export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
 export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
 export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
 export const PHOTO_COMMENTS_LOADED = 'wisaw/photosList/PHOTO_COMMENTS_LOADED'
+export const COMMENT_POSTED = 'wisaw/photosList/COMMENT_POSTED'
 
 export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
@@ -138,7 +139,23 @@ export default function reducer(state = initialState, action) {
 					...state.photos,
 				],
 			}
-
+		case COMMENT_POSTED:
+			return {
+				...state,
+				photos: state.photos.map(
+					item => ((item.id === action.photoId)
+						? {
+							...item,
+							comments:
+							[
+								action.comment,
+								...item.comments,
+							],
+							commentsCount: item.comments.length + 1,
+						}
+						: item)
+				),
+			}
 		default:
 			return state
 	}

@@ -9,6 +9,7 @@ import {
 	PHOTO_BANNED,
 	PHOTO_DELETED,
 	PHOTO_COMMENTS_LOADED,
+	COMMENT_POSTED,
 } from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
@@ -287,11 +288,16 @@ export function submitComment({ inputText, item, }) {
 					comment: inputText,
 				}),
 			})
-			// const responseJson = await response.json()
+			const responseJson = await response.json()
 			if (response.status === 201) {
 				// lets update the state in the photos collection so it renders the right number of likes in the list
 				dispatch({
 					type: SUBMIT_COMMENT_FINISHED,
+				})
+				dispatch({
+					type: COMMENT_POSTED,
+					photoId: item.id,
+					comment: responseJson.comment,
 				})
 				Toast.show({
 					text: "Comment submitted.",

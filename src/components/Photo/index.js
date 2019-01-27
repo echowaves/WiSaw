@@ -102,13 +102,12 @@ class Photo extends Component {
 					style={{
 						marginRight: 10,
 						marginLeft: 10,
-						color: CONST.MAIN_COLOR,
 					}}>
 					<CardItem>
 						<Body>
 							<Text
 								style={{
-									color: CONST.MAIN_COLOR,
+									color: CONST.TEXT_COLOR,
 								}}>{comment.comment}
 							</Text>
 						</Body>
@@ -272,6 +271,10 @@ class Photo extends Component {
 									/>
 								</Button>
 							</View>
+						</Row>
+						<Row style={{ height: 10, }} />
+						<Row style={{ marginTop: 10, }}>
+							<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.commentsCount} Comments</Text>
 						</Row>
 						<Row style={{ height: 10, }} />
 					</Grid>
