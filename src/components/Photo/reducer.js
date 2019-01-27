@@ -11,13 +11,13 @@ import {
 	PHOTO_COMMENTS_LOADED,
 	COMMENT_POSTED,
 	TOGGLE_COMMENT_BUTTONS,
+	COMMENT_DELETED,
 } from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
 
 export const LIKE_PHOTO = 'wisaw/photo/LIKE_PHOTO'
 export const UNLIKE_PHOTO = 'wisaw/photo/UNLIKE_PHOTO' // in case of network error
-export const DELETE_PHOTO = 'wisaw/photo/DELETE_PHOTO'
 export const BAN_PHOTO = 'wisaw/photo/BAN_PHOTO'
 export const UNBAN_PHOTO = 'wisaw/photo/UNBAN_PHOTO'
 export const SET_INPUT_TEXT = 'wisaw/photo/SET_INPUT_TEXT'
@@ -26,6 +26,7 @@ export const SUBMIT_COMMENT_FAILED = 'wisaw/photo/SUBMIT_COMMENT_FAILED'
 export const SUBMIT_COMMENT_FINISHED = 'wisaw/photo/SUBMIT_COMMENT_FINISHED'
 export const GET_COMMENTS_STARTED = 'wisaw/photo/GET_COMMENTS_STARTED'
 export const GET_COMMENTS_FINISHED = 'wisaw/photo/GET_COMMENTS_FINISHED'
+export const DELETE_COMMENT = 'wisaw/photo/DELETE_COMMENT'
 
 export const initialState = {
 	photo: {},
@@ -189,10 +190,6 @@ export function deletePhoto({ item, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
 		// const { uuid, } = getState().photosList
-		dispatch({
-			type: DELETE_PHOTO,
-			photoId: item.id,
-		})
 
 		try {
 			const response = await fetch(`${CONST.HOST}/photos/${item.id}`, {
@@ -397,5 +394,45 @@ export function toggleCommentButtons({ photoId, commentId, }) {
 		type: TOGGLE_COMMENT_BUTTONS,
 		photoId,
 		commentId,
+	}
+}
+
+export function deleteComment({ photo, comment, }) {
+	return async (dispatch, getState) => {
+		const { uuid, } = getState().photosList
+		// const { uuid, } = getState().photosList
+
+		try {
+			const response = await fetch(`${CONST.HOST}/comments/${comment.id}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					deactivatedBy: uuid,
+				}),
+			})
+			// const responseJson = await response.json()
+			if (response.status === 200) {
+				// lets update the state in the photos collection so it renders the right number of likes in the list
+				dispatch({
+					type: COMMENT_DELETED,
+					photoId: photo.id,
+					commentId: comment.id,
+				})
+			} else {
+				Toast.show({
+					text: "Unable to delete comment. Try again later.",
+					buttonText: "OK",
+					type: "warning",
+				})
+			}
+		} catch (err) {
+			Toast.show({
+				text: "Unable to delete comment. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
+		}
 	}
 }

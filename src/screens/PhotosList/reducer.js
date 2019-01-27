@@ -23,6 +23,7 @@ export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
 export const PHOTO_COMMENTS_LOADED = 'wisaw/photosList/PHOTO_COMMENTS_LOADED'
 export const COMMENT_POSTED = 'wisaw/photosList/COMMENT_POSTED'
 export const TOGGLE_COMMENT_BUTTONS = 'wisaw/photosList/TOGGLE_COMMENT_BUTTONS'
+export const COMMENT_DELETED = 'wisaw/photosList/COMMENT_DELETED'
 
 export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
@@ -178,6 +179,22 @@ export default function reducer(state = initialState, action) {
 										hiddenButtons: true,
 									}
 								)
+							)
+							,
+						}
+						: item)
+				),
+			}
+		case COMMENT_DELETED:
+			return {
+				...state,
+				photos: state.photos.map(
+					item => ((item.id === action.photoId)
+						? {
+							...item,
+							commentsCount: item.comments.length - 1,
+							comments: item.comments.filter(
+								comment => (comment.id !== action.commentId)
 							)
 							,
 						}

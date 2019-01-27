@@ -7,8 +7,8 @@ import { connect, } from 'react-redux'
 import {
 	Dimensions,
 	View,
-	Image,
 	TouchableOpacity,
+	Alert,
 } from 'react-native'
 
 import {
@@ -16,7 +16,7 @@ import {
 	Spinner,
 	Button,
 	Container,
-	Header, Content, Card, CardItem, Body, Text, Item, Input, Footer,
+	Content, Card, CardItem, Text, Item, Input, Footer,
 } from 'native-base'
 
 import { Col, Row, Grid, } from "react-native-easy-grid"
@@ -34,6 +34,7 @@ import {
 	submitComment,
 	getComments,
 	toggleCommentButtons,
+	deleteComment,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -50,6 +51,7 @@ class Photo extends Component {
 		commentsSubmitting: PropTypes.bool.isRequired,
 		getComments: PropTypes.func.isRequired,
 		toggleCommentButtons: PropTypes.func.isRequired,
+		deleteComment: PropTypes.func.isRequired,
 	}
 
 	static navigationOptions = {
@@ -94,7 +96,11 @@ class Photo extends Component {
 		return likes.includes(photoId)
 	}
 
-	renderCommentButtons({ comment, }) {
+	renderCommentButtons({ photo, comment, }) {
+		const {
+			deleteComment,
+		} = this.props
+
 		if (!comment.hiddenButtons) {
 			return (
 				<View style={{
@@ -107,18 +113,22 @@ class Photo extends Component {
 				}}>
 					<Icon
 						onPress={
-							() => params.handleBan()
-						}
-						name="ban"
-						type="FontAwesome"
-						style={{
-							color: CONST.MAIN_COLOR,
-							marginRight: 10,
-						}}
-					/>
-					<Icon
-						onPress={
-							() => params.handleDelete()
+							() => {
+								Alert.alert(
+									'Delete Comment?',
+									'The comment will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
+									[
+										{ text: 'No', onPress: () => null, style: 'cancel', },
+										{
+											text: 'Yes',
+											onPress: () => {
+												deleteComment({ photo, comment, })
+											},
+										},
+									],
+									{ cancelable: true, }
+								)
+							}
 						}
 						name="trash"
 						type="FontAwesome"
@@ -157,7 +167,7 @@ class Photo extends Component {
 									color: CONST.TEXT_COLOR,
 								}}>{comment.comment}
 							</Text>
-							{this.renderCommentButtons({ comment, })}
+							{this.renderCommentButtons({ photo: item, comment, })}
 						</CardItem>
 					</TouchableOpacity>
 				</Card>
@@ -378,6 +388,7 @@ const mapDispatchToProps = {
 	submitComment,
 	getComments,
 	toggleCommentButtons,
+	deleteComment,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)
