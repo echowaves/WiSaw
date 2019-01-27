@@ -1,6 +1,8 @@
-import { Alert, } from 'react-native'
-
 import branch from 'react-native-branch'
+
+import {
+	Toast,
+} from 'native-base'
 
 import {
 	PHOTO_LIKED,
@@ -19,9 +21,12 @@ export const SET_INPUT_TEXT = 'wisaw/photo/SET_INPUT_TEXT'
 export const SUBMIT_COMMENT_STARTED = 'wisaw/photo/SUBMIT_COMMENT_STARTED'
 export const SUBMIT_COMMENT_FAILED = 'wisaw/photo/SUBMIT_COMMENT_FAILED'
 export const SUBMIT_COMMENT_FINISHED = 'wisaw/photo/SUBMIT_COMMENT_FINISHED'
+export const GET_COMMENTS_STARTED = 'wisaw/photo/GET_COMMENTS_STARTED'
+export const GET_COMMENTS_FINISHED = 'wisaw/photo/GET_COMMENTS_FINISHED'
 
 export const initialState = {
 	photo: {},
+	comments: [],
 	likes: [],
 	bans: [],
 	inputText: '',
@@ -74,6 +79,16 @@ export default function reducer(state = initialState, action) {
 				commentsSubmitting: false,
 				inputText: '',
 				error: '',
+			}
+		case GET_COMMENTS_STARTED:
+			return {
+				...state,
+				comments: [],
+			}
+		case GET_COMMENTS_FINISHED:
+			return {
+				...state,
+				comments: action.comments,
 			}
 		// case DELETE_PHOTO:
 		// 	return state
@@ -150,13 +165,11 @@ export function banPhoto({ item, }) {
 					type: PHOTO_BANNED,
 					photoId: item.id,
 				})
-				Alert.alert(
-					'Abusive Photo reported.',
-					'Thank you.',
-					[
-						{ text: 'OK', onPress: () => null, },
-					],
-				)
+				Toast.show({
+					text: "Abusive Photo reported.",
+					buttonText: "OK",
+					type: "success",
+				})
 			} else {
 				dispatch({
 					type: UNBAN_PHOTO,
@@ -199,22 +212,18 @@ export function deletePhoto({ item, }) {
 					photoId: item.id,
 				})
 			} else {
-				Alert.alert(
-					'Unable to delete photo.',
-					'Try again later.',
-					[
-						{ text: 'OK', onPress: () => null, },
-					],
-				)
+				Toast.show({
+					text: "Unable to delete photo. Try again later.",
+					buttonText: "OK",
+					type: "warning",
+				})
 			}
 		} catch (err) {
-			Alert.alert(
-				'Unable to delete photo.',
-				'Potential Network Issue. Try again later.',
-				[
-					{ text: 'OK', onPress: () => null, },
-				],
-			)
+			Toast.show({
+				text: "Unable to delete photo. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
 		}
 	}
 }
@@ -241,13 +250,11 @@ export function sharePhoto({ item, }) {
 			// const { channel, completed, error, } =
 			await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
 		} catch (err) {
-			Alert.alert(
-				'Unable to share photo.',
-				'Try again later.',
-				[
-					{ text: 'OK', onPress: () => null, },
-				],
-			)
+			Toast.show({
+				text: "Unable to share photo.",
+				buttonText: "OK",
+				type: "warning",
+			})
 		}
 	}
 }
@@ -288,31 +295,78 @@ export function submitComment({ inputText, item, }) {
 				dispatch({
 					type: SUBMIT_COMMENT_FINISHED,
 				})
+				Toast.show({
+					text: "Comment submitted.",
+					buttonText: "OK",
+					type: "success",
+				})
 			} else {
 				dispatch({
 					type: SUBMIT_COMMENT_FAILED,
 					error: 'failed submitting comment',
 				})
-				Alert.alert(
-					'Unable to submit comment.',
-					'Try again later.',
-					[
-						{ text: 'OK', onPress: () => null, },
-					],
-				)
+				Toast.show({
+					text: "Unable to submit comment. Try again later.",
+					buttonText: "OK",
+					type: "warning",
+				})
 			}
 		} catch (err) {
 			dispatch({
 				type: SUBMIT_COMMENT_FAILED,
 				error: JSON.stringify(err),
 			})
-			Alert.alert(
-				'Unable to submit comment.',
-				'Potential Network Issue. Try again later.',
-				[
-					{ text: 'OK', onPress: () => null, },
-				],
-			)
+			Toast.show({
+				text: "Unable to submit comment. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
+		}
+	}
+}
+
+export function getComments({ item, }) {
+	return async (dispatch, getState) => {
+		dispatch({
+			type: GET_COMMENTS_STARTED,
+		})
+		try {
+			const response = await fetch(`${CONST.HOST}/photos/${item.id}/comments`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			const responseJson = await response.json()
+
+			if (response.status === 200) {
+				// lets update the state in the photos collection so it renders the right number of likes in the list
+				dispatch({
+					type: GET_COMMENTS_FINISHED,
+					comments: responseJson.comments,
+				})
+			} else {
+				dispatch({
+					type: GET_COMMENTS_FINISHED,
+					comments: [],
+				})
+				Toast.show({
+					text: "Unable to load comments. Try again later.",
+					buttonText: "OK",
+					type: "warning",
+				})
+			}
+		} catch (err) {
+			dispatch({
+				type: GET_COMMENTS_FINISHED,
+				comments: [],
+			})
+
+			Toast.show({
+				text: "Unable to load comments. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
 		}
 	}
 }

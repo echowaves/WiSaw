@@ -44,7 +44,8 @@
     "redux": "4.0.1",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.15",
-    "uuid": "3.3.2"
+    "uuid": "3.3.2",
+		"react-native-keyboard-spacer": "0.4.1"
   },
   "devDependencies": {
     "babel-eslint": "10.0.1",

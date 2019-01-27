@@ -168,7 +168,7 @@ class PhotosDetails extends Component {
 					autoplay={false}
 					horizontal
 					loop={false}
-					showsButtons
+					showsButtons={false}
 					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
 					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
 					index={currentPhotoIndex}

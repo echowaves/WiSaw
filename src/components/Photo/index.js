@@ -22,6 +22,8 @@ import { Col, Row, Grid, } from "react-native-easy-grid"
 
 import PhotoView from 'react-native-photo-view-ex'
 
+import KeyboardSpacer from 'react-native-keyboard-spacer'
+
 import PropTypes from 'prop-types'
 
 import {
@@ -29,6 +31,7 @@ import {
 	sharePhoto,
 	setInputText,
 	submitComment,
+	getComments,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -36,6 +39,7 @@ import * as CONST from '../../consts.js'
 class Photo extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
+		comments: PropTypes.array.isRequired,
 		likes: PropTypes.array.isRequired,
 		likePhoto: PropTypes.func.isRequired,
 		sharePhoto: PropTypes.func.isRequired,
@@ -43,7 +47,7 @@ class Photo extends Component {
 		inputText: PropTypes.string.isRequired,
 		submitComment: PropTypes.func.isRequired,
 		commentsSubmitting: PropTypes.bool.isRequired,
-		error: PropTypes.string.isRequired,
+		getComments: PropTypes.func.isRequired,
 	}
 
 	static navigationOptions = {
@@ -69,9 +73,12 @@ class Photo extends Component {
 
 	componentDidMount() {
 		const {
+			item,
 			setInputText,
+			getComments,
 		} = this.props
 		setInputText({ inputText: '', })
+		getComments({ item, })
 	}
 
 	onLayout(e) {
@@ -85,6 +92,31 @@ class Photo extends Component {
 		return likes.includes(photoId)
 	}
 
+	renderComments() {
+		const {
+			comments,
+		} = this.props
+		return comments.map((comment, i) => (
+			<Card
+				key={comment.id}
+				style={{
+					marginRight: 10,
+					marginLeft: 10,
+					color: CONST.MAIN_COLOR,
+				}}>
+				<CardItem>
+					<Body>
+						<Text
+							style={{
+								color: CONST.MAIN_COLOR,
+							}}>{comment.comment}
+						</Text>
+					</Body>
+				</CardItem>
+			</Card>
+		))
+	}
+
 	render() {
 		const {
 			item,
@@ -94,7 +126,6 @@ class Photo extends Component {
 			inputText,
 			submitComment,
 			commentsSubmitting,
-			error,
 		} = this.props
 		const { width, height, } = Dimensions.get('window')
 
@@ -241,51 +272,41 @@ class Photo extends Component {
 							</View>
 						</Row>
 						<Row style={{ height: 10, }} />
-						<Row>
-							<Col style={{ width: 50, justifyContent: 'center', }}>
-								<Text style={
+					</Grid>
+					{this.renderComments()}
+				</Content>
+				<Footer style={{ marginTop: 5, }} keyboardShouldPersistTaps="always">
+					<Col style={{ width: 50, justifyContent: 'center', }}>
+						<Text style={
+							{
+								color: CONST.MAIN_COLOR,
+								textAlign: 'center',
+							}
+						}>
+							{140 - inputText.length}
+						</Text>
+					</Col>
+					<Col>
+						<Item rounded>
+							<Input
+								placeholder="any thoughts?"
+								placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+								style={
 									{
 										color: CONST.MAIN_COLOR,
-										textAlign: 'center',
 									}
-								}>
-									{140 - inputText.length}
-								</Text>
-							</Col>
-							<Col>
-								<Item rounded>
-									<Input
-										placeholder="any thoughts?"
-										placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-										style={
-											{
-												color: CONST.MAIN_COLOR,
-											}
-										}
-										onChangeText={inputText => setInputText({ inputText, })}
-										value={inputText}
-										editable={!commentsSubmitting}
-									/>
-								</Item>
-							</Col>
-							<Col style={{ width: 50, }}>
-								<Icon
-									onPress={
-										() => submitComment({ inputText, item, })
-									}
-									name="send"
-									type="MaterialIcons"
-									style={
-										{
-											margin: 10,
-											color: CONST.MAIN_COLOR,
-										}
-									}
-								/>
-							</Col>
-						</Row>
-					</Grid>
-				</Content>
+								}
+								onChangeText={inputText => setInputText({ inputText, })}
+								value={inputText}
+								editable={!commentsSubmitting}
+								onSubmitEditing={
+									() => submitComment({ inputText, item, })
+								}
+							/>
+						</Item>
+					</Col>
+				</Footer>
+				<KeyboardSpacer />
 			</Container>
 		)
 	}
@@ -293,6 +314,7 @@ class Photo extends Component {
 
 const mapStateToProps = state => ({
 	likes: state.photo.likes,
+	comments: state.photo.comments,
 	inputText: state.photo.inputText,
 	commentsSubmitting: state.photo.commentsSubmitting,
 	error: state.photo.error,
@@ -302,6 +324,7 @@ const mapDispatchToProps = {
 	sharePhoto,
 	setInputText,
 	submitComment,
+	getComments,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)

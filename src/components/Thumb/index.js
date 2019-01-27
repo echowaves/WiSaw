@@ -98,6 +98,42 @@ class Thumb extends Component {
 						</Text>
 					</View>
 				)}
+				{ item.commentsCount > 0 && (
+					<View
+						style={
+							{
+								fontSize: 30,
+								color: CONST.MAIN_COLOR,
+								position: 'absolute',
+								bottom: 2,
+								left: 5,
+							}
+						}>
+						<Icon
+							type="FontAwesome"
+							name="comment"
+							style={
+								{
+									fontSize: 30,
+									color: CONST.SECONDARY_COLOR,
+								}
+							}
+						/>
+						<Text
+							style={
+								{
+									fontSize: 10,
+									color: CONST.TEXT_COLOR,
+									position: 'absolute',
+									right: 8,
+									top: 12,
+								}
+							}>
+							{item.commentsCount > 99 ? '+99' : item.commentsCount}
+						</Text>
+					</View>
+				)}
+
 			</View>
 		)
 	}
