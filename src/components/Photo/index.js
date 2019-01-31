@@ -75,6 +75,7 @@ class Photo extends Component {
 		loaded: false, // this state is only used for loading photos
 	}
 
+
 	componentWillMount() {
 		const {
 			item,
@@ -83,6 +84,11 @@ class Photo extends Component {
 		} = this.props
 		setInputText({ inputText: '', })
 		getComments({ item, })
+		this.intervalId = setInterval(() => { getComments({ item, }) }, 30000)
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.intervalId)
 	}
 
 	onLayout(e) {
@@ -192,7 +198,7 @@ class Photo extends Component {
 			<Container onLayout={this.onLayout.bind(this)}>
 				<Content>
 					<Grid>
-						<Row style={{ height: height - 170, }}>
+						<Row>
 							<PhotoView
 								source={{
 									uri: item.getImgUrl,
@@ -203,7 +209,7 @@ class Photo extends Component {
 								androidScaleType="fitCenter"
 								style={{
 									width,
-									height: height - 170,
+									height: height - 200,
 								}}
 								backgroundColor="transparent"
 							/>
@@ -225,7 +231,7 @@ class Photo extends Component {
 										androidScaleType="fitCenter"
 										style={{
 											width,
-											height: height - 170,
+											height: height - 200,
 										}}
 										backgroundColor="transparent"
 									/>
@@ -330,26 +336,17 @@ class Photo extends Component {
 								</Button>
 							</View>
 						</Row>
-						<Row style={{ height: 10, }} />
-						<Row style={{ marginTop: 10, }}>
-							<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.commentsCount} Comment{item.commentsCount !== '1' ? 's' : ''}</Text>
+						<Row style={{ marginTop: 5, }}>
+							<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}</Text>
 						</Row>
-						<Row style={{ height: 10, }} />
 					</Grid>
 					{this.renderComments()}
 				</Content>
-				<Footer style={{ marginTop: 5, }} keyboardShouldPersistTaps="always">
-					<Col style={{ width: 50, justifyContent: 'center', }}>
-						<Text style={
-							{
-								color: CONST.MAIN_COLOR,
-								textAlign: 'center',
-							}
-						}>
-							{140 - inputText.length}
-						</Text>
-					</Col>
-					<Col>
+				<Footer keyboardShouldPersistTaps="always">
+					<Col style={{
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}>
 						<Item rounded>
 							<Input
 								placeholder="any thoughts?"
@@ -367,6 +364,21 @@ class Photo extends Component {
 								}
 							/>
 						</Item>
+					</Col>
+					<Col style={{
+						width: 50,
+						marginLeft: 5,
+						alignItems: 'center',
+						justifyContent: 'center',
+					}}>
+						<Text style={
+							{
+								color: CONST.MAIN_COLOR,
+								fontSize: 10,
+							}
+						}>
+							{140 - inputText.length}
+						</Text>
 					</Col>
 				</Footer>
 				<KeyboardSpacer />
