@@ -245,13 +245,12 @@ export function sharePhoto({ item, }) {
 
 			if (item.comments) {
 				// get only the 3 comments
-
-				messageBody = `${messageBody}\n\n${item.likes > 0 ? ` liked ${item.likes} ${item.likes === 1 ? 'time.' : 'times.'}\n\n` : ''} ${
+				messageBody = `${messageBody}\n\n${
 					item.comments.slice(0, 3).map(
 						comment => (
 							comment.comment
 						)
-					).join('\n\n')}\n\n`
+					).join('\n\n')}\n\n${item.likes > 0 ? `Thumbs Up: ${item.likes}\n\n` : ''}`
 			}
 
 			const shareOptions = { messageHeader, messageBody, }
