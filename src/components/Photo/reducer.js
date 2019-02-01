@@ -240,8 +240,21 @@ export function sharePhoto({ item, }) {
 					locallyIndex: true,
 				}
 			)
+			let messageBody = 'Check out what I saw today:'
+			const messageHeader = 'Check out what I saw today:'
 
-			const shareOptions = { messageHeader: 'Check out what I saw today:', messageBody: 'Check out what I saw today:', }
+			if (item.comments) {
+				// get only the 3 comments
+
+				messageBody = `${messageBody}\n\n${item.likes > 0 ? ` liked ${item.likes} times.` : ''}\n\n${
+					item.comments.slice(0, 3).map(
+						comment => (
+							comment.comment
+						)
+					).join('\n\n')}\n`
+			}
+
+			const shareOptions = { messageHeader, messageBody, }
 			const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing', }
 			const controlParams = { $photo_id: item.id, $item: item, }
 			// const { channel, completed, error, } =
