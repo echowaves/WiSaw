@@ -336,9 +336,11 @@ class Photo extends Component {
 								</Button>
 							</View>
 						</Row>
-						<Row style={{ marginTop: 5, }}>
-							<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}</Text>
-						</Row>
+						{ item.comments && item.comments.length > 0 && (
+							<Row style={{ marginTop: 5, }}>
+								<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}</Text>
+							</Row>
+						)}
 					</Grid>
 					{this.renderComments()}
 				</Content>
