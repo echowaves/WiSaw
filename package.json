@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@babel/core": "7.2.2",
+    "@dudigital/react-native-zoomable-view": "1.0.12",
     "babel-core": "7.0.0-bridge.0",
     "metro-react-native-babel-preset": "0.51.1",
     "moment": "2.23.0",
@@ -26,13 +27,13 @@
     "react-native-device-settings": "1.2.0",
     "react-native-easy-grid": "0.2.0",
     "react-native-fabric": "0.5.2",
+    "react-native-fast-image": "5.2.0",
     "react-native-fontawesome": "6.0.1",
     "react-native-gesture-handler": "1.0.12",
     "react-native-image-progress": "1.1.1",
+    "react-native-keyboard-spacer": "0.4.1",
     "react-native-modal": "7.0.2",
     "react-native-permissions": "1.1.1",
-    "react-native-photo-view": "github:alwx/react-native-photo-view",
-    "react-native-photo-view-ex": "1.0.4",
     "react-native-progress": "3.5.0",
     "react-native-screens": "1.0.0-alpha.19",
     "react-native-secure-key-store": "2.0.0",
@@ -44,9 +45,8 @@
     "redux": "4.0.1",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.15",
-    "uuid": "3.3.2",
-		"react-native-keyboard-spacer": "0.4.1"
-    },
+    "uuid": "3.3.2"
+  },
   "devDependencies": {
     "babel-eslint": "10.0.1",
     "babel-jest": "23.6.0",

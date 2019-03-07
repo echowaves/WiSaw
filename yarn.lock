@@ -647,6 +647,13 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@dudigital/react-native-zoomable-view@1.0.12":
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@dudigital/react-native-zoomable-view/-/react-native-zoomable-view-1.0.12.tgz#50d0e0a869f526cd7857c65e99d4280334da7773"
+  integrity sha512-VZupqaG4oeT883NBAzUDbmJcUpKEDHzOHY4Ca/0/RXsJqjWmbSOnSJUNQZ1P8ns5C/8nKLpBTo8R6ZNmg+K+fw==
+  dependencies:
+    prop-types "^15.5.10"
+
 "@react-navigation/core@3.0.2":
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/@react-navigation/core/-/core-3.0.2.tgz#8631801533a27d034a3b8421dfd0510a9f27dcf3"
@@ -5240,6 +5247,11 @@ react-native-fabric@0.5.2:
   resolved "https://registry.yarnpkg.com/react-native-fabric/-/react-native-fabric-0.5.2.tgz#6eb728cb4f55652c60eab4fbfe1ab6bc3841805f"
   integrity sha512-uarBq3XtADCJIGwzeHMzG7LCTfElGuqUj4UqMxsWbPsXaYForfNw+EMkEQ+6eBq/a2k4PKfuVQXQAC7rfgo/Vg==
 
+react-native-fast-image@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-5.2.0.tgz#6730eb06951ea6f9a79abe02a733bc05b7a73412"
+  integrity sha512-S+2gmv9HfLc7CGjjnQ3kO/QoZD9BJnjfwWhsJWgjEvaeOPbpHZaXSUkINSqLcHD5KIHcYidu+U2lgXdEv4Jamg==
+
 react-native-fontawesome@6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/react-native-fontawesome/-/react-native-fontawesome-6.0.1.tgz#6a4f06b3d2523ef2567cdde84c601a1b50733110"
@@ -5291,19 +5303,6 @@ react-native-permissions@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/react-native-permissions/-/react-native-permissions-1.1.1.tgz#4876004681ff8556454613d85249b01baff9b35b"
   integrity sha512-t0Ujm177bagjUOSzhpmkSz+LqFW04HnY9TeZFavDCmV521fQvFz82aD+POXqWsAdsJVOK3umJYBNNqCjC3g0hQ==
-
-react-native-photo-view-ex@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/react-native-photo-view-ex/-/react-native-photo-view-ex-1.0.4.tgz#d5b26bea1b6d0627d244cce6784bf568de583fc7"
-  integrity sha512-DCZi5KFaBxB5fIFxM62gwblK0pW/wDJPg9jvRvoyLfBY/dPq4N+xrV5JHiBkaFT/wH9yHw9+3MoiuAwxUmbUSg==
-  dependencies:
-    prop-types "^15.6.0"
-
-"react-native-photo-view@github:alwx/react-native-photo-view":
-  version "1.5.2"
-  resolved "https://codeload.github.com/alwx/react-native-photo-view/tar.gz/e28f5416574cbfa07b2d4fa862c0048df56f7b02"
-  dependencies:
-    prop-types "^15.5.10"
 
 react-native-progress@3.5.0:
   version "3.5.0"

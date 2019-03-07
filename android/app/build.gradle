@@ -124,8 +124,8 @@ android {
         applicationId "com.echowaves.wisaw"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 70
-        versionName "5.1.5"
+        versionCode 72
+        versionName "5.2.1"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
@@ -171,9 +171,9 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-fast-image')
     api project(':react-native-fabric')
     api project(':react-native-branch')
-    api project(':react-native-photo-view-ex')
     api project(':rn-fetch-blob')
     api project(':react-native-camera')
     api project(':react-native-device-settings')

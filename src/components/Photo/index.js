@@ -21,7 +21,9 @@ import {
 
 import { Col, Row, Grid, } from "react-native-easy-grid"
 
-import PhotoView from 'react-native-photo-view-ex'
+import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
+
+import FastImage from 'react-native-fast-image'
 
 import KeyboardSpacer from 'react-native-keyboard-spacer'
 
@@ -199,60 +201,62 @@ class Photo extends Component {
 				<Content>
 					<Grid>
 						<Row>
-							<PhotoView
-								source={{
-									uri: item.getImgUrl,
-								}}
-								onLoadEnd={() => this.setState({ loaded: true, })}
-								minimumZoomScale={1}
-								maximumZoomScale={5}
-								androidScaleType="fitCenter"
-								style={{
-									width,
-									height: height - 200,
-								}}
-								backgroundColor="transparent"
-							/>
-							{ !this.state.loaded && ( // eslint-disable-line react/destructuring-assignment
-								<View style={{
-									flex: 1,
-									position: 'absolute',
-									top: 0,
-									bottom: 0,
-									right: 0,
-									left: 0,
-								}}>
-									<PhotoView
-										source={{
-											uri: item.getThumbUrl,
-										}}
-										minimumZoomScale={1}
-										maximumZoomScale={5}
-										androidScaleType="fitCenter"
-										style={{
-											width,
-											height: height - 200,
-										}}
-										backgroundColor="transparent"
-									/>
-									<Spinner
-										style={{
-											flex: 1,
-											width,
-											height,
-											position: 'absolute',
-											top: 0,
-											bottom: 0,
-											right: 0,
-											left: 0,
-										}}
-										color={
-											CONST.MAIN_COLOR
-										}
-									/>
-								</View>
-							)}
-
+							<ReactNativeZoomableView
+								maxZoom={3}
+								minZoom={0.5}
+								zoomStep={3}
+								initialZoom={1}
+								bindToBorders>
+								<FastImage
+									source={{
+										uri: item.getImgUrl,
+									}}
+									onLoadEnd={() => this.setState({ loaded: true, })}
+									style={{
+										width,
+										height: height - 200,
+									}}
+									backgroundColor="transparent"
+									resizeMode={FastImage.resizeMode.contain}
+								/>
+								{ !this.state.loaded && ( // eslint-disable-line react/destructuring-assignment
+									<View style={{
+										flex: 1,
+										position: 'absolute',
+										top: 0,
+										bottom: 0,
+										right: 0,
+										left: 0,
+									}}>
+										<FastImage
+											source={{
+												uri: item.getThumbUrl,
+											}}
+											style={{
+												width,
+												height: height - 200,
+											}}
+											backgroundColor="transparent"
+											resizeMode={FastImage.resizeMode.contain}
+										/>
+										<Spinner
+											style={{
+												flex: 1,
+												width,
+												height,
+												position: 'absolute',
+												top: 0,
+												bottom: 0,
+												right: 0,
+												left: 0,
+											}}
+											color={
+												CONST.MAIN_COLOR
+											}
+										/>
+									</View>
+								)}
+							</ReactNativeZoomableView>
 							<View style={{
 								flex: 2,
 								flexDirection: 'row',

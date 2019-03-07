@@ -1,10 +1,10 @@
 import React, { Component, } from 'react'
 import { connect, } from 'react-redux'
+import FastImage from 'react-native-fast-image'
 
 import {
 	View,
 	StyleSheet,
-	Image,
 	TouchableHighlight,
 	Text,
 } from 'react-native'
@@ -58,7 +58,7 @@ class Thumb extends Component {
 						styles.container,
 						thumbWidthStyles,
 					]}>
-					<Image
+					<FastImage
 						source={{ uri: item.getThumbUrl, }}
 						style={styles.thumbnail}
 					/>

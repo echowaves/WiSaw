@@ -3,8 +3,8 @@ package com.echowaves.wisaw;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.dylanvann.fastimage.FastImageViewPackage;
 import com.smixx.fabric.FabricPackage;
-import io.amarcruz.photoview.PhotoViewPackage;
 // import Branch and RNBranch
 import io.branch.rnbranch.RNBranchPackage;
 import io.branch.referral.Branch;
@@ -35,9 +35,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new FastImageViewPackage(),
             new FabricPackage(),
             new RNBranchPackage(),
-            new PhotoViewPackage(),
             new RNFetchBlobPackage(),
             new RNCameraPackage(),
             new OpenSettingsPackage(),
