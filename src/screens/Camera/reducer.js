@@ -137,7 +137,7 @@ export function uploadPendingPhotos() {
 						// eslint-disable-next-line no-await-in-loop
 						pendingUploads: pendingUploads || 0,
 					})
-					photo.getThumbUrl = fileJson.uri
+					// photo.getThumbUrl = fileJson.uri
 					// show the photo in the photo list immidiately
 					dispatch({
 						type: PHOTO_UPLOADED_PREPEND,
