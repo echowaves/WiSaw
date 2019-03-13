@@ -61,6 +61,7 @@ class Thumb extends Component {
 					<FastImage
 						source={{ uri: item.getThumbUrl, }}
 						style={styles.thumbnail}
+						fallback={item.fallback}
 					/>
 				</TouchableHighlight>
 				{ item.likes > 0 && (
