@@ -57,8 +57,9 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				photos:
-				state.photos.concat(action.photos.sort((a, b) => b.id - a.id))
-					.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
+				state.photos.concat(action.photos)
+					.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos)// fancy way to remove duplicate photos
+					.sort((a, b) => b.id - a.id),
 				daysAgo: state.daysAgo + 1,
 				errorMessage: '',
 			}
