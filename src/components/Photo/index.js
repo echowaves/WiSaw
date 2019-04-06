@@ -25,7 +25,7 @@ import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/R
 
 import FastImage from 'react-native-fast-image'
 
-import KeyboardSpacer from 'react-native-keyboard-spacer'
+import KeyboardSpaceView from 'react-native-keyboard-spacer-view'
 
 import PropTypes from 'prop-types'
 
@@ -198,196 +198,197 @@ class Photo extends Component {
 
 		return (
 			<Container onLayout={this.onLayout.bind(this)}>
-				<Content>
-					<Grid>
-						<Row>
-							<ReactNativeZoomableView
-								maxZoom={3}
-								minZoom={0.5}
-								zoomStep={3}
-								initialZoom={1}
-								bindToBorders>
-								<FastImage
-									source={{
-										uri: item.getImgUrl,
-									}}
-									onLoadEnd={() => this.setState({ loaded: true, })}
-									style={{
-										width,
-										height: height - 200,
-									}}
-									backgroundColor="transparent"
-									resizeMode={FastImage.resizeMode.contain}
-								/>
-								{ !this.state.loaded && ( // eslint-disable-line react/destructuring-assignment
-									<View style={{
-										flex: 1,
-										position: 'absolute',
-										top: 0,
-										bottom: 0,
-										right: 0,
-										left: 0,
-									}}>
-										<FastImage
-											source={{
-												uri: item.getThumbUrl,
-											}}
-											style={{
-												width,
-												height: height - 200,
-											}}
-											backgroundColor="transparent"
-											resizeMode={FastImage.resizeMode.contain}
-										/>
-										<Spinner
-											style={{
-												flex: 1,
-												width,
-												height,
-												position: 'absolute',
-												top: 0,
-												bottom: 0,
-												right: 0,
-												left: 0,
-											}}
-											color={
-												CONST.MAIN_COLOR
-											}
-										/>
-									</View>
-								)}
-							</ReactNativeZoomableView>
-							<View style={{
-								flex: 2,
-								flexDirection: 'row',
-								justifyContent: 'space-around',
-								width,
-								hieght: 100,
-								position: 'absolute',
-								bottom: 20,
-
-							}}>
-								<Button
-									rounded
-									light
-									transparent
-									bordered
-									disabled={this.isPhotoLikedByMe({ photoId: item.id, })}
-									onPress={
-										() => {
-											likePhoto({ photoId: item.id, })
-										}
-									}
-									style={
-										{
-											height: 85,
-											width: 85,
-											backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-										}
-									}>
-									<Icon
-										type="FontAwesome"
-										name="thumbs-up"
-										style={
-											{
-												fontSize: 50,
-												color: (this.isPhotoLikedByMe({ photoId: item.id, }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
-											}
-										}
+				<KeyboardSpaceView>
+					<Content>
+						<Grid>
+							<Row>
+								<ReactNativeZoomableView
+									maxZoom={3}
+									minZoom={0.5}
+									zoomStep={3}
+									initialZoom={1}
+									bindToBorders>
+									<FastImage
+										source={{
+											uri: item.getImgUrl,
+										}}
+										onLoadEnd={() => this.setState({ loaded: true, })}
+										style={{
+											width,
+											height: height - 200,
+										}}
+										backgroundColor="transparent"
+										resizeMode={FastImage.resizeMode.contain}
 									/>
-									<Text
+									{ !this.state.loaded && ( // eslint-disable-line react/destructuring-assignment
+										<View style={{
+											flex: 1,
+											position: 'absolute',
+											top: 0,
+											bottom: 0,
+											right: 0,
+											left: 0,
+										}}>
+											<FastImage
+												source={{
+													uri: item.getThumbUrl,
+												}}
+												style={{
+													width,
+													height: height - 200,
+												}}
+												backgroundColor="transparent"
+												resizeMode={FastImage.resizeMode.contain}
+											/>
+											<Spinner
+												style={{
+													flex: 1,
+													width,
+													height,
+													position: 'absolute',
+													top: 0,
+													bottom: 0,
+													right: 0,
+													left: 0,
+												}}
+												color={
+													CONST.MAIN_COLOR
+												}
+											/>
+										</View>
+									)}
+								</ReactNativeZoomableView>
+								<View style={{
+									flex: 2,
+									flexDirection: 'row',
+									justifyContent: 'space-around',
+									width,
+									hieght: 100,
+									position: 'absolute',
+									bottom: 20,
+
+								}}>
+									<Button
+										rounded
+										light
+										transparent
+										bordered
+										disabled={this.isPhotoLikedByMe({ photoId: item.id, })}
+										onPress={
+											() => {
+												likePhoto({ photoId: item.id, })
+											}
+										}
 										style={
 											{
-												fontSize: 12,
-												color: (!this.isPhotoLikedByMe({ photoId: item.id, }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
-												position: 'absolute',
-												right: 0,
-												top: "55%",
-												textAlign: 'center',
-												width: '100%',
+												height: 85,
+												width: 85,
+												backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 											}
 										}>
-										{item.likes}
-									</Text>
-								</Button>
-								<Button
-									rounded
-									light
-									transparent
-									bordered
-									onPress={
-										() => {
-											sharePhoto({ item, })
-										}
-									}
-									style={
-										{
-											height: 85,
-											width: 85,
-											backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-										}
-									}>
-									<Icon
-										type="FontAwesome"
-										name="share"
-										style={
-											{
-												fontSize: 50,
-												color: CONST.MAIN_COLOR,
+										<Icon
+											type="FontAwesome"
+											name="thumbs-up"
+											style={
+												{
+													fontSize: 50,
+													color: (this.isPhotoLikedByMe({ photoId: item.id, }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
+												}
+											}
+										/>
+										<Text
+											style={
+												{
+													fontSize: 12,
+													color: (!this.isPhotoLikedByMe({ photoId: item.id, }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
+													position: 'absolute',
+													right: 0,
+													top: "55%",
+													textAlign: 'center',
+													width: '100%',
+												}
+											}>
+											{item.likes}
+										</Text>
+									</Button>
+									<Button
+										rounded
+										light
+										transparent
+										bordered
+										onPress={
+											() => {
+												sharePhoto({ item, })
 											}
 										}
-									/>
-								</Button>
-							</View>
-						</Row>
-						{ item.comments && item.comments.length > 0 && (
-							<Row style={{ marginTop: 5, }}>
-								<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}</Text>
+										style={
+											{
+												height: 85,
+												width: 85,
+												backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+											}
+										}>
+										<Icon
+											type="FontAwesome"
+											name="share"
+											style={
+												{
+													fontSize: 50,
+													color: CONST.MAIN_COLOR,
+												}
+											}
+										/>
+									</Button>
+								</View>
 							</Row>
-						)}
-					</Grid>
-					{this.renderComments()}
-				</Content>
-				<Footer keyboardShouldPersistTaps="always">
-					<Col style={{
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}>
-						<Item rounded>
-							<Input
-								placeholder="any thoughts?"
-								placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-								style={
-									{
-										color: CONST.MAIN_COLOR,
+							{ item.comments && item.comments.length > 0 && (
+								<Row style={{ marginTop: 5, }}>
+									<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}</Text>
+								</Row>
+							)}
+						</Grid>
+						{this.renderComments()}
+					</Content>
+					<Footer keyboardShouldPersistTaps="always">
+						<Col style={{
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}>
+							<Item rounded>
+								<Input
+									placeholder="any thoughts?"
+									placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+									style={
+										{
+											color: CONST.MAIN_COLOR,
+										}
 									}
+									onChangeText={inputText => setInputText({ inputText, })}
+									value={inputText}
+									editable={!commentsSubmitting}
+									onSubmitEditing={
+										() => submitComment({ inputText, item, })
+									}
+								/>
+							</Item>
+						</Col>
+						<Col style={{
+							width: 50,
+							marginLeft: 5,
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}>
+							<Text style={
+								{
+									color: CONST.MAIN_COLOR,
+									fontSize: 10,
 								}
-								onChangeText={inputText => setInputText({ inputText, })}
-								value={inputText}
-								editable={!commentsSubmitting}
-								onSubmitEditing={
-									() => submitComment({ inputText, item, })
-								}
-							/>
-						</Item>
-					</Col>
-					<Col style={{
-						width: 50,
-						marginLeft: 5,
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}>
-						<Text style={
-							{
-								color: CONST.MAIN_COLOR,
-								fontSize: 10,
-							}
-						}>
-							{140 - inputText.length}
-						</Text>
-					</Col>
-				</Footer>
-				<KeyboardSpacer />
+							}>
+								{140 - inputText.length}
+							</Text>
+						</Col>
+					</Footer>
+				</KeyboardSpaceView>
 			</Container>
 		)
 	}
