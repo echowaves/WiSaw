@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -13,7 +12,9 @@
 		00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */; };
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
 		00E356F31AD99517003FC87E /* WiSawTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* WiSawTests.m */; };
+		0A001E562258372A00F93800 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0ABF0CB42255A0F2002F5DA0 /* JavaScriptCore.framework */; };
 		0A08B73021D57FC90009EE88 /* libRCTCameraRoll.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A08B70821D57FBF0009EE88 /* libRCTCameraRoll.a */; };
+		0A546A39225839E300BC42D0 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0ABF0CB42255A0F2002F5DA0 /* JavaScriptCore.framework */; };
 		0A70C34A21ED5D8C006B8984 /* WiSaw.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 0A70C34921ED5C9F006B8984 /* WiSaw.entitlements */; };
 		0AD5A1CE21F00BE20056C774 /* Crashlytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AD5A19E21F00BE10056C774 /* Crashlytics.framework */; };
 		0AD5A1CF21F00BE20056C774 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AD5A1CD21F00BE20056C774 /* Fabric.framework */; };
@@ -66,6 +67,7 @@
 		F453006417794D9498A00FF1 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8B50827177964DB1B7DB893C /* Entypo.ttf */; };
 		F97574A206BC4D60AA93EE3A /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BEC8F15A8EA34565A474F53E /* MaterialIcons.ttf */; };
 		FD4A1EF9B42646A69133C037 /* libRNSecureKeyStore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 612040EE6F834B1E86DBE539 /* libRNSecureKeyStore.a */; };
+		1380D983EBFF45FAB6EE2D14 /* libRNCAsyncStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FFF34BC312744BDC9E835DB7 /* libRNCAsyncStorage.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -152,6 +154,34 @@
 			proxyType = 2;
 			remoteGlobalIDString = A15C300E1CD25C330074CB35;
 			remoteInfo = RNFetchBlob;
+		};
+		0ABF0CDC2255A0F2002F5DA0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EDEBC6D6214B3E7000DD5AC8;
+			remoteInfo = jsi;
+		};
+		0ABF0CDE2255A0F2002F5DA0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EDEBC73B214B45A300DD5AC8;
+			remoteInfo = jsiexecutor;
+		};
+		0ABF0CE02255A0F2002F5DA0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = ED296FB6214C9A0900B7C4FE;
+			remoteInfo = "jsi-tvOS";
+		};
+		0ABF0CE22255A0F2002F5DA0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = ED296FEE214C9CF800B7C4FE;
+			remoteInfo = "jsiexecutor-tvOS";
 		};
 		0AC43A7E21EC1B02005388C2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -279,20 +309,6 @@
 			remoteGlobalIDString = 3D383D621EBD27B9005632C8;
 			remoteInfo = "double-conversion-tvOS";
 		};
-		2DF0FFEA2056DD460020B375 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 9936F3131F5F2E4B0010BF04;
-			remoteInfo = privatedata;
-		};
-		2DF0FFEC2056DD460020B375 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 9936F32F1F5F2E5B0010BF04;
-			remoteInfo = "privatedata-tvOS";
-		};
 		3DAD3E831DF850E9000B6D8A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */;
@@ -370,20 +386,6 @@
 			remoteGlobalIDString = 3D3CD9321DE5FBEE00167DC4;
 			remoteInfo = "cxxreact-tvOS";
 		};
-		3DAD3EAC1DF850E9000B6D8A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3D3CD90B1DE5FBD600167DC4;
-			remoteInfo = jschelpers;
-		};
-		3DAD3EAE1DF850E9000B6D8A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3D3CD9181DE5FBD800167DC4;
-			remoteInfo = "jschelpers-tvOS";
-		};
 		5E9157321DD0AC6500FF2AA8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */;
@@ -434,6 +436,7 @@
 		04502D5852CB42EDAD611075 /* libRNCamera.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNCamera.a; sourceTree = "<group>"; };
 		0A08B6FE21D57FBE0009EE88 /* RCTCameraRoll.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTCameraRoll.xcodeproj; path = "../node_modules/react-native/Libraries/CameraRoll/RCTCameraRoll.xcodeproj"; sourceTree = "<group>"; };
 		0A70C34921ED5C9F006B8984 /* WiSaw.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = WiSaw.entitlements; path = WiSaw/WiSaw.entitlements; sourceTree = "<group>"; };
+		0ABF0CB42255A0F2002F5DA0 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		0AD5A19E21F00BE10056C774 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		0AD5A1CD21F00BE20056C774 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		0AEE3BA121A8FDBA00902A31 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -486,6 +489,8 @@
 		F92C5999D19E4F27A030B1FF /* libRNGestureHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNGestureHandler.a; sourceTree = "<group>"; };
 		FC83381C2A7D4406B6417AEB /* RNGestureHandler.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNGestureHandler.xcodeproj; path = "../node_modules/react-native-gesture-handler/ios/RNGestureHandler.xcodeproj"; sourceTree = "<group>"; };
 		FFE64FAF0322431E8D0FAB9C /* rubicon-icon-font.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "rubicon-icon-font.ttf"; path = "../node_modules/native-base/Fonts/rubicon-icon-font.ttf"; sourceTree = "<group>"; };
+		55450DDA8A9143089A41B0B2 /* RNCAsyncStorage.xcodeproj */ = {isa = PBXFileReference; name = "RNCAsyncStorage.xcodeproj"; path = "../node_modules/@react-native-community/async-storage/ios/RNCAsyncStorage.xcodeproj"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.pb-project; explicitFileType = undefined; includeInIndex = 0; };
+		FFF34BC312744BDC9E835DB7 /* libRNCAsyncStorage.a */ = {isa = PBXFileReference; name = "libRNCAsyncStorage.a"; path = "libRNCAsyncStorage.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -493,6 +498,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A546A39225839E300BC42D0 /* JavaScriptCore.framework in Frameworks */,
 				140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -501,6 +507,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A001E562258372A00F93800 /* JavaScriptCore.framework in Frameworks */,
 				0AD5A1CF21F00BE20056C774 /* Fabric.framework in Frameworks */,
 				0A08B73021D57FC90009EE88 /* libRCTCameraRoll.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
@@ -525,6 +532,7 @@
 				2B9459419B1D482C84D34FA8 /* libreact-native-branch.a in Frameworks */,
 				4ED83950B69D4CABB1CBEBD7 /* libSMXCrashlytics.a in Frameworks */,
 				4D969CB8C4174DAEA2A44408 /* libFastImage.a in Frameworks */,
+				1380D983EBFF45FAB6EE2D14 /* libRNCAsyncStorage.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -756,16 +764,16 @@
 				3DAD3EA71DF850E9000B6D8A /* libyoga.a */,
 				3DAD3EA91DF850E9000B6D8A /* libcxxreact.a */,
 				3DAD3EAB1DF850E9000B6D8A /* libcxxreact.a */,
-				3DAD3EAD1DF850E9000B6D8A /* libjschelpers.a */,
-				3DAD3EAF1DF850E9000B6D8A /* libjschelpers.a */,
 				2DF0FFDF2056DD460020B375 /* libjsinspector.a */,
 				2DF0FFE12056DD460020B375 /* libjsinspector-tvOS.a */,
 				2DF0FFE32056DD460020B375 /* libthird-party.a */,
 				2DF0FFE52056DD460020B375 /* libthird-party.a */,
 				2DF0FFE72056DD460020B375 /* libdouble-conversion.a */,
 				2DF0FFE92056DD460020B375 /* libdouble-conversion.a */,
-				2DF0FFEB2056DD460020B375 /* libprivatedata.a */,
-				2DF0FFED2056DD460020B375 /* libprivatedata-tvOS.a */,
+				0ABF0CDD2255A0F2002F5DA0 /* libjsi.a */,
+				0ABF0CDF2255A0F2002F5DA0 /* libjsiexecutor.a */,
+				0ABF0CE12255A0F2002F5DA0 /* libjsi-tvOS.a */,
+				0ABF0CE32255A0F2002F5DA0 /* libjsiexecutor-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -773,6 +781,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0ABF0CB42255A0F2002F5DA0 /* JavaScriptCore.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
 			);
 			name = Frameworks;
@@ -842,6 +851,7 @@
 				3C259FE38DDE4E7087507B6D /* RNBranch.xcodeproj */,
 				AECE739BCAEF4560A4F929AF /* SMXCrashlytics.xcodeproj */,
 				7FFD219A58B2476AA5513528 /* FastImage.xcodeproj */,
+				55450DDA8A9143089A41B0B2 /* RNCAsyncStorage.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1192,6 +1202,34 @@
 			remoteRef = 0AA9D2F321D872DF00E9CD67 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		0ABF0CDD2255A0F2002F5DA0 /* libjsi.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libjsi.a;
+			remoteRef = 0ABF0CDC2255A0F2002F5DA0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0ABF0CDF2255A0F2002F5DA0 /* libjsiexecutor.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libjsiexecutor.a;
+			remoteRef = 0ABF0CDE2255A0F2002F5DA0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0ABF0CE12255A0F2002F5DA0 /* libjsi-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libjsi-tvOS.a";
+			remoteRef = 0ABF0CE02255A0F2002F5DA0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		0ABF0CE32255A0F2002F5DA0 /* libjsiexecutor-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libjsiexecutor-tvOS.a";
+			remoteRef = 0ABF0CE22255A0F2002F5DA0 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		0AC43A7F21EC1B02005388C2 /* libreact-native-branch.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1311,20 +1349,6 @@
 			remoteRef = 2DF0FFE82056DD460020B375 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		2DF0FFEB2056DD460020B375 /* libprivatedata.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libprivatedata.a;
-			remoteRef = 2DF0FFEA2056DD460020B375 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		2DF0FFED2056DD460020B375 /* libprivatedata-tvOS.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libprivatedata-tvOS.a";
-			remoteRef = 2DF0FFEC2056DD460020B375 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		3DAD3E841DF850E9000B6D8A /* libRCTImage-tvOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1400,20 +1424,6 @@
 			fileType = archive.ar;
 			path = libcxxreact.a;
 			remoteRef = 3DAD3EAA1DF850E9000B6D8A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		3DAD3EAD1DF850E9000B6D8A /* libjschelpers.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libjschelpers.a;
-			remoteRef = 3DAD3EAC1DF850E9000B6D8A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		3DAD3EAF1DF850E9000B6D8A /* libjschelpers.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libjschelpers.a;
-			remoteRef = 3DAD3EAE1DF850E9000B6D8A /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */ = {
@@ -1635,11 +1645,15 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = WiSawTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1667,11 +1681,15 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = WiSawTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1705,6 +1723,7 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = WiSaw/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1743,6 +1762,7 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = WiSaw/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1782,10 +1802,14 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1821,10 +1845,14 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1859,10 +1887,14 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -1897,10 +1929,14 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-fast-image/ios/FastImage/**",
+					"$(SRCROOT)/../node_modules/@react-native-community/async-storage/ios",
 				);
 				INFOPLIST_FILE = "WiSaw-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",

@@ -33,7 +33,7 @@ import {
 	connect,
 } from 'react-redux'
 
-import GridView from 'react-native-super-grid'
+import FlatGrid from 'react-native-super-grid'
 
 import PropTypes from 'prop-types'
 
@@ -353,7 +353,7 @@ class PhotosList extends Component {
 			this.calculateThumbWidth()
 			return (
 				<Container onLayout={this.onLayout.bind(this)}>
-					<GridView
+					<FlatGrid
 						// extraData={this.state}
 						itemDimension={
 							this.thumbWidth
@@ -363,7 +363,7 @@ class PhotosList extends Component {
 							photos
 						}
 						renderItem={
-							(item, index) => (
+							({ item, index, }) => (
 								<Thumb
 									item={
 										item

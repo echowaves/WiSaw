@@ -64,41 +64,6 @@ class Thumb extends Component {
 						fallback={item.fallback}
 					/>
 				</TouchableHighlight>
-				{ item.likes > 0 && (
-					<View
-						style={
-							{
-								fontSize: 30,
-								color: CONST.MAIN_COLOR,
-								position: 'absolute',
-								bottom: 2,
-								right: 5,
-							}
-						}>
-						<Icon
-							type="FontAwesome"
-							name="thumbs-up"
-							style={
-								{
-									fontSize: 30,
-									color: CONST.SECONDARY_COLOR,
-								}
-							}
-						/>
-						<Text
-							style={
-								{
-									fontSize: 10,
-									color: CONST.TEXT_COLOR,
-									position: 'absolute',
-									right: 5,
-									top: 12,
-								}
-							}>
-							{item.likes > 99 ? '+ 99' : item.likes}
-						</Text>
-					</View>
-				)}
 				{ item.commentsCount > 0 && (
 					<View
 						style={
@@ -107,7 +72,7 @@ class Thumb extends Component {
 								color: CONST.MAIN_COLOR,
 								position: 'absolute',
 								bottom: 2,
-								left: 5,
+								right: 5,
 							}
 						}>
 						<Icon
@@ -134,7 +99,41 @@ class Thumb extends Component {
 						</Text>
 					</View>
 				)}
-
+				{ item.likes > 0 && (
+					<View
+						style={
+							{
+								fontSize: 30,
+								color: CONST.MAIN_COLOR,
+								position: 'absolute',
+								bottom: 2,
+								left: 5,
+							}
+						}>
+						<Icon
+							type="FontAwesome"
+							name="thumbs-up"
+							style={
+								{
+									fontSize: 30,
+									color: CONST.SECONDARY_COLOR,
+								}
+							}
+						/>
+						<Text
+							style={
+								{
+									fontSize: 10,
+									color: CONST.TEXT_COLOR,
+									position: 'absolute',
+									right: 5,
+									top: 12,
+								}
+							}>
+							{item.likes > 99 ? '+ 99' : item.likes}
+						</Text>
+					</View>
+				)}
 			</View>
 		)
 	}
