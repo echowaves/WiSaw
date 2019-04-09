@@ -175,7 +175,8 @@ dependencies {
     implementation project(':@react-native-community_async-storage')
     compile project(':react-native-fast-image')
     api project(':react-native-fabric')
-    api project(':react-native-branch')
+    implementation project(':react-native-branch')
+    implementation "io.branch.sdk.android:library:3.0.4"
     api project(':rn-fetch-blob')
     api project(':react-native-camera')
     api project(':react-native-device-settings')
