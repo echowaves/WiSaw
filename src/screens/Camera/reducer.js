@@ -184,7 +184,6 @@ async function uploadFile(fileJson) {
 	}
 	if (response.status === 201) {
 		const { uploadURL, photo, } = responseJson
-
 		const responseData = await RNFetchBlob.fetch('PUT', uploadURL, {
 			"Content-Type": "image/jpeg",
 		}, await RNFetchBlob.wrap(uri))
