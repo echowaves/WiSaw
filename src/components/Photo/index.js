@@ -197,8 +197,8 @@ class Photo extends Component {
 		const { width, height, } = Dimensions.get('window')
 
 		return (
-			<Container onLayout={this.onLayout.bind(this)}>
-				<KeyboardSpaceView>
+			<KeyboardSpaceView>
+				<Container onLayout={this.onLayout.bind(this)}>
 					<Content>
 						<Grid>
 							<Row>
@@ -388,8 +388,8 @@ class Photo extends Component {
 							</Text>
 						</Col>
 					</Footer>
-				</KeyboardSpaceView>
-			</Container>
+				</Container>
+			</KeyboardSpaceView>
 		)
 	}
 }
