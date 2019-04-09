@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>77</string>
+	<string>79</string>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>
@@ -48,17 +48,19 @@
 		<dict/>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>Some description</string>
+	<string>The photos you take will be saved in the media library</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Some description</string>
+	<string>We may use perepheral devices</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Some description</string>
+	<string>We may need to acces your calendar</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Want to take a photo? Why don't you enable camera?</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Want to see cool things around you? Why don't you enable your location?</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Want to see cool things around you? Why don't you enable your location?</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Some description</string>
+	<string>Want to see cool things around you? Why don't you enable your location?</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Want to have your photos stored on your device? Why don't you enable Photo Library?</string>
 	<key>NSPhotoLibraryUsageDescription</key>
