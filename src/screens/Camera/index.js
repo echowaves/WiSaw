@@ -79,12 +79,13 @@ class Camera extends Component {
 		setZoom(0)
 	}
 
-	async takePicture() {
+	takePicture() {
 		const {
 			setPreviewUri,
 			uploadPendingPhotos,
 		} = this.props
 		if (this.cameraView) {
+			alert(2)
 			const options = {
 				quality: 1,
 				// orientation: "auto",
@@ -95,37 +96,42 @@ class Camera extends Component {
 				pauseAfterCapture: false,
 			}
 
-			const data = await this.cameraView.takePictureAsync(options)
-
-			if (this.animatableImage) {
-				this.animatableImage.stopAnimation()
-				this.animatableImage.fadeOut()
-			}
-			alert(1)
-			setPreviewUri(data.uri)
-
-			const cameraRollUri = await CameraRoll.saveToCameraRoll(data.uri)
-
-			const now = moment().format()
-			const { uuid, location, } = store.getState().photosList
-
-
-			await AsyncStorage.setItem(`wisaw-pending-${now}`,
-				JSON.stringify(
-					{
-						time: now,
-						uri: cameraRollUri,
-						uuid,
-						location: {
-							type: 'Point',
-							coordinates: [
-								location.coords.latitude,
-								location.coords.longitude,
-							],
-						},
+			this.cameraView.takePictureAsync(options)
+				.then(data => {
+					if (this.animatableImage) {
+						this.animatableImage.stopAnimation()
+						this.animatableImage.fadeOut()
 					}
-				))
-			uploadPendingPhotos()
+					setPreviewUri(data.uri)
+
+					CameraRoll.saveToCameraRoll(data.uri)
+						.then(
+							cameraRollUri => {
+								const now = moment().format()
+								const { uuid, location, } = store.getState().photosList
+
+								AsyncStorage.setItem(`wisaw-pending-${now}`,
+									JSON.stringify(
+										{
+											time: now,
+											uri: cameraRollUri,
+											uuid,
+											location: {
+												type: 'Point',
+												coordinates: [
+													location.coords.latitude,
+													location.coords.longitude,
+												],
+											},
+										}
+									)).then(
+									() => {
+										uploadPendingPhotos()
+									}
+								)
+							}
+						)
+				})
 		}
 	}
 
