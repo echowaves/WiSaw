@@ -268,7 +268,6 @@ async function _requestPhotos(getState, lat, long) {
 	return responseJson
 }
 
-
 export function getPhotos() {
 	return async (dispatch, getState) => {
 		if (!getState().photosList.location) {

@@ -68,9 +68,11 @@ export default function reducer(state = initialState, action) {
 }
 
 export function setPreviewUri(previewUri) {
-	return {
-		type: SET_PREVIEW_URI,
-		previewUri,
+	return async (dispatch, getState) => {
+		dispatch({
+			type: SET_PREVIEW_URI,
+			previewUri,
+		})
 	}
 }
 

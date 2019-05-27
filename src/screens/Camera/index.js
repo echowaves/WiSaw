@@ -79,12 +79,11 @@ class Camera extends Component {
 		setZoom(0)
 	}
 
-	takePicture = async function () {
+	async takePicture() {
 		const {
 			setPreviewUri,
 			uploadPendingPhotos,
 		} = this.props
-
 		if (this.cameraView) {
 			const options = {
 				quality: 1,
@@ -95,16 +94,17 @@ class Camera extends Component {
 				exif: false,
 				pauseAfterCapture: false,
 			}
+
 			const data = await this.cameraView.takePictureAsync(options)
 
 			if (this.animatableImage) {
 				this.animatableImage.stopAnimation()
 				this.animatableImage.fadeOut()
 			}
+			alert(1)
+			setPreviewUri(data.uri)
 
 			const cameraRollUri = await CameraRoll.saveToCameraRoll(data.uri)
-
-			setPreviewUri(data.uri)
 
 			const now = moment().format()
 			const { uuid, location, } = store.getState().photosList
@@ -247,7 +247,11 @@ class Camera extends Component {
 										backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 									}
 								}
-								onPress={this.takePicture.bind(this)}>
+								onPress={
+									() => {
+										this.takePicture()
+									}
+								}>
 								<Icon
 									type="FontAwesome"
 									name="camera"

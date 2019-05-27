@@ -196,15 +196,17 @@ class PhotosList extends Component {
 		this.thumbWidth = Math.floor((width - thumbsCount * 3 * 2) / thumbsCount)
 	}
 
-	async reload() {
+	reload() {
 		const {
 			resetState,
 			getPhotos,
 			uploadPendingPhotos,
 		} = this.props
-		await resetState()
-		getPhotos()
-		uploadPendingPhotos()
+		resetState().then(() => {
+			getPhotos().then(() => {
+				uploadPendingPhotos()
+			})
+		})
 	}
 
 	async alertForPermission(headerText, bodyText) {
