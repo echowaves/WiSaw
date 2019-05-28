@@ -114,6 +114,8 @@ class PhotosList extends Component {
 		setOrientation: PropTypes.func.isRequired,
 	}
 
+	thumbWidth
+
 	componentDidMount() {
 		const {
 			navigation,
@@ -188,23 +190,23 @@ class PhotosList extends Component {
 		setOrientation(name)
 	}
 
-	thumbWidth
-
 	calculateThumbWidth() {
 		const { width, } = Dimensions.get('window')
 		const thumbsCount = Math.floor(width / 100)
 		this.thumbWidth = Math.floor((width - thumbsCount * 3 * 2) / thumbsCount)
 	}
 
-	async reload() {
+	reload() {
 		const {
 			resetState,
 			getPhotos,
 			uploadPendingPhotos,
 		} = this.props
-		await resetState()
-		getPhotos()
-		uploadPendingPhotos()
+		resetState().then(() => {
+			getPhotos().then(() => {
+				uploadPendingPhotos()
+			})
+		})
 	}
 
 	async alertForPermission(headerText, bodyText) {

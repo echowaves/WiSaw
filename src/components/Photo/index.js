@@ -11,6 +11,8 @@ import {
 	Alert,
 } from 'react-native'
 
+import { KeyboardAwareScrollView, } from 'react-native-keyboard-aware-scroll-view'
+
 import {
 	Icon,
 	Spinner,
@@ -25,7 +27,6 @@ import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/R
 
 import FastImage from 'react-native-fast-image'
 
-import KeyboardSpaceView from 'react-native-keyboard-spacer-view'
 
 import PropTypes from 'prop-types'
 
@@ -197,8 +198,8 @@ class Photo extends Component {
 		const { width, height, } = Dimensions.get('window')
 
 		return (
-			<KeyboardSpaceView>
-				<Container onLayout={this.onLayout.bind(this)}>
+			<Container onLayout={this.onLayout.bind(this)}>
+				<KeyboardAwareScrollView>
 					<Content>
 						<Grid>
 							<Row>
@@ -388,8 +389,8 @@ class Photo extends Component {
 							</Text>
 						</Col>
 					</Footer>
-				</Container>
-			</KeyboardSpaceView>
+				</KeyboardAwareScrollView>
+			</Container>
 		)
 	}
 }

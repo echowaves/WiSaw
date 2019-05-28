@@ -38,7 +38,7 @@ import {
 	setZoom,
 } from './reducer'
 
-import { store, } from '../../../App'
+import { store, } from '../../../App' // eslint-disable-line import/no-cycle
 import * as CONST from '../../consts.js'
 
 class Camera extends Component {
@@ -79,12 +79,11 @@ class Camera extends Component {
 		setZoom(0)
 	}
 
-	takePicture = async function () {
+	takePicture() {
 		const {
 			setPreviewUri,
 			uploadPendingPhotos,
 		} = this.props
-
 		if (this.cameraView) {
 			const options = {
 				quality: 1,
@@ -95,37 +94,43 @@ class Camera extends Component {
 				exif: false,
 				pauseAfterCapture: false,
 			}
-			const data = await this.cameraView.takePictureAsync(options)
 
-			if (this.animatableImage) {
-				this.animatableImage.stopAnimation()
-				this.animatableImage.fadeOut()
-			}
-
-			const cameraRollUri = await CameraRoll.saveToCameraRoll(data.uri)
-
-			setPreviewUri(data.uri)
-
-			const now = moment().format()
-			const { uuid, location, } = store.getState().photosList
-
-
-			await AsyncStorage.setItem(`wisaw-pending-${now}`,
-				JSON.stringify(
-					{
-						time: now,
-						uri: cameraRollUri,
-						uuid,
-						location: {
-							type: 'Point',
-							coordinates: [
-								location.coords.latitude,
-								location.coords.longitude,
-							],
-						},
+			this.cameraView.takePictureAsync(options)
+				.then(data => {
+					if (this.animatableImage) {
+						this.animatableImage.stopAnimation()
+						this.animatableImage.fadeOut()
 					}
-				))
-			uploadPendingPhotos()
+					setPreviewUri(data.uri)
+
+					CameraRoll.saveToCameraRoll(data.uri)
+						.then(
+							cameraRollUri => {
+								const now = moment().format()
+								const { uuid, location, } = store.getState().photosList
+
+								AsyncStorage.setItem(`wisaw-pending-${now}`,
+									JSON.stringify(
+										{
+											time: now,
+											uri: cameraRollUri,
+											uuid,
+											location: {
+												type: 'Point',
+												coordinates: [
+													location.coords.latitude,
+													location.coords.longitude,
+												],
+											},
+										}
+									)).then(
+									() => {
+										uploadPendingPhotos()
+									}
+								)
+							}
+						)
+				})
 		}
 	}
 
@@ -247,7 +252,11 @@ class Camera extends Component {
 										backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 									}
 								}
-								onPress={this.takePicture.bind(this)}>
+								onPress={
+									() => {
+										this.takePicture()
+									}
+								}>
 								<Icon
 									type="FontAwesome"
 									name="camera"

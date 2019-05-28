@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage'
+import { Platform, } from 'react-native'
 
 import RNFetchBlob from 'rn-fetch-blob'
 
@@ -68,9 +69,11 @@ export default function reducer(state = initialState, action) {
 }
 
 export function setPreviewUri(previewUri) {
-	return {
-		type: SET_PREVIEW_URI,
-		previewUri,
+	return async (dispatch, getState) => {
+		dispatch({
+			type: SET_PREVIEW_URI,
+			previewUri,
+		})
 	}
 }
 
@@ -184,9 +187,20 @@ async function uploadFile(fileJson) {
 	}
 	if (response.status === 201) {
 		const { uploadURL, photo, } = responseJson
+
+		let filePath = uri
+
+		// ths has to be addressed by the rn-fetch-blob -- remove when rn-fetch-blob supports it
+		if (Platform.OS === 'ios') {
+			const ext = 'jpg' // or heic or png etc
+			const newuri = uri.replace('ph://', '')
+			const localuri = newuri.split('/')[0] // leaves 9F983DBA-EC35-42B8-8773-B597CF782EDD
+			filePath = `assets-library://asset/asset.${ext}?id=${localuri}&ext=${ext}` // this you can pass into rn-fetch-blob stuff
+		}
+
 		const responseData = await RNFetchBlob.fetch('PUT', uploadURL, {
 			"Content-Type": "image/jpeg",
-		}, await RNFetchBlob.wrap(uri))
+		}, await RNFetchBlob.wrap(filePath))
 		return { responseData, photo, }
 	}
 }

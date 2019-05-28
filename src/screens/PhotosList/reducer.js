@@ -151,11 +151,11 @@ export default function reducer(state = initialState, action) {
 							...item,
 							comments:
 							[
+								...item.comments,
 								{
 									...action.comment,
 									hiddenButtons: true,
 								},
-								...item.comments,
 							],
 							commentsCount: item.comments.length + 1,
 						}
@@ -267,7 +267,6 @@ async function _requestPhotos(getState, lat, long) {
 	// })
 	return responseJson
 }
-
 
 export function getPhotos() {
 	return async (dispatch, getState) => {
