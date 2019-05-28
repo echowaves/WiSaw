@@ -38,7 +38,7 @@ import {
 	setZoom,
 } from './reducer'
 
-import { store, } from '../../../App'
+import { store, } from '../../../App' // eslint-disable-line import/no-cycle
 import * as CONST from '../../consts.js'
 
 class Camera extends Component {
