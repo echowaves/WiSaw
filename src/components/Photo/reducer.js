@@ -366,7 +366,7 @@ export function getComments({ item, }) {
 							...comment,
 							hiddenButtons: true,
 						})
-					),
+					).reverse(),
 				})
 			} else {
 				dispatch({

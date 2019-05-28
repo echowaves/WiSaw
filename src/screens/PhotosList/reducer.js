@@ -151,11 +151,11 @@ export default function reducer(state = initialState, action) {
 							...item,
 							comments:
 							[
+								...item.comments,
 								{
 									...action.comment,
 									hiddenButtons: true,
 								},
-								...item.comments,
 							],
 							commentsCount: item.comments.length + 1,
 						}
