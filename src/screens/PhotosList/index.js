@@ -114,6 +114,8 @@ class PhotosList extends Component {
 		setOrientation: PropTypes.func.isRequired,
 	}
 
+	thumbWidth
+
 	componentDidMount() {
 		const {
 			navigation,
@@ -187,8 +189,6 @@ class PhotosList extends Component {
 		}
 		setOrientation(name)
 	}
-
-	thumbWidth
 
 	calculateThumbWidth() {
 		const { width, } = Dimensions.get('window')

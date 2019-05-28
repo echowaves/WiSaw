@@ -85,7 +85,6 @@ class Camera extends Component {
 			uploadPendingPhotos,
 		} = this.props
 		if (this.cameraView) {
-			alert(2)
 			const options = {
 				quality: 1,
 				// orientation: "auto",
