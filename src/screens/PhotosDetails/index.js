@@ -169,6 +169,18 @@ class PhotosDetails extends Component {
 					horizontal
 					loop={false}
 					showsButtons
+					buttonWrapperStyle={{
+						backgroundColor: 'transparent',
+						flexDirection: 'row',
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						flex: 1,
+						paddingHorizontal: 10,
+						paddingVertical: 10,
+						justifyContent: 'space-between',
+						alignItems: 'baseline',
+					}}
 					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
 					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
 					index={currentPhotoIndex}
