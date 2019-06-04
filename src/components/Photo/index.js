@@ -9,17 +9,14 @@ import {
 	View,
 	TouchableOpacity,
 	Alert,
-	Keyboard,
 } from 'react-native'
-
-import { KeyboardAwareScrollView, } from 'react-native-keyboard-aware-scroll-view'
 
 import {
 	Icon,
 	Spinner,
 	Button,
 	Container,
-	Content, Card, CardItem, Text, Item, Input, Footer,
+	Content, Card, CardItem, Text, Item, Input,
 } from 'native-base'
 
 import { Col, Row, Grid, } from "react-native-easy-grid"
@@ -204,10 +201,13 @@ class Photo extends Component {
 		const { width, height, } = Dimensions.get('window')
 
 		return (
-			<Container
-				onLayout={this.onLayout.bind(this)}>
-				<KeyboardAwareScrollView keyboardShouldPersistTaps="always">
-					<Grid>
+			<Container>
+				<Content
+					disableKBDismissScroll
+					keyboardDismissMode="on-drag"
+					keyboardShouldPersistTaps="always"
+					enableOnAndroid>
+					<Grid onLayout={this.onLayout.bind(this)}>
 						<Row>
 							<ReactNativeZoomableView
 								maxZoom={3}
@@ -358,7 +358,6 @@ class Photo extends Component {
 						{ item.comments && item.comments.length > 0
 								&& (this.renderComments())
 						}
-
 						<Row>
 							<Col
 								style={{
@@ -408,15 +407,12 @@ class Photo extends Component {
 									alignItems: 'center',
 									justifyContent: 'center',
 								}}>
-								<TouchableOpacity
+								<Button
+									transparent
+									iconLeft
 									onPress={
 										() => {
 											submitComment({ inputText, item, })
-										}
-									}
-									style={
-										{
-											backgroundColor: 'transparent',
 										}
 									}>
 									<Icon
@@ -429,11 +425,11 @@ class Photo extends Component {
 											}
 										}
 									/>
-								</TouchableOpacity>
+								</Button>
 							</Col>
 						</Row>
 					</Grid>
-				</KeyboardAwareScrollView>
+				</Content>
 			</Container>
 		)
 	}
