@@ -163,42 +163,42 @@ class PhotosDetails extends Component {
 			getPhotos,
 		} = this.props
 		return (
-			<View style={styles.container} onLayout={this.onLayout.bind(this)}>
-				<Swiper
-					autoplay={false}
-					horizontal
-					loop={false}
-					showsButtons
-					buttonWrapperStyle={{
-						backgroundColor: 'transparent',
-						flexDirection: 'row',
-						position: 'absolute',
-						top: 0,
-						left: 0,
-						flex: 1,
-						paddingHorizontal: 10,
-						paddingVertical: 10,
-						justifyContent: 'space-between',
-						alignItems: 'baseline',
-					}}
-					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
-					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
-					index={currentPhotoIndex}
-					onIndexChanged={index => {
-						setCurrentPhotoIndex(index)
-						if (currentPhotoIndex > photos.length - 5) {
-							getPhotos() // pre-load more photos when nearing the end
-						}
-					}} // otherwise will jump to wrong photo onLayout
-					loadMinimal
-					loadMinimalSize={1}
-					showsPagination={false}
-					pagingEnabled>
-					{photos.map(item => (
-						<Photo item={item} key={item.id} />
-					))}
-				</Swiper>
-			</View>
+			<Swiper
+				style={styles.container}
+				keyboardShouldPersistTaps="always"
+				autoplay={false}
+				horizontal
+				loop={false}
+				showsButtons
+				buttonWrapperStyle={{
+					backgroundColor: 'transparent',
+					flexDirection: 'row',
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					flex: 1,
+					paddingHorizontal: 10,
+					paddingVertical: 10,
+					justifyContent: 'space-between',
+					alignItems: 'baseline',
+				}}
+				nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
+				prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
+				index={currentPhotoIndex}
+				onIndexChanged={index => {
+					setCurrentPhotoIndex(index)
+					if (currentPhotoIndex > photos.length - 5) {
+						getPhotos() // pre-load more photos when nearing the end
+					}
+				}} // otherwise will jump to wrong photo onLayout
+				loadMinimal
+				loadMinimalSize={1}
+				showsPagination={false}
+				pagingEnabled>
+				{photos.map(item => (
+					<Photo item={item} key={item.id} />
+				))}
+			</Swiper>
 		)
 	}
 }
