@@ -206,7 +206,7 @@ class Photo extends Component {
 						<Row>
 							<ReactNativeZoomableView
 								maxZoom={3}
-								minZoom={0.5}
+								minZoom={1}
 								zoomStep={3}
 								initialZoom={1}
 								bindToBorders>
