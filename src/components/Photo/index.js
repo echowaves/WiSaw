@@ -236,7 +236,7 @@ class Photo extends Component {
 											width,
 											height,
 											position: 'absolute',
-											top: 0,
+											top: -50,
 											bottom: 0,
 											right: 0,
 											left: 0,
