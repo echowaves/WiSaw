@@ -27,12 +27,9 @@ export const SUBMIT_COMMENT_FINISHED = 'wisaw/photo/SUBMIT_COMMENT_FINISHED'
 export const GET_COMMENTS_STARTED = 'wisaw/photo/GET_COMMENTS_STARTED'
 export const GET_COMMENTS_FINISHED = 'wisaw/photo/GET_COMMENTS_FINISHED'
 export const DELETE_COMMENT = 'wisaw/photo/DELETE_COMMENT'
-export const SET_PHOTO_LOADED = 'wisaw/photo/SET_PHOTO_LOADED'
-
 
 export const initialState = {
 	photo: {},
-	loaded: false,
 	likes: [],
 	bans: [],
 	inputText: '',
@@ -93,11 +90,6 @@ export default function reducer(state = initialState, action) {
 		case GET_COMMENTS_FINISHED:
 			return {
 				...state,
-			}
-		case SET_PHOTO_LOADED:
-			return {
-				...state,
-				loaded: true,
 			}
 		// case DELETE_PHOTO:
 		// 	return state
@@ -454,11 +446,5 @@ export function deleteComment({ photo, comment, }) {
 				type: "warning",
 			})
 		}
-	}
-}
-
-export function setPhotoLoaded() {
-	return {
-		type: SET_PHOTO_LOADED,
 	}
 }

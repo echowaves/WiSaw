@@ -36,7 +36,6 @@ import {
 	getComments,
 	toggleCommentButtons,
 	deleteComment,
-	setPhotoLoaded,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -44,7 +43,6 @@ import * as CONST from '../../consts.js'
 class Photo extends Component {
 	static propTypes = {
 		item: PropTypes.object.isRequired,
-		loaded: PropTypes.bool.isRequired,
 		likes: PropTypes.array.isRequired,
 		likePhoto: PropTypes.func.isRequired,
 		sharePhoto: PropTypes.func.isRequired,
@@ -55,7 +53,6 @@ class Photo extends Component {
 		getComments: PropTypes.func.isRequired,
 		toggleCommentButtons: PropTypes.func.isRequired,
 		deleteComment: PropTypes.func.isRequired,
-		setPhotoLoaded: PropTypes.func.isRequired,
 	}
 
 	static navigationOptions = {
@@ -194,11 +191,6 @@ class Photo extends Component {
 			inputText,
 			submitComment,
 			commentsSubmitting,
-			setPhotoLoaded,
-		} = this.props
-
-		const {
-			loaded,
 		} = this.props
 
 		const { width, height, } = Dimensions.get('window')
@@ -218,12 +210,46 @@ class Photo extends Component {
 								zoomStep={3}
 								initialZoom={1}
 								bindToBorders>
+
+								<View style={{
+									flex: 1,
+									position: 'absolute',
+									top: 0,
+									bottom: 0,
+									right: 0,
+									left: 0,
+								}}>
+									<FastImage
+										source={{
+											uri: item.getThumbUrl,
+										}}
+										style={{
+											width,
+											height: height - 200,
+										}}
+										backgroundColor="transparent"
+										resizeMode={FastImage.resizeMode.contain}
+									/>
+									<Spinner
+										style={{
+											flex: 1,
+											width,
+											height,
+											position: 'absolute',
+											top: 0,
+											bottom: 0,
+											right: 0,
+											left: 0,
+										}}
+										color={
+											CONST.MAIN_COLOR
+										}
+									/>
+								</View>
 								<FastImage
 									source={{
 										uri: item.getImgUrl,
 									}}
-									onLoadEnd={() => setPhotoLoaded()
-									}
 									style={{
 										width,
 										height: height - 200,
@@ -231,43 +257,7 @@ class Photo extends Component {
 									backgroundColor="transparent"
 									resizeMode={FastImage.resizeMode.contain}
 								/>
-								{ !loaded && ( // eslint-disable-line react/destructuring-assignment
-									<View style={{
-										flex: 1,
-										position: 'absolute',
-										top: 0,
-										bottom: 0,
-										right: 0,
-										left: 0,
-									}}>
-										<FastImage
-											source={{
-												uri: item.getThumbUrl,
-											}}
-											style={{
-												width,
-												height: height - 200,
-											}}
-											backgroundColor="transparent"
-											resizeMode={FastImage.resizeMode.contain}
-										/>
-										<Spinner
-											style={{
-												flex: 1,
-												width,
-												height,
-												position: 'absolute',
-												top: 0,
-												bottom: 0,
-												right: 0,
-												left: 0,
-											}}
-											color={
-												CONST.MAIN_COLOR
-											}
-										/>
-									</View>
-								)}
+
 							</ReactNativeZoomableView>
 							<View style={{
 								flex: 2,
@@ -440,7 +430,6 @@ class Photo extends Component {
 }
 
 const mapStateToProps = state => ({
-	loaded: state.photo.loaded,
 	likes: state.photo.likes,
 	inputText: state.photo.inputText,
 	commentsSubmitting: state.photo.commentsSubmitting,
@@ -454,7 +443,6 @@ const mapDispatchToProps = {
 	getComments,
 	toggleCommentButtons,
 	deleteComment,
-	setPhotoLoaded,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)
