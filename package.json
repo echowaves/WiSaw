@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start-iphone": "react-native run-ios --simulator \"iPhone 8 Plus\"",
+		"start-iphone-x": "react-native run-ios --simulator \"iPhone X\"",
     "start-ipad": "react-native run-ios --simulator \"iPad Pro (12.9-inch) (2nd generation)\"",
     "start-android": "react-native run-android",
     "start": "node node_modules/react-native/local-cli/cli.js start",

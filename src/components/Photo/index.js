@@ -352,7 +352,10 @@ class Photo extends Component {
 						{ item.comments && item.comments.length > 0
 								&& (this.renderComments())
 						}
-						<Row>
+						<Row
+							style={{
+								paddingVertical: 20,
+							}}>
 							<Col
 								style={{
 									width: 50,
@@ -400,6 +403,7 @@ class Photo extends Component {
 									width: 50,
 									alignItems: 'center',
 									justifyContent: 'center',
+									marginRight: 10,
 								}}>
 								<Button
 									transparent
