@@ -82,7 +82,6 @@ class Camera extends Component {
 	takePicture() {
 		const {
 			setPreviewUri,
-			uploadPendingPhotos,
 		} = this.props
 		if (this.cameraView) {
 			const options = {
@@ -102,60 +101,122 @@ class Camera extends Component {
 						this.animatableImage.fadeOut()
 					}
 					setPreviewUri(data.uri)
-
-					CameraRoll.saveToCameraRoll(data.uri)
-						.then(
-							cameraRollUri => {
-								const now = moment().format()
-								const { uuid, location, } = store.getState().photosList
-
-								AsyncStorage.setItem(`wisaw-pending-${now}`,
-									JSON.stringify(
-										{
-											time: now,
-											uri: cameraRollUri,
-											uuid,
-											location: {
-												type: 'Point',
-												coordinates: [
-													location.coords.latitude,
-													location.coords.longitude,
-												],
-											},
-										}
-									)).then(
-									() => {
-										uploadPendingPhotos()
-									}
-								)
-							}
-						)
 				})
 		}
 	}
 
-	renderPreviewImage(imageUri) {
-		return (
-			<Animatable.Image
-				ref={ref => {
-					this.animatableImage = ref
-				}}
-				source={imageUri ? { uri: imageUri, } : {}}
-				animation="fadeOut"
-				duration={30000}
-				style={
-					{
-						position: 'absolute',
-						alignSelf: 'center',
-						top: 20,
-						height: 100,
-						width: 100,
-						borderRadius: 10,
-						borderWidth: imageUri ? 1 : 0,
-						borderColor: '#fff',
-					}
+	upload(uri) {
+		const {
+			uploadPendingPhotos,
+			setPreviewUri,
+		} = this.props
+		CameraRoll.saveToCameraRoll(uri)
+			.then(
+				cameraRollUri => {
+					const now = moment().format()
+					const { uuid, location, } = store.getState().photosList
+
+					AsyncStorage.setItem(`wisaw-pending-${now}`,
+						JSON.stringify(
+							{
+								time: now,
+								uri: cameraRollUri,
+								uuid,
+								location: {
+									type: 'Point',
+									coordinates: [
+										location.coords.latitude,
+										location.coords.longitude,
+									],
+								},
+							}
+						)).then(
+						() => {
+							uploadPendingPhotos()
+						}
+					)
 				}
-			/>
+			)
+		setPreviewUri(null)
+	}
+
+	renderPreviewImage(imageUri) {
+		const {
+			setPreviewUri,
+		} = this.props
+		return (
+			<View style={{
+				position: 'absolute',
+				top: 0,
+				bottom: 0,
+				left: 0,
+				right: 0,
+				backgroundColor: '#000',
+			}}>
+				<Animatable.Image
+					ref={ref => {
+						this.animatableImage = ref
+					}}
+					source={imageUri ? { uri: imageUri, } : {}}
+					animation="fadeIn"
+					duration={1000}
+					style={
+						{
+							flex: 1,
+							resizeMode: "contain",
+							borderRadius: 10,
+							borderWidth: 1,
+							borderColor: '#fff',
+						}
+					}
+				/>
+				<Button
+					iconLeft danger large
+					style={{
+						position: 'absolute',
+						bottom: 10,
+						left: 10,
+						paddingRight: 20,
+						width: 100,
+					}}
+					onPress={
+						() => {
+							setPreviewUri(null)
+						}
+					}>
+					<Icon name="close-circle-outline" />
+					<Text
+						style={
+							{
+								color: '#fff',
+							}
+						}>skip
+					</Text>
+				</Button>
+				<Button
+					iconLeft success large
+					style={{
+						position: 'absolute',
+						bottom: 10,
+						right: 10,
+						paddingRight: 20,
+						width: 100,
+					}}
+					onPress={
+						() => {
+							this.upload(imageUri)
+						}
+					}>
+					<Icon name="cloud-upload" />
+					<Text
+						style={
+							{
+								color: '#fff',
+							}
+						}>  upload
+					</Text>
+				</Button>
+			</View>
 		)
 	}
 
@@ -329,7 +390,7 @@ class Camera extends Component {
 						</TouchableOpacity>
 					</View>
 				</View>
-				{ this.renderPreviewImage(previewUri) }
+				{ previewUri && this.renderPreviewImage(previewUri) }
 			</View>
 		)
 	}
