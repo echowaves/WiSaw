@@ -17,27 +17,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>5.4.0</string>
+	<string>1.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>96</string>
-	<key>Fabric</key>
-	<dict>
-		<key>APIKey</key>
-		<string>87b4cce77e2726175a21523cd45fd311d50ec654</string>
-		<key>Kits</key>
-		<array>
-			<dict>
-				<key>KitInfo</key>
-				<dict/>
-				<key>KitName</key>
-				<string>Crashlytics</string>
-			</dict>
-		</array>
-	</dict>
-	<key>LSApplicationCategoryType</key>
-	<string></string>
+	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -45,34 +29,40 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSExceptionDomains</key>
-		<dict/>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
 	</dict>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>The photos you take will be saved in the media library</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>We may use perepheral devices</string>
-	<key>NSCalendarsUsageDescription</key>
-	<string>We may need to acces your calendar</string>
-	<key>NSCameraUsageDescription</key>
-	<string>We need to access your camera, so that you can take photos.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>We need to know your location so that we can show you posts in your area.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Want to see cool things around you? Why don't you enable your location?</string>
-	<key>NSMotionUsageDescription</key>
-	<string>This will help us to improve the releavnce of posts that you can see related to you location.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Want to have your photos stored on your device? Why don't you enable Photo Library?</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Want to see photos stored on your device? Why don't you enable it?</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Some description</string>
+	<string/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 	<key>UIAppFonts</key>
 	<array>
+		<string>AntDesign.ttf</string>
 		<string>Entypo.ttf</string>
 		<string>EvilIcons.ttf</string>
 		<string>Feather.ttf</string>
 		<string>FontAwesome.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
 		<string>Foundation.ttf</string>
 		<string>Ionicons.ttf</string>
 		<string>MaterialCommunityIcons.ttf</string>
@@ -84,25 +74,5 @@
 		<string>SimpleLineIcons.ttf</string>
 		<string>Zocial.ttf</string>
 	</array>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>armv7</string>
-	</array>
-	<key>UIRequiresFullScreen</key>
-	<true/>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
-	<key>branch_app_domain</key>
-	<string>link.wisaw.com</string>
-	<key>branch_key</key>
-	<string>key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4</string>
 </dict>
 </plist>
