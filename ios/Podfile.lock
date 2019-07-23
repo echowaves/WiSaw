@@ -1,13 +1,12 @@
 PODS:
   - boost-for-react-native (1.63.0)
-  - Branch-SDK (0.26.0):
-    - Branch-SDK/Core (= 0.26.0)
-  - Branch-SDK/Core (0.26.0)
-  - Crashlytics (3.10.2):
-    - Fabric (~> 1.7.7)
+  - Branch (0.27.1):
+    - Branch/Core (= 0.27.1)
+  - Branch/Core (0.27.1)
+  - Crashlytics (3.13.4):
+    - Fabric (~> 1.10.2)
   - DoubleConversion (1.1.6)
-  - Fabric (1.7.7)
-  - FLAnimatedImage (1.0.12)
+  - Fabric (1.10.2)
   - Folly (2018.10.22.00):
     - boost-for-react-native
     - DoubleConversion
@@ -18,30 +17,30 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - libwebp (0.6.1):
-    - libwebp/core (= 0.6.1)
-    - libwebp/dec (= 0.6.1)
-    - libwebp/demux (= 0.6.1)
-    - libwebp/dsp (= 0.6.1)
-    - libwebp/enc (= 0.6.1)
-    - libwebp/mux (= 0.6.1)
-    - libwebp/utils (= 0.6.1)
-    - libwebp/webp (= 0.6.1)
-  - libwebp/core (0.6.1):
+  - libwebp (1.0.2):
+    - libwebp/core (= 1.0.2)
+    - libwebp/dec (= 1.0.2)
+    - libwebp/demux (= 1.0.2)
+    - libwebp/dsp (= 1.0.2)
+    - libwebp/enc (= 1.0.2)
+    - libwebp/mux (= 1.0.2)
+    - libwebp/utils (= 1.0.2)
+    - libwebp/webp (= 1.0.2)
+  - libwebp/core (1.0.2):
     - libwebp/webp
-  - libwebp/dec (0.6.1):
+  - libwebp/dec (1.0.2):
     - libwebp/core
-  - libwebp/demux (0.6.1):
+  - libwebp/demux (1.0.2):
     - libwebp/core
-  - libwebp/dsp (0.6.1):
+  - libwebp/dsp (1.0.2):
     - libwebp/core
-  - libwebp/enc (0.6.1):
+  - libwebp/enc (1.0.2):
     - libwebp/core
-  - libwebp/mux (0.6.1):
+  - libwebp/mux (1.0.2):
     - libwebp/core
-  - libwebp/utils (0.6.1):
+  - libwebp/utils (1.0.2):
     - libwebp/core
-  - libwebp/webp (0.6.1)
+  - libwebp/webp (1.0.2)
   - React (0.60.4):
     - React-Core (= 0.60.4)
     - React-DevSupport (= 0.60.4)
@@ -88,24 +87,18 @@ PODS:
     - React-cxxreact (= 0.60.4)
     - React-jsi (= 0.60.4)
   - React-jsinspector (0.60.4)
-  - react-native-branch (2.3.5):
-    - Branch-SDK
+  - react-native-branch (4.0.0):
+    - Branch (= 0.27.1)
     - React
-  - react-native-camera (2.9.0):
+  - react-native-camera (3.0.0):
     - React
-    - react-native-camera/RCT (= 2.9.0)
-    - react-native-camera/RN (= 2.9.0)
-  - react-native-camera/RCT (2.9.0):
+    - react-native-camera/RCT (= 3.0.0)
+    - react-native-camera/RN (= 3.0.0)
+  - react-native-camera/RCT (3.0.0):
     - React
-  - react-native-camera/RN (2.9.0):
+  - react-native-camera/RN (3.0.0):
     - React
-  - react-native-fast-image (5.2.0):
-    - FLAnimatedImage
-    - React
-    - SDWebImage/Core
-    - SDWebImage/GIF
-    - SDWebImage/WebP
-  - react-native-slider (1.1.2):
+  - react-native-slider (2.0.0):
     - React
   - React-RCTActionSheet (0.60.4):
     - React-Core (= 0.60.4)
@@ -135,31 +128,33 @@ PODS:
     - Crashlytics
     - Fabric
     - React
-  - ReactNativePermissions (1.1.1):
+  - ReactNativePermissions (1.2.0):
     - React
   - rn-fetch-blob (0.10.16):
     - React-Core
-  - RNCAsyncStorage (1.4.2):
+  - RNCAsyncStorage (1.5.1):
     - React
   - RNCViewpager (1.1.7):
     - React
-  - RNGestureHandler (1.2.1):
+  - RNFastImage (7.0.2):
     - React
-  - RNScreens (1.0.0-alpha.22):
+    - SDWebImage (~> 5.0)
+    - SDWebImageWebPCoder (~> 0.2.3)
+  - RNGestureHandler (1.3.0):
+    - React
+  - RNScreens (1.0.0-alpha.23):
     - React
   - RNSecureKeyStore (1.0.0):
     - React
-  - SDWebImage/Core (4.4.1)
-  - SDWebImage/GIF (4.4.1):
-    - FLAnimatedImage (~> 1.0)
-    - SDWebImage/Core
-  - SDWebImage/WebP (4.4.1):
-    - libwebp (~> 0.5)
-    - SDWebImage/Core
+  - SDWebImage (5.0.6):
+    - SDWebImage/Core (= 5.0.6)
+  - SDWebImage/Core (5.0.6)
+  - SDWebImageWebPCoder (0.2.3):
+    - libwebp (~> 1.0)
+    - SDWebImage/Core (~> 5.0)
   - yoga (0.60.4.React)
 
 DEPENDENCIES:
-  - Branch-SDK (from `../node_modules/react-native-branch/ios`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
@@ -173,7 +168,6 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-branch (from `../node_modules/react-native-branch`)
   - react-native-camera (from `../node_modules/react-native-camera`)
-  - react-native-fast-image (from `../node_modules/react-native-fast-image`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
@@ -190,6 +184,7 @@ DEPENDENCIES:
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - "RNCViewpager (from `../node_modules/@react-native-community/viewpager`)"
+  - RNFastImage (from `../node_modules/react-native-fast-image`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSecureKeyStore (from `../node_modules/react-native-secure-key-store/ios`)
@@ -198,15 +193,14 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - boost-for-react-native
+    - Branch
     - Crashlytics
     - Fabric
-    - FLAnimatedImage
     - libwebp
     - SDWebImage
+    - SDWebImageWebPCoder
 
 EXTERNAL SOURCES:
-  Branch-SDK:
-    :path: "../node_modules/react-native-branch/ios"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   Folly:
@@ -233,8 +227,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-branch"
   react-native-camera:
     :path: "../node_modules/react-native-camera"
-  react-native-fast-image:
-    :path: "../node_modules/react-native-fast-image"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
   React-RCTActionSheet:
@@ -267,6 +259,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/async-storage"
   RNCViewpager:
     :path: "../node_modules/@react-native-community/viewpager"
+  RNFastImage:
+    :path: "../node_modules/react-native-fast-image"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNScreens:
@@ -278,14 +272,13 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
-  Branch-SDK: a9af035315c388b684545a74e6bce35083c89d6a
-  Crashlytics: 0360624eea1c978a743feddb2fb1ef8b37fb7a0d
+  Branch: 1ace77c04b6e3efbf982bf4364f0662bfac156a0
+  Crashlytics: 2dfd686bcb918dc10ee0e76f7f853fe42c7bd552
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
-  Fabric: bda89e242bce1b7b8ab264248cf3407774ce0095
-  FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
+  Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
-  libwebp: 0f01098c6c17175391af621b2f14150f3ca16e16
+  libwebp: b068a3bd7c45f7460f6715be7bed1a18fd5d6b48
   React: ff7ee2ae5ee1c1d9ae2183b4111045b25294bb01
   React-Core: 8e0ea421cae5609d2562850f98421b15030476fa
   React-cxxreact: 326880209990151a7182a813311054e9772ba510
@@ -294,10 +287,9 @@ SPEC CHECKSUMS:
   React-jsi: 21d3153b1153fbf6510a92b6b11e33e725cb7432
   React-jsiexecutor: 7549641e48bafae7bfee3f3ea19bf4901639c5de
   React-jsinspector: 73f24a02fa684ed6a2b828ba116874a2191ded88
-  react-native-branch: 3294bdc6f60d23c311f545e2663ce6dc3079de21
-  react-native-camera: 571e4cfe70e7021e9077c1699a53e659db971f96
-  react-native-fast-image: 21d2d84a46b12cacbe7958ab6414fe828c094f82
-  react-native-slider: ffaac188e066a48d57dafa962273f89472706ce5
+  react-native-branch: 5e2b3a7bbda82a7af421ce1981a956ef18c38d96
+  react-native-camera: 53e453fd5e6501afbac79d6b21a5fbfd84950eda
+  react-native-slider: 40bdbfc1af0393922ac331bc1d95a6c5d5174fb6
   React-RCTActionSheet: 9f71d7ae3e8fb10e08d162cbf14c621349dbfab3
   React-RCTAnimation: 981d8c95b0e30918a9832ccac32af83562a27fae
   React-RCTBlob: 21e73d1020a302a75fed30dbaee9f15287b80baa
@@ -309,16 +301,18 @@ SPEC CHECKSUMS:
   React-RCTVibration: 0bea40cd51bd089bd591a8f74c86e91fdf2666c5
   React-RCTWebSocket: 163873f4cdd5f1058a9483443404fc3801581cb6
   ReactNativeFabric: d05320ff347d5c72567c115b97edeead111ac4d2
-  ReactNativePermissions: b64e084dff6a5cad51587d38c306f09246246384
+  ReactNativePermissions: f3beb8871251594a8ea2c6b19a3f8252d5c7379d
   rn-fetch-blob: 651b8d076b43d0d7aa294a3d9ec16c00aab8bef9
-  RNCAsyncStorage: 0d2b0cf659d2def90d8ed7de76f502d335268156
+  RNCAsyncStorage: b63d6e83fc629b01df6b624688f17944cea5637f
   RNCViewpager: d11d720f0c6fbd2024788d09108a9f7abb1fac5a
-  RNGestureHandler: aea90f0ad8e35fec23438db6fc3ad79be58bb734
-  RNScreens: 720a9e6968beb73e8196239801e887d8401f86ed
+  RNFastImage: 9b0c22643872bb7494c8d87bbbb66cc4c0d9e7a2
+  RNGestureHandler: 5329a942fce3d41c68b84c2c2276ce06a696d8b0
+  RNScreens: f28b48b8345f2f5f39ed6195518291515032a788
   RNSecureKeyStore: f1ad870e53806453039f650720d2845c678d89c8
-  SDWebImage: 47e9b5b925cbce75946c23f0c42dd19464189af4
+  SDWebImage: 920f1a2ff1ca8296ad34f6e0510a1ef1d70ac965
+  SDWebImageWebPCoder: 7568737603c50f6237850afedd7e9e28e5917e6b
   yoga: c2c050f6ae6e222534760cc82f559b89214b67e2
 
-PODFILE CHECKSUM: bcefae708602bee3d4d1e62adac51ba0d3d72664
+PODFILE CHECKSUM: 04cbb561e53414616c6e25919cf45d96a493d043
 
 COCOAPODS: 1.7.5
