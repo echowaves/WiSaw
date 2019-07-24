@@ -1,3 +1,5 @@
+import Geolocation from '@react-native-community/geolocation'
+
 import v4 from 'uuid/v4'
 import RNSecureKeyStore, { ACCESSIBLE, } from 'react-native-secure-key-store'
 import {
@@ -412,7 +414,8 @@ async function getLocation() {
 
 function _getCurrentPosition(options = {}) {
 	return new Promise((resolve, reject) => {
-		navigator.geolocation.getCurrentPosition(resolve, reject, options)
+		Geolocation.getCurrentPosition(resolve, reject, options)
+		// navigator.geolocation.getCurrentPosition(resolve, reject, options)
 	})
 }
 // https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux

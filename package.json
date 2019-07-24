@@ -18,6 +18,7 @@
   "dependencies": {
     "@dudigital/react-native-zoomable-view": "1.0.13",
     "@react-native-community/async-storage": "1.5.1",
+    "@react-native-community/geolocation": "^1.4.2",
     "@react-native-community/slider": "2.0.0",
     "@react-native-community/viewpager": "1.1.7",
     "babel-plugin-transform-async-to-generator": "6.24.1",
