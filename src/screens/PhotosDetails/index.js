@@ -163,7 +163,7 @@ class PhotosDetails extends Component {
 			getPhotos,
 		} = this.props
 		return (
-			<View style={styles.container}>
+			<View style={styles.container} onLayout={this.onLayout.bind(this)}>
 				<Swiper
 					keyboardShouldPersistTaps="always"
 					autoplay={false}

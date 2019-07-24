@@ -196,13 +196,13 @@ class Photo extends Component {
 		const { width, height, } = Dimensions.get('window')
 
 		return (
-			<Container>
+			<Container onLayout={this.onLayout.bind(this)}>
 				<Content
 					disableKBDismissScroll
 					keyboardDismissMode="on-drag"
 					keyboardShouldPersistTaps="always"
 					enableOnAndroid>
-					<Grid onLayout={this.onLayout.bind(this)}>
+					<Grid>
 						<Row>
 							<ReactNativeZoomableView
 								maxZoom={3}
@@ -211,14 +211,15 @@ class Photo extends Component {
 								initialZoom={1}
 								bindToBorders>
 
-								<View style={{
-									flex: 1,
-									position: 'absolute',
-									top: 0,
-									bottom: 0,
-									right: 0,
-									left: 0,
-								}}>
+								<View
+									style={{
+										flex: 1,
+										position: 'absolute',
+										top: 0,
+										bottom: 0,
+										right: 0,
+										left: 0,
+									}}>
 									<FastImage
 										source={{
 											uri: item.getThumbUrl,

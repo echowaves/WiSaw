@@ -169,7 +169,7 @@ class SharedPhoto extends Component {
 		}
 
 		return (
-			<Container>
+			<Container onLayout={this.onLayout.bind(this)}>
 				<Content padder>
 					<Body>
 						<Spinner color={
