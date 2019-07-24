@@ -2,12 +2,13 @@ import React, { Component, } from 'react'
 import {
 	StyleSheet,
 	View,
-	CameraRoll,
 	Text,
 	Dimensions,
 	Platform,
 	TouchableOpacity,
 } from 'react-native'
+
+import CameraRoll from "@react-native-community/cameraroll"
 
 import AsyncStorage from '@react-native-community/async-storage'
 

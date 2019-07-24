@@ -98,6 +98,8 @@ PODS:
     - React
   - react-native-camera/RN (3.0.0):
     - React
+  - react-native-cameraroll (1.1.1):
+    - React
   - react-native-geolocation (1.4.2):
     - React
   - react-native-slider (2.0.0):
@@ -170,6 +172,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-branch (from `../node_modules/react-native-branch`)
   - react-native-camera (from `../node_modules/react-native-camera`)
+  - "react-native-cameraroll (from `../node_modules/@react-native-community/cameraroll`)"
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -230,6 +233,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-branch"
   react-native-camera:
     :path: "../node_modules/react-native-camera"
+  react-native-cameraroll:
+    :path: "../node_modules/@react-native-community/cameraroll"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-slider:
@@ -294,6 +299,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 73f24a02fa684ed6a2b828ba116874a2191ded88
   react-native-branch: 5e2b3a7bbda82a7af421ce1981a956ef18c38d96
   react-native-camera: 53e453fd5e6501afbac79d6b21a5fbfd84950eda
+  react-native-cameraroll: 976d4c5c72f3d06f0725a6e2e956b183744ea00e
   react-native-geolocation: a7b94614afbd5fd8350e0233a2025c8228fc8041
   react-native-slider: 40bdbfc1af0393922ac331bc1d95a6c5d5174fb6
   React-RCTActionSheet: 9f71d7ae3e8fb10e08d162cbf14c621349dbfab3
@@ -319,6 +325,6 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 7568737603c50f6237850afedd7e9e28e5917e6b
   yoga: c2c050f6ae6e222534760cc82f559b89214b67e2
 
-PODFILE CHECKSUM: 877eda55492992b5d3223d2b421e5048ec6c838e
+PODFILE CHECKSUM: 2336bbeb19a5d5bae02c39f17c66c492a9aec6ac
 
 COCOAPODS: 1.7.5

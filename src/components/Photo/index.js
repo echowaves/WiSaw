@@ -72,7 +72,7 @@ class Photo extends Component {
 
 	static defaultProps = {}
 
-	componentWillMount() {
+	componentDidMount() {
 		const {
 			item,
 			setInputText,
