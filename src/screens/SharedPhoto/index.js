@@ -93,10 +93,6 @@ class SharedPhoto extends Component {
 		setItem({ item: navigation.getParam('item'), })
 	}
 
-	onLayout(e) {
-		this.forceUpdate()
-	}
-
 	isPhotoBannedByMe({ photoId, }) {
 		const {
 			bans,
@@ -162,14 +158,14 @@ class SharedPhoto extends Component {
 		} = this.props
 		if (item) {
 			return (
-				<View style={styles.container} onLayout={this.onLayout.bind(this)}>
+				<View style={styles.container}>
 					<Photo item={item} key={item.id} />
 				</View>
 			)
 		}
 
 		return (
-			<Container onLayout={this.onLayout.bind(this)}>
+			<Container>
 				<Content padder>
 					<Body>
 						<Spinner color={

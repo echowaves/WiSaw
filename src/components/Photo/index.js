@@ -192,7 +192,6 @@ class Photo extends Component {
 			submitComment,
 			commentsSubmitting,
 		} = this.props
-
 		const { width, height, } = Dimensions.get('window')
 
 		return (

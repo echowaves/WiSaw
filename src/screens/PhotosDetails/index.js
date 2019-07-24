@@ -89,10 +89,6 @@ class PhotosDetails extends Component {
 		navigation.setParams({ handleDelete: () => (this.handleDelete()), })
 	}
 
-	onLayout(e) {
-		this.forceUpdate()
-	}
-
 	isPhotoBannedByMe({ photoId, }) {
 		const {
 			bans,
@@ -163,7 +159,7 @@ class PhotosDetails extends Component {
 			getPhotos,
 		} = this.props
 		return (
-			<View style={styles.container} onLayout={this.onLayout.bind(this)}>
+			<View style={styles.container}>
 				<Swiper
 					keyboardShouldPersistTaps="always"
 					autoplay={false}
