@@ -87,7 +87,7 @@ PODS:
     - React-cxxreact (= 0.60.4)
     - React-jsi (= 0.60.4)
   - React-jsinspector (0.60.4)
-  - react-native-branch (4.0.0):
+  - react-native-branch (4.1.0):
     - Branch (= 0.27.1)
     - React
   - react-native-camera (3.0.0):
@@ -297,7 +297,7 @@ SPEC CHECKSUMS:
   React-jsi: 21d3153b1153fbf6510a92b6b11e33e725cb7432
   React-jsiexecutor: 7549641e48bafae7bfee3f3ea19bf4901639c5de
   React-jsinspector: 73f24a02fa684ed6a2b828ba116874a2191ded88
-  react-native-branch: 5e2b3a7bbda82a7af421ce1981a956ef18c38d96
+  react-native-branch: 861e9210afb3a52317fe4cc6a04086a9250f71b8
   react-native-camera: 53e453fd5e6501afbac79d6b21a5fbfd84950eda
   react-native-cameraroll: 976d4c5c72f3d06f0725a6e2e956b183744ea00e
   react-native-geolocation: a7b94614afbd5fd8350e0233a2025c8228fc8041
@@ -325,6 +325,6 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 7568737603c50f6237850afedd7e9e28e5917e6b
   yoga: c2c050f6ae6e222534760cc82f559b89214b67e2
 
-PODFILE CHECKSUM: 2336bbeb19a5d5bae02c39f17c66c492a9aec6ac
+PODFILE CHECKSUM: 85f430986bba5799e4d4bfdc0c57421f43a0c140
 
 COCOAPODS: 1.7.5

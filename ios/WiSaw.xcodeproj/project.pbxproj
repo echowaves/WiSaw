@@ -11,6 +11,7 @@
 		02DE7508C24746C1928D3580 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D50821CA00140DBBE8FD30F /* MaterialCommunityIcons.ttf */; };
 		07EBFED6F4AA464884C6BD8C /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 28549C55AF434F8A9D1F2101 /* Octicons.ttf */; };
 		0A43FF7E2DA243789229E161 /* Roboto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 942461AB625C46AC8CDA18CE /* Roboto.ttf */; };
+		0A54463822EBF63100C96ED4 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A54463722EBF63100C96ED4 /* branch.json */; };
 		0A6ECB5622E7993D004853C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A6ECB5522E7993D004853C5 /* Assets.xcassets */; };
 		0A6ECB5822E7995D004853C5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A6ECB5722E7995C004853C5 /* LaunchScreen.storyboard */; };
 		0A6ECB5A22E79996004853C5 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A6ECB5922E79996004853C5 /* branch.json */; };
@@ -65,6 +66,7 @@
 		00E356EE1AD99517003FC87E /* WiSawTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WiSawTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* WiSawTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WiSawTests.m; sourceTree = "<group>"; };
+		0A54463722EBF63100C96ED4 /* branch.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = branch.json; path = ../android/app/src/main/assets/branch.json; sourceTree = "<group>"; };
 		0A6ECB5422E79927004853C5 /* WiSaw.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WiSaw.entitlements; sourceTree = "<group>"; };
 		0A6ECB5522E7993D004853C5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0A6ECB5722E7995C004853C5 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -178,6 +180,7 @@
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
+				0A54463722EBF63100C96ED4 /* branch.json */,
 				13B07FB71A68108700A75B9A /* main.m */,
 			);
 			name = WiSaw;
@@ -435,6 +438,7 @@
 				CF8A219D22074984A7342E76 /* rubicon-icon-font.ttf in Resources */,
 				142721B122494D11962B13D4 /* SimpleLineIcons.ttf in Resources */,
 				2F41ACD0CE3A45E88A4BEF1E /* Zocial.ttf in Resources */,
+				0A54463822EBF63100C96ED4 /* branch.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

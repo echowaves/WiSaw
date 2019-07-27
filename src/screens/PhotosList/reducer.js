@@ -297,7 +297,7 @@ export function getPhotos() {
 				}
 			} while (
 				(responseJson.photos.length === 0 && getState().photosList.daysAgo < 3000)
-				|| (responseJson.photos.length > 0 && getState().photosList.daysAgo < 10)
+				|| (responseJson.photos.length > 0 && getState().photosList.daysAgo < 30)
 			)
 		} catch (err) {
 			dispatch({
