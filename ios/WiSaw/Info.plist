@@ -57,6 +57,7 @@
 		<string>rubicon-icon-font.ttf</string>
 		<string>SimpleLineIcons.ttf</string>
 		<string>Zocial.ttf</string>
+		<string>Fontisto.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -75,7 +76,7 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Want to see cool things around you? Why don&apos;t you enable your location?</string>
+	<string>Want to see cool things around you? Why don't you enable your location?</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>The photos you take will be saved in the media library</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
@@ -89,9 +90,9 @@
 	<key>NSMotionUsageDescription</key>
 	<string>This will help us to improve the releavnce of posts that you can see related to you location.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?</string>
+	<string>Want to have your photos stored on your device? Why don't you enable Photo Library?</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Want to see photos stored on your device? Why don&apos;t you enable it?</string>
+	<string>Want to see photos stored on your device? Why don't you enable it?</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Some description</string>
 </dict>
