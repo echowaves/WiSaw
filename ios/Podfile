@@ -34,9 +34,6 @@ target 'WiSaw' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
-  # pod 'react-native-branch', path: '../node_modules/react-native-branch'
-  # pod 'Branch-SDK', path: '../node_modules/react-native-branch/ios'
-
 
   target 'WiSawTests' do
     inherit! :search_paths
@@ -48,10 +45,8 @@ end
 
 target 'WiSaw-tvOS' do
   # Pods for WiSaw-tvOS
-
   target 'WiSaw-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end
-
 end
