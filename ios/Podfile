@@ -41,6 +41,7 @@ target 'WiSaw' do
   end
 
   use_native_modules!
+
 end
 
 target 'WiSaw-tvOS' do
