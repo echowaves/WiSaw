@@ -3,10 +3,7 @@ PODS:
   - Branch (0.29.0):
     - Branch/Core (= 0.29.0)
   - Branch/Core (0.29.0)
-  - Crashlytics (3.14.0):
-    - Fabric (~> 1.10.2)
   - DoubleConversion (1.1.6)
-  - Fabric (1.10.2)
   - FBLazyVector (0.61.2)
   - FBReactNativeSpec (0.61.2):
     - Folly (= 2018.10.22.00)
@@ -210,9 +207,11 @@ PODS:
     - React
   - react-native-cameraroll (1.2.1):
     - React
-  - react-native-geolocation (1.4.2):
+  - react-native-geolocation (2.0.2):
     - React
-  - react-native-slider (2.0.0):
+  - react-native-slider (2.0.2):
+    - React
+  - react-native-viewpager (2.0.1):
     - React
   - React-RCTActionSheet (0.61.2):
     - React-Core/RCTActionSheetHeaders (= 0.61.2)
@@ -249,17 +248,11 @@ PODS:
     - React-cxxreact (= 0.61.2)
     - React-jsi (= 0.61.2)
     - ReactCommon/jscallinvoker (= 0.61.2)
-  - ReactNativeFabric (0.5.2):
-    - Crashlytics
-    - Fabric
-    - React
   - ReactNativePermissions (1.2.0):
     - React
   - rn-fetch-blob (0.11.2):
     - React-Core
-  - RNCAsyncStorage (1.5.1):
-    - React
-  - RNCViewpager (1.1.7):
+  - RNCAsyncStorage (1.6.2):
     - React
   - RNFastImage (7.0.2):
     - React
@@ -301,6 +294,7 @@ DEPENDENCIES:
   - "react-native-cameraroll (from `../node_modules/@react-native-community/cameraroll`)"
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - "react-native-viewpager (from `../node_modules/@react-native-community/viewpager`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
   - React-RCTBlob (from `../node_modules/react-native/Libraries/Blob`)
@@ -312,11 +306,9 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - ReactCommon/jscallinvoker (from `../node_modules/react-native/ReactCommon`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
-  - ReactNativeFabric (from `../node_modules/react-native-fabric`)
   - ReactNativePermissions (from `../node_modules/react-native-permissions`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
-  - "RNCViewpager (from `../node_modules/@react-native-community/viewpager`)"
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -327,8 +319,6 @@ SPEC REPOS:
   trunk:
     - boost-for-react-native
     - Branch
-    - Crashlytics
-    - Fabric
     - libwebp
     - SDWebImage
     - SDWebImageWebPCoder
@@ -372,6 +362,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/geolocation"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
+  react-native-viewpager:
+    :path: "../node_modules/@react-native-community/viewpager"
   React-RCTActionSheet:
     :path: "../node_modules/react-native/Libraries/ActionSheetIOS"
   React-RCTAnimation:
@@ -392,16 +384,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/Libraries/Vibration"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
-  ReactNativeFabric:
-    :path: "../node_modules/react-native-fabric"
   ReactNativePermissions:
     :path: "../node_modules/react-native-permissions"
   rn-fetch-blob:
     :path: "../node_modules/rn-fetch-blob"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-community/async-storage"
-  RNCViewpager:
-    :path: "../node_modules/@react-native-community/viewpager"
   RNFastImage:
     :path: "../node_modules/react-native-fast-image"
   RNGestureHandler:
@@ -416,9 +404,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   Branch: 6e7421e1f3c0adebdf80008a40a74969b2603cf8
-  Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
   DoubleConversion: 5805e889d232975c086db112ece9ed034df7a0b2
-  Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
   FBLazyVector: 68b6a76960fbd8ecd9fb7ce0aadd3329c3340a99
   FBReactNativeSpec: 5a764c60abdc3336a213e5310c40b74741f32839
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
@@ -436,8 +422,9 @@ SPEC CHECKSUMS:
   react-native-branch: cc611a2d0e7e6c7c4cafebc8e59065b89c38002b
   react-native-camera: 53e453fd5e6501afbac79d6b21a5fbfd84950eda
   react-native-cameraroll: 3e5e34d36d93548ae7770ee8ab7b2ae9e778f571
-  react-native-geolocation: a7b94614afbd5fd8350e0233a2025c8228fc8041
-  react-native-slider: 40bdbfc1af0393922ac331bc1d95a6c5d5174fb6
+  react-native-geolocation: c956aeb136625c23e0dce0467664af2c437888c9
+  react-native-slider: 5d61590f26a51cf0a858bfd1543f6d6ec8b78a6e
+  react-native-viewpager: f41b42bba71407e916654d64e87ff2680edecc92
   React-RCTActionSheet: 89b037c0fb7d2671607cb645760164e7e0c013f6
   React-RCTAnimation: e3cefa93c38c004c318f7ec04b883eb14b8b8235
   React-RCTBlob: d26ac0e313fbf14e7203473fd593ccaaeee8329e
@@ -448,11 +435,9 @@ SPEC CHECKSUMS:
   React-RCTText: e3ef6191cdb627855ff7fe8fa0c1e14094967fb8
   React-RCTVibration: fb54c732fd20405a76598e431aa2f8c2bf527de9
   ReactCommon: 5848032ed2f274fcb40f6b9ec24067787c42d479
-  ReactNativeFabric: d05320ff347d5c72567c115b97edeead111ac4d2
   ReactNativePermissions: f3beb8871251594a8ea2c6b19a3f8252d5c7379d
   rn-fetch-blob: f525a73a78df9ed5d35e67ea65e79d53c15255bc
-  RNCAsyncStorage: b63d6e83fc629b01df6b624688f17944cea5637f
-  RNCViewpager: d11d720f0c6fbd2024788d09108a9f7abb1fac5a
+  RNCAsyncStorage: 60a80e72d95bf02a01cace55d3697d9724f0d77f
   RNFastImage: 9b0c22643872bb7494c8d87bbbb66cc4c0d9e7a2
   RNGestureHandler: 5329a942fce3d41c68b84c2c2276ce06a696d8b0
   RNScreens: f28b48b8345f2f5f39ed6195518291515032a788
@@ -461,6 +446,6 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 947093edd1349d820c40afbd9f42acb6cdecd987
   Yoga: 14927e37bd25376d216b150ab2a561773d57911f
 
-PODFILE CHECKSUM: 663d1f10aa84e4e5da5a17a285fa422e994f7bb3
+PODFILE CHECKSUM: 2d7049319c3afe223f819369f00a3f7f086747af
 
 COCOAPODS: 1.8.3

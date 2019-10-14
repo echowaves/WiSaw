@@ -1,1 +1,0 @@
-../../../../../node_modules/react-native-fabric/ios/SMXCrashlytics/SMXCrashlytics.h
