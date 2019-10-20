@@ -131,9 +131,9 @@ android {
         applicationId "com.echowaves.wisaw"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 97
+        versionCode 98
         versionName "5.5.0"
-        missingDimensionStrategy 'react-native-camera', 'general' 
+        missingDimensionStrategy 'react-native-camera', 'general'
     }
     splits {
         abi {
@@ -150,6 +150,14 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+          if (project.hasProperty('WISAW_RELEASE_STORE_FILE')) {
+              storeFile file(WISAW_RELEASE_STORE_FILE)
+              storePassword WISAW_RELEASE_STORE_PASSWORD
+              keyAlias WISAW_RELEASE_KEY_ALIAS
+              keyPassword WISAW_RELEASE_KEY_PASSWORD
+          }
+        }
     }
     buildTypes {
         debug {
@@ -158,9 +166,9 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://facebook.github.io/react-native/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
         }
     }
     // applicationVariants are e.g. debug, release
