@@ -21,7 +21,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>97</string>
+	<string>98</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -80,7 +80,7 @@
 	<key>branch_key</key>
 	<string>key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Want to see cool things around you? Why don't you enable your location?</string>
+	<string>Want to see cool things around you? Why don&apos;t you enable your location?</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>The photos you take will be saved in the media library</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
@@ -94,10 +94,14 @@
 	<key>NSMotionUsageDescription</key>
 	<string>This will help us to improve the releavnce of posts that you can see related to you location.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Want to have your photos stored on your device? Why don't you enable Photo Library?</string>
+	<string>Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Want to see photos stored on your device? Why don't you enable it?</string>
+	<string>Want to see photos stored on your device? Why don&apos;t you enable it?</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Some description</string>
+	<key>NSContactsUsageDescription</key>
+	<string>This app requires contacts access to function properly.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>This app requires Bluetooth acccess to function properly.</string>
 </dict>
 </plist>
