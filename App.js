@@ -1,7 +1,9 @@
 import { Root, } from 'native-base'
 import React, { Component, } from 'react'
 import { StyleSheet, View, } from 'react-native'
-import { createStackNavigator, createAppContainer, } from "react-navigation"
+import { createAppContainer, } from "react-navigation"
+import { createStackNavigator, } from 'react-navigation-stack'
+
 import { createStore, applyMiddleware, compose, } from 'redux'
 import { Provider, } from 'react-redux'
 import ReduxThunk from 'redux-thunk'
