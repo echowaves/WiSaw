@@ -75,6 +75,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>branch_app_domain</key>
+	<string>link.wisaw.com</string>
+	<key>branch_key</key>
+	<string>key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Want to see cool things around you? Why don't you enable your location?</string>
 	<key>NSAppleMusicUsageDescription</key>

@@ -232,7 +232,6 @@ export function sharePhoto({ item, }) {
 			const branchUniversalObject = await branch.createBranchUniversalObject(
 				`photo/${item.id}`,
 				{
-					canonicalUrl: item.getThumbUrl,
 					title: 'What I saw today:',
 					contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
 					contentImageUrl: item.getImgUrl,
@@ -242,6 +241,7 @@ export function sharePhoto({ item, }) {
 			)
 			let messageBody = 'Check out what I saw today:'
 			const messageHeader = 'Check out what I saw today:'
+			const emailSubject = 'WiSaw: Check out what I saw today'
 
 			if (item.comments) {
 				// get only the 3 comments
@@ -252,10 +252,11 @@ export function sharePhoto({ item, }) {
 						)
 					).join('\n\n')}\n\n${item.likes > 0 ? `Thumbs Up: ${item.likes}\n\n` : ''}`
 			}
-
-			const shareOptions = { messageHeader, messageBody, }
 			const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing', }
 			const controlParams = { $photo_id: item.id, $item: item, }
+
+			const shareOptions = { messageHeader, emailSubject, messageBody, }
+
 			// const { channel, completed, error, } =
 			await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
 		} catch (err) {

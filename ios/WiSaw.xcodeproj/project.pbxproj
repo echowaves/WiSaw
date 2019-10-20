@@ -11,7 +11,6 @@
 		02DE7508C24746C1928D3580 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D50821CA00140DBBE8FD30F /* MaterialCommunityIcons.ttf */; };
 		07EBFED6F4AA464884C6BD8C /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 28549C55AF434F8A9D1F2101 /* Octicons.ttf */; };
 		0A43FF7E2DA243789229E161 /* Roboto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 942461AB625C46AC8CDA18CE /* Roboto.ttf */; };
-		0A54463822EBF63100C96ED4 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A54463722EBF63100C96ED4 /* branch.json */; };
 		0A6ECB5622E7993D004853C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A6ECB5522E7993D004853C5 /* Assets.xcassets */; };
 		0A6ECB5822E7995D004853C5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A6ECB5722E7995C004853C5 /* LaunchScreen.storyboard */; };
 		137C4FD01CBE4788B7A4DF91 /* Roboto_medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2455AFA8CE2C435B9CAB9659 /* Roboto_medium.ttf */; };
@@ -439,7 +438,6 @@
 				CF8A219D22074984A7342E76 /* rubicon-icon-font.ttf in Resources */,
 				142721B122494D11962B13D4 /* SimpleLineIcons.ttf in Resources */,
 				2F41ACD0CE3A45E88A4BEF1E /* Zocial.ttf in Resources */,
-				0A54463822EBF63100C96ED4 /* branch.json in Resources */,
 				4FB6733309BD490EAE2A9C1A /* Fontisto.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
