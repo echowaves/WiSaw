@@ -1,3 +1,5 @@
+import 'react-native-gesture-handler' // keep this line to prevent crashes
+
 import { Root, } from 'native-base'
 import React, { Component, } from 'react'
 import { StyleSheet, View, } from 'react-native'

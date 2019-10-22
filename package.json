@@ -6,6 +6,7 @@
     "start-iphone": "react-native run-ios --simulator \"iPhone 8 Plus\"",
     "start-iphone-x": "react-native run-ios --simulator \"iPhone X\"",
     "start-ipad": "react-native run-ios --simulator \"iPad Pro (12.9-inch) (2nd generation)\"",
+		"start-phone": "react-native run-ios --device \"DiPhone\" --configuration=release",
     "start-android": "react-native run-android",
     "clean": "react-native-clean-project",
     "bundle-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
