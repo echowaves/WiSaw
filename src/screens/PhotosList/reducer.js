@@ -29,6 +29,8 @@ export const COMMENT_DELETED = 'wisaw/photosList/COMMENT_DELETED'
 
 export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
+export const SET_ACTIVE_SEGMENT = 'wisaw/photosList/SET_ACTIVE_SEGMENT'
+
 const UUID_KEY = 'wisaw_device_uuid'
 //  date '+%Y%m%d%H%M%S'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
@@ -45,6 +47,7 @@ export const initialState = {
 	daysAgo: 0,
 	locationPermission: null,
 	orientation: 'portrait-primary',
+	activeSegment: 0,
 }
 
 export default function reducer(state = initialState, action) {
@@ -204,7 +207,11 @@ export default function reducer(state = initialState, action) {
 						: item)
 				),
 			}
-
+		case SET_ACTIVE_SEGMENT:
+			return {
+				...state,
+				activeSegment: action.activeSegment,
+			}
 		default:
 			return state
 	}
@@ -346,6 +353,13 @@ export function setOrientation(orientation) {
 	return {
 		type: SET_ORIENTATION,
 		orientation,
+	}
+}
+
+export function setActiveSegment(activeSegment) {
+	return {
+		type: SET_ACTIVE_SEGMENT,
+		activeSegment,
 	}
 }
 

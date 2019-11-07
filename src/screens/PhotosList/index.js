@@ -23,11 +23,14 @@ import {
 	Button,
 	Left,
 	Right,
+	Segment,
+	StyleProvider,
 } from 'native-base'
 
 import Permissions from 'react-native-permissions'
 import DeviceSettings from 'react-native-device-settings'
 import branch from 'react-native-branch'
+
 
 import {
 	connect,
@@ -39,19 +42,22 @@ import PropTypes from 'prop-types'
 
 import Modal from "react-native-modal"
 
+import getTheme from "../../../native-base-theme/components"
+import material from '../../../native-base-theme/variables/material'
+
 import {
 	resetState,
 	getPhotos,
 	acceptTandC,
 	setLocationPermission,
 	setOrientation,
+	setActiveSegment,
 } from './reducer'
 
 import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
-import HeaderTitle from './HeaderTitle'
 
 class PhotosList extends Component {
 	static navigationOptions = ({
@@ -59,7 +65,30 @@ class PhotosList extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: () => <HeaderTitle />,
+			headerTitle: (
+				<StyleProvider style={getTheme(material)}>
+					<Segment style={{ marginBottom: 2, }}>
+						<Button first active>
+							<Icon
+								onPress={
+									() => navigation.push('Feedback')
+								}
+								name="globe"
+								type="FontAwesome"
+							/>
+						</Button>
+						<Button last>
+							<Icon
+								onPress={
+									() => navigation.push('Feedback')
+								}
+								name="eye"
+								type="FontAwesome"
+							/>
+						</Button>
+					</Segment>
+				</StyleProvider>
+			),
 			headerTintColor: CONST.MAIN_COLOR,
 			headerRight: (
 				<Icon
@@ -113,6 +142,8 @@ class PhotosList extends Component {
 		uploadPendingPhotos: PropTypes.func.isRequired,
 		orientation: PropTypes.string.isRequired,
 		setOrientation: PropTypes.func.isRequired,
+		activeSegment: PropTypes.number.isRequired,
+		setActiveSegment: PropTypes.func.isRequired,
 	}
 
 	thumbWidth
@@ -124,7 +155,9 @@ class PhotosList extends Component {
 			setLocationPermission,
 		} = this.props
 
-		navigation.setParams({ handleRefresh: () => (this.reload()), })
+		navigation.setParams({
+			handleRefresh: () => (this.reload()),
+		})
 
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
 
@@ -324,6 +357,37 @@ class PhotosList extends Component {
 			</View>
 		)
 	}
+
+
+	// renderHeaderTitle() {
+	// 	const {
+	// 		setActiveSegment,
+	// 	} = this.props
+	// 	return (
+	// 		<StyleProvider style={getTheme(material)}>
+	// 			<Segment style={{ marginBottom: 2, }}>
+	// 				<Button first active>
+	// 					<Icon
+	// 						onPress={
+	// 							() => navigation.push('Feedback')
+	// 						}
+	// 						name="globe"
+	// 						type="FontAwesome"
+	// 					/>
+	// 				</Button>
+	// 				<Button last>
+	// 					<Icon
+	// 						onPress={
+	// 							() => navigation.push('Feedback')
+	// 						}
+	// 						name="eye"
+	// 						type="FontAwesome"
+	// 					/>
+	// 				</Button>
+	// 			</Segment>
+	// 		</StyleProvider>
+	// 	)
+	// }
 
 	render() {
 		const {
@@ -558,6 +622,7 @@ const mapStateToProps = state => {
 		locationPermission: state.photosList.locationPermission,
 		pendingUploads: state.camera.pendingUploads,
 		orientation: state.photosList.orientation,
+		activeSegment: state.photosList.activeSegment,
 	}
 }
 
@@ -569,6 +634,7 @@ const mapDispatchToProps = {
 	setLocationPermission,
 	uploadPendingPhotos,
 	setOrientation,
+	setActiveSegment,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
