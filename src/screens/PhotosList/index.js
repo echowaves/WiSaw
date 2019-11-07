@@ -51,6 +51,7 @@ import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
+import HeaderTitle from './HeaderTitle'
 
 class PhotosList extends Component {
 	static navigationOptions = ({
@@ -58,7 +59,7 @@ class PhotosList extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: 'here&now',
+			headerTitle: () => <HeaderTitle />,
 			headerTintColor: CONST.MAIN_COLOR,
 			headerRight: (
 				<Icon

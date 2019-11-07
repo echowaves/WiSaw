@@ -5754,7 +5754,7 @@ react-native-animatable@^1.3.1:
   dependencies:
     prop-types "^15.7.2"
 
-react-native-branch@^4.2.1:
+react-native-branch@4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-4.2.1.tgz#3ed1a071c053b420d11af8aa368142b19e2d5129"
   integrity sha512-wwBCsj3VslS0zG8UAZjx+nNrWgd3CuA24r5muFDzS38oQ4S9oB0NJPafEcWcUT7TPxw/rfpdPLb+JccGvS2/Lg==
@@ -5803,10 +5803,10 @@ react-native-fast-image@^7.0.2:
   resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-7.0.2.tgz#e06b21f42f4a9786eaa86f3db35d919070fb8403"
   integrity sha512-MfuzJbC0RjYobR2gFCdqe1I7jvNOCfDkjQ7VGOHXniqjohhULMkcWNBE9Umovi9Dx93lJ6t5utcE2wf/09zvlg==
 
-react-native-fontawesome@6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/react-native-fontawesome/-/react-native-fontawesome-6.0.1.tgz#6a4f06b3d2523ef2567cdde84c601a1b50733110"
-  integrity sha512-j/nuOQCX+FeSsHDbqrownPsOuxMtiKQy7aj1pK5CV3ri8SoWlglNXU26IN8KTAs5XPJpoYS+6kY99qwqHKJPtw==
+react-native-fontawesome@7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-fontawesome/-/react-native-fontawesome-7.0.0.tgz#9050d50e03c5264c071292b885ab189f29accfad"
+  integrity sha512-UBZXyTLO8rK2NMf7Eomzb70b6cpL5JlBI4xwJGnRroRofrIXUxPelmm0Ojs6OcMs4ucAyPidCOxbJDJlmb2vdA==
 
 react-native-gesture-handler@1.4.1:
   version "1.4.1"
@@ -5900,10 +5900,10 @@ react-native-vector-icons@^6.6.0:
     prop-types "^15.6.2"
     yargs "^13.2.2"
 
-react-native@0.61.2:
-  version "0.61.2"
-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.2.tgz#987b91b063557f8ebec803fdfea2044a24bdbe4d"
-  integrity sha512-hhd8bYbkkZYHoOndxUwbjJ6Yd9HFn5PvwqqS41uJ1xADdw44rx/svuwmJNA1RKF7jH74uR2jpBViWYGd36zGyg==
+react-native@0.61.4:
+  version "0.61.4"
+  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.4.tgz#9ec6e8a2aa8eac57143dcfa39115c7d9a139bc2c"
+  integrity sha512-L8U+dDEy4vP74yWYbb+2XKaZeUkbpCUoSzcmeEM8Oznt69q71Q4fuYyxZGrzVW6tMYw9ZzGXTkfLuOh2nvLeVw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@react-native-community/cli" "^3.0.0-alpha.1"
@@ -5935,10 +5935,10 @@ react-native@0.61.2:
     stacktrace-parser "^0.1.3"
     whatwg-fetch "^3.0.0"
 
-react-navigation-stack@^1.10.2:
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/react-navigation-stack/-/react-navigation-stack-1.10.2.tgz#86521ec876ce030b54073b89d31d3a1d82e6675b"
-  integrity sha512-dLyhLX0EM53grtsuzjl3azatCVr9ZdK/I/ZzW6c9GSqwXwFTJ+XL4z9kbIXoviMb9qXbLRpVhSR9eAlpsmPZUw==
+react-navigation-stack@1.10.3:
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/react-navigation-stack/-/react-navigation-stack-1.10.3.tgz#e714e442b20427f0d2d3c18fce1f9e8cfe69be0b"
+  integrity sha512-1gksFi/g/Lg9sBhgLlD0OiEB5xnatHb4C0eNMA5tli9cTVlhq375XNPIqOiTyftibBmjdApAsZFj5srUCoOu/w==
   dependencies:
     prop-types "^15.7.2"
 

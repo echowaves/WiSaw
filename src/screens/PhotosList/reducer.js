@@ -258,7 +258,6 @@ async function _requestPhotos(getState, lat, long) {
 				],
 			},
 			daysAgo,
-			timeZoneShiftHours: new Date().getTimezoneOffset() / 60,
 		}),
 	})
 	const responseJson = await response.json()
