@@ -65,30 +65,7 @@ class PhotosList extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: (
-				<StyleProvider style={getTheme(material)}>
-					<Segment style={{ marginBottom: 2, }}>
-						<Button first active={params.activeSegment === 0}>
-							<Icon
-								onPress={
-									() => params.handleSetActiveSegment(0)
-								}
-								name="globe"
-								type="FontAwesome"
-							/>
-						</Button>
-						<Button last active={params.activeSegment === 1}>
-							<Icon
-								onPress={
-									() => params.handleSetActiveSegment(1)
-								}
-								name="eye"
-								type="FontAwesome"
-							/>
-						</Button>
-					</Segment>
-				</StyleProvider>
-			),
+			headerTitle: navigation.getParam('headerTitle'),
 			headerTintColor: CONST.MAIN_COLOR,
 			headerRight: (
 				<Icon
@@ -240,7 +217,9 @@ class PhotosList extends Component {
 			resetState,
 			getPhotos,
 			uploadPendingPhotos,
+			navigation,
 		} = this.props
+		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
 		resetState().then(() => {
 			getPhotos().then(() => {
 				uploadPendingPhotos()
@@ -360,6 +339,47 @@ class PhotosList extends Component {
 					)}
 				</View>
 			</View>
+		)
+	}
+
+	renderHeaderTitle() {
+		const {
+			activeSegment,
+			setActiveSegment,
+			navigation,
+		} = this.props
+
+		return (
+			<StyleProvider style={getTheme(material)}>
+				<Segment style={{ marginBottom: 2, }}>
+					<Button
+						first active={activeSegment === 0}
+						onPress={
+							() => {
+								setActiveSegment(0)
+								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+							}
+						}>
+						<Icon
+							name="globe"
+							type="FontAwesome"
+						/>
+					</Button>
+					<Button
+						last active={activeSegment === 1}
+						onPress={
+							() => {
+								setActiveSegment(1)
+								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+							}
+						}>
+						<Icon
+							name="eye"
+							type="FontAwesome"
+						/>
+					</Button>
+				</Segment>
+			</StyleProvider>
 		)
 	}
 
