@@ -68,19 +68,19 @@ class PhotosList extends Component {
 			headerTitle: (
 				<StyleProvider style={getTheme(material)}>
 					<Segment style={{ marginBottom: 2, }}>
-						<Button first active>
+						<Button first active={params.activeSegment === 0}>
 							<Icon
 								onPress={
-									() => navigation.push('Feedback')
+									() => params.handleSetActiveSegment(0)
 								}
 								name="globe"
 								type="FontAwesome"
 							/>
 						</Button>
-						<Button last>
+						<Button last active={params.activeSegment === 1}>
 							<Icon
 								onPress={
-									() => navigation.push('Feedback')
+									() => params.handleSetActiveSegment(1)
 								}
 								name="eye"
 								type="FontAwesome"
@@ -124,6 +124,7 @@ class PhotosList extends Component {
 		})
 	}
 
+
 	static defaultProps = {
 		locationPermission: null,
 	}
@@ -153,10 +154,14 @@ class PhotosList extends Component {
 			navigation,
 			locationPermission,
 			setLocationPermission,
+			activeSegment,
+			setActiveSegment,
 		} = this.props
 
 		navigation.setParams({
 			handleRefresh: () => (this.reload()),
+			activeSegment,
+			handleSetActiveSegment: segment => (setActiveSegment(segment)),
 		})
 
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
@@ -357,37 +362,6 @@ class PhotosList extends Component {
 			</View>
 		)
 	}
-
-
-	// renderHeaderTitle() {
-	// 	const {
-	// 		setActiveSegment,
-	// 	} = this.props
-	// 	return (
-	// 		<StyleProvider style={getTheme(material)}>
-	// 			<Segment style={{ marginBottom: 2, }}>
-	// 				<Button first active>
-	// 					<Icon
-	// 						onPress={
-	// 							() => navigation.push('Feedback')
-	// 						}
-	// 						name="globe"
-	// 						type="FontAwesome"
-	// 					/>
-	// 				</Button>
-	// 				<Button last>
-	// 					<Icon
-	// 						onPress={
-	// 							() => navigation.push('Feedback')
-	// 						}
-	// 						name="eye"
-	// 						type="FontAwesome"
-	// 					/>
-	// 				</Button>
-	// 			</Segment>
-	// 		</StyleProvider>
-	// 	)
-	// }
 
 	render() {
 		const {
