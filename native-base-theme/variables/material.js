@@ -238,9 +238,9 @@ export default {
 
 	// Segment
 	segmentBackgroundColor: '#ffffff',
-	segmentActiveBackgroundColor: '#ffffff',
-	segmentTextColor: '#aaaaaa',
-	segmentActiveTextColor: '#EA5E3D',
+	segmentActiveBackgroundColor: '#EA5E3D',
+	segmentTextColor: '#EA5E3D',
+	segmentActiveTextColor: '#ffffff',
 	segmentBorderColor: '#EA5E3D',
 	segmentBorderColorMain: '#EA5E3D',
 
