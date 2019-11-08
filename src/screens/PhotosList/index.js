@@ -132,13 +132,11 @@ class PhotosList extends Component {
 			locationPermission,
 			setLocationPermission,
 			activeSegment,
-			setActiveSegment,
 		} = this.props
 
 		navigation.setParams({
 			handleRefresh: () => (this.reload()),
 			activeSegment,
-			handleSetActiveSegment: segment => (setActiveSegment(segment)),
 		})
 
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
@@ -358,6 +356,7 @@ class PhotosList extends Component {
 							() => {
 								setActiveSegment(0)
 								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+								this.reload()
 							}
 						}>
 						<Icon
@@ -371,6 +370,7 @@ class PhotosList extends Component {
 							() => {
 								setActiveSegment(1)
 								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+								this.reload()
 							}
 						}>
 						<Icon
