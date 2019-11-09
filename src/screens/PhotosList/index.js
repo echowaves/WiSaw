@@ -112,6 +112,7 @@ class PhotosList extends Component {
 		photos: PropTypes.array.isRequired,
 		batch: PropTypes.number.isRequired,
 		isTandcAccepted: PropTypes.bool.isRequired,
+		loading: PropTypes.bool.isRequired,
 		acceptTandC: PropTypes.func.isRequired,
 		locationPermission: PropTypes.string,
 		setLocationPermission: PropTypes.func.isRequired,
@@ -406,13 +407,15 @@ class PhotosList extends Component {
 			getPhotos,
 			navigation,
 			isTandcAccepted,
+			loading,
 			acceptTandC,
 			locationPermission,
 			batch,
+			activeSegment,
 		} = this.props
 
 		if (locationPermission === 'authorized') {
-			if (photos.length === 0) {
+			if (photos.length === 0 && loading) {
 				return (
 					<Container>
 						<Content padder>
@@ -427,7 +430,46 @@ class PhotosList extends Component {
 					</Container>
 				)
 			}
+			if (photos.length === 0 && !loading) {
+				return (
+					<Container>
+						<Content padder>
+							<Body>
+								{activeSegment === 0 && (
+									<Card transparent>
+										<CardItem style={{ borderRadius: 10, }}>
+											<Text style={{
+												fontSize: 20,
+												textAlign: 'center',
+												margin: 10,
+											}}>
+										No Photos found in your location.
+										Try to take some photos.
+											</Text>
+										</CardItem>
+									</Card>
+								)}
+								{activeSegment === 1 && (
+									<Card transparent>
+										<CardItem style={{ borderRadius: 10, }}>
+											<Text style={{
+												fontSize: 20,
+												textAlign: 'center',
+												margin: 10,
+											}}>
+										You don&apos;t seem to be watching any photos.
+										Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
+											</Text>
+										</CardItem>
+									</Card>
+								)}
 
+							</Body>
+						</Content>
+						{this.photoButton()}
+					</Container>
+				)
+			}
 			this.calculateThumbWidth()
 			return (
 				<Container onLayout={this.onLayout.bind(this)}>
@@ -629,6 +671,7 @@ const mapStateToProps = state => {
 		batch: state.photosList.batch,
 		paging: state.photosList.paging,
 		isTandcAccepted: state.photosList.isTandcAccepted,
+		loading: state.photosList.loading,
 		locationPermission: state.photosList.locationPermission,
 		pendingUploads: state.camera.pendingUploads,
 		orientation: state.photosList.orientation,
