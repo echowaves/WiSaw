@@ -101,7 +101,6 @@ class PhotosList extends Component {
 		})
 	}
 
-
 	static defaultProps = {
 		locationPermission: null,
 	}
@@ -210,6 +209,18 @@ class PhotosList extends Component {
 		this.thumbWidth = Math.floor((width - thumbsCount * 3 * 2) / thumbsCount)
 	}
 
+	isListFilllsScreen() {
+		const {
+			photos,
+		} = this.props
+		const { width, height, } = Dimensions.get('window')
+		const numColumns = Math.floor(width / this.thumbWidth)
+		const numRows = Math.floor(photos.length / numColumns)
+		const listHeight = numRows * this.thumbWidth
+		// alert(`${photos.length}:${listHeight}:${height}`)
+		return listHeight > height
+	}
+
 	async reload() {
 		const {
 			resetState,
@@ -220,10 +231,13 @@ class PhotosList extends Component {
 		} = this.props
 		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
 		await resetState()
-		await getPhotos(batch)
-		await getPhotos(batch)
-		await getPhotos(batch)
-
+		let i = 0
+		/* eslint-disable no-await-in-loop */
+		while (!this.isListFilllsScreen() && i < 30) {
+			await getPhotos(batch)
+			i += 1
+		}
+		// alert(`${i}`)
 		await uploadPendingPhotos()
 	}
 
@@ -385,6 +399,7 @@ class PhotosList extends Component {
 		)
 	}
 
+
 	render() {
 		const {
 			photos,
@@ -455,7 +470,7 @@ class PhotosList extends Component {
 							}
 						}
 						onEndReachedThreshold={
-							15
+							150
 						}
 						refreshing={
 							false
@@ -463,6 +478,7 @@ class PhotosList extends Component {
 						onRefresh={
 							() => (this.reload())
 						}
+						onContentSizeChange={this.onContentSizeChange}
 					/>
 
 					<Modal

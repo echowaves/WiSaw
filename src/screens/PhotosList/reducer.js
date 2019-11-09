@@ -64,8 +64,8 @@ export default function reducer(state = initialState, action) {
 				...state,
 				photos:
 				state.photos.concat(action.photos)
-					.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos)// fancy way to remove duplicate photos
-					.sort((a, b) => b.id - a.id),
+					.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
+				// .sort((a, b) => b.id - a.id),
 				pageNumber: state.pageNumber + 1,
 				errorMessage: '',
 			}
@@ -89,7 +89,6 @@ export default function reducer(state = initialState, action) {
 				loading: false,
 				errorMessage: '',
 				pageNumber: 0,
-				batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
 			}
 		case SET_IS_TANDC_ACCEPTED:
 			return {
@@ -213,11 +212,13 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				activeSegment: action.activeSegment,
+				batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
 			}
 		default:
 			return state
 	}
 }
+
 
 export function resetState() {
 	return async (dispatch, getState) => {
@@ -313,7 +314,7 @@ export function getPhotos(requestedBatch) {
 			return Promise.resolve()
 		}
 		const { latitude, longitude, } = getState().photosList.location.coords
-		const { activeSegment, batch, } = getState().photosList
+		const { activeSegment, } = getState().photosList
 		dispatch({
 			type: GET_PHOTOS_STARTED,
 		})
@@ -325,7 +326,7 @@ export function getPhotos(requestedBatch) {
 			} else if (activeSegment === 1) {
 				responseJson = await _requestWatchedPhotos(getState, requestedBatch)
 			}
-
+			// alert(`batch:${batch}, requestedBatch:${requestedBatch}, responseJson.batch:${responseJson.batch}`)
 			if (responseJson.photos && responseJson.photos.length > 0) {
 				if (responseJson.batch === requestedBatch) {
 					// alert(batch)
@@ -392,9 +393,11 @@ export function setOrientation(orientation) {
 }
 
 export function setActiveSegment(activeSegment) {
-	return {
-		type: SET_ACTIVE_SEGMENT,
-		activeSegment,
+	return async (dispatch, getState) => {
+		dispatch({
+			type: SET_ACTIVE_SEGMENT,
+			activeSegment,
+		})
 	}
 }
 
