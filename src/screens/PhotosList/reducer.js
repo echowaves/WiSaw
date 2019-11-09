@@ -44,10 +44,11 @@ export const initialState = {
 	photos: [],
 	loading: false,
 	errorMessage: '',
-	daysAgo: 0,
+	pageNumber: 0,
 	locationPermission: null,
 	orientation: 'portrait-primary',
 	activeSegment: 0,
+	batch: 0,
 }
 
 export default function reducer(state = initialState, action) {
@@ -65,13 +66,13 @@ export default function reducer(state = initialState, action) {
 				state.photos.concat(action.photos)
 					.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos)// fancy way to remove duplicate photos
 					.sort((a, b) => b.id - a.id),
-				daysAgo: state.daysAgo + 1,
+				pageNumber: state.pageNumber + 1,
 				errorMessage: '',
 			}
 		case GET_PHOTOS_FAIL:
 			return {
 				...state,
-				daysAgo: state.daysAgo + 1,
+				pageNumber: state.pageNumber + 1,
 				errorMessage: action.errorMessage,
 				loading: false,
 			}
@@ -87,7 +88,8 @@ export default function reducer(state = initialState, action) {
 				photos: [],
 				loading: false,
 				errorMessage: '',
-				daysAgo: 0,
+				pageNumber: 0,
+				batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
 			}
 		case SET_IS_TANDC_ACCEPTED:
 			return {
@@ -243,8 +245,8 @@ export function resetState() {
 	}
 }
 
-async function _requestPhotos(getState, lat, long) {
-	const { daysAgo, } = getState().photosList
+async function _requestGeoPhotos(getState, lat, long, batch) {
+	const { pageNumber, } = getState().photosList
 	let { uuid, } = getState().photosList
 	if (uuid == null) {
 		uuid = 'initializing'
@@ -264,7 +266,8 @@ async function _requestPhotos(getState, lat, long) {
 					long,
 				],
 			},
-			daysAgo,
+			daysAgo: pageNumber,
+			batch,
 		}),
 	})
 	const responseJson = await response.json()
@@ -276,35 +279,67 @@ async function _requestPhotos(getState, lat, long) {
 	return responseJson
 }
 
-export function getPhotos() {
+
+async function _requestWatchedPhotos(getState, batch) {
+	const { pageNumber, } = getState().photosList
+	let { uuid, } = getState().photosList
+	if (uuid == null) {
+		uuid = 'initializing'
+	}
+
+	const response = await fetch(`${CONST.HOST}/photos/feedForWatcher`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			uuid,
+			pageNumber,
+			batch,
+		}),
+	})
+	const responseJson = await response.json()
+	// Toast.show({
+	// 	text: `uuid: ${uuid}`,
+	// 	buttonText: "OK",
+	// 	duration: 15000,
+	// })
+	return responseJson
+}
+
+export function getPhotos(requestedBatch) {
 	return async (dispatch, getState) => {
 		if (!getState().photosList.location) {
 			return Promise.resolve()
 		}
 		const { latitude, longitude, } = getState().photosList.location.coords
+		const { activeSegment, batch, } = getState().photosList
 		dispatch({
 			type: GET_PHOTOS_STARTED,
 		})
 		try {
 			let responseJson
-			do {
+			if (activeSegment === 0) {
 				/* eslint-disable no-await-in-loop */
-				responseJson = await _requestPhotos(getState, latitude, longitude)
-				if (responseJson.photos && responseJson.photos.length > 0) {
+				responseJson = await _requestGeoPhotos(getState, latitude, longitude, requestedBatch)
+			} else if (activeSegment === 1) {
+				responseJson = await _requestWatchedPhotos(getState, requestedBatch)
+			}
+
+			if (responseJson.photos && responseJson.photos.length > 0) {
+				if (responseJson.batch === requestedBatch) {
+					// alert(batch)
 					dispatch({
 						type: GET_PHOTOS_SUCCESS,
 						photos: responseJson.photos,
 					})
-				} else {
-					dispatch({
-						type: GET_PHOTOS_FAIL,
-						errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-					})
 				}
-			} while (
-				(responseJson.photos.length === 0 && getState().photosList.daysAgo < 3000)
-				|| (responseJson.photos.length > 0 && getState().photosList.daysAgo < 30)
-			)
+			} else {
+				dispatch({
+					type: GET_PHOTOS_FAIL,
+					errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
+				})
+			}
 		} catch (err) {
 			dispatch({
 				type: GET_PHOTOS_FAIL,

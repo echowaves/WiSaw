@@ -73,6 +73,7 @@ class PhotosDetails extends Component {
 	static propTypes = {
 		navigation: PropTypes.object.isRequired,
 		photos: PropTypes.array.isRequired,
+		batch: PropTypes.number.isRequired,
 		currentPhotoIndex: PropTypes.number.isRequired,
 		setCurrentPhotoIndex: PropTypes.func.isRequired,
 		banPhoto: PropTypes.func.isRequired,
@@ -157,6 +158,7 @@ class PhotosDetails extends Component {
 			currentPhotoIndex,
 			setCurrentPhotoIndex,
 			getPhotos,
+			batch,
 		} = this.props
 		return (
 			<View style={styles.container}>
@@ -184,7 +186,7 @@ class PhotosDetails extends Component {
 					onIndexChanged={index => {
 						setCurrentPhotoIndex(index)
 						if (currentPhotoIndex > photos.length - 5) {
-							getPhotos() // pre-load more photos when nearing the end
+							getPhotos(batch) // pre-load more photos when nearing the end
 						}
 					}} // otherwise will jump to wrong photo onLayout
 					loadMinimal
@@ -209,6 +211,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = state => (
 	{
 		photos: state.photosList.photos,
+		batch: state.photosList.batch,
 		currentPhotoIndex: state.thumb.currentPhotoIndex,
 		bans: state.photo.bans,
 	}

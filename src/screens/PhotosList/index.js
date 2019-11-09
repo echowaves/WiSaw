@@ -111,7 +111,7 @@ class PhotosList extends Component {
 		resetState: PropTypes.func.isRequired,
 		getPhotos: PropTypes.func.isRequired,
 		photos: PropTypes.array.isRequired,
-		loading: PropTypes.bool.isRequired,
+		batch: PropTypes.number.isRequired,
 		isTandcAccepted: PropTypes.bool.isRequired,
 		acceptTandC: PropTypes.func.isRequired,
 		locationPermission: PropTypes.string,
@@ -210,19 +210,21 @@ class PhotosList extends Component {
 		this.thumbWidth = Math.floor((width - thumbsCount * 3 * 2) / thumbsCount)
 	}
 
-	reload() {
+	async reload() {
 		const {
 			resetState,
 			getPhotos,
 			uploadPendingPhotos,
 			navigation,
+			batch,
 		} = this.props
 		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
-		resetState().then(() => {
-			getPhotos().then(() => {
-				uploadPendingPhotos()
-			})
-		})
+		await resetState()
+		await getPhotos(batch)
+		await getPhotos(batch)
+		await getPhotos(batch)
+
+		await uploadPendingPhotos()
 	}
 
 	async alertForPermission(headerText, bodyText) {
@@ -386,12 +388,12 @@ class PhotosList extends Component {
 	render() {
 		const {
 			photos,
-			loading,
 			getPhotos,
 			navigation,
 			isTandcAccepted,
 			acceptTandC,
 			locationPermission,
+			batch,
 		} = this.props
 
 		if (locationPermission === 'authorized') {
@@ -449,13 +451,11 @@ class PhotosList extends Component {
 						}
 						onEndReached={
 							() => {
-								if (loading === false) {
-									getPhotos()
-								}
+								getPhotos(batch)
 							}
 						}
 						onEndReachedThreshold={
-							5
+							15
 						}
 						refreshing={
 							false
@@ -610,7 +610,7 @@ const mapStateToProps = state => {
 	return {
 		photos: storedPhotos,
 		errorMessage: state.photosList.errorMessage,
-		loading: state.photosList.loading,
+		batch: state.photosList.batch,
 		paging: state.photosList.paging,
 		isTandcAccepted: state.photosList.isTandcAccepted,
 		locationPermission: state.photosList.locationPermission,
