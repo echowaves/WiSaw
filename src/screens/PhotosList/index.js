@@ -231,6 +231,7 @@ class PhotosList extends Component {
 			batch,
 		} = this.props
 		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+
 		await resetState()
 		let i = 0
 		/* eslint-disable no-await-in-loop */
@@ -507,8 +508,10 @@ class PhotosList extends Component {
 							false
 						}
 						onEndReached={
-							() => {
-								getPhotos(batch)
+							async () => {
+								if (!loading) {
+									await getPhotos(batch)
+								}
 							}
 						}
 						onEndReachedThreshold={

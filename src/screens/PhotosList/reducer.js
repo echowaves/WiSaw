@@ -36,6 +36,7 @@ const UUID_KEY = 'wisaw_device_uuid'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
+const PHOTO_DOES_NOT_BELONG_TO_BATCH = 'batch updated, ignoring this photo'
 
 export const initialState = {
 	isTandcAccepted: false,
@@ -63,9 +64,9 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				photos:
-				state.photos.concat(action.photos)
+				state.photos.concat(action.photos),
 				// this really stinks, need to figure out why there are duplicates in the first place
-					.filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
+				// .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
 				// .sort((a, b) => b.id - a.id), // the sort should always happen on the server
 				pageNumber: state.pageNumber + 1,
 				errorMessage: '',
@@ -334,6 +335,11 @@ export function getPhotos(requestedBatch) {
 					dispatch({
 						type: GET_PHOTOS_SUCCESS,
 						photos: responseJson.photos,
+					})
+				} else {
+					dispatch({
+						type: GET_PHOTOS_FAIL,
+						errorMessage: PHOTO_DOES_NOT_BELONG_TO_BATCH,
 					})
 				}
 			} else {
