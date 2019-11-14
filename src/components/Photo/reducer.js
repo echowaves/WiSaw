@@ -9,6 +9,8 @@ import {
 	PHOTO_BANNED,
 	PHOTO_DELETED,
 	PHOTO_COMMENTS_LOADED,
+	PHOTO_WATCHED,
+	PHOTO_UNWATCHED,
 	COMMENT_POSTED,
 	TOGGLE_COMMENT_BUTTONS,
 	COMMENT_DELETED,
@@ -27,6 +29,7 @@ export const SUBMIT_COMMENT_FINISHED = 'wisaw/photo/SUBMIT_COMMENT_FINISHED'
 export const GET_COMMENTS_STARTED = 'wisaw/photo/GET_COMMENTS_STARTED'
 export const GET_COMMENTS_FINISHED = 'wisaw/photo/GET_COMMENTS_FINISHED'
 export const DELETE_COMMENT = 'wisaw/photo/DELETE_COMMENT'
+
 
 export const initialState = {
 	photo: {},
@@ -139,6 +142,63 @@ export function likePhoto({ photoId, }) {
 	}
 }
 
+export function watchPhoto({ item, }) {
+	return async (dispatch, getState) => {
+		const { uuid, } = getState().photosList
+
+		try {
+			const response = await fetch(`${CONST.HOST}/photos/${item.id}/watchers`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					uuid,
+				}),
+			})
+			// const responseJson = await response.json()
+			if (response.status !== 201) {
+				alert('watched')
+			}
+		} catch (err) {
+			Toast.show({
+				text: "Unable to watch photo. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
+		}
+	}
+}
+
+
+export function unwatchPhoto({ item, }) {
+	return async (dispatch, getState) => {
+		const { uuid, } = getState().photosList
+
+		try {
+			const response = await fetch(`${CONST.HOST}/photos/${item.id}/watchers`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					uuid,
+				}),
+			})
+			// const responseJson = await response.json()
+			if (response.status !== 200) {
+				alert('unwatched')
+			}
+		} catch (err) {
+			Toast.show({
+				text: "Unable to unwatch photo. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
+		}
+	}
+}
+
 export function banPhoto({ item, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
@@ -189,7 +249,6 @@ export function banPhoto({ item, }) {
 export function deletePhoto({ item, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
-		// const { uuid, } = getState().photosList
 
 		try {
 			const response = await fetch(`${CONST.HOST}/photos/${item.id}`, {
@@ -402,6 +461,40 @@ export function getComments({ item, }) {
 	}
 }
 
+
+export function isPhotoWatched({ item, }) {
+	return async (dispatch, getState) => {
+		const { uuid, } = getState().photosList
+		try {
+			const response = await fetch(`${CONST.HOST}/photos/${item.id}/watchers/${uuid}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			// const responseJson = await response.json()
+			if (response.status === 200) {
+				dispatch({
+					type: PHOTO_WATCHED,
+					item,
+				})
+				return
+			}
+		} catch (err) {
+			Toast.show({
+				text: "Unable to check if photo is watched. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
+		}
+		dispatch({
+			type: PHOTO_UNWATCHED,
+			item,
+		})
+	}
+}
+
+
 export function toggleCommentButtons({ photoId, commentId, }) {
 	return {
 		type: TOGGLE_COMMENT_BUTTONS,
@@ -413,7 +506,6 @@ export function toggleCommentButtons({ photoId, commentId, }) {
 export function deleteComment({ photo, comment, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
-		// const { uuid, } = getState().photosList
 
 		try {
 			const response = await fetch(`${CONST.HOST}/comments/${comment.id}`, {

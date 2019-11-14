@@ -23,6 +23,8 @@ export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
 export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
 export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
 export const PHOTO_COMMENTS_LOADED = 'wisaw/photosList/PHOTO_COMMENTS_LOADED'
+export const PHOTO_WATCHED = 'wisaw/photosList/PHOTO_WATCHED'
+export const PHOTO_UNWATCHED = 'wisaw/photosList/PHOTO_UNWATCHED'
 export const COMMENT_POSTED = 'wisaw/photosList/COMMENT_POSTED'
 export const TOGGLE_COMMENT_BUTTONS = 'wisaw/photosList/TOGGLE_COMMENT_BUTTONS'
 export const COMMENT_DELETED = 'wisaw/photosList/COMMENT_DELETED'
@@ -142,6 +144,16 @@ export default function reducer(state = initialState, action) {
 				...state,
 				photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, comments: action.comments, } : item)),
 			}
+		case PHOTO_WATCHED:
+			return {
+				...state,
+				photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: true, } : item)),
+			}
+		case PHOTO_UNWATCHED:
+			return {
+				...state,
+				photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: false, } : item)),
+			}
 		case PHOTO_UPLOADED_PREPEND:
 			return {
 				...state,
@@ -170,6 +182,7 @@ export default function reducer(state = initialState, action) {
 						: item)
 				),
 			}
+
 		case TOGGLE_COMMENT_BUTTONS:
 			return {
 				...state,

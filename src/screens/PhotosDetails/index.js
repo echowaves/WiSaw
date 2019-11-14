@@ -26,6 +26,8 @@ import {
 import {
 	banPhoto,
 	deletePhoto,
+	watchPhoto,
+	unwatchPhoto,
 } from '../../components/Photo/reducer'
 
 import { getPhotos, } from '../PhotosList/reducer'
@@ -37,9 +39,29 @@ class PhotosDetails extends Component {
 		navigation,
 	}) => {
 		const { params = {}, } = navigation.state
+
 		return ({
 			headerTitle: '',
 			headerTintColor: CONST.MAIN_COLOR,
+			headerLeft: (
+				<View style={{
+					flex: 1,
+					flexDirection: "row",
+				}}>
+					<Icon
+						onPress={
+							() => navigation.goBack()
+						}
+						name="angle-left"
+						type="FontAwesome"
+						style={{
+							marginLeft: 20,
+							color: CONST.MAIN_COLOR,
+						}}
+					/>
+					{ navigation.getParam('watchIcon')}
+				</View>
+			),
 			headerRight: (
 				<View style={{
 					flex: 1,
@@ -80,14 +102,22 @@ class PhotosDetails extends Component {
 		deletePhoto: PropTypes.func.isRequired,
 		bans: PropTypes.array.isRequired,
 		getPhotos: PropTypes.func.isRequired,
+		watchPhoto: PropTypes.func.isRequired,
+		unwatchPhoto: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
 		const {
 			navigation,
 		} = this.props
-		navigation.setParams({ handleBan: () => (this.handleBan()), })
-		navigation.setParams({ handleDelete: () => (this.handleDelete()), })
+		navigation.setParams({
+			handleBan: () => (this.handleBan()),
+			handleDelete: () => (this.handleDelete()),
+			// handleIsPhotoWatched: () => (this.isPhotoWatched()),
+			handleFlipWatch: () => (this.handleFlipWatch()),
+			watchIcon: this.renderWatchIcon(),
+		})
+		// navigation.setParams({ watchIcon: this.renderWatchIcon(), })
 	}
 
 	isPhotoBannedByMe({ photoId, }) {
@@ -149,6 +179,48 @@ class PhotosDetails extends Component {
 				},
 			],
 			{ cancelable: true, }
+		)
+	}
+
+	isPhotoWatched() {
+		const {
+			// navigation,
+			photos,
+			currentPhotoIndex,
+		} = this.props
+		const item = photos[currentPhotoIndex]
+
+		return !(!item || !item.watched)
+	}
+
+	handleFlipWatch() {
+		const {
+			// navigation,
+			photos,
+			currentPhotoIndex,
+			watchPhoto,
+			unwatchPhoto,
+		} = this.props
+		const item = photos[currentPhotoIndex]
+
+		if (item.watched) {
+			unwatchPhoto({ item, })
+		} else {
+			watchPhoto({ item, })
+		}
+		// navigation.setParams({	handleIsPhotoWatched: () => (this.handleIsPhotoWatched()), })
+	}
+
+	renderWatchIcon() {
+		return (
+			<Icon
+				onPress={
+					() => this.handleFlipWatch()
+				}
+				name={this.isPhotoWatched() ? "eye" : "eye-slash"}
+				type="FontAwesome"
+				style={{ marginLeft: 20, color: CONST.MAIN_COLOR, }}
+			/>
 		)
 	}
 
@@ -222,6 +294,8 @@ const mapDispatchToProps = {
 	banPhoto,
 	deletePhoto,
 	getPhotos,
+	watchPhoto,
+	unwatchPhoto,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosDetails)
