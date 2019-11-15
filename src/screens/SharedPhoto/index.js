@@ -12,6 +12,7 @@ import { connect, } from 'react-redux'
 
 import {
 	Icon,
+	Button,
 	Container,
 	Content,
 	Body,
@@ -23,6 +24,9 @@ import Photo from '../../components/Photo'
 import {
 	banPhoto,
 	deletePhoto,
+	watchPhoto,
+	unwatchPhoto,
+	checkIsPhotoWatched,
 } from '../../components/Photo/reducer'
 
 import {
@@ -39,6 +43,41 @@ class SharedPhoto extends Component {
 		return ({
 			headerTitle: 'shared photo',
 			headerTintColor: CONST.MAIN_COLOR,
+			headerLeft: (
+				<View style={{
+					flex: 1,
+					flexDirection: "row",
+				}}>
+					<Button
+						onPress={
+							() => navigation.goBack()
+						}
+						style={{
+							backgroundColor: '#ffffff',
+						}}>
+						<Icon
+							name="angle-left"
+							type="FontAwesome"
+							style={{
+								color: CONST.MAIN_COLOR,
+							}}
+						/>
+					</Button>
+					<Button
+						onPress={
+							navigation.getParam('handleFlipWatch')
+						}
+						style={{
+							backgroundColor: '#ffffff',
+						}}>
+						<Icon
+							name={navigation.getParam('watched') ? "eye" : "eye-slash"}
+							type="FontAwesome"
+							style={{ color: CONST.MAIN_COLOR, }}
+						/>
+					</Button>
+				</View>
+			),
 			headerRight: (
 				<View style={{
 					flex: 1,
@@ -76,6 +115,10 @@ class SharedPhoto extends Component {
 		bans: PropTypes.array.isRequired,
 		item: PropTypes.object,
 		setItem: PropTypes.func.isRequired,
+		watched: PropTypes.bool.isRequired,
+		watchPhoto: PropTypes.func.isRequired,
+		unwatchPhoto: PropTypes.func.isRequired,
+		checkIsPhotoWatched: PropTypes.func.isRequired,
 	}
 
 	static defaultProps = {
@@ -86,11 +129,17 @@ class SharedPhoto extends Component {
 		const {
 			navigation,
 			setItem,
+			checkIsPhotoWatched,
 		} = this.props
 		navigation.setParams({ handleBan: () => (this.handleBan()), })
 		navigation.setParams({ handleDelete: () => (this.handleDelete()), })
 
 		setItem({ item: navigation.getParam('item'), })
+
+		navigation.setParams({
+			handleFlipWatch: () => (this.handleFlipWatch()),
+		})
+		checkIsPhotoWatched({ item: navigation.getParam('item'), navigation, })
 	}
 
 	isPhotoBannedByMe({ photoId, }) {
@@ -151,6 +200,20 @@ class SharedPhoto extends Component {
 		)
 	}
 
+	handleFlipWatch() {
+		const {
+			navigation,
+			watchPhoto,
+			unwatchPhoto,
+			watched,
+			item,
+		} = this.props
+		if (watched) {
+			unwatchPhoto({ item, navigation, })
+		} else {
+			watchPhoto({ item, navigation, })
+		}
+	}
 
 	render() {
 		const {
@@ -189,6 +252,7 @@ const mapStateToProps = state => (
 	{
 		item: state.sharedPhoto.item,
 		bans: state.photo.bans,
+		watched: state.photo.watched,
 	}
 )
 
@@ -197,6 +261,9 @@ const mapDispatchToProps = {
 	banPhoto,
 	deletePhoto,
 	setItem,
+	watchPhoto,
+	unwatchPhoto,
+	checkIsPhotoWatched,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SharedPhoto)
