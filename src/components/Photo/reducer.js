@@ -153,7 +153,7 @@ export function likePhoto({ photoId, }) {
 	}
 }
 
-export function watchPhoto({ item, }) {
+export function watchPhoto({ item, navigation, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
 
@@ -168,8 +168,11 @@ export function watchPhoto({ item, }) {
 				}),
 			})
 			// const responseJson = await response.json()
-			if (response.status !== 201) {
-				alert('watched')
+			if (response.status === 201) {
+				dispatch({
+					type: PHOTO_WATCHED,
+				})
+				navigation.setParams({ watched: true, })
 			}
 		} catch (err) {
 			Toast.show({
@@ -182,7 +185,7 @@ export function watchPhoto({ item, }) {
 }
 
 
-export function unwatchPhoto({ item, }) {
+export function unwatchPhoto({ item, navigation, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
 
@@ -197,8 +200,11 @@ export function unwatchPhoto({ item, }) {
 				}),
 			})
 			// const responseJson = await response.json()
-			if (response.status !== 200) {
-				alert('unwatched')
+			if (response.status === 200) {
+				dispatch({
+					type: PHOTO_UNWATCHED,
+				})
+				navigation.setParams({ watched: false, })
 			}
 		} catch (err) {
 			Toast.show({

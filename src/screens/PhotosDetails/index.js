@@ -61,7 +61,7 @@ class PhotosDetails extends Component {
 					/>
 					<Icon
 						onPress={
-							() => this.handleFlipWatch()
+							navigation.getParam('handleFlipWatch')
 						}
 						name={navigation.getParam('watched') ? "eye" : "eye-slash"}
 						type="FontAwesome"
@@ -194,7 +194,7 @@ class PhotosDetails extends Component {
 
 	handleFlipWatch() {
 		const {
-			// navigation,
+			navigation,
 			photos,
 			currentPhotoIndex,
 			watchPhoto,
@@ -202,11 +202,10 @@ class PhotosDetails extends Component {
 			watched,
 		} = this.props
 		const item = photos[currentPhotoIndex]
-
 		if (watched) {
-			unwatchPhoto({ item, })
+			unwatchPhoto({ item, navigation, })
 		} else {
-			watchPhoto({ item, })
+			watchPhoto({ item, navigation, })
 		}
 	}
 
