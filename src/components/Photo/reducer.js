@@ -358,7 +358,7 @@ export function setInputText({ inputText, }) {
 	}
 }
 
-export function submitComment({ inputText, item, }) {
+export function submitComment({ inputText, item, navigation, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
 		dispatch({
@@ -391,6 +391,8 @@ export function submitComment({ inputText, item, }) {
 					buttonText: "OK",
 					type: "success",
 				})
+				watchPhoto({ item, navigation, })
+				navigation.setParams({ watched: true, })
 			} else {
 				dispatch({
 					type: SUBMIT_COMMENT_FAILED,

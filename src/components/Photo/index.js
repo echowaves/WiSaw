@@ -42,6 +42,7 @@ import * as CONST from '../../consts.js'
 
 class Photo extends Component {
 	static propTypes = {
+		navigation: PropTypes.object.isRequired,
 		item: PropTypes.object.isRequired,
 		likes: PropTypes.array.isRequired,
 		likePhoto: PropTypes.func.isRequired,
@@ -54,21 +55,6 @@ class Photo extends Component {
 		toggleCommentButtons: PropTypes.func.isRequired,
 		deleteComment: PropTypes.func.isRequired,
 	}
-
-	static navigationOptions = {
-		drawerLabel: 'Home',
-		drawerIcon: ({ tintColor, }) => (
-			<Icon
-				type="FontAwesome"
-				name="bars"
-				style={
-					{
-						color: CONST.MAIN_COLOR,
-					}
-				}
-			/>
-		),
-	};
 
 	static defaultProps = {}
 
@@ -192,9 +178,10 @@ class Photo extends Component {
 			inputText,
 			submitComment,
 			commentsSubmitting,
+			navigation,
 		} = this.props
 		const { width, height, } = Dimensions.get('window')
-
+		// alert(JSON.stringify(navigation))
 		return (
 			<Container onLayout={this.onLayout.bind(this)}>
 				<Content
@@ -394,7 +381,7 @@ class Photo extends Component {
 										value={inputText}
 										editable={!commentsSubmitting}
 										onSubmitEditing={
-											() => submitComment({ inputText, item, })
+											() => submitComment({ inputText, item, navigation, })
 										}
 									/>
 								</Item>
@@ -411,7 +398,7 @@ class Photo extends Component {
 									iconLeft
 									onPress={
 										() => {
-											submitComment({ inputText, item, })
+											submitComment({ inputText, item, navigation, })
 										}
 									}>
 									<Icon
