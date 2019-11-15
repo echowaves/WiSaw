@@ -13,6 +13,7 @@ import { connect, } from 'react-redux'
 
 import {
 	Icon,
+	Button,
 } from 'native-base'
 
 import Swiper from 'react-native-swiper'
@@ -48,25 +49,34 @@ class PhotosDetails extends Component {
 					flex: 1,
 					flexDirection: "row",
 				}}>
-					<Icon
+					<Button
 						onPress={
 							() => navigation.goBack()
 						}
-						name="angle-left"
-						type="FontAwesome"
 						style={{
-							marginLeft: 20,
-							color: CONST.MAIN_COLOR,
-						}}
-					/>
-					<Icon
+							backgroundColor: '#ffffff',
+						}}>
+						<Icon
+							name="angle-left"
+							type="FontAwesome"
+							style={{
+								color: CONST.MAIN_COLOR,
+							}}
+						/>
+					</Button>
+					<Button
 						onPress={
 							navigation.getParam('handleFlipWatch')
 						}
-						name={navigation.getParam('watched') ? "eye" : "eye-slash"}
-						type="FontAwesome"
-						style={{ marginLeft: 20, color: CONST.MAIN_COLOR, }}
-					/>
+						style={{
+							backgroundColor: '#ffffff',
+						}}>
+						<Icon
+							name={navigation.getParam('watched') ? "eye" : "eye-slash"}
+							type="FontAwesome"
+							style={{ color: CONST.MAIN_COLOR, }}
+						/>
+					</Button>
 				</View>
 			),
 			headerRight: (
