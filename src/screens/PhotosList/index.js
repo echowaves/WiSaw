@@ -53,7 +53,6 @@ import {
 	setOrientation,
 	setActiveSegment,
 } from './reducer'
-
 import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'

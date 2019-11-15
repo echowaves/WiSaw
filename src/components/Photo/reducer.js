@@ -9,8 +9,6 @@ import {
 	PHOTO_BANNED,
 	PHOTO_DELETED,
 	PHOTO_COMMENTS_LOADED,
-	PHOTO_WATCHED,
-	PHOTO_UNWATCHED,
 	COMMENT_POSTED,
 	TOGGLE_COMMENT_BUTTONS,
 	COMMENT_DELETED,
@@ -29,6 +27,8 @@ export const SUBMIT_COMMENT_FINISHED = 'wisaw/photo/SUBMIT_COMMENT_FINISHED'
 export const GET_COMMENTS_STARTED = 'wisaw/photo/GET_COMMENTS_STARTED'
 export const GET_COMMENTS_FINISHED = 'wisaw/photo/GET_COMMENTS_FINISHED'
 export const DELETE_COMMENT = 'wisaw/photo/DELETE_COMMENT'
+export const PHOTO_WATCHED = 'wisaw/photo/PHOTO_WATCHED'
+export const PHOTO_UNWATCHED = 'wisaw/photo/PHOTO_UNWATCHED'
 
 
 export const initialState = {
@@ -38,6 +38,7 @@ export const initialState = {
 	inputText: '',
 	commentsSubmitting: false,
 	error: '',
+	watched: false,
 }
 
 export default function reducer(state = initialState, action) {
@@ -96,6 +97,16 @@ export default function reducer(state = initialState, action) {
 			}
 		// case DELETE_PHOTO:
 		// 	return state
+		case PHOTO_WATCHED:
+			return {
+				...state,
+				watched: true,
+			}
+		case PHOTO_UNWATCHED:
+			return {
+				...state,
+				watched: false,
+			}
 		default:
 			return state
 	}
@@ -462,7 +473,7 @@ export function getComments({ item, }) {
 }
 
 
-export function isPhotoWatched({ item, }) {
+export function checkIsPhotoWatched({ item, navigation, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
 		try {
@@ -476,8 +487,8 @@ export function isPhotoWatched({ item, }) {
 			if (response.status === 200) {
 				dispatch({
 					type: PHOTO_WATCHED,
-					item,
 				})
+				navigation.setParams({ watched: true, })
 				return
 			}
 		} catch (err) {
@@ -489,8 +500,8 @@ export function isPhotoWatched({ item, }) {
 		}
 		dispatch({
 			type: PHOTO_UNWATCHED,
-			item,
 		})
+		navigation.setParams({ watched: false, })
 	}
 }
 

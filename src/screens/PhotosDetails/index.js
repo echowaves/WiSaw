@@ -28,6 +28,7 @@ import {
 	deletePhoto,
 	watchPhoto,
 	unwatchPhoto,
+	checkIsPhotoWatched,
 } from '../../components/Photo/reducer'
 
 import { getPhotos, } from '../PhotosList/reducer'
@@ -39,7 +40,6 @@ class PhotosDetails extends Component {
 		navigation,
 	}) => {
 		const { params = {}, } = navigation.state
-
 		return ({
 			headerTitle: '',
 			headerTintColor: CONST.MAIN_COLOR,
@@ -59,7 +59,14 @@ class PhotosDetails extends Component {
 							color: CONST.MAIN_COLOR,
 						}}
 					/>
-					{ navigation.getParam('watchIcon')}
+					<Icon
+						onPress={
+							() => this.handleFlipWatch()
+						}
+						name={navigation.getParam('watched') ? "eye" : "eye-slash"}
+						type="FontAwesome"
+						style={{ marginLeft: 20, color: CONST.MAIN_COLOR, }}
+					/>
 				</View>
 			),
 			headerRight: (
@@ -98,26 +105,29 @@ class PhotosDetails extends Component {
 		batch: PropTypes.number.isRequired,
 		currentPhotoIndex: PropTypes.number.isRequired,
 		setCurrentPhotoIndex: PropTypes.func.isRequired,
+		watched: PropTypes.bool.isRequired,
 		banPhoto: PropTypes.func.isRequired,
 		deletePhoto: PropTypes.func.isRequired,
 		bans: PropTypes.array.isRequired,
 		getPhotos: PropTypes.func.isRequired,
 		watchPhoto: PropTypes.func.isRequired,
 		unwatchPhoto: PropTypes.func.isRequired,
+		checkIsPhotoWatched: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
 		const {
 			navigation,
+			currentPhotoIndex,
+			photos,
+			checkIsPhotoWatched,
 		} = this.props
 		navigation.setParams({
 			handleBan: () => (this.handleBan()),
 			handleDelete: () => (this.handleDelete()),
-			// handleIsPhotoWatched: () => (this.isPhotoWatched()),
 			handleFlipWatch: () => (this.handleFlipWatch()),
-			watchIcon: this.renderWatchIcon(),
 		})
-		// navigation.setParams({ watchIcon: this.renderWatchIcon(), })
+		checkIsPhotoWatched({ item: photos[currentPhotoIndex], navigation, })
 	}
 
 	isPhotoBannedByMe({ photoId, }) {
@@ -182,17 +192,6 @@ class PhotosDetails extends Component {
 		)
 	}
 
-	isPhotoWatched() {
-		const {
-			// navigation,
-			photos,
-			currentPhotoIndex,
-		} = this.props
-		const item = photos[currentPhotoIndex]
-
-		return !(!item || !item.watched)
-	}
-
 	handleFlipWatch() {
 		const {
 			// navigation,
@@ -200,38 +199,28 @@ class PhotosDetails extends Component {
 			currentPhotoIndex,
 			watchPhoto,
 			unwatchPhoto,
+			watched,
 		} = this.props
 		const item = photos[currentPhotoIndex]
 
-		if (item.watched) {
+		if (watched) {
 			unwatchPhoto({ item, })
 		} else {
 			watchPhoto({ item, })
 		}
-		// navigation.setParams({	handleIsPhotoWatched: () => (this.handleIsPhotoWatched()), })
-	}
-
-	renderWatchIcon() {
-		return (
-			<Icon
-				onPress={
-					() => this.handleFlipWatch()
-				}
-				name={this.isPhotoWatched() ? "eye" : "eye-slash"}
-				type="FontAwesome"
-				style={{ marginLeft: 20, color: CONST.MAIN_COLOR, }}
-			/>
-		)
 	}
 
 	render() {
 		const {
+			navigation,
 			photos,
 			currentPhotoIndex,
 			setCurrentPhotoIndex,
 			getPhotos,
 			batch,
+			checkIsPhotoWatched,
 		} = this.props
+
 		return (
 			<View style={styles.container}>
 				<Swiper
@@ -257,6 +246,7 @@ class PhotosDetails extends Component {
 					index={currentPhotoIndex}
 					onIndexChanged={index => {
 						setCurrentPhotoIndex(index)
+						checkIsPhotoWatched({ item: photos[index], navigation, })
 						if (currentPhotoIndex > photos.length - 5) {
 							getPhotos(batch) // pre-load more photos when nearing the end
 						}
@@ -286,6 +276,7 @@ const mapStateToProps = state => (
 		batch: state.photosList.batch,
 		currentPhotoIndex: state.thumb.currentPhotoIndex,
 		bans: state.photo.bans,
+		watched: state.photo.watched,
 	}
 )
 
@@ -296,6 +287,7 @@ const mapDispatchToProps = {
 	getPhotos,
 	watchPhoto,
 	unwatchPhoto,
+	checkIsPhotoWatched,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosDetails)

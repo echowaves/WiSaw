@@ -36,7 +36,6 @@ import {
 	getComments,
 	toggleCommentButtons,
 	deleteComment,
-	isPhotoWatched,
 } from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -52,7 +51,6 @@ class Photo extends Component {
 		submitComment: PropTypes.func.isRequired,
 		commentsSubmitting: PropTypes.bool.isRequired,
 		getComments: PropTypes.func.isRequired,
-		isPhotoWatched: PropTypes.func.isRequired,
 		toggleCommentButtons: PropTypes.func.isRequired,
 		deleteComment: PropTypes.func.isRequired,
 	}
@@ -79,11 +77,10 @@ class Photo extends Component {
 			item,
 			setInputText,
 			getComments,
-			isPhotoWatched,
 		} = this.props
 		setInputText({ inputText: '', })
 		getComments({ item, })
-		isPhotoWatched({ item, })
+
 		this.intervalId = setInterval(() => { getComments({ item, }) }, 30000)
 	}
 
@@ -449,7 +446,6 @@ const mapDispatchToProps = {
 	setInputText,
 	submitComment,
 	getComments,
-	isPhotoWatched,
 	toggleCommentButtons,
 	deleteComment,
 }
