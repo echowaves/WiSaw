@@ -78,7 +78,7 @@ class SharedPhoto extends Component {
 					</Button>
 				</View>
 			),
-			headerRight: (
+			headerRight: (!navigation.getParam('watched') && (
 				<View style={{
 					flex: 1,
 					flexDirection: "row",
@@ -103,7 +103,7 @@ class SharedPhoto extends Component {
 						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
 					/>
 				</View>
-			),
+			)),
 			headerBackTitle: null,
 		})
 	}

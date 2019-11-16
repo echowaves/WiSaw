@@ -79,7 +79,7 @@ class PhotosDetails extends Component {
 					</Button>
 				</View>
 			),
-			headerRight: (
+			headerRight: (!navigation.getParam('watched') && (
 				<View style={{
 					flex: 1,
 					flexDirection: "row",
@@ -104,7 +104,7 @@ class PhotosDetails extends Component {
 						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
 					/>
 				</View>
-			),
+			)),
 			headerBackTitle: null,
 		})
 	}
