@@ -218,11 +218,12 @@ class SharedPhoto extends Component {
 	render() {
 		const {
 			item,
+			navigation,
 		} = this.props
 		if (item) {
 			return (
 				<View style={styles.container}>
-					<Photo item={item} key={item.id} />
+					<Photo item={item} key={item.id} navigation={navigation} />
 				</View>
 			)
 		}
