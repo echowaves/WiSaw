@@ -253,11 +253,11 @@ class PhotosDetails extends Component {
 					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
 					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
 					index={currentPhotoIndex}
-					onIndexChanged={index => {
+					onIndexChanged={async index => {
 						setCurrentPhotoIndex(index)
 						checkIsPhotoWatched({ item: photos[index], navigation, })
 						if (currentPhotoIndex > photos.length - 5) {
-							getPhotos(batch) // pre-load more photos when nearing the end
+							await getPhotos(batch) // pre-load more photos when nearing the end
 						}
 					}} // otherwise will jump to wrong photo onLayout
 					loadMinimal
