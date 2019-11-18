@@ -196,5 +196,4 @@ FeedbackScreen.propTypes = {
 	resetForm: PropTypes.func.isRequired,
 }
 
-
 export default connect(mapStateToProps, mapDispatchToProps)(FeedbackScreen)

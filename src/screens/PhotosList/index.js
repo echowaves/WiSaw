@@ -642,10 +642,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = state => {
 	const storedPhotos = state.photosList.photos
-	// .map(photo => ({
-	// 	key: photo.id,
-	// 	...photo,
-	// })) // add key to photos
+
 	return {
 		photos: storedPhotos,
 		errorMessage: state.photosList.errorMessage,

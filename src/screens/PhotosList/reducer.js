@@ -91,6 +91,7 @@ export default function reducer(state = initialState, action) {
 				loading: false,
 				errorMessage: '',
 				pageNumber: 0,
+				batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
 			}
 		case SET_IS_TANDC_ACCEPTED:
 			return {
@@ -216,7 +217,6 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				activeSegment: action.activeSegment,
-				batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
 			}
 		default:
 			return state
@@ -312,7 +312,7 @@ async function _requestWatchedPhotos(getState, batch) {
 	return responseJson
 }
 
-export function getPhotos(requestedBatch) {
+export function getPhotos(batch) {
 	return async (dispatch, getState) => {
 		if (!getState().photosList.location) {
 			return Promise.resolve()
@@ -326,14 +326,12 @@ export function getPhotos(requestedBatch) {
 			let responseJson
 			if (activeSegment === 0) {
 				/* eslint-disable no-await-in-loop */
-				responseJson = await _requestGeoPhotos(getState, latitude, longitude, requestedBatch)
+				responseJson = await _requestGeoPhotos(getState, latitude, longitude, batch)
 			} else if (activeSegment === 1) {
-				responseJson = await _requestWatchedPhotos(getState, requestedBatch)
+				responseJson = await _requestWatchedPhotos(getState, batch)
 			}
-			// alert(`batch:${batch}, requestedBatch:${requestedBatch}, responseJson.batch:${responseJson.batch}`)
 			if (responseJson.photos && responseJson.photos.length > 0) {
-				if (responseJson.batch === requestedBatch) {
-					// alert(batch)
+				if (responseJson.batch === batch) {
 					dispatch({
 						type: GET_PHOTOS_SUCCESS,
 						photos: responseJson.photos,
