@@ -19,18 +19,6 @@ import { setCurrentPhotoIndex, } from './reducer'
 import * as CONST from '../../consts.js'
 
 class Thumb extends Component {
-	static propTypes = {
-		navigation: PropTypes.object.isRequired,
-		setCurrentPhotoIndex: PropTypes.func.isRequired,
-		item: PropTypes.object.isRequired,
-		index: PropTypes.number.isRequired,
-		thumbWidth: PropTypes.number,
-	}
-
-	static defaultProps = {
-		thumbWidth: 100,
-	}
-
 	constructor(props) {
 		super(props)
 	}
@@ -160,5 +148,18 @@ const mapStateToProps = null
 const mapDispatchToProps = {
 	setCurrentPhotoIndex, // will be wrapped into a dispatch call
 }
+
+Thumb.propTypes = {
+	navigation: PropTypes.object.isRequired,
+	setCurrentPhotoIndex: PropTypes.func.isRequired,
+	item: PropTypes.object.isRequired,
+	index: PropTypes.number.isRequired,
+	thumbWidth: PropTypes.number,
+}
+
+Thumb.defaultProps = {
+	thumbWidth: 100,
+}
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(Thumb)

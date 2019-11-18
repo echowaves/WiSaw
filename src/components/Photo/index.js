@@ -41,23 +41,6 @@ import {
 import * as CONST from '../../consts.js'
 
 class Photo extends Component {
-	static propTypes = {
-		navigation: PropTypes.object.isRequired,
-		item: PropTypes.object.isRequired,
-		likes: PropTypes.array.isRequired,
-		likePhoto: PropTypes.func.isRequired,
-		sharePhoto: PropTypes.func.isRequired,
-		setInputText: PropTypes.func.isRequired,
-		inputText: PropTypes.string.isRequired,
-		submitComment: PropTypes.func.isRequired,
-		commentsSubmitting: PropTypes.bool.isRequired,
-		getComments: PropTypes.func.isRequired,
-		toggleCommentButtons: PropTypes.func.isRequired,
-		deleteComment: PropTypes.func.isRequired,
-	}
-
-	static defaultProps = {}
-
 	componentDidMount() {
 		const {
 			item,
@@ -335,11 +318,9 @@ class Photo extends Component {
 									<Row style={{ marginTop: 5, }}>
 										<Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR, }}>{item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}</Text>
 									</Row>
-								)
-						}
+								)}
 						{ item.comments && item.comments.length > 0
-								&& (this.renderComments())
-						}
+								&& (this.renderComments())}
 						<Row
 							style={{
 								paddingVertical: 20,
@@ -427,6 +408,7 @@ const mapStateToProps = state => ({
 	commentsSubmitting: state.photo.commentsSubmitting,
 	error: state.photo.error,
 })
+
 const mapDispatchToProps = {
 	likePhoto, // will be wrapped into a dispatch call
 	sharePhoto,
@@ -436,5 +418,22 @@ const mapDispatchToProps = {
 	toggleCommentButtons,
 	deleteComment,
 }
+
+Photo.propTypes = {
+	navigation: PropTypes.object.isRequired,
+	item: PropTypes.object.isRequired,
+	likes: PropTypes.array.isRequired,
+	likePhoto: PropTypes.func.isRequired,
+	sharePhoto: PropTypes.func.isRequired,
+	setInputText: PropTypes.func.isRequired,
+	inputText: PropTypes.string.isRequired,
+	submitComment: PropTypes.func.isRequired,
+	commentsSubmitting: PropTypes.bool.isRequired,
+	getComments: PropTypes.func.isRequired,
+	toggleCommentButtons: PropTypes.func.isRequired,
+	deleteComment: PropTypes.func.isRequired,
+}
+
+Photo.defaultProps = {}
 
 export default connect(mapStateToProps, mapDispatchToProps)(Photo)

@@ -109,22 +109,6 @@ class PhotosDetails extends Component {
 		})
 	}
 
-	static propTypes = {
-		navigation: PropTypes.object.isRequired,
-		photos: PropTypes.array.isRequired,
-		batch: PropTypes.number.isRequired,
-		currentPhotoIndex: PropTypes.number.isRequired,
-		setCurrentPhotoIndex: PropTypes.func.isRequired,
-		watched: PropTypes.bool.isRequired,
-		banPhoto: PropTypes.func.isRequired,
-		deletePhoto: PropTypes.func.isRequired,
-		bans: PropTypes.array.isRequired,
-		getPhotos: PropTypes.func.isRequired,
-		watchPhoto: PropTypes.func.isRequired,
-		unwatchPhoto: PropTypes.func.isRequired,
-		checkIsPhotoWatched: PropTypes.func.isRequired,
-	}
-
 	componentDidMount() {
 		const {
 			navigation,
@@ -297,6 +281,22 @@ const mapDispatchToProps = {
 	watchPhoto,
 	unwatchPhoto,
 	checkIsPhotoWatched,
+}
+
+PhotosDetails.propTypes = {
+	navigation: PropTypes.object.isRequired,
+	photos: PropTypes.array.isRequired,
+	batch: PropTypes.number.isRequired,
+	currentPhotoIndex: PropTypes.number.isRequired,
+	setCurrentPhotoIndex: PropTypes.func.isRequired,
+	watched: PropTypes.bool.isRequired,
+	banPhoto: PropTypes.func.isRequired,
+	deletePhoto: PropTypes.func.isRequired,
+	bans: PropTypes.array.isRequired,
+	getPhotos: PropTypes.func.isRequired,
+	watchPhoto: PropTypes.func.isRequired,
+	unwatchPhoto: PropTypes.func.isRequired,
+	checkIsPhotoWatched: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosDetails)

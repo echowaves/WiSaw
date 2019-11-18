@@ -39,38 +39,10 @@ import {
 	setZoom,
 } from './reducer'
 
-import { store, } from '../../../App' // eslint-disable-line import/no-cycle
+import { store, } from '../../index.js' // eslint-disable-line import/no-cycle
 import * as CONST from '../../consts.js'
 
 class Camera extends Component {
-	static navigationOptions = {
-		headerTintColor: CONST.MAIN_COLOR,
-		headerStyle: {
-			borderBottomColor: 'black',
-			borderBottomWidth: 0,
-		},
-		headerTransparent: true,
-	}
-
-	static defaultProps = {
-		previewUri: null,
-	}
-
-	static propTypes = {
-		// navigation: PropTypes.object.isRequired,
-		previewUri: PropTypes.string,
-		setPreviewUri: PropTypes.func.isRequired,
-		uploadPendingPhotos: PropTypes.func.isRequired,
-		pendingUploads: PropTypes.number.isRequired,
-		orientation: PropTypes.string.isRequired,
-		flashMode: PropTypes.bool.isRequired,
-		setFlashMode: PropTypes.func.isRequired,
-		frontCam: PropTypes.bool.isRequired,
-		setFrontCam: PropTypes.func.isRequired,
-		zoom: PropTypes.number.isRequired,
-		setZoom: PropTypes.func.isRequired,
-	}
-
 	componentDidMount() {
 		const {
 			setPreviewUri,
@@ -463,6 +435,34 @@ const mapDispatchToProps = {
 	setFlashMode,
 	setFrontCam,
 	setZoom,
+}
+
+Camera.navigationOptions = {
+	headerTintColor: CONST.MAIN_COLOR,
+	headerStyle: {
+		borderBottomColor: 'black',
+		borderBottomWidth: 0,
+	},
+	headerTransparent: true,
+}
+
+Camera.defaultProps = {
+	previewUri: null,
+}
+
+Camera.propTypes = {
+	// navigation: PropTypes.object.isRequired,
+	previewUri: PropTypes.string,
+	setPreviewUri: PropTypes.func.isRequired,
+	uploadPendingPhotos: PropTypes.func.isRequired,
+	pendingUploads: PropTypes.number.isRequired,
+	orientation: PropTypes.string.isRequired,
+	flashMode: PropTypes.bool.isRequired,
+	setFlashMode: PropTypes.func.isRequired,
+	frontCam: PropTypes.bool.isRequired,
+	setFrontCam: PropTypes.func.isRequired,
+	zoom: PropTypes.number.isRequired,
+	setZoom: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Camera)

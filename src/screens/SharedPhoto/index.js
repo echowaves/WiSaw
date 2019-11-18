@@ -108,23 +108,6 @@ class SharedPhoto extends Component {
 		})
 	}
 
-	static propTypes = {
-		navigation: PropTypes.object.isRequired,
-		banPhoto: PropTypes.func.isRequired,
-		deletePhoto: PropTypes.func.isRequired,
-		bans: PropTypes.array.isRequired,
-		item: PropTypes.object,
-		setItem: PropTypes.func.isRequired,
-		watched: PropTypes.bool.isRequired,
-		watchPhoto: PropTypes.func.isRequired,
-		unwatchPhoto: PropTypes.func.isRequired,
-		checkIsPhotoWatched: PropTypes.func.isRequired,
-	}
-
-	static defaultProps = {
-		item: null,
-	}
-
 	componentDidMount() {
 		const {
 			navigation,
@@ -265,6 +248,23 @@ const mapDispatchToProps = {
 	watchPhoto,
 	unwatchPhoto,
 	checkIsPhotoWatched,
+}
+
+SharedPhoto.propTypes = {
+	navigation: PropTypes.object.isRequired,
+	banPhoto: PropTypes.func.isRequired,
+	deletePhoto: PropTypes.func.isRequired,
+	bans: PropTypes.array.isRequired,
+	item: PropTypes.object,
+	setItem: PropTypes.func.isRequired,
+	watched: PropTypes.bool.isRequired,
+	watchPhoto: PropTypes.func.isRequired,
+	unwatchPhoto: PropTypes.func.isRequired,
+	checkIsPhotoWatched: PropTypes.func.isRequired,
+}
+
+SharedPhoto.defaultProps = {
+	item: null,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SharedPhoto)

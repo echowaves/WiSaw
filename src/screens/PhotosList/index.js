@@ -58,6 +58,7 @@ import { uploadPendingPhotos, } from '../Camera/reducer'
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
 
+
 class PhotosList extends Component {
 	static navigationOptions = ({
 		navigation,
@@ -98,29 +99,6 @@ class PhotosList extends Component {
 			),
 			headerBackTitle: null,
 		})
-	}
-
-	static defaultProps = {
-		locationPermission: null,
-	}
-
-	static propTypes = {
-		navigation: PropTypes.object.isRequired,
-		resetState: PropTypes.func.isRequired,
-		getPhotos: PropTypes.func.isRequired,
-		photos: PropTypes.array.isRequired,
-		batch: PropTypes.number.isRequired,
-		isTandcAccepted: PropTypes.bool.isRequired,
-		loading: PropTypes.bool.isRequired,
-		acceptTandC: PropTypes.func.isRequired,
-		locationPermission: PropTypes.string,
-		setLocationPermission: PropTypes.func.isRequired,
-		pendingUploads: PropTypes.number.isRequired,
-		uploadPendingPhotos: PropTypes.func.isRequired,
-		orientation: PropTypes.string.isRequired,
-		setOrientation: PropTypes.func.isRequired,
-		activeSegment: PropTypes.number.isRequired,
-		setActiveSegment: PropTypes.func.isRequired,
 	}
 
 	thumbWidth
@@ -496,7 +474,8 @@ class PhotosList extends Component {
 									}
 									thumbWidth={this.thumbWidth}
 								/>
-							)}
+							)
+						}
 						style={
 							styles.container
 						}
@@ -690,6 +669,29 @@ const mapDispatchToProps = {
 	uploadPendingPhotos,
 	setOrientation,
 	setActiveSegment,
+}
+
+PhotosList.defaultProps = {
+	locationPermission: null,
+}
+
+PhotosList.propTypes = {
+	navigation: PropTypes.object.isRequired,
+	resetState: PropTypes.func.isRequired,
+	getPhotos: PropTypes.func.isRequired,
+	photos: PropTypes.array.isRequired,
+	batch: PropTypes.number.isRequired,
+	isTandcAccepted: PropTypes.bool.isRequired,
+	loading: PropTypes.bool.isRequired,
+	acceptTandC: PropTypes.func.isRequired,
+	locationPermission: PropTypes.string,
+	setLocationPermission: PropTypes.func.isRequired,
+	pendingUploads: PropTypes.number.isRequired,
+	uploadPendingPhotos: PropTypes.func.isRequired,
+	orientation: PropTypes.string.isRequired,
+	setOrientation: PropTypes.func.isRequired,
+	activeSegment: PropTypes.number.isRequired,
+	setActiveSegment: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)

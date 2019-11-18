@@ -7,13 +7,10 @@ import { createAppContainer, } from "react-navigation"
 import { createStackNavigator, } from 'react-navigation-stack'
 // import createNativeStackNavigator from 'react-native-screens/createNativeStackNavigator'
 
-
-import { createStore, applyMiddleware, compose, } from 'redux'
 import { Provider, } from 'react-redux'
-import ReduxThunk from 'redux-thunk'
 
 // import { enableScreens, } from 'react-native-screens'
-import reducers from './src'
+import { store, } from './src'
 
 import PhotosList from './src/screens/PhotosList'
 import PhotosDetails from './src/screens/PhotosDetails'
@@ -45,14 +42,6 @@ const AppNavigator = createStackNavigator({
 })
 
 const AppContainer = createAppContainer(AppNavigator)
-
-let composeEnhancers = compose
-/* eslint no-undef: */
-if (__DEV__) {
-	composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
-}
-
-export const store = createStore(reducers, composeEnhancers(applyMiddleware(ReduxThunk)))
 
 export default class App extends Component {
 	render() {

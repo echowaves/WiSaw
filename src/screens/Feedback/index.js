@@ -34,6 +34,7 @@ import {
 	resetForm,
 } from './reducer'
 
+
 class FeedbackScreen extends Component {
 	static navigationOptions = ({
 		navigation,
@@ -59,17 +60,6 @@ class FeedbackScreen extends Component {
 			),
 			headerBackTitle: null,
 		})
-	}
-
-	static propTypes = {
-		navigation: PropTypes.object.isRequired,
-		feedbackText: PropTypes.string.isRequired,
-		errorMessage: PropTypes.string.isRequired,
-		loading: PropTypes.bool.isRequired,
-		finished: PropTypes.bool.isRequired,
-		submitFeedback: PropTypes.func.isRequired,
-		setFeedbackText: PropTypes.func.isRequired,
-		resetForm: PropTypes.func.isRequired,
 	}
 
 	componentDidMount() {
@@ -194,5 +184,17 @@ const mapDispatchToProps = {
 	submitFeedback,
 	resetForm,
 }
+
+FeedbackScreen.propTypes = {
+	navigation: PropTypes.object.isRequired,
+	feedbackText: PropTypes.string.isRequired,
+	errorMessage: PropTypes.string.isRequired,
+	loading: PropTypes.bool.isRequired,
+	finished: PropTypes.bool.isRequired,
+	submitFeedback: PropTypes.func.isRequired,
+	setFeedbackText: PropTypes.func.isRequired,
+	resetForm: PropTypes.func.isRequired,
+}
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(FeedbackScreen)
