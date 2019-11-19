@@ -220,6 +220,7 @@ class Camera extends Component {
 					flashMode={flashMode ? RNCamera.Constants.FlashMode.on : RNCamera.Constants.FlashMode.off}
 					type={frontCam ? RNCamera.Constants.Type.front : RNCamera.Constants.Type.back}
 					zoom={zoom}
+					captureAudio={false}
 				/>
 				<View style={
 					[

@@ -8,7 +8,7 @@
     "start-ipad": "react-native run-ios --simulator \"iPad Pro (12.9-inch) (3rd generation)\"",
 		"start-phone": "react-native run-ios --device \"DiPhone\" --configuration=release",
     "start-android": "react-native run-android",
-    "clean": "react-native-clean-project",
+    "clean": "react-native clean-project-auto",
     "bundle-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
     "start": "react-native start",
     "test": "jest",

@@ -103,7 +103,7 @@ class PhotosList extends Component {
 
 	thumbWidth
 
-	componentDidMount() {
+	async componentDidMount() {
 		const {
 			navigation,
 			locationPermission,
@@ -112,7 +112,7 @@ class PhotosList extends Component {
 		} = this.props
 
 		navigation.setParams({
-			handleRefresh: () => (this.reload()),
+			handleRefresh: async () => (this.reload()),
 			activeSegment,
 		})
 
@@ -120,12 +120,12 @@ class PhotosList extends Component {
 
 		if (locationPermission !== 'authorized') {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-			Permissions.request('location', { type: 'whenInUse', }).then(permissionResponse => {
+			Permissions.request('location', { type: 'whenInUse', }).then(async permissionResponse => {
 				setLocationPermission(permissionResponse)
-				this.reload()
+				await this.reload()
 			})
 		} else {
-			this.reload()
+			await this.reload()
 		}
 
 		branch.initSessionTtl = 10000 // Set to 10 seconds
@@ -390,6 +390,7 @@ class PhotosList extends Component {
 			locationPermission,
 			batch,
 			activeSegment,
+			resetState,
 		} = this.props
 
 		if (locationPermission === 'authorized') {
@@ -499,7 +500,10 @@ class PhotosList extends Component {
 							false
 						}
 						onRefresh={
-							() => (this.reload())
+							async () => {
+								await resetState()
+								await this.reload()
+							}
 						}
 						onContentSizeChange={this.onContentSizeChange}
 					/>
