@@ -103,7 +103,7 @@ class PhotosList extends Component {
 
 	thumbWidth
 
-	async componentDidMount() {
+	componentDidMount() {
 		const {
 			navigation,
 			locationPermission,
@@ -112,7 +112,7 @@ class PhotosList extends Component {
 		} = this.props
 
 		navigation.setParams({
-			handleRefresh: async () => (this.reload()),
+			handleRefresh: () => (this.reload()),
 			activeSegment,
 		})
 
@@ -122,10 +122,10 @@ class PhotosList extends Component {
 			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
 			Permissions.request('location', { type: 'whenInUse', }).then(async permissionResponse => {
 				setLocationPermission(permissionResponse)
-				await this.reload()
+				this.reload()
 			})
 		} else {
-			await this.reload()
+			this.reload()
 		}
 
 		branch.initSessionTtl = 10000 // Set to 10 seconds
@@ -215,6 +215,7 @@ class PhotosList extends Component {
 			navigation,
 			batch,
 		} = this.props
+		uploadPendingPhotos()
 		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
 		/* eslint-disable no-await-in-loop */
 		while (this.isLoading() === true) {
@@ -226,8 +227,6 @@ class PhotosList extends Component {
 		while (!this.isListFilllsScreen()) {
 			await getPhotos(batch)
 		}
-		// alert(`${i}`)
-		await uploadPendingPhotos()
 	}
 
 	async alertForPermission(headerText, bodyText) {
@@ -358,11 +357,10 @@ class PhotosList extends Component {
 					<Button
 						first active={activeSegment === 0}
 						onPress={
-							async () => {
-								// await resetState()
-								await setActiveSegment(0)
-								await navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
-								await this.reload()
+							() => {
+								setActiveSegment(0)
+								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+								this.reload()
 							}
 						}>
 						<Icon
@@ -373,11 +371,10 @@ class PhotosList extends Component {
 					<Button
 						last active={activeSegment === 1}
 						onPress={
-							async () => {
-								// await resetState()
-								await setActiveSegment(1)
-								await navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
-								await this.reload()
+							() => {
+								setActiveSegment(1)
+								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+								this.reload()
 							}
 						}>
 						<Icon
@@ -499,21 +496,21 @@ class PhotosList extends Component {
 							false
 						}
 						onEndReached={
-							async () => {
+							() => {
 								if (!loading && !isLastPage) {
-									await getPhotos(batch)
+									getPhotos(batch)
 								}
 							}
 						}
 						onEndReachedThreshold={
-							150
+							350
 						}
 						refreshing={
 							false
 						}
 						onRefresh={
-							async () => {
-								await this.reload()
+							() => {
+								this.reload()
 							}
 						}
 						onContentSizeChange={this.onContentSizeChange}
