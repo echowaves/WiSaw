@@ -215,7 +215,6 @@ class PhotosList extends Component {
 			navigation,
 			batch,
 		} = this.props
-		uploadPendingPhotos()
 		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
 		/* eslint-disable no-await-in-loop */
 		while (this.isLoading() === true) {
@@ -227,6 +226,7 @@ class PhotosList extends Component {
 		while (!this.isListFilllsScreen()) {
 			await getPhotos(batch)
 		}
+		await uploadPendingPhotos()
 	}
 
 	async alertForPermission(headerText, bodyText) {
