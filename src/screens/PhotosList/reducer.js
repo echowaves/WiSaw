@@ -36,7 +36,6 @@ const UUID_KEY = 'wisaw_device_uuid'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
-const PHOTO_DOES_NOT_BELONG_TO_BATCH = 'batch updated, ignoring this photo'
 
 export const initialState = {
 	isTandcAccepted: false,
@@ -50,6 +49,7 @@ export const initialState = {
 	orientation: 'portrait-primary',
 	activeSegment: 0,
 	batch: 0,
+	isLastPage: false,
 }
 
 export default function reducer(state = initialState, action) {
@@ -76,12 +76,13 @@ export default function reducer(state = initialState, action) {
 				...state,
 				pageNumber: state.pageNumber + 1,
 				errorMessage: action.errorMessage,
-				loading: false,
 			}
 		case GET_PHOTOS_FINISHED:
 			return {
 				...state,
 				loading: false,
+				isLastPage: (state.activeSegment === 0 && state.pageNumber > 1095)
+				|| (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE),
 			}
 		case RESET_STATE:
 			return {
@@ -91,6 +92,7 @@ export default function reducer(state = initialState, action) {
 				loading: false,
 				errorMessage: '',
 				pageNumber: 0,
+				isLastPage: false,
 				batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
 			}
 		case SET_IS_TANDC_ACCEPTED:
@@ -330,8 +332,8 @@ export function getPhotos(batch) {
 			} else if (activeSegment === 1) {
 				responseJson = await _requestWatchedPhotos(getState, batch)
 			}
-			if (responseJson.photos && responseJson.photos.length > 0) {
-				if (responseJson.batch === batch) {
+			if (responseJson.batch === batch) {
+				if (responseJson.photos && responseJson.photos.length > 0) {
 					dispatch({
 						type: GET_PHOTOS_SUCCESS,
 						photos: responseJson.photos,
@@ -339,14 +341,9 @@ export function getPhotos(batch) {
 				} else {
 					dispatch({
 						type: GET_PHOTOS_FAIL,
-						errorMessage: PHOTO_DOES_NOT_BELONG_TO_BATCH,
+						errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
 					})
 				}
-			} else {
-				dispatch({
-					type: GET_PHOTOS_FAIL,
-					errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-				})
 			}
 		} catch (err) {
 			dispatch({

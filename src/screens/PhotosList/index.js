@@ -190,13 +190,21 @@ class PhotosList extends Component {
 	isListFilllsScreen() {
 		const {
 			photos,
+			isLastPage,
 		} = this.props
 		const { width, height, } = Dimensions.get('window')
 		const numColumns = Math.floor(width / this.thumbWidth)
 		const numRows = Math.floor(photos.length / numColumns)
 		const listHeight = numRows * this.thumbWidth
 		// alert(`${photos.length}:${listHeight}:${height}`)
-		return listHeight > height
+		return listHeight > height || isLastPage
+	}
+
+	isLoading() {
+		const {
+			loading,
+		} = this.props
+		return loading
 	}
 
 	async reload() {
@@ -208,13 +216,15 @@ class PhotosList extends Component {
 			batch,
 		} = this.props
 		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
-
-		await resetState()
-		let i = 0
 		/* eslint-disable no-await-in-loop */
-		while (!this.isListFilllsScreen() && i < 30) {
+		while (this.isLoading() === true) {
+			// alert('loading')
+			await new Promise(resolve => setTimeout(resolve, 1000)) // sleep
+		}
+		await resetState()
+		/* eslint-disable no-await-in-loop */
+		while (!this.isListFilllsScreen()) {
 			await getPhotos(batch)
-			i += 1
 		}
 		// alert(`${i}`)
 		await uploadPendingPhotos()
@@ -348,10 +358,11 @@ class PhotosList extends Component {
 					<Button
 						first active={activeSegment === 0}
 						onPress={
-							() => {
-								setActiveSegment(0)
-								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
-								this.reload()
+							async () => {
+								// await resetState()
+								await setActiveSegment(0)
+								await navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+								await this.reload()
 							}
 						}>
 						<Icon
@@ -362,10 +373,11 @@ class PhotosList extends Component {
 					<Button
 						last active={activeSegment === 1}
 						onPress={
-							() => {
-								setActiveSegment(1)
-								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
-								this.reload()
+							async () => {
+								// await resetState()
+								await setActiveSegment(1)
+								await navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+								await this.reload()
 							}
 						}>
 						<Icon
@@ -390,7 +402,7 @@ class PhotosList extends Component {
 			locationPermission,
 			batch,
 			activeSegment,
-			resetState,
+			isLastPage,
 		} = this.props
 
 		if (locationPermission === 'authorized') {
@@ -488,7 +500,7 @@ class PhotosList extends Component {
 						}
 						onEndReached={
 							async () => {
-								if (!loading) {
+								if (!loading && !isLastPage) {
 									await getPhotos(batch)
 								}
 							}
@@ -501,7 +513,6 @@ class PhotosList extends Component {
 						}
 						onRefresh={
 							async () => {
-								await resetState()
 								await this.reload()
 							}
 						}
@@ -645,12 +656,14 @@ const styles = StyleSheet.create({
 })
 
 const mapStateToProps = state => {
-	const storedPhotos = state.photosList.photos
+	const { photos, pageNumber, } = state.photosList
 
 	return {
-		photos: storedPhotos,
+		photos,
+		pageNumber,
 		errorMessage: state.photosList.errorMessage,
 		batch: state.photosList.batch,
+		isLastPage: state.photosList.isLastPage,
 		paging: state.photosList.paging,
 		isTandcAccepted: state.photosList.isTandcAccepted,
 		loading: state.photosList.loading,
@@ -681,6 +694,7 @@ PhotosList.propTypes = {
 	resetState: PropTypes.func.isRequired,
 	getPhotos: PropTypes.func.isRequired,
 	photos: PropTypes.array.isRequired,
+	isLastPage: PropTypes.bool.isRequired,
 	batch: PropTypes.number.isRequired,
 	isTandcAccepted: PropTypes.bool.isRequired,
 	loading: PropTypes.bool.isRequired,
