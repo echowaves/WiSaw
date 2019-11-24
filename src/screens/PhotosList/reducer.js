@@ -81,7 +81,7 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				loading: false,
-				isLastPage: (state.activeSegment === 0 && state.pageNumber > 1095)
+				isLastPage: (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
 				|| (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE),
 			}
 		case RESET_STATE:

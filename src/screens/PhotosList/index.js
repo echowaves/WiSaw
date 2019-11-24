@@ -219,7 +219,7 @@ class PhotosList extends Component {
 		/* eslint-disable no-await-in-loop */
 		while (this.isLoading() === true) {
 			// alert('loading')
-			await new Promise(resolve => setTimeout(resolve, 1000)) // sleep
+			await new Promise(resolve => setTimeout(resolve, 500)) // sleep
 		}
 		await resetState()
 		/* eslint-disable no-await-in-loop */
