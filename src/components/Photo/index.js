@@ -165,50 +165,39 @@ class Photo extends Component {
 		const moderationLabels = jmespath.search(recognition, "metaData.ModerationLabels[]")
 
 		return (
-			<View>
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center", }}>
 				{labels.length > 0 && (
-					<View style={{ margin: 10, paddingBottom: 20, }}>
-						<View align="center" style={{ fontWeight: "bold", }}>
-							<Text>AI recognized tags:</Text>
-						</View>
-						<View align="center">
-							{labels.map(label => (
-								<View key={label.Name} style={{ fontSize: `${label.Confidence}%`, }}>
-									<Text>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
-								</View>
-							))}
-						</View>
+					<View style={{ paddingBottom: 20, }}>
+						<Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center", }}>AI recognized tags:</Text>
+						{labels.map(label => (
+							<Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center", }}>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
+						))}
 					</View>
 				)}
 
 				{textDetections.length > 0 && (
-					<View style={{ margin: 10, paddingBottom: 20, }}>
-						<View align="center" style={{ fontWeight: "bold", }}>
-							<Text>AI recognized text:</Text>
-						</View>
-						<View align="center">
-							{textDetections.map(text => (
-								<View key={text.Id} style={{ fontSize: `${text.Confidence}%`, }}>
-									<Text>{stringifyObject(text.DetectedText).replace(/'/g, '')}</Text>
-								</View>
-							))}
-						</View>
+					<View style={{ paddingBottom: 20, }}>
+						<Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center", }}>AI recognized text:</Text>
+						{textDetections.map(text => (
+							<Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center", }}>{stringifyObject(text.DetectedText).replace(/'/g, '')}</Text>
+						))}
 					</View>
 				)}
 
 
 				{moderationLabels.length > 0 && (
-					<View style={{ margin: 10, paddingBottom: 20, }}>
-						<View align="center" style={{ fontWeight: "bold", color: 'red', }}>
-							<Text>AI moderation tags:</Text>
-						</View>
-						<View align="center">
-							{moderationLabels.map(label => (
-								<View key={label.Name} style={{ fontSize: `${label.Confidence}%`, color: 'red', }}>
-									<Text>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
-								</View>
-							))}
-						</View>
+					<View style={{ paddingBottom: 20, }}>
+						<Text style={{
+							fontWeight: 'bold', color: 'red', textAlignVertical: "center", textAlign: "center",
+						}}>AI moderation tags:
+						</Text>
+						{moderationLabels.map(label => (
+							<Text
+								key={label.Name} style={{
+									fontSize: label.Confidence / 5, color: 'red', textAlignVertical: "center", textAlign: "center",
+								}}>{stringifyObject(label.Name).replace(/'/g, '')}
+							</Text>
+						))}
 					</View>
 				)}
 			</View>
