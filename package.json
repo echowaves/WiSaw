@@ -74,7 +74,7 @@
     "metro-react-native-babel-preset": "0.57.0",
     "react-native-clean-project": "3.2.4",
     "react-test-renderer": "16.12.0",
-    "jetifier": "1.6.4"
+    "jetifier": "1.6.5"
   },
   "jest": {
     "preset": "react-native"
