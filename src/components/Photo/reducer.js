@@ -9,6 +9,7 @@ import {
 	PHOTO_BANNED,
 	PHOTO_DELETED,
 	PHOTO_COMMENTS_LOADED,
+	PHOTO_RECOGNITIONS_LOADED,
 	COMMENT_POSTED,
 	TOGGLE_COMMENT_BUTTONS,
 	COMMENT_DELETED,
@@ -26,6 +27,8 @@ export const SUBMIT_COMMENT_FAILED = 'wisaw/photo/SUBMIT_COMMENT_FAILED'
 export const SUBMIT_COMMENT_FINISHED = 'wisaw/photo/SUBMIT_COMMENT_FINISHED'
 export const GET_COMMENTS_STARTED = 'wisaw/photo/GET_COMMENTS_STARTED'
 export const GET_COMMENTS_FINISHED = 'wisaw/photo/GET_COMMENTS_FINISHED'
+export const GET_RECOGNITIONS_STARTED = 'wisaw/photo/GET_RECOGNITIONS_STARTED'
+export const GET_RECOGNITIONS_FINISHED = 'wisaw/photo/GET_RECOGNITIONS_FINISHED'
 export const DELETE_COMMENT = 'wisaw/photo/DELETE_COMMENT'
 export const PHOTO_WATCHED = 'wisaw/photo/PHOTO_WATCHED'
 export const PHOTO_UNWATCHED = 'wisaw/photo/PHOTO_UNWATCHED'
@@ -92,6 +95,14 @@ export default function reducer(state = initialState, action) {
 				...state,
 			}
 		case GET_COMMENTS_FINISHED:
+			return {
+				...state,
+			}
+		case GET_RECOGNITIONS_STARTED:
+			return {
+				...state,
+			}
+		case GET_RECOGNITIONS_FINISHED:
 			return {
 				...state,
 			}
@@ -473,6 +484,63 @@ export function getComments({ item, }) {
 			})
 			Toast.show({
 				text: "Unable to load comments. Potential Network Issue.",
+				buttonText: "OK",
+				type: "warning",
+			})
+		}
+	}
+}
+
+export function getRecognitions({ item, }) {
+	return async (dispatch, getState) => {
+		dispatch({
+			type: GET_RECOGNITIONS_STARTED,
+		})
+		try {
+			const response = await fetch(`${CONST.HOST}/photos/${item.id}/recognitions`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			const responseJson = await response.json()
+
+			if (response.status === 200) {
+				// lets update the state in the photos collection so it renders the right number of likes in the list
+				dispatch({
+					type: GET_RECOGNITIONS_FINISHED,
+				})
+				dispatch({
+					type: PHOTO_RECOGNITIONS_LOADED,
+					item,
+					recognitions: responseJson.recognition,
+				})
+			} else {
+				dispatch({
+					type: GET_RECOGNITIONS_FINISHED,
+				})
+				dispatch({
+					type: PHOTO_RECOGNITIONS_LOADED,
+					item,
+					recognitions: null,
+				})
+				Toast.show({
+					text: "Unable to load recognitions. Try again later.",
+					buttonText: "OK",
+					type: "warning",
+				})
+			}
+		} catch (err) {
+			dispatch({
+				type: GET_RECOGNITIONS_FINISHED,
+			})
+			dispatch({
+				type: PHOTO_RECOGNITIONS_LOADED,
+				item,
+				recognitions: null,
+			})
+			Toast.show({
+				text: "Unable to load recognitions. Potential Network Issue.",
 				buttonText: "OK",
 				type: "warning",
 			})

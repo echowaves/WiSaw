@@ -28,12 +28,17 @@ import FastImage from 'react-native-fast-image'
 
 import PropTypes from 'prop-types'
 
+
+import stringifyObject from 'stringify-object'
+import jmespath from 'jmespath'
+
 import {
 	likePhoto,
 	sharePhoto,
 	setInputText,
 	submitComment,
 	getComments,
+	getRecognitions,
 	toggleCommentButtons,
 	deleteComment,
 } from './reducer'
@@ -46,9 +51,11 @@ class Photo extends Component {
 			item,
 			setInputText,
 			getComments,
+			getRecognitions,
 		} = this.props
 		setInputText({ inputText: '', })
 		getComments({ item, })
+		getRecognitions({ item, })
 
 		this.intervalId = setInterval(() => { getComments({ item, }) }, 30000)
 	}
@@ -150,6 +157,62 @@ class Photo extends Component {
 				</Row>
 			))
 		}
+	}
+
+	renderRecognitions(recognition) {
+		const labels = jmespath.search(recognition, "metaData.Labels[]")
+		const textDetections = jmespath.search(recognition, "metaData.TextDetections[?Type=='LINE']")
+		const moderationLabels = jmespath.search(recognition, "metaData.ModerationLabels[]")
+
+		return (
+			<View>
+				{labels.length > 0 && (
+					<View style={{ margin: 10, paddingBottom: 20, }}>
+						<View align="center" style={{ fontWeight: "bold", }}>
+							<Text>AI recognized tags:</Text>
+						</View>
+						<View align="center">
+							{labels.map(label => (
+								<View key={label.Name} style={{ fontSize: `${label.Confidence}%`, }}>
+									<Text>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
+								</View>
+							))}
+						</View>
+					</View>
+				)}
+
+				{textDetections.length > 0 && (
+					<View style={{ margin: 10, paddingBottom: 20, }}>
+						<View align="center" style={{ fontWeight: "bold", }}>
+							<Text>AI recognized text:</Text>
+						</View>
+						<View align="center">
+							{textDetections.map(text => (
+								<View key={text.Id} style={{ fontSize: `${text.Confidence}%`, }}>
+									<Text>{stringifyObject(text.DetectedText).replace(/'/g, '')}</Text>
+								</View>
+							))}
+						</View>
+					</View>
+				)}
+
+
+				{moderationLabels.length > 0 && (
+					<View style={{ margin: 10, paddingBottom: 20, }}>
+						<View align="center" style={{ fontWeight: "bold", color: 'red', }}>
+							<Text>AI moderation tags:</Text>
+						</View>
+						<View align="center">
+							{moderationLabels.map(label => (
+								<View key={label.Name} style={{ fontSize: `${label.Confidence}%`, color: 'red', }}>
+									<Text>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
+								</View>
+							))}
+						</View>
+					</View>
+				)}
+			</View>
+		)
 	}
 
 	render() {
@@ -395,6 +458,10 @@ class Photo extends Component {
 								</Button>
 							</Col>
 						</Row>
+						<Row>
+							{ item.recognitions
+								&& (this.renderRecognitions(item.recognitions))}
+						</Row>
 					</Grid>
 				</Content>
 			</Container>
@@ -415,6 +482,7 @@ const mapDispatchToProps = {
 	setInputText,
 	submitComment,
 	getComments,
+	getRecognitions,
 	toggleCommentButtons,
 	deleteComment,
 }
@@ -430,6 +498,7 @@ Photo.propTypes = {
 	submitComment: PropTypes.func.isRequired,
 	commentsSubmitting: PropTypes.bool.isRequired,
 	getComments: PropTypes.func.isRequired,
+	getRecognitions: PropTypes.func.isRequired,
 	toggleCommentButtons: PropTypes.func.isRequired,
 	deleteComment: PropTypes.func.isRequired,
 }

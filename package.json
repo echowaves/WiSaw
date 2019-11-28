@@ -52,6 +52,8 @@
     "redux": "4.0.4",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.11.2",
+		"stringify-object": "3.3.0",
+		"jmespath": "0.15.0",
     "uuid": "3.3.3"
   },
   "devDependencies": {
