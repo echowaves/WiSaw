@@ -524,11 +524,6 @@ export function getRecognitions({ item, }) {
 					item,
 					recognitions: null,
 				})
-				Toast.show({
-					text: "Unable to load recognitions. Try again later.",
-					buttonText: "OK",
-					type: "warning",
-				})
 			}
 		} catch (err) {
 			dispatch({
