@@ -235,6 +235,7 @@ export default function reducer(state = initialState, action) {
 		case SET_SEARCH_TERM:
 			return {
 				...state,
+				photos: [],
 				searchTerm: action.searchTerm,
 			}
 		default:
@@ -333,7 +334,7 @@ async function _requestWatchedPhotos(getState, batch) {
 
 
 async function _requestSearchedPhotos(getState, batch) {
-	const { pageNumber, } = getState().photosList
+	const { pageNumber, searchTerm, } = getState().photosList
 	let { uuid, } = getState().photosList
 	if (uuid === null) {
 		uuid = 'initializing'
@@ -346,7 +347,7 @@ async function _requestSearchedPhotos(getState, batch) {
 		},
 		body: JSON.stringify({
 			uuid,
-			term: 'nudity',
+			searchTerm,
 			pageNumber,
 			batch,
 		}),
@@ -379,6 +380,7 @@ export function getPhotos(batch) {
 			} else if (activeSegment === 1) {
 				responseJson = await _requestWatchedPhotos(getState, batch)
 			}
+
 			if (responseJson.batch === batch) {
 				if (responseJson.photos && responseJson.photos.length > 0) {
 					dispatch({

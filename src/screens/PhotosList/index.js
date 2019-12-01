@@ -382,8 +382,12 @@ class PhotosList extends Component {
 						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
 						onPress={
 							() => {
+								navigation.setParams({
+									headerTitle: () => this.renderHeaderTitle(),
+									headerLeft: () => this.renderHeaderLeft(),
+									headerRight: () => this.renderHeaderRight(),
+								})
 								setSearchTerm('')
-								this.reload()
 							}
 						}
 					/>
