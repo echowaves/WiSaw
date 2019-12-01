@@ -327,6 +327,7 @@ class PhotosList extends Component {
 	renderHeaderLeft() {
 		const {
 			searchTerm,
+			setSearchTerm,
 			navigation,
 		} = this.props
 		const { params = {}, } = navigation.state
@@ -352,8 +353,15 @@ class PhotosList extends Component {
 				name="times"
 				type="FontAwesome"
 				style={{
+					marginLeft: 10,
 					color: CONST.MAIN_COLOR,
 				}}
+				onPress={
+					() => {
+						setSearchTerm(null)
+						this.reload()
+					}
+				}
 			/>
 		)
 	}
@@ -386,7 +394,10 @@ class PhotosList extends Component {
 						}
 						name="feedback"
 						type="MaterialIcons"
-						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+						style={{
+							marginRight: 20,
+							color: CONST.MAIN_COLOR,
+						}}
 					/>
 				</View>
 			)
@@ -397,7 +408,7 @@ class PhotosList extends Component {
 				name="search"
 				style={
 					{
-						fontSize: 30,
+						marginRight: 20,
 						color: CONST.MAIN_COLOR,
 					}
 				}
