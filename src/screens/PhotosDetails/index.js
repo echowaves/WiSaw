@@ -57,7 +57,7 @@ class PhotosDetails extends Component {
 							backgroundColor: '#ffffff',
 						}}>
 						<Icon
-							name="angle-left"
+							name="chevron-left"
 							type="FontAwesome"
 							style={{
 								color: CONST.MAIN_COLOR,

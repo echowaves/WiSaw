@@ -31,6 +31,7 @@ export const COMMENT_DELETED = 'wisaw/photosList/COMMENT_DELETED'
 export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
 export const SET_ACTIVE_SEGMENT = 'wisaw/photosList/SET_ACTIVE_SEGMENT'
+export const SET_SEARCH_TERM = 'wisaw/photosList/SET_SEARCH_TERM'
 
 const UUID_KEY = 'wisaw_device_uuid'
 //  date '+%Y%m%d%H%M%S'
@@ -49,6 +50,7 @@ export const initialState = {
 	locationPermission: null,
 	orientation: 'portrait-primary',
 	activeSegment: 0,
+	searchTerm: null,
 	batch: 0,
 	isLastPage: false,
 }
@@ -82,8 +84,11 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				loading: false,
-				isLastPage: (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
-				|| (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE),
+				isLastPage:
+				(state.searchTerm && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+				|| (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
+				|| (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+				,
 			}
 		case RESET_STATE:
 			return {
@@ -227,6 +232,11 @@ export default function reducer(state = initialState, action) {
 				...state,
 				activeSegment: action.activeSegment,
 			}
+		case SET_SEARCH_TERM:
+			return {
+				...state,
+				searchTerm: action.searchTerm,
+			}
 		default:
 			return state
 	}
@@ -321,20 +331,50 @@ async function _requestWatchedPhotos(getState, batch) {
 	return responseJson
 }
 
+
+async function _requestSearchedPhotos(getState, batch) {
+	const { pageNumber, } = getState().photosList
+	let { uuid, } = getState().photosList
+	if (uuid == null) {
+		uuid = 'initializing'
+	}
+
+	const response = await fetch(`${CONST.HOST}/photos/feedForTextSearch`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			uuid,
+			term: 'nudity',
+			pageNumber,
+			batch,
+		}),
+	})
+	const responseJson = await response.json()
+	// Toast.show({
+	// 	text: `uuid: ${uuid}`,
+	// 	buttonText: "OK",
+	// 	duration: 15000,
+	// })
+	return responseJson
+}
+
 export function getPhotos(batch) {
 	return async (dispatch, getState) => {
 		if (!getState().photosList.location) {
 			return Promise.resolve()
 		}
 		const { latitude, longitude, } = getState().photosList.location.coords
-		const { activeSegment, } = getState().photosList
+		const { activeSegment, searchTerm, } = getState().photosList
 		dispatch({
 			type: GET_PHOTOS_STARTED,
 		})
 		try {
 			let responseJson
-			if (activeSegment === 0) {
-				/* eslint-disable no-await-in-loop */
+			if (searchTerm !== null) {
+				responseJson = await _requestSearchedPhotos(getState, batch)
+			} else if (activeSegment === 0) {
 				responseJson = await _requestGeoPhotos(getState, latitude, longitude, batch)
 			} else if (activeSegment === 1) {
 				responseJson = await _requestWatchedPhotos(getState, batch)
@@ -408,6 +448,15 @@ export function setActiveSegment(activeSegment) {
 		dispatch({
 			type: SET_ACTIVE_SEGMENT,
 			activeSegment,
+		})
+	}
+}
+
+export function setSearchTerm(searchTerm) {
+	return async (dispatch, getState) => {
+		dispatch({
+			type: SET_SEARCH_TERM,
+			searchTerm,
 		})
 	}
 }

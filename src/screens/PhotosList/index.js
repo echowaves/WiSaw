@@ -25,7 +25,11 @@ import {
 	Right,
 	Segment,
 	StyleProvider,
+	Input,
+	Item,
 } from 'native-base'
+
+import { Col, Row, Grid, } from "react-native-easy-grid"
 
 import Permissions from 'react-native-permissions'
 import DeviceSettings from 'react-native-device-settings'
@@ -52,6 +56,7 @@ import {
 	setLocationPermission,
 	setOrientation,
 	setActiveSegment,
+	setSearchTerm,
 } from './reducer'
 import { uploadPendingPhotos, } from '../Camera/reducer'
 
@@ -62,44 +67,13 @@ import Thumb from '../../components/Thumb'
 class PhotosList extends Component {
 	static navigationOptions = ({
 		navigation,
-	}) => {
-		const { params = {}, } = navigation.state
-		return ({
-			headerTitle: navigation.getParam('headerTitle'),
-			headerTintColor: CONST.MAIN_COLOR,
-			headerRight: (
-				<Icon
-					onPress={
-						() => navigation.push('Feedback')
-					}
-					name="feedback"
-					type="MaterialIcons"
-					style={
-						{
-							marginRight: 10,
-							color: CONST.MAIN_COLOR,
-						}
-					}
-				/>
-			),
-			headerLeft: (
-				<Icon
-					onPress={
-						() => params.handleRefresh()
-					}
-					name="sync"
-					type="MaterialIcons"
-					style={
-						{
-							marginLeft: 10,
-							color: CONST.MAIN_COLOR,
-						}
-					}
-				/>
-			),
-			headerBackTitle: null,
-		})
-	}
+	}) => ({
+		headerTintColor: CONST.MAIN_COLOR,
+		headerLeft: navigation.getParam('headerLeft'),
+		headerTitle: navigation.getParam('headerTitle'),
+		headerRight: navigation.getParam('headerRight'),
+		headerBackTitle: null,
+	})
 
 	thumbWidth
 
@@ -216,6 +190,8 @@ class PhotosList extends Component {
 			batch,
 		} = this.props
 		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
+		navigation.setParams({ headerLeft: () => this.renderHeaderLeft(), })
+		navigation.setParams({ headerRight: () => this.renderHeaderRight(), })
 		/* eslint-disable no-await-in-loop */
 		while (this.isLoading() === true) {
 			// alert('loading')
@@ -344,13 +320,131 @@ class PhotosList extends Component {
 		)
 	}
 
+	renderHeaderLeft() {
+		const {
+			searchTerm,
+			navigation,
+		} = this.props
+		const { params = {}, } = navigation.state
+		if (searchTerm) {
+			return (
+				<Icon
+					name="times"
+					type="FontAwesome"
+					style={{
+						color: CONST.MAIN_COLOR,
+					}}
+				/>
+			)
+		}
+		return (
+			<Icon
+				onPress={
+					() => params.handleRefresh()
+				}
+				name="sync"
+				type="MaterialIcons"
+				style={
+					{
+						marginLeft: 10,
+						color: CONST.MAIN_COLOR,
+					}
+				}
+			/>
+		)
+	}
+
+	renderHeaderRight() {
+		const {
+			searchTerm,
+			navigation,
+			setSearchTerm,
+		} = this.props
+
+		if (!searchTerm) {
+			return (
+				<View style={{ flex: 1, flexDirection: 'row', }}>
+					<Icon
+						type="MaterialIcons"
+						name="search"
+						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+						onPress={
+							() => {
+								setSearchTerm('')
+								this.reload()
+							}
+						}
+					/>
+
+					<Icon
+						onPress={
+							() => navigation.push('Feedback')
+						}
+						name="feedback"
+						type="MaterialIcons"
+						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+					/>
+				</View>
+			)
+		}
+		return (
+			<Icon
+				type="MaterialIcons"
+				name="search"
+				style={
+					{
+						fontSize: 30,
+						color: CONST.MAIN_COLOR,
+					}
+				}
+			/>
+		)
+	}
+
 	renderHeaderTitle() {
 		const {
 			activeSegment,
 			setActiveSegment,
-			navigation,
+			searchTerm,
 		} = this.props
 
+		if (searchTerm) {
+			return (
+				<Grid>
+					<Row
+						style={{
+							paddingVertical: 0,
+							marginTop: 0,
+							marginBottom: 0,
+						}}>
+						<Col
+							style={{
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}>
+							<Item
+								rounded>
+								<Input
+									placeholder="any thoughts?"
+									placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+									style={
+										{
+											color: CONST.MAIN_COLOR,
+										}
+									}
+									onChangeText={searchTerm => setSearchTerm({ searchTerm, })}
+									value={searchTerm}
+									editable
+									// onSubmitEditing={
+									// 	// () => submitSearchTerm({ searchTerm, item, navigation, })
+									// }
+								/>
+							</Item>
+						</Col>
+					</Row>
+				</Grid>
+			)
+		}
 		return (
 			<StyleProvider style={getTheme(material)}>
 				<Segment style={{ marginBottom: 2, }}>
@@ -359,7 +453,6 @@ class PhotosList extends Component {
 						onPress={
 							() => {
 								setActiveSegment(0)
-								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
 								this.reload()
 							}
 						}>
@@ -373,7 +466,6 @@ class PhotosList extends Component {
 						onPress={
 							() => {
 								setActiveSegment(1)
-								navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
 								this.reload()
 							}
 						}>
@@ -399,6 +491,7 @@ class PhotosList extends Component {
 			locationPermission,
 			batch,
 			activeSegment,
+			searchTerm,
 			isLastPage,
 		} = this.props
 
@@ -423,7 +516,21 @@ class PhotosList extends Component {
 					<Container>
 						<Content padder>
 							<Body>
-								{activeSegment === 0 && (
+								{searchTerm !== null && (
+									<Card transparent>
+										<CardItem style={{ borderRadius: 10, }}>
+											<Text style={{
+												fontSize: 20,
+												textAlign: 'center',
+												margin: 10,
+											}}>
+									No Photos found.
+									Try to search for something else.
+											</Text>
+										</CardItem>
+									</Card>
+								)}
+								{!searchTerm && activeSegment === 0 && (
 									<Card transparent>
 										<CardItem style={{ borderRadius: 10, }}>
 											<Text style={{
@@ -437,7 +544,7 @@ class PhotosList extends Component {
 										</CardItem>
 									</Card>
 								)}
-								{activeSegment === 1 && (
+								{!searchTerm && activeSegment === 1 && (
 									<Card transparent>
 										<CardItem style={{ borderRadius: 10, }}>
 											<Text style={{
@@ -668,6 +775,7 @@ const mapStateToProps = state => {
 		pendingUploads: state.camera.pendingUploads,
 		orientation: state.photosList.orientation,
 		activeSegment: state.photosList.activeSegment,
+		searchTerm: state.photosList.searchTerm,
 	}
 }
 
@@ -680,10 +788,12 @@ const mapDispatchToProps = {
 	uploadPendingPhotos,
 	setOrientation,
 	setActiveSegment,
+	setSearchTerm,
 }
 
 PhotosList.defaultProps = {
 	locationPermission: null,
+	searchTerm: null,
 }
 
 PhotosList.propTypes = {
@@ -704,6 +814,8 @@ PhotosList.propTypes = {
 	setOrientation: PropTypes.func.isRequired,
 	activeSegment: PropTypes.number.isRequired,
 	setActiveSegment: PropTypes.func.isRequired,
+	searchTerm: PropTypes.string,
+	setSearchTerm: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)
