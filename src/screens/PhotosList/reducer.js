@@ -272,7 +272,7 @@ export function resetState() {
 async function _requestGeoPhotos(getState, lat, long, batch) {
 	const { pageNumber, } = getState().photosList
 	let { uuid, } = getState().photosList
-	if (uuid == null) {
+	if (uuid === null) {
 		uuid = 'initializing'
 	}
 
@@ -307,7 +307,7 @@ async function _requestGeoPhotos(getState, lat, long, batch) {
 async function _requestWatchedPhotos(getState, batch) {
 	const { pageNumber, } = getState().photosList
 	let { uuid, } = getState().photosList
-	if (uuid == null) {
+	if (uuid === null) {
 		uuid = 'initializing'
 	}
 
@@ -335,7 +335,7 @@ async function _requestWatchedPhotos(getState, batch) {
 async function _requestSearchedPhotos(getState, batch) {
 	const { pageNumber, } = getState().photosList
 	let { uuid, } = getState().photosList
-	if (uuid == null) {
+	if (uuid === null) {
 		uuid = 'initializing'
 	}
 
@@ -463,7 +463,7 @@ export function setSearchTerm(searchTerm) {
 
 async function getUUID(getState) {
 	let { uuid, } = getState().photosList
-	if (uuid == null) {
+	if (uuid === null) {
 	// try to retreive from secure store
 		try {
 			uuid = await RNSecureKeyStore.get(UUID_KEY)
