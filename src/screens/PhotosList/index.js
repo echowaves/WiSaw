@@ -82,12 +82,13 @@ class PhotosList extends Component {
 			navigation,
 			locationPermission,
 			setLocationPermission,
-			activeSegment,
 		} = this.props
 
 		navigation.setParams({
-			handleRefresh: () => (this.reload()),
-			activeSegment,
+			handleRefresh: () => this.reload(),
+			headerLeft: () => this.renderHeaderLeft(),
+			headerTitle: () => this.renderHeaderTitle(),
+			headerRight: () => this.renderHeaderRight(),
 		})
 
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
@@ -186,12 +187,15 @@ class PhotosList extends Component {
 			resetState,
 			getPhotos,
 			uploadPendingPhotos,
-			navigation,
 			batch,
+			navigation,
 		} = this.props
-		navigation.setParams({ headerTitle: () => this.renderHeaderTitle(), })
-		navigation.setParams({ headerLeft: () => this.renderHeaderLeft(), })
-		navigation.setParams({ headerRight: () => this.renderHeaderRight(), })
+		navigation.setParams({
+			headerTitle: () => this.renderHeaderTitle(),
+			headerLeft: () => this.renderHeaderLeft(),
+			headerRight: () => this.renderHeaderRight(),
+		})
+
 		/* eslint-disable no-await-in-loop */
 		while (this.isLoading() === true) {
 			// alert('loading')
@@ -326,30 +330,30 @@ class PhotosList extends Component {
 			navigation,
 		} = this.props
 		const { params = {}, } = navigation.state
-		if (searchTerm) {
+		if (searchTerm === null) {
 			return (
 				<Icon
-					name="times"
-					type="FontAwesome"
-					style={{
-						color: CONST.MAIN_COLOR,
-					}}
+					onPress={
+						() => params.handleRefresh()
+					}
+					name="sync"
+					type="MaterialIcons"
+					style={
+						{
+							marginLeft: 10,
+							color: CONST.MAIN_COLOR,
+						}
+					}
 				/>
 			)
 		}
 		return (
 			<Icon
-				onPress={
-					() => params.handleRefresh()
-				}
-				name="sync"
-				type="MaterialIcons"
-				style={
-					{
-						marginLeft: 10,
-						color: CONST.MAIN_COLOR,
-					}
-				}
+				name="times"
+				type="FontAwesome"
+				style={{
+					color: CONST.MAIN_COLOR,
+				}}
 			/>
 		)
 	}
@@ -361,7 +365,7 @@ class PhotosList extends Component {
 			setSearchTerm,
 		} = this.props
 
-		if (!searchTerm) {
+		if (searchTerm === null) {
 			return (
 				<View style={{ flex: 1, flexDirection: 'row', }}>
 					<Icon
@@ -408,74 +412,74 @@ class PhotosList extends Component {
 			searchTerm,
 		} = this.props
 
-		if (searchTerm) {
+		if (searchTerm === null) {
 			return (
-				<Grid>
-					<Row
-						style={{
-							paddingVertical: 0,
-							marginTop: 0,
-							marginBottom: 0,
-						}}>
-						<Col
-							style={{
-								alignItems: 'center',
-								justifyContent: 'center',
-							}}>
-							<Item
-								rounded>
-								<Input
-									placeholder="any thoughts?"
-									placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-									style={
-										{
-											color: CONST.MAIN_COLOR,
-										}
-									}
-									onChangeText={searchTerm => setSearchTerm({ searchTerm, })}
-									value={searchTerm}
-									editable
-									// onSubmitEditing={
-									// 	// () => submitSearchTerm({ searchTerm, item, navigation, })
-									// }
-								/>
-							</Item>
-						</Col>
-					</Row>
-				</Grid>
+				<StyleProvider style={getTheme(material)}>
+					<Segment style={{ marginBottom: 2, }}>
+						<Button
+							first active={activeSegment === 0}
+							onPress={
+								() => {
+									setActiveSegment(0)
+									this.reload()
+								}
+							}>
+							<Icon
+								name="globe"
+								type="FontAwesome"
+							/>
+						</Button>
+						<Button
+							last active={activeSegment === 1}
+							onPress={
+								() => {
+									setActiveSegment(1)
+									this.reload()
+								}
+							}>
+							<Icon
+								name="eye"
+								type="FontAwesome"
+							/>
+						</Button>
+					</Segment>
+				</StyleProvider>
 			)
 		}
 		return (
-			<StyleProvider style={getTheme(material)}>
-				<Segment style={{ marginBottom: 2, }}>
-					<Button
-						first active={activeSegment === 0}
-						onPress={
-							() => {
-								setActiveSegment(0)
-								this.reload()
-							}
-						}>
-						<Icon
-							name="globe"
-							type="FontAwesome"
-						/>
-					</Button>
-					<Button
-						last active={activeSegment === 1}
-						onPress={
-							() => {
-								setActiveSegment(1)
-								this.reload()
-							}
-						}>
-						<Icon
-							name="eye"
-							type="FontAwesome"
-						/>
-					</Button>
-				</Segment>
-			</StyleProvider>
+			<Grid>
+				<Row
+					style={{
+						paddingVertical: 0,
+						marginTop: 0,
+						marginBottom: 0,
+					}}>
+					<Col
+						style={{
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}>
+						<Item
+							rounded>
+							<Input
+								placeholder="any thoughts?"
+								placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+								style={
+									{
+										color: CONST.MAIN_COLOR,
+									}
+								}
+								onChangeText={searchTerm => setSearchTerm({ searchTerm, })}
+								value={searchTerm}
+								editable
+								// onSubmitEditing={
+								// 	// () => submitSearchTerm({ searchTerm, item, navigation, })
+								// }
+							/>
+						</Item>
+					</Col>
+				</Row>
+			</Grid>
 		)
 	}
 
@@ -530,7 +534,7 @@ class PhotosList extends Component {
 										</CardItem>
 									</Card>
 								)}
-								{!searchTerm && activeSegment === 0 && (
+								{searchTerm === null && activeSegment === 0 && (
 									<Card transparent>
 										<CardItem style={{ borderRadius: 10, }}>
 											<Text style={{
@@ -544,7 +548,7 @@ class PhotosList extends Component {
 										</CardItem>
 									</Card>
 								)}
-								{!searchTerm && activeSegment === 1 && (
+								{searchTerm === null && activeSegment === 1 && (
 									<Card transparent>
 										<CardItem style={{ borderRadius: 10, }}>
 											<Text style={{
