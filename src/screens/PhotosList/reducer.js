@@ -373,16 +373,6 @@ export function getPhotos(batch) {
 		})
 		try {
 			let responseJson
-			if (searchTerm !== null && searchTerm.length < 3) { // don't allow to search for strings shorter than 3
-				dispatch({
-					type: GET_PHOTOS_FAIL,
-					errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-				})
-				dispatch({
-					type: GET_PHOTOS_FINISHED,
-				})
-				return
-			}
 			if (searchTerm !== null) {
 				responseJson = await _requestSearchedPhotos(getState, batch)
 			} else if (activeSegment === 0) {

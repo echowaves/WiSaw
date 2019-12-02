@@ -26,6 +26,7 @@ import {
 	Segment,
 	StyleProvider,
 	Input,
+	Toast,
 } from 'native-base'
 
 import Permissions from 'react-native-permissions'
@@ -420,11 +421,21 @@ class PhotosList extends Component {
 				}
 				onPress={
 					() => {
-						setSearchTerm(navigation.getParam('currentTerm'))
-						navigation.setParams({
-							headerTitle: () => this.renderHeaderTitle(),
-						})
-						this.reload()
+						// alert(navigation.getParam('currentTerm'))
+						const currentTerm = navigation.getParam('currentTerm')
+						if (currentTerm && currentTerm.length >= 3) {
+							setSearchTerm(currentTerm)
+							navigation.setParams({
+								headerTitle: () => this.renderHeaderTitle(),
+							})
+							this.reload()
+						} else {
+							Toast.show({
+								text: "Search for more than 3 characters",
+								buttonText: "OK",
+								type: "warning",
+							})
+						}
 					}
 				}
 			/>
