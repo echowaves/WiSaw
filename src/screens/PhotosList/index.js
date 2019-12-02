@@ -438,7 +438,7 @@ class PhotosList extends Component {
 			navigation,
 			searchTerm,
 		} = this.props
-		const { params = {}, } = navigation.state
+		// const { params = {}, } = navigation.state
 
 		if (searchTerm === null) {
 			return (
