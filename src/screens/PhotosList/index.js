@@ -189,6 +189,7 @@ class PhotosList extends Component {
 			uploadPendingPhotos,
 			batch,
 			navigation,
+			searchTerm,
 		} = this.props
 		navigation.setParams({
 			headerTitle: () => this.renderHeaderTitle(),
@@ -358,6 +359,11 @@ class PhotosList extends Component {
 				}}
 				onPress={
 					() => {
+						navigation.setParams({
+							headerTitle: () => this.renderHeaderTitle(),
+							headerLeft: () => this.renderHeaderLeft(),
+							headerRight: () => this.renderHeaderRight(),
+						})
 						setSearchTerm(null)
 						this.reload()
 					}
@@ -416,6 +422,17 @@ class PhotosList extends Component {
 						color: CONST.MAIN_COLOR,
 					}
 				}
+				onPress={
+					() => {
+						setSearchTerm(navigation.getParam('currentTerm'))
+
+						navigation.setParams({
+							headerTitle: () => this.renderHeaderTitle(),
+						})
+						// alert(navigation.getParam('currentTerm'))
+						this.reload()
+					}
+				}
 			/>
 		)
 	}
@@ -424,6 +441,7 @@ class PhotosList extends Component {
 		const {
 			activeSegment,
 			setActiveSegment,
+			navigation,
 			searchTerm,
 		} = this.props
 
@@ -477,15 +495,21 @@ class PhotosList extends Component {
 						<Item
 							rounded>
 							<Input
-								placeholder="any thoughts?"
+								placeholder="what are you searching for?"
 								placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
 								style={
 									{
 										color: CONST.MAIN_COLOR,
 									}
 								}
-								onChangeText={searchTerm => setSearchTerm({ searchTerm, })}
-								value={searchTerm}
+								onChangeText={currentTerm => {
+									setSearchTerm(currentTerm)
+									navigation.setParams({
+										headerTitle: () => this.renderHeaderTitle(),
+										currentTerm,
+									})
+								}}
+								value={navigation.getParam('currentTerm')}
 								editable
 								// onSubmitEditing={
 								// 	// () => submitSearchTerm({ searchTerm, item, navigation, })
