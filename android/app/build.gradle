@@ -131,8 +131,8 @@ android {
         applicationId "com.echowaves.wisaw"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 110
-        versionName "5.7.0"
+        versionCode 111
+        versionName "5.8.0"
         missingDimensionStrategy 'react-native-camera', 'general'
         multiDexEnabled true
     }

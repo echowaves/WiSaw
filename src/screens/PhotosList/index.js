@@ -26,10 +26,7 @@ import {
 	Segment,
 	StyleProvider,
 	Input,
-	Item,
 } from 'native-base'
-
-import { Col, Row, Grid, } from "react-native-easy-grid"
 
 import Permissions from 'react-native-permissions'
 import DeviceSettings from 'react-native-device-settings'
