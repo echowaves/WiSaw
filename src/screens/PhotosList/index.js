@@ -507,11 +507,8 @@ class PhotosList extends Component {
 				editable
 				autoFocus
 			/>
-
-
 		)
 	}
-
 
 	render() {
 		const {
