@@ -479,45 +479,32 @@ class PhotosList extends Component {
 			)
 		}
 		return (
-			<Grid>
-				<Row
-					style={{
-						paddingVertical: 0,
-						marginTop: 0,
-						marginBottom: 0,
-					}}>
-					<Col
-						style={{
-							alignItems: 'center',
-							justifyContent: 'center',
-						}}>
-						<Item
-							rounded>
-							<Input
-								placeholder="what are you searching for?"
-								placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-								style={
-									{
-										color: CONST.MAIN_COLOR,
-									}
-								}
-								onChangeText={currentTerm => {
-									setSearchTerm(currentTerm)
-									navigation.setParams({
-										headerTitle: () => this.renderHeaderTitle(),
-										currentTerm,
-									})
-								}}
-								value={navigation.getParam('currentTerm')}
-								editable
-								// onSubmitEditing={
-								// 	// () => submitSearchTerm({ searchTerm, item, navigation, })
-								// }
-							/>
-						</Item>
-					</Col>
-				</Row>
-			</Grid>
+
+			<Input
+				placeholder="what are you searching for?"
+				placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+				style={
+					{
+						color: CONST.MAIN_COLOR,
+						paddingLeft: 0,
+						paddingRight: 0,
+					}
+				}
+				onChangeText={currentTerm => {
+					setSearchTerm(currentTerm)
+					navigation.setParams({
+						headerTitle: () => this.renderHeaderTitle(),
+						currentTerm,
+					})
+				}}
+				value={navigation.getParam('currentTerm')}
+				editable
+				// onSubmitEditing={
+				// 	// () => submitSearchTerm({ searchTerm, item, navigation, })
+				// }
+			/>
+
+
 		)
 	}
 
