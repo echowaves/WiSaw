@@ -355,14 +355,15 @@ class PhotosList extends Component {
 					color: CONST.MAIN_COLOR,
 				}}
 				onPress={
-					() => {
+					async () => {
 						navigation.setParams({
 							headerTitle: () => this.renderHeaderTitle(),
 							headerLeft: () => this.renderHeaderLeft(),
 							headerRight: () => this.renderHeaderRight(),
+							currentTerm: '',
 						})
-						setSearchTerm(null)
-						this.reload()
+						await setSearchTerm(null)
+						await this.reload()
 					}
 				}
 			/>
@@ -391,6 +392,7 @@ class PhotosList extends Component {
 									headerRight: () => this.renderHeaderRight(),
 								})
 								setSearchTerm('')
+								// this.reload()
 							}
 						}
 					/>
