@@ -421,11 +421,9 @@ class PhotosList extends Component {
 				onPress={
 					() => {
 						setSearchTerm(navigation.getParam('currentTerm'))
-
 						navigation.setParams({
 							headerTitle: () => this.renderHeaderTitle(),
 						})
-						// alert(navigation.getParam('currentTerm'))
 						this.reload()
 					}
 				}
@@ -440,6 +438,7 @@ class PhotosList extends Component {
 			navigation,
 			searchTerm,
 		} = this.props
+		const { params = {}, } = navigation.state
 
 		if (searchTerm === null) {
 			return (
@@ -494,11 +493,19 @@ class PhotosList extends Component {
 						currentTerm,
 					})
 				}}
+				// onSubmitEditing={
+				// 	() => {
+				// 		setSearchTerm(navigation.getParam('currentTerm'))
+				// 		navigation.setParams({
+				// 			headerTitle: () => this.renderHeaderTitle(),
+				// 		})
+				// 		params.handleRefresh()
+				// 		// this.reload()
+				// 	}
+				// }
 				value={navigation.getParam('currentTerm')}
 				editable
-				// onSubmitEditing={
-				// 	// () => submitSearchTerm({ searchTerm, item, navigation, })
-				// }
+				autoFocus
 			/>
 
 
