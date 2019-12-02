@@ -556,6 +556,7 @@ class PhotosList extends Component {
 											}}>
 									No Photos found.
 									Try to search for something else.
+									Search string should be more than 3 characters.
 											</Text>
 										</CardItem>
 									</Card>
