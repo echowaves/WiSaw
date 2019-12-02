@@ -189,7 +189,6 @@ class PhotosList extends Component {
 			uploadPendingPhotos,
 			batch,
 			navigation,
-			searchTerm,
 		} = this.props
 		navigation.setParams({
 			headerTitle: () => this.renderHeaderTitle(),
