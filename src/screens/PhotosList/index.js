@@ -422,7 +422,7 @@ class PhotosList extends Component {
 					}
 				}
 				onPress={
-					() => {
+					async () => {
 						// alert(navigation.getParam('currentTerm'))
 						const currentTerm = navigation.getParam('currentTerm')
 						if (currentTerm && currentTerm.length >= 3) {
@@ -430,7 +430,7 @@ class PhotosList extends Component {
 							navigation.setParams({
 								headerTitle: () => this.renderHeaderTitle(),
 							})
-							this.reload()
+							await this.reload()
 						} else {
 							Toast.show({
 								text: "Search for more than 3 characters",
@@ -460,9 +460,9 @@ class PhotosList extends Component {
 						<Button
 							first active={activeSegment === 0}
 							onPress={
-								() => {
-									setActiveSegment(0)
-									this.reload()
+								async () => {
+									await setActiveSegment(0)
+									await this.reload()
 								}
 							}>
 							<Icon
@@ -473,9 +473,9 @@ class PhotosList extends Component {
 						<Button
 							last active={activeSegment === 1}
 							onPress={
-								() => {
-									setActiveSegment(1)
-									this.reload()
+								async () => {
+									await setActiveSegment(1)
+									await this.reload()
 								}
 							}>
 							<Icon
@@ -660,8 +660,8 @@ class PhotosList extends Component {
 							false
 						}
 						onRefresh={
-							() => {
-								this.reload()
+							async () => {
+								await this.reload()
 							}
 						}
 						onContentSizeChange={this.onContentSizeChange}
