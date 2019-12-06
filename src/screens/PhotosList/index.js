@@ -29,6 +29,8 @@ import {
 	Toast,
 } from 'native-base'
 
+import NetInfo from "@react-native-community/netinfo"
+
 import Permissions from 'react-native-permissions'
 import DeviceSettings from 'react-native-device-settings'
 import branch from 'react-native-branch'
@@ -55,6 +57,7 @@ import {
 	setOrientation,
 	setActiveSegment,
 	setSearchTerm,
+	setNetAvailable,
 } from './reducer'
 import { uploadPendingPhotos, } from '../Camera/reducer'
 
@@ -75,12 +78,25 @@ class PhotosList extends Component {
 
 	thumbWidth
 
+	unsubscribeFromNetInfo
+
 	componentDidMount() {
 		const {
 			navigation,
 			locationPermission,
 			setLocationPermission,
+			setNetAvailable,
 		} = this.props
+
+		this.unsubscribeFromNetInfo = NetInfo.addEventListener(state => {
+			// console.log("Connection type", state.type);
+			// console.log("Is connected?", state.isConnected);
+			if (state.isConnected === true && state.isInternetReachable === true) {
+				setNetAvailable(true)
+			} else { // not connected to the internet
+				setNetAvailable(false)
+			}
+		})
 
 		navigation.setParams({
 			handleRefresh: () => this.reload(),
@@ -104,7 +120,13 @@ class PhotosList extends Component {
 		branch.initSessionTtl = 10000 // Set to 10 seconds
 		branch.subscribe(({ error, params, }) => {
 			if (error) {
-				alert(`Error from Branch: ${error}`)
+				// alert(`Error from Branch: ${error}`)
+				Toast.show({
+					text: `${error}`,
+					buttonText: "OK",
+					type: "warning",
+				})
+
 				return
 			}
 			// params will never be null if error is null
@@ -128,6 +150,7 @@ class PhotosList extends Component {
 
 	componentWillUnmount() {
 		DeviceEventEmitter.removeListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
+		this.unsubscribeFromNetInfo()
 	}
 
 	onLayout(e) {
@@ -536,7 +559,35 @@ class PhotosList extends Component {
 			activeSegment,
 			searchTerm,
 			isLastPage,
+			netAvailable,
 		} = this.props
+
+
+		if (netAvailable === false) {
+			return (
+				<Container>
+					<Content padder>
+						<Body>
+
+							<Card transparent>
+								<CardItem style={{ borderRadius: 10, }}>
+									<Text style={{
+										fontSize: 20,
+										textAlign: 'center',
+										margin: 10,
+									}}>
+								You are not connected to reliable network.
+								You can still snap photos.
+								They will be uploaded later.
+									</Text>
+								</CardItem>
+							</Card>
+						</Body>
+					</Content>
+					{this.photoButton()}
+				</Container>
+			)
+		}
 
 		if (locationPermission === 'authorized') {
 			if (photos.length === 0 && loading) {
@@ -820,6 +871,7 @@ const mapStateToProps = state => {
 		orientation: state.photosList.orientation,
 		activeSegment: state.photosList.activeSegment,
 		searchTerm: state.photosList.searchTerm,
+		netAvailable: state.photosList.netAvailable,
 	}
 }
 
@@ -833,6 +885,7 @@ const mapDispatchToProps = {
 	setOrientation,
 	setActiveSegment,
 	setSearchTerm,
+	setNetAvailable,
 }
 
 PhotosList.defaultProps = {
@@ -860,6 +913,8 @@ PhotosList.propTypes = {
 	setActiveSegment: PropTypes.func.isRequired,
 	searchTerm: PropTypes.string,
 	setSearchTerm: PropTypes.func.isRequired,
+	netAvailable: PropTypes.bool.isRequired,
+	setNetAvailable: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosList)

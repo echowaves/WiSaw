@@ -32,6 +32,7 @@ export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 
 export const SET_ACTIVE_SEGMENT = 'wisaw/photosList/SET_ACTIVE_SEGMENT'
 export const SET_SEARCH_TERM = 'wisaw/photosList/SET_SEARCH_TERM'
+export const SET_NET_AVAILABLE = 'wisaw/photosList/SET_NET_AVAILABLE'
 
 const UUID_KEY = 'wisaw_device_uuid'
 //  date '+%Y%m%d%H%M%S'
@@ -53,6 +54,7 @@ export const initialState = {
 	searchTerm: null,
 	batch: 0,
 	isLastPage: false,
+	netAvailable: false,
 }
 
 export default function reducer(state = initialState, action) {
@@ -238,6 +240,11 @@ export default function reducer(state = initialState, action) {
 				photos: [],
 				searchTerm: action.searchTerm,
 			}
+		case SET_NET_AVAILABLE:
+			return {
+				...state,
+				netAvailable: action.netAvailable,
+			}
 		default:
 			return state
 	}
@@ -363,7 +370,7 @@ async function _requestSearchedPhotos(getState, batch) {
 
 export function getPhotos(batch) {
 	return async (dispatch, getState) => {
-		if (!getState().photosList.location) {
+		if (!getState().photosList.location || getState().photosList.netAvailable === false) {
 			return Promise.resolve()
 		}
 		const { latitude, longitude, } = getState().photosList.location.coords
@@ -459,6 +466,15 @@ export function setSearchTerm(searchTerm) {
 		dispatch({
 			type: SET_SEARCH_TERM,
 			searchTerm,
+		})
+	}
+}
+
+export function setNetAvailable(netAvailable) {
+	return async (dispatch, getState) => {
+		dispatch({
+			type: SET_NET_AVAILABLE,
+			netAvailable,
 		})
 	}
 }

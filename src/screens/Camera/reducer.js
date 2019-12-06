@@ -40,7 +40,7 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				uploadingPhoto: false,
-				pendingUploads: 0,
+				// pendingUploads: 0,
 			}
 		case UPDATE_PHOTOS_PENDING_UPLOAD:
 			return {
@@ -106,10 +106,11 @@ async function getMyKeys() {
 
 export function uploadPendingPhotos() {
 	return async (dispatch, getState) => {
-		const keys = await getMyKeys()
+		const keys = await getMyKeys() || []
+		let pendingUploads = keys.length
 		dispatch({
 			type: UPDATE_PHOTOS_PENDING_UPLOAD,
-			pendingUploads: keys.length,
+			pendingUploads,
 		})
 
 		if (getState().camera.uploadingPhoto) {
@@ -134,11 +135,11 @@ export function uploadPendingPhotos() {
 					// eslint-disable-next-line no-await-in-loop
 					await AsyncStorage.removeItem(keys[i])
 					// eslint-disable-next-line no-await-in-loop
-					const pendingUploads = await getMyKeys().length
+					pendingUploads = (await getMyKeys() || []).length
 					dispatch({
 						type: UPDATE_PHOTOS_PENDING_UPLOAD,
 						// eslint-disable-next-line no-await-in-loop
-						pendingUploads: pendingUploads || 0,
+						pendingUploads,
 					})
 					photo.getThumbUrl = fileJson.uri
 					photo.fallback = true

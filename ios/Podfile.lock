@@ -209,6 +209,8 @@ PODS:
     - React
   - react-native-geolocation (2.0.2):
     - React
+  - react-native-netinfo (4.6.1):
+    - React
   - react-native-slider (2.0.5):
     - React
   - react-native-viewpager (2.0.2):
@@ -293,6 +295,7 @@ DEPENDENCIES:
   - react-native-camera (from `../node_modules/react-native-camera`)
   - "react-native-cameraroll (from `../node_modules/@react-native-community/cameraroll`)"
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
+  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - "react-native-viewpager (from `../node_modules/@react-native-community/viewpager`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -360,6 +363,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/cameraroll"
   react-native-geolocation:
     :path: "../node_modules/@react-native-community/geolocation"
+  react-native-netinfo:
+    :path: "../node_modules/@react-native-community/netinfo"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
   react-native-viewpager:
@@ -423,6 +428,7 @@ SPEC CHECKSUMS:
   react-native-camera: c529629e3ecd017dcdacfd0355576ef489d9d198
   react-native-cameraroll: 463aff54e37cff27ea76eb792e6f1fa43b876320
   react-native-geolocation: c956aeb136625c23e0dce0467664af2c437888c9
+  react-native-netinfo: a59d8426a8484f739fe3a95dd6ad5af1435db05f
   react-native-slider: 39208600e44f885e2d2c0510b5c6435a0f62d087
   react-native-viewpager: 88f4269c19d626d2ccd5f7c7f5f7f76422ddb9e3
   React-RCTActionSheet: 7369b7c85f99b6299491333affd9f01f5a130c22
