@@ -118,11 +118,17 @@ class PhotosList extends Component {
 		}
 
 		branch.initSessionTtl = 10000 // Set to 10 seconds
-		branch.subscribe(({ error, params, }) => {
+		branch.subscribe(async ({ error, params, }) => {
+			const state = await NetInfo.fetch()
+			if (state.isConnected === true && state.isInternetReachable === true) {
+				setNetAvailable(true)
+			} else { // not connected to the internet
+				setNetAvailable(false)
+			}
+
 			if (error) {
-				// alert(`Error from Branch: ${error}`)
 				Toast.show({
-					text: `${error}`,
+					text: 'No Network',
 					buttonText: "OK",
 					type: "warning",
 				})
