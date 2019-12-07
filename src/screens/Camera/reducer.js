@@ -112,7 +112,9 @@ export function uploadPendingPhotos() {
 			type: UPDATE_PHOTOS_PENDING_UPLOAD,
 			pendingUploads,
 		})
-
+		if (getState().photosList.netAvailable === false) {
+			return Promise.resolve()
+		}
 		if (getState().camera.uploadingPhoto) {
 			// already uploading photos, just exit here
 			return Promise.resolve()

@@ -93,17 +93,24 @@ class PhotosList extends Component {
 			// console.log("Is connected?", state.isConnected);
 			if (state.isConnected === true && state.isInternetReachable === true) {
 				setNetAvailable(true)
+				navigation.setParams({
+					handleRefresh: () => this.reload(),
+					headerLeft: () => this.renderHeaderLeft(),
+					headerTitle: () => this.renderHeaderTitle(),
+					headerRight: () => this.renderHeaderRight(),
+				})
+				this.reload()
 			} else { // not connected to the internet
 				setNetAvailable(false)
+				navigation.setParams({
+					handleRefresh: null,
+					headerLeft: null,
+					headerTitle: null,
+					headerRight: null,
+				})
 			}
 		})
 
-		navigation.setParams({
-			handleRefresh: () => this.reload(),
-			headerLeft: () => this.renderHeaderLeft(),
-			headerTitle: () => this.renderHeaderTitle(),
-			headerRight: () => this.renderHeaderRight(),
-		})
 
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
 
@@ -116,6 +123,7 @@ class PhotosList extends Component {
 		} else {
 			this.reload()
 		}
+
 
 		branch.initSessionTtl = 10000 // Set to 10 seconds
 		branch.subscribe(async ({ error, params, }) => {
@@ -216,24 +224,29 @@ class PhotosList extends Component {
 			uploadPendingPhotos,
 			batch,
 			navigation,
+			netAvailable,
 		} = this.props
-		navigation.setParams({
-			headerTitle: () => this.renderHeaderTitle(),
-			headerLeft: () => this.renderHeaderLeft(),
-			headerRight: () => this.renderHeaderRight(),
-		})
 
-		/* eslint-disable no-await-in-loop */
-		while (this.isLoading() === true) {
+		if (netAvailable === true) {
+			navigation.setParams({
+				headerTitle: () => this.renderHeaderTitle(),
+				headerLeft: () => this.renderHeaderLeft(),
+				headerRight: () => this.renderHeaderRight(),
+			})
+
+			/* eslint-disable no-await-in-loop */
+			while (this.isLoading() === true) {
 			// alert('loading')
-			await new Promise(resolve => setTimeout(resolve, 500)) // sleep
+				await new Promise(resolve => setTimeout(resolve, 500)) // sleep
+			}
+			await resetState()
+
+			/* eslint-disable no-await-in-loop */
+			while (!this.isListFilllsScreen()) {
+				await getPhotos(batch)
+			}
+			await uploadPendingPhotos()
 		}
-		await resetState()
-		/* eslint-disable no-await-in-loop */
-		while (!this.isListFilllsScreen()) {
-			await getPhotos(batch)
-		}
-		await uploadPendingPhotos()
 	}
 
 	async alertForPermission(headerText, bodyText) {
