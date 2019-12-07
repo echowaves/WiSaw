@@ -227,6 +227,7 @@ class PhotosList extends Component {
 			netAvailable,
 		} = this.props
 
+
 		if (netAvailable === true) {
 			navigation.setParams({
 				headerTitle: () => this.renderHeaderTitle(),
@@ -246,6 +247,8 @@ class PhotosList extends Component {
 				await getPhotos(batch)
 			}
 			await uploadPendingPhotos()
+		} else {
+			await resetState()
 		}
 	}
 
