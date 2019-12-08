@@ -39,75 +39,13 @@ import * as CONST from '../../consts.js'
 class PhotosDetails extends Component {
 	static navigationOptions = ({
 		navigation,
-	}) => {
-		const { params = {}, } = navigation.state
-		return ({
-			headerTitle: navigation.getParam('handleHeaderTitle'),
-			headerTintColor: CONST.MAIN_COLOR,
-			headerLeft: (
-				<View style={{
-					flex: 1,
-					flexDirection: "row",
-				}}>
-					<Button
-						onPress={
-							() => navigation.goBack()
-						}
-						style={{
-							backgroundColor: '#ffffff',
-						}}>
-						<Icon
-							name="chevron-left"
-							type="FontAwesome"
-							style={{
-								color: CONST.MAIN_COLOR,
-							}}
-						/>
-					</Button>
-					<Button
-						onPress={
-							navigation.getParam('handleFlipWatch')
-						}
-						style={{
-							backgroundColor: '#ffffff',
-						}}>
-						<Icon
-							name={navigation.getParam('watched') ? "eye" : "eye-slash"}
-							type="FontAwesome"
-							style={{ color: CONST.MAIN_COLOR, }}
-						/>
-					</Button>
-				</View>
-			),
-			headerRight: (!navigation.getParam('watched') && (
-				<View style={{
-					flex: 1,
-					flexDirection: "row",
-				}}>
-					<Icon
-						onPress={
-							() => params.handleBan()
-						}
-						name="ban"
-						type="FontAwesome"
-						style={{
-							marginRight: 20,
-							color: CONST.MAIN_COLOR,
-						}}
-					/>
-					<Icon
-						onPress={
-							() => params.handleDelete()
-						}
-						name="trash"
-						type="FontAwesome"
-						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
-					/>
-				</View>
-			)),
-			headerBackTitle: null,
-		})
-	}
+	}) => ({
+		headerTintColor: CONST.MAIN_COLOR,
+		headerTitle: navigation.getParam('headerTitle'),
+		headerLeft: navigation.getParam('headerLeft'),
+		headerRight: navigation.getParam('headerRight'),
+		headerBackTitle: null,
+	})
 
 	componentDidMount() {
 		const {
@@ -121,7 +59,9 @@ class PhotosDetails extends Component {
 			handleBan: () => (this.handleBan()),
 			handleDelete: () => (this.handleDelete()),
 			handleFlipWatch: () => (this.handleFlipWatch()),
-			handleHeaderTitle: () => (this.renderHeaderTitle()),
+			headerTitle: () => (this.renderHeaderTitle()),
+			headerLeft: () => (this.renderHeaderLeft()),
+			headerRight: () => (this.renderHeaderRight()),
 		})
 
 		checkIsPhotoWatched({ item: photos[currentPhotoIndex], navigation, })
@@ -206,11 +146,85 @@ class PhotosDetails extends Component {
 		}
 	}
 
+	renderHeaderLeft() {
+		const {
+			navigation,
+		} = this.props
+		return (
+			<View style={{
+				flex: 1,
+				flexDirection: "row",
+			}}>
+				<Button
+					onPress={
+						() => navigation.goBack()
+					}
+					style={{
+						backgroundColor: '#ffffff',
+					}}>
+					<Icon
+						name="chevron-left"
+						type="FontAwesome"
+						style={{
+							color: CONST.MAIN_COLOR,
+						}}
+					/>
+				</Button>
+				<Button
+					onPress={
+						navigation.getParam('handleFlipWatch')
+					}
+					style={{
+						backgroundColor: '#ffffff',
+					}}>
+					<Icon
+						name={navigation.getParam('watched') ? "eye" : "eye-slash"}
+						type="FontAwesome"
+						style={{ color: CONST.MAIN_COLOR, }}
+					/>
+				</Button>
+			</View>
+		)
+	}
+
+	renderHeaderRight() {
+		const {
+			navigation,
+		} = this.props
+		return (!navigation.getParam('watched') && (
+			<View style={{
+				flex: 1,
+				flexDirection: "row",
+			}}>
+				<Icon
+					onPress={
+						() => navigation.getParam('handleBan')
+					}
+					name="ban"
+					type="FontAwesome"
+					style={{
+						marginRight: 20,
+						color: CONST.MAIN_COLOR,
+					}}
+				/>
+				<Icon
+					onPress={
+						() => navigation.getParam('handleDelete')
+					}
+					name="trash"
+					type="FontAwesome"
+					style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
+				/>
+			</View>
+		))
+	}
+
 	renderHeaderTitle() {
 		const {
 			activeSegment,
 			searchTerm,
 		} = this.props
+
 		if (searchTerm !== null) {
 			return (
 				<Text style={{ color: CONST.SECONDARY_COLOR, }}>
