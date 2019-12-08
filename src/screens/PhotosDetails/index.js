@@ -42,7 +42,7 @@ class PhotosDetails extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: '',
+			headerTitle: navigation.getParam('handleHeaderTitle'),
 			headerTintColor: CONST.MAIN_COLOR,
 			headerLeft: (
 				<View style={{
@@ -116,11 +116,14 @@ class PhotosDetails extends Component {
 			photos,
 			checkIsPhotoWatched,
 		} = this.props
+
 		navigation.setParams({
 			handleBan: () => (this.handleBan()),
 			handleDelete: () => (this.handleDelete()),
 			handleFlipWatch: () => (this.handleFlipWatch()),
+			handleHeaderTitle: () => (this.renderHeaderTitle()),
 		})
+
 		checkIsPhotoWatched({ item: photos[currentPhotoIndex], navigation, })
 	}
 
@@ -203,6 +206,23 @@ class PhotosDetails extends Component {
 		}
 	}
 
+	renderHeaderTitle() {
+		const {
+			activeSegment,
+			searchTerm,
+		} = this.props
+		if (searchTerm !== null) {
+			return (
+				<Text style={{ color: CONST.SECONDARY_COLOR, }}>
+					{searchTerm}
+				</Text>
+			)
+		} if (activeSegment === 0) {
+			return (<Icon name="globe" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR, }} />)
+		}
+		return (<Icon name="eye" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR, }} />)
+	}
+
 	render() {
 		const {
 			navigation,
@@ -270,6 +290,8 @@ const mapStateToProps = state => (
 		currentPhotoIndex: state.thumb.currentPhotoIndex,
 		bans: state.photo.bans,
 		watched: state.photo.watched,
+		searchTerm: state.photosList.searchTerm,
+		activeSegment: state.photosList.activeSegment,
 	}
 )
 
@@ -281,6 +303,10 @@ const mapDispatchToProps = {
 	watchPhoto,
 	unwatchPhoto,
 	checkIsPhotoWatched,
+}
+
+PhotosDetails.defaultProps = {
+	searchTerm: null,
 }
 
 PhotosDetails.propTypes = {
@@ -297,6 +323,8 @@ PhotosDetails.propTypes = {
 	watchPhoto: PropTypes.func.isRequired,
 	unwatchPhoto: PropTypes.func.isRequired,
 	checkIsPhotoWatched: PropTypes.func.isRequired,
+	searchTerm: PropTypes.string,
+	activeSegment: PropTypes.number.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhotosDetails)

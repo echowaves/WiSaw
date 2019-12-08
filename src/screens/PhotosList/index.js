@@ -533,7 +533,6 @@ class PhotosList extends Component {
 			)
 		}
 		return (
-
 			<Input
 				placeholder="what are you searching for?"
 				placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}

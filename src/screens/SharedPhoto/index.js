@@ -42,7 +42,7 @@ class SharedPhoto extends Component {
 		const { params = {}, } = navigation.state
 		return ({
 			headerTitle: 'shared photo',
-			headerTintColor: CONST.MAIN_COLOR,
+			headerTintColor: CONST.SECONDARY_COLOR,
 			headerLeft: (
 				<View style={{
 					flex: 1,
