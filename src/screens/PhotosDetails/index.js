@@ -81,7 +81,6 @@ class PhotosDetails extends Component {
 			banPhoto,
 		} = this.props
 		const item = photos[currentPhotoIndex]
-
 		if (this.isPhotoBannedByMe({ photoId: item.id, })) {
 			Alert.alert(
 				'Looks like you already reported this Photo',
@@ -140,8 +139,10 @@ class PhotosDetails extends Component {
 		} = this.props
 		const item = photos[currentPhotoIndex]
 		if (watched) {
+			navigation.setParams({ watched: false, })
 			unwatchPhoto({ item, navigation, })
 		} else {
+			navigation.setParams({ watched: true, })
 			watchPhoto({ item, navigation, })
 		}
 	}
@@ -198,7 +199,7 @@ class PhotosDetails extends Component {
 			}}>
 				<Icon
 					onPress={
-						() => navigation.getParam('handleBan')
+						navigation.getParam('handleBan')
 					}
 					name="ban"
 					type="FontAwesome"
@@ -209,7 +210,7 @@ class PhotosDetails extends Component {
 				/>
 				<Icon
 					onPress={
-						() => navigation.getParam('handleDelete')
+						navigation.getParam('handleDelete')
 					}
 					name="trash"
 					type="FontAwesome"
@@ -271,9 +272,19 @@ class PhotosDetails extends Component {
 					nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>›</Text>}
 					prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60, }}>‹</Text>}
 					index={currentPhotoIndex}
-					onIndexChanged={index => {
+					onIndexChanged={async index => {
+						navigation.setParams({
+							headerTitle: null,
+							headerLeft: null,
+							headerRight: null,
+						})
 						setCurrentPhotoIndex(index)
-						checkIsPhotoWatched({ item: photos[index], navigation, })
+						await checkIsPhotoWatched({ item: photos[index], navigation, })
+						navigation.setParams({
+							headerTitle: () => (this.renderHeaderTitle()),
+							headerLeft: () => (this.renderHeaderLeft()),
+							headerRight: () => (this.renderHeaderRight()),
+						})
 						if (currentPhotoIndex > photos.length - 5) {
 							getPhotos(batch) // pre-load more photos when nearing the end
 						}

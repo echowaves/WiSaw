@@ -186,6 +186,7 @@ export function watchPhoto({ item, navigation, }) {
 				navigation.setParams({ watched: true, })
 			}
 		} catch (err) {
+			navigation.setParams({ watched: false, })
 			Toast.show({
 				text: "Unable to watch photo. Potential Network Issue.",
 				buttonText: "OK",
@@ -218,6 +219,7 @@ export function unwatchPhoto({ item, navigation, }) {
 				navigation.setParams({ watched: false, })
 			}
 		} catch (err) {
+			navigation.setParams({ watched: true, })
 			Toast.show({
 				text: "Unable to unwatch photo. Potential Network Issue.",
 				buttonText: "OK",
@@ -543,7 +545,6 @@ export function getRecognitions({ item, }) {
 	}
 }
 
-
 export function checkIsPhotoWatched({ item, navigation, }) {
 	return async (dispatch, getState) => {
 		const { uuid, } = getState().photosList
@@ -560,7 +561,11 @@ export function checkIsPhotoWatched({ item, navigation, }) {
 					type: PHOTO_WATCHED,
 				})
 				navigation.setParams({ watched: true, })
-				return
+			} else {
+				dispatch({
+					type: PHOTO_UNWATCHED,
+				})
+				navigation.setParams({ watched: false, })
 			}
 		} catch (err) {
 			Toast.show({
@@ -569,13 +574,8 @@ export function checkIsPhotoWatched({ item, navigation, }) {
 				type: "warning",
 			})
 		}
-		dispatch({
-			type: PHOTO_UNWATCHED,
-		})
-		navigation.setParams({ watched: false, })
 	}
 }
-
 
 export function toggleCommentButtons({ photoId, commentId, }) {
 	return {
