@@ -274,17 +274,22 @@ class PhotosDetails extends Component {
 					index={currentPhotoIndex}
 					onIndexChanged={async index => {
 						navigation.setParams({
-							headerTitle: null,
-							headerLeft: null,
-							headerRight: null,
-						})
-						setCurrentPhotoIndex(index)
-						await checkIsPhotoWatched({ item: photos[index], navigation, })
-						navigation.setParams({
 							headerTitle: () => (this.renderHeaderTitle()),
 							headerLeft: () => (this.renderHeaderLeft()),
 							headerRight: () => (this.renderHeaderRight()),
 						})
+						// navigation.setParams({
+						// 	headerTitle: null,
+						// 	headerLeft: null,
+						// 	headerRight: null,
+						// })
+						setCurrentPhotoIndex(index)
+						await checkIsPhotoWatched({ item: photos[index], navigation, })
+						// navigation.setParams({
+						// 	headerTitle: () => (this.renderHeaderTitle()),
+						// 	headerLeft: () => (this.renderHeaderLeft()),
+						// 	headerRight: () => (this.renderHeaderRight()),
+						// })
 						if (currentPhotoIndex > photos.length - 5) {
 							getPhotos(batch) // pre-load more photos when nearing the end
 						}
