@@ -1,3 +1,9 @@
+
+import {
+	Platform,
+	Alert,
+} from 'react-native'
+
 import Geolocation from '@react-native-community/geolocation'
 
 import v4 from 'uuid/v4'
@@ -5,6 +11,11 @@ import RNSecureKeyStore, { ACCESSIBLE, } from 'react-native-secure-key-store'
 import {
 	Toast,
 } from 'native-base'
+
+
+import {
+	PERMISSIONS, request, check, openSettings,
+} from 'react-native-permissions'
 
 import * as CONST from '../../consts.js'
 
@@ -371,44 +382,48 @@ async function _requestSearchedPhotos(getState, batch) {
 export function getPhotos(batch) {
 	return async (dispatch, getState) => {
 		if (!getState().photosList.location || getState().photosList.netAvailable === false) {
-			return Promise.resolve()
-		}
-		const { latitude, longitude, } = getState().photosList.location.coords
-		const { activeSegment, searchTerm, } = getState().photosList
-		dispatch({
-			type: GET_PHOTOS_STARTED,
-		})
-		try {
-			let responseJson
-			if (searchTerm !== null) {
-				responseJson = await _requestSearchedPhotos(getState, batch)
-			} else if (activeSegment === 0) {
-				responseJson = await _requestGeoPhotos(getState, latitude, longitude, batch)
-			} else if (activeSegment === 1) {
-				responseJson = await _requestWatchedPhotos(getState, batch)
-			}
-
-			if (responseJson.batch === batch) {
-				if (responseJson.photos && responseJson.photos.length > 0) {
-					dispatch({
-						type: GET_PHOTOS_SUCCESS,
-						photos: responseJson.photos,
-					})
-				} else {
-					dispatch({
-						type: GET_PHOTOS_FAIL,
-						errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-					})
-				}
-			}
-		} catch (err) {
 			dispatch({
 				type: GET_PHOTOS_FAIL,
-				errorMessage: err.toString(),
+				errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
 			})
-			Toast.show({
-				text: err.toString(),
+		} else {
+			const { latitude, longitude, } = getState().photosList.location.coords
+			const { activeSegment, searchTerm, } = getState().photosList
+			dispatch({
+				type: GET_PHOTOS_STARTED,
 			})
+			try {
+				let responseJson
+				if (searchTerm !== null) {
+					responseJson = await _requestSearchedPhotos(getState, batch)
+				} else if (activeSegment === 0) {
+					responseJson = await _requestGeoPhotos(getState, latitude, longitude, batch)
+				} else if (activeSegment === 1) {
+					responseJson = await _requestWatchedPhotos(getState, batch)
+				}
+
+				if (responseJson.batch === batch) {
+					if (responseJson.photos && responseJson.photos.length > 0) {
+						dispatch({
+							type: GET_PHOTOS_SUCCESS,
+							photos: responseJson.photos,
+						})
+					} else {
+						dispatch({
+							type: GET_PHOTOS_FAIL,
+							errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
+						})
+					}
+				}
+			} catch (err) {
+				dispatch({
+					type: GET_PHOTOS_FAIL,
+					errorMessage: err.toString(),
+				})
+				Toast.show({
+					text: err.toString(),
+				})
+			}
 		}
 		dispatch({
 			type: GET_PHOTOS_FINISHED,
@@ -522,21 +537,66 @@ async function getTancAccepted(getState) {
 	return isTandcAccepted
 }
 
+async function checkPermission(permissionType, alertHeader, alertBody) {
+	let permission
+	if (!this.checkingPermission) {
+		this.checkingPermission = true
+
+		// permission = await check(permissionType)
+
+		// alert(`${permission}`)
+		// if (permission !== 'granted') {
+		permission = await request(permissionType)
+		if (permission !== 'granted') {
+			Alert.alert(
+				alertHeader,
+				alertBody,
+				[
+					{
+						text: 'Open Settings',
+						onPress: () => {
+							this.checkingPermission = false
+							openSettings()
+						},
+					},
+				],
+			)
+		} else {
+			this.checkingPermission = false
+		}
+		// } else {
+		// 	this.checkingPermission = false
+		// }
+	}
+	return permission
+}
+
 async function getLocation() {
 	let position = null
-	try {
-		position = await _getCurrentPosition({
-			enableHighAccuracy: false,
-			timeout: 200000,
-			maximumAge: 200000,
-		})
-	} catch (err) {
-		position = null
-		Toast.show({
-			text: err.toString(),
-			buttonText: "OK",
-			duration: 15000,
-		})
+	const permission = await checkPermission(
+		Platform.select({
+			android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
+			ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+		}),
+		'How am I supposed to show you the near-by photos?',
+		'Why don\'t you enable Location in Settings and Try Again?'
+	)
+	if (permission === 'granted') {
+		try {
+			position = await _getCurrentPosition({
+				enableHighAccuracy: false,
+				timeout: 200000,
+				maximumAge: 200000,
+			})
+		} catch (err) {
+			position = null
+			Toast.show({
+				text: 'unable to get location',
+				buttonText: "OK",
+				type: "danger",
+				duration: 5000,
+			})
+		}
 	}
 	return position
 }

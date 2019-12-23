@@ -31,8 +31,10 @@ import {
 
 import NetInfo from "@react-native-community/netinfo"
 
-import Permissions from 'react-native-permissions'
-import DeviceSettings from 'react-native-device-settings'
+import {
+	PERMISSIONS, request, check, openSettings,
+} from 'react-native-permissions'
+
 import branch from 'react-native-branch'
 
 
@@ -58,6 +60,7 @@ import {
 	setActiveSegment,
 	setSearchTerm,
 	setNetAvailable,
+	checkPermission,
 } from './reducer'
 import { uploadPendingPhotos, } from '../Camera/reducer'
 
@@ -111,19 +114,23 @@ class PhotosList extends Component {
 			}
 		})
 
-
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
 
-		if (locationPermission !== 'authorized') {
-			// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
-			Permissions.request('location', { type: 'whenInUse', }).then(async permissionResponse => {
-				setLocationPermission(permissionResponse)
-				this.reload()
-			})
-		} else {
-			this.reload()
-		}
-
+		// if (locationPermission !== 'granted') {
+		// 	// Response is one of: 'unavailable' | 'denied' | 'blocked' | 'granted';
+		// 	request(
+		// 		Platform.select({
+		// 			android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
+		// 			ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+		// 		}),
+		// 	).then(async permissionResponse => {
+		// 		setLocationPermission(permissionResponse)
+		// 		this.reload()
+		// 	})
+		// } else {
+		// 	this.reload()
+		// }
+		//
 
 		branch.initSessionTtl = 10000 // Set to 10 seconds
 		branch.subscribe(async ({ error, params, }) => {
@@ -264,33 +271,77 @@ class PhotosList extends Component {
 				},
 				{
 					text: 'Open Settings',
-					onPress: () => DeviceSettings.app(),
+					onPress:
+						() => {
+							openSettings()
+						}
+					,
 				},
 				],
 			)
 		})
 	}
 
+
 	async checkPermissionsForPhotoTaking() {
-		let cameraPermission = await Permissions.check('camera')
-		let photoPermission = await Permissions.check('photo')
-		// alert(`${cameraPermission}, ${photoPermission}`)
-		// Response is one of: 'authorized', 'denied', 'restricted', or 'undetermined'
+		let cameraPermission = await check(
+			Platform.select({
+				android: PERMISSIONS.ANDROID.CAMERA,
+				ios: PERMISSIONS.IOS.CAMERA,
+			})
+		)
 
-		if (cameraPermission === 'denied') {
-			await this.alertForPermission('Can we access your camera?', 'How else would you be able to take a photo?')
-		} else if (cameraPermission !== 'authorized') {
-			cameraPermission = await Permissions.request('camera')
+		// PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE;
+
+		let photoPermission = null
+
+		switch (Platform.OS) {
+			case 'ios':
+				photoPermission = await check(PERMISSIONS.IOS.PHOTO_LIBRARY)
+				break
+			case 'android':
+				photoPermission = await check(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE)
+				if (photoPermission === 'granted') {
+					photoPermission = await check(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE)
+				}
+				break
+			default:
+				alert('unknown platform')
 		}
 
-		if (photoPermission === 'denied') {
+		// Response is one of: 'unavailable' | 'denied' | 'blocked' | 'granted';
+		if (photoPermission !== 'granted') {
 			await this.alertForPermission('Can we access your photos?', 'How else would you be able to save the photo you take on your device?')
-		} else if (photoPermission !== 'authorized') {
-			photoPermission = await Permissions.request('photo')
+		} else if (photoPermission !== 'granted') {
+			switch (Platform.OS) {
+				case 'ios':
+					photoPermission = await request(PERMISSIONS.IOS.PHOTO_LIBRARY)
+					break
+				case 'android':
+					photoPermission = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE)
+					if (photoPermission === 'granted') {
+						photoPermission = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE)
+					}
+					break
+				default:
+					alert('unknown platform')
+			}
 		}
 
 
-		if (cameraPermission === 'authorized' && photoPermission === 'authorized') {
+		// alert(`${cameraPermission}, ${photoPermission}`)
+		if (cameraPermission !== 'granted') {
+			await this.alertForPermission('Can we access your camera?', 'How else would you be able to take a photo?')
+		} else if (cameraPermission !== 'granted') {
+			cameraPermission = await request(
+				Platform.select({
+					android: PERMISSIONS.ANDROID.CAMERA,
+					ios: PERMISSIONS.IOS.CAMERA,
+				})
+			)
+		}
+
+		if (cameraPermission === 'granted' && photoPermission === 'granted') {
 			this.takePhoto()
 		}
 	}
@@ -437,7 +488,7 @@ class PhotosList extends Component {
 									headerRight: () => this.renderHeaderRight(),
 								})
 								setSearchTerm('')
-								// this.reload()
+							// this.reload()
 							}
 						}
 					/>
@@ -468,7 +519,7 @@ class PhotosList extends Component {
 				}
 				onPress={
 					async () => {
-						// alert(navigation.getParam('currentTerm'))
+					// alert(navigation.getParam('currentTerm'))
 						const currentTerm = navigation.getParam('currentTerm')
 						if (currentTerm && currentTerm.length >= 3) {
 							setSearchTerm(currentTerm)
@@ -583,7 +634,6 @@ class PhotosList extends Component {
 			netAvailable,
 		} = this.props
 
-
 		if (netAvailable === false) {
 			return (
 				<Container>
@@ -610,236 +660,185 @@ class PhotosList extends Component {
 			)
 		}
 
-		if (locationPermission === 'authorized') {
-			if (photos.length === 0 && loading) {
-				return (
-					<Container>
-						<Content padder>
-							<Body>
-								<Spinner color={
-									CONST.MAIN_COLOR
-								}
-								/>
-							</Body>
-						</Content>
-						{this.photoButton()}
-					</Container>
-				)
-			}
-			if (photos.length === 0 && !loading) {
-				return (
-					<Container>
-						<Content padder>
-							<Body>
-								{searchTerm !== null && (
-									<Card transparent>
-										<CardItem style={{ borderRadius: 10, }}>
-											<Text style={{
-												fontSize: 20,
-												textAlign: 'center',
-												margin: 10,
-											}}>
-									No Photos found.
-									Try to search for something else.
-									Search string should be more than 3 characters.
-											</Text>
-										</CardItem>
-									</Card>
-								)}
-								{searchTerm === null && activeSegment === 0 && (
-									<Card transparent>
-										<CardItem style={{ borderRadius: 10, }}>
-											<Text style={{
-												fontSize: 20,
-												textAlign: 'center',
-												margin: 10,
-											}}>
-										No Photos found in your location.
-										Try to take some photos.
-											</Text>
-										</CardItem>
-									</Card>
-								)}
-								{searchTerm === null && activeSegment === 1 && (
-									<Card transparent>
-										<CardItem style={{ borderRadius: 10, }}>
-											<Text style={{
-												fontSize: 20,
-												textAlign: 'center',
-												margin: 10,
-											}}>
-										You don&apos;t seem to be watching any photos.
-										Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
-											</Text>
-										</CardItem>
-									</Card>
-								)}
-
-							</Body>
-						</Content>
-						{this.photoButton()}
-					</Container>
-				)
-			}
-			this.calculateThumbWidth()
+		if (photos.length === 0 && loading) {
 			return (
-				<Container onLayout={this.onLayout.bind(this)}>
-					<FlatGrid
-						// extraData={this.state}
-						itemDimension={
-							this.thumbWidth
-						}
-						spacing={3}
-						items={
-							photos
-						}
-						renderItem={
-							({ item, index, }) => (
-								<Thumb
-									item={
-										item
-									}
-									index={
-										index
-									}
-									navigation={
-										navigation
-									}
-									thumbWidth={this.thumbWidth}
-								/>
-							)
-						}
-						style={
-							styles.container
-						}
-						showsVerticalScrollIndicator={
-							false
-						}
-						horizontal={
-							false
-						}
-						onEndReached={
-							() => {
-								if (!loading && !isLastPage) {
-									getPhotos(batch)
-								}
+				<Container>
+					<Content padder>
+						<Body>
+							<Spinner color={
+								CONST.MAIN_COLOR
 							}
-						}
-						onEndReachedThreshold={
-							350
-						}
-						refreshing={
-							false
-						}
-						onRefresh={
-							async () => {
-								await this.reload()
-							}
-						}
-						onContentSizeChange={this.onContentSizeChange}
-					/>
-
-					<Modal
-						isVisible={
-							!isTandcAccepted
-						}>
-						<Content padder>
-							<Card transparent>
-								<CardItem style={{ borderRadius: 10, }}>
-									<Text> * When you take a photo with WiSaw app,
-								it will be added to a Photo Album on your phone,
-								as well as posted to global feed in the cloud.
-									</Text>
-								</CardItem>
-								<CardItem style={{ borderRadius: 10, }}>
-									<Text> * People close-by can see your photos.</Text>
-								</CardItem>
-								<CardItem style={{ borderRadius: 10, }}>
-									<Text> * You can see other people&#39;s photos too.
-									</Text>
-								</CardItem>
-								<CardItem style={{ borderRadius: 10, }}>
-									<Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-								</CardItem>
-								<CardItem style={{ borderRadius: 10, }}>
-									<Text>* No one will tolerate objectionable content or abusive users.</Text>
-								</CardItem>
-								<CardItem style={{ borderRadius: 10, }}>
-									<Text>* The abusive users will be banned from WiSaw by other users.</Text>
-								</CardItem>
-								<CardItem style={{ borderRadius: 10, }}>
-									<Text>* By using WiSaw I agree to Terms and Conditions.</Text>
-								</CardItem>
-								<CardItem footer style={{ borderRadius: 10, }}>
-									<Left />
-									<Button
-										block
-										bordered
-										success
-										small
-										onPress={
-											() => {
-												acceptTandC()
-											}
-										}>
-										<Text>  Agree  </Text>
-									</Button>
-									<Right />
-								</CardItem>
-							</Card>
-						</Content>
-					</Modal>
+							/>
+						</Body>
+					</Content>
 					{this.photoButton()}
 				</Container>
 			)
-		} // if (locationPermission === 'authorized')
-		return (
-			<Container>
-				<Content padder>
-					<Body>
-						<Modal isVisible>
-							<Content padder>
+		}
+		if (photos.length === 0 && !loading) {
+			return (
+				<Container>
+					<Content padder>
+						<Body>
+							{searchTerm !== null && (
 								<Card transparent>
 									<CardItem style={{ borderRadius: 10, }}>
-										<Text> How am I supposed to show you the near-by photos ?
+										<Text style={{
+											fontSize: 20,
+											textAlign: 'center',
+											margin: 10,
+										}}>
+									No Photos found.
+									Try to search for something else.
+									Search string should be more than 3 characters.
 										</Text>
-									</CardItem>
-									<CardItem style={{ borderRadius: 10, }}>
-										<Text> Why don &#39;t you enable Location in Settings and Try Again?
-										</Text>
-									</CardItem>
-									<CardItem footer style={{ borderRadius: 10, }}>
-										<Left>
-											<Button
-												block
-												bordered
-												success
-												small
-												onPress={
-													() => {
-														this.componentDidMount()
-													}
-												}>
-												<Text> Try Again </Text>
-											</Button>
-										</Left>
-										<Right>
-											<Button
-												block bordered warning small onPress={
-													() => {
-														DeviceSettings.app()
-													}
-												}>
-												<Text> Open Settings
-												</Text>
-											</Button>
-										</Right>
 									</CardItem>
 								</Card>
-							</Content>
-						</Modal>
-					</Body>
-				</Content>
+							)}
+							{searchTerm === null && activeSegment === 0 && (
+								<Card transparent>
+									<CardItem style={{ borderRadius: 10, }}>
+										<Text style={{
+											fontSize: 20,
+											textAlign: 'center',
+											margin: 10,
+										}}>
+										No Photos found in your location.
+										Try to take some photos.
+										</Text>
+									</CardItem>
+								</Card>
+							)}
+							{searchTerm === null && activeSegment === 1 && (
+								<Card transparent>
+									<CardItem style={{ borderRadius: 10, }}>
+										<Text style={{
+											fontSize: 20,
+											textAlign: 'center',
+											margin: 10,
+										}}>
+										You don&apos;t seem to be watching any photos.
+										Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
+										</Text>
+									</CardItem>
+								</Card>
+							)}
+
+						</Body>
+					</Content>
+					{this.photoButton()}
+				</Container>
+			)
+		}
+		this.calculateThumbWidth()
+		return (
+			<Container onLayout={this.onLayout.bind(this)}>
+				<FlatGrid
+				// extraData={this.state}
+					itemDimension={
+						this.thumbWidth
+					}
+					spacing={3}
+					items={
+						photos
+					}
+					renderItem={
+						({ item, index, }) => (
+							<Thumb
+								item={
+									item
+								}
+								index={
+									index
+								}
+								navigation={
+									navigation
+								}
+								thumbWidth={this.thumbWidth}
+							/>
+						)
+					}
+					style={
+						styles.container
+					}
+					showsVerticalScrollIndicator={
+						false
+					}
+					horizontal={
+						false
+					}
+					onEndReached={
+						() => {
+							if (!loading && !isLastPage) {
+								getPhotos(batch)
+							}
+						}
+					}
+					onEndReachedThreshold={
+						350
+					}
+					refreshing={
+						false
+					}
+					onRefresh={
+						async () => {
+							await this.reload()
+						}
+					}
+					onContentSizeChange={this.onContentSizeChange}
+				/>
+
+				<Modal
+					isVisible={
+						!isTandcAccepted
+					}>
+					<Content padder>
+						<Card transparent>
+							<CardItem style={{ borderRadius: 10, }}>
+								<Text> * When you take a photo with WiSaw app,
+								it will be added to a Photo Album on your phone,
+								as well as posted to global feed in the cloud.
+								</Text>
+							</CardItem>
+							<CardItem style={{ borderRadius: 10, }}>
+								<Text> * People close-by can see your photos.</Text>
+							</CardItem>
+							<CardItem style={{ borderRadius: 10, }}>
+								<Text> * You can see other people&#39;s photos too.
+								</Text>
+							</CardItem>
+							<CardItem style={{ borderRadius: 10, }}>
+								<Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+							</CardItem>
+							<CardItem style={{ borderRadius: 10, }}>
+								<Text>* No one will tolerate objectionable content or abusive users.</Text>
+							</CardItem>
+							<CardItem style={{ borderRadius: 10, }}>
+								<Text>* The abusive users will be banned from WiSaw by other users.</Text>
+							</CardItem>
+							<CardItem style={{ borderRadius: 10, }}>
+								<Text>* By using WiSaw I agree to Terms and Conditions.</Text>
+							</CardItem>
+							<CardItem footer style={{ borderRadius: 10, }}>
+								<Left />
+								<Button
+									block
+									bordered
+									success
+									small
+									onPress={
+										() => {
+											acceptTandC()
+										}
+									}>
+									<Text>  Agree  </Text>
+								</Button>
+								<Right />
+							</CardItem>
+						</Card>
+					</Content>
+				</Modal>
+				{this.photoButton()}
 			</Container>
 		)
 	}
