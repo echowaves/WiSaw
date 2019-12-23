@@ -6,7 +6,6 @@ import {
 	StyleSheet,
 	Text,
 	View,
-	Alert,
 	Dimensions,
 	DeviceEventEmitter,
 	Platform,
@@ -32,7 +31,7 @@ import {
 import NetInfo from "@react-native-community/netinfo"
 
 import {
-	PERMISSIONS, request, check, openSettings,
+	PERMISSIONS,
 } from 'react-native-permissions'
 
 import branch from 'react-native-branch'
@@ -55,7 +54,6 @@ import {
 	resetState,
 	getPhotos,
 	acceptTandC,
-	setLocationPermission,
 	setOrientation,
 	setActiveSegment,
 	setSearchTerm,
@@ -86,8 +84,6 @@ class PhotosList extends Component {
 	componentDidMount() {
 		const {
 			navigation,
-			locationPermission,
-			setLocationPermission,
 			setNetAvailable,
 		} = this.props
 
@@ -115,22 +111,6 @@ class PhotosList extends Component {
 		})
 
 		DeviceEventEmitter.addListener('namedOrientationDidChange', this.handleOrientationDidChange.bind(this))
-
-		// if (locationPermission !== 'granted') {
-		// 	// Response is one of: 'unavailable' | 'denied' | 'blocked' | 'granted';
-		// 	request(
-		// 		Platform.select({
-		// 			android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
-		// 			ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-		// 		}),
-		// 	).then(async permissionResponse => {
-		// 		setLocationPermission(permissionResponse)
-		// 		this.reload()
-		// 	})
-		// } else {
-		// 	this.reload()
-		// }
-		//
 
 		branch.initSessionTtl = 10000 // Set to 10 seconds
 		branch.subscribe(async ({ error, params, }) => {
@@ -259,89 +239,42 @@ class PhotosList extends Component {
 		}
 	}
 
-	async alertForPermission(headerText, bodyText) {
-		return new Promise((resolve, reject) => {
-			Alert.alert(
-				headerText,
-				bodyText,
-				[{
-					text: 'Try Again',
-					onPress: () => reject,
-					style: 'cancel',
-				},
-				{
-					text: 'Open Settings',
-					onPress:
-						() => {
-							openSettings()
-						}
-					,
-				},
-				],
-			)
-		})
-	}
-
-
 	async checkPermissionsForPhotoTaking() {
-		let cameraPermission = await check(
+		let permission = await checkPermission(
 			Platform.select({
 				android: PERMISSIONS.ANDROID.CAMERA,
 				ios: PERMISSIONS.IOS.CAMERA,
-			})
+			}),
+			'Can we access your camera?',
+			'How else would you be able to take a photo?'
 		)
-
-		// PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE;
-
-		let photoPermission = null
-
-		switch (Platform.OS) {
-			case 'ios':
-				photoPermission = await check(PERMISSIONS.IOS.PHOTO_LIBRARY)
-				break
-			case 'android':
-				photoPermission = await check(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE)
-				if (photoPermission === 'granted') {
-					photoPermission = await check(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE)
-				}
-				break
-			default:
-				alert('unknown platform')
-		}
-
-		// Response is one of: 'unavailable' | 'denied' | 'blocked' | 'granted';
-		if (photoPermission !== 'granted') {
-			await this.alertForPermission('Can we access your photos?', 'How else would you be able to save the photo you take on your device?')
-		} else if (photoPermission !== 'granted') {
+		if (permission === 'granted') {
 			switch (Platform.OS) {
 				case 'ios':
-					photoPermission = await request(PERMISSIONS.IOS.PHOTO_LIBRARY)
+					permission =				await checkPermission(
+						PERMISSIONS.IOS.PHOTO_LIBRARY,
+						'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
+					)
 					break
 				case 'android':
-					photoPermission = await request(PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE)
-					if (photoPermission === 'granted') {
-						photoPermission = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE)
+					permission = await checkPermission(
+						PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+						'Can we write photos to your devise?',
+						'How else would we be able to save the photos you take on your device?'
+					)
+					if (permission === 'granted') {
+						permission =					await checkPermission(
+							PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
+							'Can we read photos on your devise?',
+							'How else would we be able upload the photos you take from your device?'
+						)
 					}
 					break
 				default:
 					alert('unknown platform')
 			}
 		}
-
-
-		// alert(`${cameraPermission}, ${photoPermission}`)
-		if (cameraPermission !== 'granted') {
-			await this.alertForPermission('Can we access your camera?', 'How else would you be able to take a photo?')
-		} else if (cameraPermission !== 'granted') {
-			cameraPermission = await request(
-				Platform.select({
-					android: PERMISSIONS.ANDROID.CAMERA,
-					ios: PERMISSIONS.IOS.CAMERA,
-				})
-			)
-		}
-
-		if (cameraPermission === 'granted' && photoPermission === 'granted') {
+		if (permission === 'granted') {
 			this.takePhoto()
 		}
 	}
@@ -626,7 +559,6 @@ class PhotosList extends Component {
 			isTandcAccepted,
 			loading,
 			acceptTandC,
-			locationPermission,
 			batch,
 			activeSegment,
 			searchTerm,
@@ -886,7 +818,6 @@ const mapStateToProps = state => {
 		paging: state.photosList.paging,
 		isTandcAccepted: state.photosList.isTandcAccepted,
 		loading: state.photosList.loading,
-		locationPermission: state.photosList.locationPermission,
 		pendingUploads: state.camera.pendingUploads,
 		orientation: state.photosList.orientation,
 		activeSegment: state.photosList.activeSegment,
@@ -900,7 +831,6 @@ const mapDispatchToProps = {
 	resetState,
 	getPhotos,
 	acceptTandC,
-	setLocationPermission,
 	uploadPendingPhotos,
 	setOrientation,
 	setActiveSegment,
@@ -909,7 +839,6 @@ const mapDispatchToProps = {
 }
 
 PhotosList.defaultProps = {
-	locationPermission: null,
 	searchTerm: null,
 }
 
@@ -923,8 +852,6 @@ PhotosList.propTypes = {
 	isTandcAccepted: PropTypes.bool.isRequired,
 	loading: PropTypes.bool.isRequired,
 	acceptTandC: PropTypes.func.isRequired,
-	locationPermission: PropTypes.string,
-	setLocationPermission: PropTypes.func.isRequired,
 	pendingUploads: PropTypes.number.isRequired,
 	uploadPendingPhotos: PropTypes.func.isRequired,
 	orientation: PropTypes.string.isRequired,

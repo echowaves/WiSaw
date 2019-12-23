@@ -14,7 +14,7 @@ import {
 
 
 import {
-	PERMISSIONS, request, check, openSettings,
+	PERMISSIONS, request, openSettings,
 } from 'react-native-permissions'
 
 import * as CONST from '../../consts.js'
@@ -27,7 +27,6 @@ export const RESET_STATE = 'wisaw/photosList/RESET_STATE'
 export const SET_IS_TANDC_ACCEPTED = 'wisaw/photosList/SET_IS_TANDC_ACCEPTED'
 export const SET_UUID = 'wisaw/photosList/SET_UUID'
 export const SET_LOCATION = 'wisaw/photosList/SET_LOCATION'
-export const SET_LOCATION_PERMISSION = 'wisaw/photosList/SET_LOCATION_PERMISSION'
 export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
 export const SET_ORIENTATION = 'wisaw/photosList/SET_ORIENTATION'
 export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
@@ -59,7 +58,6 @@ export const initialState = {
 	loading: false,
 	errorMessage: '',
 	pageNumber: 0,
-	locationPermission: null,
 	orientation: 'portrait-primary',
 	activeSegment: 0,
 	searchTerm: null,
@@ -128,11 +126,6 @@ export default function reducer(state = initialState, action) {
 			return {
 				...state,
 				location: action.location,
-			}
-		case SET_LOCATION_PERMISSION:
-			return {
-				...state,
-				locationPermission: action.locationPermission,
 			}
 		case SET_ERROR:
 			return {
@@ -453,13 +446,6 @@ export function acceptTandC() {
 	}
 }
 
-export function setLocationPermission(locationPermission) {
-	return {
-		type: SET_LOCATION_PERMISSION,
-		locationPermission,
-	}
-}
-
 export function setOrientation(orientation) {
 	return {
 		type: SET_ORIENTATION,
@@ -537,7 +523,7 @@ async function getTancAccepted(getState) {
 	return isTandcAccepted
 }
 
-async function checkPermission(permissionType, alertHeader, alertBody) {
+export async function checkPermission(permissionType, alertHeader, alertBody) {
 	let permission
 	if (!this.checkingPermission) {
 		this.checkingPermission = true
