@@ -44,7 +44,8 @@ import {
 import { store, } from '../../index.js' // eslint-disable-line import/no-cycle
 import * as CONST from '../../consts.js'
 
-const osFactor = Platform.OS === 'ios' ? 0.01 : 1
+const osFactor = Platform.OS === 'ios' ? 0.05 : 1
+const initialZoom = 0.01
 
 class Camera extends Component {
 	componentDidMount() {
@@ -64,8 +65,8 @@ class Camera extends Component {
 			zoom,
 		} = this.props
 		if (event.nativeEvent.state === State.ACTIVE) {
-			if (zoom === 0) {
-				setInitialPinchValue(0.00001 * osFactor)
+			if (zoom < initialZoom * osFactor) {
+				setInitialPinchValue(initialZoom * osFactor)
 			} else {
 				setInitialPinchValue(zoom)
 			}
@@ -83,8 +84,8 @@ class Camera extends Component {
 		if (zoomFactor > 1 * osFactor) {
 			zoomFactor = 1 * osFactor
 		}
-		if (zoomFactor < 0.1 * osFactor) {
-			zoomFactor = 0.1 * osFactor
+		if (zoomFactor < initialZoom * osFactor) {
+			zoomFactor = 0
 		}
 
 		Toast.show({
