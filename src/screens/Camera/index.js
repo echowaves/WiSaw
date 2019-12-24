@@ -12,12 +12,13 @@ import CameraRoll from "@react-native-community/cameraroll"
 
 import AsyncStorage from '@react-native-community/async-storage'
 
+import { PinchGestureHandler, State, } from 'react-native-gesture-handler'
+
 import {
 	Icon,
 	Button,
+	Toast,
 } from 'native-base'
-
-import Slider from 'react-native-slider'
 
 import PropTypes from 'prop-types'
 
@@ -37,10 +38,13 @@ import {
 	setFlashMode,
 	setFrontCam,
 	setZoom,
+	setInitialPinchValue,
 } from './reducer'
 
 import { store, } from '../../index.js' // eslint-disable-line import/no-cycle
 import * as CONST from '../../consts.js'
+
+const osFactor = Platform.OS === 'ios' ? 0.01 : 1
 
 class Camera extends Component {
 	componentDidMount() {
@@ -50,6 +54,44 @@ class Camera extends Component {
 		} = this.props
 		setPreviewUri(null)
 		setZoom(0)
+		setInitialPinchValue(0)
+	}
+
+
+	startStopPinching = event => {
+		const {
+			setInitialPinchValue,
+			zoom,
+		} = this.props
+		if (event.nativeEvent.state === State.ACTIVE) {
+			if (zoom === 0) {
+				setInitialPinchValue(0.00001 * osFactor)
+			} else {
+				setInitialPinchValue(zoom)
+			}
+		}
+	}
+
+
+	pinching = event => {
+		const {
+			initialPinchValue,
+			setZoom,
+		} = this.props
+
+		let zoomFactor = initialPinchValue * event.nativeEvent.scale
+		if (zoomFactor > 1 * osFactor) {
+			zoomFactor = 1 * osFactor
+		}
+		if (zoomFactor < 0.1 * osFactor) {
+			zoomFactor = 0.1 * osFactor
+		}
+
+		Toast.show({
+			text: `${zoomFactor}`,
+		})
+
+		setZoom(zoomFactor)
 	}
 
 	takePicture() {
@@ -203,169 +245,154 @@ class Camera extends Component {
 			zoom,
 			setFlashMode,
 			setFrontCam,
-			setZoom,
 		} = this.props
 		return (
-			<View style={styles.container}>
-				<RNCamera
-					ref={ref => {
-						this.cameraView = ref
-					}}
-					style={styles.cameraView}
-					orientation={RNCamera.Constants.Orientation.auto}
-					onFaceDetected={null}
-					onGoogleVisionBarcodesDetected={null}
-					onTextRecognized={null}
-					onBarCodeRead={null}
-					flashMode={flashMode ? RNCamera.Constants.FlashMode.on : RNCamera.Constants.FlashMode.off}
-					type={frontCam ? RNCamera.Constants.Type.front : RNCamera.Constants.Type.back}
-					zoom={zoom}
-					captureAudio={false}
-				/>
-				<View style={
-					[
-						orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
-						orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
-						orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
-						orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
-					]
-				}>
-					<View style={{ flex: 2, }}>
-						<Slider
-							maximumValue={10}
-							minimumValue={0}
-							step={1}
-							value={zoom}
-							onValueChange={
-								val => {
-									setZoom(Platform.OS === 'ios' ? (val / 200) : (val / 10)) // this is to address iOS bug
-								}
-							}
-							style={
-								{
-									flex: 1,
-									width: '80%',
-									height: '80%',
-									justifyContent: 'center',
-									alignSelf: 'center',
-								}
-							}
-							maximumTrackTintColor={CONST.MAIN_COLOR}
-							minimumTrackTintColor={CONST.MAIN_COLOR}
-							thumbTintColor={CONST.MAIN_COLOR}
-						/>
-					</View>
+			<PinchGestureHandler
+				onGestureEvent={this.pinching}
+				onHandlerStateChange={this.startStopPinching}>
+				<View style={styles.container}>
+
+					<RNCamera
+						ref={ref => {
+							this.cameraView = ref
+						}}
+						style={styles.cameraView}
+						orientation={RNCamera.Constants.Orientation.auto}
+						onFaceDetected={null}
+						onGoogleVisionBarcodesDetected={null}
+						onTextRecognized={null}
+						onBarCodeRead={null}
+						flashMode={flashMode ? RNCamera.Constants.FlashMode.on : RNCamera.Constants.FlashMode.off}
+						type={frontCam ? RNCamera.Constants.Type.front : RNCamera.Constants.Type.back}
+						zoom={zoom}
+						captureAudio={false}
+					/>
 					<View style={
 						[
-							{
-								flex: 2,
-							},
-							orientation === 'portrait-primary' && { flexDirection: 'row', justifyContent: 'center', },
-							orientation === 'portrait-secondary' && { flexDirection: 'row', justifyContent: 'center', },
-							orientation === 'landscape-primary' && { flexDirection: 'column', justifyContent: 'center', },
-							orientation === 'landscape-secondary' && { flexDirection: 'column', justifyContent: 'center', },
+							orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
+							orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
+							orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
+							orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
 						]
 					}>
-						<View
-							style={
-								{
-									alignSelf: 'center',
-									height: 100,
-									width: 100,
-								}
-							}>
-							<Button
-								rounded
-								light
-								transparent
-								bordered
-								style={
-									{
-										flex: 1,
-										height: 100,
-										width: 100,
-										backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-									}
-								}
+						<View style={{
+							flex: 2,
+							justifyContent: 'space-evenly',
+							alignSelf: 'center',
+						}}>
+							<TouchableOpacity
 								onPress={
-									() => {
-										this.takePicture()
+									val => {
+										setFlashMode(!flashMode)
 									}
 								}>
 								<Icon
-									type="FontAwesome"
-									name="camera"
-									style={
-										{
-											fontSize: 60,
-											color: '#FF4136',
-										}
-									}
+									type="MaterialIcons" name={flashMode ? "flash-on" : "flash-off"}
+									style={{
+										flex: 0,
+										alignSelf: 'center',
+										color: CONST.MAIN_COLOR,
+									}}
 								/>
-							</Button>
-							{pendingUploads > 0 && (
-								<Text
+							</TouchableOpacity>
+						</View>
+						<View style={
+							[
+								{
+									flex: 2,
+								},
+								orientation === 'portrait-primary' && { flexDirection: 'row', justifyContent: 'center', },
+								orientation === 'portrait-secondary' && { flexDirection: 'row', justifyContent: 'center', },
+								orientation === 'landscape-primary' && { flexDirection: 'column', justifyContent: 'center', },
+								orientation === 'landscape-secondary' && { flexDirection: 'column', justifyContent: 'center', },
+							]
+						}>
+							<View
+								style={
+									{
+										alignSelf: 'center',
+										height: 100,
+										width: 100,
+									}
+								}>
+								<Button
+									rounded
+									light
+									transparent
+									bordered
 									style={
 										{
-											position: 'absolute',
-											alignSelf: 'center',
-											color: 'white',
+											flex: 1,
+											height: 100,
+											width: 100,
 											backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
 										}
+									}
+									onPress={
+										() => {
+											this.takePicture()
+										}
 									}>
-									{pendingUploads}
-								</Text>
-							)}
+									<Icon
+										type="FontAwesome"
+										name="camera"
+										style={
+											{
+												fontSize: 60,
+												color: '#FF4136',
+											}
+										}
+									/>
+								</Button>
+								{pendingUploads > 0 && (
+									<Text
+										style={
+											{
+												position: 'absolute',
+												alignSelf: 'center',
+												color: 'white',
+												backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+											}
+										}>
+										{pendingUploads}
+									</Text>
+								)}
+							</View>
+						</View>
+						<View style={
+							[
+								{
+									flex: 2,
+									justifyContent: 'space-evenly',
+									alignSelf: 'center',
+								},
+								orientation === 'portrait-primary' && { flexDirection: 'row', },
+								orientation === 'portrait-secondary' && { flexDirection: 'row', },
+								orientation === 'landscape-primary' && { flexDirection: 'column', },
+								orientation === 'landscape-secondary' && { flexDirection: 'column', },
+							]
+						}>
+							<TouchableOpacity
+								onPress={
+									val => {
+										setFrontCam(!frontCam)
+									}
+								}>
+								<Icon
+									type="MaterialIcons"
+									name={frontCam ? "camera-front" : "camera-rear"}
+									style={{
+										flex: 0,
+										alignSelf: 'center',
+										color: CONST.MAIN_COLOR,
+									}}
+								/>
+							</TouchableOpacity>
 						</View>
 					</View>
-					<View style={
-						[
-							{
-								flex: 2,
-								justifyContent: 'space-evenly',
-								alignSelf: 'center',
-							},
-							orientation === 'portrait-primary' && { flexDirection: 'row', },
-							orientation === 'portrait-secondary' && { flexDirection: 'row', },
-							orientation === 'landscape-primary' && { flexDirection: 'column', },
-							orientation === 'landscape-secondary' && { flexDirection: 'column', },
-						]
-					}>
-						<TouchableOpacity
-							onPress={
-								val => {
-									setFrontCam(!frontCam)
-								}
-							}>
-							<Icon
-								type="MaterialIcons"
-								name={frontCam ? "camera-front" : "camera-rear"}
-								style={{
-									flex: 0,
-									alignSelf: 'center',
-									color: CONST.MAIN_COLOR,
-								}}
-							/>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={
-								val => {
-									setFlashMode(!flashMode)
-								}
-							}>
-							<Icon
-								type="MaterialIcons" name={flashMode ? "flash-on" : "flash-off"}
-								style={{
-									flex: 0,
-									alignSelf: 'center',
-									color: CONST.MAIN_COLOR,
-								}}
-							/>
-						</TouchableOpacity>
-					</View>
+					{ previewUri && this.renderPreviewImage(previewUri) }
 				</View>
-				{ previewUri && this.renderPreviewImage(previewUri) }
-			</View>
+			</PinchGestureHandler>
 		)
 	}
 }
@@ -427,6 +454,7 @@ const mapStateToProps = state => ({
 	flashMode: state.camera.flashMode,
 	frontCam: state.camera.frontCam,
 	zoom: state.camera.zoom,
+	initialPinchValue: state.camera.initialPinchValue,
 })
 
 const mapDispatchToProps = {
@@ -436,6 +464,7 @@ const mapDispatchToProps = {
 	setFlashMode,
 	setFrontCam,
 	setZoom,
+	setInitialPinchValue,
 }
 
 Camera.navigationOptions = {
@@ -464,6 +493,8 @@ Camera.propTypes = {
 	setFrontCam: PropTypes.func.isRequired,
 	zoom: PropTypes.number.isRequired,
 	setZoom: PropTypes.func.isRequired,
+	initialPinchValue: PropTypes.number.isRequired,
+	setInitialPinchValue: PropTypes.func.isRequired,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Camera)

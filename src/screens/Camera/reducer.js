@@ -14,6 +14,7 @@ export const UPDATE_PHOTOS_PENDING_UPLOAD = 'wisaw/camera/UPDATE_PHOTOS_PENDING_
 export const SET_FLASH = 'wisaw/camera/SET_FLASH'
 export const SET_FRONT_CAM = 'wisaw/camera/SET_FRONT_CAM'
 export const SET_ZOOM = 'wisaw/camera/SET_ZOOM'
+export const SET_INITIAL_PINCH_VALUE = 'wisaw/camera/SET_INITIAL_PINCH_VALUE'
 
 export const initialState = {
 	previewUri: null,
@@ -22,6 +23,7 @@ export const initialState = {
 	flashMode: false,
 	frontCam: false,
 	zoom: 0,
+	initialPinchValue: 0,
 }
 
 export default function reducer(state = initialState, action) {
@@ -62,6 +64,11 @@ export default function reducer(state = initialState, action) {
 				...state,
 				zoom: action.zoom,
 			}
+		case SET_INITIAL_PINCH_VALUE:
+			return {
+				...state,
+				initialPinchValue: action.initialPinchValue,
+			}
 
 		default:
 			return state
@@ -95,6 +102,13 @@ export function setZoom(zoom) {
 	return {
 		type: SET_ZOOM,
 		zoom,
+	}
+}
+
+export function setInitialPinchValue(initialPinchValue) {
+	return {
+		type: SET_INITIAL_PINCH_VALUE,
+		initialPinchValue,
 	}
 }
 
