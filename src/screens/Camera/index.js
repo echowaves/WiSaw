@@ -17,7 +17,7 @@ import { PinchGestureHandler, State, } from 'react-native-gesture-handler'
 import {
 	Icon,
 	Button,
-	Toast,
+	// Toast,
 } from 'native-base'
 
 import PropTypes from 'prop-types'
@@ -88,9 +88,9 @@ class Camera extends Component {
 			zoomFactor = 0
 		}
 
-		Toast.show({
-			text: `${zoomFactor}`,
-		})
+		// Toast.show({
+		// 	text: `${zoomFactor}`,
+		// })
 
 		setZoom(zoomFactor)
 	}
@@ -176,6 +176,7 @@ class Camera extends Component {
 					source={imageUri ? { uri: imageUri, } : {}}
 					animation="fadeIn"
 					duration={1000}
+					useNativeDriver
 					style={
 						{
 							flex: 1,

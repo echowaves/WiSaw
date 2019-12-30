@@ -59,3 +59,5 @@ buck-out/
 *.jsbundle
 
 android/app/wisaw.jks
+
+logcat.txt

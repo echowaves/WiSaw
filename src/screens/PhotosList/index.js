@@ -86,7 +86,7 @@ class PhotosList extends Component {
 			navigation,
 			setNetAvailable,
 		} = this.props
-
+		// alert(global.HermesInternal != null)
 		this.unsubscribeFromNetInfo = NetInfo.addEventListener(state => {
 			// console.log("Connection type", state.type);
 			// console.log("Is connected?", state.isConnected);

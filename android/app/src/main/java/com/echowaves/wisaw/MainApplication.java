@@ -9,6 +9,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import android.content.Context;
+import com.facebook.react.ReactInstanceManager;
 
 // import Branch and RNBranch
 import io.branch.referral.Branch;
@@ -47,22 +48,27 @@ public class MainApplication extends Application implements ReactApplication {
 		// Branch object initialization
 		Branch.getAutoInstance(this);
     SoLoader.init(this, /* native exopackage */ false);
-		initializeFlipper(this); // Remove this line if you don't want Flipper enabled
   }
 	/**
-	* Loads Flipper in React Native templates.
-	*
+	* Loads Flipper in React Native templates. Call this in the onCreate method with something like
+  * initializeFlipper(this, getReactNativeHost().getReactInstanceManager());	*
 	* @param context
 	*/
- private static void initializeFlipper(Context context) {
-	 if (BuildConfig.DEBUG) {
+	private static void initializeFlipper(
+      Context context, ReactInstanceManager reactInstanceManager) {
+		 if (BuildConfig.DEBUG) {
 		 try {
 			 /*
 				We use reflection here to pick up the class that initializes Flipper,
 			 since Flipper library is not available in release mode
 			 */
-			 Class<?> aClass = Class.forName("com.facebook.flipper.ReactNativeFlipper");
-			 aClass.getMethod("initializeFlipper", Context.class).invoke(null, context);
+
+			 Class<?> aClass = Class.forName("com.rndiffapp.ReactNativeFlipper");
+			 aClass
+					 .getMethod("initializeFlipper", Context.class, ReactInstanceManager.class)
+					 .invoke(null, context, reactInstanceManager);
+					 
+
 		 } catch (ClassNotFoundException e) {
 			 e.printStackTrace();
 		 } catch (NoSuchMethodException e) {

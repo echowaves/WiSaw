@@ -1,4 +1,12 @@
-import 'react-native-gesture-handler' // keep this line to prevent crashes
+/**
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ * @flow strict-local
+ */
+
+// import 'react-native-gesture-handler' // keep this line to prevent crashes
+import { gestureHandlerRootHOC, } from 'react-native-gesture-handler'
 
 import { Root, } from 'native-base'
 import React, { Component, } from 'react'
@@ -22,19 +30,19 @@ import Camera from './src/screens/Camera'
 
 const AppNavigator = createStackNavigator({
 	PhotosList: {
-		screen: PhotosList,
+		screen: gestureHandlerRootHOC(PhotosList),
 	},
 	PhotosDetails: {
-		screen: PhotosDetails,
+		screen: gestureHandlerRootHOC(PhotosDetails),
 	},
 	SharedPhoto: {
-		screen: SharedPhoto,
+		screen: gestureHandlerRootHOC(SharedPhoto),
 	},
 	Feedback: {
-		screen: FeedbackScreen,
+		screen: gestureHandlerRootHOC(FeedbackScreen),
 	},
 	Camera: {
-		screen: Camera,
+		screen: gestureHandlerRootHOC(Camera),
 	},
 },
 {

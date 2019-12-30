@@ -76,8 +76,7 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    entryFile: "index.js",
-    enableHermes: true,  // clean and rebuild if changing
+    enableHermes: false,  // clean and rebuild if changing
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
@@ -131,8 +130,8 @@ android {
         applicationId "com.echowaves.wisaw"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 123
-        versionName "5.9.1"
+        versionCode 125
+        versionName "5.9.3"
         missingDimensionStrategy 'react-native-camera', 'general'
         multiDexEnabled true
     }
@@ -172,6 +171,13 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    packagingOptions {
+     pickFirst "lib/armeabi-v7a/libc++_shared.so"
+     pickFirst "lib/arm64-v8a/libc++_shared.so"
+     pickFirst "lib/x86/libc++_shared.so"
+     pickFirst "lib/x86_64/libc++_shared.so"
+     }
+
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -192,7 +198,13 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation 'org.webkit:android-jsc:+'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
 
+    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
+       exclude group:'com.facebook.yoga'
+       exclude group:'com.facebook.flipper', module: 'fbjni'
+       exclude group:'com.facebook.litho', module: 'litho-annotations'
+     }
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";

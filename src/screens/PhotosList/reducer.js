@@ -524,41 +524,40 @@ async function getTancAccepted(getState) {
 }
 
 export async function checkPermission(permissionType, alertHeader, alertBody) {
-	let permission
-	if (!this.checkingPermission) {
-		this.checkingPermission = true
+	// let permission
+	// if (!this.checkingPermission) {
+	// 	this.checkingPermission = true
 
-		// permission = await check(permissionType)
+	// permission = await check(permissionType)
 
-		// alert(`${permission}`)
-		// if (permission !== 'granted') {
-		permission = await request(permissionType)
-		if (permission !== 'granted') {
-			Alert.alert(
-				alertHeader,
-				alertBody,
-				[
-					{
-						text: 'Open Settings',
-						onPress: () => {
-							this.checkingPermission = false
-							openSettings()
-						},
+	// alert(`${permission}`)
+	// if (permission !== 'granted') {
+
+	const permission = await request(permissionType)
+
+	if (permission !== 'granted') {
+		Alert.alert(
+			alertHeader,
+			alertBody,
+			[
+				{
+					text: 'Open Settings',
+					onPress: () => {
+						this.checkingPermission = false
+						openSettings()
 					},
-				],
-			)
-		} else {
-			this.checkingPermission = false
-		}
-		// } else {
-		// 	this.checkingPermission = false
+				},
+			],
+		)
 		// }
+		// this.checkingPermission = false
 	}
 	return permission
 }
 
 async function getLocation() {
 	let position = null
+	// Toast("started checking permission")
 	const permission = await checkPermission(
 		Platform.select({
 			android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
@@ -567,6 +566,7 @@ async function getLocation() {
 		'How am I supposed to show you the near-by photos?',
 		'Why don\'t you enable Location in Settings and Try Again?'
 	)
+	// Toast("finished checking permission")
 	if (permission === 'granted') {
 		try {
 			position = await _getCurrentPosition({

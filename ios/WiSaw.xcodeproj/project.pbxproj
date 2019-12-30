@@ -10,6 +10,7 @@
 		00E356F31AD99517003FC87E /* WiSawTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* WiSawTests.m */; };
 		02DE7508C24746C1928D3580 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D50821CA00140DBBE8FD30F /* MaterialCommunityIcons.ttf */; };
 		07EBFED6F4AA464884C6BD8C /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 28549C55AF434F8A9D1F2101 /* Octicons.ttf */; };
+		0A3EA81F23B9A3A90078B788 /* Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A3EA81E23B9A3A90078B788 /* Swift.swift */; };
 		0A43FF7E2DA243789229E161 /* Roboto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 942461AB625C46AC8CDA18CE /* Roboto.ttf */; };
 		0A6ECB5622E7993D004853C5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A6ECB5522E7993D004853C5 /* Assets.xcassets */; };
 		0A6ECB5822E7995D004853C5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A6ECB5722E7995C004853C5 /* LaunchScreen.storyboard */; };
@@ -19,6 +20,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		142721B122494D11962B13D4 /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C72FD226B41843D18EAAC92B /* SimpleLineIcons.ttf */; };
+		293E4FA4E16E4AB56DD3F669 /* libPods-WiSaw-WiSawTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A96EEC435B8CD356D16E199 /* libPods-WiSaw-WiSawTests.a */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -33,7 +35,6 @@
 		931A9F34E6B7B5F7C22BA4A0 /* libPods-WiSaw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AED62352F5B66DD4EC7938E /* libPods-WiSaw.a */; };
 		9A6FD6729C3645B5AC182223 /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AE1D881B20414C80B0458D83 /* MaterialIcons.ttf */; };
 		A3BEA754F16C49E6A9D7C7BA /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2DFBB0E2E3BF4AC8AB49A32A /* Entypo.ttf */; };
-		A604F38418465E67BAD76CE1 /* libPods-WiSawTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ACBE17CC1260589EDADCF74C /* libPods-WiSawTests.a */; };
 		A8AD8A3BFEC32F255206EB5B /* libPods-WiSaw-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9F34015FFFC1DA9D12314CD /* libPods-WiSaw-tvOS.a */; };
 		AB588DF50CAD431E9DF79D37 /* FontAwesome5_Brands.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E6491DE63DF7458FBBBACBD9 /* FontAwesome5_Brands.ttf */; };
 		C4FFD4E90F0743F5AD507E7A /* Foundation.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D2D605E97828403DBAD13D0A /* Foundation.ttf */; };
@@ -65,6 +66,8 @@
 		00E356EE1AD99517003FC87E /* WiSawTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WiSawTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* WiSawTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WiSawTests.m; sourceTree = "<group>"; };
+		0A3EA81D23B9A3A80078B788 /* WiSaw-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WiSaw-Bridging-Header.h"; sourceTree = "<group>"; };
+		0A3EA81E23B9A3A90078B788 /* Swift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Swift.swift; sourceTree = "<group>"; };
 		0A54463722EBF63100C96ED4 /* branch.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = branch.json; path = ../android/app/src/main/assets/branch.json; sourceTree = "<group>"; };
 		0A6ECB5422E79927004853C5 /* WiSaw.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WiSaw.entitlements; sourceTree = "<group>"; };
 		0A6ECB5522E7993D004853C5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -77,6 +80,7 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = WiSaw/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = WiSaw/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = WiSaw/main.m; sourceTree = "<group>"; };
+		1A96EEC435B8CD356D16E199 /* libPods-WiSaw-WiSawTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WiSaw-WiSawTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2455AFA8CE2C435B9CAB9659 /* Roboto_medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Roboto_medium.ttf; path = "../node_modules/native-base/Fonts/Roboto_medium.ttf"; sourceTree = "<group>"; };
 		2652C7F8C3B812CC8EC1E725 /* Pods-WiSaw.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WiSaw.debug.xcconfig"; path = "Target Support Files/Pods-WiSaw/Pods-WiSaw.debug.xcconfig"; sourceTree = "<group>"; };
 		28549C55AF434F8A9D1F2101 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/native-base/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
@@ -90,11 +94,12 @@
 		4AED62352F5B66DD4EC7938E /* libPods-WiSaw.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WiSaw.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5439D8A7B043C9A3046AA9FD /* Pods-WiSaw-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WiSaw-tvOS.release.xcconfig"; path = "Target Support Files/Pods-WiSaw-tvOS/Pods-WiSaw-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		5BCA4F24870C70577B35712D /* Pods-WiSaw.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WiSaw.release.xcconfig"; path = "Target Support Files/Pods-WiSaw/Pods-WiSaw.release.xcconfig"; sourceTree = "<group>"; };
+		64C398248F0C79C2F0BBDDD7 /* Pods-WiSaw-WiSawTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WiSaw-WiSawTests.release.xcconfig"; path = "Target Support Files/Pods-WiSaw-WiSawTests/Pods-WiSaw-WiSawTests.release.xcconfig"; sourceTree = "<group>"; };
 		7BF799FE5FA0D5844B99BA9A /* Pods-WiSaw-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WiSaw-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-WiSaw-tvOS/Pods-WiSaw-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
 		8D50821CA00140DBBE8FD30F /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
+		922259AFE28BC9E597A6C3CE /* Pods-WiSaw-WiSawTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WiSaw-WiSawTests.debug.xcconfig"; path = "Target Support Files/Pods-WiSaw-WiSawTests/Pods-WiSaw-WiSawTests.debug.xcconfig"; sourceTree = "<group>"; };
 		942461AB625C46AC8CDA18CE /* Roboto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Roboto.ttf; path = "../node_modules/native-base/Fonts/Roboto.ttf"; sourceTree = "<group>"; };
 		9BD2B29912304EA68DD2DE42 /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Solid.ttf; path = "../node_modules/native-base/Fonts/FontAwesome5_Solid.ttf"; sourceTree = "<group>"; };
-		ACBE17CC1260589EDADCF74C /* libPods-WiSawTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WiSawTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE1D881B20414C80B0458D83 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		B09C523FD51D4F8BBF325292 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/native-base/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		B9F34015FFFC1DA9D12314CD /* libPods-WiSaw-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WiSaw-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -119,7 +124,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A604F38418465E67BAD76CE1 /* libPods-WiSawTests.a in Frameworks */,
+				293E4FA4E16E4AB56DD3F669 /* libPods-WiSaw-WiSawTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,7 +199,7 @@
 				4AED62352F5B66DD4EC7938E /* libPods-WiSaw.a */,
 				B9F34015FFFC1DA9D12314CD /* libPods-WiSaw-tvOS.a */,
 				EE9E7994784AA81E9A5322DD /* libPods-WiSaw-tvOSTests.a */,
-				ACBE17CC1260589EDADCF74C /* libPods-WiSawTests.a */,
+				1A96EEC435B8CD356D16E199 /* libPods-WiSaw-WiSawTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -209,6 +214,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				0A3EA81E23B9A3A90078B788 /* Swift.swift */,
 				13B07FAE1A68108700A75B9A /* WiSaw */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* WiSawTests */,
@@ -216,6 +222,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				EF6DF719A76478B4319A3461 /* Pods */,
 				C2C6E4E848FC42F4B50E578B /* Resources */,
+				0A3EA81D23B9A3A80078B788 /* WiSaw-Bridging-Header.h */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -270,6 +277,8 @@
 				37AF1F5B17A79D3BCB42E2D0 /* Pods-WiSaw-tvOSTests.release.xcconfig */,
 				E4FC3DBEF06D2281D98978F7 /* Pods-WiSawTests.debug.xcconfig */,
 				2CDC0231EDB0CB17F5482661 /* Pods-WiSawTests.release.xcconfig */,
+				922259AFE28BC9E597A6C3CE /* Pods-WiSaw-WiSawTests.debug.xcconfig */,
+				64C398248F0C79C2F0BBDDD7 /* Pods-WiSaw-WiSawTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -370,6 +379,7 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 33P3Q88Y8K;
+						LastSwiftMigration = 1130;
 					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -472,7 +482,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh";
+			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
 		11D7C67614AABFD4AA068F30 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -569,7 +579,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-WiSawTests-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-WiSaw-WiSawTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -630,6 +640,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				0A3EA81F23B9A3A90078B788 /* Swift.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -681,8 +692,9 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E4FC3DBEF06D2281D98978F7 /* Pods-WiSawTests.debug.xcconfig */;
+			baseConfigurationReference = 922259AFE28BC9E597A6C3CE /* Pods-WiSaw-WiSawTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -691,6 +703,10 @@
 				INFOPLIST_FILE = WiSawTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -704,13 +720,18 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2CDC0231EDB0CB17F5482661 /* Pods-WiSawTests.release.xcconfig */;
+			baseConfigurationReference = 64C398248F0C79C2F0BBDDD7 /* Pods-WiSaw-WiSawTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = WiSawTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-lc++",
@@ -727,12 +748,17 @@
 			baseConfigurationReference = 2652C7F8C3B812CC8EC1E725 /* Pods-WiSaw.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 33P3Q88Y8K;
 				INFOPLIST_FILE = WiSaw/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -740,6 +766,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.echowaves;
 				PRODUCT_NAME = WiSaw;
+				SWIFT_OBJC_BRIDGING_HEADER = "WiSaw-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -750,12 +779,17 @@
 			baseConfigurationReference = 5BCA4F24870C70577B35712D /* Pods-WiSaw.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 33P3Q88Y8K;
 				INFOPLIST_FILE = WiSaw/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -763,6 +797,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.echowaves;
 				PRODUCT_NAME = WiSaw;
+				SWIFT_OBJC_BRIDGING_HEADER = "WiSaw-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -783,6 +819,10 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "WiSaw-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -811,6 +851,10 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "WiSaw-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -838,6 +882,10 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "WiSaw-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -865,6 +913,10 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "WiSaw-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-DFB_SONARKIT_ENABLED=1",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
