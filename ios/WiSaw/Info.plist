@@ -30,7 +30,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>125</string>
+	<string>126</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -95,7 +95,7 @@
 	<key>NSCalendarsUsageDescription</key>
 	<string>We may need to acces your calendar</string>
 	<key>NSCameraUsageDescription</key>
-	<string>We need to access your camera, so that you can take photos.</string>
+	<string>We need to access your camera, so that you can take and share photos.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>We need to know your location so that we can show you posts in your area.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
