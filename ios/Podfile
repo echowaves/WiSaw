@@ -74,11 +74,6 @@ target 'WiSaw' do
   # pod 'Permission-LocationAlways', :path => "#{permissions_path}/LocationAlways.podspec"
   pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary.podspec"
 
-  target 'WiSawTests' do
-    inherit! :complete
-    # Pods for testing
-  end
-
   use_native_modules!
 
     # For enabling Flipper.
@@ -88,12 +83,4 @@ target 'WiSaw' do
     post_install do |installer|
       flipper_post_install(installer)
     end
-end
-
-target 'WiSaw-tvOS' do
-  # Pods for WiSaw-tvOS
-  target 'WiSaw-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
 end

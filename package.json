@@ -23,7 +23,6 @@
     "@react-native-community/slider": "2.0.8",
     "@react-native-community/viewpager": "3.3.0",
     "@babel/plugin-transform-async-to-generator": "7.7.4",
-    "core-js": "3.6.0",
     "moment": "2.24.0",
     "native-base": "2.13.8",
     "prop-types": "15.7.2",
