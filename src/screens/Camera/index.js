@@ -230,7 +230,7 @@ class Camera extends Component {
 							{
 								color: '#fff',
 							}
-						}>  upload
+						}>  share
 					</Text>
 				</Button>
 			</View>
