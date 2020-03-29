@@ -76,7 +76,7 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    enableHermes: false,  // clean and rebuild if changing
+    enableHermes: true,  // clean and rebuild if changing
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
@@ -112,7 +112,7 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 /**
  * Whether to enable the Hermes VM.
  *
- * This should be set on project.ext.react and mirrored here.  If it is not set
+ * This should be set on packagingOptions and mirrored here.  If it is not set
  * on project.ext.react, JavaScript will not be compiled to Hermes Bytecode
  * and the benefits of using Hermes will therefore be sharply reduced.
  */
@@ -130,8 +130,8 @@ android {
         applicationId "com.echowaves.wisaw"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 128
-        versionName "5.9.4"
+        versionCode 129
+        versionName "5.9.5"
         missingDimensionStrategy 'react-native-camera', 'general'
         multiDexEnabled true
     }
@@ -172,11 +172,11 @@ android {
         }
     }
     packagingOptions {
-     pickFirst "lib/armeabi-v7a/libc++_shared.so"
-     pickFirst "lib/arm64-v8a/libc++_shared.so"
-     pickFirst "lib/x86/libc++_shared.so"
-     pickFirst "lib/x86_64/libc++_shared.so"
-     }
+           pickFirst "lib/armeabi-v7a/libc++_shared.so"
+           pickFirst "lib/arm64-v8a/libc++_shared.so"
+           pickFirst "lib/x86/libc++_shared.so"
+           pickFirst "lib/x86_64/libc++_shared.so"
+       }
 
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
@@ -196,15 +196,18 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
-    implementation 'org.webkit:android-jsc:+'
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
-
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
-       exclude group:'com.facebook.yoga'
-       exclude group:'com.facebook.flipper', module: 'fbjni'
-       exclude group:'com.facebook.litho', module: 'litho-annotations'
-     }
+      exclude group:'com.facebook.fbjni'
+    }
+    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
+        exclude group:'com.facebook.flipper'
+    }
+    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
+        exclude group:'com.facebook.flipper'
+    }
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
