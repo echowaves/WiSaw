@@ -36,7 +36,6 @@ import {
 
 import branch from 'react-native-branch'
 
-
 import {
 	connect,
 } from 'react-redux'
@@ -64,7 +63,6 @@ import { uploadPendingPhotos, } from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
-
 
 class PhotosList extends Component {
 	static navigationOptions = ({
@@ -194,6 +192,7 @@ class PhotosList extends Component {
 		const numRows = Math.floor(photos.length / numColumns)
 		const listHeight = numRows * this.thumbWidth
 		// alert(`${photos.length}:${listHeight}:${height}`)
+		// alert(`${listHeight}:${height}:${isLastPage}`)
 		return listHeight > height || isLastPage
 	}
 
@@ -213,7 +212,6 @@ class PhotosList extends Component {
 			navigation,
 			netAvailable,
 		} = this.props
-
 
 		if (netAvailable === true) {
 			navigation.setParams({
@@ -579,9 +577,9 @@ class PhotosList extends Component {
 										textAlign: 'center',
 										margin: 10,
 									}}>
-								You are not connected to reliable network.
-								You can still snap photos.
-								They will be uploaded later.
+										You are not connected to reliable network.
+										You can still snap photos.
+										They will be uploaded later.
 									</Text>
 								</CardItem>
 							</Card>
@@ -620,9 +618,9 @@ class PhotosList extends Component {
 											textAlign: 'center',
 											margin: 10,
 										}}>
-									No Photos found.
-									Try to search for something else.
-									Search string should be more than 3 characters.
+											No Photos found.
+											Try to search for something else.
+											Search string should be more than 3 characters.
 										</Text>
 									</CardItem>
 								</Card>
@@ -635,8 +633,8 @@ class PhotosList extends Component {
 											textAlign: 'center',
 											margin: 10,
 										}}>
-										No Photos found in your location.
-										Try to take some photos.
+											No Photos found in your location.
+											Try to take some photos.
 										</Text>
 									</CardItem>
 								</Card>
@@ -649,8 +647,8 @@ class PhotosList extends Component {
 											textAlign: 'center',
 											margin: 10,
 										}}>
-										You don&apos;t seem to be watching any photos.
-										Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
+											You don&apos;t seem to be watching any photos.
+											Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
 										</Text>
 									</CardItem>
 								</Card>
@@ -671,7 +669,7 @@ class PhotosList extends Component {
 						this.thumbWidth
 					}
 					spacing={3}
-					items={
+					data={
 						photos
 					}
 					renderItem={
@@ -728,8 +726,8 @@ class PhotosList extends Component {
 						<Card transparent>
 							<CardItem style={{ borderRadius: 10, }}>
 								<Text> * When you take a photo with WiSaw app,
-								it will be added to a Photo Album on your phone,
-								as well as posted to global feed in the cloud.
+									it will be added to a Photo Album on your phone,
+									as well as posted to global feed in the cloud.
 								</Text>
 							</CardItem>
 							<CardItem style={{ borderRadius: 10, }}>
