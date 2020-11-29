@@ -3,6 +3,7 @@ import {
 } from 'redux'
 import ReduxThunk from 'redux-thunk'
 
+import 'react-native-get-random-values'
 
 import camera from './screens/Camera/reducer'
 import photosList from './screens/PhotosList/reducer'
@@ -16,7 +17,6 @@ let composeEnhancers = compose
 if (__DEV__) {
 	composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 }
-
 
 export const reducers = combineReducers({
 	camera,

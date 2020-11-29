@@ -1,4 +1,3 @@
-
 import {
 	Platform,
 	Alert,
@@ -6,12 +5,12 @@ import {
 
 import Geolocation from '@react-native-community/geolocation'
 
-import v4 from 'uuid/v4'
+import { v4 as uuidv4, } from 'uuid'
+
 import RNSecureKeyStore, { ACCESSIBLE, } from 'react-native-secure-key-store'
 import {
 	Toast,
 } from 'native-base'
-
 
 import {
 	PERMISSIONS, request, openSettings,
@@ -254,7 +253,6 @@ export default function reducer(state = initialState, action) {
 	}
 }
 
-
 export function resetState() {
 	return async (dispatch, getState) => {
 		dispatch({
@@ -315,7 +313,6 @@ async function _requestGeoPhotos(getState, lat, long, batch) {
 	return responseJson
 }
 
-
 async function _requestWatchedPhotos(getState, batch) {
 	const { pageNumber, } = getState().photosList
 	let { uuid, } = getState().photosList
@@ -342,7 +339,6 @@ async function _requestWatchedPhotos(getState, batch) {
 	// })
 	return responseJson
 }
-
 
 async function _requestSearchedPhotos(getState, batch) {
 	const { pageNumber, searchTerm, } = getState().photosList
@@ -496,7 +492,7 @@ async function getUUID(getState) {
 		// no uuid in the store, generate a new one and store
 		// alert(uuid)
 		if (uuid === '' || uuid === null) {
-			uuid = v4()
+			uuid = uuidv4()
 			try {
 				await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
 			} catch (err) {
