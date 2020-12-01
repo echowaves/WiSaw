@@ -27,13 +27,11 @@ import {
 
 import * as CONST from '../../consts.js'
 
-
 import {
 	submitFeedback,
 	setFeedbackText,
 	resetForm,
 } from './reducer'
-
 
 class FeedbackScreen extends Component {
 	static navigationOptions = ({
@@ -41,9 +39,9 @@ class FeedbackScreen extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: 'feedback form',
+			headerTitle: () => 'feedback form',
 			headerTintColor: CONST.MAIN_COLOR,
-			headerRight: (
+			headerRight: () => (
 				<Icon
 					onPress={
 						() => params.handleSubmit()
@@ -169,7 +167,6 @@ class FeedbackScreen extends Component {
 		)
 	}
 }
-
 
 const mapStateToProps = state => ({
 	feedbackText: state.feedback.feedbackText,

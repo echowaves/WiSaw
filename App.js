@@ -5,19 +5,17 @@
  * @flow strict-local
  */
 
-// import 'react-native-gesture-handler' // keep this line to prevent crashes
-import { gestureHandlerRootHOC, } from 'react-native-gesture-handler'
+import 'react-native-gesture-handler'
 
 import { Root, } from 'native-base'
 import React, { Component, } from 'react'
 import { StyleSheet, View, } from 'react-native'
-import { createAppContainer, } from "react-navigation"
-import { createStackNavigator, } from 'react-navigation-stack'
-// import createNativeStackNavigator from 'react-native-screens/createNativeStackNavigator'
+import { NavigationContainer, } from '@react-navigation/native'
+import { createStackNavigator, } from '@react-navigation/stack'
 
 import { Provider, } from 'react-redux'
 
-// import { enableScreens, } from 'react-native-screens'
+import * as CONST from './src/consts.js'
 import { store, } from './src'
 
 import PhotosList from './src/screens/PhotosList'
@@ -26,30 +24,7 @@ import SharedPhoto from './src/screens/SharedPhoto'
 import FeedbackScreen from './src/screens/Feedback'
 import Camera from './src/screens/Camera'
 
-// enableScreens()
-
-const AppNavigator = createStackNavigator({
-	PhotosList: {
-		screen: gestureHandlerRootHOC(PhotosList),
-	},
-	PhotosDetails: {
-		screen: gestureHandlerRootHOC(PhotosDetails),
-	},
-	SharedPhoto: {
-		screen: gestureHandlerRootHOC(SharedPhoto),
-	},
-	Feedback: {
-		screen: gestureHandlerRootHOC(FeedbackScreen),
-	},
-	Camera: {
-		screen: gestureHandlerRootHOC(Camera),
-	},
-},
-{
-	initialRouteName: 'PhotosList',
-})
-
-const AppContainer = createAppContainer(AppNavigator)
+const Stack = createStackNavigator()
 
 export default class App extends Component {
 	render() {
@@ -57,7 +32,41 @@ export default class App extends Component {
 			<Provider store={store}>
 				<View style={styles.container}>
 					<Root>
-						<AppContainer />
+						<NavigationContainer>
+							<Stack.Navigator
+								// mode="modal"
+								// headerMode="none"
+								initialRouteName="PhotosList"
+								screenOptions={{ gestureEnabled: true, }}>
+
+								<Stack.Screen
+  						  	name="PhotosList"
+						 			component={PhotosList}
+									options={{ headerTintColor: CONST.MAIN_COLOR, }}
+								/>
+
+								<Stack.Screen
+			 			 			name="PhotosDetails"
+			 			 			component={PhotosDetails}
+									options={{ headerTintColor: CONST.MAIN_COLOR, }}
+								/>
+								<Stack.Screen
+			 			 			name="SharedPhoto"
+			 			 			component={SharedPhoto}
+									options={{ headerTintColor: CONST.MAIN_COLOR, }}
+								/>
+								<Stack.Screen
+			 			 			name="FeedbackScreen"
+			 			 			component={FeedbackScreen}
+									options={{ headerTintColor: CONST.MAIN_COLOR, }}
+								/>
+								<Stack.Screen
+			 			 			name="Camera"
+			 			 			component={Camera}
+									options={{ headerTintColor: CONST.MAIN_COLOR, }}
+								/>
+							</Stack.Navigator>
+						</NavigationContainer>
 					</Root>
 				</View>
 			</Provider>

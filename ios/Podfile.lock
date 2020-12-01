@@ -257,15 +257,15 @@ PODS:
   - react-native-branch (4.2.1):
     - Branch (= 0.29.0)
     - React
-  - react-native-camera (3.15.0):
-    - React
-    - react-native-camera/RCT (= 3.15.0)
-    - react-native-camera/RN (= 3.15.0)
-  - react-native-camera/RCT (3.15.0):
-    - React
-  - react-native-camera/RN (3.15.0):
-    - React
-  - react-native-cameraroll (1.3.0):
+  - react-native-camera (3.40.0):
+    - React-Core
+    - react-native-camera/RCT (= 3.40.0)
+    - react-native-camera/RN (= 3.40.0)
+  - react-native-camera/RCT (3.40.0):
+    - React-Core
+  - react-native-camera/RN (3.40.0):
+    - React-Core
+  - react-native-cameraroll (4.0.1):
     - React
   - react-native-geolocation (2.0.2):
     - React
@@ -273,10 +273,12 @@ PODS:
     - React
   - react-native-netinfo (5.9.9):
     - React-Core
-  - react-native-slider (2.0.8):
+  - react-native-safe-area-context (3.1.9):
+    - React-Core
+  - react-native-slider (3.0.3):
     - React
-  - react-native-viewpager (3.3.0):
-    - React
+  - react-native-viewpager (4.2.1):
+    - React-Core
   - React-RCTActionSheet (0.63.3):
     - React-Core/RCTActionSheetHeaders (= 0.63.3)
   - React-RCTAnimation (0.63.3):
@@ -341,16 +343,20 @@ PODS:
     - React-Core
   - RNCAsyncStorage (1.12.1):
     - React-Core
+  - RNCMaskedView (0.1.10):
+    - React
   - RNFastImage (8.3.4):
     - React-Core
     - SDWebImage (~> 5.8)
     - SDWebImageWebPCoder (~> 0.6.1)
-  - RNGestureHandler (1.5.2):
-    - React
+  - RNGestureHandler (1.9.0):
+    - React-Core
   - RNPermissions (3.0.0):
     - React-Core
-  - RNScreens (2.0.0-alpha.20):
-    - React
+  - RNReanimated (1.13.2):
+    - React-Core
+  - RNScreens (2.15.0):
+    - React-Core
   - RNSecureKeyStore (1.0.0):
     - React
   - SDWebImage (5.10.0):
@@ -409,6 +415,7 @@ DEPENDENCIES:
   - "react-native-geolocation (from `../node_modules/@react-native-community/geolocation`)"
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
+  - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - "react-native-viewpager (from `../node_modules/@react-native-community/viewpager`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -423,9 +430,11 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
+  - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
+  - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSecureKeyStore (from `../node_modules/react-native-secure-key-store/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -498,6 +507,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-get-random-values"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
+  react-native-safe-area-context:
+    :path: "../node_modules/react-native-safe-area-context"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
   react-native-viewpager:
@@ -526,12 +537,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/rn-fetch-blob"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-community/async-storage"
+  RNCMaskedView:
+    :path: "../node_modules/@react-native-community/masked-view"
   RNFastImage:
     :path: "../node_modules/react-native-fast-image"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
+  RNReanimated:
+    :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNSecureKeyStore:
@@ -572,13 +587,14 @@ SPEC CHECKSUMS:
   React-jsiexecutor: b56c03e61c0dd5f5801255f2160a815f4a53d451
   React-jsinspector: 8e68ffbfe23880d3ee9bafa8be2777f60b25cbe2
   react-native-branch: cc611a2d0e7e6c7c4cafebc8e59065b89c38002b
-  react-native-camera: 52114c432860b89986c9ee4919d00a48a6ba7abb
-  react-native-cameraroll: 463aff54e37cff27ea76eb792e6f1fa43b876320
+  react-native-camera: 35854c4f764a4a6cf61c1c3525888b92f0fe4b31
+  react-native-cameraroll: 60ba0068826eab1c8d43146191bafd4363ea58a7
   react-native-geolocation: c956aeb136625c23e0dce0467664af2c437888c9
   react-native-get-random-values: 1404bd5cc0ab0e287f75ee1c489555688fc65f89
   react-native-netinfo: 0212ce8604e88edf686f1481b925b17a42a52449
-  react-native-slider: 3a1cfd00c9c31068251b536822f7192e8d1d6b6f
-  react-native-viewpager: a7b438ca32c57b2614ece2a123e7fe116f743131
+  react-native-safe-area-context: b6e0e284002381d2ff29fa4fff42b4d8282e3c94
+  react-native-slider: e99fc201cefe81270fc9d81714a7a0f5e566b168
+  react-native-viewpager: 40876e00dbd7bcee4c627cf5a9640e6593a019b4
   React-RCTActionSheet: 53ea72699698b0b47a6421cb1c8b4ab215a774aa
   React-RCTAnimation: 1befece0b5183c22ae01b966f5583f42e69a83c2
   React-RCTBlob: 0b284339cbe4b15705a05e2313a51c6d8b51fa40
@@ -591,10 +607,12 @@ SPEC CHECKSUMS:
   ReactCommon: 4167844018c9ed375cc01a843e9ee564399e53c3
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNCAsyncStorage: b03032fdbdb725bea0bd9e5ec5a7272865ae7398
+  RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
   RNFastImage: d4870d58f5936111c56218dbd7fcfc18e65b58ff
-  RNGestureHandler: 946a7691e41df61e2c4b1884deab41a4cdc3afff
+  RNGestureHandler: 9b7e605a741412e20e13c512738a31bd1611759b
   RNPermissions: 99dd8d4a30ff13509b949ca63cd1f69edc461775
-  RNScreens: 36f8c83e5e23b6bfd5b912148453d81e335573eb
+  RNReanimated: e03f7425cb7a38dcf1b644d680d1bfc91c3337ad
+  RNScreens: 2ad555d4d9fa10b91bb765ca07fe9b29d59573f0
   RNSecureKeyStore: f1ad870e53806453039f650720d2845c678d89c8
   SDWebImage: 9169792e9eec3e45bba2a0c02f74bf8bd922d1ee
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21

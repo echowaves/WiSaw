@@ -41,9 +41,9 @@ class PhotosDetails extends Component {
 		navigation,
 	}) => ({
 		headerTintColor: CONST.MAIN_COLOR,
-		headerTitle: navigation.getParam('headerTitle'),
-		headerLeft: navigation.getParam('headerLeft'),
-		headerRight: navigation.getParam('headerRight'),
+		headerTitle: () => navigation.getParam('headerTitle'),
+		headerLeft: () => navigation.getParam('headerLeft'),
+		headerRight: () => navigation.getParam('headerRight'),
 		headerBackTitle: null,
 	})
 

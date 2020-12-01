@@ -41,9 +41,9 @@ class SharedPhoto extends Component {
 	}) => {
 		const { params = {}, } = navigation.state
 		return ({
-			headerTitle: 'shared photo',
+			headerTitle: () => 'shared photo',
 			headerTintColor: CONST.SECONDARY_COLOR,
-			headerLeft: (
+			headerLeft: () => (
 				<View style={{
 					flex: 1,
 					flexDirection: "row",
@@ -78,7 +78,7 @@ class SharedPhoto extends Component {
 					</Button>
 				</View>
 			),
-			headerRight: (!navigation.getParam('watched') && (
+			headerRight: () => (!navigation.getParam('watched') && (
 				<View style={{
 					flex: 1,
 					flexDirection: "row",
@@ -239,7 +239,6 @@ const mapStateToProps = state => (
 		watched: state.photo.watched,
 	}
 )
-
 
 const mapDispatchToProps = {
 	banPhoto,
