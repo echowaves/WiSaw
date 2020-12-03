@@ -93,7 +93,7 @@ class PhotosList extends Component {
         navigation.setOptions({
           // handleRefresh: () => { this.reload() },
           // headerLeft: () => { this.renderHeaderLeft() },
-          // headerTitle: () => (this.renderHeaderTitle),
+          // headerTitle: props => (<this.HeaderTitle props={this.props} reload={() => this.reload()} />),
           // headerRight: () => { this.renderHeaderRight() },
         })
         this.reload()
