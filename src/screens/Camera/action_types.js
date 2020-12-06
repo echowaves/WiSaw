@@ -1,0 +1,8 @@
+export const SET_PREVIEW_URI = 'wisaw/camera/SET_PREVIEW_URI'
+export const START_PHOTO_UPLOADING = 'wisaw/camera/START_PHOTO_UPLOADING'
+export const FINISH_PHOTO_UPLOADING = 'wisaw/camera/FINISH_PHOTO_UPLOADING'
+export const UPDATE_PHOTOS_PENDING_UPLOAD = 'wisaw/camera/UPDATE_PHOTOS_PENDING_UPLOAD'
+export const SET_FLASH = 'wisaw/camera/SET_FLASH'
+export const SET_FRONT_CAM = 'wisaw/camera/SET_FRONT_CAM'
+export const SET_ZOOM = 'wisaw/camera/SET_ZOOM'
+export const SET_INITIAL_PINCH_VALUE = 'wisaw/camera/SET_INITIAL_PINCH_VALUE'

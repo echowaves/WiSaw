@@ -1,5 +1,5 @@
 import {
-	createStore, applyMiddleware, compose, combineReducers,
+  createStore, applyMiddleware, compose, combineReducers,
 } from 'redux'
 import ReduxThunk from 'redux-thunk'
 
@@ -15,16 +15,16 @@ import photo from './components/Photo/reducer'
 let composeEnhancers = compose
 /* eslint no-undef: */
 if (__DEV__) {
-	composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+  composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 }
 
 export const reducers = combineReducers({
-	camera,
-	photosList,
-	sharedPhoto,
-	thumb,
-	photo,
-	feedback,
+  camera,
+  photosList,
+  sharedPhoto,
+  thumb,
+  photo,
+  feedback,
 })
 
 export const store = createStore(reducers, composeEnhancers(applyMiddleware(ReduxThunk)))

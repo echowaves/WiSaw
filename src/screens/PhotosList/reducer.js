@@ -1,47 +1,24 @@
 import {
-	Platform,
-	Alert,
+  Platform,
+  Alert,
 } from 'react-native'
 
 import Geolocation from '@react-native-community/geolocation'
 
-import { v4 as uuidv4, } from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 
-import RNSecureKeyStore, { ACCESSIBLE, } from 'react-native-secure-key-store'
+import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store'
 import {
-	Toast,
+  Toast,
 } from 'native-base'
 
 import {
-	PERMISSIONS, request, openSettings,
+  PERMISSIONS, request, openSettings,
 } from 'react-native-permissions'
 
 import * as CONST from '../../consts.js'
 
-export const GET_PHOTOS_STARTED = 'wisaw/photosList/GET_PHOTOS'
-export const GET_PHOTOS_SUCCESS = 'wisaw/photosList/GET_PHOTOS_SUCCESS'
-export const GET_PHOTOS_FAIL = 'wisaw/photosList/GET_PHOTOS_FAIL'
-export const GET_PHOTOS_FINISHED = 'wisaw/photosList/GET_PHOTOS_FINISHED'
-export const RESET_STATE = 'wisaw/photosList/RESET_STATE'
-export const SET_IS_TANDC_ACCEPTED = 'wisaw/photosList/SET_IS_TANDC_ACCEPTED'
-export const SET_UUID = 'wisaw/photosList/SET_UUID'
-export const SET_LOCATION = 'wisaw/photosList/SET_LOCATION'
-export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
-export const SET_ORIENTATION = 'wisaw/photosList/SET_ORIENTATION'
-export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
-export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
-export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
-export const PHOTO_COMMENTS_LOADED = 'wisaw/photosList/PHOTO_COMMENTS_LOADED'
-export const PHOTO_RECOGNITIONS_LOADED = 'wisaw/photosList/PHOTO_RECOGNITIONS_LOADED'
-export const COMMENT_POSTED = 'wisaw/photosList/COMMENT_POSTED'
-export const TOGGLE_COMMENT_BUTTONS = 'wisaw/photosList/TOGGLE_COMMENT_BUTTONS'
-export const COMMENT_DELETED = 'wisaw/photosList/COMMENT_DELETED'
-
-export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
-
-export const SET_ACTIVE_SEGMENT = 'wisaw/photosList/SET_ACTIVE_SEGMENT'
-export const SET_SEARCH_TERM = 'wisaw/photosList/SET_SEARCH_TERM'
-export const SET_NET_AVAILABLE = 'wisaw/photosList/SET_NET_AVAILABLE'
+import * as ACTION_TYPES from './action_types'
 
 const UUID_KEY = 'wisaw_device_uuid'
 //  date '+%Y%m%d%H%M%S'
@@ -50,544 +27,545 @@ const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
-	isTandcAccepted: false,
-	uuid: null,
-	location: null,
-	photos: [],
-	loading: false,
-	errorMessage: '',
-	pageNumber: 0,
-	orientation: 'portrait-primary',
-	activeSegment: 0,
-	searchTerm: null,
-	batch: 0,
-	isLastPage: false,
-	netAvailable: false,
+  isTandcAccepted: false,
+  uuid: null,
+  location: null,
+  photos: [],
+  loading: false,
+  errorMessage: '',
+  pageNumber: 0,
+  orientation: 'portrait-primary',
+  activeSegment: 0,
+  searchTerm: null,
+  batch: 0,
+  isLastPage: false,
+  netAvailable: false,
 }
 
-export default function reducer(state = initialState, action) {
-	switch (action.type) {
-		case GET_PHOTOS_STARTED:
-			return {
-				...state,
-				loading: true,
-				errorMessage: '',
-			}
-		case GET_PHOTOS_SUCCESS:
-			return {
-				...state,
-				photos:
-				state.photos.concat(action.photos),
-				// this really stinks, need to figure out why there are duplicates in the first place
-				// .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
-				// .sort((a, b) => b.id - a.id), // the sort should always happen on the server
-				pageNumber: state.pageNumber + 1,
-				errorMessage: '',
-			}
-		case GET_PHOTOS_FAIL:
-			return {
-				...state,
-				pageNumber: state.pageNumber + 1,
-				errorMessage: action.errorMessage,
-			}
-		case GET_PHOTOS_FINISHED:
-			return {
-				...state,
-				loading: false,
-				isLastPage:
-				(state.searchTerm && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
-				|| (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
-				|| (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
-				,
-			}
-		case RESET_STATE:
-			return {
-				...state,
-				location: null,
-				photos: [],
-				loading: false,
-				errorMessage: '',
-				pageNumber: 0,
-				isLastPage: false,
-				batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
-			}
-		case SET_IS_TANDC_ACCEPTED:
-			return {
-				...state,
-				isTandcAccepted: action.isTandcAccepted,
-			}
-		case SET_UUID:
-			return {
-				...state,
-				uuid: action.uuid,
-			}
-		case SET_LOCATION:
-			return {
-				...state,
-				location: action.location,
-			}
-		case SET_ERROR:
-			return {
-				...state,
-				error: action.error,
-			}
-		case SET_ORIENTATION:
-			return {
-				...state,
-				orientation: action.orientation,
-			}
-		case PHOTO_LIKED:
-			return {
-				...state,
-				photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1, } : item)),
-			}
-		case PHOTO_BANNED:
-			return {
-				...state,
-				// photos: state.photos.filter(item => (item.id !== action.photoId)),
-			}
-		case PHOTO_DELETED:
-			return {
-				...state,
-				photos: state.photos.filter(item => (item.id !== action.photoId)),
-			}
-		case PHOTO_COMMENTS_LOADED:
-			return {
-				...state,
-				photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, comments: action.comments, } : item)),
-			}
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case ACTION_TYPES.GET_PHOTOS_STARTED:
+      return {
+        ...state,
+        loading: true,
+        errorMessage: '',
+      }
+    case ACTION_TYPES.GET_PHOTOS_SUCCESS:
+      return {
+        ...state,
+        photos:
+        state.photos.concat(action.photos),
+        // this really stinks, need to figure out why there are duplicates in the first place
+        // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
+        // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
+        pageNumber: state.pageNumber + 1,
+        errorMessage: '',
+      }
+    case ACTION_TYPES.GET_PHOTOS_FAIL:
+      return {
+        ...state,
+        pageNumber: state.pageNumber + 1,
+        errorMessage: action.errorMessage,
+      }
+    case ACTION_TYPES.GET_PHOTOS_FINISHED:
+      return {
+        ...state,
+        loading: false,
+        isLastPage:
+        (state.searchTerm && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+        || (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
+        || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+        ,
+      }
+    case ACTION_TYPES.RESET_STATE:
+      return {
+        ...state,
+        location: null,
+        photos: [],
+        loading: false,
+        errorMessage: '',
+        pageNumber: 0,
+        isLastPage: false,
+        batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+      }
+    case ACTION_TYPES.SET_IS_TANDC_ACCEPTED:
+      return {
+        ...state,
+        isTandcAccepted: action.isTandcAccepted,
+      }
+    case ACTION_TYPES.SET_UUID:
+      return {
+        ...state,
+        uuid: action.uuid,
+      }
+    case ACTION_TYPES.SET_LOCATION:
+      return {
+        ...state,
+        location: action.location,
+      }
+    case ACTION_TYPES.SET_ERROR:
+      return {
+        ...state,
+        error: action.error,
+      }
+    case ACTION_TYPES.SET_ORIENTATION:
+      return {
+        ...state,
+        orientation: action.orientation,
+      }
+    case ACTION_TYPES.PHOTO_LIKED:
+      return {
+        ...state,
+        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1 } : item)),
+      }
+    case ACTION_TYPES.PHOTO_BANNED:
+      return {
+        ...state,
+        // photos: state.photos.filter(item => (item.id !== action.photoId)),
+      }
+    case ACTION_TYPES.PHOTO_DELETED:
+      return {
+        ...state,
+        photos: state.photos.filter(item => (item.id !== action.photoId)),
+      }
+    case ACTION_TYPES.PHOTO_COMMENTS_LOADED:
+      return {
+        ...state,
+        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, comments: action.comments } : item)),
+      }
 
-		case PHOTO_RECOGNITIONS_LOADED:
-			return {
-				...state,
-				photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, recognitions: action.recognitions, } : item)),
-			}
+    case ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED:
+      return {
+        ...state,
+        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, recognitions: action.recognitions } : item)),
+      }
 
-		case PHOTO_UPLOADED_PREPEND:
-			return {
-				...state,
-				photos:
-				[action.photo,
-					...state.photos,
-				],
-			}
-		case COMMENT_POSTED:
-			return {
-				...state,
-				photos: state.photos.map(
-					item => ((item.id === action.photoId)
-						? {
-							...item,
-							comments:
-							[
-								...item.comments,
-								{
-									...action.comment,
-									hiddenButtons: true,
-								},
-							],
-							commentsCount: item.comments.length + 1,
-						}
-						: item)
-				),
-			}
+    case ACTION_TYPES.PHOTO_UPLOADED_PREPEND:
+      return {
+        ...state,
+        photos:
+        [action.photo,
+          ...state.photos,
+        ],
+      }
+    case ACTION_TYPES.COMMENT_POSTED:
+      return {
+        ...state,
+        photos: state.photos.map(
+          item => ((item.id === action.photoId)
+            ? {
+              ...item,
+              comments:
+              [
+                ...item.comments,
+                {
+                  ...action.comment,
+                  hiddenButtons: true,
+                },
+              ],
+              commentsCount: item.comments.length + 1,
+            }
+            : item)
+        ),
+      }
 
-		case TOGGLE_COMMENT_BUTTONS:
-			return {
-				...state,
-				photos: state.photos.map(
-					item => ((item.id === action.photoId)
-						? {
-							...item,
-							comments: item.comments.map(
-								comment => ((comment.id === action.commentId)
-									? {
-										...comment,
-										hiddenButtons: !comment.hiddenButtons,
-									}
-									: {
-										...comment,
-										hiddenButtons: true,
-									}
-								)
-							)
-							,
-						}
-						: item)
-				),
-			}
-		case COMMENT_DELETED:
-			return {
-				...state,
-				photos: state.photos.map(
-					item => ((item.id === action.photoId)
-						? {
-							...item,
-							commentsCount: item.comments.length - 1,
-							comments: item.comments.filter(
-								comment => (comment.id !== action.commentId)
-							)
-							,
-						}
-						: item)
-				),
-			}
-		case SET_ACTIVE_SEGMENT:
-			return {
-				...state,
-				activeSegment: action.activeSegment,
-			}
-		case SET_SEARCH_TERM:
-			return {
-				...state,
-				photos: [],
-				searchTerm: action.searchTerm,
-			}
-		case SET_NET_AVAILABLE:
-			return {
-				...state,
-				netAvailable: action.netAvailable,
-			}
-		default:
-			return state
-	}
+    case ACTION_TYPES.TOGGLE_COMMENT_BUTTONS:
+      return {
+        ...state,
+        photos: state.photos.map(
+          item => ((item.id === action.photoId)
+            ? {
+              ...item,
+              comments: item.comments.map(
+                comment => ((comment.id === action.commentId)
+                  ? {
+                    ...comment,
+                    hiddenButtons: !comment.hiddenButtons,
+                  }
+                  : {
+                    ...comment,
+                    hiddenButtons: true,
+                  }
+                )
+              )
+              ,
+            }
+            : item)
+        ),
+      }
+    case ACTION_TYPES.COMMENT_DELETED:
+      return {
+        ...state,
+        photos: state.photos.map(
+          item => ((item.id === action.photoId)
+            ? {
+              ...item,
+              commentsCount: item.comments.length - 1,
+              comments: item.comments.filter(
+                comment => (comment.id !== action.commentId)
+              )
+              ,
+            }
+            : item)
+        ),
+      }
+    case ACTION_TYPES.SET_ACTIVE_SEGMENT:
+      return {
+        ...state,
+        activeSegment: action.activeSegment,
+      }
+    case ACTION_TYPES.SET_SEARCH_TERM:
+      return {
+        ...state,
+        photos: [],
+        searchTerm: action.searchTerm,
+      }
+    case ACTION_TYPES.SET_NET_AVAILABLE:
+      return {
+        ...state,
+        netAvailable: action.netAvailable,
+      }
+    default:
+      return state
+  }
 }
+export default reducer
 
 export function resetState() {
-	return async (dispatch, getState) => {
-		dispatch({
-			type: RESET_STATE,
-		})
+  return async (dispatch, getState) => {
+    dispatch({
+      type: ACTION_TYPES.RESET_STATE,
+    })
 
-		const uuid = await getUUID(getState)
-		dispatch({
-			type: SET_UUID,
-			uuid,
-		})
+    const uuid = await getUUID(getState)
+    dispatch({
+      type: ACTION_TYPES.SET_UUID,
+      uuid,
+    })
 
-		const isTandcAccepted = await getTancAccepted(getState)
-		dispatch({
-			type: SET_IS_TANDC_ACCEPTED,
-			isTandcAccepted,
-		})
+    const isTandcAccepted = await getTancAccepted(getState)
+    dispatch({
+      type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
+      isTandcAccepted,
+    })
 
-		const location = await getLocation()
-		dispatch({
-			type: SET_LOCATION,
-			location,
-		})
-	}
+    const location = await getLocation()
+    dispatch({
+      type: ACTION_TYPES.SET_LOCATION,
+      location,
+    })
+  }
 }
 
 async function _requestGeoPhotos(getState, lat, long, batch) {
-	const { pageNumber, } = getState().photosList
-	let { uuid, } = getState().photosList
-	if (uuid === null) {
-		uuid = 'initializing'
-	}
+  const { pageNumber } = getState().photosList
+  let { uuid } = getState().photosList
+  if (uuid === null) {
+    uuid = 'initializing'
+  }
 
-	const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			uuid,
-			location: {
-				type: 'Point',
-				coordinates: [
-					lat,
-					long,
-				],
-			},
-			daysAgo: pageNumber,
-			batch,
-		}),
-	})
-	const responseJson = await response.json()
-	// Toast.show({
-	// 	text: `uuid: ${uuid}`,
-	// 	buttonText: "OK",
-	// 	duration: 15000,
-	// })
-	return responseJson
+  const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      uuid,
+      location: {
+        type: 'Point',
+        coordinates: [
+          lat,
+          long,
+        ],
+      },
+      daysAgo: pageNumber,
+      batch,
+    }),
+  })
+  const responseJson = await response.json()
+  // Toast.show({
+  //   text: `uuid: ${uuid}`,
+  //   buttonText: "OK",
+  //   duration: 15000,
+  // })
+  return responseJson
 }
 
 async function _requestWatchedPhotos(getState, batch) {
-	const { pageNumber, } = getState().photosList
-	let { uuid, } = getState().photosList
-	if (uuid === null) {
-		uuid = 'initializing'
-	}
+  const { pageNumber } = getState().photosList
+  let { uuid } = getState().photosList
+  if (uuid === null) {
+    uuid = 'initializing'
+  }
 
-	const response = await fetch(`${CONST.HOST}/photos/feedForWatcher`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			uuid,
-			pageNumber,
-			batch,
-		}),
-	})
-	const responseJson = await response.json()
-	// Toast.show({
-	// 	text: `uuid: ${uuid}`,
-	// 	buttonText: "OK",
-	// 	duration: 15000,
-	// })
-	return responseJson
+  const response = await fetch(`${CONST.HOST}/photos/feedForWatcher`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      uuid,
+      pageNumber,
+      batch,
+    }),
+  })
+  const responseJson = await response.json()
+  // Toast.show({
+  //   text: `uuid: ${uuid}`,
+  //   buttonText: "OK",
+  //   duration: 15000,
+  // })
+  return responseJson
 }
 
 async function _requestSearchedPhotos(getState, batch) {
-	const { pageNumber, searchTerm, } = getState().photosList
-	let { uuid, } = getState().photosList
-	if (uuid === null) {
-		uuid = 'initializing'
-	}
+  const { pageNumber, searchTerm } = getState().photosList
+  let { uuid } = getState().photosList
+  if (uuid === null) {
+    uuid = 'initializing'
+  }
 
-	const response = await fetch(`${CONST.HOST}/photos/feedForTextSearch`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			uuid,
-			searchTerm,
-			pageNumber,
-			batch,
-		}),
-	})
-	const responseJson = await response.json()
-	// Toast.show({
-	// 	text: `uuid: ${uuid}`,
-	// 	buttonText: "OK",
-	// 	duration: 15000,
-	// })
-	return responseJson
+  const response = await fetch(`${CONST.HOST}/photos/feedForTextSearch`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      uuid,
+      searchTerm,
+      pageNumber,
+      batch,
+    }),
+  })
+  const responseJson = await response.json()
+  // Toast.show({
+  //   text: `uuid: ${uuid}`,
+  //   buttonText: "OK",
+  //   duration: 15000,
+  // })
+  return responseJson
 }
 
 export function getPhotos(batch) {
-	return async (dispatch, getState) => {
-		if (!getState().photosList.location || getState().photosList.netAvailable === false) {
-			dispatch({
-				type: GET_PHOTOS_FAIL,
-				errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-			})
-		} else {
-			const { latitude, longitude, } = getState().photosList.location.coords
-			const { activeSegment, searchTerm, } = getState().photosList
-			dispatch({
-				type: GET_PHOTOS_STARTED,
-			})
-			try {
-				let responseJson
-				if (searchTerm !== null) {
-					responseJson = await _requestSearchedPhotos(getState, batch)
-				} else if (activeSegment === 0) {
-					responseJson = await _requestGeoPhotos(getState, latitude, longitude, batch)
-				} else if (activeSegment === 1) {
-					responseJson = await _requestWatchedPhotos(getState, batch)
-				}
+  return async (dispatch, getState) => {
+    if (!getState().photosList.location || getState().photosList.netAvailable === false) {
+      dispatch({
+        type: ACTION_TYPES.GET_PHOTOS_FAIL,
+        errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
+      })
+    } else {
+      const { latitude, longitude } = getState().photosList.location.coords
+      const { activeSegment, searchTerm } = getState().photosList
+      dispatch({
+        type: ACTION_TYPES.GET_PHOTOS_STARTED,
+      })
+      try {
+        let responseJson
+        if (searchTerm !== null) {
+          responseJson = await _requestSearchedPhotos(getState, batch)
+        } else if (activeSegment === 0) {
+          responseJson = await _requestGeoPhotos(getState, latitude, longitude, batch)
+        } else if (activeSegment === 1) {
+          responseJson = await _requestWatchedPhotos(getState, batch)
+        }
 
-				if (responseJson.batch === batch) {
-					if (responseJson.photos && responseJson.photos.length > 0) {
-						dispatch({
-							type: GET_PHOTOS_SUCCESS,
-							photos: responseJson.photos,
-						})
-					} else {
-						dispatch({
-							type: GET_PHOTOS_FAIL,
-							errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-						})
-					}
-				}
-			} catch (err) {
-				dispatch({
-					type: GET_PHOTOS_FAIL,
-					errorMessage: err.toString(),
-				})
-				Toast.show({
-					text: err.toString(),
-				})
-			}
-		}
-		dispatch({
-			type: GET_PHOTOS_FINISHED,
-		})
-	}
+        if (responseJson.batch === batch) {
+          if (responseJson.photos && responseJson.photos.length > 0) {
+            dispatch({
+              type: ACTION_TYPES.GET_PHOTOS_SUCCESS,
+              photos: responseJson.photos,
+            })
+          } else {
+            dispatch({
+              type: ACTION_TYPES.GET_PHOTOS_FAIL,
+              errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
+            })
+          }
+        }
+      } catch (err) {
+        dispatch({
+          type: ACTION_TYPES.GET_PHOTOS_FAIL,
+          errorMessage: err.toString(),
+        })
+        Toast.show({
+          text: err.toString(),
+        })
+      }
+    }
+    dispatch({
+      type: ACTION_TYPES.GET_PHOTOS_FINISHED,
+    })
+  }
 }
 
 export function acceptTandC() {
-	return async dispatch => {
-		try {
-			await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "true", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
-			dispatch({
-				type: SET_IS_TANDC_ACCEPTED,
-				isTandcAccepted: true,
-			})
-		} catch (err) {
-			dispatch({
-				type: SET_IS_TANDC_ACCEPTED,
-				isTandcAccepted: false,
-			})
-			Toast.show({
-				text: err.toString(),
-				buttonText: "OK",
-				duration: 15000,
-			})
-		}
-	}
+  return async dispatch => {
+    try {
+      await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "true", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
+      dispatch({
+        type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
+        isTandcAccepted: true,
+      })
+    } catch (err) {
+      dispatch({
+        type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
+        isTandcAccepted: false,
+      })
+      Toast.show({
+        text: err.toString(),
+        buttonText: "OK",
+        duration: 15000,
+      })
+    }
+  }
 }
 
 export function setOrientation(orientation) {
-	return {
-		type: SET_ORIENTATION,
-		orientation,
-	}
+  return {
+    type: ACTION_TYPES.SET_ORIENTATION,
+    orientation,
+  }
 }
 
 export function setActiveSegment(activeSegment) {
-	return async (dispatch, getState) => {
-		dispatch({
-			type: SET_ACTIVE_SEGMENT,
-			activeSegment,
-		})
-	}
+  return async (dispatch, getState) => {
+    dispatch({
+      type: ACTION_TYPES.SET_ACTIVE_SEGMENT,
+      activeSegment,
+    })
+  }
 }
 
 export function setSearchTerm(searchTerm) {
-	return async (dispatch, getState) => {
-		dispatch({
-			type: SET_SEARCH_TERM,
-			searchTerm,
-		})
-	}
+  return async (dispatch, getState) => {
+    dispatch({
+      type: ACTION_TYPES.SET_SEARCH_TERM,
+      searchTerm,
+    })
+  }
 }
 
 export function setNetAvailable(netAvailable) {
-	return async (dispatch, getState) => {
-		dispatch({
-			type: SET_NET_AVAILABLE,
-			netAvailable,
-		})
-	}
+  return async (dispatch, getState) => {
+    dispatch({
+      type: ACTION_TYPES.SET_NET_AVAILABLE,
+      netAvailable,
+    })
+  }
 }
 
 async function getUUID(getState) {
-	let { uuid, } = getState().photosList
-	if (uuid === null) {
-	// try to retreive from secure store
-		try {
-			uuid = await RNSecureKeyStore.get(UUID_KEY)
-		} catch (err) {
-			// Toast.show({
-			// 	text: err.toString(),
-			// 	buttonText: "OK23",
-			// 	duration: 15000,
-			// })
-		}
-		// no uuid in the store, generate a new one and store
-		// alert(uuid)
-		if (uuid === '' || uuid === null) {
-			uuid = uuidv4()
-			try {
-				await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY, })
-			} catch (err) {
-				// Toast.show({
-				// 	text: err.toString(),
-				// 	buttonText: "OK",
-				// 	duration: 15000,
-				// })
-			}
-		}
-	}
-	return uuid
+  let { uuid } = getState().photosList
+  if (uuid === null) {
+    // try to retreive from secure store
+    try {
+      uuid = await RNSecureKeyStore.get(UUID_KEY)
+    } catch (err) {
+      // Toast.show({
+      //   text: err.toString(),
+      //   buttonText: "OK23",
+      //   duration: 15000,
+      // })
+    }
+    // no uuid in the store, generate a new one and store
+    // alert(uuid)
+    if (uuid === '' || uuid === null) {
+      uuid = uuidv4()
+      try {
+        await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
+      } catch (err) {
+        // Toast.show({
+        //   text: err.toString(),
+        //   buttonText: "OK",
+        //   duration: 15000,
+        // })
+      }
+    }
+  }
+  return uuid
 }
 
 async function getTancAccepted(getState) {
-	let { isTandcAccepted, } = getState().photosList
-	if (isTandcAccepted == null || isTandcAccepted === false) {
-		try {
-			isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
-		} catch (err) {
-			isTandcAccepted = false
-		}
-	}
-	return isTandcAccepted
+  let { isTandcAccepted } = getState().photosList
+  if (isTandcAccepted == null || isTandcAccepted === false) {
+    try {
+      isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
+    } catch (err) {
+      isTandcAccepted = false
+    }
+  }
+  return isTandcAccepted
 }
 
 export async function checkPermission(permissionType, alertHeader, alertBody) {
-	// let permission
-	// if (!this.checkingPermission) {
-	// 	this.checkingPermission = true
+  // let permission
+  // if (!this.checkingPermission) {
+  //   this.checkingPermission = true
 
-	// permission = await check(permissionType)
+  // permission = await check(permissionType)
 
-	// alert(`${permission}`)
-	// if (permission !== 'granted') {
+  // alert(`${permission}`)
+  // if (permission !== 'granted') {
 
-	const permission = await request(permissionType)
+  const permission = await request(permissionType)
 
-	if (permission !== 'granted') {
-		Alert.alert(
-			alertHeader,
-			alertBody,
-			[
-				{
-					text: 'Open Settings',
-					onPress: () => {
-						this.checkingPermission = false
-						openSettings()
-					},
-				},
-			],
-		)
-		// }
-		// this.checkingPermission = false
-	}
-	return permission
+  if (permission !== 'granted') {
+    Alert.alert(
+      alertHeader,
+      alertBody,
+      [
+        {
+          text: 'Open Settings',
+          onPress: () => {
+            this.checkingPermission = false
+            openSettings()
+          },
+        },
+      ],
+    )
+    // }
+    // this.checkingPermission = false
+  }
+  return permission
 }
 
 async function getLocation() {
-	let position = null
-	// Toast("started checking permission")
-	const permission = await checkPermission(
-		Platform.select({
-			android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
-			ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-		}),
-		'How am I supposed to show you the near-by photos?',
-		'Why don\'t you enable Location in Settings and Try Again?'
-	)
-	// Toast("finished checking permission")
-	if (permission === 'granted') {
-		try {
-			position = await _getCurrentPosition({
-				enableHighAccuracy: false,
-				timeout: 200000,
-				maximumAge: 200000,
-			})
-		} catch (err) {
-			position = null
-			Toast.show({
-				text: 'unable to get location',
-				buttonText: "OK",
-				type: "danger",
-				duration: 5000,
-			})
-		}
-	}
-	return position
+  let position = null
+  // Toast("started checking permission")
+  const permission = await checkPermission(
+    Platform.select({
+      android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
+      ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+    }),
+    'How am I supposed to show you the near-by photos?',
+    'Why don\'t you enable Location in Settings and Try Again?'
+  )
+  // Toast("finished checking permission")
+  if (permission === 'granted') {
+    try {
+      position = await _getCurrentPosition({
+        enableHighAccuracy: false,
+        timeout: 200000,
+        maximumAge: 200000,
+      })
+    } catch (err) {
+      position = null
+      Toast.show({
+        text: 'unable to get location',
+        buttonText: "OK",
+        type: "danger",
+        duration: 5000,
+      })
+    }
+  }
+  return position
 }
 
 function _getCurrentPosition(options = {}) {
-	return new Promise((resolve, reject) => {
-		Geolocation.getCurrentPosition(resolve, reject, options)
-		// navigator.geolocation.getCurrentPosition(resolve, reject, options)
-	})
+  return new Promise((resolve, reject) => {
+    Geolocation.getCurrentPosition(resolve, reject, options)
+    // navigator.geolocation.getCurrentPosition(resolve, reject, options)
+  })
 }
 // https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux
 // https://hackernoon.com/react-native-basics-geolocation-adf3c0d10112
