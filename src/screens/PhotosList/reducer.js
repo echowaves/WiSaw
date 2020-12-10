@@ -1,9 +1,6 @@
 import {
   Platform,
-  Alert,
 } from 'react-native'
-
-import Geolocation from '@react-native-community/geolocation'
 
 import { v4 as uuidv4 } from 'uuid'
 
@@ -11,10 +8,6 @@ import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store'
 import {
   Toast,
 } from 'native-base'
-
-import {
-  PERMISSIONS, request, openSettings,
-} from 'react-native-permissions'
 
 import * as CONST from '../../consts.js'
 
@@ -234,26 +227,21 @@ export default reducer
 
 export function resetState() {
   return async (dispatch, getState) => {
+    const uuid = await _getUUID(getState)
+
     dispatch({
       type: ACTION_TYPES.RESET_STATE,
     })
 
-    const uuid = await getUUID(getState)
     dispatch({
       type: ACTION_TYPES.SET_UUID,
       uuid,
     })
 
-    const isTandcAccepted = await getTancAccepted(getState)
+    const isTandcAccepted = await _getTancAccepted(getState)
     dispatch({
       type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
       isTandcAccepted,
-    })
-
-    const location = await getLocation()
-    dispatch({
-      type: ACTION_TYPES.SET_LOCATION,
-      location,
     })
   }
 }
@@ -349,6 +337,8 @@ async function _requestSearchedPhotos(getState, batch) {
 
 export function getPhotos(batch) {
   return async (dispatch, getState) => {
+    // if (getState().photosList.location) alert(getState().photosList.location)
+
     if (!getState().photosList.location || getState().photosList.netAvailable === false) {
       dispatch({
         type: ACTION_TYPES.GET_PHOTOS_FAIL,
@@ -421,6 +411,12 @@ export function acceptTandC() {
   }
 }
 
+export function setLocation(location) {
+  return {
+    type: ACTION_TYPES.SET_LOCATION,
+    location,
+  }
+}
 export function setOrientation(orientation) {
   return {
     type: ACTION_TYPES.SET_ORIENTATION,
@@ -429,33 +425,31 @@ export function setOrientation(orientation) {
 }
 
 export function setActiveSegment(activeSegment) {
-  return async (dispatch, getState) => {
-    dispatch({
-      type: ACTION_TYPES.SET_ACTIVE_SEGMENT,
-      activeSegment,
-    })
+  return {
+    type: ACTION_TYPES.SET_ACTIVE_SEGMENT,
+    activeSegment,
   }
 }
 
 export function setSearchTerm(searchTerm) {
-  return async (dispatch, getState) => {
-    dispatch({
-      type: ACTION_TYPES.SET_SEARCH_TERM,
-      searchTerm,
-    })
+  return {
+    type: ACTION_TYPES.SET_SEARCH_TERM,
+    searchTerm,
   }
 }
 
 export function setNetAvailable(netAvailable) {
-  return async (dispatch, getState) => {
-    dispatch({
-      type: ACTION_TYPES.SET_NET_AVAILABLE,
-      netAvailable,
-    })
+  return {
+    type: ACTION_TYPES.SET_NET_AVAILABLE,
+    netAvailable,
   }
 }
 
-async function getUUID(getState) {
+async function _getUUID(getState) {
+  if (Platform.OS === 'ios') {
+    RNSecureKeyStore.setResetOnAppUninstallTo(false)
+  }
+
   let { uuid } = getState().photosList
   if (uuid === null) {
     // try to retreive from secure store
@@ -469,7 +463,7 @@ async function getUUID(getState) {
       // })
     }
     // no uuid in the store, generate a new one and store
-    // alert(uuid)
+
     if (uuid === '' || uuid === null) {
       uuid = uuidv4()
       try {
@@ -486,7 +480,7 @@ async function getUUID(getState) {
   return uuid
 }
 
-async function getTancAccepted(getState) {
+async function _getTancAccepted(getState) {
   let { isTandcAccepted } = getState().photosList
   if (isTandcAccepted == null || isTandcAccepted === false) {
     try {
@@ -498,76 +492,6 @@ async function getTancAccepted(getState) {
   return isTandcAccepted
 }
 
-export async function checkPermission(permissionType, alertHeader, alertBody) {
-  // let permission
-  // if (!this.checkingPermission) {
-  //   this.checkingPermission = true
-
-  // permission = await check(permissionType)
-
-  // alert(`${permission}`)
-  // if (permission !== 'granted') {
-
-  const permission = await request(permissionType)
-
-  if (permission !== 'granted') {
-    Alert.alert(
-      alertHeader,
-      alertBody,
-      [
-        {
-          text: 'Open Settings',
-          onPress: () => {
-            this.checkingPermission = false
-            openSettings()
-          },
-        },
-      ],
-    )
-    // }
-    // this.checkingPermission = false
-  }
-  return permission
-}
-
-async function getLocation() {
-  let position = null
-  // Toast("started checking permission")
-  const permission = await checkPermission(
-    Platform.select({
-      android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
-      ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-    }),
-    'How am I supposed to show you the near-by photos?',
-    'Why don\'t you enable Location in Settings and Try Again?'
-  )
-  // Toast("finished checking permission")
-  if (permission === 'granted') {
-    try {
-      position = await _getCurrentPosition({
-        enableHighAccuracy: false,
-        timeout: 200000,
-        maximumAge: 200000,
-      })
-    } catch (err) {
-      position = null
-      Toast.show({
-        text: 'unable to get location',
-        buttonText: "OK",
-        type: "danger",
-        duration: 5000,
-      })
-    }
-  }
-  return position
-}
-
-function _getCurrentPosition(options = {}) {
-  return new Promise((resolve, reject) => {
-    Geolocation.getCurrentPosition(resolve, reject, options)
-    // navigator.geolocation.getCurrentPosition(resolve, reject, options)
-  })
-}
 // https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux
 // https://hackernoon.com/react-native-basics-geolocation-adf3c0d10112
 

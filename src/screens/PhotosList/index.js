@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 
+import Geolocation from '@react-native-community/geolocation'
+
 import {
   StyleSheet,
   Text,
@@ -7,6 +9,7 @@ import {
   Dimensions,
   DeviceEventEmitter,
   Platform,
+  Alert,
 } from 'react-native'
 
 import {
@@ -29,7 +32,7 @@ import {
 import NetInfo from "@react-native-community/netinfo"
 
 import {
-  PERMISSIONS,
+  PERMISSIONS, request, openSettings,
 } from 'react-native-permissions'
 
 import branch from 'react-native-branch'
@@ -87,7 +90,7 @@ const PhotosList = ({ navigation }) => {
           // headerTitle: props => (<this.HeaderTitle props={this.props} reload={() => this.reload()} />),
           // headerRight: () => { this.renderHeaderRight() },
         })
-        reload()
+        // reload()
       } else { // not connected to the internet
         dispatch(reducer.setNetAvailable(false))
         navigation.setOptions({
@@ -201,7 +204,7 @@ const PhotosList = ({ navigation }) => {
               first active={activeSegment === 0}
               onPress={
                 async () => {
-                  dispatch(await reducer.setActiveSegment(0))
+                  dispatch(reducer.setActiveSegment(0))
                   await reload()
                 }
               }>
@@ -214,7 +217,7 @@ const PhotosList = ({ navigation }) => {
               last active={activeSegment === 1}
               onPress={
                 async () => {
-                  dispatch(await reducer.setActiveSegment(1))
+                  dispatch(reducer.setActiveSegment(1))
                   await reload()
                 }
               }>
@@ -279,43 +282,47 @@ const PhotosList = ({ navigation }) => {
         // alert('loading')
         await new Promise(resolve => setTimeout(resolve, 500)) // sleep
       }
-      dispatch(await reducer.resetState())
+
+      dispatch(reducer.setLocation(await _getLocation()))
+
+      dispatch(reducer.resetState())
 
       /* eslint-disable no-await-in-loop */
       while (!isListFilllsScreen()) {
-        dispatch(await reducer.getPhotos(batch))
+        // alert(`photos batch(${batch})`)
+        dispatch(reducer.getPhotos(batch))
       }
       await uploadPendingPhotos()
     } else {
-      dispatch(await reducer.resetState())
+      dispatch(reducer.resetState())
     }
   }
 
   const checkPermissionsForPhotoTaking = async () => {
-    let permission = dispatch(await reducer.checkPermission(
+    let permission = await reducer.checkPermission(
       Platform.select({
         android: PERMISSIONS.ANDROID.CAMERA,
         ios: PERMISSIONS.IOS.CAMERA,
       }),
       'Can we access your camera?',
       'How else would you be able to take a photo?'
-    ))
+    )
     if (permission === 'granted') {
       switch (Platform.OS) {
         case 'ios':
-          permission = dispatch(await reducer.checkPermission(
+          permission = dispatch(reducer.checkPermission(
             PERMISSIONS.IOS.PHOTO_LIBRARY,
             'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
           ))
           break
         case 'android':
-          permission = dispatch(await reducer.checkPermission(
+          permission = dispatch(reducer.checkPermission(
             PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
             'Can we write photos to your devise?',
             'How else would we be able to save the photos you take on your device?'
           ))
           if (permission === 'granted') {
-            permission = dispatch(await reducer.checkPermission(
+            permission = dispatch(reducer.checkPermission(
               PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
               'Can we read photos on your devise?',
               'How else would we be able upload the photos you take from your device?'
@@ -329,6 +336,78 @@ const PhotosList = ({ navigation }) => {
     if (permission === 'granted') {
       takePhoto()
     }
+  }
+
+  async function _checkPermission(permissionType, alertHeader, alertBody) {
+    // let permission
+    // if (!this.checkingPermission) {
+    //   this.checkingPermission = true
+
+    // permission = await check(permissionType)
+
+    // alert(`${permission}`)
+    // if (permission !== 'granted') {
+
+    const permission = await request(permissionType)
+
+    if (permission !== 'granted') {
+      Alert.alert(
+        alertHeader,
+        alertBody,
+        [
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              // this.checkingPermission = false
+              openSettings()
+            },
+          },
+        ],
+      )
+      // }
+      // this.checkingPermission = false
+    }
+    return permission
+  }
+
+  async function _getLocation() {
+    // alert('get location')
+    let position = null
+    // Toast("started checking permission")
+    const permission = await _checkPermission(
+      Platform.select({
+        android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
+        ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
+      }),
+      'How am I supposed to show you the near-by photos?',
+      'Why don\'t you enable Location in Settings and Try Again?'
+    )
+    // Toast("finished checking permission")
+    if (permission === 'granted') {
+      try {
+        position = await _getCurrentPosition({
+          enableHighAccuracy: false,
+          timeout: 200000,
+          maximumAge: 200000,
+        })
+      } catch (err) {
+        position = null
+        Toast.show({
+          text: 'unable to get location',
+          buttonText: "OK",
+          type: "danger",
+          duration: 5000,
+        })
+      }
+    }
+    return position
+  }
+
+  function _getCurrentPosition(options = {}) {
+    return new Promise((resolve, reject) => {
+      Geolocation.getCurrentPosition(resolve, reject, options)
+      // navigator.geolocation.getCurrentPosition(resolve, reject, options)
+    })
   }
 
   const takePhoto = () => {
@@ -434,7 +513,7 @@ const PhotosList = ({ navigation }) => {
               // headerRight: () => this.renderHeaderRight(),
               // currentTerm: '',
             })
-            dispatch(await reducer.setSearchTerm(null))
+            dispatch(reducer.setSearchTerm(null))
             await reload()
           }
         }
