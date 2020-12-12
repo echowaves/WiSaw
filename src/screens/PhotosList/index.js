@@ -99,9 +99,9 @@ const PhotosList = ({ navigation }) => {
         type: "success",
       })
       navigation.setOptions({
-        title: renderHeaderTitle(),
-        // headerLeft: renderHeaderLeft(),
-        // headerRight: renderHeaderRight(),
+        headerTitle: renderHeaderTitle(),
+        headerLeft: renderHeaderLeft,
+        headerRight: renderHeaderRight,
         // currentTerm: '',
       })
     } else {
@@ -111,12 +111,30 @@ const PhotosList = ({ navigation }) => {
         type: "warning",
       })
       navigation.setOptions({
-        title: null,
+        headerTitle: null,
         headerLeft: null,
         headerRight: null,
       })
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // re-render title on state chage
+  useEffect(() => {
+    if (netAvailable) {
+      navigation.setOptions({
+        headerTitle: renderHeaderTitle(),
+        headerLeft: renderHeaderLeft,
+        headerRight: renderHeaderRight,
+        // currentTerm: '',
+      })
+    } else {
+      navigation.setOptions({
+        headerTitle: null,
+        headerLeft: null,
+        headerRight: null,
+      })
+    }
+  })
 
   // when with of screen changes
   useEffect(() => {
@@ -172,66 +190,6 @@ const PhotosList = ({ navigation }) => {
   //   this.forceUpdate()
   // }
 
-  const renderHeaderTitle = () => {
-    if (searchTerm === null) {
-      return (
-        <StyleProvider style={getTheme(material)}>
-          <Segment style={{ marginBottom: 2 }}>
-            <Button
-              first active={activeSegment === 0}
-              onPress={
-                async () => {
-                  dispatch(reducer.setActiveSegment(0))
-                  await reload()
-                }
-              }>
-              <Icon
-                name="globe"
-                type="FontAwesome"
-              />
-            </Button>
-            <Button
-              last active={activeSegment === 1}
-              onPress={
-                async () => {
-                  dispatch(reducer.setActiveSegment(1))
-                  await reload()
-                }
-              }>
-              <Icon
-                name="eye"
-                type="FontAwesome"
-              />
-            </Button>
-          </Segment>
-        </StyleProvider>
-      )
-    }
-    return (
-      <Input
-        placeholder="what are you searching for?"
-        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-        style={
-          {
-            color: CONST.MAIN_COLOR,
-            paddingLeft: 0,
-            paddingRight: 0,
-          }
-        }
-        onChangeText={currentTerm => {
-          dispatch(reducer.setSearchTerm(currentTerm))
-          navigation.setOptions({
-            title: () => renderHeaderTitle(),
-            currentTerm,
-          })
-        }}
-        value={navigation.getParam('currentTerm')}
-        editable
-        autoFocus
-      />
-    )
-  }
-
   const isListFilllsScreen = () => {
     const numColumns = Math.floor(width / thumbWidth)
     const numRows = Math.floor(photos.length / numColumns)
@@ -240,6 +198,7 @@ const PhotosList = ({ navigation }) => {
   }
 
   const reload = async () => {
+    alert('reload')
     dispatch(reducer.setLocation(await _getLocation()))
     /* eslint-disable no-await-in-loop */
     // while (!isListFilllsScreen()) {
@@ -413,13 +372,72 @@ const PhotosList = ({ navigation }) => {
     </View>
   )
 
+  const renderHeaderTitle = () => {
+    if (searchTerm === null) {
+      return (
+        <StyleProvider style={getTheme(material)}>
+          <Segment style={{ marginBottom: 2 }}>
+            <Button
+              first active={activeSegment === 0}
+              onPress={
+                async () => {
+                  dispatch(reducer.setActiveSegment(0))
+                  await reload()
+                }
+              }>
+              <Icon
+                name="globe"
+                type="FontAwesome"
+              />
+            </Button>
+            <Button
+              last active={activeSegment === 1}
+              onPress={
+                async () => {
+                  dispatch(reducer.setActiveSegment(1))
+                  reload()
+                }
+              }>
+              <Icon
+                name="eye"
+                type="FontAwesome"
+              />
+            </Button>
+          </Segment>
+        </StyleProvider>
+      )
+    }
+    return (
+      <Input
+        placeholder="what are you searching for?"
+        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+        style={
+          {
+            color: CONST.MAIN_COLOR,
+            paddingLeft: 0,
+            paddingRight: 0,
+          }
+        }
+        onChangeText={currentTerm => {
+          dispatch(reducer.setSearchTerm(currentTerm))
+          navigation.setOptions({
+            title: () => renderHeaderTitle(),
+            currentTerm,
+          })
+        }}
+        value={navigation.getParam('currentTerm')}
+        editable
+        autoFocus
+      />
+    )
+  }
+
   const renderHeaderLeft = () => {
-    const { params = {} } = navigation.state
     if (searchTerm === null) {
       return (
         <Icon
           onPress={
-            () => params.handleRefresh()
+            () => reload()
           }
           name="sync"
           type="MaterialIcons"
@@ -442,14 +460,14 @@ const PhotosList = ({ navigation }) => {
         }}
         onPress={
           async () => {
-            navigation.setOptions({
-              title: () => renderHeaderTitle(),
-              // headerLeft: () => this.renderHeaderLeft(),
-              // headerRight: () => this.renderHeaderRight(),
-              // currentTerm: '',
-            })
+            // navigation.setOptions({
+            //   title: () => renderHeaderTitle(),
+            //   // headerLeft: () => this.renderHeaderLeft(),
+            //   // headerRight: () => this.renderHeaderRight(),
+            //   // currentTerm: '',
+            // })
             dispatch(reducer.setSearchTerm(null))
-            await reload()
+            // await reload()
           }
         }
       />
@@ -465,14 +483,14 @@ const PhotosList = ({ navigation }) => {
             name="search"
             style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
             onPress={
-              () => {
+              async () => {
                 navigation.setOptions({
                   title: () => (renderHeaderTitle()),
                   // headerLeft: () => this.renderHeaderLeft(),
                   // headerRight: () => this.renderHeaderRight(),
                 })
                 dispatch(reducer.setSearchTerm(''))
-                // this.reload()
+                // await reload()
               }
             }
           />
@@ -507,10 +525,10 @@ const PhotosList = ({ navigation }) => {
             const currentTerm = navigation.getParam('currentTerm')
             if (currentTerm && currentTerm.length >= 3) {
               dispatch(reducer.setSearchTerm(currentTerm))
-              navigation.setOptions({
-                title: () => renderHeaderTitle(),
-              })
-              await reload()
+              // navigation.setOptions({
+              //   title: () => renderHeaderTitle(),
+              // })
+              // await reload()
             } else {
               Toast.show({
                 text: "Search for more than 3 characters",

@@ -32,7 +32,7 @@ export const initialState = {
   searchTerm: null,
   batch: 0,
   isLastPage: false,
-  netAvailable: false,
+  netAvailable: true,
 }
 
 const reducer = (state = initialState, action) => {
