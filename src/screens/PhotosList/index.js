@@ -460,14 +460,8 @@ const PhotosList = ({ navigation }) => {
         }}
         onPress={
           async () => {
-            // navigation.setOptions({
-            //   title: () => renderHeaderTitle(),
-            //   // headerLeft: () => this.renderHeaderLeft(),
-            //   // headerRight: () => this.renderHeaderRight(),
-            //   // currentTerm: '',
-            // })
             dispatch(reducer.setSearchTerm(null))
-            // await reload()
+            reload()
           }
         }
       />
