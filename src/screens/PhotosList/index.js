@@ -102,7 +102,6 @@ const PhotosList = ({ navigation }) => {
         headerTitle: renderHeaderTitle(),
         headerLeft: renderHeaderLeft,
         headerRight: renderHeaderRight,
-        // currentTerm: '',
       })
     } else {
       Toast.show({
@@ -125,7 +124,6 @@ const PhotosList = ({ navigation }) => {
         headerTitle: renderHeaderTitle(),
         headerLeft: renderHeaderLeft,
         headerRight: renderHeaderRight,
-        // currentTerm: '',
       })
     } else {
       navigation.setOptions({
@@ -420,12 +418,8 @@ const PhotosList = ({ navigation }) => {
         }
         onChangeText={currentTerm => {
           dispatch(reducer.setSearchTerm(currentTerm))
-          navigation.setOptions({
-            title: () => renderHeaderTitle(),
-            currentTerm,
-          })
         }}
-        value={navigation.getParam('currentTerm')}
+        value={searchTerm}
         editable
         autoFocus
       />
@@ -478,13 +472,8 @@ const PhotosList = ({ navigation }) => {
             style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
             onPress={
               async () => {
-                navigation.setOptions({
-                  title: () => (renderHeaderTitle()),
-                  // headerLeft: () => this.renderHeaderLeft(),
-                  // headerRight: () => this.renderHeaderRight(),
-                })
                 dispatch(reducer.setSearchTerm(''))
-                // await reload()
+                reload()
               }
             }
           />
@@ -515,14 +504,8 @@ const PhotosList = ({ navigation }) => {
         }
         onPress={
           async () => {
-            // alert(navigation.getParam('currentTerm'))
-            const currentTerm = navigation.getParam('currentTerm')
-            if (currentTerm && currentTerm.length >= 3) {
-              dispatch(reducer.setSearchTerm(currentTerm))
-              // navigation.setOptions({
-              //   title: () => renderHeaderTitle(),
-              // })
-              // await reload()
+            if (searchTerm && searchTerm.length >= 3) {
+              reload()
             } else {
               Toast.show({
                 text: "Search for more than 3 characters",
