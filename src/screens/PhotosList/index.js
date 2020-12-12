@@ -58,7 +58,7 @@ import Thumb from '../../components/Thumb'
 const PhotosList = ({ navigation }) => {
   const [width, setWidth] = useState(Dimensions.get('window').width)
   const [height, setHeight] = useState(Dimensions.get('window').height)
-  const [thumbWidth, setThumbWidth] = useState(0)
+  const [thumbWidth, setThumbWidth] = useState()
 
   const photos = useSelector(state => state.photosList.photos)
   // const pageNumber = useSelector(state => state.photosList.pageNumber)
@@ -76,75 +76,48 @@ const PhotosList = ({ navigation }) => {
 
   const dispatch = useDispatch()
 
+  // componentDidMount
   useEffect(() => {
-    // alert(global.HermesInternal != null)
-    const unsubscribeFromNetInfo = NetInfo.addEventListener(state => {
-      // console.log("Connection type", state.type);
-      // console.log("Is connected?", state.isConnected);
-      if (state.isConnected === true && state.isInternetReachable === true) {
-        dispatch(reducer.setNetAvailable(true))
-
-        navigation.setOptions({
-          // handleRefresh: () => { this.reload() },
-          // headerLeft: () => { this.renderHeaderLeft() },
-          // headerTitle: props => (<this.HeaderTitle props={this.props} reload={() => this.reload()} />),
-          // headerRight: () => { this.renderHeaderRight() },
-        })
-        // reload()
-      } else { // not connected to the internet
-        dispatch(reducer.setNetAvailable(false))
-        navigation.setOptions({
-          handleRefresh: null,
-          headerLeft: null,
-          title: null,
-          headerRight: null,
-        })
-      }
-    })
-
-    DeviceEventEmitter.addListener('namedOrientationDidChange', handleOrientationDidChange)
-
     branch.initSessionTtl = 10000 // Set to 10 seconds
     branch.subscribe(async ({ error, params }) => {
-      const state = await NetInfo.fetch()
-      if (state.isConnected === true && state.isInternetReachable === true) {
-        dispatch(reducer.setNetAvailable(true))
-      } else { // not connected to the internet
-        dispatch(reducer.setNetAvailable(false))
+      const item = params.$item
+
+      if (item) {
+      // go back to the top screen, just in case
+        navigation.popToTop()
+        navigation.navigate('SharedPhoto', { item })
+      }
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // isInternetReachable
+  useEffect(() => {
+    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
+      if (state && state.isInternetReachable) {
+        dispatch(reducer.setNetAvailable(state.isInternetReachable))
       }
 
-      if (error) {
+      if (state.isInternetReachable) {
+        Toast.show({
+          text: "Connected to Network.",
+          buttonText: "OK",
+          type: "success",
+        })
+      } else {
         Toast.show({
           text: 'No Network',
           buttonText: "OK",
           type: "warning",
         })
-
-        return
-      }
-      // params will never be null if error is null
-      // A Branch link was opened.
-      // Route link based on data in params, e.g.
-
-      // Get title and url for route
-      // const title = params.$og_title
-      // const url = params.$canonical_url
-      // const image = params.$og_image_url
-      // const photoId = params.$photo_id
-      const item = params.$item
-
-      if (item) {
-        // go back to the top screen, just in case
-        navigation.popToTop()
-        navigation.navigate('SharedPhoto', { item })
       }
     })
+    return () => unsubscribeNetInfo()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-    return function cleanup() {
-      DeviceEventEmitter.removeListener('namedOrientationDidChange', handleOrientationDidChange)
-      unsubscribeFromNetInfo()
-    }
-  })
+  const _calculateThumbWidth = () => {
+    const thumbsCount = Math.floor(width / 100)
+    return (Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -255,47 +228,27 @@ const PhotosList = ({ navigation }) => {
     )
   }
 
-  const calculateThumbWidth = () => {
-    const thumbsCount = Math.floor(width / 100)
-    setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
-  }
-
   const isListFilllsScreen = () => {
     const numColumns = Math.floor(width / thumbWidth)
     const numRows = Math.floor(photos.length / numColumns)
     const listHeight = numRows * thumbWidth
-    // alert(`${photos.length}:${listHeight}:${height}`)
-    // alert(`${listHeight}:${height}:${isLastPage}`)
     return listHeight > height || isLastPage
   }
 
   const reload = async () => {
-    if (netAvailable === true) {
-      navigation.setOptions({
-        headerTitle: () => renderHeaderTitle(),
-        // headerLeft: () => this.renderHeaderLeft(),
-        // headerRight: () => this.renderHeaderRight(),
-      })
+    alert(1)
+    dispatch(reducer.setLocation(await _getLocation()))
+    alert(2)
 
-      /* eslint-disable no-await-in-loop */
-      while (loading === true) {
-        // alert('loading')
-        await new Promise(resolve => setTimeout(resolve, 500)) // sleep
-      }
+    dispatch(reducer.resetState())
+    alert(3)
 
-      dispatch(reducer.setLocation(await _getLocation()))
-
-      dispatch(reducer.resetState())
-
-      /* eslint-disable no-await-in-loop */
-      while (!isListFilllsScreen()) {
-        // alert(`photos batch(${batch})`)
-        dispatch(reducer.getPhotos(batch))
-      }
-      await uploadPendingPhotos()
-    } else {
-      dispatch(reducer.resetState())
-    }
+    /* eslint-disable no-await-in-loop */
+    // while (!isListFilllsScreen()) {
+    // alert(`photos batch(${batch})`)
+    // dispatch(reducer.getPhotos(batch))
+    // }
+    await uploadPendingPhotos()
   }
 
   const checkPermissionsForPhotoTaking = async () => {
@@ -521,173 +474,172 @@ const PhotosList = ({ navigation }) => {
     )
   }
 
-  const renderHeaderRight = () => {
-    if (searchTerm === null) {
-      return (
-        <View style={{ flex: 1, flexDirection: 'row' }}>
-          <Icon
-            type="MaterialIcons"
-            name="search"
-            style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
-            onPress={
-              () => {
-                navigation.setOptions({
-                  title: () => (renderHeaderTitle()),
-                  // headerLeft: () => this.renderHeaderLeft(),
-                  // headerRight: () => this.renderHeaderRight(),
-                })
-                dispatch(reducer.setSearchTerm(''))
-                // this.reload()
-              }
-            }
-          />
+  // const renderHeaderRight = () => {
+  //   if (searchTerm === null) {
+  //     return (
+  //       <View style={{ flex: 1, flexDirection: 'row' }}>
+  //         <Icon
+  //           type="MaterialIcons"
+  //           name="search"
+  //           style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
+  //           onPress={
+  //             () => {
+  //               navigation.setOptions({
+  //                 title: () => (renderHeaderTitle()),
+  //                 // headerLeft: () => this.renderHeaderLeft(),
+  //                 // headerRight: () => this.renderHeaderRight(),
+  //               })
+  //               dispatch(reducer.setSearchTerm(''))
+  //               // this.reload()
+  //             }
+  //           }
+  //         />
+  //
+  //         <Icon
+  //           onPress={
+  //             () => navigation.push('Feedback')
+  //           }
+  //           name="feedback"
+  //           type="MaterialIcons"
+  //           style={{
+  //             marginRight: 20,
+  //             color: CONST.MAIN_COLOR,
+  //           }}
+  //         />
+  //       </View>
+  //     )
+  //   }
+  //   return (
+  //     <Icon
+  //       type="MaterialIcons"
+  //       name="search"
+  //       style={
+  //         {
+  //           marginRight: 20,
+  //           color: CONST.MAIN_COLOR,
+  //         }
+  //       }
+  //       onPress={
+  //         async () => {
+  //           // alert(navigation.getParam('currentTerm'))
+  //           const currentTerm = navigation.getParam('currentTerm')
+  //           if (currentTerm && currentTerm.length >= 3) {
+  //             dispatch(reducer.setSearchTerm(currentTerm))
+  //             navigation.setOptions({
+  //               title: () => renderHeaderTitle(),
+  //             })
+  //             await reload()
+  //           } else {
+  //             Toast.show({
+  //               text: "Search for more than 3 characters",
+  //               buttonText: "OK",
+  //               type: "warning",
+  //             })
+  //           }
+  //         }
+  //       }
+  //     />
+  //   )
+  // }
 
-          <Icon
-            onPress={
-              () => navigation.push('Feedback')
-            }
-            name="feedback"
-            type="MaterialIcons"
-            style={{
-              marginRight: 20,
-              color: CONST.MAIN_COLOR,
-            }}
-          />
-        </View>
-      )
-    }
-    return (
-      <Icon
-        type="MaterialIcons"
-        name="search"
-        style={
-          {
-            marginRight: 20,
-            color: CONST.MAIN_COLOR,
-          }
-        }
-        onPress={
-          async () => {
-            // alert(navigation.getParam('currentTerm'))
-            const currentTerm = navigation.getParam('currentTerm')
-            if (currentTerm && currentTerm.length >= 3) {
-              dispatch(reducer.setSearchTerm(currentTerm))
-              navigation.setOptions({
-                title: () => renderHeaderTitle(),
-              })
-              await reload()
-            } else {
-              Toast.show({
-                text: "Search for more than 3 characters",
-                buttonText: "OK",
-                type: "warning",
-              })
-            }
-          }
-        }
-      />
-    )
-  }
+  // if (netAvailable === false) {
+  //   return (
+  //     <Container>
+  //       <Content padder>
+  //         <Body>
+  //
+  //           <Card transparent>
+  //             <CardItem style={{ borderRadius: 10 }}>
+  //               <Text style={{
+  //                 fontSize: 20,
+  //                 textAlign: 'center',
+  //                 margin: 10,
+  //               }}>
+  //                 You are not connected to reliable network.
+  //                 You can still snap photos.
+  //                 They will be uploaded later.
+  //               </Text>
+  //             </CardItem>
+  //           </Card>
+  //         </Body>
+  //       </Content>
+  //       {renderPhotoButton()}
+  //     </Container>
+  //   )
+  // }
 
-  if (netAvailable === false) {
-    return (
-      <Container>
-        <Content padder>
-          <Body>
+  // if (photos.length === 0 && loading) {
+  //   return (
+  //     <Container>
+  //       <Content padder>
+  //         <Body>
+  //           <Spinner color={
+  //             CONST.MAIN_COLOR
+  //           }
+  //           />
+  //         </Body>
+  //       </Content>
+  //       {renderPhotoButton()}
+  //     </Container>
+  //   )
+  // }
 
-            <Card transparent>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text style={{
-                  fontSize: 20,
-                  textAlign: 'center',
-                  margin: 10,
-                }}>
-                  You are not connected to reliable network.
-                  You can still snap photos.
-                  They will be uploaded later.
-                </Text>
-              </CardItem>
-            </Card>
-          </Body>
-        </Content>
-        {renderPhotoButton()}
-      </Container>
-    )
-  }
+  // if (photos.length === 0 && !loading) {
+  //   return (
+  //     <Container>
+  //       <Content padder>
+  //         <Body>
+  //           {searchTerm !== null && (
+  //             <Card transparent>
+  //               <CardItem style={{ borderRadius: 10 }}>
+  //                 <Text style={{
+  //                   fontSize: 20,
+  //                   textAlign: 'center',
+  //                   margin: 10,
+  //                 }}>
+  //                   No Photos found.
+  //                   Try to search for something else.
+  //                   Search string should be more than 3 characters.
+  //                 </Text>
+  //               </CardItem>
+  //             </Card>
+  //           )}
+  //           {searchTerm === null && activeSegment === 0 && (
+  //             <Card transparent>
+  //               <CardItem style={{ borderRadius: 10 }}>
+  //                 <Text style={{
+  //                   fontSize: 20,
+  //                   textAlign: 'center',
+  //                   margin: 10,
+  //                 }}>
+  //                   No Photos found in your location.
+  //                   Try to take some photos.
+  //                 </Text>
+  //               </CardItem>
+  //             </Card>
+  //           )}
+  //           {searchTerm === null && activeSegment === 1 && (
+  //             <Card transparent>
+  //               <CardItem style={{ borderRadius: 10 }}>
+  //                 <Text style={{
+  //                   fontSize: 20,
+  //                   textAlign: 'center',
+  //                   margin: 10,
+  //                 }}>
+  //                   You don&apos;t seem to be watching any photos.
+  //                   Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
+  //                 </Text>
+  //               </CardItem>
+  //             </Card>
+  //           )}
+  //
+  //         </Body>
+  //       </Content>
+  //       {renderPhotoButton()}
+  //     </Container>
+  //   )
+  // }
 
-  if (photos.length === 0 && loading) {
-    return (
-      <Container>
-        <Content padder>
-          <Body>
-            <Spinner color={
-              CONST.MAIN_COLOR
-            }
-            />
-          </Body>
-        </Content>
-        {renderPhotoButton()}
-      </Container>
-    )
-  }
-
-  if (photos.length === 0 && !loading) {
-    return (
-      <Container>
-        <Content padder>
-          <Body>
-            {searchTerm !== null && (
-              <Card transparent>
-                <CardItem style={{ borderRadius: 10 }}>
-                  <Text style={{
-                    fontSize: 20,
-                    textAlign: 'center',
-                    margin: 10,
-                  }}>
-                    No Photos found.
-                    Try to search for something else.
-                    Search string should be more than 3 characters.
-                  </Text>
-                </CardItem>
-              </Card>
-            )}
-            {searchTerm === null && activeSegment === 0 && (
-              <Card transparent>
-                <CardItem style={{ borderRadius: 10 }}>
-                  <Text style={{
-                    fontSize: 20,
-                    textAlign: 'center',
-                    margin: 10,
-                  }}>
-                    No Photos found in your location.
-                    Try to take some photos.
-                  </Text>
-                </CardItem>
-              </Card>
-            )}
-            {searchTerm === null && activeSegment === 1 && (
-              <Card transparent>
-                <CardItem style={{ borderRadius: 10 }}>
-                  <Text style={{
-                    fontSize: 20,
-                    textAlign: 'center',
-                    margin: 10,
-                  }}>
-                    You don&apos;t seem to be watching any photos.
-                    Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
-                  </Text>
-                </CardItem>
-              </Card>
-            )}
-
-          </Body>
-        </Content>
-        {renderPhotoButton()}
-      </Container>
-    )
-  }
-
-  calculateThumbWidth()
   return (
     <Container>
       <FlatGrid
@@ -724,13 +676,13 @@ const PhotosList = ({ navigation }) => {
         horizontal={
           false
         }
-        onEndReached={
-          () => {
-            if (!loading && !isLastPage) {
-              dispatch(reducer.getPhotos(batch))
-            }
-          }
-        }
+        // onEndReached={
+        //   () => {
+        //     if (!loading && !isLastPage) {
+        //       dispatch(reducer.getPhotos(batch))
+        //     }
+        //   }
+        // }
         onEndReachedThreshold={
           350
         }

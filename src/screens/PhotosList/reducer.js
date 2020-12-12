@@ -237,8 +237,8 @@ export function resetState() {
       type: ACTION_TYPES.SET_UUID,
       uuid,
     })
-
     const isTandcAccepted = await _getTancAccepted(getState)
+
     dispatch({
       type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
       isTandcAccepted,
@@ -336,6 +336,7 @@ async function _requestSearchedPhotos(getState, batch) {
 }
 
 export function getPhotos(batch) {
+  alert(`getPhotos(${batch})`)
   return async (dispatch, getState) => {
     // if (getState().photosList.location) alert(getState().photosList.location)
 
@@ -439,15 +440,15 @@ export function setSearchTerm(searchTerm) {
 }
 
 export function setNetAvailable(netAvailable) {
-  return {
+  return ({
     type: ACTION_TYPES.SET_NET_AVAILABLE,
     netAvailable,
-  }
+  })
 }
 
 async function _getUUID(getState) {
   if (Platform.OS === 'ios') {
-    RNSecureKeyStore.setResetOnAppUninstallTo(false)
+    RNSecureKeyStore.setResetOnAppUninstallTo(true)
   }
 
   let { uuid } = getState().photosList
