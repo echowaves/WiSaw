@@ -20,7 +20,7 @@ const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
-  isTandcAccepted: false,
+  isTandcAccepted: true, // innocent unless proven guilty
   uuid: null,
   location: null,
   photos: [],
@@ -225,8 +225,14 @@ const reducer = (state = initialState, action) => {
 
 export default reducer
 
-export function resetState() {
+export function initState() {
   return async (dispatch, getState) => {
+    // force reset tandc
+    // await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "false", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
+    if (Platform.OS === 'ios') {
+      await RNSecureKeyStore.setResetOnAppUninstallTo(false)
+    }
+
     const uuid = await _getUUID(getState)
 
     dispatch({
@@ -447,10 +453,6 @@ export function setNetAvailable(netAvailable) {
 }
 
 async function _getUUID(getState) {
-  if (Platform.OS === 'ios') {
-    RNSecureKeyStore.setResetOnAppUninstallTo(true)
-  }
-
   let { uuid } = getState().photosList
   if (uuid === null) {
     // try to retreive from secure store
@@ -482,15 +484,11 @@ async function _getUUID(getState) {
 }
 
 async function _getTancAccepted(getState) {
-  let { isTandcAccepted } = getState().photosList
-  if (isTandcAccepted == null || isTandcAccepted === false) {
-    try {
-      isTandcAccepted = JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
-    } catch (err) {
-      isTandcAccepted = false
-    }
+  try {
+    return JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
+  } catch (err) {
+    return false
   }
-  return isTandcAccepted
 }
 
 // https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
+import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 
 import Geolocation from '@react-native-community/geolocation'
 
@@ -56,8 +57,6 @@ import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
 
 const PhotosList = ({ navigation }) => {
-  const [width, setWidth] = useState(Dimensions.get('window').width)
-  const [height, setHeight] = useState(Dimensions.get('window').height)
   const [thumbWidth, setThumbWidth] = useState()
 
   const photos = useSelector(state => state.photosList.photos)
@@ -76,6 +75,56 @@ const PhotosList = ({ navigation }) => {
 
   const dispatch = useDispatch()
 
+  const deviceOrientation = useDeviceOrientation()
+  const { width, height } = useDimensions().window
+
+  // check permissions and retrieve UUID
+  useEffect(() => {
+    dispatch(reducer.initState())
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  // when screen orientation changes
+  useEffect(() => {
+    // alert(deviceOrientation.portrait ? 'portrait' : 'landscape')
+    dispatch(reducer.setOrientation(deviceOrientation.portrait ? 'portrait' : 'landscape'))
+  }, [deviceOrientation]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // when network availability changes
+  useEffect(() => {
+    if (netAvailable) {
+      reload()
+      Toast.show({
+        text: "Connected to Network.",
+        buttonText: "OK",
+        type: "success",
+      })
+      navigation.setOptions({
+        title: renderHeaderTitle(),
+        // headerLeft: renderHeaderLeft(),
+        // headerRight: renderHeaderRight(),
+        // currentTerm: '',
+      })
+    } else {
+      Toast.show({
+        text: 'No Network',
+        buttonText: "OK",
+        type: "warning",
+      })
+      navigation.setOptions({
+        title: null,
+        headerLeft: null,
+        headerRight: null,
+      })
+    }
+  }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // when with of screen changes
+  useEffect(() => {
+    const thumbsCount = Math.floor(width / 100)
+    setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
+    // alert(`${thumbsCount}, ${Math.floor((width - thumbsCount * 3 * 2) / thumbsCount)}`)
+  }, [width])
+
   // componentDidMount
   useEffect(() => {
     branch.initSessionTtl = 10000 // Set to 10 seconds
@@ -90,79 +139,34 @@ const PhotosList = ({ navigation }) => {
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // isInternetReachable
+  // add network availability listener
   useEffect(() => {
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
-      if (state && state.isInternetReachable) {
+      if (state) {
         dispatch(reducer.setNetAvailable(state.isInternetReachable))
-      }
-
-      if (state.isInternetReachable) {
-        Toast.show({
-          text: "Connected to Network.",
-          buttonText: "OK",
-          type: "success",
-        })
-      } else {
-        Toast.show({
-          text: 'No Network',
-          buttonText: "OK",
-          type: "warning",
-        })
       }
     })
     return () => unsubscribeNetInfo()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const _calculateThumbWidth = () => {
-    const thumbsCount = Math.floor(width / 100)
-    return (Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
-  }
-
   const styles = StyleSheet.create({
     container: {
       flex: 1,
     },
-    cameraButtonPortraitPrimary: {
+    cameraButtonPortrait: {
       flexDirection: 'row',
       bottom: 20,
       alignSelf: 'center',
       justifyContent: 'center',
     },
-    cameraButtonPortraitSecondary: {
-      flexDirection: 'row',
-      bottom: 20,
-      alignSelf: 'center',
-      justifyContent: 'center',
-    },
-    cameraButtonLandscapePrimary: {
+
+    cameraButtonLandscape: {
       flexDirection: 'column',
       right: 20,
       top: width < height ? width * 0.5 - 50 - 32 : height * 0.5 - 50 - 32,
     },
-    cameraButtonLandscapeSecondary: {
-      flexDirection: 'column',
-      left: 20,
-      top: width < height ? width * 0.5 - 50 - 32 : height * 0.5 - 50 - 32,
-    },
+
   })
-
-  const handleOrientationDidChange = data => {
-    let { name } = data
-    // this weird logic is necessary due to a bug in iOS which swaps portrair primary and secondary
-    if (Platform.OS === 'ios') {
-      if (name === 'landscape-primary') {
-        name = 'landscape-secondary'
-      } else if (name === 'landscape-secondary') {
-        name = 'landscape-primary'
-      }
-    }
-
-    if (name === 'portrait-secondary') {
-      return
-    }
-    dispatch(reducer.setOrientation(name))
-  }
 
   // const onLayout = e => {
   //   this.forceUpdate()
@@ -236,13 +240,7 @@ const PhotosList = ({ navigation }) => {
   }
 
   const reload = async () => {
-    alert(1)
     dispatch(reducer.setLocation(await _getLocation()))
-    alert(2)
-
-    dispatch(reducer.resetState())
-    alert(3)
-
     /* eslint-disable no-await-in-loop */
     // while (!isListFilllsScreen()) {
     // alert(`photos batch(${batch})`)
@@ -292,15 +290,6 @@ const PhotosList = ({ navigation }) => {
   }
 
   async function _checkPermission(permissionType, alertHeader, alertBody) {
-    // let permission
-    // if (!this.checkingPermission) {
-    //   this.checkingPermission = true
-
-    // permission = await check(permissionType)
-
-    // alert(`${permission}`)
-    // if (permission !== 'granted') {
-
     const permission = await request(permissionType)
 
     if (permission !== 'granted') {
@@ -367,11 +356,6 @@ const PhotosList = ({ navigation }) => {
     navigation.push('Camera')
   }
 
-  const onContentSizeChange = () => {
-    setWidth(Dimensions.get('window').width)
-    setHeight(Dimensions.get('window').height)
-  }
-
   const renderPhotoButton = () => (
     <View style={
       [
@@ -379,10 +363,8 @@ const PhotosList = ({ navigation }) => {
           flex: 1,
           position: 'absolute',
         },
-        orientation === 'portrait-primary' && styles.cameraButtonPortraitPrimary,
-        orientation === 'portrait-secondary' && styles.cameraButtonPortraitSecondary,
-        orientation === 'landscape-primary' && styles.cameraButtonLandscapePrimary,
-        orientation === 'landscape-secondary' && styles.cameraButtonLandscapeSecondary,
+        orientation === 'portrait' && styles.cameraButtonPortrait,
+        orientation === 'landscape' && styles.cameraButtonLandscape,
       ]
     }>
       <View>
@@ -474,99 +456,99 @@ const PhotosList = ({ navigation }) => {
     )
   }
 
-  // const renderHeaderRight = () => {
-  //   if (searchTerm === null) {
-  //     return (
-  //       <View style={{ flex: 1, flexDirection: 'row' }}>
-  //         <Icon
-  //           type="MaterialIcons"
-  //           name="search"
-  //           style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
-  //           onPress={
-  //             () => {
-  //               navigation.setOptions({
-  //                 title: () => (renderHeaderTitle()),
-  //                 // headerLeft: () => this.renderHeaderLeft(),
-  //                 // headerRight: () => this.renderHeaderRight(),
-  //               })
-  //               dispatch(reducer.setSearchTerm(''))
-  //               // this.reload()
-  //             }
-  //           }
-  //         />
-  //
-  //         <Icon
-  //           onPress={
-  //             () => navigation.push('Feedback')
-  //           }
-  //           name="feedback"
-  //           type="MaterialIcons"
-  //           style={{
-  //             marginRight: 20,
-  //             color: CONST.MAIN_COLOR,
-  //           }}
-  //         />
-  //       </View>
-  //     )
-  //   }
-  //   return (
-  //     <Icon
-  //       type="MaterialIcons"
-  //       name="search"
-  //       style={
-  //         {
-  //           marginRight: 20,
-  //           color: CONST.MAIN_COLOR,
-  //         }
-  //       }
-  //       onPress={
-  //         async () => {
-  //           // alert(navigation.getParam('currentTerm'))
-  //           const currentTerm = navigation.getParam('currentTerm')
-  //           if (currentTerm && currentTerm.length >= 3) {
-  //             dispatch(reducer.setSearchTerm(currentTerm))
-  //             navigation.setOptions({
-  //               title: () => renderHeaderTitle(),
-  //             })
-  //             await reload()
-  //           } else {
-  //             Toast.show({
-  //               text: "Search for more than 3 characters",
-  //               buttonText: "OK",
-  //               type: "warning",
-  //             })
-  //           }
-  //         }
-  //       }
-  //     />
-  //   )
-  // }
+  const renderHeaderRight = () => {
+    if (searchTerm === null) {
+      return (
+        <View style={{ flex: 1, flexDirection: 'row' }}>
+          <Icon
+            type="MaterialIcons"
+            name="search"
+            style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
+            onPress={
+              () => {
+                navigation.setOptions({
+                  title: () => (renderHeaderTitle()),
+                  // headerLeft: () => this.renderHeaderLeft(),
+                  // headerRight: () => this.renderHeaderRight(),
+                })
+                dispatch(reducer.setSearchTerm(''))
+                // this.reload()
+              }
+            }
+          />
 
-  // if (netAvailable === false) {
-  //   return (
-  //     <Container>
-  //       <Content padder>
-  //         <Body>
-  //
-  //           <Card transparent>
-  //             <CardItem style={{ borderRadius: 10 }}>
-  //               <Text style={{
-  //                 fontSize: 20,
-  //                 textAlign: 'center',
-  //                 margin: 10,
-  //               }}>
-  //                 You are not connected to reliable network.
-  //                 You can still snap photos.
-  //                 They will be uploaded later.
-  //               </Text>
-  //             </CardItem>
-  //           </Card>
-  //         </Body>
-  //       </Content>
-  //       {renderPhotoButton()}
-  //     </Container>
-  //   )
-  // }
+          <Icon
+            onPress={
+              () => navigation.push('Feedback')
+            }
+            name="feedback"
+            type="MaterialIcons"
+            style={{
+              marginRight: 20,
+              color: CONST.MAIN_COLOR,
+            }}
+          />
+        </View>
+      )
+    }
+    return (
+      <Icon
+        type="MaterialIcons"
+        name="search"
+        style={
+          {
+            marginRight: 20,
+            color: CONST.MAIN_COLOR,
+          }
+        }
+        onPress={
+          async () => {
+            // alert(navigation.getParam('currentTerm'))
+            const currentTerm = navigation.getParam('currentTerm')
+            if (currentTerm && currentTerm.length >= 3) {
+              dispatch(reducer.setSearchTerm(currentTerm))
+              navigation.setOptions({
+                title: () => renderHeaderTitle(),
+              })
+              await reload()
+            } else {
+              Toast.show({
+                text: "Search for more than 3 characters",
+                buttonText: "OK",
+                type: "warning",
+              })
+            }
+          }
+        }
+      />
+    )
+  }
+
+  if (netAvailable === false) {
+    return (
+      <Container>
+        <Content padder>
+          <Body>
+
+            <Card transparent>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text style={{
+                  fontSize: 20,
+                  textAlign: 'center',
+                  margin: 10,
+                }}>
+                  You are not connected to reliable network.
+                  You can still snap photos.
+                  They will be uploaded later.
+                </Text>
+              </CardItem>
+            </Card>
+          </Body>
+        </Content>
+        {renderPhotoButton()}
+      </Container>
+    )
+  }
 
   // if (photos.length === 0 && loading) {
   //   return (
@@ -640,6 +622,63 @@ const PhotosList = ({ navigation }) => {
   //   )
   // }
 
+  if (!isTandcAccepted) {
+    return (
+      <Container>
+        <Modal
+          isVisible={
+            !isTandcAccepted
+          }>
+          <Content padder>
+            <Card transparent>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * When you take a photo with WiSaw app,
+                  it will be added to a Photo Album on your phone,
+                  as well as posted to global feed in the cloud.
+                </Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * People close-by can see your photos.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * You can see other people&#39;s photos too.
+                </Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* No one will tolerate objectionable content or abusive users.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* The abusive users will be banned from WiSaw by other users.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
+              </CardItem>
+              <CardItem footer style={{ borderRadius: 10 }}>
+                <Left />
+                <Button
+                  block
+                  bordered
+                  success
+                  small
+                  onPress={
+                    () => {
+                      dispatch(reducer.acceptTandC())
+                    }
+                  }>
+                  <Text>  Agree  </Text>
+                </Button>
+                <Right />
+              </CardItem>
+            </Card>
+          </Content>
+        </Modal>
+      </Container>
+    )
+  }
+
   return (
     <Container>
       <FlatGrid
@@ -694,59 +733,8 @@ const PhotosList = ({ navigation }) => {
             await reload()
           }
         }
-        onContentSizeChange={onContentSizeChange}
+        // onContentSizeChange={}
       />
-
-      <Modal
-        isVisible={
-          !isTandcAccepted
-        }>
-        <Content padder>
-          <Card transparent>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * When you take a photo with WiSaw app,
-                it will be added to a Photo Album on your phone,
-                as well as posted to global feed in the cloud.
-              </Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * People close-by can see your photos.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * You can see other people&#39;s photos too.
-              </Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* No one will tolerate objectionable content or abusive users.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* The abusive users will be banned from WiSaw by other users.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
-            </CardItem>
-            <CardItem footer style={{ borderRadius: 10 }}>
-              <Left />
-              <Button
-                block
-                bordered
-                success
-                small
-                onPress={
-                  () => {
-                    dispatch(reducer.acceptTandC())
-                  }
-                }>
-                <Text>  Agree  </Text>
-              </Button>
-              <Right />
-            </CardItem>
-          </Card>
-        </Content>
-      </Modal>
       {renderPhotoButton()}
     </Container>
   )
