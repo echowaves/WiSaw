@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 
 import Geolocation from '@react-native-community/geolocation'
@@ -62,7 +62,6 @@ const PhotosList = ({ navigation }) => {
   const photos = useSelector(state => state.photosList.photos)
   // const pageNumber = useSelector(state => state.photosList.pageNumber)
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
-  const batch = useSelector(state => state.photosList.batch)
   const isLastPage = useSelector(state => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
@@ -72,6 +71,7 @@ const PhotosList = ({ navigation }) => {
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
+  const batch = useSelector(state => state.photosList.batch)
 
   const dispatch = useDispatch()
 
@@ -81,43 +81,15 @@ const PhotosList = ({ navigation }) => {
   // check permissions and retrieve UUID
   useEffect(() => {
     dispatch(reducer.initState())
+    reload()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   // when screen orientation changes
   useEffect(() => {
-    // alert(deviceOrientation.portrait ? 'portrait' : 'landscape')
     dispatch(reducer.setOrientation(deviceOrientation.portrait ? 'portrait' : 'landscape'))
   }, [deviceOrientation]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // when network availability changes
-  useEffect(() => {
-    if (netAvailable) {
-      reload()
-      Toast.show({
-        text: "Connected to Network.",
-        buttonText: "OK",
-        type: "success",
-      })
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle(),
-        headerLeft: renderHeaderLeft,
-        headerRight: renderHeaderRight,
-      })
-    } else {
-      Toast.show({
-        text: 'No Network',
-        buttonText: "OK",
-        type: "warning",
-      })
-      navigation.setOptions({
-        headerTitle: null,
-        headerLeft: null,
-        headerRight: null,
-      })
-    }
-  }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // re-render title on state chage
+  // re-render title on any state chage
   useEffect(() => {
     if (netAvailable) {
       navigation.setOptions({
@@ -127,7 +99,7 @@ const PhotosList = ({ navigation }) => {
       })
     } else {
       navigation.setOptions({
-        headerTitle: null,
+        headerTitle: (<Text>Network not Availble</Text>),
         headerLeft: null,
         headerRight: null,
       })
@@ -138,10 +110,9 @@ const PhotosList = ({ navigation }) => {
   useEffect(() => {
     const thumbsCount = Math.floor(width / 100)
     setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
-    // alert(`${thumbsCount}, ${Math.floor((width - thumbsCount * 3 * 2) / thumbsCount)}`)
   }, [width])
 
-  // componentDidMount
+  // componentDidMount branch initialization
   useEffect(() => {
     branch.initSessionTtl = 10000 // Set to 10 seconds
     branch.subscribe(async ({ error, params }) => {
@@ -165,6 +136,20 @@ const PhotosList = ({ navigation }) => {
     return () => unsubscribeNetInfo()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // when screen orientation changes
+  useEffect(() => {
+    if (!loading && !isLastPage && !isListFilllsScreen() && batch) {
+      dispatch(reducer.getPhotos())
+    }
+  }, [loading, isLastPage]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isListFilllsScreen = () => {
+    const numColumns = Math.floor(width / thumbWidth)
+    const numRows = Math.floor(photos.length / numColumns)
+    const listHeight = numRows * thumbWidth
+    return listHeight > height || isLastPage
+  }
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -184,25 +169,11 @@ const PhotosList = ({ navigation }) => {
 
   })
 
-  // const onLayout = e => {
-  //   this.forceUpdate()
-  // }
-
-  const isListFilllsScreen = () => {
-    const numColumns = Math.floor(width / thumbWidth)
-    const numRows = Math.floor(photos.length / numColumns)
-    const listHeight = numRows * thumbWidth
-    return listHeight > height || isLastPage
-  }
-
   const reload = async () => {
-    alert('reload')
+    dispatch(reducer.resetState())
     dispatch(reducer.setLocation(await _getLocation()))
-    /* eslint-disable no-await-in-loop */
-    // while (!isListFilllsScreen()) {
-    // alert(`photos batch(${batch})`)
-    // dispatch(reducer.getPhotos(batch))
-    // }
+    dispatch(reducer.getPhotos())
+
     await uploadPendingPhotos()
   }
 
@@ -270,7 +241,6 @@ const PhotosList = ({ navigation }) => {
   }
 
   async function _getLocation() {
-    // alert('get location')
     let position = null
     // Toast("started checking permission")
     const permission = await _checkPermission(
@@ -305,7 +275,6 @@ const PhotosList = ({ navigation }) => {
   function _getCurrentPosition(options = {}) {
     return new Promise((resolve, reject) => {
       Geolocation.getCurrentPosition(resolve, reject, options)
-      // navigator.geolocation.getCurrentPosition(resolve, reject, options)
     })
   }
 
@@ -393,7 +362,7 @@ const PhotosList = ({ navigation }) => {
               onPress={
                 async () => {
                   dispatch(reducer.setActiveSegment(1))
-                  reload()
+                  await reload()
                 }
               }>
               <Icon
@@ -431,7 +400,7 @@ const PhotosList = ({ navigation }) => {
       return (
         <Icon
           onPress={
-            () => reload()
+            async () => await reload()
           }
           name="sync"
           type="MaterialIcons"
@@ -455,7 +424,7 @@ const PhotosList = ({ navigation }) => {
         onPress={
           async () => {
             dispatch(reducer.setSearchTerm(null))
-            reload()
+            await reload()
           }
         }
       />
@@ -473,7 +442,7 @@ const PhotosList = ({ navigation }) => {
             onPress={
               async () => {
                 dispatch(reducer.setSearchTerm(''))
-                reload()
+                await reload()
               }
             }
           />
@@ -505,7 +474,7 @@ const PhotosList = ({ navigation }) => {
         onPress={
           async () => {
             if (searchTerm && searchTerm.length >= 3) {
-              reload()
+              await reload()
             } else {
               Toast.show({
                 text: "Search for more than 3 characters",
@@ -519,12 +488,71 @@ const PhotosList = ({ navigation }) => {
     )
   }
 
+  if (
+    isTandcAccepted
+  && netAvailable
+  && photos.length > 0
+  ) {
+    return (
+      <Container>
+        <FlatGrid
+          itemDimension={
+            thumbWidth
+          }
+          spacing={3}
+          data={
+            photos
+          }
+          renderItem={
+            ({ item, index }) => (
+              <Thumb
+                item={
+                  item
+                }
+                index={
+                  index
+                }
+                thumbWidth={thumbWidth}
+                navigation={navigation}
+              />
+            )
+          }
+          style={
+            styles.container
+          }
+          showsVerticalScrollIndicator={
+            false
+          }
+          horizontal={
+            false
+          }
+          onEndReached={
+            () => console.log('reached the end')
+          }
+          onEndReachedThreshold={
+            350
+          }
+          refreshing={
+            false
+          }
+          onRefresh={
+            async () => {
+              await reload()
+            }
+          }
+          // onContentSizeChange={console.log(`photos.length = ${photos.length}`)}
+        />
+        {renderPhotoButton()}
+      </Container>
+
+    )
+  }
+
   if (netAvailable === false) {
     return (
       <Container>
         <Content padder>
           <Body>
-
             <Card transparent>
               <CardItem style={{ borderRadius: 10 }}>
                 <Text style={{
@@ -545,192 +573,130 @@ const PhotosList = ({ navigation }) => {
     )
   }
 
-  // if (photos.length === 0 && loading) {
-  //   return (
-  //     <Container>
-  //       <Content padder>
-  //         <Body>
-  //           <Spinner color={
-  //             CONST.MAIN_COLOR
-  //           }
-  //           />
-  //         </Body>
-  //       </Content>
-  //       {renderPhotoButton()}
-  //     </Container>
-  //   )
-  // }
-
-  // if (photos.length === 0 && !loading) {
-  //   return (
-  //     <Container>
-  //       <Content padder>
-  //         <Body>
-  //           {searchTerm !== null && (
-  //             <Card transparent>
-  //               <CardItem style={{ borderRadius: 10 }}>
-  //                 <Text style={{
-  //                   fontSize: 20,
-  //                   textAlign: 'center',
-  //                   margin: 10,
-  //                 }}>
-  //                   No Photos found.
-  //                   Try to search for something else.
-  //                   Search string should be more than 3 characters.
-  //                 </Text>
-  //               </CardItem>
-  //             </Card>
-  //           )}
-  //           {searchTerm === null && activeSegment === 0 && (
-  //             <Card transparent>
-  //               <CardItem style={{ borderRadius: 10 }}>
-  //                 <Text style={{
-  //                   fontSize: 20,
-  //                   textAlign: 'center',
-  //                   margin: 10,
-  //                 }}>
-  //                   No Photos found in your location.
-  //                   Try to take some photos.
-  //                 </Text>
-  //               </CardItem>
-  //             </Card>
-  //           )}
-  //           {searchTerm === null && activeSegment === 1 && (
-  //             <Card transparent>
-  //               <CardItem style={{ borderRadius: 10 }}>
-  //                 <Text style={{
-  //                   fontSize: 20,
-  //                   textAlign: 'center',
-  //                   margin: 10,
-  //                 }}>
-  //                   You don&apos;t seem to be watching any photos.
-  //                   Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
-  //                 </Text>
-  //               </CardItem>
-  //             </Card>
-  //           )}
-  //
-  //         </Body>
-  //       </Content>
-  //       {renderPhotoButton()}
-  //     </Container>
-  //   )
-  // }
-
-  if (!isTandcAccepted) {
+  if (loading) {
     return (
       <Container>
-        <Modal
-          isVisible={
-            !isTandcAccepted
-          }>
-          <Content padder>
-            <Card transparent>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text> * When you take a photo with WiSaw app,
-                  it will be added to a Photo Album on your phone,
-                  as well as posted to global feed in the cloud.
-                </Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text> * People close-by can see your photos.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text> * You can see other people&#39;s photos too.
-                </Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* No one will tolerate objectionable content or abusive users.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* The abusive users will be banned from WiSaw by other users.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
-              </CardItem>
-              <CardItem footer style={{ borderRadius: 10 }}>
-                <Left />
-                <Button
-                  block
-                  bordered
-                  success
-                  small
-                  onPress={
-                    () => {
-                      dispatch(reducer.acceptTandC())
-                    }
-                  }>
-                  <Text>  Agree  </Text>
-                </Button>
-                <Right />
-              </CardItem>
-            </Card>
-          </Content>
-        </Modal>
+        <Content padder>
+          <Body>
+            <Spinner color={
+              CONST.MAIN_COLOR
+            }
+            />
+          </Body>
+        </Content>
+        {renderPhotoButton()}
       </Container>
     )
   }
 
-  return (
+  if (photos.length === 0 && !loading && isTandcAccepted) {
+    return (
+      <Container>
+        <Content padder>
+          <Body>
+            {searchTerm !== null && (
+              <Card transparent>
+                <CardItem style={{ borderRadius: 10 }}>
+                  <Text style={{
+                    fontSize: 20,
+                    textAlign: 'center',
+                    margin: 10,
+                  }}>
+                    No Photos found.
+                    Try to search for something else.
+                    Search string should be more than 3 characters.
+                  </Text>
+                </CardItem>
+              </Card>
+            )}
+            {searchTerm === null && activeSegment === 0 && (
+              <Card transparent>
+                <CardItem style={{ borderRadius: 10 }}>
+                  <Text style={{
+                    fontSize: 20,
+                    textAlign: 'center',
+                    margin: 10,
+                  }}>
+                    No Photos found in your location.
+                    Try to take some photos.
+                  </Text>
+                </CardItem>
+              </Card>
+            )}
+            {searchTerm === null && activeSegment === 1 && (
+              <Card transparent>
+                <CardItem style={{ borderRadius: 10 }}>
+                  <Text style={{
+                    fontSize: 20,
+                    textAlign: 'center',
+                    margin: 10,
+                  }}>
+                    You don&apos;t seem to be watching any photos.
+                    Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
+                  </Text>
+                </CardItem>
+              </Card>
+            )}
+
+          </Body>
+        </Content>
+        {renderPhotoButton()}
+      </Container>
+    )
+  }
+
+  return ( // if TANDC is not accepted, this should always come last to prevemt flickering
     <Container>
-      <FlatGrid
-        // extraData={this.state}
-        itemDimension={
-          thumbWidth
-        }
-        spacing={3}
-        data={
-          photos
-        }
-        renderItem={
-          ({ item, index }) => (
-            <Thumb
-              item={
-                item
-              }
-              index={
-                index
-              }
-              navigation={
-                navigation
-              }
-              thumbWidth={thumbWidth}
-            />
-          )
-        }
-        style={
-          styles.container
-        }
-        showsVerticalScrollIndicator={
-          false
-        }
-        horizontal={
-          false
-        }
-        // onEndReached={
-        //   () => {
-        //     if (!loading && !isLastPage) {
-        //       dispatch(reducer.getPhotos(batch))
-        //     }
-        //   }
-        // }
-        onEndReachedThreshold={
-          350
-        }
-        refreshing={
-          false
-        }
-        onRefresh={
-          async () => {
-            await reload()
-          }
-        }
-        // onContentSizeChange={}
-      />
-      {renderPhotoButton()}
+      <Modal
+        isVisible={
+          !isTandcAccepted
+        }>
+        <Content padder>
+          <Card transparent>
+            <CardItem style={{ borderRadius: 10 }}>
+              <Text> * When you take a photo with WiSaw app,
+                it will be added to a Photo Album on your phone,
+                as well as posted to global feed in the cloud.
+              </Text>
+            </CardItem>
+            <CardItem style={{ borderRadius: 10 }}>
+              <Text> * People close-by can see your photos.</Text>
+            </CardItem>
+            <CardItem style={{ borderRadius: 10 }}>
+              <Text> * You can see other people&#39;s photos too.
+              </Text>
+            </CardItem>
+            <CardItem style={{ borderRadius: 10 }}>
+              <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+            </CardItem>
+            <CardItem style={{ borderRadius: 10 }}>
+              <Text>* No one will tolerate objectionable content or abusive users.</Text>
+            </CardItem>
+            <CardItem style={{ borderRadius: 10 }}>
+              <Text>* The abusive users will be banned from WiSaw by other users.</Text>
+            </CardItem>
+            <CardItem style={{ borderRadius: 10 }}>
+              <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
+            </CardItem>
+            <CardItem footer style={{ borderRadius: 10 }}>
+              <Left />
+              <Button
+                block
+                bordered
+                success
+                small
+                onPress={
+                  () => {
+                    dispatch(reducer.acceptTandC())
+                  }
+                }>
+                <Text>  Agree  </Text>
+              </Button>
+              <Right />
+            </CardItem>
+          </Card>
+        </Content>
+      </Modal>
     </Container>
   )
 }

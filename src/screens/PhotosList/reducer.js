@@ -20,17 +20,17 @@ const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
-  isTandcAccepted: true, // innocent unless proven guilty
+  isTandcAccepted: false,
   uuid: null,
   location: null,
   photos: [],
   loading: false,
   errorMessage: '',
-  pageNumber: 0,
+  pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the net page
   orientation: 'portrait-primary',
   activeSegment: 0,
   searchTerm: null,
-  batch: 0,
+  batch: null,
   isLastPage: false,
   netAvailable: true,
 }
@@ -41,6 +41,7 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
+        pageNumber: state.pageNumber + 1,
         errorMessage: '',
       }
     case ACTION_TYPES.GET_PHOTOS_SUCCESS:
@@ -51,13 +52,13 @@ const reducer = (state = initialState, action) => {
         // this really stinks, need to figure out why there are duplicates in the first place
         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
         // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
-        pageNumber: state.pageNumber + 1,
+        // pageNumber: state.pageNumber + 1,
         errorMessage: '',
       }
     case ACTION_TYPES.GET_PHOTOS_FAIL:
       return {
         ...state,
-        pageNumber: state.pageNumber + 1,
+        // pageNumber: state.pageNumber + 1,
         errorMessage: action.errorMessage,
       }
     case ACTION_TYPES.GET_PHOTOS_FINISHED:
@@ -77,7 +78,7 @@ const reducer = (state = initialState, action) => {
         photos: [],
         loading: false,
         errorMessage: '',
-        pageNumber: 0,
+        pageNumber: -1,
         isLastPage: false,
         batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
       }
@@ -229,35 +230,29 @@ export function initState() {
   return async (dispatch, getState) => {
     // force reset tandc
     // await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "false", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
-    if (Platform.OS === 'ios') {
-      await RNSecureKeyStore.setResetOnAppUninstallTo(false)
-    }
 
-    const uuid = await _getUUID(getState)
-
-    dispatch({
-      type: ACTION_TYPES.RESET_STATE,
-    })
+    // if (Platform.OS === 'ios') {
+    //   await RNSecureKeyStore.setResetOnAppUninstallTo(false)
+    // }
 
     dispatch({
       type: ACTION_TYPES.SET_UUID,
-      uuid,
+      uuid: await _getUUID(getState),
     })
-    const isTandcAccepted = await _getTancAccepted(getState)
 
     dispatch({
       type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
-      isTandcAccepted,
+      isTandcAccepted: await _getTancAccepted(getState),
     })
   }
 }
 
-async function _requestGeoPhotos(getState, lat, long, batch) {
-  const { pageNumber } = getState().photosList
-  let { uuid } = getState().photosList
-  if (uuid === null) {
-    uuid = 'initializing'
-  }
+async function _requestGeoPhotos(getState) {
+  const { latitude, longitude } = getState().photosList.location.coords
+
+  const { pageNumber, uuid, batch } = getState().photosList
+
+  // console.log(`_requestGeoPhotos(${pageNumber})`)
 
   const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
     method: 'POST',
@@ -269,8 +264,8 @@ async function _requestGeoPhotos(getState, lat, long, batch) {
       location: {
         type: 'Point',
         coordinates: [
-          lat,
-          long,
+          latitude,
+          longitude,
         ],
       },
       daysAgo: pageNumber,
@@ -278,20 +273,13 @@ async function _requestGeoPhotos(getState, lat, long, batch) {
     }),
   })
   const responseJson = await response.json()
-  // Toast.show({
-  //   text: `uuid: ${uuid}`,
-  //   buttonText: "OK",
-  //   duration: 15000,
-  // })
   return responseJson
 }
 
-async function _requestWatchedPhotos(getState, batch) {
-  const { pageNumber } = getState().photosList
-  let { uuid } = getState().photosList
-  if (uuid === null) {
-    uuid = 'initializing'
-  }
+async function _requestWatchedPhotos(getState) {
+  const { pageNumber, uuid, batch } = getState().photosList
+
+  // console.log(`_requestWatchedPhotos(${pageNumber})`)
 
   const response = await fetch(`${CONST.HOST}/photos/feedForWatcher`, {
     method: 'POST',
@@ -313,8 +301,9 @@ async function _requestWatchedPhotos(getState, batch) {
   return responseJson
 }
 
-async function _requestSearchedPhotos(getState, batch) {
-  const { pageNumber, searchTerm } = getState().photosList
+async function _requestSearchedPhotos(getState) {
+  const { pageNumber, searchTerm, batch } = getState().photosList
+  // console.log(`_requestSearchedPhotos(${pageNumber})`)
   let { uuid } = getState().photosList
   if (uuid === null) {
     uuid = 'initializing'
@@ -341,10 +330,12 @@ async function _requestSearchedPhotos(getState, batch) {
   return responseJson
 }
 
-export function getPhotos(batch) {
-  alert(`getPhotos(${batch})`)
+export function getPhotos() {
   return async (dispatch, getState) => {
-    // if (getState().photosList.location) alert(getState().photosList.location)
+    const { batch } = getState().photosList
+    // const { loading, isLastPage, pageNumber } = getState().photosList
+
+    // console.log(`loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
 
     if (!getState().photosList.location || getState().photosList.netAvailable === false) {
       dispatch({
@@ -352,7 +343,6 @@ export function getPhotos(batch) {
         errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
       })
     } else {
-      const { latitude, longitude } = getState().photosList.location.coords
       const { activeSegment, searchTerm } = getState().photosList
       dispatch({
         type: ACTION_TYPES.GET_PHOTOS_STARTED,
@@ -360,11 +350,11 @@ export function getPhotos(batch) {
       try {
         let responseJson
         if (searchTerm !== null) {
-          responseJson = await _requestSearchedPhotos(getState, batch)
+          responseJson = await _requestSearchedPhotos(getState)
         } else if (activeSegment === 0) {
-          responseJson = await _requestGeoPhotos(getState, latitude, longitude, batch)
+          responseJson = await _requestGeoPhotos(getState)
         } else if (activeSegment === 1) {
-          responseJson = await _requestWatchedPhotos(getState, batch)
+          responseJson = await _requestWatchedPhotos(getState)
         }
 
         if (responseJson.batch === batch) {
@@ -379,7 +369,7 @@ export function getPhotos(batch) {
               errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
             })
           }
-        }
+        } // else { alert('wrong batch') }
       } catch (err) {
         dispatch({
           type: ACTION_TYPES.GET_PHOTOS_FAIL,
@@ -418,11 +408,16 @@ export function acceptTandC() {
   }
 }
 
-export function setLocation(location) {
+export function resetState() {
   return {
+    type: ACTION_TYPES.RESET_STATE,
+  }
+}
+export function setLocation(location) {
+  return ({
     type: ACTION_TYPES.SET_LOCATION,
     location,
-  }
+  })
 }
 export function setOrientation(orientation) {
   return {
@@ -432,10 +427,10 @@ export function setOrientation(orientation) {
 }
 
 export function setActiveSegment(activeSegment) {
-  return {
+  return ({
     type: ACTION_TYPES.SET_ACTIVE_SEGMENT,
     activeSegment,
-  }
+  })
 }
 
 export function setSearchTerm(searchTerm) {
