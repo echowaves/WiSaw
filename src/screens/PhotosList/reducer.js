@@ -48,7 +48,7 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos:
-        state.photos.concat(action.photos),
+        state.photos.concat(action.photos).sort((a, b) => b.id - a.id),
         // this really stinks, need to figure out why there are duplicates in the first place
         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
         // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
@@ -230,10 +230,9 @@ export function initState() {
   return async (dispatch, getState) => {
     // force reset tandc
     // await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "false", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
-
-    // if (Platform.OS === 'ios') {
-    //   await RNSecureKeyStore.setResetOnAppUninstallTo(false)
-    // }
+    if (Platform.OS === 'ios') {
+      await RNSecureKeyStore.setResetOnAppUninstallTo(false)
+    }
 
     dispatch({
       type: ACTION_TYPES.SET_UUID,
@@ -334,7 +333,6 @@ export function getPhotos() {
   return async (dispatch, getState) => {
     const { batch } = getState().photosList
     // const { loading, isLastPage, pageNumber } = getState().photosList
-
     // console.log(`loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
 
     if (!getState().photosList.location || getState().photosList.netAvailable === false) {

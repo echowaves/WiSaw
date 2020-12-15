@@ -527,10 +527,51 @@ const PhotosList = ({ navigation }) => {
             false
           }
           onEndReached={
-            () => console.log('reached the end')
+            async () => {
+              // console.log(`reached the end ${isListFilllsScreen()}`)
+              // if (!loading && !isLastPage && !isListFilllsScreen() && batch) {
+              // if (isListFilllsScreen()) {
+              // if (!loading && !isLastPage && isListFilllsScreen()) {
+              dispatch(reducer.getPhotos())
+              await new Promise(resolve => setTimeout(resolve, 100))
+
+              dispatch(reducer.getPhotos())
+              await new Promise(resolve => setTimeout(resolve, 100))
+
+              dispatch(reducer.getPhotos())
+              await new Promise(resolve => setTimeout(resolve, 100))
+
+              dispatch(reducer.getPhotos())
+              await new Promise(resolve => setTimeout(resolve, 100))
+
+              dispatch(reducer.getPhotos())
+              await new Promise(resolve => setTimeout(resolve, 100))
+
+              // dispatch(reducer.getPhotos())
+              // await new Promise(resolve => setTimeout(resolve, 100))
+              //
+              // dispatch(reducer.getPhotos())
+              // await new Promise(resolve => setTimeout(resolve, 100))
+              //
+              // dispatch(reducer.getPhotos())
+              // await new Promise(resolve => setTimeout(resolve, 100))
+              //
+              // dispatch(reducer.getPhotos())
+              // await new Promise(resolve => setTimeout(resolve, 100))
+              //
+              // dispatch(reducer.getPhotos())
+              // await new Promise(resolve => setTimeout(resolve, 100))
+
+              dispatch(reducer.getPhotos())
+              // }
+
+              // dispatch(reducer.getPhotos())
+              // dispatch(reducer.getPhotos())
+              // }
+            }
           }
           onEndReachedThreshold={
-            350
+            0.1
           }
           refreshing={
             false
@@ -540,11 +581,27 @@ const PhotosList = ({ navigation }) => {
               await reload()
             }
           }
-          // onContentSizeChange={console.log(`photos.length = ${photos.length}`)}
+          // onContentSizeChange={() => console.log(`photos.length = ${photos.length}`)}
         />
         {renderPhotoButton()}
       </Container>
 
+    )
+  }
+
+  if (photos.length === 0 && !isLastPage) {
+    return (
+      <Container>
+        <Content padder>
+          <Body>
+            <Spinner color={
+              CONST.MAIN_COLOR
+            }
+            />
+          </Body>
+        </Content>
+        {renderPhotoButton()}
+      </Container>
     )
   }
 
@@ -566,22 +623,6 @@ const PhotosList = ({ navigation }) => {
                 </Text>
               </CardItem>
             </Card>
-          </Body>
-        </Content>
-        {renderPhotoButton()}
-      </Container>
-    )
-  }
-
-  if (loading) {
-    return (
-      <Container>
-        <Content padder>
-          <Body>
-            <Spinner color={
-              CONST.MAIN_COLOR
-            }
-            />
           </Body>
         </Content>
         {renderPhotoButton()}
