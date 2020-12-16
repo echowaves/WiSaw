@@ -292,11 +292,6 @@ async function _requestWatchedPhotos(getState) {
     }),
   })
   const responseJson = await response.json()
-  // Toast.show({
-  //   text: `uuid: ${uuid}`,
-  //   buttonText: "OK",
-  //   duration: 15000,
-  // })
   return responseJson
 }
 
@@ -321,11 +316,6 @@ async function _requestSearchedPhotos(getState) {
     }),
   })
   const responseJson = await response.json()
-  // Toast.show({
-  //   text: `uuid: ${uuid}`,
-  //   buttonText: "OK",
-  //   duration: 15000,
-  // })
   return responseJson
 }
 
@@ -333,7 +323,7 @@ export function getPhotos() {
   return async (dispatch, getState) => {
     const { batch } = getState().photosList
     // const { loading, isLastPage, pageNumber } = getState().photosList
-    // console.log(`loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
+    // console.log(`getPhotos() loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
 
     if (!getState().photosList.location || getState().photosList.netAvailable === false) {
       dispatch({

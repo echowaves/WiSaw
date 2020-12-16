@@ -7,14 +7,14 @@ import {
   StyleSheet,
   Text,
   View,
-  Dimensions,
-  DeviceEventEmitter,
   Platform,
   Alert,
 } from 'react-native'
 
 import {
   Icon,
+  Item,
+  Input,
   Container,
   Content,
   Body,
@@ -26,7 +26,6 @@ import {
   Right,
   Segment,
   StyleProvider,
-  Input,
   Toast,
 } from 'native-base'
 
@@ -58,6 +57,7 @@ import Thumb from '../../components/Thumb'
 
 const PhotosList = ({ navigation }) => {
   const [thumbWidth, setThumbWidth] = useState()
+  const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
   // const pageNumber = useSelector(state => state.photosList.pageNumber)
@@ -138,10 +138,19 @@ const PhotosList = ({ navigation }) => {
 
   // when screen orientation changes
   useEffect(() => {
-    if (!loading && !isLastPage && !isListFilllsScreen() && batch) {
-      dispatch(reducer.getPhotos())
+    // console.log(`useEffect:  loading:${loading}, loadMore:${loadMore}, isLastPage:${isLastPage}, isListFilllsScreen:${isListFilllsScreen()}`)
+    if (searchTerm === null || searchTerm.length >= 3) {
+      if (loadMore && !isLastPage && batch) {
+        dispatch(reducer.getPhotos())
+        setLoadMore(false)
+      }
+      if (!isListFilllsScreen()) {
+        dispatch(reducer.getPhotos())
+      }
+    } else {
+      setLoadMore(false)
     }
-  }, [loading, isLastPage]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading, loadMore, isLastPage]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isListFilllsScreen = () => {
     const numColumns = Math.floor(width / thumbWidth)
@@ -170,11 +179,13 @@ const PhotosList = ({ navigation }) => {
   })
 
   const reload = async () => {
+    /* eslint-disable no-await-in-loop */
+
     dispatch(reducer.resetState())
     dispatch(reducer.setLocation(await _getLocation()))
-    dispatch(reducer.getPhotos())
+    setLoadMore(true)
 
-    await uploadPendingPhotos()
+    uploadPendingPhotos()
   }
 
   const checkPermissionsForPhotoTaking = async () => {
@@ -375,23 +386,27 @@ const PhotosList = ({ navigation }) => {
       )
     }
     return (
-      <Input
-        placeholder="what are you searching for?"
-        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+      <Item
+        rounded
         style={
           {
-            color: CONST.MAIN_COLOR,
-            paddingLeft: 0,
-            paddingRight: 0,
+            width: '100%',
           }
-        }
-        onChangeText={currentTerm => {
-          dispatch(reducer.setSearchTerm(currentTerm))
-        }}
-        value={searchTerm}
-        editable
-        autoFocus
-      />
+        }>
+        <Input
+          placeholder="what are you searching for?"
+          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+          style={
+            {
+              color: CONST.MAIN_COLOR,
+              paddingLeft: 10,
+              paddingRight: 10,
+            }
+          }
+          onChangeText={currentTerm => dispatch(reducer.setSearchTerm(currentTerm))}
+          value={searchTerm}
+        />
+      </Item>
     )
   }
 
@@ -400,7 +415,7 @@ const PhotosList = ({ navigation }) => {
       return (
         <Icon
           onPress={
-            async () => await reload()
+            () => reload()
           }
           name="sync"
           type="MaterialIcons"
@@ -422,9 +437,9 @@ const PhotosList = ({ navigation }) => {
           color: CONST.MAIN_COLOR,
         }}
         onPress={
-          async () => {
+          () => {
             dispatch(reducer.setSearchTerm(null))
-            await reload()
+            reload()
           }
         }
       />
@@ -440,9 +455,9 @@ const PhotosList = ({ navigation }) => {
             name="search"
             style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
             onPress={
-              async () => {
+              () => {
                 dispatch(reducer.setSearchTerm(''))
-                await reload()
+                reload()
               }
             }
           />
@@ -472,9 +487,9 @@ const PhotosList = ({ navigation }) => {
           }
         }
         onPress={
-          async () => {
+          () => {
             if (searchTerm && searchTerm.length >= 3) {
-              await reload()
+              reload()
             } else {
               Toast.show({
                 text: "Search for more than 3 characters",
@@ -526,59 +541,27 @@ const PhotosList = ({ navigation }) => {
           horizontal={
             false
           }
+          onMomentumScrollBegin={
+            async () => {
+              // console.log(`onMomentumScrollBegin() ${isListFilllsScreen()}`)
+              setLoadMore(true)
+            }
+          }
           onEndReached={
             async () => {
-              // console.log(`reached the end ${isListFilllsScreen()}`)
-              // if (!loading && !isLastPage && !isListFilllsScreen() && batch) {
-              // if (isListFilllsScreen()) {
-              // if (!loading && !isLastPage && isListFilllsScreen()) {
-              dispatch(reducer.getPhotos())
-              await new Promise(resolve => setTimeout(resolve, 100))
-
-              dispatch(reducer.getPhotos())
-              await new Promise(resolve => setTimeout(resolve, 100))
-
-              dispatch(reducer.getPhotos())
-              await new Promise(resolve => setTimeout(resolve, 100))
-
-              dispatch(reducer.getPhotos())
-              await new Promise(resolve => setTimeout(resolve, 100))
-
-              dispatch(reducer.getPhotos())
-              await new Promise(resolve => setTimeout(resolve, 100))
-
-              // dispatch(reducer.getPhotos())
-              // await new Promise(resolve => setTimeout(resolve, 100))
-              //
-              // dispatch(reducer.getPhotos())
-              // await new Promise(resolve => setTimeout(resolve, 100))
-              //
-              // dispatch(reducer.getPhotos())
-              // await new Promise(resolve => setTimeout(resolve, 100))
-              //
-              // dispatch(reducer.getPhotos())
-              // await new Promise(resolve => setTimeout(resolve, 100))
-              //
-              // dispatch(reducer.getPhotos())
-              // await new Promise(resolve => setTimeout(resolve, 100))
-
-              dispatch(reducer.getPhotos())
-              // }
-
-              // dispatch(reducer.getPhotos())
-              // dispatch(reducer.getPhotos())
-              // }
+              // console.log(`reached the end() ${isListFilllsScreen()}`)
+              setLoadMore(true)
             }
           }
           onEndReachedThreshold={
-            0.1
+            0.9
           }
           refreshing={
             false
           }
           onRefresh={
-            async () => {
-              await reload()
+            () => {
+              reload()
             }
           }
           // onContentSizeChange={() => console.log(`photos.length = ${photos.length}`)}
@@ -589,7 +572,7 @@ const PhotosList = ({ navigation }) => {
     )
   }
 
-  if (photos.length === 0 && !isLastPage) {
+  if (loading) {
     return (
       <Container>
         <Content padder>
@@ -630,7 +613,7 @@ const PhotosList = ({ navigation }) => {
     )
   }
 
-  if (photos.length === 0 && !loading && isTandcAccepted) {
+  if (!loading && photos.length === 0 && isTandcAccepted) {
     return (
       <Container>
         <Content padder>
