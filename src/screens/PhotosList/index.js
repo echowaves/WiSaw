@@ -405,6 +405,8 @@ const PhotosList = ({ navigation }) => {
           }
           onChangeText={currentTerm => dispatch(reducer.setSearchTerm(currentTerm))}
           value={searchTerm}
+          editable
+          autoFocus
         />
       </Item>
     )
