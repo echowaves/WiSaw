@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 import { useNavigation } from '@react-navigation/native'
-import { Col, Row, Grid } from 'react-native-easy-grid'
 
 import Geolocation from '@react-native-community/geolocation'
 

@@ -1,5 +1,6 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React from 'react'
+import { useDispatch } from "react-redux"
+
 import FastImage from 'react-native-fast-image'
 
 import {
@@ -14,117 +15,114 @@ import {
 } from 'native-base'
 
 import PropTypes from 'prop-types'
-import { setCurrentPhotoIndex } from './reducer'
 
 import * as CONST from '../../consts.js'
 
-class Thumb extends Component {
-  constructor(props) {
-    super(props)
-  }
+import * as reducer from './reducer'
 
-  onThumbPress(item) {
-    const { navigation, index, setCurrentPhotoIndex } = this.props
-    setCurrentPhotoIndex(index)
+const Thumb = props => {
+  const {
+    navigation, index, item, thumbWidth,
+  } = props
+
+  const dispatch = useDispatch()
+
+  const onThumbPress = item => {
+    dispatch(reducer.setCurrentPhotoIndex(index))
     navigation.navigate('PhotosDetails')
   }
 
-  render() {
-    const { item, thumbWidth } = this.props
-
-    // alert(this.thumbD)
-    const thumbWidthStyles = {
-      width: thumbWidth,
-      height: thumbWidth,
-    }
-
-    return (
-      <View>
-        <TouchableHighlight
-          onPress={() => this.onThumbPress(item)}
-          style={[
-            styles.container,
-            thumbWidthStyles,
-          ]}>
-          <FastImage
-            source={{ uri: item.getThumbUrl }}
-            style={styles.thumbnail}
-            fallback={item.fallback}
-          />
-        </TouchableHighlight>
-        { item.commentsCount > 0 && (
-          <View
-            style={
-              {
-                fontSize: 30,
-                color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                bottom: 2,
-                right: 5,
-              }
-            }>
-            <Icon
-              type="FontAwesome"
-              name="comment"
-              style={
-                {
-                  fontSize: 30,
-                  color: CONST.SECONDARY_COLOR,
-                }
-              }
-            />
-            <Text
-              style={
-                {
-                  fontSize: 10,
-                  color: CONST.TEXT_COLOR,
-                  position: 'absolute',
-                  right: 8,
-                  top: 12,
-                }
-              }>
-              {item.commentsCount > 99 ? '+99' : item.commentsCount}
-            </Text>
-          </View>
-        )}
-        { item.likes > 0 && (
-          <View
-            style={
-              {
-                fontSize: 30,
-                color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                bottom: 2,
-                left: 5,
-              }
-            }>
-            <Icon
-              type="FontAwesome"
-              name="thumbs-up"
-              style={
-                {
-                  fontSize: 30,
-                  color: CONST.SECONDARY_COLOR,
-                }
-              }
-            />
-            <Text
-              style={
-                {
-                  fontSize: 10,
-                  color: CONST.TEXT_COLOR,
-                  position: 'absolute',
-                  right: 5,
-                  top: 12,
-                }
-              }>
-              {item.likes > 99 ? '+ 99' : item.likes}
-            </Text>
-          </View>
-        )}
-      </View>
-    )
+  const thumbWidthStyles = {
+    width: thumbWidth,
+    height: thumbWidth,
   }
+
+  return (
+    <View>
+      <TouchableHighlight
+        onPress={() => onThumbPress(item)}
+        style={[
+          styles.container,
+          thumbWidthStyles,
+        ]}>
+        <FastImage
+          source={{ uri: item.getThumbUrl }}
+          style={styles.thumbnail}
+          fallback={item.fallback}
+        />
+      </TouchableHighlight>
+      { item.commentsCount > 0 && (
+        <View
+          style={
+            {
+              fontSize: 30,
+              color: CONST.MAIN_COLOR,
+              position: 'absolute',
+              bottom: 2,
+              right: 5,
+            }
+          }>
+          <Icon
+            type="FontAwesome"
+            name="comment"
+            style={
+              {
+                fontSize: 30,
+                color: CONST.SECONDARY_COLOR,
+              }
+            }
+          />
+          <Text
+            style={
+              {
+                fontSize: 10,
+                color: CONST.TEXT_COLOR,
+                position: 'absolute',
+                right: 8,
+                top: 12,
+              }
+            }>
+            {item.commentsCount > 99 ? '+99' : item.commentsCount}
+          </Text>
+        </View>
+      )}
+      { item.likes > 0 && (
+        <View
+          style={
+            {
+              fontSize: 30,
+              color: CONST.MAIN_COLOR,
+              position: 'absolute',
+              bottom: 2,
+              left: 5,
+            }
+          }>
+          <Icon
+            type="FontAwesome"
+            name="thumbs-up"
+            style={
+              {
+                fontSize: 30,
+                color: CONST.SECONDARY_COLOR,
+              }
+            }
+          />
+          <Text
+            style={
+              {
+                fontSize: 10,
+                color: CONST.TEXT_COLOR,
+                position: 'absolute',
+                right: 5,
+                top: 12,
+              }
+            }>
+            {item.likes > 99 ? '+ 99' : item.likes}
+          </Text>
+        </View>
+      )}
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -139,19 +137,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 10,
-    // resizeMode: 'contain',
   },
 })
 
-const mapStateToProps = null
-
-const mapDispatchToProps = {
-  setCurrentPhotoIndex, // will be wrapped into a dispatch call
-}
-
 Thumb.propTypes = {
   navigation: PropTypes.object.isRequired,
-  setCurrentPhotoIndex: PropTypes.func.isRequired,
+  // setCurrentPhotoIndex: PropTypes.func.isRequired,
   item: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   thumbWidth: PropTypes.number,
@@ -161,4 +152,4 @@ Thumb.defaultProps = {
   thumbWidth: 100,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Thumb)
+export default Thumb
