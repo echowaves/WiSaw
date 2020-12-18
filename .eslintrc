@@ -8,7 +8,8 @@
 	],
 	"plugins": [
 		"react",
-    "jest"
+    "jest",
+    "react-hooks"
 	],
   "parser": "babel-eslint",
 	"parserOptions": {
@@ -103,6 +104,8 @@
 		"react/require-extension": 0,
 		"react/self-closing-comp": 1,
 		"react/sort-comp": 1,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn", 
 		"semi": [1, "never"]
 	},
 	"settings": {

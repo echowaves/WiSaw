@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
+import { useNavigation } from '@react-navigation/native'
+import { Col, Row, Grid } from 'react-native-easy-grid'
 
 import Geolocation from '@react-native-community/geolocation'
 
@@ -9,12 +11,11 @@ import {
   View,
   Platform,
   Alert,
+  TextInput,
 } from 'react-native'
 
 import {
   Icon,
-  Item,
-  Input,
   Container,
   Content,
   Body,
@@ -27,6 +28,7 @@ import {
   Segment,
   StyleProvider,
   Toast,
+  Input,
 } from 'native-base'
 
 import NetInfo from "@react-native-community/netinfo"
@@ -55,7 +57,9 @@ import { uploadPendingPhotos } from '../Camera/reducer'
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
 
-const PhotosList = ({ navigation }) => {
+const PhotosList = () => {
+  const navigation = useNavigation()
+
   const [thumbWidth, setThumbWidth] = useState()
   const [loadMore, setLoadMore] = useState(false)
 
@@ -89,8 +93,18 @@ const PhotosList = ({ navigation }) => {
     dispatch(reducer.setOrientation(deviceOrientation.portrait ? 'portrait' : 'landscape'))
   }, [deviceOrientation]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // re-render title on any state chage
+  // re-render title on  state chage
   useEffect(() => {
+    updateNavBar()
+  }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // when with of screen changes
+  useEffect(() => {
+    const thumbsCount = Math.floor(width / 100)
+    setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
+  }, [width])
+
+  const updateNavBar = () => {
     if (netAvailable) {
       navigation.setOptions({
         headerTitle: renderHeaderTitle(),
@@ -104,13 +118,7 @@ const PhotosList = ({ navigation }) => {
         headerRight: null,
       })
     }
-  })
-
-  // when with of screen changes
-  useEffect(() => {
-    const thumbsCount = Math.floor(width / 100)
-    setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
-  }, [width])
+  }
 
   // componentDidMount branch initialization
   useEffect(() => {
@@ -151,6 +159,13 @@ const PhotosList = ({ navigation }) => {
       setLoadMore(false)
     }
   }, [loading, loadMore, isLastPage]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // when screen orientation changes
+  useEffect(() => {
+    if (searchTerm === null || searchTerm === '') {
+      updateNavBar()
+    }
+  }, [activeSegment, searchTerm]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isListFilllsScreen = () => {
     const numColumns = Math.floor(width / thumbWidth)
@@ -386,29 +401,7 @@ const PhotosList = ({ navigation }) => {
       )
     }
     return (
-      <Item
-        rounded
-        style={
-          {
-            width: '100%',
-          }
-        }>
-        <Input
-          placeholder="what are you searching for?"
-          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-          style={
-            {
-              color: CONST.MAIN_COLOR,
-              paddingLeft: 10,
-              paddingRight: 10,
-            }
-          }
-          onChangeText={currentTerm => dispatch(reducer.setSearchTerm(currentTerm))}
-          value={searchTerm}
-          editable
-          autoFocus
-        />
-      </Item>
+      <Text />
     )
   }
 
@@ -479,31 +472,72 @@ const PhotosList = ({ navigation }) => {
       )
     }
     return (
-      <Icon
-        type="MaterialIcons"
-        name="search"
-        style={
-          {
-            marginRight: 20,
-            color: CONST.MAIN_COLOR,
-          }
-        }
-        onPress={
-          () => {
-            if (searchTerm && searchTerm.length >= 3) {
-              reload()
-            } else {
-              Toast.show({
-                text: "Search for more than 3 characters",
-                buttonText: "OK",
-                type: "warning",
-              })
-            }
-          }
-        }
-      />
+      <Text />
     )
   }
+
+  const renderSearchBar = () => (
+    <CardItem
+      style={
+        {
+          height: 40,
+        }
+      }>
+      <Grid>
+        <Col
+          style={
+            {
+              width: '90%',
+            }
+          }>
+          <Input
+            placeholder="what are you searching for?"
+            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+            style={
+              {
+                color: CONST.MAIN_COLOR,
+                paddingLeft: 10,
+                paddingRight: 10,
+              }
+            }
+            onChangeText={currentTerm => {
+              dispatch(reducer.setSearchTerm(currentTerm))
+              // updateNavBar()
+            }}
+            value={searchTerm}
+            editable
+            autoFocus
+          />
+        </Col>
+        <Col>
+          <Icon
+            type="MaterialIcons"
+            name="search"
+            style={
+              {
+                width: 400,
+                marginRight: 20,
+                color: CONST.MAIN_COLOR,
+              }
+            }
+            onPress={
+              () => {
+                if (searchTerm && searchTerm.length >= 3) {
+                  reload()
+                } else {
+                  Toast.show({
+                    text: "Search for more than 3 characters",
+                    buttonText: "OK",
+                    type: "warning",
+                  })
+                }
+              }
+            }
+          />
+        </Col>
+      </Grid>
+    </CardItem>
+  )
 
   if (
     isTandcAccepted
@@ -512,6 +546,11 @@ const PhotosList = ({ navigation }) => {
   ) {
     return (
       <Container>
+
+        <Card transparent>
+          {searchTerm && (renderSearchBar())}
+        </Card>
+
         <FlatGrid
           itemDimension={
             thumbWidth
@@ -546,6 +585,12 @@ const PhotosList = ({ navigation }) => {
           onMomentumScrollBegin={
             async () => {
               // console.log(`onMomentumScrollBegin() ${isListFilllsScreen()}`)
+              setLoadMore(true)
+            }
+          }
+          onMomentumScrollEnd={
+            async () => {
+              // console.log(`onMomentumScrollEnd() ${isListFilllsScreen()}`)
               setLoadMore(true)
             }
           }
@@ -622,7 +667,8 @@ const PhotosList = ({ navigation }) => {
           <Body>
             {searchTerm !== null && (
               <Card transparent>
-                <CardItem style={{ borderRadius: 10 }}>
+                {renderSearchBar()}
+                <CardItem>
                   <Text style={{
                     fontSize: 20,
                     textAlign: 'center',
@@ -726,8 +772,8 @@ const PhotosList = ({ navigation }) => {
     </Container>
   )
 }
-PhotosList.propTypes = {
-  navigation: PropTypes.object.isRequired,
-}
+// PhotosList.propTypes = {
+//   navigation: PropTypes.object.isRequired,
+// }
 
 export default PhotosList
