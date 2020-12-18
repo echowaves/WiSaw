@@ -147,7 +147,6 @@ const PhotosList = () => {
 
   // when screen orientation changes
   useEffect(() => {
-    // console.log(`useEffect:  loading:${loading}, loadMore:${loadMore}, isLastPage:${isLastPage}, isListFilllsScreen:${isListFilllsScreen()}`)
     if (searchTerm === null || searchTerm.length >= 3) {
       if (loadMore && !isLastPage && batch) {
         dispatch(reducer.getPhotos())
@@ -411,7 +410,10 @@ const PhotosList = () => {
       return (
         <Icon
           onPress={
-            () => reload()
+            () => {
+              dispatch(reducer.initState())
+              reload()
+            }
           }
           name="sync"
           type="MaterialIcons"
@@ -490,7 +492,6 @@ const PhotosList = () => {
           }
           onChangeText={currentTerm => {
             dispatch(reducer.setSearchTerm(currentTerm))
-            // updateNavBar()
           }}
           value={searchTerm}
           editable
@@ -567,19 +568,16 @@ const PhotosList = () => {
           }
           onMomentumScrollBegin={
             async () => {
-              // console.log(`onMomentumScrollBegin() ${isListFilllsScreen()}`)
               setLoadMore(true)
             }
           }
           onMomentumScrollEnd={
             async () => {
-              // console.log(`onMomentumScrollEnd() ${isListFilllsScreen()}`)
               setLoadMore(true)
             }
           }
           onEndReached={
             async () => {
-              // console.log(`reached the end() ${isListFilllsScreen()}`)
               setLoadMore(true)
             }
           }
@@ -594,7 +592,6 @@ const PhotosList = () => {
               reload()
             }
           }
-          // onContentSizeChange={() => console.log(`photos.length = ${photos.length}`)}
         />
 
         {renderPhotoButton()}

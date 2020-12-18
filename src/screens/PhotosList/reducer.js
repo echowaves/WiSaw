@@ -27,7 +27,7 @@ export const initialState = {
   loading: false,
   errorMessage: '',
   pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the net page
-  orientation: 'portrait-primary',
+  orientation: 'portrait',
   activeSegment: 0,
   searchTerm: null,
   batch: null,
@@ -62,6 +62,7 @@ const reducer = (state = initialState, action) => {
         errorMessage: action.errorMessage,
       }
     case ACTION_TYPES.GET_PHOTOS_FINISHED:
+      // console.log(`${state.searchTerm} && ${state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE}`)
       return {
         ...state,
         loading: false,
@@ -74,7 +75,7 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.RESET_STATE:
       return {
         ...state,
-        location: null,
+        // location: null,
         photos: [],
         loading: false,
         errorMessage: '',
@@ -322,9 +323,10 @@ async function _requestSearchedPhotos(getState) {
 export function getPhotos() {
   return async (dispatch, getState) => {
     const { batch } = getState().photosList
-    // const { loading, isLastPage, pageNumber } = getState().photosList
-    // console.log(`getPhotos() loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
-
+    // const {
+    //   loading, isLastPage, pageNumber, searchTerm,
+    // } = getState().photosList
+    // console.log(`getPhotos() searchTerm:${searchTerm} loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
     if (!getState().photosList.location || getState().photosList.netAvailable === false) {
       dispatch({
         type: ACTION_TYPES.GET_PHOTOS_FAIL,
