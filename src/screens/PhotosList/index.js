@@ -11,7 +11,6 @@ import {
   View,
   Platform,
   Alert,
-  TextInput,
 } from 'react-native'
 
 import {
@@ -29,6 +28,8 @@ import {
   StyleProvider,
   Toast,
   Input,
+  Header,
+  Item,
 } from 'native-base'
 
 import NetInfo from "@react-native-community/netinfo"
@@ -477,66 +478,50 @@ const PhotosList = () => {
   }
 
   const renderSearchBar = () => (
-    <CardItem
-      style={
-        {
-          height: 40,
-        }
-      }>
-      <Grid>
-        <Col
+    <Header searchBar rounded renderSearchBar>
+      <Item>
+        <Input
+          placeholder="what are you searching for?"
+          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
           style={
             {
-              width: '90%',
+              color: CONST.MAIN_COLOR,
             }
-          }>
-          <Input
-            placeholder="what are you searching for?"
-            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
-                paddingLeft: 10,
-                paddingRight: 10,
+          }
+          onChangeText={currentTerm => {
+            dispatch(reducer.setSearchTerm(currentTerm))
+            // updateNavBar()
+          }}
+          value={searchTerm}
+          editable
+          autoFocus
+        />
+      </Item>
+      <Button transparent>
+        <Icon
+          type="MaterialIcons"
+          name="search"
+          style={
+            {
+              color: CONST.MAIN_COLOR,
+            }
+          }
+          onPress={
+            () => {
+              if (searchTerm && searchTerm.length >= 3) {
+                reload()
+              } else {
+                Toast.show({
+                  text: "Search for more than 3 characters",
+                  buttonText: "OK",
+                  type: "warning",
+                })
               }
             }
-            onChangeText={currentTerm => {
-              dispatch(reducer.setSearchTerm(currentTerm))
-              // updateNavBar()
-            }}
-            value={searchTerm}
-            editable
-            autoFocus
-          />
-        </Col>
-        <Col>
-          <Icon
-            type="MaterialIcons"
-            name="search"
-            style={
-              {
-                width: 400,
-                marginRight: 20,
-                color: CONST.MAIN_COLOR,
-              }
-            }
-            onPress={
-              () => {
-                if (searchTerm && searchTerm.length >= 3) {
-                  reload()
-                } else {
-                  Toast.show({
-                    text: "Search for more than 3 characters",
-                    buttonText: "OK",
-                    type: "warning",
-                  })
-                }
-              }
-            }
-          />
-        </Col>
-      </Grid>
-    </CardItem>
+          }
+        />
+      </Button>
+    </Header>
   )
 
   if (
@@ -547,9 +532,7 @@ const PhotosList = () => {
     return (
       <Container>
 
-        <Card transparent>
-          {searchTerm && (renderSearchBar())}
-        </Card>
+        {searchTerm && (renderSearchBar())}
 
         <FlatGrid
           itemDimension={
@@ -613,6 +596,7 @@ const PhotosList = () => {
           }
           // onContentSizeChange={() => console.log(`photos.length = ${photos.length}`)}
         />
+
         {renderPhotoButton()}
       </Container>
 
@@ -622,6 +606,7 @@ const PhotosList = () => {
   if (loading) {
     return (
       <Container>
+        {searchTerm && (renderSearchBar())}
         <Content padder>
           <Body>
             <Spinner color={
