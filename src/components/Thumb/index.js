@@ -1,5 +1,5 @@
 import React from 'react'
-import { useDispatch } from "react-redux"
+// import { useDispatch } from "react-redux"
 
 import FastImage from 'react-native-fast-image'
 
@@ -18,18 +18,15 @@ import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts.js'
 
-import * as reducer from './reducer'
-
 const Thumb = props => {
   const {
     navigation, index, item, thumbWidth,
   } = props
 
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
 
   const onThumbPress = item => {
-    dispatch(reducer.setCurrentPhotoIndex(index))
-    navigation.navigate('PhotosDetails')
+    navigation.navigate('PhotosDetails', { currentPhotoIndex: index })
   }
 
   const thumbWidthStyles = {

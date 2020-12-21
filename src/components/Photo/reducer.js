@@ -159,10 +159,15 @@ export function watchPhoto({ item, navigation }) {
         dispatch({
           type: ACTION_TYPES.PHOTO_WATCHED,
         })
-        navigation.setParams({ watched: true })
+      } else {
+        dispatch({
+          type: ACTION_TYPES.PHOTO_UNWATCHED,
+        })
       }
     } catch (err) {
-      navigation.setParams({ watched: false })
+      dispatch({
+        type: ACTION_TYPES.PHOTO_UNWATCHED,
+      })
       Toast.show({
         text: "Unable to watch photo. Potential Network Issue.",
         buttonText: "OK",
@@ -191,10 +196,15 @@ export function unwatchPhoto({ item, navigation }) {
         dispatch({
           type: ACTION_TYPES.PHOTO_UNWATCHED,
         })
-        navigation.setParams({ watched: false })
+      } else {
+        dispatch({
+          type: ACTION_TYPES.PHOTO_WATCHED,
+        })
       }
     } catch (err) {
-      navigation.setParams({ watched: true })
+      dispatch({
+        type: ACTION_TYPES.PHOTO_WATCHED,
+      })
       Toast.show({
         text: "Unable to unwatch photo. Potential Network Issue.",
         buttonText: "OK",
@@ -380,7 +390,6 @@ export function submitComment({ inputText, item, navigation }) {
           type: "success",
         })
         watchPhoto({ item, navigation })
-        navigation.setParams({ watched: true })
       } else {
         dispatch({
           type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
@@ -535,12 +544,10 @@ export function checkIsPhotoWatched({ item, navigation }) {
         dispatch({
           type: ACTION_TYPES.PHOTO_WATCHED,
         })
-        navigation.setParams({ watched: true })
       } else {
         dispatch({
           type: ACTION_TYPES.PHOTO_UNWATCHED,
         })
-        navigation.setParams({ watched: false })
       }
     } catch (err) {
       Toast.show({
