@@ -102,7 +102,7 @@ const PhotosDetails = ({ route, navigation }) => {
           text: 'Yes',
           onPress: () => {
             dispatch(reducer.deletePhoto({ item }))
-            // navigation.goBack()
+            navigation.goBack()
           },
         },
       ],
