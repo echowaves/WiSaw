@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import React, { useEffect } from 'react'
+// import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
-import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
+import { useDimensions } from '@react-native-community/hooks'
 
 import {
-  Dimensions,
+  // Dimensions,
   View,
   TouchableOpacity,
   Alert,
@@ -39,7 +39,7 @@ const Photo = props => {
     item,
   } = props
   const dispatch = useDispatch()
-  const deviceOrientation = useDeviceOrientation()
+  // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
 
   const likes = useSelector(state => state.photo.likes)
