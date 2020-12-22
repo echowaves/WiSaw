@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
@@ -147,30 +147,4 @@ const FeedbackScreen = () => {
     </Container>
   )
 }
-
-// const mapStateToProps = state => ({
-//   feedbackText: state.feedback.feedbackText,
-//   loading: state.feedback.loading,
-//   errorMessage: state.feedback.errorMessage,
-//   finished: state.feedback.finished,
-// })
-//
-// const mapDispatchToProps = {
-//   // will be wrapped into a dispatch call
-//   setFeedbackText,
-//   submitFeedback,
-//   resetForm,
-// }
-
-// FeedbackScreen.propTypes = {
-//   navigation: PropTypes.object.isRequired,
-//   feedbackText: PropTypes.string.isRequired,
-//   errorMessage: PropTypes.string.isRequired,
-//   loading: PropTypes.bool.isRequired,
-//   finished: PropTypes.bool.isRequired,
-//   submitFeedback: PropTypes.func.isRequired,
-//   setFeedbackText: PropTypes.func.isRequired,
-//   resetForm: PropTypes.func.isRequired,
-// }
-//
 export default FeedbackScreen
