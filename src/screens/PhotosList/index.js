@@ -304,7 +304,7 @@ const PhotosList = () => {
   }
 
   const takePhoto = () => {
-    navigation.push('Camera')
+    navigation.navigate('Camera')
   }
 
   const renderPhotoButton = () => (
@@ -461,7 +461,7 @@ const PhotosList = () => {
 
           <Icon
             onPress={
-              () => navigation.push('Feedback')
+              () => navigation.navigate('FeedbackScreen')
             }
             name="feedback"
             type="MaterialIcons"

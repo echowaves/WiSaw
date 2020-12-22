@@ -13,7 +13,7 @@
     "ipad-pro": "react-native run-ios --simulator \"iPad Pro (12.9-inch) (3rd generation)\"",
     "ipad": "react-native run-ios --device \"DiPad (2)\" --configuration=release",
     "phone": "react-native run-ios --device \"DiPhone\" --configuration=release",
-    "android": "react-native run-android",
+    "android": " npx react-native run-android",
     "clean": "react-native clean-project-auto",
     "bundle-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
     "start": "react-native start",
