@@ -203,7 +203,7 @@ const PhotosList = () => {
   }
 
   const checkPermissionsForPhotoTaking = async () => {
-    let permission = await reducer.checkPermission(
+    let permission = await _checkPermission(
       Platform.select({
         android: PERMISSIONS.ANDROID.CAMERA,
         ios: PERMISSIONS.IOS.CAMERA,
@@ -214,23 +214,23 @@ const PhotosList = () => {
     if (permission === 'granted') {
       switch (Platform.OS) {
         case 'ios':
-          permission = dispatch(reducer.checkPermission(
+          permission = await _checkPermission(
             PERMISSIONS.IOS.PHOTO_LIBRARY,
             'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
-          ))
+          )
           break
         case 'android':
-          permission = dispatch(reducer.checkPermission(
+          permission = await _checkPermission(
             PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
             'Can we write photos to your devise?',
             'How else would we be able to save the photos you take on your device?'
-          ))
+          )
           if (permission === 'granted') {
-            permission = dispatch(reducer.checkPermission(
+            permission = await _checkPermission(
               PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
               'Can we read photos on your devise?',
               'How else would we be able upload the photos you take from your device?'
-            ))
+            )
           }
           break
         default:
