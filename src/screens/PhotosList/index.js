@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 import { useNavigation } from '@react-navigation/native'
+import { useDispatch, useSelector } from "react-redux"
+
+import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 
 import Geolocation from '@react-native-community/geolocation'
 
@@ -38,8 +40,6 @@ import {
 } from 'react-native-permissions'
 
 import branch from 'react-native-branch'
-
-import { useDispatch, useSelector } from "react-redux"
 
 import FlatGrid from 'react-native-super-grid'
 

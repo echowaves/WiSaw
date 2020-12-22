@@ -140,10 +140,9 @@ export function likePhoto({ photoId }) {
   }
 }
 
-export function watchPhoto({ item, navigation }) {
+export function watchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-
     try {
       const response = await fetch(`${CONST.HOST}/photos/${item.id}/watchers`, {
         method: 'POST',
@@ -177,7 +176,7 @@ export function watchPhoto({ item, navigation }) {
   }
 }
 
-export function unwatchPhoto({ item, navigation }) {
+export function unwatchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
 
@@ -356,7 +355,7 @@ export function setInputText({ inputText }) {
   }
 }
 
-export function submitComment({ inputText, item, navigation }) {
+export function submitComment({ inputText, item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     dispatch({
@@ -389,7 +388,7 @@ export function submitComment({ inputText, item, navigation }) {
           buttonText: "OK",
           type: "success",
         })
-        watchPhoto({ item, navigation })
+        dispatch(watchPhoto({ item }))
       } else {
         dispatch({
           type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
@@ -529,7 +528,7 @@ export function getRecognitions({ item }) {
   }
 }
 
-export function checkIsPhotoWatched({ item, navigation }) {
+export function checkIsPhotoWatched({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
