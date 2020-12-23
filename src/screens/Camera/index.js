@@ -192,11 +192,12 @@ const Camera = () => {
             dispatch(reducer.setPreviewUri(null))
           }
         }>
-        <Icon name="close-circle" />
+        <Icon name="times-circle" type="FontAwesome" />
         <Text
           style={
             {
               color: '#fff',
+              paddingLeft: 5,
             }
           }>skip
         </Text>
@@ -219,10 +220,11 @@ const Camera = () => {
           style={
             {
               color: '#fff',
+              paddingRight: 5,
             }
-          }>  share
+          }>share
         </Text>
-        <Icon name="cloud-upload" />
+        <Icon name="cloud-upload" type="FontAwesome" />
       </Button>
     </View>
   )
