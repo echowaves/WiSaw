@@ -165,7 +165,7 @@ export function uploadPendingPhotos() {
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
-      uploadPendingPhotos()
+      dispatch(uploadPendingPhotos())
     }
 
     dispatch({
@@ -191,12 +191,11 @@ async function uploadFile(fileJson) {
   const responseJson = await response.json()
 
   if (response.status === 401) {
-    alert("Sorry, looks like you are banned from WiSaw.")
+    alert("Sorry, looks like you have been banned from WiSaw.")
     return
   }
   if (response.status === 201) {
     const { uploadURL, photo } = responseJson
-
     let filePath = uri
 
     // ths has to be addressed by the rn-fetch-blob -- remove when rn-fetch-blob supports it

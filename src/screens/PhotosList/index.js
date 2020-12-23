@@ -74,7 +74,7 @@ const PhotosList = () => {
   // const paging = useSelector(state => state.photosList.paging)
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
   const loading = useSelector(state => state.photosList.loading)
-  const pendingUploads = useSelector(state => state.photosList.pendingUploads)
+  const pendingUploads = useSelector(state => state.camera.pendingUploads)
   const orientation = useSelector(state => state.photosList.orientation)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
@@ -95,6 +95,9 @@ const PhotosList = () => {
   // re-render title on  state chage
   useEffect(() => {
     updateNavBar()
+    if (netAvailable) {
+      dispatch(cameraReducer.uploadPendingPhotos())
+    }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // when with of screen changes
