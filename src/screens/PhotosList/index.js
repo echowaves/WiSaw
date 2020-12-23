@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux"
 
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 
+import useKeyboard from '@rnhooks/keyboard'
+
 import Geolocation from '@react-native-community/geolocation'
 
 import {
@@ -80,6 +82,8 @@ const PhotosList = () => {
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
   const batch = useSelector(state => state.photosList.batch)
+
+  const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
   // check permissions and retrieve UUID
   useEffect(() => {
@@ -481,14 +485,26 @@ const PhotosList = () => {
   }
 
   const renderSearchBar = () => (
-    <Header searchBar rounded renderSearchBar>
-      <Item>
+    <Header
+      searchBar rounded renderSearchBar
+      style={
+        {
+          backgroundColor: '#FFFFFF',
+        }
+      }>
+
+      <Body style={
+        {
+          width: '100%',
+        }
+      }>
         <Input
-          placeholder="what are you searching for?"
+          placeholder="type text here"
           placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
           style={
             {
               color: CONST.MAIN_COLOR,
+              width: '100%',
             }
           }
           onChangeText={currentTerm => {
@@ -496,35 +512,44 @@ const PhotosList = () => {
           }}
           value={searchTerm}
           editable
-          autoFocus
-        />
-      </Item>
-      <Button transparent>
-        <Icon
-          type="MaterialIcons"
-          name="search"
-          style={
-            {
-              color: CONST.MAIN_COLOR,
-            }
+          onSubmitEditing={
+            () => submitSearch()
           }
-          onPress={
-            () => {
-              if (searchTerm && searchTerm.length >= 3) {
-                reload()
-              } else {
-                Toast.show({
-                  text: "Search for more than 3 characters",
-                  buttonText: "OK",
-                  type: "warning",
-                })
+        />
+      </Body>
+      <Right>
+        <Button transparent>
+          <Icon
+            type="MaterialIcons"
+            name="search"
+            style={
+              {
+                color: CONST.MAIN_COLOR,
               }
             }
-          }
-        />
-      </Button>
+            onPress={
+              () => submitSearch()
+            }
+          />
+        </Button>
+      </Right>
     </Header>
   )
+
+  const submitSearch = () => {
+    if (searchTerm && searchTerm.length >= 3) {
+      reload()
+      if (keyboardVisible) {
+        dismissKeyboard()
+      }
+    } else {
+      Toast.show({
+        text: "Search for more than 3 characters",
+        buttonText: "OK",
+        type: "warning",
+      })
+    }
+  }
 
   if (
     isTandcAccepted

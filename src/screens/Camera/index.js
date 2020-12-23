@@ -126,7 +126,6 @@ const Camera = () => {
         cameraRollUri => {
           const now = moment().format()
           const { uuid, location } = store.getState().photosList
-
           AsyncStorage.setItem(`wisaw-pending-${now}`,
             JSON.stringify(
               {
