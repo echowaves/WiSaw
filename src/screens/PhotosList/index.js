@@ -32,7 +32,7 @@ import {
   Toast,
   Input,
   Header,
-  Item,
+  // Item,
 } from 'native-base'
 
 import NetInfo from "@react-native-community/netinfo"
