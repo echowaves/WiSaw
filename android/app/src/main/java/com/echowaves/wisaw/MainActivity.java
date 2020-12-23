@@ -12,6 +12,8 @@ import org.json.JSONObject;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
+import io.branch.rnbranch.RNBranchModule;
+
 public class MainActivity extends ReactActivity {
 
     /**
