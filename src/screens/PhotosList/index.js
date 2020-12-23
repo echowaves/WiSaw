@@ -52,13 +52,17 @@ import material from '../../../native-base-theme/variables/material'
 
 import * as reducer from './reducer'
 
-import { uploadPendingPhotos } from '../Camera/reducer'
+import * as cameraReducer from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
 
 const PhotosList = () => {
   const navigation = useNavigation()
+  const dispatch = useDispatch()
+
+  const deviceOrientation = useDeviceOrientation()
+  const { width, height } = useDimensions().window
 
   const [thumbWidth, setThumbWidth] = useState()
   const [loadMore, setLoadMore] = useState(false)
@@ -76,11 +80,6 @@ const PhotosList = () => {
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
   const batch = useSelector(state => state.photosList.batch)
-
-  const dispatch = useDispatch()
-
-  const deviceOrientation = useDeviceOrientation()
-  const { width, height } = useDimensions().window
 
   // check permissions and retrieve UUID
   useEffect(() => {
@@ -199,7 +198,7 @@ const PhotosList = () => {
     dispatch(reducer.setLocation(await _getLocation()))
     setLoadMore(true)
 
-    uploadPendingPhotos()
+    dispatch(cameraReducer.uploadPendingPhotos())
   }
 
   const checkPermissionsForPhotoTaking = async () => {

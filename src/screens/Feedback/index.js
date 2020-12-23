@@ -42,7 +42,7 @@ const FeedbackScreen = () => {
       headerTitle: <Text>feedback form</Text>,
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
-      headerBackTitle: () => null,
+      headerBackTitle: <Text />,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
