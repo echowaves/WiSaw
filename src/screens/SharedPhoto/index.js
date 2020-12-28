@@ -1,270 +1,224 @@
-import React, { Component, } from 'react'
+import React, { useEffect } from 'react'
+import { useNavigation } from '@react-navigation/native'
+
+import { useDispatch, useSelector } from "react-redux"
 
 import PropTypes from 'prop-types'
 
 import {
-	StyleSheet,
-	View,
-	Alert,
+  StyleSheet,
+  View,
+  Alert,
+  Text,
 } from 'react-native'
 
-import { connect, } from 'react-redux'
-
 import {
-	Icon,
-	Button,
-	Container,
-	Content,
-	Body,
-	Spinner,
+  Icon,
+  Button,
+  Container,
+  Content,
+  Body,
+  Spinner,
 } from 'native-base'
 
 import Photo from '../../components/Photo'
 
-import {
-	banPhoto,
-	deletePhoto,
-	watchPhoto,
-	unwatchPhoto,
-	checkIsPhotoWatched,
-} from '../../components/Photo/reducer'
+import * as photoReducer from '../../components/Photo/reducer'
 
-import {
-	setItem,
-} from './reducer'
+import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
 
-class SharedPhoto extends Component {
-	static navigationOptions = ({
-		navigation,
-	}) => {
-		const { params = {}, } = navigation.state
-		return ({
-			headerTitle: 'shared photo',
-			headerTintColor: CONST.SECONDARY_COLOR,
-			headerLeft: (
-				<View style={{
-					flex: 1,
-					flexDirection: "row",
-				}}>
-					<Button
-						onPress={
-							() => navigation.goBack()
-						}
-						style={{
-							backgroundColor: '#ffffff',
-						}}>
-						<Icon
-							name="angle-left"
-							type="FontAwesome"
-							style={{
-								color: CONST.MAIN_COLOR,
-							}}
-						/>
-					</Button>
-					<Button
-						onPress={
-							navigation.getParam('handleFlipWatch')
-						}
-						style={{
-							backgroundColor: '#ffffff',
-						}}>
-						<Icon
-							name={navigation.getParam('watched') ? "eye" : "eye-slash"}
-							type="FontAwesome"
-							style={{ color: CONST.MAIN_COLOR, }}
-						/>
-					</Button>
-				</View>
-			),
-			headerRight: (!navigation.getParam('watched') && (
-				<View style={{
-					flex: 1,
-					flexDirection: "row",
-				}}>
-					<Icon
-						onPress={
-							() => params.handleBan()
-						}
-						name="ban"
-						type="FontAwesome"
-						style={{
-							marginRight: 20,
-							color: CONST.MAIN_COLOR,
-						}}
-					/>
-					<Icon
-						onPress={
-							() => params.handleDelete()
-						}
-						name="trash"
-						type="FontAwesome"
-						style={{ marginRight: 20, color: CONST.MAIN_COLOR, }}
-					/>
-				</View>
-			)),
-			headerBackTitle: null,
-		})
-	}
+const SharedPhoto = props => {
+  const navigation = useNavigation()
+  const dispatch = useDispatch()
 
-	componentDidMount() {
-		const {
-			navigation,
-			setItem,
-			checkIsPhotoWatched,
-		} = this.props
-		navigation.setParams({ handleBan: () => (this.handleBan()), })
-		navigation.setParams({ handleDelete: () => (this.handleDelete()), })
+  const item = useSelector(state => state.sharedPhoto.item)
+  const bans = useSelector(state => state.photo.bans)
+  const watched = useSelector(state => state.photo.watched)
 
-		setItem({ item: navigation.getParam('item'), })
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: <Text>shared photo</Text>,
+      headerTintColor: CONST.SECONDARY_COLOR,
+      headerLeft: (
+        <View style={{
+          flex: 1,
+          flexDirection: "row",
+        }}>
+          <Button
+            onPress={
+              () => navigation.goBack()
+            }
+            style={{
+              backgroundColor: '#ffffff',
+            }}>
+            <Icon
+              name="angle-left"
+              type="FontAwesome"
+              style={{
+                color: CONST.MAIN_COLOR,
+              }}
+            />
+          </Button>
+          <Button
+            onPress={
+              () => handleFlipWatch()
+            }
+            style={{
+              backgroundColor: '#ffffff',
+            }}>
+            <Icon
+              name={watched ? "eye" : "eye-slash"}
+              type="FontAwesome"
+              style={{ color: CONST.MAIN_COLOR }}
+            />
+          </Button>
+        </View>
+      ),
+      headerRight: (!watched && (
+        <View style={{
+          flex: 1,
+          flexDirection: "row",
+        }}>
+          <Icon
+            onPress={
+              () => handleBan()
+            }
+            name="ban"
+            type="FontAwesome"
+            style={{
+              marginRight: 20,
+              color: CONST.MAIN_COLOR,
+            }}
+          />
+          <Icon
+            onPress={
+              () => handleDelete()
+            }
+            name="trash"
+            type="FontAwesome"
+            style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
+          />
+        </View>
+      )),
+      headerBackTitle: null,
+    })
 
-		navigation.setParams({
-			handleFlipWatch: () => (this.handleFlipWatch()),
-		})
-		checkIsPhotoWatched({ item: navigation.getParam('item'), navigation, })
-	}
+    reducer.setItem({ item: props.item })
 
-	isPhotoBannedByMe({ photoId, }) {
-		const {
-			bans,
-		} = this.props
-		return bans.includes(photoId)
-	}
+    dispatch(photoReducer.checkIsPhotoWatched({ item }))
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-	handleBan() {
-		const {
-			banPhoto,
-			item,
-		} = this.props
+  const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
 
-		if (this.isPhotoBannedByMe({ photoId: item.id, })) {
-			Alert.alert(
-				'Looks like you already reported this Photo',
-				'You can only report same Photo once.',
-				[
-					{ text: 'OK', onPress: () => null, },
-				],
-			)
-		} else {
-			Alert.alert(
-				'Report abusive Photo?',
-				'The user who posted this photo will be banned. Are you sure?',
-				[
-					{ text: 'No', onPress: () => null, style: 'cancel', },
-					{ text: 'Yes', onPress: () => banPhoto({ item, }), },
-				],
-				{ cancelable: true, }
-			)
-		}
-	}
+  const handleBan = () => {
+    if (isPhotoBannedByMe({ photoId: item.id })) {
+      Alert.alert(
+        'Looks like you already reported this Photo',
+        'You can only report same Photo once.',
+        [
+          { text: 'OK', onPress: () => null },
+        ],
+      )
+    } else {
+      Alert.alert(
+        'Report abusive Photo?',
+        'The user who posted this photo will be banned. Are you sure?',
+        [
+          { text: 'No', onPress: () => null, style: 'cancel' },
+          { text: 'Yes', onPress: () => dispatch(photoReducer.banPhoto({ item })) },
+        ],
+        { cancelable: true }
+      )
+    }
+  }
 
-	handleDelete() {
-		const {
-			// navigation,
-			deletePhoto,
-			item,
-		} = this.props
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Photo?',
+      'The photo will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
+      [
+        { text: 'No', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: () => {
+            dispatch(photoReducer.deletePhoto({ item }))
+          },
+        },
+      ],
+      { cancelable: true }
+    )
+  }
 
-		Alert.alert(
-			'Delete Photo?',
-			'The photo will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
-			[
-				{ text: 'No', onPress: () => null, style: 'cancel', },
-				{
-					text: 'Yes',
-					onPress: () => {
-						deletePhoto({ item, })
-						// navigation.goBack()
-					},
-				},
-			],
-			{ cancelable: true, }
-		)
-	}
+  const handleFlipWatch = () => {
+    if (watched) {
+      dispatch(photoReducer.unwatchPhoto({ item, navigation }))
+    } else {
+      dispatch(photoReducer.watchPhoto({ item, navigation }))
+    }
+  }
 
-	handleFlipWatch() {
-		const {
-			navigation,
-			watchPhoto,
-			unwatchPhoto,
-			watched,
-			item,
-		} = this.props
-		if (watched) {
-			unwatchPhoto({ item, navigation, })
-		} else {
-			watchPhoto({ item, navigation, })
-		}
-	}
+  if (item) {
+    return (
+      <View style={styles.container}>
+        <Photo item={item} key={item.id} />
+      </View>
+    )
+  }
 
-	render() {
-		const {
-			item,
-			navigation,
-		} = this.props
-		if (item) {
-			return (
-				<View style={styles.container}>
-					<Photo item={item} key={item.id} navigation={navigation} />
-				</View>
-			)
-		}
-
-		return (
-			<Container>
-				<Content padder>
-					<Body>
-						<Spinner color={
-							CONST.MAIN_COLOR
-						}
-						/>
-					</Body>
-				</Content>
-			</Container>
-		)
-	}
+  return (
+    <Container>
+      <Content padder>
+        <Body>
+          <Spinner color={
+            CONST.MAIN_COLOR
+          }
+          />
+        </Body>
+      </Content>
+    </Container>
+  )
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
+  container: {
+    flex: 1,
+  },
 })
 
-const mapStateToProps = state => (
-	{
-		item: state.sharedPhoto.item,
-		bans: state.photo.bans,
-		watched: state.photo.watched,
-	}
-)
+// const mapStateToProps = state => (
+//   {
+//     item: state.sharedPhoto.item,
+//     bans: state.photo.bans,
+//     watched: state.photo.watched,
+//   }
+// )
 
-
-const mapDispatchToProps = {
-	banPhoto,
-	deletePhoto,
-	setItem,
-	watchPhoto,
-	unwatchPhoto,
-	checkIsPhotoWatched,
-}
-
-SharedPhoto.propTypes = {
-	navigation: PropTypes.object.isRequired,
-	banPhoto: PropTypes.func.isRequired,
-	deletePhoto: PropTypes.func.isRequired,
-	bans: PropTypes.array.isRequired,
-	item: PropTypes.object,
-	setItem: PropTypes.func.isRequired,
-	watched: PropTypes.bool.isRequired,
-	watchPhoto: PropTypes.func.isRequired,
-	unwatchPhoto: PropTypes.func.isRequired,
-	checkIsPhotoWatched: PropTypes.func.isRequired,
-}
-
-SharedPhoto.defaultProps = {
-	item: null,
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(SharedPhoto)
+// const mapDispatchToProps = {
+//   banPhoto,
+//   deletePhoto,
+//   setItem,
+//   watchPhoto,
+//   unwatchPhoto,
+//   checkIsPhotoWatched,
+// }
+//
+// SharedPhoto.propTypes = {
+//   navigation: PropTypes.object.isRequired,
+//   banPhoto: PropTypes.func.isRequired,
+//   deletePhoto: PropTypes.func.isRequired,
+//   bans: PropTypes.array.isRequired,
+//   item: PropTypes.object,
+//   setItem: PropTypes.func.isRequired,
+//   watched: PropTypes.bool.isRequired,
+//   watchPhoto: PropTypes.func.isRequired,
+//   unwatchPhoto: PropTypes.func.isRequired,
+//   checkIsPhotoWatched: PropTypes.func.isRequired,
+// }
+//
+// SharedPhoto.defaultProps = {
+//   item: null,
+// }
+//
+export default SharedPhoto

@@ -14,7 +14,8 @@
 #import <RNBranch/RNBranch.h> // at the top
 
 
-#if DEBUG
+#ifdef FB_SONARKIT_ENABLED
+
 #import <FlipperKit/FlipperClient.h>
 #import <FlipperKitLayoutPlugin/FlipperKitLayoutPlugin.h>
 #import <FlipperKitUserDefaultsPlugin/FKUserDefaultsPlugin.h>
@@ -38,8 +39,10 @@ static void InitializeFlipper(UIApplication *application) {
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   #if DEBUG
+  #ifdef FB_SONARKIT_ENABLED
     InitializeFlipper(application);
   #endif
+#endif
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
@@ -65,7 +68,7 @@ static void InitializeFlipper(UIApplication *application) {
 // RNBranch
 // Add the openURL and continueUserActivity functions
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
-    if (![RNBranch.branch application:app openURL:url options:options]) {
+    if (![RNBranch application:app openURL:url options:options]) {
         // do other deep link routing for the Facebook SDK, Pinterest SDK, etc
     }
     return YES;
