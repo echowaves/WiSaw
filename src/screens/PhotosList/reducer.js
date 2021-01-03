@@ -322,7 +322,7 @@ async function _requestSearchedPhotos(getState) {
 
 export function getPhotos() {
   return async (dispatch, getState) => {
-    const { batch } = getState().photosList
+    // const { batch } = getState().photosList
     // const {
     //   loading, isLastPage, pageNumber, searchTerm,
     // } = getState().photosList
@@ -347,7 +347,8 @@ export function getPhotos() {
           responseJson = await _requestWatchedPhotos(getState)
         }
 
-        if (responseJson.batch === batch) {
+        // console.log(`${responseJson.batch}:${getState().photosList.batch}`)
+        if (responseJson.batch === getState().photosList.batch) {
           if (responseJson.photos && responseJson.photos.length > 0) {
             dispatch({
               type: ACTION_TYPES.GET_PHOTOS_SUCCESS,
@@ -359,7 +360,7 @@ export function getPhotos() {
               errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
             })
           }
-        } // else { alert('wrong batch') }
+        } // else { console.log('wrong batch') }
       } catch (err) {
         dispatch({
           type: ACTION_TYPES.GET_PHOTOS_FAIL,
