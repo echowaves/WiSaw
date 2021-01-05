@@ -3,16 +3,14 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
+import { Location, Permissions } from 'expo'
 
 import useKeyboard from '@rnhooks/keyboard'
-
-import Geolocation from '@react-native-community/geolocation'
 
 import {
   StyleSheet,
   Text,
   View,
-  Platform,
   Alert,
 } from 'react-native'
 
@@ -37,9 +35,9 @@ import {
 
 import NetInfo from "@react-native-community/netinfo"
 
-import {
-  PERMISSIONS, request, openSettings,
-} from 'react-native-permissions'
+// import {
+//   PERMISSIONS, request, openSettings,
+// } from 'react-native-permissions'
 
 import branch from 'react-native-branch'
 
@@ -210,46 +208,23 @@ const PhotosList = () => {
 
   const checkPermissionsForPhotoTaking = async () => {
     let permission = await _checkPermission(
-      Platform.select({
-        android: PERMISSIONS.ANDROID.CAMERA,
-        ios: PERMISSIONS.IOS.CAMERA,
-      }),
+      Permissions.CAMERA,
       'Can we access your camera?',
       'How else would you be able to take a photo?'
     )
     if (permission === 'granted') {
-      switch (Platform.OS) {
-        case 'ios':
-          permission = await _checkPermission(
-            PERMISSIONS.IOS.PHOTO_LIBRARY,
-            'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
-          )
-          break
-        case 'android':
-          permission = await _checkPermission(
-            PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-            'Can we write photos to your devise?',
-            'How else would we be able to save the photos you take on your device?'
-          )
-          if (permission === 'granted') {
-            permission = await _checkPermission(
-              PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-              'Can we read photos on your devise?',
-              'How else would we be able upload the photos you take from your device?'
-            )
-          }
-          break
-        default:
-          alert('unknown platform')
+      permission = await _checkPermission(
+        Permissions.MEDIA_LIBRARY,
+        'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
+      )
+      if (permission === 'granted') {
+        takePhoto()
       }
-    }
-    if (permission === 'granted') {
-      takePhoto()
     }
   }
 
   async function _checkPermission(permissionType, alertHeader, alertBody) {
-    const permission = await request(permissionType)
+    const permission = await Permissions.askAsync(permissionType)
 
     if (permission !== 'granted') {
       Alert.alert(
@@ -275,10 +250,7 @@ const PhotosList = () => {
     let position = null
     // Toast("started checking permission")
     const permission = await _checkPermission(
-      Platform.select({
-        android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
-        ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-      }),
+      Permissions.LOCATION,
       'How am I supposed to show you the near-by photos?',
       'Why don\'t you enable Location in Settings and Try Again?'
     )
@@ -303,10 +275,9 @@ const PhotosList = () => {
     return position
   }
 
-  function _getCurrentPosition(options = {}) {
-    return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition(resolve, reject, options)
-    })
+  const _getCurrentPosition = async (options = {}) => {
+    const location = await Location.getCurrentPositionAsync(options)
+    return location
   }
 
   const takePhoto = () => {
