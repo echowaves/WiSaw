@@ -9,6 +9,7 @@ import {
   View,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native'
 
 import {
@@ -22,8 +23,6 @@ import {
 import { Col, Row, Grid } from "react-native-easy-grid"
 
 import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
-
-import FastImage from 'react-native-fast-image'
 
 import PropTypes from 'prop-types'
 
@@ -206,7 +205,7 @@ const Photo = props => {
                   right: 0,
                   left: 0,
                 }}>
-                <FastImage
+                <Image
                   source={{
                     uri: item.getThumbUrl,
                   }}
@@ -215,7 +214,7 @@ const Photo = props => {
                     height: height - 200,
                   }}
                   backgroundColor="transparent"
-                  resizeMode={FastImage.resizeMode.contain}
+                  // resizeMode={FastImage.resizeMode.contain}
                 />
                 <Spinner
                   style={{
@@ -233,7 +232,7 @@ const Photo = props => {
                   }
                 />
               </View>
-              <FastImage
+              <Image
                 source={{
                   uri: item.getImgUrl,
                 }}
@@ -242,7 +241,7 @@ const Photo = props => {
                   height: height - 200,
                 }}
                 backgroundColor="transparent"
-                resizeMode={FastImage.resizeMode.contain}
+                // resizeMode={FastImage.resizeMode.contain}
               />
 
             </ReactNativeZoomableView>

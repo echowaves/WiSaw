@@ -33,6 +33,11 @@
         "NSPhotoLibraryAddUsageDescription": "Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?",
         "NSPhotoLibraryUsageDescription": "Want to see photos stored on your device? Why don&apos;t you enable it?"
       },
+      "config": {
+        "branch": {
+          "apiKey": "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4"
+        },
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -49,6 +54,11 @@
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE"
       ],
+      "config": {
+        "branch": {
+          "apiKey": "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4"
+        },
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

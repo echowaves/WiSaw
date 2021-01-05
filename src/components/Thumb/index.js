@@ -1,13 +1,12 @@
 import React from 'react'
 // import { useDispatch } from "react-redux"
 
-import FastImage from 'react-native-fast-image'
-
 import {
   View,
   StyleSheet,
   TouchableHighlight,
   Text,
+  Image,
 } from 'react-native'
 
 import {
@@ -42,7 +41,7 @@ const Thumb = props => {
           styles.container,
           thumbWidthStyles,
         ]}>
-        <FastImage
+        <Image
           source={{ uri: item.getThumbUrl }}
           style={styles.thumbnail}
           fallback={item.fallback}

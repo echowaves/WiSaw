@@ -1,4 +1,4 @@
-import branch from 'react-native-branch'
+// import Branch from 'react-native-branch'
 
 import {
   Toast,
@@ -302,16 +302,16 @@ export function sharePhoto({ item }) {
   return async (dispatch, getState) => {
     try {
       // only canonicalIdentifier is required
-      const branchUniversalObject = await branch.createBranchUniversalObject(
-        `photo/${item.id}`,
-        {
-          title: 'What I saw today:',
-          contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
-          contentImageUrl: item.getImgUrl,
-          publiclyIndex: true,
-          locallyIndex: true,
-        }
-      )
+      // const branchUniversalObject = await Branch.createBranchUniversalObject(
+      //   `photo/${item.id}`,
+      //   {
+      //     title: 'What I saw today:',
+      //     contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
+      //     contentImageUrl: item.getImgUrl,
+      //     publiclyIndex: true,
+      //     locallyIndex: true,
+      //   }
+      // )
       let messageBody = 'Check out what I saw today:'
       const messageHeader = 'Check out what I saw today:'
       const emailSubject = 'WiSaw: Check out what I saw today'
@@ -331,7 +331,7 @@ export function sharePhoto({ item }) {
       const shareOptions = { messageHeader, emailSubject, messageBody }
 
       // const { channel, completed, error, } =
-      await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
+      // await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
     } catch (err) {
       Toast.show({
         text: "Unable to share photo.",

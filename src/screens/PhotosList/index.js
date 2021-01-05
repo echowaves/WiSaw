@@ -3,7 +3,10 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
-import { Location, Permissions } from 'expo'
+import * as Location from 'expo-location'
+import * as Linking from 'expo-linking'
+
+import * as Permissions from 'expo-permissions'
 
 import useKeyboard from '@rnhooks/keyboard'
 
@@ -39,7 +42,7 @@ import NetInfo from "@react-native-community/netinfo"
 //   PERMISSIONS, request, openSettings,
 // } from 'react-native-permissions'
 
-import branch from 'react-native-branch'
+// import Branch from 'react-native-branch'
 
 import FlatGrid from 'react-native-super-grid'
 
@@ -126,16 +129,18 @@ const PhotosList = () => {
 
   // componentDidMount branch initialization
   useEffect(() => {
-    branch.initSessionTtl = 10000 // Set to 10 seconds
-    branch.subscribe(async ({ error, params }) => {
-      const item = params.$item
-
-      if (item) {
-      // go back to the top screen, just in case
-        navigation.popToTop()
-        navigation.navigate('SharedPhoto', { item })
-      }
-    })
+    // Branch.subscribe(bundle => {
+    //   if (bundle && bundle.params && !bundle.error) {
+    //     // `bundle.params` contains all the info about the link.
+    //     const item = bundle.params.$item
+    //
+    //     if (item) {
+    //     // go back to the top screen, just in case
+    //       navigation.popToTop()
+    //       navigation.navigate('SharedPhoto', { item })
+    //     }
+    //   }
+    // })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // add network availability listener
@@ -212,12 +217,12 @@ const PhotosList = () => {
       'Can we access your camera?',
       'How else would you be able to take a photo?'
     )
-    if (permission === 'granted') {
+    if (permission.status === 'granted') {
       permission = await _checkPermission(
         Permissions.MEDIA_LIBRARY,
         'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
       )
-      if (permission === 'granted') {
+      if (permission.status === 'granted') {
         takePhoto()
       }
     }
@@ -226,7 +231,7 @@ const PhotosList = () => {
   async function _checkPermission(permissionType, alertHeader, alertBody) {
     const permission = await Permissions.askAsync(permissionType)
 
-    if (permission !== 'granted') {
+    if (permission.status !== 'granted') {
       Alert.alert(
         alertHeader,
         alertBody,
@@ -234,14 +239,11 @@ const PhotosList = () => {
           {
             text: 'Open Settings',
             onPress: () => {
-              // this.checkingPermission = false
-              openSettings()
+              Linking.openSettings()
             },
           },
         ],
       )
-      // }
-      // this.checkingPermission = false
     }
     return permission
   }
@@ -255,14 +257,17 @@ const PhotosList = () => {
       'Why don\'t you enable Location in Settings and Try Again?'
     )
     // Toast("finished checking permission")
-    if (permission === 'granted') {
+    // alert(JSON.stringify(permission))
+    // console.log(permission.status)
+    if (permission.status === 'granted') {
       try {
-        position = await _getCurrentPosition({
+        position = await Location.getCurrentPositionAsync({
           enableHighAccuracy: false,
           timeout: 200000,
           maximumAge: 200000,
         })
       } catch (err) {
+        console.log(err)
         position = null
         Toast.show({
           text: 'unable to get location',
@@ -273,11 +278,6 @@ const PhotosList = () => {
       }
     }
     return position
-  }
-
-  const _getCurrentPosition = async (options = {}) => {
-    const location = await Location.getCurrentPositionAsync(options)
-    return location
   }
 
   const takePhoto = () => {

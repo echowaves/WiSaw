@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import {
+  AsyncStorage,
   StyleSheet,
   View,
   Text,
@@ -11,8 +12,6 @@ import {
 } from 'react-native'
 
 import CameraRoll from "@react-native-community/cameraroll"
-
-import AsyncStorage from '@react-native-community/async-storage'
 
 import { PinchGestureHandler, State } from 'react-native-gesture-handler'
 import { useDimensions } from '@react-native-community/hooks'
