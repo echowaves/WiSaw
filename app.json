@@ -2,8 +2,7 @@
   "expo": {
     "name": "WiSaw",
     "version": "5.10.3",
-    "slug": "WiSaw",
-    "orientation": "portrait",
+    "slug": "WiSaw",    
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
