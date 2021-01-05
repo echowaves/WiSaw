@@ -214,7 +214,7 @@ const Photo = props => {
                     height: height - 200,
                   }}
                   backgroundColor="transparent"
-                  // resizeMode={FastImage.resizeMode.contain}
+                  resizeMode="contain"
                 />
                 <Spinner
                   style={{
@@ -241,7 +241,7 @@ const Photo = props => {
                   height: height - 200,
                 }}
                 backgroundColor="transparent"
-                // resizeMode={FastImage.resizeMode.contain}
+                resizeMode="contain"
               />
 
             </ReactNativeZoomableView>
