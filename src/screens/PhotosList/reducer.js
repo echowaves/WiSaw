@@ -17,7 +17,7 @@ const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
-  isTandcAccepted: false,
+  isTandcAccepted: true,
   uuid: null,
   location: null,
   photos: [],
@@ -239,7 +239,7 @@ export function initState() {
 
     dispatch({
       type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
-      isTandcAccepted: await _getTancAccepted(getState),
+      isTandcAccepted: await _getTancAccepted(),
     })
   }
 }
@@ -248,8 +248,6 @@ async function _requestGeoPhotos(getState) {
   const { latitude, longitude } = getState().photosList.location.coords
 
   const { pageNumber, uuid, batch } = getState().photosList
-
-  // console.log(`_requestGeoPhotos(${pageNumber})`)
 
   const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
     method: 'POST',
@@ -377,7 +375,7 @@ export function getPhotos() {
 export function acceptTandC() {
   return async dispatch => {
     try {
-      SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, "true")
+      await SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, "true")
       dispatch({
         type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
         isTandcAccepted: true,
@@ -440,7 +438,7 @@ async function _getUUID(getState) {
   if (uuid === null) {
     // try to retreive from secure store
     try {
-      uuid = SecureStore.getItemAsync(UUID_KEY)
+      uuid = await SecureStore.getItemAsync(UUID_KEY)
     } catch (err) {
       // Toast.show({
       //   text: err.toString(),
@@ -453,7 +451,7 @@ async function _getUUID(getState) {
     if (uuid === '' || uuid === null) {
       uuid = uuidv4()
       try {
-        SecureStore.setItemAsync(UUID_KEY, uuid)
+        await SecureStore.setItemAsync(UUID_KEY, uuid)
       } catch (err) {
         // Toast.show({
         //   text: err.toString(),
@@ -466,9 +464,9 @@ async function _getUUID(getState) {
   return uuid
 }
 
-async function _getTancAccepted(getState) {
+async function _getTancAccepted() {
   try {
-    return JSON.parse(SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY))
+    return await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY) === "true"
   } catch (err) {
     return false
   }

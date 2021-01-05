@@ -256,9 +256,6 @@ const PhotosList = () => {
       'How am I supposed to show you the near-by photos?',
       'Why don\'t you enable Location in Settings and Try Again?'
     )
-    // Toast("finished checking permission")
-    // alert(JSON.stringify(permission))
-    // console.log(permission.status)
     if (permission.status === 'granted') {
       try {
         position = await Location.getCurrentPositionAsync({
@@ -267,7 +264,6 @@ const PhotosList = () => {
           maximumAge: 200000,
         })
       } catch (err) {
-        console.log(err)
         position = null
         Toast.show({
           text: 'unable to get location',
@@ -387,7 +383,7 @@ const PhotosList = () => {
         <Icon
           onPress={
             () => {
-              dispatch(reducer.initState())
+              // dispatch(reducer.initState())
               reload()
             }
           }
