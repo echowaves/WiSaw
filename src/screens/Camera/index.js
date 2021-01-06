@@ -7,7 +7,6 @@ import {
   StyleSheet,
   View,
   Text,
-  Platform,
   TouchableOpacity,
 } from 'react-native'
 
@@ -24,7 +23,7 @@ import {
 
 import PropTypes from 'prop-types'
 
-import { RNCamera } from 'react-native-camera'
+import * as ExpoCamera from 'expo-camera'
 
 import * as Animatable from 'react-native-animatable'
 
@@ -35,8 +34,7 @@ import * as reducer from './reducer'
 import { store } from '../../index.js' // eslint-disable-line import/no-cycle
 import * as CONST from '../../consts.js'
 
-const osFactor = Platform.OS === 'ios' ? 0.05 : 1
-const initialZoom = 0.01
+// const initialZoom = 1
 
 const Camera = () => {
   const navigation = useNavigation()
@@ -76,24 +74,29 @@ const Camera = () => {
 
   const startStopPinching = event => {
     if (event.nativeEvent.state === State.ACTIVE) {
-      if (zoom < initialZoom * osFactor) {
-        dispatch(reducer.setInitialPinchValue(initialZoom * osFactor))
-      } else {
-        dispatch(reducer.setInitialPinchValue(zoom))
-      }
+      dispatch(reducer.setInitialPinchValue(zoom))
     }
   }
 
   const pinching = event => {
-    let zoomFactor = initialPinchValue * event.nativeEvent.scale
-    if (zoomFactor > 1 * osFactor) {
-      zoomFactor = 1 * osFactor
-    }
-    if (zoomFactor < initialZoom * osFactor) {
-      zoomFactor = 0
-    }
+    const { scale } = event.nativeEvent
 
-    dispatch(reducer.setZoom(zoomFactor))
+    let zoom = initialPinchValue
+
+    if (scale > 1) {
+      zoom += 1 - (1 / scale)
+      if (zoom >= 1) {
+        zoom = 1
+      }
+    } else if (scale < 1) {
+      zoom -= 1 - scale
+      if (zoom <= 0) {
+        zoom = 0
+      }
+    }
+    // console.log(`scale:${scale}     initialPinchValue:${initialPinchValue}     zoom:${zoom}`)
+
+    dispatch(reducer.setZoom(zoom))
   }
 
   const takePicture = () => {
@@ -273,20 +276,15 @@ const Camera = () => {
       onHandlerStateChange={startStopPinching}>
       <View style={styles.container}>
 
-        <RNCamera
+        <ExpoCamera.Camera
           ref={ref => {
             setCameraView(ref)
           }}
           style={styles.cameraView}
-          orientation={RNCamera.Constants.Orientation.auto}
-          onFaceDetected={null}
-          onGoogleVisionBarcodesDetected={null}
-          onTextRecognized={null}
-          onBarCodeRead={null}
-          flashMode={flashMode ? RNCamera.Constants.FlashMode.on : RNCamera.Constants.FlashMode.off}
-          type={frontCam ? RNCamera.Constants.Type.front : RNCamera.Constants.Type.back}
+          autofocus
+          type={frontCam ? "front" : "back"}
+          flashMode={flashMode}
           zoom={zoom}
-          captureAudio={false}
         />
         <View style={
           [
