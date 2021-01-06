@@ -258,10 +258,9 @@ const PhotosList = () => {
     )
     if (permission.status === 'granted') {
       try {
-        position = await Location.getCurrentPositionAsync({
-          enableHighAccuracy: false,
-          timeout: 200000,
-          maximumAge: 200000,
+        position = await Location.getLastKnownPositionAsync({
+          requiredAccuracy: 10000,
+          maxAge: 200000,
         })
       } catch (err) {
         position = null

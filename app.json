@@ -2,7 +2,7 @@
   "expo": {
     "name": "WiSaw",
     "version": "5.10.3",
-    "slug": "WiSaw",    
+    "slug": "WiSaw",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -35,7 +35,7 @@
       "config": {
         "branch": {
           "apiKey": "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4"
-        },
+        }
       }
     },
     "android": {
@@ -56,11 +56,12 @@
       "config": {
         "branch": {
           "apiKey": "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4"
-        },
+        }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": ""
   }
 }
