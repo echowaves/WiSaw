@@ -659,7 +659,7 @@ const PhotosList = () => {
     )
   }
 
-  if (!location) {
+  if (!location && !loading) {
     return (
       <Container>
         <Content padder>
@@ -682,7 +682,7 @@ const PhotosList = () => {
     )
   }
 
-  if (!netAvailable) {
+  if (!netAvailable && !loading) {
     return (
       <Container>
         <Content padder>
