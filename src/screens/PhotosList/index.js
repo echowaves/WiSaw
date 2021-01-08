@@ -259,7 +259,7 @@ const PhotosList = () => {
     if (permission.status === 'granted') {
       try {
         position = await Location.getLastKnownPositionAsync({
-          requiredAccuracy: 10000,
+          requiredAccuracy: 5000,
           maxAge: 200000,
         })
       } catch (err) {
@@ -549,6 +549,7 @@ const PhotosList = () => {
               />
             )
           }
+          keyExtractor={item => item.id}
           style={
             styles.container
           }

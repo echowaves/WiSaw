@@ -9,7 +9,7 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  Image,
+  // Image,
 } from 'react-native'
 
 import {
@@ -28,6 +28,8 @@ import PropTypes from 'prop-types'
 
 import stringifyObject from 'stringify-object'
 import jmespath from 'jmespath'
+
+import CachedImage from '../CachedImage'
 
 import * as reducer from './reducer'
 
@@ -205,16 +207,15 @@ const Photo = props => {
                   right: 0,
                   left: 0,
                 }}>
-                <Image
-                  source={{
-                    uri: item.getThumbUrl,
-                  }}
+                <CachedImage
+                  uri={`${item.getThumbUrl}`}
+                  cacheKey={`${item.id}t`}
+                  backgroundColor="transparent"
+                  resizeMode="contain"
                   style={{
                     width,
                     height: height - 200,
                   }}
-                  backgroundColor="transparent"
-                  resizeMode="contain"
                 />
                 <Spinner
                   style={{
@@ -232,16 +233,15 @@ const Photo = props => {
                   }
                 />
               </View>
-              <Image
-                source={{
-                  uri: item.getImgUrl,
-                }}
+              <CachedImage
+                uri={`${item.getImgUrl}`}
+                cacheKey={`${item.id}i`}
+                backgroundColor="transparent"
+                resizeMode="contain"
                 style={{
                   width,
                   height: height - 200,
                 }}
-                backgroundColor="transparent"
-                resizeMode="contain"
               />
 
             </ReactNativeZoomableView>

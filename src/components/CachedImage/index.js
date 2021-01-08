@@ -1,0 +1,61 @@
+import React, { useEffect, useState, useRef } from 'react'
+
+import { Image } from 'react-native'
+
+import * as FileSystem from 'expo-file-system'
+
+import PropTypes from 'prop-types'
+
+const CachedImage = props => {
+  const [imgURI, setImgURI] = useState(null)
+
+  const componentIsMounted = useRef(true)
+
+  useEffect(() => {
+    (async () => getImageUri())()
+    return () => {
+      componentIsMounted.current = false
+    }
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  const getImageUri = async () => {
+    const { uri, cacheKey } = props
+
+    const filesystemURI = `${FileSystem.cacheDirectory}${cacheKey}`
+    // console.log(cacheKey)
+    try {
+      // Use the cached image if it exists
+      const metadata = await FileSystem.getInfoAsync(filesystemURI)
+      if (!metadata.exists) {
+        // download to cache
+        await FileSystem.downloadAsync(
+          uri,
+          filesystemURI
+        )
+      }
+      if (componentIsMounted.current) {
+        setImgURI(filesystemURI)
+      }
+    } catch (err) {
+      if (componentIsMounted.current) {
+        setImgURI(uri)
+      }
+    }
+  }
+
+  return (
+    <Image
+      {...props} // eslint-disable-line react/jsx-props-no-spreading
+      source={{
+        uri: imgURI,
+      }}
+    />
+  )
+}
+
+CachedImage.propTypes = {
+  uri: PropTypes.string.isRequired,
+  cacheKey: PropTypes.string.isRequired,
+}
+
+export default CachedImage

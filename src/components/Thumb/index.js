@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TouchableHighlight,
   Text,
-  Image,
+  // Image,
 } from 'react-native'
 
 import {
@@ -15,13 +15,15 @@ import {
 
 import PropTypes from 'prop-types'
 
+import CachedImage from '../CachedImage'
+
 import * as CONST from '../../consts.js'
 
 const Thumb = props => {
   const {
     navigation, index, item, thumbWidth,
   } = props
-
+  // console.log(item.id)
   // const dispatch = useDispatch()
 
   const onThumbPress = item => {
@@ -41,10 +43,10 @@ const Thumb = props => {
           styles.container,
           thumbWidthStyles,
         ]}>
-        <Image
-          source={{ uri: item.getThumbUrl }}
+        <CachedImage
+          uri={`${item.getThumbUrl}`}
+          cacheKey={`${item.id}.t`}
           style={styles.thumbnail}
-          fallback={item.fallback}
         />
       </TouchableHighlight>
       { item.commentsCount > 0 && (
