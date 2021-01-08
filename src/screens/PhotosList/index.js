@@ -71,7 +71,7 @@ const PhotosList = () => {
   const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
-  // const pageNumber = useSelector(state => state.photosList.pageNumber)
+  const location = useSelector(state => state.photosList.location)
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
   const isLastPage = useSelector(state => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
@@ -124,6 +124,10 @@ const PhotosList = () => {
         headerLeft: null,
         headerRight: null,
       })
+    }
+
+    if (!location) {
+      reload()
     }
   }
 
@@ -517,9 +521,14 @@ const PhotosList = () => {
     }
   }
 
+  /// //////////////////////////////////////////////////////////////////////////
+  // here where the rendering starts
+  /// //////////////////////////////////////////////////////////////////////////
+
   if (
     isTandcAccepted
   && netAvailable
+  && location
   && photos.length > 0
   ) {
     return (
@@ -593,24 +602,87 @@ const PhotosList = () => {
     )
   }
 
-  if (loading) {
+  if (!isTandcAccepted) {
     return (
       <Container>
-        {searchTerm && (renderSearchBar())}
-        <Content padder>
-          <Body>
-            <Spinner color={
-              CONST.MAIN_COLOR
-            }
-            />
-          </Body>
-        </Content>
-        {renderPhotoButton()}
+        <Modal
+          isVisible={
+            !isTandcAccepted
+          }>
+          <Content padder>
+            <Card transparent>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * When you take a photo with WiSaw app,
+                  it will be added to a Photo Album on your phone,
+                  as well as posted to global feed in the cloud.
+                </Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * People close-by can see your photos.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * You can see other people&#39;s photos too.
+                </Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* No one will tolerate objectionable content or abusive users.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* The abusive users will be banned from WiSaw by other users.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
+              </CardItem>
+              <CardItem footer style={{ borderRadius: 10 }}>
+                <Left />
+                <Button
+                  block
+                  bordered
+                  success
+                  small
+                  onPress={
+                    () => {
+                      dispatch(reducer.acceptTandC())
+                    }
+                  }>
+                  <Text>  Agree  </Text>
+                </Button>
+                <Right />
+              </CardItem>
+            </Card>
+          </Content>
+        </Modal>
       </Container>
     )
   }
 
-  if (netAvailable === false) {
+  if (!location) {
+    return (
+      <Container>
+        <Content padder>
+          <Body>
+            <Card transparent>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text style={{
+                  fontSize: 20,
+                  textAlign: 'center',
+                  margin: 10,
+                }}>
+                  Unable to get your location, make sure to turn Location Service on and reload screen.
+                </Text>
+              </CardItem>
+            </Card>
+          </Body>
+        </Content>
+        {/* renderPhotoButton() */}
+      </Container>
+    )
+  }
+
+  if (!netAvailable) {
     return (
       <Container>
         <Content padder>
@@ -635,7 +707,24 @@ const PhotosList = () => {
     )
   }
 
-  if (!loading && photos.length === 0 && isTandcAccepted) {
+  if (loading) {
+    return (
+      <Container>
+        {searchTerm && (renderSearchBar())}
+        <Content padder>
+          <Body>
+            <Spinner color={
+              CONST.MAIN_COLOR
+            }
+            />
+          </Body>
+        </Content>
+        {renderPhotoButton()}
+      </Container>
+    )
+  }
+
+  if (photos.length === 0) {
     return (
       <Container>
         <Content padder>
@@ -691,61 +780,6 @@ const PhotosList = () => {
       </Container>
     )
   }
-
-  return ( // if TANDC is not accepted, this should always come last to prevemt flickering
-    <Container>
-      <Modal
-        isVisible={
-          !isTandcAccepted
-        }>
-        <Content padder>
-          <Card transparent>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * When you take a photo with WiSaw app,
-                it will be added to a Photo Album on your phone,
-                as well as posted to global feed in the cloud.
-              </Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * People close-by can see your photos.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * You can see other people&#39;s photos too.
-              </Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* No one will tolerate objectionable content or abusive users.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* The abusive users will be banned from WiSaw by other users.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
-            </CardItem>
-            <CardItem footer style={{ borderRadius: 10 }}>
-              <Left />
-              <Button
-                block
-                bordered
-                success
-                small
-                onPress={
-                  () => {
-                    dispatch(reducer.acceptTandC())
-                  }
-                }>
-                <Text>  Agree  </Text>
-              </Button>
-              <Right />
-            </CardItem>
-          </Card>
-        </Content>
-      </Modal>
-    </Container>
-  )
 }
 // PhotosList.propTypes = {
 //   navigation: PropTypes.object.isRequired,
