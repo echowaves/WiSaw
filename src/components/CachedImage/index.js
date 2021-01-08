@@ -7,7 +7,10 @@ import * as FileSystem from 'expo-file-system'
 import PropTypes from 'prop-types'
 
 const CachedImage = props => {
-  const [imgURI, setImgURI] = useState(null)
+  const { uri, cacheKey } = props
+  const filesystemURI = `${FileSystem.cacheDirectory}${cacheKey}`
+
+  const [imgURI, setImgURI] = useState(filesystemURI)
 
   const componentIsMounted = useRef(true)
 
@@ -20,9 +23,6 @@ const CachedImage = props => {
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const getImageUri = async () => {
-    const { uri, cacheKey } = props
-
-    const filesystemURI = `${FileSystem.cacheDirectory}${cacheKey}`
     // console.log(cacheKey)
     try {
       // Use the cached image if it exists
@@ -33,9 +33,10 @@ const CachedImage = props => {
           uri,
           filesystemURI
         )
-      }
-      if (componentIsMounted.current) {
-        setImgURI(filesystemURI)
+        if (componentIsMounted.current) {
+          setImgURI(null)
+          setImgURI(filesystemURI)
+        }
       }
     } catch (err) {
       if (componentIsMounted.current) {

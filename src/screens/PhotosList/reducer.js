@@ -45,7 +45,8 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos:
-        state.photos.concat(action.photos).sort((a, b) => b.id - a.id),
+        state.photos.concat(action.photos),
+        // .sort((a, b) => b.id - a.id),
         // this really stinks, need to figure out why there are duplicates in the first place
         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
         // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
