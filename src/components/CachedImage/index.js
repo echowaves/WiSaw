@@ -12,7 +12,8 @@ const CachedImage = props => {
   const componentIsMounted = useRef(true)
 
   useEffect(() => {
-    (async () => getImageUri())()
+    // (async () => getImageUri())()
+    getImageUri()
     return () => {
       componentIsMounted.current = false
     }
