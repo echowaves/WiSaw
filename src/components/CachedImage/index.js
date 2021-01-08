@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 
 import { Image } from 'react-native'
 
@@ -12,10 +12,13 @@ const CachedImage = props => {
 
   const [imgURI, setImgURI] = useState(filesystemURI)
 
-  // const componentIsMounted = useRef(true)
+  const componentIsMounted = useRef(true)
 
   useEffect(() => {
     getImageUri()
+    return () => {
+      componentIsMounted.current = false
+    }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const getImageUri = async () => {
@@ -25,13 +28,20 @@ const CachedImage = props => {
       const metadata = await FileSystem.getInfoAsync(filesystemURI)
       if (!metadata.exists) {
         // download to cache
-        await FileSystem.downloadAsync(
-          uri,
-          filesystemURI
-        )
-        await setImgURI(null)
+
+        if (componentIsMounted.current) {
+          setImgURI(null)
+          await FileSystem.downloadAsync(
+            uri,
+            filesystemURI
+          )
+        }
+        await new Promise(r => setTimeout(r, 100))
+        if (componentIsMounted.current) {
+          setImgURI(filesystemURI)
+        }
         // TODO: ugly timeout
-        setTimeout(() => { setImgURI(filesystemURI) }, 100)
+        // setTimeout(() => { setImgURI(filesystemURI) }, 100)
       }
     } catch (err) {
       setImgURI(uri)
