@@ -45,7 +45,7 @@ const Thumb = props => {
         ]}>
         <CachedImage
           uri={`${item.getThumbUrl}`}
-          cacheKey={`${item.id}.t`}
+          cacheKey={`${item.id}t`}
           style={styles.thumbnail}
         />
       </TouchableHighlight>
