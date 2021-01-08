@@ -322,7 +322,24 @@ const PhotosList = () => {
               }
             }
           />
+
         </Button>
+        {loading && (
+          <Spinner
+            style={{
+            // width,
+            // height,
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              width: '100%',
+              height: '100%',
+            }}
+            color="white"
+          />
+        )}
         {pendingUploads > 0 && (
           <Text
             style={
@@ -336,6 +353,7 @@ const PhotosList = () => {
             {pendingUploads}
           </Text>
         )}
+
       </View>
     </View>
   )
@@ -707,22 +725,22 @@ const PhotosList = () => {
     )
   }
 
-  if (loading) {
-    return (
-      <Container>
-        {searchTerm && (renderSearchBar())}
-        <Content padder>
-          <Body>
-            <Spinner color={
-              CONST.MAIN_COLOR
-            }
-            />
-          </Body>
-        </Content>
-        {renderPhotoButton()}
-      </Container>
-    )
-  }
+  // if (loading) {
+  //   return (
+  //     <Container>
+  //       {searchTerm && (renderSearchBar())}
+  //       <Content padder>
+  //         <Body>
+  //           <Spinner color={
+  //             CONST.MAIN_COLOR
+  //           }
+  //           />
+  //         </Body>
+  //       </Content>
+  //       {renderPhotoButton()}
+  //     </Container>
+  //   )
+  // }
 
   if (photos.length === 0) {
     return (
