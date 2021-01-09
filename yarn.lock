@@ -1453,11 +1453,6 @@
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
 
-"@react-native-community/cameraroll@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cameraroll/-/cameraroll-4.0.1.tgz#8466f99a476e6b833ecd5efff045f74a4224459b"
-  integrity sha512-KLKh5rAg511KUoGKHrbRhBLvkHhOz6kZ2sx8dPhndZ5ZFVYfVpTadSN1x3cfQbOAlkyGZql07p1hk7lEb3sa8g==
-
 "@react-native-community/cli-debugger-ui@^4.13.1":
   version "4.13.1"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-debugger-ui/-/cli-debugger-ui-4.13.1.tgz#07de6d4dab80ec49231de1f1fbf658b4ad39b32c"

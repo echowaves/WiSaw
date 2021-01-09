@@ -132,77 +132,111 @@ export function uploadPendingPhotos() {
       let i = 0
       // here let's iterate over the items to upload and upload one file at a time
       for (; i < keys.length; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-        const fileJson = JSON.parse(await AsyncStorage.getItem(keys[i]))
+        console.log(1)
         // eslint-disable-next-line no-await-in-loop
-        const { responseData, photo } = await uploadFile(fileJson)
-
-        if (responseData.respInfo.status === 200) {
+        const item = JSON.parse(await AsyncStorage.getItem(keys[i]))
+        console.log(2)
+        // eslint-disable-next-line no-await-in-loop
+        const { responseData } = await uploadFile(item)
+        console.log(3)
+        if (responseData.status === 200) {
+          console.log(4)
           // eslint-disable-next-line no-await-in-loop
           await AsyncStorage.removeItem(keys[i])
+          console.log(5)
           // eslint-disable-next-line no-await-in-loop
           pendingUploads = (await getMyKeys() || []).length
+          console.log(6)
           dispatch({
             type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
             // eslint-disable-next-line no-await-in-loop
             pendingUploads,
           })
-          photo.getThumbUrl = fileJson.uri
-          photo.fallback = true
+          console.log(7)
+          const photo = {
+            getThumbUrl: item.asset.uri,
+            fallback: true,
+            id: item.asset.id,
+          }
+          console.log(8)
           // show the photo in the photo list immidiately
           dispatch({
             type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
             photo,
           })
+          console.log(9)
         } else {
           alert("Error uploading file, try again.")
         }
       }
     } catch (error) {
+      console.log(10)
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
-      dispatch(uploadPendingPhotos())
+      console.log(error)
+      // dispatch(uploadPendingPhotos())
     }
-
+    console.log(11)
     dispatch({
       type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
     })
+    console.log(12)
     return Promise.resolve()
   }
 }
 
-async function uploadFile(fileJson) {
-  const { uuid, location, uri } = fileJson
-  const response = await fetch(`${CONST.HOST}/photos`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      uuid,
-      location,
-    }),
-  })
-
-  const responseJson = await response.json()
-
-  if (response.status === 401) {
-    alert("Sorry, looks like you have been banned from WiSaw.")
-    return
-  }
-  if (response.status === 201) {
-    const { uploadURL, photo } = responseJson
-
-    const responseData = await fetch(uploadURL, {
-      method: 'PUT',
-      body: JSON.stringify({
-        uri,
-      }),
+const uploadFile = async item => {
+  try {
+    const {
+      uuid, location, asset, uri,
+    } = item
+    console.log(item)
+    console.log(20)
+    const response = await fetch(`${CONST.HOST}/photos`, {
+      method: 'POST',
       headers: {
-        "Content-Type": "image/jpeg",
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        uuid,
+        location,
+      }),
     })
-    return { responseData, photo }
+    console.log(21)
+    const responseJson = await response.json()
+    // console.log({ assetFile })
+    // console.log({ responseJson })
+    console.log(22)
+    if (response.status === 401) {
+      alert("Sorry, looks like you have been banned from WiSaw.")
+      return
+    }
+    console.log(23)
+    if (response.status === 201) {
+      console.log(24)
+      const { uploadURL } = responseJson
+      console.log(25)
+      console.log(uri)
+      console.log(asset.uri)
+      let picture = await fetch(asset.uri)
+      console.log(26)
+      picture = await picture.blob()
+      console.log(27)
+      const imageData = new File([picture], "file.jpeg")
+      console.log(28)
+
+      const responseData = await fetch(uploadURL, {
+        method: 'PUT',
+        body: imageData,
+        headers: {
+          "Content-Type": "image/jpeg",
+        },
+      })
+      console.log(29)
+      return { responseData }
+    }
+  } catch (error) {
+    console.log(error)
   }
 }

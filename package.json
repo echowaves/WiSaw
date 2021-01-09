@@ -15,7 +15,6 @@
   "dependencies": {
     "@babel/plugin-transform-async-to-generator": "7.12.1",
     "@dudigital/react-native-zoomable-view": "1.0.16",
-    "@react-native-community/cameraroll": "4.0.1",
     "@react-native-community/hooks": "2.6.0",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "5.9.7",

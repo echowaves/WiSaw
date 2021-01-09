@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
-import CameraRoll from "@react-native-community/cameraroll"
+import * as MediaLibrary from 'expo-media-library'
 
 import { PinchGestureHandler, State } from 'react-native-gesture-handler'
 import { useDimensions } from '@react-native-community/hooks'
@@ -122,33 +122,29 @@ const Camera = () => {
     }
   }
 
-  const upload = uri => {
-    CameraRoll.save(uri)
-      .then(
-        cameraRollUri => {
-          const now = moment().format()
-          const { uuid, location } = store.getState().photosList
-          AsyncStorage.setItem(`wisaw-pending-${now}`,
-            JSON.stringify(
-              {
-                time: now,
-                uri: cameraRollUri,
-                uuid,
-                location: {
-                  type: 'Point',
-                  coordinates: [
-                    location.coords.latitude,
-                    location.coords.longitude,
-                  ],
-                },
-              }
-            )).then(
-            () => {
-              dispatch(reducer.uploadPendingPhotos())
-            }
-          )
+  const upload = async uri => {
+    const asset = await MediaLibrary.createAssetAsync(uri)
+    const now = moment().format()
+    const { uuid, location } = store.getState().photosList
+
+    await AsyncStorage.setItem(`wisaw-pending-${now}`,
+      JSON.stringify(
+        {
+          time: now,
+          asset,
+          uri,
+          uuid,
+          location: {
+            type: 'Point',
+            coordinates: [
+              location.coords.latitude,
+              location.coords.longitude,
+            ],
+          },
         }
-      )
+      ))
+
+    dispatch(reducer.uploadPendingPhotos())
     dispatch(reducer.setPreviewUri(null))
   }
 
