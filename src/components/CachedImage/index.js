@@ -33,9 +33,13 @@ const CachedImage = props => {
         // download to cache
         if (componentIsMounted.current) {
           // console.log(CachedImage.counter)
-          while (CachedImage.counter > 10) {
+          let i = 0
+          while (CachedImage.counter > 4 && i < 1000) {
             await new Promise(r => setTimeout(r, 10)) // eslint-disable-line no-await-in-loop
+            i += 1
           }
+        }
+        if (componentIsMounted.current) {
           CachedImage.counter += 1
           setImgURI(null)
           // make sure no more than 4 images at a time are being downloading
@@ -50,10 +54,17 @@ const CachedImage = props => {
         // await new Promise(r => setTimeout(r, 100))
         if (componentIsMounted.current) {
           setImgURI(filesystemURI)
+          if (!filesystemURI) {
+            console.log('null uri')
+          }
         }
       }
     } catch (err) {
+      console.log()
       setImgURI(uri)
+      if (CachedImage.counter > 0) {
+        CachedImage.counter -= 1
+      }
     }
   }
 
