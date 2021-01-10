@@ -25,7 +25,6 @@ const CachedImage = props => {
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const getImageUri = async () => {
-    CachedImage.counter += 1
     // console.log(cacheKey)
     try {
       // Use the cached image if it exists
@@ -34,12 +33,19 @@ const CachedImage = props => {
         // download to cache
         if (componentIsMounted.current) {
           // console.log(CachedImage.counter)
+          while (CachedImage.counter > 10) {
+            await new Promise(r => setTimeout(r, 10)) // eslint-disable-line no-await-in-loop
+          }
+          CachedImage.counter += 1
           setImgURI(null)
-          await new Promise(r => setTimeout(r, 10 * CachedImage.counter))
+          // make sure no more than 4 images at a time are being downloading
+
+          // await new Promise(r => setTimeout(r, 10 * CachedImage.counter))
           await FileSystem.downloadAsync(
             uri,
             filesystemURI
           )
+          CachedImage.counter -= 1
         }
         // await new Promise(r => setTimeout(r, 100))
         if (componentIsMounted.current) {
@@ -49,7 +55,6 @@ const CachedImage = props => {
     } catch (err) {
       setImgURI(uri)
     }
-    CachedImage.counter = 0
   }
 
   return (
