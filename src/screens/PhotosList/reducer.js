@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store'
 import {
   Toast,
 } from 'native-base'
+import * as FileSystem from 'expo-file-system'
 
 import * as CONST from '../../consts.js'
 
@@ -15,6 +16,8 @@ const UUID_KEY = 'wisaw_device_uuid'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
+
+export const PENDING_UPLOADS_FOLDER = `${FileSystem.cacheDirectory}pendingUploads/`
 
 export const initialState = {
   isTandcAccepted: true,
@@ -30,6 +33,8 @@ export const initialState = {
   batch: null,
   isLastPage: false,
   netAvailable: true,
+  uploadingPhoto: false,
+  pendingUploads: 0,
 }
 
 const reducer = (state = initialState, action) => {
@@ -217,6 +222,23 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         netAvailable: action.netAvailable,
+      }
+
+    case ACTION_TYPES.START_PHOTO_UPLOADING:
+      return {
+        ...state,
+        uploadingPhoto: true,
+      }
+    case ACTION_TYPES.FINISH_PHOTO_UPLOADING:
+      return {
+        ...state,
+        uploadingPhoto: false,
+        // pendingUploads: 0,
+      }
+    case ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD:
+      return {
+        ...state,
+        pendingUploads: action.pendingUploads,
       }
     default:
       return state
@@ -470,6 +492,139 @@ async function _getTancAccepted() {
     return await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY) === "true"
   } catch (err) {
     return false
+  }
+}
+
+export function uploadPendingPhotos() {
+  return async (dispatch, getState) => {
+    const keys = /* await getMyKeys() || */ []
+    let pendingUploads = keys.length
+    dispatch({
+      type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
+      pendingUploads,
+    })
+    if (getState().photosList.netAvailable === false) {
+      return Promise.resolve()
+    }
+    if (getState().photosList.uploadingPhoto) {
+      // already uploading photos, just exit here
+      return Promise.resolve()
+    }
+
+    try {
+      dispatch({
+        type: ACTION_TYPES.START_PHOTO_UPLOADING,
+      })
+
+      let i = 0
+      // here let's iterate over the items to upload and upload one file at a time
+      for (; i < keys.length; i += 1) {
+        console.log(1)
+        // eslint-disable-next-line no-await-in-loop
+        const item = JSON.parse(await AsyncStorage.getItem(keys[i]))
+        console.log(2)
+        // eslint-disable-next-line no-await-in-loop
+        const { responseData } = await uploadFile(item)
+        console.log(3)
+        if (responseData.status === 200) {
+          console.log(4)
+          // eslint-disable-next-line no-await-in-loop
+          await AsyncStorage.removeItem(keys[i])
+          console.log(5)
+          // eslint-disable-next-line no-await-in-loop
+          pendingUploads = (/* await getMyKeys() || */ []).length
+          console.log(6)
+          dispatch({
+            type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
+            // eslint-disable-next-line no-await-in-loop
+            pendingUploads,
+          })
+          console.log(7)
+          const photo = {
+            getThumbUrl: item.asset.uri,
+            fallback: true,
+            id: item.asset.id,
+          }
+          console.log(8)
+          // show the photo in the photo list immidiately
+          dispatch({
+            type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
+            photo,
+          })
+          console.log(9)
+        } else {
+          alert("Error uploading file, try again.")
+        }
+      }
+    } catch (error) {
+      console.log(10)
+      dispatch({
+        type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
+      })
+      console.log(error)
+      // dispatch(uploadPendingPhotos())
+    }
+    console.log(11)
+    dispatch({
+      type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
+    })
+    console.log(12)
+    return Promise.resolve()
+  }
+}
+
+const uploadFile = async item => {
+  try {
+    const {
+      uuid, location, asset, uri,
+    } = item
+    console.log(item)
+    console.log(20)
+    const response = await fetch(`${CONST.HOST}/photos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uuid,
+        location,
+      }),
+    })
+    console.log(21)
+    const responseJson = await response.json()
+    // console.log({ assetFile })
+    // console.log({ responseJson })
+    console.log(22)
+    if (response.status === 401) {
+      alert("Sorry, looks like you have been banned from WiSaw.")
+      return
+    }
+    console.log(23)
+    if (response.status === 201) {
+      console.log(24)
+      const { uploadURL } = responseJson
+      console.log(25)
+      console.log(uri)
+      console.log(asset.uri)
+      let picture = await fetch(asset.uri)
+      console.log(26)
+      picture = await picture.blob()
+      console.log(27)
+      const imageData = new File([picture], "file.jpeg")
+      console.log(28)
+
+      const responseData = await fetch(uploadURL, {
+        method: 'PUT',
+        body: imageData,
+        headers: {
+          "Content-Type": "image/jpeg",
+        },
+      })
+      console.log(29)
+      return { responseData }
+    }
+  } catch (error) {
+    console.log(error)
   }
 }
 

@@ -23,7 +23,7 @@ import {
 
 import PropTypes from 'prop-types'
 
-import * as ExpoCamera from 'expo-camera'
+// import * as ExpoCamera from 'expo-camera'
 
 import * as Animatable from 'react-native-animatable'
 

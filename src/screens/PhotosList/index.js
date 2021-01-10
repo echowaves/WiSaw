@@ -5,10 +5,12 @@ import { useDispatch, useSelector } from "react-redux"
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
-
 import * as Permissions from 'expo-permissions'
-
+import * as ImagePicker from 'expo-image-picker'
+import * as MediaLibrary from 'expo-media-library'
+import * as FileSystem from 'expo-file-system'
 import useKeyboard from '@rnhooks/keyboard'
+import moment from 'moment'
 
 import {
   StyleSheet,
@@ -55,7 +57,7 @@ import material from '../../../native-base-theme/variables/material'
 
 import * as reducer from './reducer'
 
-import * as cameraReducer from '../Camera/reducer'
+// import * as cameraReducer from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
@@ -77,7 +79,7 @@ const PhotosList = () => {
   // const paging = useSelector(state => state.photosList.paging)
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
   const loading = useSelector(state => state.photosList.loading)
-  const pendingUploads = useSelector(state => state.camera.pendingUploads)
+  const pendingUploads = useSelector(state => state.photosList.pendingUploads)
   const orientation = useSelector(state => state.photosList.orientation)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
@@ -101,7 +103,7 @@ const PhotosList = () => {
   useEffect(() => {
     updateNavBar()
     if (netAvailable) {
-      dispatch(cameraReducer.uploadPendingPhotos())
+      dispatch(reducer.uploadPendingPhotos())
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -212,7 +214,7 @@ const PhotosList = () => {
     dispatch(reducer.setLocation(await _getLocation()))
     setLoadMore(true)
 
-    dispatch(cameraReducer.uploadPendingPhotos())
+    dispatch(reducer.uploadPendingPhotos())
   }
 
   const checkPermissionsForPhotoTaking = async () => {
@@ -279,8 +281,36 @@ const PhotosList = () => {
     return position
   }
 
-  const takePhoto = () => {
-    navigation.navigate('Camera')
+  const takePhoto = async () => {
+    const cameraReturn = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      // allowsEditing: true,
+      quality: 1.0,
+      exif: false,
+    })
+    if (cameraReturn.cancelled === true) {
+      return Promise.resolve() // simply return
+    }
+
+    MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
+    // check if cache dir exists
+    const cacheDirectory = await FileSystem.getInfoAsync(reducer.PENDING_UPLOADS_FOLDER)
+
+    // create cacheDir if does not exist
+    if (!cacheDirectory.exists) {
+      await FileSystem.makeDirectoryAsync(reducer.PENDING_UPLOADS_FOLDER)
+    }
+
+    // move file to cacheDir
+    await FileSystem.moveAsync({
+      from: cameraReturn.uri,
+      to: `${reducer.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
+    })
+
+    // const pendingFilesFolder = await FileSystem.readDirectoryAsync(reducer.PENDING_UPLOADS_FOLDER)
+    // console.log({ pendingFilesFolder })
+
+    // dispatch(reducer.uploadPendingPhotos())
   }
 
   const renderPhotoButton = () => (
@@ -324,7 +354,7 @@ const PhotosList = () => {
           />
 
         </Button>
-        {loading && (
+        {/* loading && (
           <Spinner
             style={{
             // width,
@@ -339,7 +369,8 @@ const PhotosList = () => {
             }}
             color="white"
           />
-        )}
+        ) */}
+
         {pendingUploads > 0 && (
           <Text
             style={
