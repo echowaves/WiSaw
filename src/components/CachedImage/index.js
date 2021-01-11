@@ -18,55 +18,52 @@ const CachedImage = props => {
     if (typeof CachedImage.counter === 'undefined') {
       CachedImage.counter = 0
     }
-    getImageUri()
+
+    const loadImage = async ({ fileURI }) => {
+      try {
+        // Use the cached image if it exists
+        const metadata = await FileSystem.getInfoAsync(fileURI)
+        if (!metadata.exists) {
+          // download to cache
+          if (componentIsMounted.current) {
+            // console.log(CachedImage.counter)
+            setImgURI(null)
+
+            let i = 0
+            while (CachedImage.counter > 10 && i < 1000) {
+              await new Promise(r => setTimeout(r, 10)) // eslint-disable-line no-await-in-loop
+              i += 1
+            }
+          }
+          if (componentIsMounted.current) {
+            await new Promise(r => setTimeout(r, 200 * CachedImage.counter))
+            CachedImage.counter += 1
+            await FileSystem.downloadAsync(
+              uri,
+              fileURI
+            )
+            CachedImage.counter -= 1
+          }
+          // await new Promise(r => setTimeout(r, 100))
+          if (componentIsMounted.current) {
+            setImgURI(fileURI)
+          }
+        }
+      } catch (err) {
+        console.log()
+        setImgURI(uri)
+        if (CachedImage.counter > 0) {
+          CachedImage.counter -= 1
+        }
+      }
+    }
+
+    loadImage({ fileURI: filesystemURI })
+
     return () => {
       componentIsMounted.current = false
     }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  const getImageUri = async () => {
-    // console.log(cacheKey)
-    try {
-      // Use the cached image if it exists
-      const metadata = await FileSystem.getInfoAsync(filesystemURI)
-      if (!metadata.exists) {
-        // download to cache
-        if (componentIsMounted.current) {
-          // console.log(CachedImage.counter)
-          let i = 0
-          while (CachedImage.counter > 4 && i < 1000) {
-            await new Promise(r => setTimeout(r, 10)) // eslint-disable-line no-await-in-loop
-            i += 1
-          }
-        }
-        if (componentIsMounted.current) {
-          CachedImage.counter += 1
-          setImgURI(null)
-          // make sure no more than 4 images at a time are being downloading
-
-          // await new Promise(r => setTimeout(r, 10 * CachedImage.counter))
-          await FileSystem.downloadAsync(
-            uri,
-            filesystemURI
-          )
-          CachedImage.counter -= 1
-        }
-        // await new Promise(r => setTimeout(r, 100))
-        if (componentIsMounted.current) {
-          setImgURI(filesystemURI)
-          if (!filesystemURI) {
-            console.log('null uri')
-          }
-        }
-      }
-    } catch (err) {
-      console.log()
-      setImgURI(uri)
-      if (CachedImage.counter > 0) {
-        CachedImage.counter -= 1
-      }
-    }
-  }
 
   return (
     <Image
