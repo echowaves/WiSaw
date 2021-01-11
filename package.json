@@ -10,7 +10,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "reset-simulator": "xcrun simctl erase all"
   },
   "dependencies": {
     "@babel/plugin-transform-async-to-generator": "7.12.1",
