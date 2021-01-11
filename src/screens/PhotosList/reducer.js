@@ -5,7 +5,10 @@ import * as SecureStore from 'expo-secure-store'
 import {
   Toast,
 } from 'native-base'
+
+import * as MediaLibrary from 'expo-media-library'
 import * as FileSystem from 'expo-file-system'
+import moment from 'moment'
 
 import * as CONST from '../../consts.js'
 
@@ -493,6 +496,29 @@ async function _getTancAccepted() {
   } catch (err) {
     return false
   }
+}
+export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
+  MediaLibrary.saveToLibraryAsync(uri)
+  // check if cache dir exists
+  const cacheDirectory = await FileSystem.getInfoAsync(PENDING_UPLOADS_FOLDER)
+
+  // create cacheDir if does not exist
+  if (!cacheDirectory.exists) {
+    await FileSystem.makeDirectoryAsync(PENDING_UPLOADS_FOLDER)
+  }
+
+  // move file to cacheDir
+  await FileSystem.moveAsync({
+    from: uri,
+    to: `${PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
+  })
+
+  const pendingFiles = await FileSystem.readDirectoryAsync(PENDING_UPLOADS_FOLDER)
+  dispatch({
+    type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
+    pendingUploads: pendingFiles.length,
+  })
+  console.log({ pendingFiles })
 }
 
 export function uploadPendingPhotos() {

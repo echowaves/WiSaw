@@ -7,10 +7,7 @@ import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
-import * as MediaLibrary from 'expo-media-library'
-import * as FileSystem from 'expo-file-system'
 import useKeyboard from '@rnhooks/keyboard'
-import moment from 'moment'
 
 import {
   StyleSheet,
@@ -56,8 +53,6 @@ import getTheme from "../../../native-base-theme/components"
 import material from '../../../native-base-theme/variables/material'
 
 import * as reducer from './reducer'
-
-// import * as cameraReducer from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
@@ -292,25 +287,9 @@ const PhotosList = () => {
       return Promise.resolve() // simply return
     }
 
-    MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
-    // check if cache dir exists
-    const cacheDirectory = await FileSystem.getInfoAsync(reducer.PENDING_UPLOADS_FOLDER)
+    dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
 
-    // create cacheDir if does not exist
-    if (!cacheDirectory.exists) {
-      await FileSystem.makeDirectoryAsync(reducer.PENDING_UPLOADS_FOLDER)
-    }
-
-    // move file to cacheDir
-    await FileSystem.moveAsync({
-      from: cameraReturn.uri,
-      to: `${reducer.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
-    })
-
-    // const pendingFilesFolder = await FileSystem.readDirectoryAsync(reducer.PENDING_UPLOADS_FOLDER)
-    // console.log({ pendingFilesFolder })
-
-    // dispatch(reducer.uploadPendingPhotos())
+    dispatch(reducer.uploadPendingPhotos())
   }
 
   const renderPhotoButton = () => (
