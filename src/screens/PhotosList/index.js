@@ -756,22 +756,22 @@ const PhotosList = () => {
     )
   }
 
-  // if (loading) {
-  //   return (
-  //     <Container>
-  //       {searchTerm && (renderSearchBar())}
-  //       <Content padder>
-  //         <Body>
-  //           <Spinner color={
-  //             CONST.MAIN_COLOR
-  //           }
-  //           />
-  //         </Body>
-  //       </Content>
-  //       {renderPhotoButton()}
-  //     </Container>
-  //   )
-  // }
+  if (loading) {
+    return (
+      <Container>
+        {searchTerm && (renderSearchBar())}
+        <Content padder>
+          <Body>
+            <Spinner color={
+              CONST.MAIN_COLOR
+            }
+            />
+          </Body>
+        </Content>
+        {renderPhotoButton()}
+      </Container>
+    )
+  }
 
   if (photos.length === 0) {
     return (
