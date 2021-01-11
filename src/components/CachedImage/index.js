@@ -15,10 +15,6 @@ const CachedImage = props => {
   const componentIsMounted = useRef(true)
 
   useEffect(() => {
-    if (typeof CachedImage.counter === 'undefined') {
-      CachedImage.counter = 0
-    }
-
     const loadImage = async ({ fileURI }) => {
       try {
         // Use the cached image if it exists
@@ -26,25 +22,12 @@ const CachedImage = props => {
         if (!metadata.exists) {
           // download to cache
           if (componentIsMounted.current) {
-            // console.log(CachedImage.counter)
             setImgURI(null)
-
-            let i = 0
-            while (CachedImage.counter > 10 && i < 1000) {
-              await new Promise(r => setTimeout(r, 10)) // eslint-disable-line no-await-in-loop
-              i += 1
-            }
-          }
-          if (componentIsMounted.current) {
-            await new Promise(r => setTimeout(r, 200 * CachedImage.counter))
-            CachedImage.counter += 1
             await FileSystem.downloadAsync(
               uri,
               fileURI
             )
-            CachedImage.counter -= 1
           }
-          // await new Promise(r => setTimeout(r, 100))
           if (componentIsMounted.current) {
             setImgURI(fileURI)
           }
@@ -52,9 +35,6 @@ const CachedImage = props => {
       } catch (err) {
         console.log()
         setImgURI(uri)
-        if (CachedImage.counter > 0) {
-          CachedImage.counter -= 1
-        }
       }
     }
 
