@@ -2627,9 +2627,9 @@ cache-base@^1.0.1:
     unset-value "^1.0.0"
 
 call-bind@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/call-bind/-/call-bind-1.0.1.tgz#29aca9151f8ddcfd5b9b786898f005f425e88567"
-  integrity sha512-tvAvUwNcRikl3RVF20X9lsYmmepsovzTWeJiXjO0PkJp15uy/6xKFZOQtuiSULwYW+6ToZBprphCgWXC2dSgcQ==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/call-bind/-/call-bind-1.0.2.tgz#b1d4e89e688119c3c9a903ad30abb2f6a919be3c"
+  integrity sha512-7O+FbCihrB5WGbFYesctwmTKae6rOiIzmz1icreWJ+0aA7LJfuqhEso2T9ncpcFtzMQtzXf2QGGueWJGTYsqrA==
   dependencies:
     function-bind "^1.1.1"
     get-intrinsic "^1.0.2"
@@ -3867,6 +3867,11 @@ expo-sharing@~8.5.0:
   version "8.5.0"
   resolved "https://registry.yarnpkg.com/expo-sharing/-/expo-sharing-8.5.0.tgz#8f54774fc0b2405bf63183c235544b7f978a7765"
   integrity sha512-k5vz5O1bu9xMpIc3TTQSOwo0g/hvDGOLZzeN9F4dW6GbicC3PTRgFxHOw6vOMS5LXphAxfYcC+9ZtbocVJ7C0g==
+
+expo-sms@~8.4.0:
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/expo-sms/-/expo-sms-8.4.0.tgz#11c0dede09a10ffebb83a5f669996ef5ac724a13"
+  integrity sha512-x6dItNvvGtPx+PelHV9NQItUr3R6ThXBdJIrZB+FMxPmziqCyDqEqc85Xxdy18xOryX+0ArUdP4PzzHRzLq6CA==
 
 expo-sqlite@~8.5.0:
   version "8.5.0"

@@ -37,17 +37,13 @@ import {
 
 import NetInfo from "@react-native-community/netinfo"
 
-// import {
-//   PERMISSIONS, request, openSettings,
-// } from 'react-native-permissions'
-
-// import Branch from 'react-native-branch'
-
 import FlatGrid from 'react-native-super-grid'
 
 import PropTypes from 'prop-types'
 
 import Modal from "react-native-modal"
+
+// import Branch from '../../util/my-branch'
 
 import getTheme from "../../../native-base-theme/components"
 import material from '../../../native-base-theme/variables/material'
@@ -129,20 +125,20 @@ const PhotosList = () => {
   }
 
   // componentDidMount branch initialization
-  useEffect(() => {
-    // Branch.subscribe(bundle => {
-    //   if (bundle && bundle.params && !bundle.error) {
-    //     // `bundle.params` contains all the info about the link.
-    //     const item = bundle.params.$item
-    //
-    //     if (item) {
-    //     // go back to the top screen, just in case
-    //       navigation.popToTop()
-    //       navigation.navigate('SharedPhoto', { item })
-    //     }
-    //   }
-    // })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // useEffect(() => {
+  //   Branch.subscribe(bundle => {
+  //     if (bundle && bundle.params && !bundle.error) {
+  //       // `bundle.params` contains all the info about the link.
+  //       const item = bundle.params.$item
+  //
+  //       if (item) {
+  //       // go back to the top screen, just in case
+  //         navigation.popToTop()
+  //         navigation.navigate('SharedPhoto', { item })
+  //       }
+  //     }
+  //   })
+  // }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // add network availability listener
   useEffect(() => {

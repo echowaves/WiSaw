@@ -598,7 +598,7 @@ export function uploadPendingPhotos() {
         text: 'Failed to upload file, refresh to try again.',
       })
       console.log({ error }) // eslint-disable-line no-console
-      // dispatch(uploadPendingPhotos())
+      dispatch(uploadPendingPhotos())
     }
     dispatch({
       type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
