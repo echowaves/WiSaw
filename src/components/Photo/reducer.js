@@ -329,6 +329,7 @@ export function sharePhoto({ item }) {
             )
           ).join('\n\n')}\n\n${item.likes > 0 ? `Thumbs Up: ${item.likes}\n\n` : ''}`
       }
+      messageBody = `${messageBody}\nhttps://www.wisaw.com/photos/${item.id}`
       // const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing' }
       // const controlParams = { $photo_id: item.id, $item: item }
       //
