@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WiSaw",
-    "version": "5.10.3",
+    "version": "5.11.0",
     "slug": "WiSaw",
     "scheme": "wisaw",
     "icon": "./assets/icon.png",
@@ -23,6 +23,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.echowaves",
+      "buildNumber": "133",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This will allow you to take photos with the application. A photo will be stored in your photo album and uploaded to the cloud.",
@@ -33,11 +34,7 @@
         "NSPhotoLibraryAddUsageDescription": "Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?",
         "NSPhotoLibraryUsageDescription": "Want to see photos stored on your device? Why don&apos;t you enable it?"
       },
-      "config": {
-        "branch": {
-          "apiKey": "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4"
-        }
-      }
+      "config": {}
     },
     "android": {
       "adaptiveIcon": {
@@ -45,6 +42,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.echowaves.wisaw",
+      "versionCode": 133,
       "permissions": [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",
@@ -54,11 +52,7 @@
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE"
       ],
-      "config": {
-        "branch": {
-          "apiKey": "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4"
-        }
-      }
+      "config": {}
     },
     "web": {
       "favicon": "./assets/favicon.png"
