@@ -603,6 +603,10 @@ export function uploadPendingPhotos() {
     dispatch({
       type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
     })
+
+    if ((await _getPendingUploadFiles()).length > 0) {
+      dispatch(uploadPendingPhotos())
+    }
   }
 }
 
