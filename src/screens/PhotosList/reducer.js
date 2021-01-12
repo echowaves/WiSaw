@@ -68,7 +68,6 @@ const reducer = (state = initialState, action) => {
         errorMessage: action.errorMessage,
       }
     case ACTION_TYPES.GET_PHOTOS_FINISHED:
-      // console.log(`${state.searchTerm} && ${state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE}`)
       return {
         ...state,
         loading: false,
@@ -299,9 +298,7 @@ async function _requestGeoPhotos(getState) {
 
 async function _requestWatchedPhotos(getState) {
   const { pageNumber, uuid, batch } = getState().photosList
-
   // console.log(`_requestWatchedPhotos(${pageNumber})`)
-
   const response = await fetch(`${CONST.HOST}/photos/feedForWatcher`, {
     method: 'POST',
     headers: {
@@ -368,7 +365,6 @@ export function getPhotos() {
           responseJson = await _requestWatchedPhotos(getState)
         }
 
-        // console.log(`${responseJson.batch}:${getState().photosList.batch}`)
         if (responseJson.batch === getState().photosList.batch) {
           if (responseJson.photos && responseJson.photos.length > 0) {
             dispatch({
@@ -497,15 +493,19 @@ async function _getTancAccepted() {
     return false
   }
 }
-export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
-  MediaLibrary.saveToLibraryAsync(uri)
-  // check if cache dir exists
-  const cacheDirectory = await FileSystem.getInfoAsync(PENDING_UPLOADS_FOLDER)
 
+const _checkUploadDirectory = async () => {
+  const cacheDirectory = await FileSystem.getInfoAsync(PENDING_UPLOADS_FOLDER)
   // create cacheDir if does not exist
   if (!cacheDirectory.exists) {
     await FileSystem.makeDirectoryAsync(PENDING_UPLOADS_FOLDER)
   }
+}
+
+export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
+  MediaLibrary.saveToLibraryAsync(uri)
+
+  await _checkUploadDirectory()
 
   // move file to cacheDir
   await FileSystem.moveAsync({
@@ -513,25 +513,36 @@ export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
     to: `${PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
   })
 
-  const pendingFiles = await FileSystem.readDirectoryAsync(PENDING_UPLOADS_FOLDER)
+  const pendingFiles = await _getPendingUploadFiles()
+
   dispatch({
     type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
     pendingUploads: pendingFiles.length,
   })
-  console.log({ pendingFiles })
+}
+
+const _getPendingUploadFiles = async () => {
+  await _checkUploadDirectory()
+  const files = await FileSystem.readDirectoryAsync(PENDING_UPLOADS_FOLDER)
+  return files
 }
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
-    const keys = /* await getMyKeys() || */ []
-    let pendingUploads = keys.length
+    const { location, uuid } = getState().photosList
+    const pendingFiles = await _getPendingUploadFiles()
+
+    let pendingUploads = pendingFiles.length
+
     dispatch({
       type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
       pendingUploads,
     })
+
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
     }
+
     if (getState().photosList.uploadingPhoto) {
       // already uploading photos, just exit here
       return Promise.resolve()
@@ -544,68 +555,60 @@ export function uploadPendingPhotos() {
 
       let i = 0
       // here let's iterate over the items to upload and upload one file at a time
-      for (; i < keys.length; i += 1) {
-        console.log(1)
+      for (; i < pendingFiles.length; i += 1) {
+        const item = pendingFiles[i]
         // eslint-disable-next-line no-await-in-loop
-        const item = JSON.parse(await AsyncStorage.getItem(keys[i]))
-        console.log(2)
-        // eslint-disable-next-line no-await-in-loop
-        const { responseData } = await uploadFile(item)
-        console.log(3)
+        const { responseData, photo } = await _uploadFile({
+          item,
+          uuid,
+          location,
+        })
         if (responseData.status === 200) {
-          console.log(4)
+          const cachedFileUri = `${FileSystem.cacheDirectory}${photo.id}t`
+          // move file to cacheDir
           // eslint-disable-next-line no-await-in-loop
-          await AsyncStorage.removeItem(keys[i])
-          console.log(5)
+          await FileSystem.moveAsync({
+            from: `${PENDING_UPLOADS_FOLDER}${item}`,
+            to: cachedFileUri,
+          })
           // eslint-disable-next-line no-await-in-loop
-          pendingUploads = (/* await getMyKeys() || */ []).length
-          console.log(6)
+          pendingUploads = (await _getPendingUploadFiles()).length
           dispatch({
             type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
-            // eslint-disable-next-line no-await-in-loop
             pendingUploads,
           })
-          console.log(7)
-          const photo = {
-            getThumbUrl: item.asset.uri,
-            fallback: true,
-            id: item.asset.id,
-          }
-          console.log(8)
+
+          photo.getThumbUrl = cachedFileUri
+          photo.fallback = true
+
           // show the photo in the photo list immidiately
           dispatch({
-            type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
+            type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
             photo,
           })
-          console.log(9)
         } else {
           alert("Error uploading file, try again.")
         }
       }
     } catch (error) {
-      console.log(10)
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
-      console.log(error)
+      Toast.show({
+        text: 'Failed to upload file, refresh to try again.',
+      })
+      console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())
     }
-    console.log(11)
     dispatch({
       type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
     })
-    console.log(12)
-    return Promise.resolve()
   }
 }
 
-const uploadFile = async item => {
+const _uploadFile = async ({ item, uuid, location }) => {
+  const assetUri = `${PENDING_UPLOADS_FOLDER}${item}`
   try {
-    const {
-      uuid, location, asset, uri,
-    } = item
-    console.log(item)
-    console.log(20)
     const response = await fetch(`${CONST.HOST}/photos`, {
       method: 'POST',
       headers: {
@@ -613,44 +616,38 @@ const uploadFile = async item => {
       },
       body: JSON.stringify({
         uuid,
-        location,
+        location: {
+          type: 'Point',
+          coordinates: [
+            location.coords.latitude,
+            location.coords.longitude,
+          ],
+        },
       }),
     })
-    console.log(21)
+
     const responseJson = await response.json()
-    // console.log({ assetFile })
-    // console.log({ responseJson })
-    console.log(22)
     if (response.status === 401) {
       alert("Sorry, looks like you have been banned from WiSaw.")
-      return
+      return Promise.resolve()
     }
-    console.log(23)
     if (response.status === 201) {
-      console.log(24)
-      const { uploadURL } = responseJson
-      console.log(25)
-      console.log(uri)
-      console.log(asset.uri)
-      let picture = await fetch(asset.uri)
-      console.log(26)
-      picture = await picture.blob()
-      console.log(27)
-      const imageData = new File([picture], "file.jpeg")
-      console.log(28)
+      const { uploadURL, photo } = responseJson
 
-      const responseData = await fetch(uploadURL, {
-        method: 'PUT',
-        body: imageData,
-        headers: {
-          "Content-Type": "image/jpeg",
-        },
-      })
-      console.log(29)
-      return { responseData }
+      const responseData = await FileSystem.uploadAsync(
+        uploadURL,
+        assetUri,
+        {
+          httpMethod: 'PUT',
+          headers: {
+            "Content-Type": "image/jpeg",
+          },
+        }
+      )
+      return { responseData, photo }
     }
   } catch (error) {
-    console.log(error)
+    console.log({ error })// eslint-disable-line no-console
   }
 }
 
