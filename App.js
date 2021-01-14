@@ -31,7 +31,7 @@ const App = () => (
       <Root>
         <NavigationContainer>
           <Stack.Navigator
-            // mode="modal"
+            mode="modal"
             // headerMode="none"
             initialRouteName="PhotosList"
             screenOptions={{ gestureEnabled: true }}>

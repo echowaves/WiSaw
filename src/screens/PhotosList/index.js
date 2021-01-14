@@ -480,9 +480,7 @@ const PhotosList = () => {
   ) {
     return (
       <Container>
-
         {activeSegment === 2 && renderSearchBar()}
-
         <FlatGrid
           itemDimension={
             thumbWidth
