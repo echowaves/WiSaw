@@ -32,7 +32,7 @@ export const initialState = {
   pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the net page
   orientation: 'portrait',
   activeSegment: 0,
-  searchTerm: null,
+  searchTerm: '',
   batch: null,
   isLastPage: false,
   netAvailable: true,
@@ -72,9 +72,9 @@ const reducer = (state = initialState, action) => {
         ...state,
         loading: false,
         isLastPage:
-        (state.searchTerm && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
-        || (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
+         (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
         || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+        || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
         ,
       }
     case ACTION_TYPES.RESET_STATE:
@@ -317,10 +317,7 @@ async function _requestWatchedPhotos(getState) {
 async function _requestSearchedPhotos(getState) {
   const { pageNumber, searchTerm, batch } = getState().photosList
   // console.log(`_requestSearchedPhotos(${pageNumber})`)
-  let { uuid } = getState().photosList
-  if (uuid === null) {
-    uuid = 'initializing'
-  }
+  const { uuid } = getState().photosList
 
   const response = await fetch(`${CONST.HOST}/photos/feedForTextSearch`, {
     method: 'POST',
@@ -345,24 +342,28 @@ export function getPhotos() {
     //   loading, isLastPage, pageNumber, searchTerm,
     // } = getState().photosList
     // console.log(`getPhotos() searchTerm:${searchTerm} loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
-    if (!getState().photosList.location || getState().photosList.netAvailable === false) {
+    if (!getState().photosList.location
+    || getState().photosList.netAvailable === false
+    || (getState().photosList.activeSegment === 2
+        && getState().photosList.searchTerm.length < 3)
+    ) {
       dispatch({
         type: ACTION_TYPES.GET_PHOTOS_FAIL,
         errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
       })
     } else {
-      const { activeSegment, searchTerm } = getState().photosList
+      const { activeSegment } = getState().photosList
       dispatch({
         type: ACTION_TYPES.GET_PHOTOS_STARTED,
       })
       try {
         let responseJson
-        if (searchTerm !== null) {
-          responseJson = await _requestSearchedPhotos(getState)
-        } else if (activeSegment === 0) {
+        if (activeSegment === 0) {
           responseJson = await _requestGeoPhotos(getState)
         } else if (activeSegment === 1) {
           responseJson = await _requestWatchedPhotos(getState)
+        } else if (activeSegment === 2) {
+          responseJson = await _requestSearchedPhotos(getState)
         }
 
         if (responseJson.batch === getState().photosList.batch) {

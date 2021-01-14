@@ -104,42 +104,6 @@ const PhotosList = () => {
     setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
   }, [width])
 
-  const updateNavBar = () => {
-    if (netAvailable) {
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle(),
-        headerLeft: renderHeaderLeft,
-        headerRight: renderHeaderRight,
-      })
-    } else {
-      navigation.setOptions({
-        headerTitle: (<Text>Network not Availble</Text>),
-        headerLeft: null,
-        headerRight: null,
-      })
-    }
-
-    if (!location) {
-      reload()
-    }
-  }
-
-  // componentDidMount branch initialization
-  // useEffect(() => {
-  //   Branch.subscribe(bundle => {
-  //     if (bundle && bundle.params && !bundle.error) {
-  //       // `bundle.params` contains all the info about the link.
-  //       const item = bundle.params.$item
-  //
-  //       if (item) {
-  //       // go back to the top screen, just in case
-  //         navigation.popToTop()
-  //         navigation.navigate('SharedPhoto', { item })
-  //       }
-  //     }
-  //   })
-  // }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   // add network availability listener
   useEffect(() => {
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
@@ -152,25 +116,18 @@ const PhotosList = () => {
 
   // when screen orientation changes
   useEffect(() => {
-    if (searchTerm === null || searchTerm.length >= 3) {
-      if (loadMore && !isLastPage && batch) {
-        dispatch(reducer.getPhotos())
-        setLoadMore(false)
-      }
-      if (!isListFilllsScreen()) {
-        dispatch(reducer.getPhotos())
-      }
-    } else {
+    if (loadMore && !isLastPage && batch) {
+      dispatch(reducer.getPhotos())
       setLoadMore(false)
+    }
+    if (!isListFilllsScreen()) {
+      dispatch(reducer.getPhotos())
     }
   }, [loading, loadMore, isLastPage]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // when screen orientation changes
   useEffect(() => {
-    if (searchTerm === null || searchTerm === '') {
-      updateNavBar()
-    }
-  }, [activeSegment, searchTerm]) // eslint-disable-line react-hooks/exhaustive-deps
+    updateNavBar()
+  }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isListFilllsScreen = () => {
     const numColumns = Math.floor(width / thumbWidth)
@@ -197,6 +154,26 @@ const PhotosList = () => {
     },
 
   })
+
+  const updateNavBar = () => {
+    if (netAvailable) {
+      navigation.setOptions({
+        headerTitle: renderHeaderTitle(),
+        headerLeft: renderHeaderLeft,
+        headerRight: renderHeaderRight,
+      })
+    } else {
+      navigation.setOptions({
+        headerTitle: (<Text>Network not Availble</Text>),
+        headerLeft: null,
+        headerRight: null,
+      })
+    }
+
+    if (!location) {
+      reload()
+    }
+  }
 
   const reload = async () => {
     /* eslint-disable no-await-in-loop */
@@ -326,25 +303,7 @@ const PhotosList = () => {
               }
             }
           />
-
         </Button>
-        {/* loading && (
-          <Spinner
-            style={{
-            // width,
-            // height,
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              width: '100%',
-              height: '100%',
-            }}
-            color="white"
-          />
-        ) */}
-
         {pendingUploads > 0 && (
           <Text
             style={
@@ -358,124 +317,89 @@ const PhotosList = () => {
             {pendingUploads}
           </Text>
         )}
-
       </View>
     </View>
   )
 
-  const renderHeaderTitle = () => {
-    if (searchTerm === null) {
-      return (
-        <StyleProvider style={getTheme(material)}>
-          <Segment style={{ marginBottom: 2 }}>
-            <Button
-              first active={activeSegment === 0}
-              onPress={
-                async () => {
-                  dispatch(reducer.setActiveSegment(0))
-                  await reload()
-                }
-              }>
-              <Icon
-                name="globe"
-                type="FontAwesome"
-              />
-            </Button>
-            <Button
-              last active={activeSegment === 1}
-              onPress={
-                async () => {
-                  dispatch(reducer.setActiveSegment(1))
-                  await reload()
-                }
-              }>
-              <Icon
-                name="eye"
-                type="FontAwesome"
-              />
-            </Button>
-          </Segment>
-        </StyleProvider>
-      )
-    }
-    return (
-      <Text />
-    )
-  }
-
-  const renderHeaderLeft = () => {
-    if (searchTerm === null) {
-      return (
-        <Icon
+  const renderHeaderTitle = () => (
+    <StyleProvider style={getTheme(material)}>
+      <Segment style={{ marginBottom: 2 }}>
+        <Button
+          first active={activeSegment === 0}
           onPress={
-            () => {
-              // dispatch(reducer.initState())
+            async () => {
+              await dispatch(reducer.setActiveSegment(0))
               reload()
             }
-          }
-          name="sync"
-          type="MaterialIcons"
-          style={
-            {
-              marginLeft: 10,
-              color: CONST.MAIN_COLOR,
+          }>
+          <Icon
+            name="globe"
+            type="FontAwesome"
+          />
+        </Button>
+        <Button
+          active={activeSegment === 1}
+          onPress={
+            async () => {
+              await dispatch(reducer.setActiveSegment(1))
+              reload()
             }
-          }
-        />
-      )
-    }
-    return (
-      <Icon
-        name="times"
-        type="FontAwesome"
-        style={{
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-        }}
-        onPress={
-          () => {
-            dispatch(reducer.setSearchTerm(null))
-            reload()
-          }
-        }
-      />
-    )
-  }
+          }>
+          <Icon
+            name="eye"
+            type="FontAwesome"
+          />
+        </Button>
 
-  const renderHeaderRight = () => {
-    if (searchTerm === null) {
-      return (
-        <View style={{ flex: 1, flexDirection: 'row' }}>
+        <Button
+          last active={activeSegment === 2}
+          onPress={
+            async () => {
+              await dispatch(reducer.setActiveSegment(2))
+              reload()
+            }
+          }>
           <Icon
             type="MaterialIcons"
             name="search"
-            style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
-            onPress={
-              () => {
-                dispatch(reducer.setSearchTerm(''))
-                reload()
-              }
-            }
           />
+        </Button>
+      </Segment>
+    </StyleProvider>
+  )
 
-          <Icon
-            onPress={
-              () => navigation.navigate('FeedbackScreen')
-            }
-            name="feedback"
-            type="MaterialIcons"
-            style={{
-              marginRight: 20,
-              color: CONST.MAIN_COLOR,
-            }}
-          />
-        </View>
-      )
-    }
-    return (
-      <Text />
-    )
-  }
+  const renderHeaderLeft = () => (
+    <Icon
+      onPress={
+        () => {
+          // dispatch(reducer.initState())
+          reload()
+        }
+      }
+      name="sync"
+      type="MaterialIcons"
+      style={
+        {
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+        }
+      }
+    />
+  )
+
+  const renderHeaderRight = () => (
+    <Icon
+      onPress={
+        () => navigation.navigate('FeedbackScreen')
+      }
+      name="feedback"
+      type="MaterialIcons"
+      style={{
+        marginRight: 20,
+        color: CONST.MAIN_COLOR,
+      }}
+    />
+  )
 
   const renderSearchBar = () => (
     <Header
@@ -557,7 +481,7 @@ const PhotosList = () => {
     return (
       <Container>
 
-        {searchTerm && (renderSearchBar())}
+        {activeSegment === 2 && renderSearchBar()}
 
         <FlatGrid
           itemDimension={
@@ -732,7 +656,7 @@ const PhotosList = () => {
   if (loading) {
     return (
       <Container>
-        {searchTerm && (renderSearchBar())}
+        {activeSegment === 2 && renderSearchBar()}
         <Content padder>
           <Body>
             <Spinner color={
@@ -751,7 +675,7 @@ const PhotosList = () => {
       <Container>
         <Content padder>
           <Body>
-            {searchTerm !== null && (
+            {activeSegment === 2 && (
               <Card transparent>
                 {renderSearchBar()}
                 <CardItem>
@@ -767,7 +691,7 @@ const PhotosList = () => {
                 </CardItem>
               </Card>
             )}
-            {searchTerm === null && activeSegment === 0 && (
+            { activeSegment === 0 && (
               <Card transparent>
                 <CardItem style={{ borderRadius: 10 }}>
                   <Text style={{
@@ -781,7 +705,7 @@ const PhotosList = () => {
                 </CardItem>
               </Card>
             )}
-            {searchTerm === null && activeSegment === 1 && (
+            {activeSegment === 1 && (
               <Card transparent>
                 <CardItem style={{ borderRadius: 10 }}>
                   <Text style={{

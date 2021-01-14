@@ -187,16 +187,20 @@ const PhotosDetails = ({ route, navigation }) => {
   }
 
   const renderHeaderTitle = () => {
-    if (searchTerm !== null) {
-      return (
-        <Text style={{ color: CONST.SECONDARY_COLOR }}>
-          {searchTerm}
-        </Text>
-      )
-    } if (activeSegment === 0) {
-      return (<Icon name="globe" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
+    switch (activeSegment) {
+      case 0:
+        return (<Icon name="globe" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
+      case 1:
+        return (<Icon name="eye" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
+      case 2:
+        return (
+          <Text style={{ color: CONST.SECONDARY_COLOR }}>
+            {searchTerm}
+          </Text>
+        )
+      default:
+        return (<Icon name="globe" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
     }
-    return (<Icon name="eye" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
   }
 
   return (
