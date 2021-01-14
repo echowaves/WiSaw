@@ -618,7 +618,6 @@ const PhotosList = () => {
             }
           }
         />
-
         {renderPhotoButton()}
       </Container>
 
@@ -700,7 +699,7 @@ const PhotosList = () => {
             </Card>
           </Body>
         </Content>
-        {/* renderPhotoButton() */}
+        {renderPhotoButton()}
       </Container>
     )
   }
@@ -804,8 +803,5 @@ const PhotosList = () => {
     )
   }
 }
-// PhotosList.propTypes = {
-//   navigation: PropTypes.object.isRequired,
-// }
 
 export default PhotosList
