@@ -3,16 +3,16 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
-
+import * as Location from 'expo-location'
+import * as Linking from 'expo-linking'
+import * as Permissions from 'expo-permissions'
+import * as ImagePicker from 'expo-image-picker'
 import useKeyboard from '@rnhooks/keyboard'
-
-import Geolocation from '@react-native-community/geolocation'
 
 import {
   StyleSheet,
   Text,
   View,
-  Platform,
   Alert,
 } from 'react-native'
 
@@ -37,24 +37,18 @@ import {
 
 import NetInfo from "@react-native-community/netinfo"
 
-import {
-  PERMISSIONS, request, openSettings,
-} from 'react-native-permissions'
-
-import branch from 'react-native-branch'
-
 import FlatGrid from 'react-native-super-grid'
 
 import PropTypes from 'prop-types'
 
 import Modal from "react-native-modal"
 
+// import Branch from '../../util/my-branch'
+
 import getTheme from "../../../native-base-theme/components"
 import material from '../../../native-base-theme/variables/material'
 
 import * as reducer from './reducer'
-
-import * as cameraReducer from '../Camera/reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
@@ -70,13 +64,13 @@ const PhotosList = () => {
   const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
-  // const pageNumber = useSelector(state => state.photosList.pageNumber)
+  const location = useSelector(state => state.photosList.location)
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
   const isLastPage = useSelector(state => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
   const loading = useSelector(state => state.photosList.loading)
-  const pendingUploads = useSelector(state => state.camera.pendingUploads)
+  const pendingUploads = useSelector(state => state.photosList.pendingUploads)
   const orientation = useSelector(state => state.photosList.orientation)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
@@ -100,7 +94,7 @@ const PhotosList = () => {
   useEffect(() => {
     updateNavBar()
     if (netAvailable) {
-      dispatch(cameraReducer.uploadPendingPhotos())
+      dispatch(reducer.uploadPendingPhotos())
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -124,21 +118,27 @@ const PhotosList = () => {
         headerRight: null,
       })
     }
+
+    if (!location) {
+      reload()
+    }
   }
 
   // componentDidMount branch initialization
-  useEffect(() => {
-    branch.initSessionTtl = 10000 // Set to 10 seconds
-    branch.subscribe(async ({ error, params }) => {
-      const item = params.$item
-
-      if (item) {
-      // go back to the top screen, just in case
-        navigation.popToTop()
-        navigation.navigate('SharedPhoto', { item })
-      }
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // useEffect(() => {
+  //   Branch.subscribe(bundle => {
+  //     if (bundle && bundle.params && !bundle.error) {
+  //       // `bundle.params` contains all the info about the link.
+  //       const item = bundle.params.$item
+  //
+  //       if (item) {
+  //       // go back to the top screen, just in case
+  //         navigation.popToTop()
+  //         navigation.navigate('SharedPhoto', { item })
+  //       }
+  //     }
+  //   })
+  // }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // add network availability listener
   useEffect(() => {
@@ -205,53 +205,30 @@ const PhotosList = () => {
     dispatch(reducer.setLocation(await _getLocation()))
     setLoadMore(true)
 
-    dispatch(cameraReducer.uploadPendingPhotos())
+    dispatch(reducer.uploadPendingPhotos())
   }
 
   const checkPermissionsForPhotoTaking = async () => {
     let permission = await _checkPermission(
-      Platform.select({
-        android: PERMISSIONS.ANDROID.CAMERA,
-        ios: PERMISSIONS.IOS.CAMERA,
-      }),
+      Permissions.CAMERA,
       'Can we access your camera?',
       'How else would you be able to take a photo?'
     )
-    if (permission === 'granted') {
-      switch (Platform.OS) {
-        case 'ios':
-          permission = await _checkPermission(
-            PERMISSIONS.IOS.PHOTO_LIBRARY,
-            'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
-          )
-          break
-        case 'android':
-          permission = await _checkPermission(
-            PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-            'Can we write photos to your devise?',
-            'How else would we be able to save the photos you take on your device?'
-          )
-          if (permission === 'granted') {
-            permission = await _checkPermission(
-              PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-              'Can we read photos on your devise?',
-              'How else would we be able upload the photos you take from your device?'
-            )
-          }
-          break
-        default:
-          alert('unknown platform')
+    if (permission.status === 'granted') {
+      permission = await _checkPermission(
+        Permissions.MEDIA_LIBRARY,
+        'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
+      )
+      if (permission.status === 'granted') {
+        takePhoto()
       }
-    }
-    if (permission === 'granted') {
-      takePhoto()
     }
   }
 
   async function _checkPermission(permissionType, alertHeader, alertBody) {
-    const permission = await request(permissionType)
+    const permission = await Permissions.askAsync(permissionType)
 
-    if (permission !== 'granted') {
+    if (permission.status !== 'granted') {
       Alert.alert(
         alertHeader,
         alertBody,
@@ -259,14 +236,11 @@ const PhotosList = () => {
           {
             text: 'Open Settings',
             onPress: () => {
-              // this.checkingPermission = false
-              openSettings()
+              Linking.openSettings()
             },
           },
         ],
       )
-      // }
-      // this.checkingPermission = false
     }
     return permission
   }
@@ -275,20 +249,15 @@ const PhotosList = () => {
     let position = null
     // Toast("started checking permission")
     const permission = await _checkPermission(
-      Platform.select({
-        android: PERMISSIONS.ANDROID.ACCESS_COARSE_LOCATION,
-        ios: PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
-      }),
+      Permissions.LOCATION,
       'How am I supposed to show you the near-by photos?',
       'Why don\'t you enable Location in Settings and Try Again?'
     )
-    // Toast("finished checking permission")
-    if (permission === 'granted') {
+    if (permission.status === 'granted') {
       try {
-        position = await _getCurrentPosition({
-          enableHighAccuracy: false,
-          timeout: 200000,
-          maximumAge: 200000,
+        position = await Location.getLastKnownPositionAsync({
+          requiredAccuracy: 5000,
+          maxAge: 200000,
         })
       } catch (err) {
         position = null
@@ -303,14 +272,20 @@ const PhotosList = () => {
     return position
   }
 
-  function _getCurrentPosition(options = {}) {
-    return new Promise((resolve, reject) => {
-      Geolocation.getCurrentPosition(resolve, reject, options)
+  const takePhoto = async () => {
+    const cameraReturn = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      // allowsEditing: true,
+      quality: 1.0,
+      exif: false,
     })
-  }
+    if (cameraReturn.cancelled === true) {
+      return Promise.resolve() // simply return
+    }
 
-  const takePhoto = () => {
-    navigation.navigate('Camera')
+    dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
+
+    dispatch(reducer.uploadPendingPhotos())
   }
 
   const renderPhotoButton = () => (
@@ -352,7 +327,25 @@ const PhotosList = () => {
               }
             }
           />
+
         </Button>
+        {/* loading && (
+          <Spinner
+            style={{
+            // width,
+            // height,
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              width: '100%',
+              height: '100%',
+            }}
+            color="white"
+          />
+        ) */}
+
         {pendingUploads > 0 && (
           <Text
             style={
@@ -366,6 +359,7 @@ const PhotosList = () => {
             {pendingUploads}
           </Text>
         )}
+
       </View>
     </View>
   )
@@ -416,7 +410,7 @@ const PhotosList = () => {
         <Icon
           onPress={
             () => {
-              dispatch(reducer.initState())
+              // dispatch(reducer.initState())
               reload()
             }
           }
@@ -551,9 +545,14 @@ const PhotosList = () => {
     }
   }
 
+  /// //////////////////////////////////////////////////////////////////////////
+  // here where the rendering starts
+  /// //////////////////////////////////////////////////////////////////////////
+
   if (
     isTandcAccepted
   && netAvailable
+  && location
   && photos.length > 0
   ) {
     return (
@@ -583,6 +582,7 @@ const PhotosList = () => {
               />
             )
           }
+          keyExtractor={item => item.id}
           style={
             styles.container
           }
@@ -626,24 +626,87 @@ const PhotosList = () => {
     )
   }
 
-  if (loading) {
+  if (!isTandcAccepted) {
     return (
       <Container>
-        {searchTerm && (renderSearchBar())}
-        <Content padder>
-          <Body>
-            <Spinner color={
-              CONST.MAIN_COLOR
-            }
-            />
-          </Body>
-        </Content>
-        {renderPhotoButton()}
+        <Modal
+          isVisible={
+            !isTandcAccepted
+          }>
+          <Content padder>
+            <Card transparent>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * When you take a photo with WiSaw app,
+                  it will be added to a Photo Album on your phone,
+                  as well as posted to global feed in the cloud.
+                </Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * People close-by can see your photos.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text> * You can see other people&#39;s photos too.
+                </Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* No one will tolerate objectionable content or abusive users.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* The abusive users will be banned from WiSaw by other users.</Text>
+              </CardItem>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
+              </CardItem>
+              <CardItem footer style={{ borderRadius: 10 }}>
+                <Left />
+                <Button
+                  block
+                  bordered
+                  success
+                  small
+                  onPress={
+                    () => {
+                      dispatch(reducer.acceptTandC())
+                    }
+                  }>
+                  <Text>  Agree  </Text>
+                </Button>
+                <Right />
+              </CardItem>
+            </Card>
+          </Content>
+        </Modal>
       </Container>
     )
   }
 
-  if (netAvailable === false) {
+  if (!location && !loading) {
+    return (
+      <Container>
+        <Content padder>
+          <Body>
+            <Card transparent>
+              <CardItem style={{ borderRadius: 10 }}>
+                <Text style={{
+                  fontSize: 20,
+                  textAlign: 'center',
+                  margin: 10,
+                }}>
+                  Unable to get your location, make sure to turn Location Service on and reload screen.
+                </Text>
+              </CardItem>
+            </Card>
+          </Body>
+        </Content>
+        {/* renderPhotoButton() */}
+      </Container>
+    )
+  }
+
+  if (!netAvailable && !loading) {
     return (
       <Container>
         <Content padder>
@@ -668,7 +731,24 @@ const PhotosList = () => {
     )
   }
 
-  if (!loading && photos.length === 0 && isTandcAccepted) {
+  if (loading) {
+    return (
+      <Container>
+        {searchTerm && (renderSearchBar())}
+        <Content padder>
+          <Body>
+            <Spinner color={
+              CONST.MAIN_COLOR
+            }
+            />
+          </Body>
+        </Content>
+        {renderPhotoButton()}
+      </Container>
+    )
+  }
+
+  if (photos.length === 0) {
     return (
       <Container>
         <Content padder>
@@ -724,61 +804,6 @@ const PhotosList = () => {
       </Container>
     )
   }
-
-  return ( // if TANDC is not accepted, this should always come last to prevemt flickering
-    <Container>
-      <Modal
-        isVisible={
-          !isTandcAccepted
-        }>
-        <Content padder>
-          <Card transparent>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * When you take a photo with WiSaw app,
-                it will be added to a Photo Album on your phone,
-                as well as posted to global feed in the cloud.
-              </Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * People close-by can see your photos.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text> * You can see other people&#39;s photos too.
-              </Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* No one will tolerate objectionable content or abusive users.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* The abusive users will be banned from WiSaw by other users.</Text>
-            </CardItem>
-            <CardItem style={{ borderRadius: 10 }}>
-              <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
-            </CardItem>
-            <CardItem footer style={{ borderRadius: 10 }}>
-              <Left />
-              <Button
-                block
-                bordered
-                success
-                small
-                onPress={
-                  () => {
-                    dispatch(reducer.acceptTandC())
-                  }
-                }>
-                <Text>  Agree  </Text>
-              </Button>
-              <Right />
-            </CardItem>
-          </Card>
-        </Content>
-      </Modal>
-    </Container>
-  )
 }
 // PhotosList.propTypes = {
 //   navigation: PropTypes.object.isRequired,

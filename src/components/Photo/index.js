@@ -9,6 +9,7 @@ import {
   View,
   TouchableOpacity,
   Alert,
+  // Image,
 } from 'react-native'
 
 import {
@@ -23,12 +24,12 @@ import { Col, Row, Grid } from "react-native-easy-grid"
 
 import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
 
-import FastImage from 'react-native-fast-image'
-
 import PropTypes from 'prop-types'
 
 import stringifyObject from 'stringify-object'
 import jmespath from 'jmespath'
+
+import CachedImage from '../CachedImage'
 
 import * as reducer from './reducer'
 
@@ -206,16 +207,15 @@ const Photo = props => {
                   right: 0,
                   left: 0,
                 }}>
-                <FastImage
-                  source={{
-                    uri: item.getThumbUrl,
-                  }}
+                <CachedImage
+                  uri={`${item.getThumbUrl}`}
+                  cacheKey={`${item.id}t`}
+                  backgroundColor="transparent"
+                  resizeMode="contain"
                   style={{
                     width,
                     height: height - 200,
                   }}
-                  backgroundColor="transparent"
-                  resizeMode={FastImage.resizeMode.contain}
                 />
                 <Spinner
                   style={{
@@ -233,16 +233,15 @@ const Photo = props => {
                   }
                 />
               </View>
-              <FastImage
-                source={{
-                  uri: item.getImgUrl,
-                }}
+              <CachedImage
+                uri={`${item.getImgUrl}`}
+                cacheKey={`${item.id}i`}
+                backgroundColor="transparent"
+                resizeMode="contain"
                 style={{
                   width,
                   height: height - 200,
                 }}
-                backgroundColor="transparent"
-                resizeMode={FastImage.resizeMode.contain}
               />
 
             </ReactNativeZoomableView>

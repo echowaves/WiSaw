@@ -1,13 +1,14 @@
-import {
-  Platform,
-} from 'react-native'
-
 import { v4 as uuidv4 } from 'uuid'
 
-import RNSecureKeyStore, { ACCESSIBLE } from 'react-native-secure-key-store'
+import * as SecureStore from 'expo-secure-store'
+
 import {
   Toast,
 } from 'native-base'
+
+import * as MediaLibrary from 'expo-media-library'
+import * as FileSystem from 'expo-file-system'
+import moment from 'moment'
 
 import * as CONST from '../../consts.js'
 
@@ -19,8 +20,10 @@ const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
+export const PENDING_UPLOADS_FOLDER = `${FileSystem.cacheDirectory}pendingUploads/`
+
 export const initialState = {
-  isTandcAccepted: false,
+  isTandcAccepted: true,
   uuid: null,
   location: null,
   photos: [],
@@ -33,6 +36,8 @@ export const initialState = {
   batch: null,
   isLastPage: false,
   netAvailable: true,
+  uploadingPhoto: false,
+  pendingUploads: 0,
 }
 
 const reducer = (state = initialState, action) => {
@@ -49,6 +54,7 @@ const reducer = (state = initialState, action) => {
         ...state,
         photos:
         state.photos.concat(action.photos),
+        // .sort((a, b) => b.id - a.id),
         // this really stinks, need to figure out why there are duplicates in the first place
         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
         // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
@@ -62,7 +68,6 @@ const reducer = (state = initialState, action) => {
         errorMessage: action.errorMessage,
       }
     case ACTION_TYPES.GET_PHOTOS_FINISHED:
-      // console.log(`${state.searchTerm} && ${state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE}`)
       return {
         ...state,
         loading: false,
@@ -220,6 +225,23 @@ const reducer = (state = initialState, action) => {
         ...state,
         netAvailable: action.netAvailable,
       }
+
+    case ACTION_TYPES.START_PHOTO_UPLOADING:
+      return {
+        ...state,
+        uploadingPhoto: true,
+      }
+    case ACTION_TYPES.FINISH_PHOTO_UPLOADING:
+      return {
+        ...state,
+        uploadingPhoto: false,
+        // pendingUploads: 0,
+      }
+    case ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD:
+      return {
+        ...state,
+        pendingUploads: action.pendingUploads,
+      }
     default:
       return state
   }
@@ -231,9 +253,9 @@ export function initState() {
   return async (dispatch, getState) => {
     // force reset tandc
     // await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "false", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
-    if (Platform.OS === 'ios') {
-      await RNSecureKeyStore.setResetOnAppUninstallTo(false)
-    }
+    // if (Platform.OS === 'ios') {
+    //   await RNSecureKeyStore.setResetOnAppUninstallTo(false)
+    // }
 
     dispatch({
       type: ACTION_TYPES.SET_UUID,
@@ -242,7 +264,7 @@ export function initState() {
 
     dispatch({
       type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
-      isTandcAccepted: await _getTancAccepted(getState),
+      isTandcAccepted: await _getTancAccepted(),
     })
   }
 }
@@ -251,8 +273,6 @@ async function _requestGeoPhotos(getState) {
   const { latitude, longitude } = getState().photosList.location.coords
 
   const { pageNumber, uuid, batch } = getState().photosList
-
-  // console.log(`_requestGeoPhotos(${pageNumber})`)
 
   const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
     method: 'POST',
@@ -278,9 +298,7 @@ async function _requestGeoPhotos(getState) {
 
 async function _requestWatchedPhotos(getState) {
   const { pageNumber, uuid, batch } = getState().photosList
-
   // console.log(`_requestWatchedPhotos(${pageNumber})`)
-
   const response = await fetch(`${CONST.HOST}/photos/feedForWatcher`, {
     method: 'POST',
     headers: {
@@ -347,7 +365,6 @@ export function getPhotos() {
           responseJson = await _requestWatchedPhotos(getState)
         }
 
-        // console.log(`${responseJson.batch}:${getState().photosList.batch}`)
         if (responseJson.batch === getState().photosList.batch) {
           if (responseJson.photos && responseJson.photos.length > 0) {
             dispatch({
@@ -380,7 +397,7 @@ export function getPhotos() {
 export function acceptTandC() {
   return async dispatch => {
     try {
-      await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "true", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
+      await SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, "true")
       dispatch({
         type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
         isTandcAccepted: true,
@@ -443,7 +460,7 @@ async function _getUUID(getState) {
   if (uuid === null) {
     // try to retreive from secure store
     try {
-      uuid = await RNSecureKeyStore.get(UUID_KEY)
+      uuid = await SecureStore.getItemAsync(UUID_KEY)
     } catch (err) {
       // Toast.show({
       //   text: err.toString(),
@@ -456,7 +473,7 @@ async function _getUUID(getState) {
     if (uuid === '' || uuid === null) {
       uuid = uuidv4()
       try {
-        await RNSecureKeyStore.set(UUID_KEY, uuid, { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
+        await SecureStore.setItemAsync(UUID_KEY, uuid)
       } catch (err) {
         // Toast.show({
         //   text: err.toString(),
@@ -469,11 +486,172 @@ async function _getUUID(getState) {
   return uuid
 }
 
-async function _getTancAccepted(getState) {
+async function _getTancAccepted() {
   try {
-    return JSON.parse(await RNSecureKeyStore.get(IS_TANDC_ACCEPTED_KEY))
+    return await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY) === "true"
   } catch (err) {
     return false
+  }
+}
+
+const _checkUploadDirectory = async () => {
+  const cacheDirectory = await FileSystem.getInfoAsync(PENDING_UPLOADS_FOLDER)
+  // create cacheDir if does not exist
+  if (!cacheDirectory.exists) {
+    await FileSystem.makeDirectoryAsync(PENDING_UPLOADS_FOLDER)
+  }
+}
+
+export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
+  MediaLibrary.saveToLibraryAsync(uri)
+
+  await _checkUploadDirectory()
+
+  // move file to cacheDir
+  await FileSystem.moveAsync({
+    from: uri,
+    to: `${PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
+  })
+
+  const pendingFiles = await _getPendingUploadFiles()
+
+  dispatch({
+    type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
+    pendingUploads: pendingFiles.length,
+  })
+}
+
+const _getPendingUploadFiles = async () => {
+  await _checkUploadDirectory()
+  const files = await FileSystem.readDirectoryAsync(PENDING_UPLOADS_FOLDER)
+  return files
+}
+
+export function uploadPendingPhotos() {
+  return async (dispatch, getState) => {
+    const { location, uuid } = getState().photosList
+    const pendingFiles = await _getPendingUploadFiles()
+
+    let pendingUploads = pendingFiles.length
+
+    dispatch({
+      type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
+      pendingUploads,
+    })
+
+    if (getState().photosList.netAvailable === false) {
+      return Promise.resolve()
+    }
+
+    if (getState().photosList.uploadingPhoto) {
+      // already uploading photos, just exit here
+      return Promise.resolve()
+    }
+
+    try {
+      dispatch({
+        type: ACTION_TYPES.START_PHOTO_UPLOADING,
+      })
+
+      let i = 0
+      // here let's iterate over the items to upload and upload one file at a time
+      for (; i < pendingFiles.length; i += 1) {
+        const item = pendingFiles[i]
+        // eslint-disable-next-line no-await-in-loop
+        const { responseData, photo } = await _uploadFile({
+          item,
+          uuid,
+          location,
+        })
+        if (responseData.status === 200) {
+          const cachedFileUri = `${FileSystem.cacheDirectory}${photo.id}t`
+          // move file to cacheDir
+          // eslint-disable-next-line no-await-in-loop
+          await FileSystem.moveAsync({
+            from: `${PENDING_UPLOADS_FOLDER}${item}`,
+            to: cachedFileUri,
+          })
+          // eslint-disable-next-line no-await-in-loop
+          pendingUploads = (await _getPendingUploadFiles()).length
+          dispatch({
+            type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
+            pendingUploads,
+          })
+
+          photo.getThumbUrl = cachedFileUri
+          photo.fallback = true
+
+          // show the photo in the photo list immidiately
+          dispatch({
+            type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
+            photo,
+          })
+        } else {
+          alert("Error uploading file, try again.")
+        }
+      }
+    } catch (error) {
+      dispatch({
+        type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
+      })
+      Toast.show({
+        text: 'Failed to upload file, refresh to try again.',
+      })
+      console.log({ error }) // eslint-disable-line no-console
+      dispatch(uploadPendingPhotos())
+    }
+    dispatch({
+      type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
+    })
+
+    if ((await _getPendingUploadFiles()).length > 0) {
+      dispatch(uploadPendingPhotos())
+    }
+  }
+}
+
+const _uploadFile = async ({ item, uuid, location }) => {
+  const assetUri = `${PENDING_UPLOADS_FOLDER}${item}`
+  try {
+    const response = await fetch(`${CONST.HOST}/photos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uuid,
+        location: {
+          type: 'Point',
+          coordinates: [
+            location.coords.latitude,
+            location.coords.longitude,
+          ],
+        },
+      }),
+    })
+
+    const responseJson = await response.json()
+    if (response.status === 401) {
+      alert("Sorry, looks like you have been banned from WiSaw.")
+      return Promise.resolve()
+    }
+    if (response.status === 201) {
+      const { uploadURL, photo } = responseJson
+
+      const responseData = await FileSystem.uploadAsync(
+        uploadURL,
+        assetUri,
+        {
+          httpMethod: 'PUT',
+          headers: {
+            "Content-Type": "image/jpeg",
+          },
+        }
+      )
+      return { responseData, photo }
+    }
+  } catch (error) {
+    console.log({ error })// eslint-disable-line no-console
   }
 }
 

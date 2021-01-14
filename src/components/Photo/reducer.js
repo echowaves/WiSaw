@@ -1,8 +1,11 @@
-import branch from 'react-native-branch'
-
 import {
   Toast,
 } from 'native-base'
+
+// import Branch from '../../util/my-branch'
+import * as SMS from 'expo-sms'
+
+import * as FileSystem from 'expo-file-system'
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -302,19 +305,20 @@ export function sharePhoto({ item }) {
   return async (dispatch, getState) => {
     try {
       // only canonicalIdentifier is required
-      const branchUniversalObject = await branch.createBranchUniversalObject(
-        `photo/${item.id}`,
-        {
-          title: 'What I saw today:',
-          contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
-          contentImageUrl: item.getImgUrl,
-          publiclyIndex: true,
-          locallyIndex: true,
-        }
-      )
+      // const branchUniversalObject = await Branch.createBranchUniversalObject(
+      //   `photo/${item.id}`,
+      //   {
+      //     title: 'What I saw today:',
+      //     contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
+      //     contentImageUrl: item.getImgUrl,
+      //     publiclyIndex: true,
+      //     locallyIndex: true,
+      //   }
+      // )
+
       let messageBody = 'Check out what I saw today:'
-      const messageHeader = 'Check out what I saw today:'
-      const emailSubject = 'WiSaw: Check out what I saw today'
+      // const messageHeader = 'Check out what I saw today:'
+      // const emailSubject = 'WiSaw: Check out what I saw today'
 
       if (item.comments) {
         // get only the 3 comments
@@ -325,13 +329,31 @@ export function sharePhoto({ item }) {
             )
           ).join('\n\n')}\n\n${item.likes > 0 ? `Thumbs Up: ${item.likes}\n\n` : ''}`
       }
-      const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing' }
-      const controlParams = { $photo_id: item.id, $item: item }
-
-      const shareOptions = { messageHeader, emailSubject, messageBody }
-
+      messageBody = `${messageBody}\nhttps://www.wisaw.com/photos/${item.id}`
+      // const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing' }
+      // const controlParams = { $photo_id: item.id, $item: item }
+      //
+      // const shareOptions = { messageHeader, emailSubject, messageBody }
+      //
       // const { channel, completed, error, } =
-      await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
+      // await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
+
+      if (!(await SMS.isAvailableAsync())) {
+        throw (new Error("SMS is not available."))
+      }
+      const uri = await FileSystem.getContentUriAsync(`${FileSystem.cacheDirectory}${item.id}i`)
+
+      await SMS.sendSMSAsync(
+        [],
+        messageBody,
+        {
+          attachments: {
+            uri,
+            mimeType: 'image/jpeg',
+            filename: `${item.id}i.jpg`,
+          },
+        }
+      )
     } catch (err) {
       Toast.show({
         text: "Unable to share photo.",

@@ -22,3 +22,7 @@ export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 export const SET_ACTIVE_SEGMENT = 'wisaw/photosList/SET_ACTIVE_SEGMENT'
 export const SET_SEARCH_TERM = 'wisaw/photosList/SET_SEARCH_TERM'
 export const SET_NET_AVAILABLE = 'wisaw/photosList/SET_NET_AVAILABLE'
+
+export const START_PHOTO_UPLOADING = 'wisaw/photosList/START_PHOTO_UPLOADING'
+export const FINISH_PHOTO_UPLOADING = 'wisaw/photosList/FINISH_PHOTO_UPLOADING'
+export const UPDATE_PHOTOS_PENDING_UPLOAD = 'wisaw/photosList/UPDATE_PHOTOS_PENDING_UPLOAD'

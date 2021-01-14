@@ -1,0 +1,26 @@
+{
+  "builds": {
+    "android": {
+      "release": {
+        "workflow": "managed",
+        "releaseChannel": "production"
+      },
+      "team": {
+        "workflow": "managed",
+        "releaseChannel": "staging",
+        "distribution": "internal"
+      }
+    },
+    "ios": {
+      "release": {
+        "workflow": "managed",
+        "releaseChannel": "production"
+      },
+      "team": {
+        "workflow": "managed",
+        "releaseChannel": "staging",
+        "distribution": "internal"
+      }
+    }
+  }
+}

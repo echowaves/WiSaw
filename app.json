@@ -1,4 +1,63 @@
 {
-  "name": "WiSaw",
-  "displayName": "WiSaw"
+  "expo": {
+    "name": "WiSaw",
+    "version": "5.11.0",
+    "slug": "WiSaw",
+    "scheme": "wisaw",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.echowaves",
+      "buildNumber": "133",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This will allow you to take photos with the application. A photo will be stored in your photo album and uploaded to the cloud.",
+        "NSLocationAlwaysUsageDescription": "We need to know your location so that we can show you posts in your area.",
+        "NSLocationWhenInUseUsageDescription": "You need to enable your location, in order to see photos that are closest to you.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "You need to enable your location, in order to see photos that are closest to you.",
+        "NSMotionUsageDescription": "This will help us to improve the relevance of posts that you can see related to you location.",
+        "NSPhotoLibraryAddUsageDescription": "Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?",
+        "NSPhotoLibraryUsageDescription": "Want to see photos stored on your device? Why don&apos;t you enable it?"
+      },
+      "config": {}
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.echowaves.wisaw",
+      "versionCode": 133,
+      "permissions": [
+        "INTERNET",
+        "SYSTEM_ALERT_WINDOW",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ],
+      "config": {}
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "description": "Minimalistic social sharing, incognito pics, anonymous posting.\n\nNo registration, no sign in -- just open the app, start taking photos, and see what's posted by other people nearby today.\nThe most minimalistic social sharing possible, yet, it's the most relevant one as well. It's relevant in time and space. You only see what may potentially matter to you. You do not have to spend time and effort making connections, describing your profile etc. You just start using it. \nThe feed will always stay relevant for your location and time. If you see something you do not like -- just delete it, which will have an effect of drastically increasing the quality of the content for everyone, reducing the noise.\nIt works best for events, large and small. Wedding or celebration party, at a beach or a park, student at a campus, or a conference attendee, or a group of fans at a football game -- these all will benefit from WiSaw and will definitely make it a lot more fun.\nRead more on https://www.echowaves.com or view the photos on https://www.wisaw.com",
+    "githubUrl": "https://github.com/echowaves/WiSaw"
+  }
 }

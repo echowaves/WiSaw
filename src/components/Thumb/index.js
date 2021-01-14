@@ -1,13 +1,12 @@
 import React from 'react'
 // import { useDispatch } from "react-redux"
 
-import FastImage from 'react-native-fast-image'
-
 import {
   View,
   StyleSheet,
   TouchableHighlight,
   Text,
+  // Image,
 } from 'react-native'
 
 import {
@@ -16,13 +15,15 @@ import {
 
 import PropTypes from 'prop-types'
 
+import CachedImage from '../CachedImage'
+
 import * as CONST from '../../consts.js'
 
 const Thumb = props => {
   const {
     navigation, index, item, thumbWidth,
   } = props
-
+  // console.log(item.id)
   // const dispatch = useDispatch()
 
   const onThumbPress = item => {
@@ -42,10 +43,10 @@ const Thumb = props => {
           styles.container,
           thumbWidthStyles,
         ]}>
-        <FastImage
-          source={{ uri: item.getThumbUrl }}
+        <CachedImage
+          uri={`${item.getThumbUrl}`}
+          cacheKey={`${item.id}t`}
           style={styles.thumbnail}
-          fallback={item.fallback}
         />
       </TouchableHighlight>
       { item.commentsCount > 0 && (
