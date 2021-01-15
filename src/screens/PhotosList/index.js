@@ -70,6 +70,7 @@ const PhotosList = () => {
   // const paging = useSelector(state => state.photosList.paging)
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
   const loading = useSelector(state => state.photosList.loading)
+
   const pendingUploads = useSelector(state => state.photosList.pendingUploads)
   const orientation = useSelector(state => state.photosList.orientation)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
@@ -84,6 +85,16 @@ const PhotosList = () => {
     dispatch(reducer.initState())
     reload()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  // add network availability listener
+  useEffect(() => {
+    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
+      if (state) {
+        dispatch(reducer.setNetAvailable(state.isInternetReachable))
+      }
+    })
+    return () => unsubscribeNetInfo()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // when screen orientation changes
   useEffect(() => {
@@ -104,26 +115,24 @@ const PhotosList = () => {
     setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
   }, [width])
 
-  // add network availability listener
   useEffect(() => {
-    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
-      if (state) {
-        dispatch(reducer.setNetAvailable(state.isInternetReachable))
+    if (!loading) {
+      if (loadMore && !isLastPage && batch) {
+        dispatch(reducer.getPhotos())
+        setLoadMore(false)
       }
-    })
-    return () => unsubscribeNetInfo()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+      if (!isListFilllsScreen()) {
+        dispatch(reducer.getPhotos())
+      }
+    }
+  }, [loading, loadMore]) // eslint-disable-line react-hooks/exhaustive-deps
+  // , loadMore, isLastPage
 
-  // when screen orientation changes
-  useEffect(() => {
-    if (loadMore && !isLastPage && batch) {
-      dispatch(reducer.getPhotos())
-      setLoadMore(false)
-    }
-    if (!isListFilllsScreen()) {
-      dispatch(reducer.getPhotos())
-    }
-  }, [loading, loadMore, isLastPage]) // eslint-disable-line react-hooks/exhaustive-deps
+  // useEffect(() => {
+  //   if (location) {
+  //     reload()
+  //   }
+  // }, [location]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     updateNavBar()
@@ -169,7 +178,6 @@ const PhotosList = () => {
         headerRight: null,
       })
     }
-
     if (!location) {
       reload()
     }
@@ -178,6 +186,7 @@ const PhotosList = () => {
   const reload = async () => {
     /* eslint-disable no-await-in-loop */
 
+    setLoadMore(false)
     dispatch(reducer.resetState())
     dispatch(reducer.setLocation(await _getLocation()))
     setLoadMore(true)
@@ -403,7 +412,7 @@ const PhotosList = () => {
 
   const renderSearchBar = autoFocus => (
     <Header
-      searchBar rounded renderSearchBar
+      searchBar rounded
       style={
         {
           backgroundColor: '#FFFFFF',
@@ -481,7 +490,7 @@ const PhotosList = () => {
   ) {
     return (
       <Container>
-        {activeSegment === 2 && renderSearchBar(true)}
+        {activeSegment === 2 && renderSearchBar(false)}
         <FlatGrid
           itemDimension={
             thumbWidth
