@@ -337,11 +337,10 @@ async function _requestSearchedPhotos(getState) {
 
 export function getPhotos() {
   return async (dispatch, getState) => {
-    // const { batch } = getState().photosList
     // const {
-    //   loading, isLastPage, pageNumber, searchTerm,
+    //   batch, loading, isLastPage, pageNumber, searchTerm,
     // } = getState().photosList
-    // console.log(`getPhotos() searchTerm:${searchTerm} loading:${loading} isLastPage:${isLastPage} batch:${batch} pageNumber:${pageNumber}`)
+    // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
     if (!getState().photosList.location
     || getState().photosList.netAvailable === false
     || (getState().photosList.activeSegment === 2

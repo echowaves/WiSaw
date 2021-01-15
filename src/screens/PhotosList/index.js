@@ -401,7 +401,7 @@ const PhotosList = () => {
     />
   )
 
-  const renderSearchBar = () => (
+  const renderSearchBar = autoFocus => (
     <Header
       searchBar rounded renderSearchBar
       style={
@@ -432,6 +432,7 @@ const PhotosList = () => {
           onSubmitEditing={
             () => submitSearch()
           }
+          autoFocus={autoFocus}
         />
       </Body>
       <Right>
@@ -480,7 +481,7 @@ const PhotosList = () => {
   ) {
     return (
       <Container>
-        {activeSegment === 2 && renderSearchBar()}
+        {activeSegment === 2 && renderSearchBar(true)}
         <FlatGrid
           itemDimension={
             thumbWidth
@@ -654,7 +655,7 @@ const PhotosList = () => {
   if (loading) {
     return (
       <Container>
-        {activeSegment === 2 && renderSearchBar()}
+        {activeSegment === 2 && renderSearchBar(false)}
         <Content padder>
           <Body>
             <Spinner color={
@@ -675,7 +676,7 @@ const PhotosList = () => {
           <Body>
             {activeSegment === 2 && (
               <Card transparent>
-                {renderSearchBar()}
+                {renderSearchBar(true)}
                 <CardItem>
                   <Text style={{
                     fontSize: 20,
