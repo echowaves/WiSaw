@@ -57,7 +57,7 @@ const Thumb = props => {
               color: CONST.MAIN_COLOR,
               position: 'absolute',
               bottom: 2,
-              right: 5,
+              left: 5,
             }
           }>
           <Icon
@@ -92,7 +92,7 @@ const Thumb = props => {
               color: CONST.MAIN_COLOR,
               position: 'absolute',
               bottom: 2,
-              left: 5,
+              right: 5,
             }
           }>
           <Icon
