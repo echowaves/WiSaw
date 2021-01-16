@@ -3,17 +3,21 @@ import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 
 import {
-  StyleSheet,
   View,
-  Text,
   Alert,
 } from 'react-native'
 
 import { useDispatch, useSelector } from "react-redux"
 
 import {
-  Icon,
+  Badge,
+  Container,
+  Content,
+  Footer,
+  FooterTab,
   Button,
+  Icon,
+  Text,
 } from 'native-base'
 
 import Swiper from 'react-native-swiper'
@@ -34,43 +38,36 @@ const PhotosDetails = ({ route, navigation }) => {
 
   const photos = useSelector(state => state.photosList.photos)
   const bans = useSelector(state => state.photo.bans)
+  const likes = useSelector(state => state.photo.likes)
 
   const watched = useSelector(state => state.photo.watched)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
 
-  const item = photos[currentPhotoIndex]
-
   const dispatch = useDispatch()
 
   useEffect(() => {
-    dispatch(reducer.checkIsPhotoWatched({ item: photos[currentPhotoIndex], navigation }))
     setIndex(currentPhotoIndex)
+    dispatch(reducer.checkIsPhotoWatched({ item: photos[currentPhotoIndex], navigation }))
     navigation.setOptions({
       headerTitle: renderHeaderTitle(),
       headerLeft: renderHeaderLeft,
-      headerRight: renderHeaderRight,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    dispatch(reducer.checkIsPhotoWatched({ item: photos[index], navigation }))
+    const item = photos[index]
+    dispatch(reducer.checkIsPhotoWatched({ item, navigation }))
     if (index > photos.length - 5) {
       dispatch(getPhotos()) // pre-load more photos when nearing the end
     }
   }, [index])// eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle(),
-      headerLeft: renderHeaderLeft,
-      headerRight: renderHeaderRight,
-    })
-  }, [watched])// eslint-disable-line react-hooks/exhaustive-deps
-
   const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
+  const isPhotoLikedByMe = ({ photoId }) => likes.includes(photoId)
 
   const handleBan = () => {
+    const item = photos[index]
     if (isPhotoBannedByMe({ photoId: item.id })) {
       Alert.alert(
         'Looks like you already reported this Photo',
@@ -93,6 +90,8 @@ const PhotosDetails = ({ route, navigation }) => {
   }
 
   const handleDelete = () => {
+    const item = photos[index]
+
     Alert.alert(
       'Delete Photo?',
       'The photo will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
@@ -139,52 +138,8 @@ const PhotosDetails = ({ route, navigation }) => {
           }}
         />
       </Button>
-      <Button
-        onPress={
-          () => handleFlipWatch()
-        }
-        style={{
-          backgroundColor: '#ffffff',
-        }}>
-        <Icon
-          name={watched ? "eye" : "eye-slash"}
-          type="FontAwesome"
-          style={{ color: CONST.MAIN_COLOR }}
-        />
-      </Button>
     </View>
   )
-
-  const renderHeaderRight = () => {
-    if (!watched) {
-      return (
-        <View style={{
-          flex: 1,
-          flexDirection: "row",
-        }}>
-          <Icon
-            onPress={
-              () => handleBan()
-            }
-            name="ban"
-            type="FontAwesome"
-            style={{
-              marginRight: 20,
-              color: CONST.MAIN_COLOR,
-            }}
-          />
-          <Icon
-            onPress={
-              () => handleDelete()
-            }
-            name="trash"
-            type="FontAwesome"
-            style={{ marginRight: 20, color: CONST.MAIN_COLOR }}
-          />
-        </View>
-      )
-    }
-  }
 
   const renderHeaderTitle = () => {
     switch (activeSegment) {
@@ -203,50 +158,176 @@ const PhotosDetails = ({ route, navigation }) => {
     }
   }
 
+  const renderFooter = () => {
+    const item = photos[index]
+    return (
+      <Footer>
+        <FooterTab>
+
+          {/* delete button */}
+          <Button
+            key="delete"
+            disabled={watched}
+            vertical
+            onPress={
+              () => handleDelete()
+            }>
+            <Icon
+              name="trash"
+              type="FontAwesome"
+              style={{
+                fontSize: 30,
+                color: CONST.MAIN_COLOR,
+              }}
+            />
+            <Text style={{ fontSize: 10 }}>
+              Delete
+            </Text>
+          </Button>
+
+          {/* ban button */}
+          <Button
+            key="ban"
+            disabled={watched}
+            vertical
+            onPress={
+              () => handleBan()
+            }>
+            <Icon
+              name="ban"
+              type="FontAwesome"
+              style={{
+                fontSize: 30,
+                color: CONST.MAIN_COLOR,
+              }}
+            />
+            <Text style={{ fontSize: 10 }}>
+              Report
+            </Text>
+          </Button>
+
+          {/* watch button */}
+          <Button
+            key="watch"
+            onPress={
+              () => handleFlipWatch()
+            }
+            style={{
+              fontSize: 30,
+            }}>
+            <Icon
+              name={watched ? "eye" : "eye-slash"}
+              type="FontAwesome"
+              style={
+                {
+                  fontSize: 30,
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+            />
+            <Text style={{ fontSize: 10 }}>
+              {`${watched ? 'UnWatch' : 'Watch'}`}
+            </Text>
+          </Button>
+
+          {/* share button */}
+          <Button
+            key="share"
+            vertical
+            onPress={
+              () => {
+                dispatch(reducer.sharePhoto({ item }))
+              }
+            }>
+            <Icon
+              type="FontAwesome"
+              name="share"
+              style={
+                {
+                  fontSize: 30,
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+            />
+            <Text style={{ fontSize: 10 }}>
+              Share
+            </Text>
+          </Button>
+
+          {/* likes button */}
+          <Button
+            key="like"
+            disabled={isPhotoLikedByMe({ photoId: item.id })}
+            vertical
+            badge={item.likes > 0}
+            onPress={
+              () => {
+                dispatch(reducer.likePhoto({ photoId: item.id }))
+              }
+            }>
+            {item.likes > 0 && (<Badge style={{ backgroundColor: CONST.SECONDARY_COLOR }}><Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text></Badge>)}
+            <Icon
+              type="FontAwesome"
+              name="thumbs-up"
+              style={
+                {
+                  fontSize: 30,
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+            />
+            <Text style={{ fontSize: 10 }}>
+              Like
+            </Text>
+          </Button>
+
+        </FooterTab>
+      </Footer>
+    )
+  }
+
+  const item = photos[index] // eslint-disable-line no-unused-vars
+
   return (
-    <View style={styles.container}>
-      <Swiper
-        keyboardShouldPersistTaps="always"
-        autoplay={false}
-        horizontal
-        loop={false}
-        showsButtons
-        buttonWrapperStyle={{
-          backgroundColor: 'transparent',
-          flexDirection: 'row',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          flex: 1,
-          paddingHorizontal: 10,
-          paddingVertical: 10,
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-        }}
-        nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60 }}>›</Text>}
-        prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 60 }}>‹</Text>}
-        index={index}
-        onIndexChanged={newIndex => {
+    <Container>
+      <Content>
+        <Swiper
+          keyboardShouldPersistTaps="always"
+          autoplay={false}
+          horizontal
+          loop={false}
+          showsButtons
+          buttonWrapperStyle={{
+            flexDirection: 'row',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            flex: 1,
+            paddingHorizontal: 10,
+            paddingVertical: 10,
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+          }}
+          nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 40 }}>›</Text>}
+          prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 40 }}>‹</Text>}
+          index={index}
+          onIndexChanged={newIndex => {
           // TODO: ugly timeout, when the library fixes the issue the timeout can be removed
-          setTimeout(() => { setIndex(newIndex) }, 1)
-        }} // otherwise will jump to wrong photo onLayout
-        loadMinimal
-        loadMinimalSize={1}
-        showsPagination={false}
-        pagingEnabled>
-        {photos.map(item => (
-          <Photo item={item} key={item.id} navigation={navigation} />
-        ))}
-      </Swiper>
-    </View>
+            setTimeout(() => { setIndex(newIndex) }, 1)
+          }} // otherwise will jump to wrong photo onLayout
+          loadMinimal
+          loadMinimalSize={1}
+          showsPagination={false}
+          pagingEnabled>
+          {photos.map(item => (
+            <Photo item={item} key={item.id} />
+          ))}
+        </Swiper>
+      </Content>
+      {renderFooter()}
+    </Container>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-})
 
 PhotosDetails.defaultProps = {
   currentPhotoIndex: 0,
@@ -254,20 +335,8 @@ PhotosDetails.defaultProps = {
 
 PhotosDetails.propTypes = {
   navigation: PropTypes.object.isRequired,
-  //   photos: PropTypes.array.isRequired,
   currentPhotoIndex: PropTypes.number,
   route: PropTypes.object.isRequired,
-//   setCurrentPhotoIndex: PropTypes.func.isRequired,
-//   watched: PropTypes.bool.isRequired,
-//   banPhoto: PropTypes.func.isRequired,
-//   deletePhoto: PropTypes.func.isRequired,
-//   bans: PropTypes.array.isRequired,
-//   getPhotos: PropTypes.func.isRequired,
-//   watchPhoto: PropTypes.func.isRequired,
-//   unwatchPhoto: PropTypes.func.isRequired,
-//   checkIsPhotoWatched: PropTypes.func.isRequired,
-//   searchTerm: PropTypes.string,
-//   activeSegment: PropTypes.number.isRequired,
 }
 
 export default PhotosDetails

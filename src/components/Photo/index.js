@@ -43,7 +43,6 @@ const Photo = props => {
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
 
-  const likes = useSelector(state => state.photo.likes)
   const inputText = useSelector(state => state.photo.inputText)
   const commentsSubmitting = useSelector(state => state.photo.commentsSubmitting)
   // const error = useSelector(state => state.photo.error)
@@ -58,8 +57,6 @@ const Photo = props => {
     const intervalId = setInterval(() => { dispatch(reducer.getComments({ item })) }, 30000)
     return (() => clearInterval(intervalId))
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  const isPhotoLikedByMe = ({ photoId }) => likes.includes(photoId)
 
   const renderCommentButtons = ({ photo, comment }) => {
     if (!comment.hiddenButtons) {
@@ -243,90 +240,7 @@ const Photo = props => {
                   height: height - 200,
                 }}
               />
-
             </ReactNativeZoomableView>
-            <View style={{
-              flex: 2,
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              width,
-              hieght: 100,
-              position: 'absolute',
-              bottom: 20,
-
-            }}>
-              <Button
-                rounded
-                light
-                transparent
-                bordered
-                disabled={isPhotoLikedByMe({ photoId: item.id })}
-                onPress={
-                  () => {
-                    dispatch(reducer.likePhoto({ photoId: item.id }))
-                  }
-                }
-                style={
-                  {
-                    height: 85,
-                    width: 85,
-                    backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-                  }
-                }>
-                <Icon
-                  type="FontAwesome"
-                  name="thumbs-up"
-                  style={
-                    {
-                      fontSize: 50,
-                      color: (isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
-                    }
-                  }
-                />
-                <Text
-                  style={
-                    {
-                      fontSize: 12,
-                      color: (!isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR),
-                      position: 'absolute',
-                      right: 0,
-                      top: "55%",
-                      textAlign: 'center',
-                      width: '100%',
-                    }
-                  }>
-                  {item.likes}
-                </Text>
-              </Button>
-              <Button
-                rounded
-                light
-                transparent
-                bordered
-                onPress={
-                  () => {
-                    dispatch(reducer.sharePhoto({ item }))
-                  }
-                }
-                style={
-                  {
-                    height: 85,
-                    width: 85,
-                    backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-                  }
-                }>
-                <Icon
-                  type="FontAwesome"
-                  name="share"
-                  style={
-                    {
-                      fontSize: 50,
-                      color: CONST.MAIN_COLOR,
-                    }
-                  }
-                />
-              </Button>
-            </View>
           </Row>
           { item.comments && item.comments.length > 0
                 && (
@@ -424,30 +338,8 @@ const Photo = props => {
   )
 }
 
-// const mapStateToProps = state => ({
-//   likes: state.photo.likes,
-//   inputText: state.photo.inputText,
-//   commentsSubmitting: state.photo.commentsSubmitting,
-//   error: state.photo.error,
-// })
-//
-//
 Photo.propTypes = {
-//   navigation: PropTypes.object.isRequired,
   item: PropTypes.object.isRequired,
-//   likes: PropTypes.array.isRequired,
-//   likePhoto: PropTypes.func.isRequired,
-//   sharePhoto: PropTypes.func.isRequired,
-//   setInputText: PropTypes.func.isRequired,
-//   inputText: PropTypes.string.isRequired,
-//   submitComment: PropTypes.func.isRequired,
-//   commentsSubmitting: PropTypes.bool.isRequired,
-//   getComments: PropTypes.func.isRequired,
-//   getRecognitions: PropTypes.func.isRequired,
-//   toggleCommentButtons: PropTypes.func.isRequired,
-//   deleteComment: PropTypes.func.isRequired,
 }
-
-// Photo.defaultProps = {}
 
 export default Photo

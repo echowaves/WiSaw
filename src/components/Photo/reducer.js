@@ -356,7 +356,7 @@ export function sharePhoto({ item }) {
       )
     } catch (err) {
       Toast.show({
-        text: "Unable to share photo.",
+        text: "Unable to share photo. Wait for the image to finish and try again.",
         buttonText: "OK",
         type: "warning",
       })
