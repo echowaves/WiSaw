@@ -202,7 +202,7 @@ const PhotosDetails = ({ route, navigation }) => {
               }}
             />
             <Text style={{ fontSize: 10 }}>
-              Report
+              Ban
             </Text>
           </Button>
 
