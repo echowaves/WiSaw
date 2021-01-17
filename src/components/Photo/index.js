@@ -332,6 +332,7 @@ const Photo = props => {
             { item.recognitions
                 && (renderRecognitions(item.recognitions))}
           </Row>
+          <Row style={{ height: 110 }} />
         </Grid>
       </Content>
     </Container>
