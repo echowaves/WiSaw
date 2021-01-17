@@ -265,7 +265,11 @@ const PhotosDetails = ({ route, navigation }) => {
                 dispatch(reducer.likePhoto({ photoId: item.id }))
               }
             }>
-            {item.likes > 0 && (<Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}><Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text></Badge>)}
+            {item.likes > 0 && (
+              <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
+                <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
+              </Badge>
+            )}
             <Icon
               type="FontAwesome"
               name="thumbs-up"
