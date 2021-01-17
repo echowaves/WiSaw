@@ -54,7 +54,6 @@ const Thumb = props => {
           style={
             {
               fontSize: 30,
-              color: CONST.MAIN_COLOR,
               position: 'absolute',
               bottom: 2,
               left: 5,
@@ -66,7 +65,7 @@ const Thumb = props => {
             style={
               {
                 fontSize: 30,
-                color: CONST.SECONDARY_COLOR,
+                color: CONST.PLACEHOLDER_TEXT_COLOR,
               }
             }
           />
@@ -74,7 +73,7 @@ const Thumb = props => {
             style={
               {
                 fontSize: 10,
-                color: CONST.TEXT_COLOR,
+                color: CONST.MAIN_COLOR,
                 position: 'absolute',
                 right: 8,
                 top: 12,
@@ -89,7 +88,6 @@ const Thumb = props => {
           style={
             {
               fontSize: 30,
-              color: CONST.MAIN_COLOR,
               position: 'absolute',
               bottom: 2,
               right: 5,
@@ -101,7 +99,7 @@ const Thumb = props => {
             style={
               {
                 fontSize: 30,
-                color: CONST.SECONDARY_COLOR,
+                color: CONST.PLACEHOLDER_TEXT_COLOR,
               }
             }
           />
@@ -109,7 +107,7 @@ const Thumb = props => {
             style={
               {
                 fontSize: 10,
-                color: CONST.TEXT_COLOR,
+                color: CONST.MAIN_COLOR,
                 position: 'absolute',
                 right: 5,
                 top: 12,
