@@ -331,50 +331,52 @@ const PhotosList = () => {
   )
 
   const renderHeaderTitle = () => (
-    <StyleProvider style={getTheme(material)}>
-      <Segment style={{ marginBottom: 2 }}>
-        <Button
-          first active={activeSegment === 0}
-          onPress={
-            async () => {
-              await dispatch(reducer.setActiveSegment(0))
-              reload()
-            }
-          }>
-          <Icon
-            name="globe"
-            type="FontAwesome"
-          />
-        </Button>
-        <Button
-          active={activeSegment === 1}
-          onPress={
-            async () => {
-              await dispatch(reducer.setActiveSegment(1))
-              reload()
-            }
-          }>
-          <Icon
-            name="eye"
-            type="FontAwesome"
-          />
-        </Button>
+    <Header hasSegment style={{ height: '100%', backgroundColor: 'rgba(0, 0, 0, 0)' }}>{/* without this trick the header segment will not receive click events on android */}
+      <StyleProvider style={getTheme(material)}>{/* withtout this trick the segment will be styled funny on android */}
+        <Segment style={{ marginBottom: 2 }}>
+          <Button
+            first active={activeSegment === 0}
+            onPress={
+              () => {
+                dispatch(reducer.setActiveSegment(0))
+                reload()
+              }
+            }>
+            <Icon
+              name="globe"
+              type="FontAwesome"
+            />
+          </Button>
+          <Button
+            active={activeSegment === 1}
+            onPress={
+              () => {
+                dispatch(reducer.setActiveSegment(1))
+                reload()
+              }
+            }>
+            <Icon
+              name="eye"
+              type="FontAwesome"
+            />
+          </Button>
 
-        <Button
-          last active={activeSegment === 2}
-          onPress={
-            async () => {
-              await dispatch(reducer.setActiveSegment(2))
-              reload()
-            }
-          }>
-          <Icon
-            type="MaterialIcons"
-            name="search"
-          />
-        </Button>
-      </Segment>
-    </StyleProvider>
+          <Button
+            last active={activeSegment === 2}
+            onPress={
+              () => {
+                dispatch(reducer.setActiveSegment(2))
+                reload()
+              }
+            }>
+            <Icon
+              type="MaterialIcons"
+              name="search"
+            />
+          </Button>
+        </Segment>
+      </StyleProvider>
+    </Header>
   )
 
   const renderHeaderLeft = () => (
