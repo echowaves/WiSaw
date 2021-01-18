@@ -66,8 +66,31 @@ const PhotosDetails = ({ route, navigation }) => {
   const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
   const isPhotoLikedByMe = ({ photoId }) => likes.includes(photoId)
 
-  const handleBan = () => {
-    const item = photos[index]
+  const handleLike = ({ item }) => {
+    if (isPhotoLikedByMe({ photoId: item.id })) {
+      Alert.alert(
+        'You already liked this photo.',
+        'Try to like some other photo.',
+        [
+          { text: 'OK', onPress: () => null },
+        ],
+      )
+      return
+    }
+    dispatch(reducer.likePhoto({ photoId: item.id }))
+  }
+
+  const handleBan = ({ item, watched }) => {
+    if (watched) {
+      Alert.alert(
+        'Unable to ban watched photo.',
+        'Unwatch photo first.',
+        [
+          { text: 'OK', onPress: () => null },
+        ],
+      )
+      return
+    }
     if (isPhotoBannedByMe({ photoId: item.id })) {
       Alert.alert(
         'Looks like you already reported this Photo',
@@ -89,9 +112,18 @@ const PhotosDetails = ({ route, navigation }) => {
     }
   }
 
-  const handleDelete = () => {
-    const item = photos[index]
-
+  const handleDelete = ({ item, watched }) => {
+    if (watched) {
+      Alert.alert(
+        'Unable to delete watched photo.',
+        'Unwatch photo first.',
+        [
+          { text: 'OK', onPress: () => null, style: 'cancel' },
+        ],
+        { cancelable: true }
+      )
+      return
+    }
     Alert.alert(
       'Delete Photo?',
       'The photo will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
@@ -167,17 +199,16 @@ const PhotosDetails = ({ route, navigation }) => {
           {/* delete button */}
           <Button
             key="delete"
-            disabled={watched}
             vertical
             onPress={
-              () => handleDelete()
+              () => handleDelete({ item, watched })
             }>
             <Icon
               name="trash"
               type="FontAwesome"
               style={{
                 fontSize: 30,
-                color: CONST.MAIN_COLOR,
+                color: watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
               }}
             />
             <Text style={{ fontSize: 10 }}>
@@ -188,17 +219,16 @@ const PhotosDetails = ({ route, navigation }) => {
           {/* ban button */}
           <Button
             key="ban"
-            disabled={watched}
             vertical
             onPress={
-              () => handleBan()
+              () => handleBan({ item, watched })
             }>
             <Icon
               name="ban"
               type="FontAwesome"
               style={{
                 fontSize: 30,
-                color: CONST.MAIN_COLOR,
+                color: watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
               }}
             />
             <Text style={{ fontSize: 10 }}>
@@ -257,12 +287,11 @@ const PhotosDetails = ({ route, navigation }) => {
           {/* likes button */}
           <Button
             key="like"
-            disabled={isPhotoLikedByMe({ photoId: item.id })}
             vertical
             badge={item.likes > 0}
             onPress={
               () => {
-                dispatch(reducer.likePhoto({ photoId: item.id }))
+                handleLike({ item })
               }
             }>
             {item.likes > 0 && (
@@ -276,7 +305,7 @@ const PhotosDetails = ({ route, navigation }) => {
               style={
                 {
                   fontSize: 30,
-                  color: CONST.MAIN_COLOR,
+                  color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
                 }
               }
             />

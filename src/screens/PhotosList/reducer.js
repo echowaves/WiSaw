@@ -631,11 +631,13 @@ const _uploadFile = async ({ item, uuid, location }) => {
     })
 
     const responseJson = await response.json()
-    if (response.status === 401) {
-      alert("Sorry, looks like you have been banned from WiSaw.")
-      return Promise.resolve()
-    }
-    if (response.status === 201) {
+    // if (response.status === 401) {
+    //   alert("Sorry, looks like you have been banned from WiSaw.")
+    //   return Promise.resolve()
+    // }
+    if (response.status === 201
+    || response.status === 401 // todo: implement better banned logic
+    ) {
       const { uploadURL, photo } = responseJson
 
       const responseData = await FileSystem.uploadAsync(
