@@ -503,7 +503,7 @@ const _checkUploadDirectory = async () => {
 }
 
 export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
-  MediaLibrary.saveToLibraryAsync(uri)
+  await MediaLibrary.saveToLibraryAsync(uri)
 
   await _checkUploadDirectory()
 
