@@ -268,8 +268,8 @@ const PhotosList = () => {
       return Promise.resolve() // simply return
     }
 
-    dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
-
+    // have to wait, otherwise the upload will not start
+    await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
     dispatch(reducer.uploadPendingPhotos())
   }
 
