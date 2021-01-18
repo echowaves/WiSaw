@@ -205,7 +205,7 @@ const Photo = props => {
                   left: 0,
                 }}>
                 <CachedImage
-                  uri={`${item.getThumbUrl}`}
+                  source={{ uri: `${item.getThumbUrl}` }}
                   cacheKey={`${item.id}t`}
                   backgroundColor="transparent"
                   resizeMode="contain"
@@ -231,7 +231,7 @@ const Photo = props => {
                 />
               </View>
               <CachedImage
-                uri={`${item.getImgUrl}`}
+                source={{ uri: `${item.getImgUrl}` }}
                 cacheKey={`${item.id}i`}
                 backgroundColor="transparent"
                 resizeMode="contain"
