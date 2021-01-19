@@ -47,7 +47,8 @@ const CachedImage = props => {
 
   return (
     <Image
-      {...props} // eslint-disable-line react/jsx-props-no-spreading
+    // eslint-disable-next-line react/jsx-props-no-spreading
+      {...props}
       source={{
         uri: imgURI,
       }}
