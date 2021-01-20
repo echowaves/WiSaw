@@ -487,21 +487,10 @@ const PhotosList = () => {
     }
   }
 
-  /// //////////////////////////////////////////////////////////////////////////
-  // here where the rendering starts
-  /// //////////////////////////////////////////////////////////////////////////
-
-  if (
-    isTandcAccepted
-  && netAvailable
-  && location
-  && photos.length > 0
-  ) {
-    return (
-      <Container>
-        {activeSegment === 2 && renderSearchBar(false)}
-        {/* pendingPhotos */}
-        {pendingPhotos.length > 0 && (
+  const renderPendingPhotos = () => {
+    if (pendingPhotos.length > 0) {
+      return (
+        <View>
           <FlatGrid
             itemDimension={
               thumbWidth
@@ -534,7 +523,25 @@ const PhotosList = () => {
               false
             }
           />
-        )}
+        </View>
+      )
+    }
+  }
+
+  /// //////////////////////////////////////////////////////////////////////////
+  // here where the rendering starts
+  /// //////////////////////////////////////////////////////////////////////////
+
+  if (
+    isTandcAccepted
+  && netAvailable
+  && location
+  && photos.length > 0
+  ) {
+    return (
+      <Container>
+        {activeSegment === 2 && renderSearchBar(false)}
+        {renderPendingPhotos()}
         {/* photos */}
         <FlatGrid
           itemDimension={
@@ -660,6 +667,7 @@ const PhotosList = () => {
   if (!location && !loading) {
     return (
       <Container>
+        {renderPendingPhotos()}
         <Content padder>
           <Body>
             <Card transparent>
@@ -683,6 +691,7 @@ const PhotosList = () => {
   if (!netAvailable && !loading) {
     return (
       <Container>
+        {renderPendingPhotos()}
         <Content padder>
           <Body>
             <Card transparent>
@@ -725,6 +734,7 @@ const PhotosList = () => {
   if (photos.length === 0) {
     return (
       <Container>
+        {renderPendingPhotos()}
         <Content padder>
           <Body>
             {activeSegment === 2 && (

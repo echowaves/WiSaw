@@ -418,14 +418,9 @@ export function acceptTandC() {
 
 export function cancelPendingUpload({ fileName }) {
   return async dispatch => {
-    FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${fileName}`, { idempotent: true })
+    await FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${fileName}`, { idempotent: true })
 
-    const pendingFiles = await _getPendingUploadFiles()
-
-    dispatch({
-      type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
-      pendingPhotos: pendingFiles,
-    })
+    _updatePendingPhotos(dispatch)
   }
 }
 
@@ -506,6 +501,14 @@ async function _getTancAccepted() {
     return false
   }
 }
+const _updatePendingPhotos = async dispatch => {
+  const pendingFiles = await _getPendingUploadFiles()
+  dispatch({
+    type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
+    pendingPhotos: pendingFiles,
+  })
+  return pendingFiles
+}
 
 const _checkUploadDirectory = async () => {
   const cacheDirectory = await FileSystem.getInfoAsync(CONST.PENDING_UPLOADS_FOLDER)
@@ -526,12 +529,7 @@ export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
     to: `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
   })
 
-  const pendingFiles = await _getPendingUploadFiles()
-
-  dispatch({
-    type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
-    pendingPhotos: pendingFiles,
-  })
+  _updatePendingPhotos(dispatch)
 }
 
 const _getPendingUploadFiles = async () => {
@@ -544,11 +542,7 @@ export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { location, uuid } = getState().photosList
 
-    const pendingFiles = await _getPendingUploadFiles()
-    dispatch({
-      type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
-      pendingPhotos: pendingFiles,
-    })
+    const pendingFiles = await _updatePendingPhotos(dispatch)
 
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
@@ -583,11 +577,7 @@ export function uploadPendingPhotos() {
             to: cachedFileUri,
           })
           // eslint-disable-next-line no-await-in-loop
-          const pendingFiles = await _getPendingUploadFiles()
-          dispatch({
-            type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
-            pendingPhotos: pendingFiles,
-          })
+          await _updatePendingPhotos(dispatch)
 
           photo.getThumbUrl = cachedFileUri
           photo.fallback = true
@@ -667,14 +657,3 @@ const _uploadFile = async ({ item, uuid, location }) => {
     console.log({ error })// eslint-disable-line no-console
   }
 }
-
-// https://blog.bam.tech/developper-news/4-ways-to-dispatch-actions-with-redux
-// https://hackernoon.com/react-native-basics-geolocation-adf3c0d10112
-
-// https://medium.com/@stowball/a-dummys-guide-to-redux-and-thunk-in-react-d8904a7005d3
-// https://medium.freecodecamp.org/avoiding-the-async-await-hell-c77a0fb71c4c
-
-// https://medium.freecodecamp.org/scaling-your-redux-app-with-ducks-6115955638be
-
-// https://blog.usejournal.com/understanding-react-native-component-lifecycle-api-d78e06870c6d
-// https://medium.com/@talkol/redux-thunks-dispatching-other-thunks-discussion-and-best-practices-dd6c2b695ecf
