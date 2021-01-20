@@ -25,4 +25,5 @@ export const SET_NET_AVAILABLE = 'wisaw/photosList/SET_NET_AVAILABLE'
 
 export const START_PHOTO_UPLOADING = 'wisaw/photosList/START_PHOTO_UPLOADING'
 export const FINISH_PHOTO_UPLOADING = 'wisaw/photosList/FINISH_PHOTO_UPLOADING'
-export const UPDATE_PHOTOS_PENDING_UPLOAD = 'wisaw/photosList/UPDATE_PHOTOS_PENDING_UPLOAD'
+
+export const UPDATE_PENDING_PHOTOS = 'wisaw/photosList/UPDATE_PENDING_PHOTOS'

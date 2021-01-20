@@ -20,13 +20,12 @@ const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
-export const PENDING_UPLOADS_FOLDER = `${FileSystem.cacheDirectory}pendingUploads/`
-
 export const initialState = {
   isTandcAccepted: true,
   uuid: null,
   location: null,
   photos: [],
+  pendingPhotos: [],
   loading: false,
   errorMessage: '',
   pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the net page
@@ -37,7 +36,7 @@ export const initialState = {
   isLastPage: false,
   netAvailable: true,
   uploadingPhoto: false,
-  pendingUploads: 0,
+  pendingUploadsCount: 0,
 }
 
 const reducer = (state = initialState, action) => {
@@ -235,13 +234,14 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         uploadingPhoto: false,
-        // pendingUploads: 0,
       }
-    case ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD:
+    case ACTION_TYPES.UPDATE_PENDING_PHOTOS:
       return {
         ...state,
-        pendingUploads: action.pendingUploads,
+        pendingUploadsCount: action.pendingPhotos.length,
+        pendingPhotos: action.pendingPhotos,
       }
+
     default:
       return state
   }
@@ -416,6 +416,19 @@ export function acceptTandC() {
   }
 }
 
+export function cancelPendingUpload({ fileName }) {
+  return async dispatch => {
+    FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${fileName}`, { idempotent: true })
+
+    const pendingFiles = await _getPendingUploadFiles()
+
+    dispatch({
+      type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
+      pendingPhotos: pendingFiles,
+    })
+  }
+}
+
 export function resetState() {
   return {
     type: ACTION_TYPES.RESET_STATE,
@@ -495,10 +508,10 @@ async function _getTancAccepted() {
 }
 
 const _checkUploadDirectory = async () => {
-  const cacheDirectory = await FileSystem.getInfoAsync(PENDING_UPLOADS_FOLDER)
+  const cacheDirectory = await FileSystem.getInfoAsync(CONST.PENDING_UPLOADS_FOLDER)
   // create cacheDir if does not exist
   if (!cacheDirectory.exists) {
-    await FileSystem.makeDirectoryAsync(PENDING_UPLOADS_FOLDER)
+    await FileSystem.makeDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
   }
 }
 
@@ -510,33 +523,31 @@ export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
   // move file to cacheDir
   await FileSystem.moveAsync({
     from: uri,
-    to: `${PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
+    to: `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
   })
 
   const pendingFiles = await _getPendingUploadFiles()
 
   dispatch({
-    type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
-    pendingUploads: pendingFiles.length,
+    type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
+    pendingPhotos: pendingFiles,
   })
 }
 
 const _getPendingUploadFiles = async () => {
   await _checkUploadDirectory()
-  const files = await FileSystem.readDirectoryAsync(PENDING_UPLOADS_FOLDER)
+  const files = await FileSystem.readDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
   return files
 }
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { location, uuid } = getState().photosList
+
     const pendingFiles = await _getPendingUploadFiles()
-
-    let pendingUploads = pendingFiles.length
-
     dispatch({
-      type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
-      pendingUploads,
+      type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
+      pendingPhotos: pendingFiles,
     })
 
     if (getState().photosList.netAvailable === false) {
@@ -568,14 +579,14 @@ export function uploadPendingPhotos() {
           // move file to cacheDir
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.moveAsync({
-            from: `${PENDING_UPLOADS_FOLDER}${item}`,
+            from: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             to: cachedFileUri,
           })
           // eslint-disable-next-line no-await-in-loop
-          pendingUploads = (await _getPendingUploadFiles()).length
+          const pendingFiles = await _getPendingUploadFiles()
           dispatch({
-            type: ACTION_TYPES.UPDATE_PHOTOS_PENDING_UPLOAD,
-            pendingUploads,
+            type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
+            pendingPhotos: pendingFiles,
           })
 
           photo.getThumbUrl = cachedFileUri
@@ -611,7 +622,7 @@ export function uploadPendingPhotos() {
 }
 
 const _uploadFile = async ({ item, uuid, location }) => {
-  const assetUri = `${PENDING_UPLOADS_FOLDER}${item}`
+  const assetUri = `${CONST.PENDING_UPLOADS_FOLDER}${item}`
   try {
     const response = await fetch(`${CONST.HOST}/photos`, {
       method: 'POST',

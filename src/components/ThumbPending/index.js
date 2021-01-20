@@ -1,7 +1,8 @@
 import React from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { useDispatch } from "react-redux"
 
 import {
+  Alert,
   View,
   StyleSheet,
   TouchableHighlight,
@@ -19,15 +20,30 @@ import CachedImage from '../CachedImage'
 
 import * as CONST from '../../consts.js'
 
-const Thumb = props => {
-  const navigation = useNavigation()
+import { cancelPendingUpload } from '../../screens/PhotosList/reducer'
 
+const ThumbPending = props => {
   const {
-    index, item, thumbWidth,
+    item, thumbWidth,
   } = props
 
+  const dispatch = useDispatch()
+
   const onThumbPress = item => {
-    navigation.navigate('PhotosDetails', { currentPhotoIndex: index })
+    Alert.alert(
+      'This photo is uploading',
+      'Do you want to try to delete it?',
+      [
+        { text: 'No', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: () => {
+            dispatch(cancelPendingUpload({ fileName: item }))
+          },
+        },
+      ],
+      { cancelable: true }
+    )
   }
 
   const thumbWidthStyles = {
@@ -44,8 +60,8 @@ const Thumb = props => {
           thumbWidthStyles,
         ]}>
         <CachedImage
-          source={{ uri: `${item.getThumbUrl}` }}
-          cacheKey={`${item.id}t`}
+          source={{ uri: `${CONST.PENDING_UPLOADS_FOLDER}${item}` }}
+          cacheKey={`${item}`}
           style={styles.thumbnail}
         />
       </TouchableHighlight>
@@ -123,9 +139,9 @@ const Thumb = props => {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(100,100,100,0.1)',
+    borderRadius: 20,
+    borderWidth: 10,
+    borderColor: CONST.MAIN_COLOR,
   },
   thumbnail: {
     flex: 1,
@@ -136,14 +152,13 @@ const styles = StyleSheet.create({
   },
 })
 
-Thumb.propTypes = {
-  item: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired,
+ThumbPending.propTypes = {
+  item: PropTypes.string.isRequired,
   thumbWidth: PropTypes.number,
 }
 
-Thumb.defaultProps = {
+ThumbPending.defaultProps = {
   thumbWidth: 100,
 }
 
-export default Thumb
+export default ThumbPending

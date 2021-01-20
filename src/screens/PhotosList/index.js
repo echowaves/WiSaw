@@ -52,6 +52,7 @@ import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
+import ThumbPending from '../../components/ThumbPending'
 
 const PhotosList = () => {
   const navigation = useNavigation()
@@ -64,6 +65,7 @@ const PhotosList = () => {
   const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
+  const pendingPhotos = useSelector(state => state.photosList.pendingPhotos)
   const location = useSelector(state => state.photosList.location)
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
   const isLastPage = useSelector(state => state.photosList.isLastPage)
@@ -71,7 +73,7 @@ const PhotosList = () => {
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
   const loading = useSelector(state => state.photosList.loading)
 
-  const pendingUploads = useSelector(state => state.photosList.pendingUploads)
+  const pendingUploadsCount = useSelector(state => state.photosList.pendingUploadsCount)
   const orientation = useSelector(state => state.photosList.orientation)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
@@ -147,7 +149,12 @@ const PhotosList = () => {
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
+      // flex: 1,
+    },
+    thumbContainer: {
+      // height: thumbWidth,
+      // paddingBottom: 10,
+      // marginBottom: 10,
     },
     cameraButtonPortrait: {
       flexDirection: 'row',
@@ -313,7 +320,7 @@ const PhotosList = () => {
             }
           />
         </Button>
-        {pendingUploads > 0 && (
+        {pendingUploadsCount > 0 && (
           <Text
             style={
               {
@@ -323,7 +330,7 @@ const PhotosList = () => {
                 backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
               }
             }>
-            {pendingUploads}
+            {pendingUploadsCount}
           </Text>
         )}
       </View>
@@ -493,6 +500,42 @@ const PhotosList = () => {
     return (
       <Container>
         {activeSegment === 2 && renderSearchBar(false)}
+        {/* pendingPhotos */}
+        {pendingPhotos.length > 0 && (
+          <FlatGrid
+            itemDimension={
+              thumbWidth
+            }
+            spacing={3}
+            data={
+              pendingPhotos
+            }
+            renderItem={
+              ({ item }) => (
+                <ThumbPending
+                  item={
+                    item
+                  }
+                  thumbWidth={thumbWidth}
+                />
+              )
+            }
+            keyExtractor={item => item}
+            style={
+              styles.thumbContainer
+            }
+            showsVerticalScrollIndicator={
+              false
+            }
+            horizontal={
+              false
+            }
+            refreshing={
+              false
+            }
+          />
+        )}
+        {/* photos */}
         <FlatGrid
           itemDimension={
             thumbWidth
@@ -511,7 +554,6 @@ const PhotosList = () => {
                   index
                 }
                 thumbWidth={thumbWidth}
-                navigation={navigation}
               />
             )
           }
