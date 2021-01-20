@@ -1,5 +1,4 @@
 import React from 'react'
-// import { useDispatch } from "react-redux"
 
 import {
   View,
@@ -23,8 +22,6 @@ const Thumb = props => {
   const {
     navigation, index, item, thumbWidth,
   } = props
-  // console.log(item.id)
-  // const dispatch = useDispatch()
 
   const onThumbPress = item => {
     navigation.navigate('PhotosDetails', { currentPhotoIndex: index })
