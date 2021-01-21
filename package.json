@@ -11,7 +11,10 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "reset-simulator": "xcrun simctl erase all"
+    "reset-simulator": "xcrun simctl erase all",
+    "build:ios": "expo build:ios --release-channel prod",
+    "build:android": "expo build:android --release-channel prod",
+    "publish": "expo publish --release-channel prod"
   },
   "dependencies": {
     "@babel/plugin-transform-async-to-generator": "7.12.1",
