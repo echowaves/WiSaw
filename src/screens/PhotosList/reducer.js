@@ -569,7 +569,7 @@ export function uploadPendingPhotos() {
           location,
         })
         if (responseData.status === 200) {
-          const cachedFileUri = `${FileSystem.cacheDirectory}${photo.id}t`
+          const cachedFileUri = `${CONST.IMAGE_CACHE_FOLDER}${photo.id}t`
           // move file to cacheDir
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.moveAsync({
@@ -655,5 +655,39 @@ const _uploadFile = async ({ item, uuid, location }) => {
     }
   } catch (error) {
     console.log({ error })// eslint-disable-line no-console
+  }
+}
+
+export const cleanupCache = () => async (dispatch, getState) => {
+  const cachedFiles = await FileSystem.readDirectoryAsync(`${FileSystem.cacheDirectory}`)
+
+  console.log(`there are ${cachedFiles.length} cache files to be deleted`)
+
+  const deletedFiles = await Promise.all(
+    cachedFiles.map(file => {
+      console.log(file)
+      if (`${FileSystem.cacheDirectory}${file}/` === CONST.PENDING_UPLOADS_FOLDER) {
+        console.log('skipping upload folder.....................................')
+        return Promise.resolve()
+      }
+      if (`${FileSystem.cacheDirectory}${file}/` === CONST.IMAGE_CACHE_FOLDER) {
+        console.log('skipping images cache folder.....................................')
+        return Promise.resolve()
+      }
+
+      return FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
+    })
+  )
+  console.log(`deleted ${deletedFiles.length} files`)
+
+  await FileSystem.makeDirectoryAsync(`${CONST.PENDING_UPLOADS_FOLDER}`, { intermediates: true })
+  console.log('deleted cache folder')
+
+  await _checkUploadDirectory()
+
+  const cacheDirectory = await FileSystem.getInfoAsync(CONST.IMAGE_CACHE_FOLDER)
+  // create cacheDir if does not exist
+  if (!cacheDirectory.exists) {
+    await FileSystem.makeDirectoryAsync(CONST.IMAGE_CACHE_FOLDER)
   }
 }

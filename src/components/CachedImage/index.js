@@ -6,9 +6,12 @@ import * as FileSystem from 'expo-file-system'
 
 import PropTypes from 'prop-types'
 
+import * as CONST from '../../consts.js'
+
 const CachedImage = props => {
   const { source: { uri }, cacheKey } = props
-  const filesystemURI = `${FileSystem.cacheDirectory}${cacheKey}`
+
+  const filesystemURI = `${CONST.IMAGE_CACHE_FOLDER}${cacheKey}`
 
   const [imgURI, setImgURI] = useState(filesystemURI)
 
