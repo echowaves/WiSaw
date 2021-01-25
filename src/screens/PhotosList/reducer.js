@@ -661,27 +661,24 @@ const _uploadFile = async ({ item, uuid, location }) => {
 export const cleanupCache = () => async (dispatch, getState) => {
   const cachedFiles = await FileSystem.readDirectoryAsync(`${FileSystem.cacheDirectory}`)
 
-  console.log(`there are ${cachedFiles.length} cache files to be deleted`)
-
   const deletedFiles = await Promise.all(
     cachedFiles.map(file => {
-      console.log(file)
+      // console.log(file)
       if (`${FileSystem.cacheDirectory}${file}/` === CONST.PENDING_UPLOADS_FOLDER) {
-        console.log('skipping upload folder.....................................')
+        // console.log('skipping upload folder.....................................')
         return Promise.resolve()
       }
       if (`${FileSystem.cacheDirectory}${file}/` === CONST.IMAGE_CACHE_FOLDER) {
-        console.log('skipping images cache folder.....................................')
+        // console.log('skipping images cache folder.....................................')
         return Promise.resolve()
       }
 
       return FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
     })
   )
-  console.log(`deleted ${deletedFiles.length} files`)
+  // console.log(`deleted ${deletedFiles.length} files`)
 
-  await FileSystem.makeDirectoryAsync(`${CONST.PENDING_UPLOADS_FOLDER}`, { intermediates: true })
-  console.log('deleted cache folder')
+  // console.log('deleted cache folder')
 
   await _checkUploadDirectory()
 
