@@ -661,6 +661,7 @@ const _uploadFile = async ({ item, uuid, location }) => {
 export const cleanupCache = () => async (dispatch, getState) => {
   const cachedFiles = await FileSystem.readDirectoryAsync(`${FileSystem.cacheDirectory}`)
 
+  // TODO: improve the deletion algorithm and delete files from the image cache by timestamp
   const deletedFiles = await Promise.all(
     cachedFiles.map(file => {
       // console.log(file)
