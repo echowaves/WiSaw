@@ -664,13 +664,19 @@ export const cleanupCache = () => async (dispatch, getState) => {
   // TODO: improve the deletion algorithm and delete files from the image cache by timestamp
   const deletedFiles = await Promise.all(
     cachedFiles.map(file => {
-      // console.log(file)
+      // skip upload folder
       if (`${FileSystem.cacheDirectory}${file}/` === CONST.PENDING_UPLOADS_FOLDER) {
         // console.log('skipping upload folder.....................................')
         return Promise.resolve()
       }
+      // skip image cache filder
       if (`${FileSystem.cacheDirectory}${file}/` === CONST.IMAGE_CACHE_FOLDER) {
         // console.log('skipping images cache folder.....................................')
+        return Promise.resolve()
+      }
+      // skip ttf fonts
+      if (`${FileSystem.cacheDirectory}${file}`.endsWith('.ttf')) {
+        // console.log('skipping ttf file..................................... ' + file)
         return Promise.resolve()
       }
 

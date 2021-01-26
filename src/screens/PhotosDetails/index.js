@@ -20,7 +20,10 @@ import {
   Text,
 } from 'native-base'
 
-import Swiper from 'react-native-swiper'
+// import Swiper from 'react-native-swiper'
+import ViewPager, {
+  ViewPagerOnPageSelectedEventData,
+} from '@react-native-community/viewpager'
 
 import Photo from '../../components/Photo'
 
@@ -324,38 +327,14 @@ const PhotosDetails = ({ route, navigation }) => {
   return (
     <Container>
       <Content>
-        <Swiper
-          keyboardShouldPersistTaps="always"
-          autoplay={false}
-          horizontal
-          loop={false}
-          showsButtons
-          buttonWrapperStyle={{
-            flexDirection: 'row',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            flex: 1,
-            paddingHorizontal: 10,
-            paddingVertical: 10,
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-          }}
-          nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 40 }}>›</Text>}
-          prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 40 }}>‹</Text>}
-          index={index}
-          onIndexChanged={newIndex => {
-          // TODO: ugly timeout, when the library fixes the issue the timeout can be removed
-            setTimeout(() => { setIndex(newIndex) }, 1)
-          }} // otherwise will jump to wrong photo onLayout
-          loadMinimal
-          loadMinimalSize={1}
-          showsPagination={false}
-          pagingEnabled>
+        <ViewPager
+          initialPage={index}>
           {photos.map(item => (
-            <Photo item={item} key={item.id} />
+            <View key={item.id}>
+              <Photo item={item} />
+            </View>
           ))}
-        </Swiper>
+        </ViewPager>
       </Content>
       {renderFooter()}
     </Container>

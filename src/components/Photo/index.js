@@ -50,6 +50,7 @@ const Photo = props => {
   // const watched = useSelector(state => state.photo.watched)
 
   useEffect(() => {
+    console.log(`image: ${item.key}`)
     dispatch(reducer.setInputText({ inputText: '' }))
     dispatch(reducer.getComments({ item }))
     dispatch(reducer.getRecognitions({ item }))
