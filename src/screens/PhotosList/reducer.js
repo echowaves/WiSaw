@@ -28,11 +28,11 @@ export const initialState = {
   pendingPhotos: [],
   loading: false,
   errorMessage: '',
-  pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the net page
+  pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
   orientation: 'portrait',
   activeSegment: 0,
   searchTerm: '',
-  batch: null,
+  batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
   isLastPage: false,
   netAvailable: true,
   uploadingPhoto: false,
