@@ -146,4 +146,4 @@ Thumb.defaultProps = {
   thumbWidth: 100,
 }
 
-export default Thumb
+export default React.memo(Thumb)

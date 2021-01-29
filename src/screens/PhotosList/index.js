@@ -147,8 +147,8 @@ const PhotosList = () => {
     const screenRows = /* Math.floor */(height / thumbDimension)
     const totalNumRows = /* Math.floor */(photos.length / screenColumns)
 
-    if ((screenRows * 4 + lastViewableRow) > totalNumRows) {
-      // console.log(`(screenRows * 4 + lastViewableRow) > totalNumRows : ${screenRows * 4 + lastViewableRow} > ${totalNumRows}`)
+    if ((screenRows * 2 + lastViewableRow) > totalNumRows) {
+      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
       return true
     }
 
