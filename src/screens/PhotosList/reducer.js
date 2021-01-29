@@ -272,9 +272,9 @@ export function initState() {
 }
 
 async function _requestGeoPhotos(getState) {
-  const { latitude, longitude } = getState().photosList.location.coords
-
-  const { pageNumber, uuid, batch } = getState().photosList
+  const {
+    pageNumber, uuid, batch, location: { latitude, longitude },
+  } = getState().photosList
 
   const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
     method: 'POST',

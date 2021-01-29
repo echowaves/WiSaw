@@ -63,7 +63,7 @@ const PhotosList = () => {
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
-  const [loadMore, setLoadMore] = useState(false)
+  // const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
   const pendingPhotos = useSelector(state => state.photosList.pendingPhotos)
@@ -85,9 +85,8 @@ const PhotosList = () => {
 
   const onViewRef = React.useRef(viewableItems => {
     const lastViewableItem = viewableItems.changed[viewableItems.changed.length - 1]
+    // const lastViewableItem = viewableItems.changed[0]
     setLastViewableRow(lastViewableItem.index)
-    setLoadMore(true)
-    // }
   })
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
@@ -130,46 +129,26 @@ const PhotosList = () => {
   useEffect(() => {
     if (wantToLoadMore()) {
       dispatch(reducer.getPhotos())
-      // dispatch(reducer.getPhotos())
-      setLoadMore(false)
-    } else {
-      setLoadMore(true)
     }
-  }, [lastViewableRow, loadMore, loading, isLastPage, activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // useEffect(() => {
-  //   // if (!loading) {
-  //     setLoadMore(true)
-  //   // }
-  // }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // useEffect(() => {
-  //   if (location) {
-  //     reload()
-  //   }
-  // }, [location]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastViewableRow, photos, location]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     updateNavBar()
+    dispatch(reducer.getPhotos())
   }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const wantToLoadMore = () => {
     if (isLastPage) {
-      console.log(`isLastPage:${isLastPage}`)
+      // console.log(`isLastPage:${isLastPage}`)
       return false
     }
 
-    const screenColumns = Math.floor(width / thumbDimension)
-    const screenRows = Math.floor(height / thumbDimension)
-    const totalNumRows = Math.floor(photos.length / screenColumns)
+    const screenColumns = /* Math.floor */(width / thumbDimension)
+    const screenRows = /* Math.floor */(height / thumbDimension)
+    const totalNumRows = /* Math.floor */(photos.length / screenColumns)
 
-    if (totalNumRows < screenRows) {
-      console.log(`totalNumRows < numRows : ${totalNumRows} < ${screenRows}`)
-      return true
-    }
-
-    if ((screenRows * 10 + lastViewableRow) > totalNumRows) {
-      console.log(`(screenRows * 10 + lastViewableRow) > totalNumRows : (${screenRows * 10 + lastViewableRow}) > ${totalNumRows}`)
+    if ((screenRows * 4 + lastViewableRow) > totalNumRows) {
+      // console.log(`(screenRows * 4 + lastViewableRow) > totalNumRows : ${screenRows * 4 + lastViewableRow} > ${totalNumRows}`)
       return true
     }
 
@@ -224,7 +203,6 @@ const PhotosList = () => {
 
     dispatch(reducer.resetState())
     dispatch(reducer.setLocation(await _getLocation()))
-    setLoadMore(true)
 
     dispatch(reducer.uploadPendingPhotos())
   }
