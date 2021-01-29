@@ -86,7 +86,7 @@ const PhotosList = () => {
   const onViewRef = React.useRef(viewableItems => {
     const lastViewableItem = viewableItems.changed[viewableItems.changed.length - 1]
     setLastViewableRow(lastViewableItem.index)
-    // setLoadMore(true)
+    setLoadMore(true)
     // }
   })
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
@@ -128,15 +128,14 @@ const PhotosList = () => {
   }, [width])
 
   useEffect(() => {
-    // if (loadMore) {
-    while (wantToLoadMore()) {
-      console.log('loading')
+    if (wantToLoadMore()) {
       dispatch(reducer.getPhotos())
       // dispatch(reducer.getPhotos())
-      // setLoadMore(false)
+      setLoadMore(false)
+    } else {
+      setLoadMore(true)
     }
-    // }
-  }, [lastViewableRow]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastViewableRow, loadMore, loading, isLastPage, activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // useEffect(() => {
   //   // if (!loading) {
@@ -160,20 +159,18 @@ const PhotosList = () => {
       return false
     }
 
-    const numColumns = Math.floor(width / thumbDimension)
-    const numRows = Math.floor(height / thumbDimension)
-    const totalNumRows = Math.floor(photos.length / numColumns)
+    const screenColumns = Math.floor(width / thumbDimension)
+    const screenRows = Math.floor(height / thumbDimension)
+    const totalNumRows = Math.floor(photos.length / screenColumns)
 
-    const listHeight = totalNumRows * thumbDimension
-
-    if (listHeight < height) {
-      console.log(`listHeight < height : ${listHeight} < ${height}`)
+    if (totalNumRows < screenRows) {
+      console.log(`totalNumRows < numRows : ${totalNumRows} < ${screenRows}`)
       return true
     }
 
-    if ((lastViewableRow + numRows * 2) > totalNumRows) {
-      console.log(`(lastViewableRow + numRows * 2) > totalNumRows : (${lastViewableRow} + ${numRows} * 2) > ${totalNumRows}`)
-      return false
+    if ((screenRows * 10 + lastViewableRow) > totalNumRows) {
+      console.log(`(screenRows * 10 + lastViewableRow) > totalNumRows : (${screenRows * 10 + lastViewableRow}) > ${totalNumRows}`)
+      return true
     }
 
     return false
