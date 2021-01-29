@@ -24,7 +24,7 @@ import { cancelPendingUpload } from '../../screens/PhotosList/reducer'
 
 const ThumbPending = props => {
   const {
-    item, thumbWidth,
+    item, thumbDimension,
   } = props
 
   const dispatch = useDispatch()
@@ -47,8 +47,8 @@ const ThumbPending = props => {
   }
 
   const thumbWidthStyles = {
-    width: thumbWidth,
-    height: thumbWidth,
+    width: thumbDimension,
+    height: thumbDimension,
   }
 
   return (
@@ -154,11 +154,11 @@ const styles = StyleSheet.create({
 
 ThumbPending.propTypes = {
   item: PropTypes.string.isRequired,
-  thumbWidth: PropTypes.number,
+  thumbDimension: PropTypes.number,
 }
 
 ThumbPending.defaultProps = {
-  thumbWidth: 100,
+  thumbDimension: 100,
 }
 
 export default ThumbPending

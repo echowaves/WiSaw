@@ -11,7 +11,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "reset-simulator": "xcrun simctl erase all",
+    "reset:simulator": "xcrun simctl erase all",
     "build:ios": "expo build:ios --release-channel prod",
     "build:android": "expo build:android --release-channel prod",
     "publish:prod": "expo publish --release-channel prod"

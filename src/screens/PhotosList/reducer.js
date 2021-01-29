@@ -82,6 +82,7 @@ const reducer = (state = initialState, action) => {
         // location: null,
         photos: [],
         loading: false,
+        loadMore: false,
         errorMessage: '',
         pageNumber: -1,
         isLastPage: false,
@@ -211,6 +212,7 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.SET_ACTIVE_SEGMENT:
       return {
         ...state,
+        isLastPage: false,
         activeSegment: action.activeSegment,
       }
     case ACTION_TYPES.SET_SEARCH_TERM:
@@ -270,9 +272,9 @@ export function initState() {
 }
 
 async function _requestGeoPhotos(getState) {
-  const { latitude, longitude } = getState().photosList.location.coords
-
-  const { pageNumber, uuid, batch } = getState().photosList
+  const {
+    pageNumber, uuid, batch, location: { latitude, longitude },
+  } = getState().photosList
 
   const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
     method: 'POST',

@@ -61,8 +61,9 @@ const PhotosList = () => {
   const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
 
-  const [thumbWidth, setThumbWidth] = useState()
-  const [loadMore, setLoadMore] = useState(false)
+  const [thumbDimension, setThumbDimension] = useState(100)
+  const [lastViewableRow, setLastViewableRow] = useState(1)
+  // const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
   const pendingPhotos = useSelector(state => state.photosList.pendingPhotos)
@@ -78,9 +79,16 @@ const PhotosList = () => {
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
-  const batch = useSelector(state => state.photosList.batch)
+  // const batch = useSelector(state => state.photosList.batch)
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
+
+  const onViewRef = React.useRef(viewableItems => {
+    const lastViewableItem = viewableItems.changed[viewableItems.changed.length - 1]
+    // const lastViewableItem = viewableItems.changed[0]
+    setLastViewableRow(lastViewableItem.index)
+  })
+  // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
   // check permissions and retrieve UUID
   useEffect(() => {
@@ -115,37 +123,36 @@ const PhotosList = () => {
   // when with of screen changes
   useEffect(() => {
     const thumbsCount = Math.floor(width / 100)
-    setThumbWidth(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
+    setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
   }, [width])
 
   useEffect(() => {
-    if (!loading) {
-      if (loadMore && !isLastPage && batch) {
-        dispatch(reducer.getPhotos())
-        setLoadMore(false)
-      }
-      if (!isListFilllsScreen()) {
-        dispatch(reducer.getPhotos())
-      }
+    if (wantToLoadMore()) {
+      dispatch(reducer.getPhotos())
     }
-  }, [loading, loadMore]) // eslint-disable-line react-hooks/exhaustive-deps
-  // , loadMore, isLastPage
-
-  // useEffect(() => {
-  //   if (location) {
-  //     reload()
-  //   }
-  // }, [location]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastViewableRow, photos, location]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     updateNavBar()
+    dispatch(reducer.getPhotos())
   }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isListFilllsScreen = () => {
-    const numColumns = Math.floor(width / thumbWidth)
-    const numRows = Math.floor(photos.length / numColumns)
-    const listHeight = numRows * thumbWidth
-    return listHeight > height || isLastPage
+  const wantToLoadMore = () => {
+    if (isLastPage) {
+      // console.log(`isLastPage:${isLastPage}`)
+      return false
+    }
+
+    const screenColumns = /* Math.floor */(width / thumbDimension)
+    const screenRows = /* Math.floor */(height / thumbDimension)
+    const totalNumRows = /* Math.floor */(photos.length / screenColumns)
+
+    if ((screenRows * 2 + lastViewableRow) > totalNumRows) {
+      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
+      return true
+    }
+
+    return false
   }
 
   const styles = StyleSheet.create({
@@ -153,7 +160,7 @@ const PhotosList = () => {
       // flex: 1,
     },
     thumbContainer: {
-      // height: thumbWidth,
+      // height: thumbDimension,
       // paddingBottom: 10,
       // marginBottom: 10,
     },
@@ -194,10 +201,8 @@ const PhotosList = () => {
   const reload = async () => {
     /* eslint-disable no-await-in-loop */
 
-    setLoadMore(false)
     dispatch(reducer.resetState())
     dispatch(reducer.setLocation(await _getLocation()))
-    setLoadMore(true)
 
     dispatch(reducer.uploadPendingPhotos())
   }
@@ -494,7 +499,7 @@ const PhotosList = () => {
         <View>
           <FlatGrid
             itemDimension={
-              thumbWidth
+              thumbDimension
             }
             spacing={3}
             data={
@@ -506,7 +511,7 @@ const PhotosList = () => {
                   item={
                     item
                   }
-                  thumbWidth={thumbWidth}
+                  thumbDimension={thumbDimension}
                 />
               )
             }
@@ -546,7 +551,7 @@ const PhotosList = () => {
         {/* photos */}
         <FlatGrid
           itemDimension={
-            thumbWidth
+            thumbDimension
           }
           spacing={3}
           data={
@@ -561,7 +566,7 @@ const PhotosList = () => {
                 index={
                   index
                 }
-                thumbWidth={thumbWidth}
+                thumbDimension={thumbDimension}
               />
             )
           }
@@ -575,24 +580,6 @@ const PhotosList = () => {
           horizontal={
             false
           }
-          onMomentumScrollBegin={
-            async () => {
-              setLoadMore(true)
-            }
-          }
-          onMomentumScrollEnd={
-            async () => {
-              setLoadMore(true)
-            }
-          }
-          onEndReached={
-            async () => {
-              setLoadMore(true)
-            }
-          }
-          onEndReachedThreshold={
-            0.9
-          }
           refreshing={
             false
           }
@@ -601,6 +588,8 @@ const PhotosList = () => {
               reload()
             }
           }
+          onViewableItemsChanged={onViewRef.current}
+          // viewabilityConfig={viewConfigRef.current}
         />
         {renderPhotoButton()}
       </Container>
