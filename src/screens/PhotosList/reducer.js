@@ -82,6 +82,7 @@ const reducer = (state = initialState, action) => {
         // location: null,
         photos: [],
         loading: false,
+        loadMore: false,
         errorMessage: '',
         pageNumber: -1,
         isLastPage: false,
