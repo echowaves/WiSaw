@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WiSaw",
-    "version": "5.12.0",
+    "version": "5.12.1",
     "slug": "WiSaw",
     "scheme": "wisaw",
     "icon": "./assets/icon.png",
@@ -23,7 +23,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.echowaves",
-      "buildNumber": "134",
+      "buildNumber": "135",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This will allow you to take photos with the application. A photo will be stored in your photo album and uploaded to the cloud.",
@@ -42,7 +42,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.echowaves.wisaw",
-      "versionCode": 134,
+      "versionCode": 135,
       "permissions": [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",
