@@ -674,6 +674,7 @@ export const cleanupCache = () => async (dispatch, getState) => {
   // let deletedCounter = 0
   const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
 
+  // remove 3 days old cached files
   await Promise.all(
     cachedFiles.map(async file => {
       const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
