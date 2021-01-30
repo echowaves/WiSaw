@@ -661,39 +661,33 @@ const _uploadFile = async ({ item, uuid, location }) => {
 }
 
 export const cleanupCache = () => async (dispatch, getState) => {
-  const cachedFiles = await FileSystem.readDirectoryAsync(`${FileSystem.cacheDirectory}`)
-
-  // TODO: improve the deletion algorithm and delete files from the image cache by timestamp
-  const deletedFiles = await Promise.all(
-    cachedFiles.map(file => {
-      // skip upload folder
-      if (`${FileSystem.cacheDirectory}${file}/` === CONST.PENDING_UPLOADS_FOLDER) {
-        // console.log('skipping upload folder.....................................')
-        return Promise.resolve()
-      }
-      // skip image cache filder
-      if (`${FileSystem.cacheDirectory}${file}/` === CONST.IMAGE_CACHE_FOLDER) {
-        // console.log('skipping images cache folder.....................................')
-        return Promise.resolve()
-      }
-      // skip ttf fonts
-      if (`${FileSystem.cacheDirectory}${file}`.endsWith('.ttf')) {
-        // console.log('skipping ttf file..................................... ' + file)
-        return Promise.resolve()
-      }
-
-      return FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
-    })
-  )
-  // console.log(`deleted ${deletedFiles.length} files`)
-
-  // console.log('deleted cache folder')
-
-  await _checkUploadDirectory()
+  _checkUploadDirectory()
 
   const cacheDirectory = await FileSystem.getInfoAsync(CONST.IMAGE_CACHE_FOLDER)
   // create cacheDir if does not exist
   if (!cacheDirectory.exists) {
     await FileSystem.makeDirectoryAsync(CONST.IMAGE_CACHE_FOLDER)
   }
+
+  // cleanup old cached files
+  const currentTime = moment().unix()
+  // let deletedCounter = 0
+  const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
+
+  await Promise.all(
+    cachedFiles.map(async file => {
+      const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
+      const timeInterval = currentTime - info.modificationTime
+      // console.log(`time interval = ${timeInterval}`)
+      if (timeInterval > 60 * 60 * 24 * 3) { // 3 days old
+        FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`, { idempotent: true })
+        // console.log(`deleting file: ${info}`)
+        // deletedCounter += 1
+      }
+
+      return Promise.resolve()
+    })
+  )
+  // console.log(`There are ${cachedFiles.length} cachedFiles.`)
+  // alert(`There are ${deletedCounter} deletedFiles.`)
 }
