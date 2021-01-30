@@ -139,8 +139,8 @@ const ThumbPending = props => {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 20,
-    borderWidth: 10,
+    borderRadius: 5,
+    borderWidth: 1,
     borderColor: CONST.MAIN_COLOR,
   },
   thumbnail: {
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     width: '100%',
     height: '100%',
-    borderRadius: 10,
+    borderRadius: 4,
   },
 })
 
