@@ -570,6 +570,17 @@ export function uploadPendingPhotos() {
           uuid,
           location,
         })
+        if (responseData === "banned") {
+          alert("Sorry, you've been banned.")
+
+          FileSystem.deleteAsync(
+            `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
+            { idempotent: true }
+          )
+          dispatch(uploadPendingPhotos())
+          return Promise.resolve()
+        }
+
         if (responseData.status === 200) {
           const cachedFileUri = `${CONST.IMAGE_CACHE_FOLDER}${photo.id}t`
           // move file to cacheDir
@@ -607,9 +618,9 @@ export function uploadPendingPhotos() {
       type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
     })
 
-    if ((await _getPendingUploadFiles()).length > 0) {
-      dispatch(uploadPendingPhotos())
-    }
+    // if ((await _getPendingUploadFiles()).length > 0) {
+    dispatch(uploadPendingPhotos())
+    // }
   }
 }
 
@@ -634,12 +645,12 @@ const _uploadFile = async ({ item, uuid, location }) => {
     })
 
     const responseJson = await response.json()
-    // if (response.status === 401) {
-    //   alert("Sorry, looks like you have been banned from WiSaw.")
-    //   return Promise.resolve()
-    // }
+    if (response.status === 401) {
+      // alert("Sorry, looks like you have been banned from WiSaw.")
+      return { responseData: "banned" }
+    }
     if (response.status === 201
-    || response.status === 401 // todo: implement better banned logic
+    // || response.status === 401 // todo: implement better banned logic
     ) {
       const { uploadURL, photo } = responseJson
 
@@ -670,25 +681,46 @@ export const cleanupCache = () => async (dispatch, getState) => {
   }
 
   // cleanup old cached files
-  const currentTime = moment().unix()
+  // const currentTime = moment().unix()
   // let deletedCounter = 0
   const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
+  // alert(cachedFiles.length)
+
+  // cleanup cache, leave only 5000 most recent files
+  const sorted = (
+    await Promise.all(cachedFiles.map(async file => {
+      const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
+      return Promise.resolve({ file, modificationTime: info.modificationTime })
+    }))
+  )
+    .sort((a, b) => a.modificationTime - b.modificationTime)
+
+  const cacheSize = 5000
+  if (sorted.length > cacheSize) {
+    await Promise.all(
+      sorted.slice(0, sorted.length - cacheSize)
+        .map(async file => {
+          await FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${file.file}`, { idempotent: true })
+          return Promise.resolve()
+        })
+    )
+  }
 
   // remove 3 days old cached files
-  await Promise.all(
-    cachedFiles.map(async file => {
-      const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
-      const timeInterval = currentTime - info.modificationTime
-      // console.log(`time interval = ${timeInterval}`)
-      if (timeInterval > 60 * 60 * 24 * 3) { // 3 days old
-        FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`, { idempotent: true })
-        // console.log(`deleting file: ${info}`)
-        // deletedCounter += 1
-      }
-
-      return Promise.resolve()
-    })
-  )
+  // await Promise.all(
+  //   cachedFiles.map(async file => {
+  //     const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
+  //     const timeInterval = currentTime - info.modificationTime
+  //     // console.log(`time interval = ${timeInterval}`)
+  //     if (timeInterval > 60 * 60 * 24 * 3) { // 3 days old
+  //       FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`, { idempotent: true })
+  //       // console.log(`deleting file: ${info}`)
+  //       // deletedCounter += 1
+  //     }
+  //
+  //     return Promise.resolve()
+  //   })
+  // )
   // console.log(`There are ${cachedFiles.length} cachedFiles.`)
   // alert(`There are ${deletedCounter} deletedFiles.`)
 }

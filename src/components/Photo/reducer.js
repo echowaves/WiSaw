@@ -284,6 +284,12 @@ export function deletePhoto({ item }) {
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DELETED,
           photoId: item.id,
         })
+        Toast.show({
+          text: "Photo deleted. No one will be able to see it any more.",
+          buttonText: "OK",
+          type: "warning",
+          duration: 5000,
+        })
       } else {
         Toast.show({
           text: "Unable to delete photo. Try again later.",

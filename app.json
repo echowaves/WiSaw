@@ -31,8 +31,8 @@
         "NSLocationWhenInUseUsageDescription": "You need to enable your location, in order to see photos that are closest to you.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "You need to enable your location, in order to see photos that are closest to you.",
         "NSMotionUsageDescription": "This will help us to improve the relevance of posts that you can see related to you location.",
-        "NSPhotoLibraryAddUsageDescription": "Want to have your photos stored on your device? Why don&apos;t you enable Photo Library?",
-        "NSPhotoLibraryUsageDescription": "Want to see photos stored on your device? Why don&apos;t you enable it?"
+        "NSPhotoLibraryAddUsageDescription": "Want to have your photos stored on your device? Why don't you enable Photo Library?",
+        "NSPhotoLibraryUsageDescription": "Want to see photos stored on your device? Why don't you enable it?"
       },
       "config": {}
     },
