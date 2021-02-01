@@ -23,16 +23,16 @@
     ],
     "ios": {
       "bundleIdentifier": "com.echowaves",
-      "buildNumber": "135",
+      "buildNumber": "136",
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "This will allow you to take photos with the application. A photo will be stored in your photo album and uploaded to the cloud.",
+        "NSCameraUsageDescription": "This will allow you to take photos with WiSaw app. When you take a photo with WiSaw, it will be stored in your photo album on your device and will be shared with other near-by users of the app. Any user who finds content objectionable or abusive will be able to remove it permanently, so that no one will be able to see it any more.",
         "NSLocationAlwaysUsageDescription": "We need to know your location so that we can show you posts in your area.",
         "NSLocationWhenInUseUsageDescription": "You need to enable your location, in order to see photos that are closest to you.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "You need to enable your location, in order to see photos that are closest to you.",
         "NSMotionUsageDescription": "This will help us to improve the relevance of posts that you can see related to you location.",
         "NSPhotoLibraryAddUsageDescription": "Want to have your photos stored on your device? Why don't you enable Photo Library?",
-        "NSPhotoLibraryUsageDescription": "Want to see photos stored on your device? Why don't you enable it?"
+        "NSPhotoLibraryUsageDescription": "This will allow to store photos you take with WiSaw in photo album on your device."
       },
       "config": {}
     },
@@ -42,7 +42,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.echowaves.wisaw",
-      "versionCode": 135,
+      "versionCode": 136,
       "permissions": [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",

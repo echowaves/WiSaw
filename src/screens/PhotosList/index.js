@@ -92,8 +92,8 @@ const PhotosList = () => {
 
   // check permissions and retrieve UUID
   useEffect(() => {
-    dispatch(reducer.cleanupCache())
     dispatch(reducer.initState())
+    dispatch(reducer.cleanupCache())
     reload()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
