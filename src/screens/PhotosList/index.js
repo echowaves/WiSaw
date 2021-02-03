@@ -91,6 +91,7 @@ const PhotosList = () => {
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
   useEffect(() => {
+    dispatch(reducer.cleanupCache())
     // check permissions and retrieve UUID
     dispatch(reducer.initState())
     reload()
