@@ -431,12 +431,14 @@ export function resetState() {
     type: ACTION_TYPES.RESET_STATE,
   }
 }
+
 export function setLocation(location) {
   return ({
     type: ACTION_TYPES.SET_LOCATION,
     location,
   })
 }
+
 export function setOrientation(orientation) {
   return {
     type: ACTION_TYPES.SET_ORIENTATION,

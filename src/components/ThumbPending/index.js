@@ -161,4 +161,4 @@ ThumbPending.defaultProps = {
   thumbDimension: 100,
 }
 
-export default ThumbPending
+export default React.memo(ThumbPending)

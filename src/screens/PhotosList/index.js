@@ -200,9 +200,9 @@ const PhotosList = () => {
 
   const reload = async () => {
     /* eslint-disable no-await-in-loop */
-
+    const location = await _getLocation()
     dispatch(reducer.resetState())
-    dispatch(reducer.setLocation(await _getLocation()))
+    dispatch(reducer.setLocation(location))
 
     dispatch(reducer.uploadPendingPhotos())
   }
