@@ -91,9 +91,9 @@ const PhotosList = () => {
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
   useEffect(() => {
-    dispatch(reducer.cleanupCache())
     // check permissions and retrieve UUID
     dispatch(reducer.initState())
+
     reload()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -200,10 +200,11 @@ const PhotosList = () => {
 
   const reload = async () => {
     const location = await _getLocation()
+    dispatch(reducer.resetState(location))
+
     dispatch(reducer.cleanupCache())
 
     dispatch(reducer.uploadPendingPhotos())
-    dispatch(reducer.resetState(location))
   }
 
   const checkPermissionsForPhotoTaking = async () => {

@@ -247,11 +247,15 @@ const reducer = (state = initialState, action) => {
 
 export function initState() {
   return async (dispatch, getState) => {
+    const uuid = await _getUUID(getState)
+    const isTandcAccepted = await _getTancAccepted()
+    // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
     dispatch({
       type: ACTION_TYPES.INIT_STATE,
-      uuid: await _getUUID(getState),
-      isTandcAccepted: await _getTancAccepted(),
+      uuid,
+      isTandcAccepted,
     })
+    // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
   }
 }
 
@@ -327,7 +331,7 @@ export function getPhotos() {
     //   batch, loading, isLastPage, pageNumber, searchTerm,
     // } = getState().photosList
     // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
-    await new Promise(r => setTimeout(r, 100)) // this is really weird, but seems to help with the order of the images
+    await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
     if (!getState().photosList.location
     || getState().photosList.netAvailable === false
     || (getState().photosList.activeSegment === 2
