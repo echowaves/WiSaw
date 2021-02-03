@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableHighlight,
   Text,
-  // Image,
+  Image,
 } from 'react-native'
 
 import {
@@ -59,9 +59,8 @@ const ThumbPending = props => {
           styles.container,
           thumbWidthStyles,
         ]}>
-        <CachedImage
+        <Image
           source={{ uri: `${CONST.PENDING_UPLOADS_FOLDER}${item}` }}
-          cacheKey={`${item}`}
           style={styles.thumbnail}
         />
       </TouchableHighlight>
