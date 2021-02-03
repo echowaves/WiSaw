@@ -577,7 +577,7 @@ export function uploadPendingPhotos() {
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )
-          dispatch(uploadPendingPhotos())
+          // dispatch(uploadPendingPhotos())
           return Promise.resolve()
         }
 
@@ -612,15 +612,15 @@ export function uploadPendingPhotos() {
         text: 'Failed to upload file, refresh to try again.',
       })
       console.log({ error }) // eslint-disable-line no-console
-      dispatch(uploadPendingPhotos())
+      // dispatch(uploadPendingPhotos())
     }
     dispatch({
       type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
     })
 
-    // if ((await _getPendingUploadFiles()).length > 0) {
-    dispatch(uploadPendingPhotos())
-    // }
+    if ((await _getPendingUploadFiles()).length > 0) {
+      dispatch(uploadPendingPhotos())
+    }
   }
 }
 
