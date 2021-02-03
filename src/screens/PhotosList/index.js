@@ -200,9 +200,8 @@ const PhotosList = () => {
 
   const reload = async () => {
     const location = await _getLocation()
-    dispatch(reducer.resetState(location))
-
     dispatch(reducer.uploadPendingPhotos())
+    dispatch(reducer.resetState(location))
   }
 
   const checkPermissionsForPhotoTaking = async () => {
@@ -348,9 +347,9 @@ const PhotosList = () => {
           <Button
             first active={activeSegment === 0}
             onPress={
-              () => {
+              async () => {
                 dispatch(reducer.setActiveSegment(0))
-                reload()
+                await reload()
               }
             }>
             <Icon
@@ -361,9 +360,9 @@ const PhotosList = () => {
           <Button
             active={activeSegment === 1}
             onPress={
-              () => {
+              async () => {
                 dispatch(reducer.setActiveSegment(1))
-                reload()
+                await reload()
               }
             }>
             <Icon
@@ -375,9 +374,9 @@ const PhotosList = () => {
           <Button
             last active={activeSegment === 2}
             onPress={
-              () => {
+              async () => {
                 dispatch(reducer.setActiveSegment(2))
-                reload()
+                await reload()
               }
             }>
             <Icon
@@ -393,9 +392,9 @@ const PhotosList = () => {
   const renderHeaderLeft = () => (
     <Icon
       onPress={
-        () => {
+        async () => {
           // dispatch(reducer.initState())
-          reload()
+          await reload()
         }
       }
       name="sync"
@@ -476,9 +475,9 @@ const PhotosList = () => {
     </Header>
   )
 
-  const submitSearch = () => {
+  const submitSearch = async () => {
     if (searchTerm && searchTerm.length >= 3) {
-      reload()
+      await reload()
       if (keyboardVisible) {
         dismissKeyboard()
       }
@@ -582,8 +581,8 @@ const PhotosList = () => {
             false
           }
           onRefresh={
-            () => {
-              reload()
+            async () => {
+              await reload()
             }
           }
           onViewableItemsChanged={onViewRef.current}

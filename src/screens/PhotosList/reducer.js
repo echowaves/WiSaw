@@ -327,6 +327,7 @@ export function getPhotos() {
     //   batch, loading, isLastPage, pageNumber, searchTerm,
     // } = getState().photosList
     // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
+    await new Promise(r => setTimeout(r, 100)) // this is really weird, but seems to help with the order of the images
     if (!getState().photosList.location
     || getState().photosList.netAvailable === false
     || (getState().photosList.activeSegment === 2
@@ -555,17 +556,22 @@ export function uploadPendingPhotos() {
         }
 
         if (responseData.status === 200) {
-          const cachedFileUri = `${CONST.IMAGE_CACHE_FOLDER}${photo.id}t`
+          const cachedThumbUri = `${CONST.IMAGE_CACHE_FOLDER}${photo.id}t`
+          const cachedImageUri = `${CONST.IMAGE_CACHE_FOLDER}${photo.id}i`
           // move file to cacheDir
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.moveAsync({
             from: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
-            to: cachedFileUri,
+            to: cachedThumbUri,
           })
+          FileSystem.downloadAsync(
+            cachedThumbUri, cachedImageUri,
+          )
+
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
 
-          photo.getThumbUrl = cachedFileUri
+          photo.getThumbUrl = cachedThumbUri
           photo.fallback = true
 
           // show the photo in the photo list immidiately
