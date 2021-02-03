@@ -90,10 +90,10 @@ const PhotosList = () => {
   })
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
-  // check permissions and retrieve UUID
   useEffect(() => {
-    dispatch(reducer.initState())
     dispatch(reducer.cleanupCache())
+    // check permissions and retrieve UUID
+    dispatch(reducer.initState())
     reload()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -130,7 +130,7 @@ const PhotosList = () => {
     if (wantToLoadMore()) {
       dispatch(reducer.getPhotos())
     }
-  }, [lastViewableRow, photos, location]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastViewableRow, loading, photos]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     updateNavBar()
@@ -147,7 +147,7 @@ const PhotosList = () => {
     const screenRows = /* Math.floor */(height / thumbDimension)
     const totalNumRows = /* Math.floor */(photos.length / screenColumns)
 
-    if ((screenRows * 2 + lastViewableRow) > totalNumRows) {
+    if ((screenRows * 1 + lastViewableRow) > totalNumRows) {
       // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
       return true
     }
@@ -193,16 +193,14 @@ const PhotosList = () => {
         headerRight: null,
       })
     }
-    if (!location) {
-      reload()
-    }
+    // if (!location) {
+    //   reload()
+    // }
   }
 
   const reload = async () => {
-    /* eslint-disable no-await-in-loop */
     const location = await _getLocation()
-    dispatch(reducer.resetState())
-    dispatch(reducer.setLocation(location))
+    dispatch(reducer.resetState(location))
 
     dispatch(reducer.uploadPendingPhotos())
   }

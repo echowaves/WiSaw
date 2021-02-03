@@ -52,7 +52,7 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos:
-        state.photos.concat(action.photos),
+        [...state.photos, ...action.photos],
         // .sort((a, b) => b.id - a.id),
         // this really stinks, need to figure out why there are duplicates in the first place
         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
@@ -79,7 +79,7 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.RESET_STATE:
       return {
         ...state,
-        // location: null,
+        location: action.location,
         photos: [],
         loading: false,
         loadMore: false,
@@ -93,15 +93,11 @@ const reducer = (state = initialState, action) => {
         ...state,
         isTandcAccepted: action.isTandcAccepted,
       }
-    case ACTION_TYPES.SET_UUID:
+    case ACTION_TYPES.INIT_STATE:
       return {
         ...state,
         uuid: action.uuid,
-      }
-    case ACTION_TYPES.SET_LOCATION:
-      return {
-        ...state,
-        location: action.location,
+        isTandcAccepted: action.isTandcAccepted,
       }
     case ACTION_TYPES.SET_ERROR:
       return {
@@ -249,23 +245,11 @@ const reducer = (state = initialState, action) => {
   }
 }
 
-export default reducer
-
 export function initState() {
   return async (dispatch, getState) => {
-    // force reset tandc
-    // await RNSecureKeyStore.set(IS_TANDC_ACCEPTED_KEY, "false", { accessible: ACCESSIBLE.ALWAYS_THIS_DEVICE_ONLY })
-    // if (Platform.OS === 'ios') {
-    //   await RNSecureKeyStore.setResetOnAppUninstallTo(false)
-    // }
-
     dispatch({
-      type: ACTION_TYPES.SET_UUID,
+      type: ACTION_TYPES.INIT_STATE,
       uuid: await _getUUID(getState),
-    })
-
-    dispatch({
-      type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
       isTandcAccepted: await _getTancAccepted(),
     })
   }
@@ -397,23 +381,16 @@ export function getPhotos() {
 }
 
 export function acceptTandC() {
-  return async dispatch => {
-    try {
-      await SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, "true")
-      dispatch({
-        type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
-        isTandcAccepted: true,
-      })
-    } catch (err) {
-      dispatch({
-        type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
-        isTandcAccepted: false,
-      })
-      Toast.show({
-        text: err.toString(),
-        buttonText: "OK",
-        duration: 15000,
-      })
+  try {
+    SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, "true")
+    return {
+      type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
+      isTandcAccepted: true,
+    }
+  } catch (err) {
+    return {
+      type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
+      isTandcAccepted: false,
     }
   }
 }
@@ -426,17 +403,11 @@ export function cancelPendingUpload({ fileName }) {
   }
 }
 
-export function resetState() {
+export function resetState(location) {
   return {
     type: ACTION_TYPES.RESET_STATE,
-  }
-}
-
-export function setLocation(location) {
-  return ({
-    type: ACTION_TYPES.SET_LOCATION,
     location,
-  })
+  }
 }
 
 export function setOrientation(orientation) {
@@ -674,7 +645,7 @@ const _uploadFile = async ({ item, uuid, location }) => {
 }
 
 export const cleanupCache = () => async (dispatch, getState) => {
-  _checkUploadDirectory()
+  // _checkUploadDirectory()
 
   const cacheDirectory = await FileSystem.getInfoAsync(CONST.IMAGE_CACHE_FOLDER)
   // create cacheDir if does not exist
@@ -726,3 +697,4 @@ export const cleanupCache = () => async (dispatch, getState) => {
   // console.log(`There are ${cachedFiles.length} cachedFiles.`)
   // alert(`There are ${deletedCounter} deletedFiles.`)
 }
+export default reducer
