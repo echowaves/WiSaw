@@ -564,9 +564,11 @@ export function uploadPendingPhotos() {
             from: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             to: cachedThumbUri,
           })
-          FileSystem.downloadAsync(
-            cachedThumbUri, cachedImageUri,
-          )
+
+          FileSystem.copyAsync({
+            from: cachedThumbUri,
+            to: cachedImageUri,
+          })
 
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
