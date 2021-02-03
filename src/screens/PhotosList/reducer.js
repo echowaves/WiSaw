@@ -676,7 +676,7 @@ export const cleanupCache = () => async (dispatch, getState) => {
   )
     .sort((a, b) => a.modificationTime - b.modificationTime)
 
-  const cacheSize = 5000
+  const cacheSize = 3000
   if (sorted.length > cacheSize) {
     await Promise.all(
       sorted.slice(0, sorted.length - cacheSize)
