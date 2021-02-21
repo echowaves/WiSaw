@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
+import * as MediaLibrary from 'expo-media-library'
 
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
@@ -277,13 +278,14 @@ const PhotosList = () => {
       quality: 1.0,
       exif: false,
     })
-    if (cameraReturn.cancelled === true) {
-      return Promise.resolve() // simply return
-    }
+    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
+    await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
 
-    // have to wait, otherwise the upload will not start
-    await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
-    dispatch(reducer.uploadPendingPhotos())
+    if (cameraReturn.cancelled === false) {
+      // have to wait, otherwise the upload will not start
+      await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
+      dispatch(reducer.uploadPendingPhotos())
+    }
   }
 
   const renderPhotoButton = () => (

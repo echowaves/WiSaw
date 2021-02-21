@@ -6,7 +6,6 @@ import {
   Toast,
 } from 'native-base'
 
-import * as MediaLibrary from 'expo-media-library'
 import * as FileSystem from 'expo-file-system'
 import moment from 'moment'
 
@@ -499,8 +498,6 @@ const _checkUploadDirectory = async () => {
 }
 
 export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
-  await MediaLibrary.saveToLibraryAsync(uri)
-
   await _checkUploadDirectory()
 
   // move file to cacheDir
