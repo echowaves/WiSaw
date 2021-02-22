@@ -352,9 +352,9 @@ const PhotosList = () => {
           <Button
             first active={activeSegment === 0}
             onPress={
-              async () => {
+              () => {
                 dispatch(reducer.setActiveSegment(0))
-                await reload()
+                reload()
               }
             }>
             <Icon
@@ -365,9 +365,9 @@ const PhotosList = () => {
           <Button
             active={activeSegment === 1}
             onPress={
-              async () => {
+              () => {
                 dispatch(reducer.setActiveSegment(1))
-                await reload()
+                reload()
               }
             }>
             <Icon
@@ -379,9 +379,9 @@ const PhotosList = () => {
           <Button
             last active={activeSegment === 2}
             onPress={
-              async () => {
+              () => {
                 dispatch(reducer.setActiveSegment(2))
-                await reload()
+                reload()
               }
             }>
             <Icon
@@ -397,9 +397,9 @@ const PhotosList = () => {
   const renderHeaderLeft = () => (
     <Icon
       onPress={
-        async () => {
+        () => {
           // dispatch(reducer.initState())
-          await reload()
+          reload()
         }
       }
       name="sync"
@@ -586,8 +586,8 @@ const PhotosList = () => {
             false
           }
           onRefresh={
-            async () => {
-              await reload()
+            () => {
+              reload()
             }
           }
           onViewableItemsChanged={onViewRef.current}
