@@ -672,38 +672,30 @@ export const cleanupCache = () => async (dispatch, getState) => {
   const sorted = (
     await Promise.all(cachedFiles.map(async file => {
       const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
-      return Promise.resolve({ file, modificationTime: info.modificationTime })
+      return Promise.resolve({ file, modificationTime: info.modificationTime, size: info.size })
     }))
   )
     .sort((a, b) => a.modificationTime - b.modificationTime)
 
-  const cacheSize = 3000
-  if (sorted.length > cacheSize) {
-    await Promise.all(
-      sorted.slice(0, sorted.length - cacheSize)
-        .map(async file => {
-          await FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${file.file}`, { idempotent: true })
-          return Promise.resolve()
-        })
-    )
+  // let's calculate the sum in the first pass
+  let sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
+  // const cachedFilesCount = 0
+
+  // second pass to clean up the cach files
+  for (let i = 0; i < sorted.length; i += 1) {
+    if (sumSize > 1000000000) {
+      // console.log({ sumSize })
+      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
+      sumSize -= sorted[i].size
+    }
+
+    // console.log({ cachedFilesCount })
+    // cachedFilesCount += 1
   }
 
-  // remove 3 days old cached files
-  // await Promise.all(
-  //   cachedFiles.map(async file => {
-  //     const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
-  //     const timeInterval = currentTime - info.modificationTime
-  //     // console.log(`time interval = ${timeInterval}`)
-  //     if (timeInterval > 60 * 60 * 24 * 3) { // 3 days old
-  //       FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`, { idempotent: true })
-  //       // console.log(`deleting file: ${info}`)
-  //       // deletedCounter += 1
-  //     }
-  //
-  //     return Promise.resolve()
-  //   })
-  // )
-  // console.log(`There are ${cachedFiles.length} cachedFiles.`)
-  // alert(`There are ${deletedCounter} deletedFiles.`)
+  // console.log('----------------------------')
+  // console.log({ sumSize })
+  // console.log({ cachedFilesCount })
+  // console.log('----------------------------')
 }
 export default reducer
