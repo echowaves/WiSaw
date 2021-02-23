@@ -669,7 +669,7 @@ const PhotosList = () => {
                   textAlign: 'center',
                   margin: 10,
                 }}>
-                  Unable to get your location, make sure to turn Location Service on and reload screen.
+                  Unable to get your location, make sure to turn Location Service on and refresh your screen.
                 </Text>
               </CardItem>
             </Card>
