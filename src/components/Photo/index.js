@@ -56,16 +56,11 @@ const Photo = props => {
 
   // const error = useSelector(state => state.photo.error)
 
-  useEffect(() => {
-    dispatch(reducer.setInputText({ inputText: '' }))
-
-    // const intervalId = setInterval(() => { dispatch(reducer.getComments({ item })) }, 30000)
-    // return (() => clearInterval(intervalId))
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
   useFocusEffect(
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
+        dispatch(reducer.setInputText({ inputText: '' }))
+
         dispatch(reducer.checkIsPhotoWatched({ item }))
         dispatch(reducer.getComments({ item }))
         dispatch(reducer.getRecognitions({ item }))

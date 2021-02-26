@@ -91,8 +91,6 @@ const PhotosDetails = ({ route }) => {
     }
   }
 
-  const item = photos[index] // eslint-disable-line no-unused-vars
-
   return (
     <Swiper
       keyboardShouldPersistTaps="always"
@@ -117,6 +115,7 @@ const PhotosDetails = ({ route }) => {
       onIndexChanged={newIndex => {
         // TODO: ugly timeout, when the library fixes the issue the timeout can be removed
         setTimeout(() => { setIndex(newIndex) }, 1)
+        // setIndex(newIndex)
       }} // otherwise will jump to wrong photo onLayout
       loadMinimal
       loadMinimalSize={1}
