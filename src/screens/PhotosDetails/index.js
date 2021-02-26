@@ -40,24 +40,28 @@ const PhotosDetails = ({ route }) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
+    // navigation.setOptions({
+    //   headerTitle: null,
+    //   headerLeft: null,
+    // })
     navigation.setOptions({
-      headerTitle: null,
-      headerLeft: null,
+      headerTitle: renderHeaderTitle(),
+      headerLeft: renderHeaderLeft,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const task = InteractionManager.runAfterInteractions(() => {
-        navigation.setOptions({
-          headerTitle: renderHeaderTitle(),
-          headerLeft: renderHeaderLeft,
-        })
-      })
-
-      return () => task.cancel()
-    }, [])// eslint-disable-line react-hooks/exhaustive-deps
-  )
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     const task = InteractionManager.runAfterInteractions(() => {
+  //       navigation.setOptions({
+  //         headerTitle: renderHeaderTitle(),
+  //         headerLeft: renderHeaderLeft,
+  //       })
+  //     })
+  //
+  //     return () => task.cancel()
+  //   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  // )
 
   useEffect(() => {
     if (index > photos.length - 5) {
