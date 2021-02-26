@@ -38,6 +38,7 @@
     "expo-secure-store": "~9.3.0",
     "expo-sms": "~8.4.0",
     "expo-status-bar": "~1.0.3",
+    "expo-updates": "~0.4.1",
     "jmespath": "0.15.0",
     "moment": "2.29.1",
     "native-base": "2.15.0",
