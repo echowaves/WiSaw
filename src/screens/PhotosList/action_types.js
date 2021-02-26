@@ -26,3 +26,6 @@ export const START_PHOTO_UPLOADING = 'wisaw/photosList/START_PHOTO_UPLOADING'
 export const FINISH_PHOTO_UPLOADING = 'wisaw/photosList/FINISH_PHOTO_UPLOADING'
 
 export const UPDATE_PENDING_PHOTOS = 'wisaw/photosList/UPDATE_PENDING_PHOTOS'
+
+export const PHOTO_WATCHED = 'wisaw/photosList/PHOTO_WATCHED'
+export const PHOTO_UNWATCHED = 'wisaw/photosList/PHOTO_UNWATCHED'

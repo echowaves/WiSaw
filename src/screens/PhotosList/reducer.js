@@ -164,6 +164,17 @@ const reducer = (state = initialState, action) => {
         ),
       }
 
+    case ACTION_TYPES.PHOTO_WATCHED:
+      return {
+        ...state,
+        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: true } : item)),
+      }
+    case ACTION_TYPES.PHOTO_UNWATCHED:
+      return {
+        ...state,
+        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: false } : item)),
+      }
+
     case ACTION_TYPES.TOGGLE_COMMENT_BUTTONS:
       return {
         ...state,

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
 import {
   View,
-  Alert,
   InteractionManager,
 } from 'react-native'
 
@@ -22,23 +21,19 @@ import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'
 
-// import * as thumbReducer from '../../components/Thumb/reducer'
-import * as reducer from '../../components/Photo/reducer'
-
 import { getPhotos } from '../PhotosList/reducer'
 
 import * as CONST from '../../consts.js'
 
-const PhotosDetails = ({ route, navigation }) => {
+const PhotosDetails = ({ route }) => {
+  const navigation = useNavigation()
+
   const { currentPhotoIndex } = route.params
   // console.log(currentPhotoIndex)
   const [index, setIndex] = useState(currentPhotoIndex)
 
   const photos = useSelector(state => state.photosList.photos)
-  const bans = useSelector(state => state.photo.bans)
-  const likes = useSelector(state => state.photo.likes)
 
-  const watched = useSelector(state => state.photo.watched)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
 
@@ -58,7 +53,6 @@ const PhotosDetails = ({ route, navigation }) => {
           headerTitle: renderHeaderTitle(),
           headerLeft: renderHeaderLeft,
         })
-        checkIsPhotoWatched()
       })
 
       return () => task.cancel()
@@ -66,7 +60,9 @@ const PhotosDetails = ({ route, navigation }) => {
   )
 
   useEffect(() => {
-    checkIsPhotoWatched()
+    if (index > photos.length - 5) {
+      dispatch(getPhotos()) // pre-load more photos when nearing the end
+    }
   }, [index])// eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHeaderLeft = () => (
@@ -152,7 +148,6 @@ PhotosDetails.defaultProps = {
 }
 
 PhotosDetails.propTypes = {
-  navigation: PropTypes.object.isRequired,
   currentPhotoIndex: PropTypes.number,
   route: PropTypes.object.isRequired,
 }
