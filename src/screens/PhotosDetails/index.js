@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 
-import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
 import {
   View,
-  InteractionManager,
 } from 'react-native'
 
 import { useDispatch, useSelector } from "react-redux"
@@ -40,28 +39,11 @@ const PhotosDetails = ({ route }) => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    // navigation.setOptions({
-    //   headerTitle: null,
-    //   headerLeft: null,
-    // })
     navigation.setOptions({
       headerTitle: renderHeaderTitle(),
       headerLeft: renderHeaderLeft,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     const task = InteractionManager.runAfterInteractions(() => {
-  //       navigation.setOptions({
-  //         headerTitle: renderHeaderTitle(),
-  //         headerLeft: renderHeaderLeft,
-  //       })
-  //     })
-  //
-  //     return () => task.cancel()
-  //   }, [])// eslint-disable-line react-hooks/exhaustive-deps
-  // )
 
   useEffect(() => {
     if (index > photos.length - 5) {
