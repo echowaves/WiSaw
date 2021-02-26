@@ -8,6 +8,8 @@ import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
+// import * as Updates from 'expo-updates'
+
 import useKeyboard from '@rnhooks/keyboard'
 
 import {
@@ -92,6 +94,8 @@ const PhotosList = () => {
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
   useEffect(() => {
+    // checkForUpdate()
+
     dispatch(reducer.cleanupCache())
 
     // check permissions and retrieve UUID
@@ -139,6 +143,26 @@ const PhotosList = () => {
     updateNavBar()
     dispatch(reducer.getPhotos())
   }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // const checkForUpdate = async () => {
+  //   try {
+  //     const update = await Updates.checkForUpdateAsync()
+  //     if (update.isAvailable) {
+  //       await Updates.fetchUpdateAsync()
+  //       Alert.alert(
+  //         "WiSaw", "just received updates over the air",
+  //         [
+  //           {
+  //             text: 'OK',
+  //           },
+  //         ],
+  //       )
+  //       Updates.reloadAsync()
+  //     }
+  //   } catch (e) {
+  //   // handle or log error
+  //   }
+  // }
 
   const wantToLoadMore = () => {
     if (isLastPage) {

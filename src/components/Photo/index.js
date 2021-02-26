@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-// import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import { useDimensions } from '@react-native-community/hooks'
@@ -9,15 +9,18 @@ import {
   View,
   TouchableOpacity,
   Alert,
-  // Image,
+  InteractionManager,
 } from 'react-native'
 
 import {
+  Badge,
+  Container,
+  Content,
+  Footer,
+  FooterTab,
   Icon,
   Spinner,
-  Button,
-  Container,
-  Content, Card, CardItem, Text, Item, Input,
+  Button, Card, CardItem, Text, Item, Input,
 } from 'native-base'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -39,24 +42,38 @@ const Photo = props => {
   const {
     item,
   } = props
+  const navigation = useNavigation()
+
   const dispatch = useDispatch()
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
 
+  const bans = useSelector(state => state.photo.bans)
+  const likes = useSelector(state => state.photo.likes)
+
   const inputText = useSelector(state => state.photo.inputText)
   const commentsSubmitting = useSelector(state => state.photo.commentsSubmitting)
-  // const error = useSelector(state => state.photo.error)
 
-  // const watched = useSelector(state => state.photo.watched)
+  // const error = useSelector(state => state.photo.error)
 
   useEffect(() => {
     dispatch(reducer.setInputText({ inputText: '' }))
-    dispatch(reducer.getComments({ item }))
-    dispatch(reducer.getRecognitions({ item }))
 
-    const intervalId = setInterval(() => { dispatch(reducer.getComments({ item })) }, 30000)
-    return (() => clearInterval(intervalId))
+    // const intervalId = setInterval(() => { dispatch(reducer.getComments({ item })) }, 30000)
+    // return (() => clearInterval(intervalId))
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        dispatch(reducer.checkIsPhotoWatched({ item }))
+        dispatch(reducer.getComments({ item }))
+        dispatch(reducer.getRecognitions({ item }))
+      })
+
+      return () => task.cancel()
+    }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  )
 
   const renderCommentButtons = ({ photo, comment }) => {
     if (!comment.hiddenButtons) {
@@ -177,6 +194,218 @@ const Photo = props => {
       </View>
     )
   }
+
+  const handleBan = ({ item }) => {
+    if (item.watched) {
+      Alert.alert(
+        'Unable to ban watched photo.',
+        'Unwatch photo first.',
+        [
+          { text: 'OK', onPress: () => null },
+        ],
+      )
+      return
+    }
+    if (isPhotoBannedByMe({ photoId: item.id })) {
+      Alert.alert(
+        'Looks like you already reported this Photo',
+        'You can only report same Photo once.',
+        [
+          { text: 'OK', onPress: () => null },
+        ],
+      )
+    } else {
+      Alert.alert(
+        'Report abusive Photo?',
+        'The user who posted this photo will be banned. Are you sure?',
+        [
+          { text: 'No', onPress: () => null, style: 'cancel' },
+          { text: 'Yes', onPress: () => dispatch(reducer.banPhoto({ item })) },
+        ],
+        { cancelable: true }
+      )
+    }
+  }
+
+  const handleDelete = ({ item }) => {
+    if (item.watched) {
+      Alert.alert(
+        'Unable to delete watched photo.',
+        'Unwatch photo first.',
+        [
+          { text: 'OK', onPress: () => null, style: 'cancel' },
+        ],
+        { cancelable: true }
+      )
+      return
+    }
+    Alert.alert(
+      'Delete Photo?',
+      'The photo will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
+      [
+        { text: 'No', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: () => {
+            dispatch(reducer.deletePhoto({ item }))
+            navigation.goBack()
+          },
+        },
+      ],
+      { cancelable: true }
+    )
+  }
+
+  const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
+  const isPhotoLikedByMe = ({ photoId }) => likes.includes(photoId)
+
+  const handleLike = ({ item }) => {
+    if (isPhotoLikedByMe({ photoId: item.id })) {
+      Alert.alert(
+        'You already liked this photo.',
+        'Try to like some other photo.',
+        [
+          { text: 'OK', onPress: () => null },
+        ],
+      )
+      return
+    }
+    dispatch(reducer.likePhoto({ photoId: item.id }))
+  }
+
+  const handleFlipWatch = () => {
+    if (item.watched) {
+      dispatch(reducer.unwatchPhoto({ item, navigation }))
+    } else {
+      dispatch(reducer.watchPhoto({ item, navigation }))
+    }
+  }
+
+  const renderFooter = () => (
+    <Footer>
+      <FooterTab>
+
+        {/* delete button */}
+        <Button
+          key="delete"
+          vertical
+          onPress={
+            () => handleDelete({ item })
+          }>
+          <Icon
+            name="trash"
+            type="FontAwesome"
+            style={{
+              fontSize: 30,
+              color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+            }}
+          />
+          <Text style={{ fontSize: 10 }}>
+            Delete
+          </Text>
+        </Button>
+
+        {/* ban button */}
+        <Button
+          key="ban"
+          vertical
+          onPress={
+            () => handleBan({ item })
+          }>
+          <Icon
+            name="ban"
+            type="FontAwesome"
+            style={{
+              fontSize: 30,
+              color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+            }}
+          />
+          <Text style={{ fontSize: 10 }}>
+            Ban
+          </Text>
+        </Button>
+
+        {/* watch button */}
+        <Button
+          key="watch"
+          onPress={
+            () => handleFlipWatch()
+          }
+          style={{
+            fontSize: 30,
+          }}>
+          <Icon
+            name={item.watched ? "eye" : "eye-slash"}
+            type="FontAwesome"
+            style={
+              {
+                fontSize: 30,
+                color: CONST.MAIN_COLOR,
+              }
+            }
+          />
+          <Text style={{ fontSize: 10 }}>
+            {`${item.watched ? 'UnWatch' : 'Watch'}`}
+          </Text>
+        </Button>
+
+        {/* share button */}
+        <Button
+          key="share"
+          vertical
+          onPress={
+            () => {
+              dispatch(reducer.sharePhoto({ item }))
+            }
+          }>
+          <Icon
+            type="FontAwesome"
+            name="share"
+            style={
+              {
+                fontSize: 30,
+                color: CONST.MAIN_COLOR,
+              }
+            }
+          />
+          <Text style={{ fontSize: 10 }}>
+            Share
+          </Text>
+        </Button>
+
+        {/* likes button */}
+        <Button
+          key="like"
+          vertical
+          badge={item.likes > 0}
+          onPress={
+            () => {
+              handleLike({ item })
+            }
+          }>
+          {item.likes > 0 && (
+            <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
+              <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
+            </Badge>
+          )}
+          <Icon
+            type="FontAwesome"
+            name="thumbs-up"
+            style={
+              {
+                fontSize: 30,
+                color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+              }
+            }
+          />
+          <Text style={{ fontSize: 10 }}>
+            Like
+          </Text>
+        </Button>
+
+      </FooterTab>
+    </Footer>
+  )
 
   // alert(JSON.stringify(navigation))
   return (
@@ -334,7 +563,9 @@ const Photo = props => {
           </Row>
           <Row style={{ height: 110 }} />
         </Grid>
+
       </Content>
+      {renderFooter()}
     </Container>
   )
 }
@@ -343,4 +574,4 @@ Photo.propTypes = {
   item: PropTypes.object.isRequired,
 }
 
-export default React.memo(Photo)
+export default Photo

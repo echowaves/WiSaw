@@ -20,7 +20,6 @@ export const initialState = {
   inputText: '',
   commentsSubmitting: false,
   error: '',
-  watched: false,
 }
 
 export default function reducer(state = initialState, action) {
@@ -87,16 +86,6 @@ export default function reducer(state = initialState, action) {
       }
       // case DELETE_PHOTO:
       // 	return state
-    case ACTION_TYPES.PHOTO_WATCHED:
-      return {
-        ...state,
-        watched: true,
-      }
-    case ACTION_TYPES.PHOTO_UNWATCHED:
-      return {
-        ...state,
-        watched: false,
-      }
     default:
       return state
   }
@@ -159,16 +148,19 @@ export function watchPhoto({ item }) {
       // const responseJson = await response.json()
       if (response.status === 201) {
         dispatch({
-          type: ACTION_TYPES.PHOTO_WATCHED,
+          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
+          item,
         })
       } else {
         dispatch({
-          type: ACTION_TYPES.PHOTO_UNWATCHED,
+          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
+          item,
         })
       }
     } catch (err) {
       dispatch({
-        type: ACTION_TYPES.PHOTO_UNWATCHED,
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
+        item,
       })
       Toast.show({
         text: "Unable to watch photo. Potential Network Issue.",
@@ -196,16 +188,19 @@ export function unwatchPhoto({ item }) {
       // const responseJson = await response.json()
       if (response.status === 200) {
         dispatch({
-          type: ACTION_TYPES.PHOTO_UNWATCHED,
+          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
+          item,
         })
       } else {
         dispatch({
-          type: ACTION_TYPES.PHOTO_WATCHED,
+          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
+          item,
         })
       }
     } catch (err) {
       dispatch({
-        type: ACTION_TYPES.PHOTO_WATCHED,
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
+        item,
       })
       Toast.show({
         text: "Unable to unwatch photo. Potential Network Issue.",
@@ -569,11 +564,13 @@ export function checkIsPhotoWatched({ item }) {
       // const responseJson = await response.json()
       if (response.status === 200) {
         dispatch({
-          type: ACTION_TYPES.PHOTO_WATCHED,
+          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
+          item,
         })
       } else {
         dispatch({
-          type: ACTION_TYPES.PHOTO_UNWATCHED,
+          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
+          item,
         })
       }
     } catch (err) {
