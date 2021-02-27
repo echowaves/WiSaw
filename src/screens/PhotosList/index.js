@@ -150,12 +150,17 @@ const PhotosList = () => {
       if (update.isAvailable) {
         await Updates.fetchUpdateAsync()
         Alert.alert(
-          "WiSaw", "just received updates over the air",
+          "WiSaw", "Just updated over the air.",
           [
             {
               text: 'OK',
-              onPress: () => {
-                Updates.reloadAsync()
+              onPress: async () => {
+                await Updates.reloadAsync()
+                // Toast.show({
+                //   text: "WiSaw updated.",
+                //   buttonText: "OK",
+                //   type: "success",
+                // })
               },
             },
           ],
