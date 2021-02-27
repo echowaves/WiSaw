@@ -154,13 +154,20 @@ const PhotosList = () => {
           [
             {
               text: 'OK',
+              onPress: () => {
+                Updates.reloadAsync()
+              },
             },
           ],
         )
-        Updates.reloadAsync()
       }
     } catch (e) {
     // handle or log error
+      Toast.show({
+        text: "Failed to get over the air update.",
+        buttonText: "OK",
+        type: "warning",
+      })
     }
   }
 
