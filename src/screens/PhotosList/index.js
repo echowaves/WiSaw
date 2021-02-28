@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigation, useFocusEffect } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
 
@@ -17,7 +17,6 @@ import {
   Text,
   View,
   Alert,
-  InteractionManager,
 } from 'react-native'
 
 import {
@@ -94,22 +93,17 @@ const PhotosList = () => {
   })
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const task = InteractionManager.runAfterInteractions(() => {
-        checkForUpdate()
-        reload()
-      })
-
-      return () => task.cancel()
-    }, [])// eslint-disable-line react-hooks/exhaustive-deps
-  )
-
   useEffect(() => {
-    dispatch(reducer.cleanupCache())
+    const initState = async () => {
+      await dispatch(reducer.cleanupCache())
 
-    // check permissions and retrieve UUID
-    dispatch(reducer.initState())
+      // check permissions and retrieve UUID
+      await dispatch(reducer.initState())
+
+      await checkForUpdate()
+      await reload()
+    }
+    initState()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   // add network availability listener
