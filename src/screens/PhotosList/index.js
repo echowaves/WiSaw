@@ -98,6 +98,7 @@ const PhotosList = () => {
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
         checkForUpdate()
+        reload()
       })
 
       return () => task.cancel()
@@ -109,8 +110,6 @@ const PhotosList = () => {
 
     // check permissions and retrieve UUID
     dispatch(reducer.initState())
-
-    reload()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   // add network availability listener
@@ -160,7 +159,7 @@ const PhotosList = () => {
         await Updates.fetchUpdateAsync()
 
         Alert.alert(
-          "WiSaw just updated over the Air.", "Click OK to Reload the app.",
+          "WiSaw just updated over the Air", "Click OK to Reload the app",
           [
             {
               text: 'OK',
