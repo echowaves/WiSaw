@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
 
@@ -17,6 +17,7 @@ import {
   Text,
   View,
   Alert,
+  InteractionManager,
 } from 'react-native'
 
 import {
@@ -93,9 +94,17 @@ const PhotosList = () => {
   })
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
-  useEffect(() => {
-    checkForUpdate()
+  useFocusEffect(
+    React.useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        checkForUpdate()
+      })
 
+      return () => task.cancel()
+    }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  )
+
+  useEffect(() => {
     dispatch(reducer.cleanupCache())
 
     // check permissions and retrieve UUID
@@ -149,8 +158,9 @@ const PhotosList = () => {
       const update = await Updates.checkForUpdateAsync()
       if (update.isAvailable) {
         await Updates.fetchUpdateAsync()
+
         Alert.alert(
-          "WiSaw", "Just updated over the air.",
+          "WiSaw just updated over the Air.", "Click OK to Reload the app.",
           [
             {
               text: 'OK',
@@ -166,10 +176,10 @@ const PhotosList = () => {
           ],
         )
       }
-    } catch (e) {
+    } catch (error) {
     // handle or log error
       Toast.show({
-        text: "Failed to get over the air update.",
+        text: `Failed to get over the air update: ${error}`,
         buttonText: "OK",
         type: "warning",
       })

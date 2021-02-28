@@ -1,4 +1,4 @@
-import React, { } from 'react'
+import React, { useRef } from 'react'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
@@ -42,6 +42,8 @@ const Photo = props => {
   const {
     item,
   } = props
+  const componentIsMounted = useRef(true)
+
   const navigation = useNavigation()
 
   const dispatch = useDispatch()
@@ -59,14 +61,17 @@ const Photo = props => {
   useFocusEffect(
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
-        dispatch(reducer.setInputText({ inputText: '' }))
+        if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
 
-        dispatch(reducer.checkIsPhotoWatched({ item }))
-        dispatch(reducer.getComments({ item }))
-        dispatch(reducer.getRecognitions({ item }))
+        if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
+        if (componentIsMounted) dispatch(reducer.getComments({ item }))
+        if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
       })
 
-      return () => task.cancel()
+      return () => {
+        componentIsMounted.current = false
+        task.cancel()
+      }
     }, [])// eslint-disable-line react-hooks/exhaustive-deps
   )
 
