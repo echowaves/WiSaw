@@ -694,7 +694,7 @@ export const cleanupCache = () => async (dispatch, getState) => {
 
   // second pass to clean up the cach files
   for (let i = 0; i < sorted.length; i += 1) {
-    if (sumSize > 500000000) { // 0.5 GB
+    if (sumSize > 750000000) { // 0.5 GB
       // console.log({ sumSize })
       FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
       sumSize -= sorted[i].size
