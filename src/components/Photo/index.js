@@ -63,9 +63,9 @@ const Photo = props => {
       const task = InteractionManager.runAfterInteractions(() => {
         if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
 
-        if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
         if (componentIsMounted) dispatch(reducer.getComments({ item }))
         if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
+        if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
       })
 
       return () => {
@@ -281,131 +281,144 @@ const Photo = props => {
     }
   }
 
-  const renderFooter = () => (
-    <Footer>
-      <FooterTab>
+  const renderFooter = () => {
+    if (item.watched === undefined) {
+      return (
+        <Footer>
+          <Spinner
+            color={
+              CONST.SECONDARY_COLOR
+            }
+          />
+        </Footer>
+      )
+    }
+    return (
+      <Footer>
+        <FooterTab>
 
-        {/* delete button */}
-        <Button
-          key="delete"
-          vertical
-          onPress={
-            () => handleDelete({ item })
-          }>
-          <Icon
-            name="trash"
-            type="FontAwesome"
+          {/* delete button */}
+          <Button
+            key="delete"
+            vertical
+            onPress={
+              () => handleDelete({ item })
+            }>
+            <Icon
+              name="trash"
+              type="FontAwesome"
+              style={{
+                fontSize: 30,
+                color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+              }}
+            />
+            <Text style={{ fontSize: 10 }}>
+              Delete
+            </Text>
+          </Button>
+
+          {/* ban button */}
+          <Button
+            key="ban"
+            vertical
+            onPress={
+              () => handleBan({ item })
+            }>
+            <Icon
+              name="ban"
+              type="FontAwesome"
+              style={{
+                fontSize: 30,
+                color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+              }}
+            />
+            <Text style={{ fontSize: 10 }}>
+              Ban
+            </Text>
+          </Button>
+
+          {/* watch button */}
+          <Button
+            key="watch"
+            onPress={
+              () => handleFlipWatch()
+            }
             style={{
               fontSize: 30,
-              color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-            }}
-          />
-          <Text style={{ fontSize: 10 }}>
-            Delete
-          </Text>
-        </Button>
-
-        {/* ban button */}
-        <Button
-          key="ban"
-          vertical
-          onPress={
-            () => handleBan({ item })
-          }>
-          <Icon
-            name="ban"
-            type="FontAwesome"
-            style={{
-              fontSize: 30,
-              color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-            }}
-          />
-          <Text style={{ fontSize: 10 }}>
-            Ban
-          </Text>
-        </Button>
-
-        {/* watch button */}
-        <Button
-          key="watch"
-          onPress={
-            () => handleFlipWatch()
-          }
-          style={{
-            fontSize: 30,
-          }}>
-          <Icon
-            name={item.watched ? "eye" : "eye-slash"}
-            type="FontAwesome"
-            style={
-              {
-                fontSize: 30,
-                color: CONST.MAIN_COLOR,
+            }}>
+            <Icon
+              name={item.watched ? "eye" : "eye-slash"}
+              type="FontAwesome"
+              style={
+                {
+                  fontSize: 30,
+                  color: CONST.MAIN_COLOR,
+                }
               }
-            }
-          />
-          <Text style={{ fontSize: 10 }}>
-            {`${item.watched ? 'UnWatch' : 'Watch'}`}
-          </Text>
-        </Button>
+            />
+            <Text style={{ fontSize: 10 }}>
+              {`${item.watched ? 'UnWatch' : 'Watch'}`}
+            </Text>
+          </Button>
 
-        {/* share button */}
-        <Button
-          key="share"
-          vertical
-          onPress={
-            () => {
-              dispatch(reducer.sharePhoto({ item }))
-            }
-          }>
-          <Icon
-            type="FontAwesome"
-            name="share"
-            style={
-              {
-                fontSize: 30,
-                color: CONST.MAIN_COLOR,
+          {/* share button */}
+          <Button
+            key="share"
+            vertical
+            onPress={
+              () => {
+                dispatch(reducer.sharePhoto({ item }))
               }
-            }
-          />
-          <Text style={{ fontSize: 10 }}>
-            Share
-          </Text>
-        </Button>
-
-        {/* likes button */}
-        <Button
-          key="like"
-          vertical
-          badge={item.likes > 0}
-          onPress={
-            () => {
-              handleLike({ item })
-            }
-          }>
-          {item.likes > 0 && (
-            <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
-              <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
-            </Badge>
-          )}
-          <Icon
-            type="FontAwesome"
-            name="thumbs-up"
-            style={
-              {
-                fontSize: 30,
-                color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+            }>
+            <Icon
+              type="FontAwesome"
+              name="share"
+              style={
+                {
+                  fontSize: 30,
+                  color: CONST.MAIN_COLOR,
+                }
               }
-            }
-          />
-          <Text style={{ fontSize: 10 }}>
-            Like
-          </Text>
-        </Button>
+            />
+            <Text style={{ fontSize: 10 }}>
+              Share
+            </Text>
+          </Button>
 
-      </FooterTab>
-    </Footer>
-  )
+          {/* likes button */}
+          <Button
+            key="like"
+            vertical
+            badge={item.likes > 0}
+            onPress={
+              () => {
+                handleLike({ item })
+              }
+            }>
+            {item.likes > 0 && (
+              <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
+                <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
+              </Badge>
+            )}
+            <Icon
+              type="FontAwesome"
+              name="thumbs-up"
+              style={
+                {
+                  fontSize: 30,
+                  color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+                }
+              }
+            />
+            <Text style={{ fontSize: 10 }}>
+              Like
+            </Text>
+          </Button>
+
+        </FooterTab>
+      </Footer>
+    )
+  }
 
   // alert(JSON.stringify(navigation))
   return (
