@@ -38,10 +38,7 @@ import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
 
-const Photo = props => {
-  const {
-    item,
-  } = props
+const Photo = ({ item }) => {
   const componentIsMounted = useRef(true)
 
   const navigation = useNavigation()
