@@ -281,7 +281,10 @@ const Photo = ({ item }) => {
   const renderFooter = () => {
     if (item.watched === undefined) {
       return (
-        <Footer>
+        <Footer
+          style={{
+            backgroundColor: 'white',
+          }}>
           <Spinner
             color={
               CONST.SECONDARY_COLOR
@@ -291,8 +294,13 @@ const Photo = ({ item }) => {
       )
     }
     return (
-      <Footer>
-        <FooterTab>
+      <Footer
+        style={{
+          backgroundColor: '#fafafa',
+        }}>
+        <FooterTab style={{
+          backgroundColor: '#fafafa',
+        }}>
 
           {/* delete button */}
           <Button
