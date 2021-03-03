@@ -94,6 +94,16 @@ const PhotosList = () => {
   })
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
+  // add network availability listener
+  useEffect(() => {
+    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
+      if (state) {
+        dispatch(reducer.setNetAvailable(state.isInternetReachable))
+      }
+    })
+    return () => unsubscribeNetInfo()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     const initState = async () => {
       await dispatch(reducer.cleanupCache())
@@ -106,16 +116,6 @@ const PhotosList = () => {
     }
     initState()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  // add network availability listener
-  useEffect(() => {
-    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
-      if (state) {
-        dispatch(reducer.setNetAvailable(state.isInternetReachable))
-      }
-    })
-    return () => unsubscribeNetInfo()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // when screen orientation changes
   useEffect(() => {
