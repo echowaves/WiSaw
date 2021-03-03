@@ -59,6 +59,7 @@ import ThumbPending from '../../components/ThumbPending'
 
 const PhotosList = () => {
   const navigation = useNavigation()
+
   const dispatch = useDispatch()
 
   const deviceOrientation = useDeviceOrientation()
@@ -94,12 +95,6 @@ const PhotosList = () => {
   // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
 
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: null,
-      headerLeft: null,
-      headerRight: null,
-    })
-
     const initState = async () => {
       await dispatch(reducer.cleanupCache())
 

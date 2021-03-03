@@ -39,7 +39,12 @@ const App = () => (
             <Stack.Screen
               name="PhotosList"
               component={PhotosList}
-              options={{ headerTintColor: CONST.MAIN_COLOR }}
+              options={{
+                headerTintColor: CONST.MAIN_COLOR,
+                headerTitle: null,
+                headerLeft: null,
+                headerRight: null,
+              }}
             />
 
             <Stack.Screen
