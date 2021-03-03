@@ -33,7 +33,7 @@ export const initialState = {
   searchTerm: '',
   batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
   isLastPage: false,
-  netAvailable: true,
+  netAvailable: false,
   uploadingPhoto: false,
   pendingUploadsCount: 0,
 }

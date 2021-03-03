@@ -92,17 +92,6 @@ const PhotosList = () => {
     // const lastViewableItem = viewableItems.changed[0]
     setLastViewableRow(lastViewableItem.index)
   })
-  // const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50 })
-
-  // add network availability listener
-  useEffect(() => {
-    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
-      if (state) {
-        dispatch(reducer.setNetAvailable(state.isInternetReachable))
-      }
-    })
-    return () => unsubscribeNetInfo()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const initState = async () => {
@@ -115,6 +104,14 @@ const PhotosList = () => {
       await reload()
     }
     initState()
+
+    // add network availability listener
+    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
+      if (state) {
+        dispatch(reducer.setNetAvailable(state.isInternetReachable))
+      }
+    })
+    return () => unsubscribeNetInfo()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   // when screen orientation changes
@@ -231,7 +228,7 @@ const PhotosList = () => {
       })
     } else {
       navigation.setOptions({
-        headerTitle: (<Text>Network not Availble</Text>),
+        headerTitle: null,
         headerLeft: null,
         headerRight: null,
       })
