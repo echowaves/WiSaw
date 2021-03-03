@@ -412,7 +412,6 @@ const PhotosList = () => {
               type="FontAwesome"
             />
           </Button>
-
           <Button
             last active={activeSegment === 2}
             onPress={
