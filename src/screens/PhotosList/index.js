@@ -517,8 +517,8 @@ const PhotosList = () => {
   )
 
   const submitSearch = async () => {
+    await reload()
     if (searchTerm && searchTerm.length >= 3) {
-      await reload()
       if (keyboardVisible) {
         dismissKeyboard()
       }
