@@ -16,8 +16,6 @@ import {
 
 import PropTypes from 'prop-types'
 
-import CachedImage from '../CachedImage'
-
 import * as CONST from '../../consts.js'
 
 import { cancelPendingUpload } from '../../screens/PhotosList/reducer'
