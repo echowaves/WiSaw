@@ -23,7 +23,7 @@ const Thumb = props => {
   const navigation = useNavigation()
 
   const {
-    index, item, thumbWidth,
+    index, item, thumbDimension,
   } = props
 
   const onThumbPress = item => {
@@ -31,8 +31,8 @@ const Thumb = props => {
   }
 
   const thumbWidthStyles = {
-    width: thumbWidth,
-    height: thumbWidth,
+    width: thumbDimension,
+    height: thumbDimension,
   }
 
   return (
@@ -139,11 +139,11 @@ const styles = StyleSheet.create({
 Thumb.propTypes = {
   item: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
-  thumbWidth: PropTypes.number,
+  thumbDimension: PropTypes.number,
 }
 
 Thumb.defaultProps = {
-  thumbWidth: 100,
+  thumbDimension: 100,
 }
 
 export default React.memo(Thumb)

@@ -127,11 +127,13 @@ const PhotosList = () => {
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // when with of screen changes
+  // when width of screen changes
   useEffect(() => {
-    const thumbsCount = Math.floor(width / 100)
-    setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount))
-  }, [width])
+    // const tmpWidth = width < height ? width : height
+    const thumbsCount = Math.floor(width / 90)
+    setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2)
+    // setThumbDimension(Math.floor(tmpWidth / 4) - 4)
+  }, [width])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (wantToLoadMore()) {
