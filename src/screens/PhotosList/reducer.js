@@ -224,7 +224,7 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.SET_SEARCH_TERM:
       return {
         ...state,
-        photos: [],
+        // photos: [],
         searchTerm: action.searchTerm,
       }
     case ACTION_TYPES.SET_NET_AVAILABLE:
