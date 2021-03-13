@@ -143,7 +143,6 @@ const PhotosList = () => {
 
   useEffect(() => {
     updateNavBar()
-    dispatch(reducer.getPhotos())
   }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkForUpdate = async () => {
