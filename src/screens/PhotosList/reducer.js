@@ -219,6 +219,7 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         isLastPage: false,
+        searchTerm: '',
         activeSegment: action.activeSegment,
       }
     case ACTION_TYPES.SET_SEARCH_TERM:
