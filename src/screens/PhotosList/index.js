@@ -764,12 +764,12 @@ const PhotosList = () => {
   if (photos.length === 0) {
     return (
       <Container>
+        {activeSegment === 2 && renderSearchBar(true)}
         {renderPendingPhotos()}
         <Content padder>
           <Body>
             {activeSegment === 2 && (
               <Card transparent>
-                {renderSearchBar(true)}
                 <CardItem>
                   <Text style={{
                     fontSize: 20,
