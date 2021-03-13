@@ -139,7 +139,7 @@ const PhotosList = () => {
     if (wantToLoadMore()) {
       dispatch(reducer.getPhotos())
     }
-  }, [lastViewableRow, loading, photos]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastViewableRow, loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     updateNavBar()
@@ -241,9 +241,9 @@ const PhotosList = () => {
 
   const reload = async () => {
     const location = await _getLocation()
-    dispatch(reducer.resetState(location))
-
-    dispatch(reducer.uploadPendingPhotos())
+    await dispatch(reducer.resetState(location))
+    await dispatch(reducer.uploadPendingPhotos())
+    await dispatch(reducer.getPhotos())
   }
 
   const checkPermissionsForPhotoTaking = async () => {
