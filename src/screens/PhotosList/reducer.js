@@ -344,12 +344,12 @@ export function getPhotos() {
     // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
     await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
     const {
-      location, activeSegment, netAvailable, searchTerm, batch,
+      location, netAvailable, searchTerm,
     } = getState().photosList
 
     if (!location
     || netAvailable === false
-    || (activeSegment === 2
+    || (getState().photosList.activeSegment === 2
         && searchTerm.length < 3)
     ) {
       dispatch({
@@ -362,15 +362,15 @@ export function getPhotos() {
       })
       try {
         let responseJson
-        if (activeSegment === 0) {
+        if (getState().photosList.activeSegment === 0) {
           responseJson = await _requestGeoPhotos(getState)
-        } else if (activeSegment === 1) {
+        } else if (getState().photosList.activeSegment === 1) {
           responseJson = await _requestWatchedPhotos(getState)
-        } else if (activeSegment === 2) {
+        } else if (getState().photosList.activeSegment === 2) {
           responseJson = await _requestSearchedPhotos(getState)
         }
 
-        if (responseJson.batch === batch) {
+        if (responseJson.batch === getState().photosList.batch) {
           if (responseJson.photos && responseJson.photos.length > 0) {
             dispatch({
               type: ACTION_TYPES.GET_PHOTOS_SUCCESS,
