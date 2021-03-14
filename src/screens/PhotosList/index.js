@@ -390,9 +390,9 @@ const PhotosList = () => {
           <Button
             first active={activeSegment === 0}
             onPress={
-              () => {
-                dispatch(reducer.setActiveSegment(0))
-                reload()
+              async () => {
+                await dispatch(reducer.setActiveSegment(0))
+                await reload()
               }
             }>
             <Icon
@@ -403,9 +403,9 @@ const PhotosList = () => {
           <Button
             active={activeSegment === 1}
             onPress={
-              () => {
-                dispatch(reducer.setActiveSegment(1))
-                reload()
+              async () => {
+                await dispatch(reducer.setActiveSegment(1))
+                await reload()
               }
             }>
             <Icon
@@ -416,9 +416,9 @@ const PhotosList = () => {
           <Button
             last active={activeSegment === 2}
             onPress={
-              () => {
-                dispatch(reducer.setActiveSegment(2))
-                reload()
+              async () => {
+                await dispatch(reducer.setActiveSegment(2))
+                await reload()
               }
             }>
             <Icon
