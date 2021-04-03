@@ -334,7 +334,8 @@ const PhotosList = () => {
           position: 'absolute',
         },
         orientation === 'portrait' && styles.cameraButtonPortrait,
-        orientation === 'landscape' && styles.cameraButtonLandscape,
+        orientation === 'landscape' && styles.cameraButtonPortrait,
+        // orientation === 'landscape' && styles.cameraButtonLandscape,
       ]
     }>
       <View>

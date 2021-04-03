@@ -10,6 +10,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "orientation": "portrait",
     "platforms": [
       "ios",
       "android",
