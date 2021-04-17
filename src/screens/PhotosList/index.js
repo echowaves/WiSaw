@@ -6,7 +6,6 @@ import * as MediaLibrary from 'expo-media-library'
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
-import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 import * as Updates from 'expo-updates'
 
@@ -246,27 +245,9 @@ const PhotosList = () => {
     await dispatch(reducer.getPhotos())
   }
 
-  const checkPermissionsForPhotoTaking = async () => {
-    let permission = await _checkPermission(
-      Permissions.CAMERA,
-      'Can we access your camera?',
-      'How else would you be able to take a photo?'
-    )
-    if (permission.status === 'granted') {
-      permission = await _checkPermission(
-        Permissions.MEDIA_LIBRARY,
-        'Can we access your photos?', 'How else would you be able to save the photo you take on your device?'
-      )
-      if (permission.status === 'granted') {
-        takePhoto()
-      }
-    }
-  }
-
-  async function _checkPermission(permissionType, alertHeader, alertBody) {
-    const permission = await Permissions.askAsync(permissionType)
-
-    if (permission.status !== 'granted') {
+  async function _checkPermission({ permissionFunction, alertHeader, alertBody }) {
+    const { status } = await permissionFunction()
+    if (status !== 'granted') {
       Alert.alert(
         alertHeader,
         alertBody,
@@ -280,18 +261,39 @@ const PhotosList = () => {
         ],
       )
     }
-    return permission
+    return status
+  }
+
+  const checkPermissionsForPhotoTaking = async () => {
+    const cameraPermission = await _checkPermission({
+      permissionFunction: ImagePicker.requestCameraPermissionsAsync,
+      alertHeader: 'Do you want to take photo with wisaw?',
+      alertBody: 'Why don\'t you enable photo permission?',
+    })
+
+    if (cameraPermission === 'granted') {
+      const photoAlbomPermission = await _checkPermission({
+        permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
+        alertHeader: 'Do you want to save photo on your device?',
+        alertBody: 'Why don\'t you enable the permission?',
+      })
+
+      if (photoAlbomPermission === 'granted') {
+        takePhoto()
+      }
+    }
   }
 
   async function _getLocation() {
     let position = null
-    // Toast("started checking permission")
-    const permission = await _checkPermission(
-      Permissions.LOCATION,
-      'How am I supposed to show you the near-by photos?',
-      'Why don\'t you enable Location in Settings and Try Again?'
-    )
-    if (permission.status === 'granted') {
+
+    const locationPermission = await _checkPermission({
+      permissionFunction: Location.requestForegroundPermissionsAsync,
+      alertHeader: 'How am I supposed to show you the near-by photos?',
+      alertBody: 'Why don\'t you enable Location in Settings and Try Again?',
+    })
+
+    if (locationPermission === 'granted') {
       try {
         position = await Location.getCurrentPositionAsync({
           accuracy: 5000,
