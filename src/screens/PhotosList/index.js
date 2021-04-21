@@ -94,7 +94,7 @@ const PhotosList = () => {
 
   useEffect(() => {
     const initState = async () => {
-      await dispatch(reducer.cleanupCache())
+      // await dispatch(reducer.cleanupCache())
 
       // check permissions and retrieve UUID
       await dispatch(reducer.initState())
