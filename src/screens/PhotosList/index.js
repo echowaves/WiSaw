@@ -319,9 +319,9 @@ const PhotosList = () => {
       exif: false,
     })
     // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
-    await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
 
     if (cameraReturn.cancelled === false) {
+      await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
       // have to wait, otherwise the upload will not start
       await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
       dispatch(reducer.uploadPendingPhotos())
