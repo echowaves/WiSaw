@@ -18,35 +18,42 @@ const CachedImage = props => {
   const componentIsMounted = useRef(true)
 
   useEffect(() => {
-    const loadImage = async ({ fileURI }) => {
-      try {
-        // Use the cached image if it exists
-        const metadata = await FileSystem.getInfoAsync(fileURI)
-        if (!metadata.exists) {
-          // download to cache
-          if (componentIsMounted.current) {
-            setImgURI(null)
-            await FileSystem.downloadAsync(
-              uri,
-              fileURI
-            )
-          }
-          if (componentIsMounted.current) {
-            setImgURI(fileURI)
-          }
-        }
-      } catch (err) {
-        console.log() // eslint-disable-line no-console
-        setImgURI(uri)
-      }
-    }
-
     loadImage({ fileURI: filesystemURI })
 
     return () => {
       componentIsMounted.current = false
     }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    loadImage({ fileURI: filesystemURI })
+
+    return () => {
+      componentIsMounted.current = false
+    }
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadImage = async ({ fileURI }) => {
+    try {
+      // Use the cached image if it exists
+      const metadata = await FileSystem.getInfoAsync(fileURI)
+      if (!metadata.exists) {
+        // download to cache
+        if (componentIsMounted.current) {
+          setImgURI(null)
+          await FileSystem.downloadAsync(
+            uri,
+            fileURI
+          )
+        }
+        if (componentIsMounted.current) {
+          setImgURI(fileURI)
+        }
+      }
+    } catch (err) {
+      setImgURI(uri)
+    }
+  }
 
   return (
     <Image
