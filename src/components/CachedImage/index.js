@@ -38,9 +38,11 @@ const CachedImage = props => {
       // Use the cached image if it exists
       const metadata = await FileSystem.getInfoAsync(fileURI)
       if (!metadata.exists) {
+        if (componentIsMounted.current) {
+          await setImgURI(null)
+        }
         // download to cache
         if (componentIsMounted.current) {
-          setImgURI(null)
           await FileSystem.downloadAsync(
             uri,
             fileURI
@@ -51,13 +53,16 @@ const CachedImage = props => {
         }
       }
     } catch (err) {
-      setImgURI(uri)
+      // console.log({ err })
+      if (componentIsMounted.current) {
+        setImgURI(uri)
+      }
     }
   }
 
   return (
     <Image
-    // eslint-disable-next-line react/jsx-props-no-spreading
+      // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
       source={{
         uri: imgURI,

@@ -7,6 +7,8 @@ import * as SMS from 'expo-sms'
 
 import * as FileSystem from 'expo-file-system'
 
+import axios from 'axios'
+
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
 import * as CONST from '../../consts'
@@ -101,14 +103,15 @@ export function likePhoto({ photoId }) {
     })
 
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${photoId}/like`, {
+      const response = await axios({
         method: 'PUT',
+        url: `${CONST.HOST}/photos/${photoId}/like`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           uuid,
-        }),
+        },
       })
       // const responseJson = await response.json()
       if (response.status === 200) {
@@ -136,15 +139,17 @@ export function watchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${item.id}/watchers`, {
+      const response = await axios({
         method: 'POST',
+        url: `${CONST.HOST}/photos/${item.id}/watchers`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           uuid,
-        }),
+        },
       })
+
       // const responseJson = await response.json()
       if (response.status === 201) {
         dispatch({
@@ -176,15 +181,17 @@ export function unwatchPhoto({ item }) {
     const { uuid } = getState().photosList
 
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${item.id}/watchers`, {
+      const response = await axios({
         method: 'DELETE',
+        url: `${CONST.HOST}/photos/${item.id}/watchers`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           uuid,
-        }),
+        },
       })
+
       // const responseJson = await response.json()
       if (response.status === 200) {
         dispatch({
@@ -221,15 +228,16 @@ export function banPhoto({ item }) {
     })
 
     try {
-      const response = await fetch(`${CONST.HOST}/abusereport`, {
+      const response = await axios({
         method: 'POST',
+        url: `${CONST.HOST}/abusereport`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           uuid,
           photoId: item.id,
-        }),
+        },
       })
       // const responseJson = await response.json()
       if (response.status === 201) {
@@ -263,14 +271,15 @@ export function deletePhoto({ item }) {
     const { uuid } = getState().photosList
 
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${item.id}`, {
+      const response = await axios({
         method: 'DELETE',
+        url: `${CONST.HOST}/photos/${item.id}`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           uuid,
-        }),
+        },
       })
       // const responseJson = await response.json()
       if (response.status === 200) {
@@ -385,17 +394,18 @@ export function submitComment({ inputText, item }) {
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
     })
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${item.id}/comments`, {
+      const response = await axios({
         method: 'POST',
+        url: `${CONST.HOST}/photos/${item.id}/comments`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           uuid,
           comment: inputText,
-        }),
+        },
       })
-      const responseJson = await response.json()
+
       if (response.status === 201) {
         // lets update the state in the photos collection so it renders the right number of likes in the list
         dispatch({
@@ -404,7 +414,7 @@ export function submitComment({ inputText, item }) {
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.COMMENT_POSTED,
           photoId: item.id,
-          comment: responseJson.comment,
+          comment: response.data.comment,
         })
         Toast.show({
           text: "Comment submitted.",
@@ -443,13 +453,16 @@ export function getComments({ item }) {
       type: ACTION_TYPES.GET_COMMENTS_STARTED,
     })
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${item.id}/comments`, {
+      const response = await axios({
         method: 'GET',
+        url: `${CONST.HOST}/photos/${item.id}/comments`,
         headers: {
           'Content-Type': 'application/json',
         },
+        // data: {
+        //   uuid,
+        // },
       })
-      const responseJson = await response.json()
 
       if (response.status === 200) {
         // lets update the state in the photos collection so it renders the right number of likes in the list
@@ -459,7 +472,7 @@ export function getComments({ item }) {
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
           item,
-          comments: responseJson.comments.map(
+          comments: response.data.comments.map(
             comment => ({
               ...comment,
               hiddenButtons: true,
@@ -505,13 +518,16 @@ export function getRecognitions({ item }) {
       type: ACTION_TYPES.GET_RECOGNITIONS_STARTED,
     })
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${item.id}/recognitions`, {
+      const response = await axios({
         method: 'GET',
+        url: `${CONST.HOST}/photos/${item.id}/recognitions`,
         headers: {
           'Content-Type': 'application/json',
         },
+        // data: {
+        //   uuid,
+        // },
       })
-      const responseJson = await response.json()
 
       if (response.status === 200) {
         // lets update the state in the photos collection so it renders the right number of likes in the list
@@ -521,7 +537,7 @@ export function getRecognitions({ item }) {
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
           item,
-          recognitions: responseJson.recognition,
+          recognitions: response.data.recognition,
         })
       } else {
         dispatch({
@@ -555,11 +571,15 @@ export function checkIsPhotoWatched({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      const response = await fetch(`${CONST.HOST}/photos/${item.id}/watchers/${uuid}`, {
+      const response = await axios({
         method: 'GET',
+        url: `${CONST.HOST}/photos/${item.id}/watchers/${uuid}`,
         headers: {
           'Content-Type': 'application/json',
         },
+        // data: {
+        //   uuid,
+        // },
       })
       // const responseJson = await response.json()
       if (response.status === 200) {
@@ -567,18 +587,20 @@ export function checkIsPhotoWatched({ item }) {
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
           item,
         })
-      } else {
+      }
+    } catch (err) {
+      if (err.response.status === 404) {
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
           item,
         })
+      } else {
+        Toast.show({
+          text: "Unable to check if photo is watched. Potential Network Issue.",
+          buttonText: "OK",
+          type: "warning",
+        })
       }
-    } catch (err) {
-      Toast.show({
-        text: "Unable to check if photo is watched. Potential Network Issue.",
-        buttonText: "OK",
-        type: "warning",
-      })
     }
   }
 }
@@ -596,15 +618,17 @@ export function deleteComment({ photo, comment }) {
     const { uuid } = getState().photosList
 
     try {
-      const response = await fetch(`${CONST.HOST}/comments/${comment.id}`, {
+      const response = await axios({
         method: 'DELETE',
+        url: `${CONST.HOST}/comments/${comment.id}`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           deactivatedBy: uuid,
-        }),
+        },
       })
+
       // const responseJson = await response.json()
       if (response.status === 200) {
         // lets update the state in the photos collection so it renders the right number of likes in the list

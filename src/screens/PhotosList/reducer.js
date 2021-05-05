@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import axios from 'axios'
 
 import * as SecureStore from 'expo-secure-store'
 
@@ -275,12 +276,13 @@ async function _requestGeoPhotos(getState) {
     pageNumber, uuid, batch, location: { latitude, longitude },
   } = getState().photosList
 
-  const response = await fetch(`${CONST.HOST}/photos/feedByDate`, {
+  const response = await axios({
     method: 'POST',
+    url: `${CONST.HOST}/photos/feedByDate`,
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
+    data: {
       uuid,
       location: {
         type: 'Point',
@@ -291,28 +293,29 @@ async function _requestGeoPhotos(getState) {
       },
       daysAgo: pageNumber,
       batch,
-    }),
+    },
   })
-  const responseJson = await response.json()
-  return responseJson
+
+  return response.data
 }
 
 async function _requestWatchedPhotos(getState) {
   const { pageNumber, uuid, batch } = getState().photosList
   // console.log(`_requestWatchedPhotos(${pageNumber})`)
-  const response = await fetch(`${CONST.HOST}/photos/feedForWatcher`, {
+  const response = await axios({
     method: 'POST',
+    url: `${CONST.HOST}/photos/feedForWatcher`,
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
+    data: {
       uuid,
       pageNumber,
       batch,
-    }),
+    },
   })
-  const responseJson = await response.json()
-  return responseJson
+
+  return response.data
 }
 
 async function _requestSearchedPhotos(getState) {
@@ -320,20 +323,21 @@ async function _requestSearchedPhotos(getState) {
   // console.log(`_requestSearchedPhotos(${pageNumber})`)
   const { uuid } = getState().photosList
 
-  const response = await fetch(`${CONST.HOST}/photos/feedForTextSearch`, {
+  const response = await axios({
     method: 'POST',
+    url: `${CONST.HOST}/photos/feedForTextSearch`,
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
+    data: {
       uuid,
       searchTerm,
       pageNumber,
       batch,
-    }),
+    },
   })
-  const responseJson = await response.json()
-  return responseJson
+
+  return response.data
 }
 
 export function getPhotos() {
@@ -608,7 +612,7 @@ export function uploadPendingPhotos() {
       Toast.show({
         text: 'Failed to upload file, refresh to try again.',
       })
-      console.log({ error }) // eslint-disable-line no-console
+      // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())
     }
     dispatch({
@@ -624,12 +628,13 @@ export function uploadPendingPhotos() {
 const _uploadFile = async ({ item, uuid, location }) => {
   const assetUri = `${CONST.PENDING_UPLOADS_FOLDER}${item}`
   try {
-    const response = await fetch(`${CONST.HOST}/photos`, {
+    const response = await axios({
       method: 'POST',
+      url: `${CONST.HOST}/photos`,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
+      data: {
         uuid,
         location: {
           type: 'Point',
@@ -638,10 +643,8 @@ const _uploadFile = async ({ item, uuid, location }) => {
             location.coords.longitude,
           ],
         },
-      }),
+      },
     })
-
-    const responseJson = await response.json()
     if (response.status === 401) {
       // alert("Sorry, looks like you have been banned from WiSaw.")
       return { responseData: "banned" }
@@ -649,7 +652,7 @@ const _uploadFile = async ({ item, uuid, location }) => {
     if (response.status === 201
     // || response.status === 401 // todo: implement better banned logic
     ) {
-      const { uploadURL, photo } = responseJson
+      const { uploadURL, photo } = response.data
 
       const responseData = await FileSystem.uploadAsync(
         uploadURL,
@@ -664,7 +667,7 @@ const _uploadFile = async ({ item, uuid, location }) => {
       return { responseData, photo }
     }
   } catch (error) {
-    console.log({ error })// eslint-disable-line no-console
+    // console.log({ error })// eslint-disable-line no-console
   }
 }
 
@@ -677,40 +680,37 @@ export const cleanupCache = () => async (dispatch, getState) => {
     await FileSystem.makeDirectoryAsync(CONST.IMAGE_CACHE_FOLDER)
   }
 
-  // cleanup old cached files
-  // const currentTime = moment().unix()
-  // let deletedCounter = 0
-  const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
-  // alert(cachedFiles.length)
-
-  // cleanup cache, leave only 5000 most recent files
-  const sorted = (
-    await Promise.all(cachedFiles.map(async file => {
-      const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
-      return Promise.resolve({ file, modificationTime: info.modificationTime, size: info.size })
-    }))
-  )
-    .sort((a, b) => a.modificationTime - b.modificationTime)
-
-  // let's calculate the sum in the first pass
-  let sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
-  // const cachedFilesCount = 0
-
-  // second pass to clean up the cach files
-  for (let i = 0; i < sorted.length; i += 1) {
-    if (sumSize > 500000000 * 4) { // 0.5 GB
-      // console.log({ sumSize })
-      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
-      sumSize -= sorted[i].size
-    }
-
-    // console.log({ cachedFilesCount })
-    // cachedFilesCount += 1
-  }
-
-  // console.log('----------------------------')
-  // console.log({ sumSize })
-  // console.log({ cachedFilesCount })
-  // console.log('----------------------------')
+  // // cleanup old cached files
+  // const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
+  //
+  // // cleanup cache, leave only 5000 most recent files
+  // const sorted = (
+  //   await Promise.all(cachedFiles.map(async file => {
+  //     const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
+  //     return Promise.resolve({ file, modificationTime: info.modificationTime, size: info.size })
+  //   }))
+  // )
+  //   .sort((a, b) => a.modificationTime - b.modificationTime)
+  //
+  // // let's calculate the sum in the first pass
+  // let sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
+  // // const cachedFilesCount = 0
+  //
+  // // second pass to clean up the cach files
+  // for (let i = 0; i < sorted.length; i += 1) {
+  //   if (sumSize > 500000000 * 4) { // 0.5 GB
+  //     // console.log({ sumSize })
+  //     FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
+  //     sumSize -= sorted[i].size
+  //   }
+  //
+  //   // console.log({ cachedFilesCount })
+  //   // cachedFilesCount += 1
+  // }
+  //
+  // // console.log('----------------------------')
+  // // console.log({ sumSize })
+  // // console.log({ cachedFilesCount })
+  // // console.log('----------------------------')
 }
 export default reducer

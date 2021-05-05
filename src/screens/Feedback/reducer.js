@@ -1,6 +1,7 @@
 import {
   Toast,
 } from 'native-base'
+import axios from 'axios'
 
 import * as CONST from '../../consts.js'
 
@@ -67,17 +68,18 @@ export function submitFeedback({ feedbackText }) {
       type: ACTION_TYPES.SUBMIT_FEEDBACK_STARTED,
     })
     try {
-      const response = await fetch(`${CONST.HOST}/contactform`, {
+      const response = await axios({
         method: 'POST',
+        url: `${CONST.HOST}/contactform`,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        data: {
           uuid,
           description: feedbackText,
-        }),
+        },
       })
-      // const responseJson = await response.json()
+
       if (response.status === 201) {
         dispatch({
           type: ACTION_TYPES.SUBMIT_FEEDBACK_FINISHED,
@@ -97,8 +99,5 @@ export function submitFeedback({ feedbackText }) {
         text: err.toString(),
       })
     }
-    dispatch({
-      type: ACTION_TYPES.SUBMIT_FEEDBACK_FINISHED,
-    })
   }
 }
