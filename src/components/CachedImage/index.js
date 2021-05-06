@@ -68,4 +68,4 @@ CachedImage.propTypes = {
   cacheKey: PropTypes.string.isRequired,
 }
 
-export default React.memo(CachedImage)
+export default (CachedImage)
