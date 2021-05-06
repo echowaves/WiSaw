@@ -592,4 +592,4 @@ Photo.propTypes = {
   item: PropTypes.object.isRequired,
 }
 
-export default Photo
+export default React.memo(Photo)
