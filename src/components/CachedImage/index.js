@@ -39,7 +39,7 @@ const CachedImage = props => {
       const metadata = await FileSystem.getInfoAsync(fileURI)
       if (!metadata.exists) {
         if (componentIsMounted.current) {
-          await setImgURI(null)
+          setImgURI(null)
         }
         // download to cache
         if (componentIsMounted.current) {
