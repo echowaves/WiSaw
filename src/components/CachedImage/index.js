@@ -25,14 +25,6 @@ const CachedImage = props => {
     }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    loadImage({ fileURI: filesystemURI })
-
-    return () => {
-      componentIsMounted.current = false
-    }
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
   const loadImage = async ({ fileURI }) => {
     try {
       // Use the cached image if it exists
