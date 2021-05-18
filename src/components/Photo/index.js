@@ -55,22 +55,22 @@ const Photo = ({ item }) => {
 
   // const error = useSelector(state => state.photo.error)
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const task = InteractionManager.runAfterInteractions(() => {
-        if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
+  // useFocusEffect(
+  React.useEffect(() => {
+    // const task = InteractionManager.runAfterInteractions(() => {
+    if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
 
-        if (componentIsMounted) dispatch(reducer.getComments({ item }))
-        if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
-        if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
-      })
+    if (componentIsMounted) dispatch(reducer.getComments({ item }))
+    if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
+    if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
+    // })
 
-      return () => {
-        componentIsMounted.current = false
-        task.cancel()
-      }
-    }, [])// eslint-disable-line react-hooks/exhaustive-deps
-  )
+    return () => {
+      componentIsMounted.current = false
+      // task.cancel()
+    }
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  // )
 
   const renderCommentButtons = ({ photo, comment }) => {
     if (!comment.hiddenButtons) {
