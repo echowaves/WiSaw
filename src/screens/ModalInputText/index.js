@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 
 import {
   Text,
+  View,
 } from 'react-native'
 
 import {
@@ -12,6 +13,7 @@ import {
   Content,
   Form,
   Textarea,
+  Button,
 } from 'native-base'
 
 import PropTypes from 'prop-types'
@@ -41,12 +43,36 @@ const ModalInputText = ({ route }) => {
 
   useEffect(() => {
     navigation.setOptions({
+      headerLeft: renderHeaderLeft,
       headerTitle: <Text>Enter comment</Text>,
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerBackTitle: <Text />,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  const renderHeaderLeft = () => (
+    <View style={{
+      flex: 1,
+      flexDirection: "row",
+    }}>
+      <Button
+        onPress={
+          () => navigation.goBack()
+        }
+        style={{
+          backgroundColor: '#ffffff',
+        }}>
+        <Icon
+          name="chevron-left"
+          type="FontAwesome"
+          style={{
+            color: CONST.MAIN_COLOR,
+          }}
+        />
+      </Button>
+    </View>
+  )
 
   const renderHeaderRight = () => (
     <Icon
@@ -67,7 +93,7 @@ const ModalInputText = ({ route }) => {
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitComment({ inputText: inputTextRef.current, uuid, item }))
+    dispatch(reducer.submitComment({ inputText: inputTextRef.current.trim(), uuid, item }))
     navigation.pop()
   }
 
