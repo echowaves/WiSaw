@@ -76,7 +76,7 @@ const ModalInputText = ({ route }) => {
         <Form>
           <Textarea
             autoFocus
-            blurOnSubmit
+            blurOnSubmit={false}
             rowSpan={7}
             bordered
             placeholder="Wanna share any thoughts?"
