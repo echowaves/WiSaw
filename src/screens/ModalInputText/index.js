@@ -16,6 +16,8 @@ import {
 
 import PropTypes from 'prop-types'
 
+import CachedImage from '../../components/CachedImage'
+
 import * as CONST from '../../consts.js'
 
 import * as reducer from '../../components/Photo/reducer'
@@ -73,11 +75,21 @@ const ModalInputText = ({ route }) => {
     <Container>
       <Content
         padder>
+        <CachedImage
+          source={{ uri: `${item.getThumbUrl}` }}
+          cacheKey={`${item.id}t`}
+          style={{
+            alignSelf: 'center',
+            width: 150,
+            height: 100,
+            borderRadius: 10,
+          }}
+        />
         <Form>
           <Textarea
             autoFocus
             blurOnSubmit={false}
-            rowSpan={7}
+            rowSpan={5}
             bordered
             placeholder="Wanna share any thoughts?"
             placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
@@ -96,7 +108,7 @@ const ModalInputText = ({ route }) => {
           flex: 1,
           flexDirection: 'row',
           position: 'absolute',
-          bottom: -12,
+          top: 12,
           right: 12,
           color: CONST.MAIN_COLOR,
 
