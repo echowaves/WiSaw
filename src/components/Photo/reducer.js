@@ -437,7 +437,7 @@ export function submitComment({ inputText, uuid, item }) {
         error: JSON.stringify(err),
       })
       Toast.show({
-        text: "Unable to submit comment. Potential Network Issue.",
+        text: "Unable to submit comment.",
         buttonText: "OK",
         type: "warning",
       })
