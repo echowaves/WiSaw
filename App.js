@@ -22,6 +22,7 @@ import PhotosList from './src/screens/PhotosList'
 import PhotosDetails from './src/screens/PhotosDetails'
 import SharedPhoto from './src/screens/SharedPhoto'
 import FeedbackScreen from './src/screens/Feedback'
+import ModalInputText from './src/screens/ModalInputText'
 
 const Stack = createStackNavigator()
 
@@ -60,6 +61,11 @@ const App = () => (
             <Stack.Screen
               name="FeedbackScreen"
               component={FeedbackScreen}
+              options={{ headerTintColor: CONST.MAIN_COLOR }}
+            />
+            <Stack.Screen
+              name="ModalInputTextScreen"
+              component={ModalInputText}
               options={{ headerTintColor: CONST.MAIN_COLOR }}
             />
           </Stack.Navigator>

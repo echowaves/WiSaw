@@ -20,7 +20,7 @@ import {
   FooterTab,
   Icon,
   Spinner,
-  Button, Card, CardItem, Text, Item, Input,
+  Button, Card, CardItem, Text,
 } from 'native-base'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -50,27 +50,23 @@ const Photo = ({ item }) => {
   const bans = useSelector(state => state.photo.bans)
   const likes = useSelector(state => state.photo.likes)
 
-  const inputText = useSelector(state => state.photo.inputText)
-  const commentsSubmitting = useSelector(state => state.photo.commentsSubmitting)
-
   // const error = useSelector(state => state.photo.error)
 
-  // useFocusEffect(
-  React.useEffect(() => {
-    // const task = InteractionManager.runAfterInteractions(() => {
-    if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
+  useFocusEffect( // use this to make the navigastion to a detailed screen faster
+    React.useCallback(() => {
+      const task = InteractionManager.runAfterInteractions(() => {
+        if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
+        if (componentIsMounted) dispatch(reducer.getComments({ item }))
+        if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
+        if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
+      })
 
-    if (componentIsMounted) dispatch(reducer.getComments({ item }))
-    if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
-    if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
-    // })
-
-    return () => {
-      componentIsMounted.current = false
-      // task.cancel()
-    }
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-  // )
+      return () => {
+        componentIsMounted.current = false
+        task.cancel()
+      }
+    }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  )
 
   const renderCommentButtons = ({ photo, comment }) => {
     if (!comment.hiddenButtons) {
@@ -501,78 +497,55 @@ const Photo = ({ item }) => {
                 && (renderComments())}
           <Row
             style={{
-              paddingVertical: 20,
-            }}>
-            <Col
-              style={{
+              width: '100%',
+              marginVertical: 10,
+            }}
+            onPress={
+              () => navigation.navigate('ModalInputTextScreen', { item })
+            }>
+            <Col style={
+              {
+                marginLeft: 30,
                 width: 50,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
+              }
+            }
+            />
+            <Col
+              style={
+                {
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: 50,
+                }
+              }>
               <Text
-                style={
-                  {
-                    fontSize: 10,
-                    color: CONST.MAIN_COLOR,
-                    textAlign: 'center',
-                    width: '100%',
-                  }
-                }>
-                {140 - inputText.length}
+                style={{
+                  fontSize: 25,
+                  color: CONST.MAIN_COLOR,
+                }}>
+                add comment
               </Text>
             </Col>
             <Col
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Item
-                rounded>
-                <Input
-                  placeholder="any thoughts?"
-                  placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-                  style={
-                    {
-                      color: CONST.MAIN_COLOR,
-                    }
+              style={
+                {
+                  justifyContent: 'center',
+                  height: 50,
+                  marginRight: 30,
+                  width: 50,
+                }
+              }>
+              <Icon
+                type="MaterialIcons"
+                name="add-circle"
+                style={
+                  {
+                    fontSize: 45,
+                    color: CONST.MAIN_COLOR,
                   }
-                  onChangeText={inputText => dispatch(reducer.setInputText({ inputText }))}
-                  value={inputText}
-                  editable={!commentsSubmitting}
-                  onSubmitEditing={
-                    () => {
-                      dispatch(reducer.submitComment({ inputText, item }))
-                    }
-                  }
-                />
-              </Item>
-            </Col>
-            <Col
-              style={{
-                width: 50,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 10,
-              }}>
-              <Button
-                transparent
-                iconLeft
-                onPress={
-                  () => {
-                    dispatch(reducer.submitComment({ inputText, item }))
-                  }
-                }>
-                <Icon
-                  type="MaterialIcons"
-                  name="send"
-                  style={
-                    {
-                      fontSize: 30,
-                      color: CONST.MAIN_COLOR,
-                    }
-                  }
-                />
-              </Button>
+                }
+              />
             </Col>
           </Row>
           <Row>

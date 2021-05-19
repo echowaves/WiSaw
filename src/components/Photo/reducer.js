@@ -387,9 +387,8 @@ export function setInputText({ inputText }) {
   }
 }
 
-export function submitComment({ inputText, item }) {
-  return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+export function submitComment({ inputText, uuid, item }) {
+  return async dispatch => {
     dispatch({
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
     })
@@ -405,7 +404,6 @@ export function submitComment({ inputText, item }) {
           comment: inputText,
         },
       })
-
       if (response.status === 201) {
         // lets update the state in the photos collection so it renders the right number of likes in the list
         dispatch({
