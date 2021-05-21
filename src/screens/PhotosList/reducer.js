@@ -7,6 +7,10 @@ import {
   Toast,
 } from 'native-base'
 
+import {
+  Platform,
+} from 'react-native'
+
 import * as FileSystem from 'expo-file-system'
 import moment from 'moment'
 
@@ -680,39 +684,41 @@ export const cleanupCache = () => async (dispatch, getState) => {
     await FileSystem.makeDirectoryAsync(CONST.IMAGE_CACHE_FOLDER)
   }
 
-  // cleanup old cached files
-  const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
+  if (Platform.OS === 'ios') {
+    // cleanup old cached files
+    const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
 
-  // cleanup cache, leave only 5000 most recent files
-  const sorted = (
-    await Promise.all(cachedFiles.map(async file => {
-      const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
-      return Promise.resolve({ file, modificationTime: info.modificationTime, size: info.size })
-    }))
-  )
-    .sort((a, b) => a.modificationTime - b.modificationTime)
+    // cleanup cache, leave only 5000 most recent files
+    const sorted = (
+      await Promise.all(cachedFiles.map(async file => {
+        const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)
+        return Promise.resolve({ file, modificationTime: info.modificationTime, size: info.size })
+      }))
+    )
+      .sort((a, b) => a.modificationTime - b.modificationTime)
 
-  // let's calculate the sum in the first pass
-  // const sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
+    // let's calculate the sum in the first pass
+    // const sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
 
-  // // second pass to clean up the cach files based on the total size of files in the cache
-  // for (let i = 0; i < sorted.length; i += 1) {
-  //   if (sumSize > 700 * 1000 * 1000) { // 1 GB
-  //     // console.log({ sumSize })
-  //     FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
-  //     sumSize -= sorted[i].size
-  //   }
+    // // second pass to clean up the cach files based on the total size of files in the cache
+    // for (let i = 0; i < sorted.length; i += 1) {
+    //   if (sumSize > 700 * 1000 * 1000) { // 1 GB
+    //     // console.log({ sumSize })
+    //     FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
+    //     sumSize -= sorted[i].size
+    //   }
 
-  // console.log({ 'sorted.length': sorted.length })
-  // second pass to clean up the cach files based on the total number of files in the cache
-  for (let i = 0; sorted.length - i > 500; i += 1) {
+    // console.log({ 'sorted.length': sorted.length })
+    // second pass to clean up the cach files based on the total number of files in the cache
+    for (let i = 0; sorted.length - i > 500; i += 1) {
     // console.log(sorted[i].modificationTime)
-    FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
-  }
+      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
+    }
 
   // console.log('----------------------------')
   // console.log({ sumSize })
   // console.log({ cachedFilesCount })
   // console.log('----------------------------')
+  }
 }
 export default reducer
