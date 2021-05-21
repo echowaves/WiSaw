@@ -312,6 +312,7 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
+    dispatch(reducer.cleanupCache())
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,

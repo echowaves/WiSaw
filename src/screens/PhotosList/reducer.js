@@ -693,19 +693,21 @@ export const cleanupCache = () => async (dispatch, getState) => {
     .sort((a, b) => a.modificationTime - b.modificationTime)
 
   // let's calculate the sum in the first pass
-  let sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
-  // const cachedFilesCount = 0
+  // const sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
 
-  // second pass to clean up the cach files
-  for (let i = 0; i < sorted.length; i += 1) {
-    if (sumSize > 1000 * 1000 * 1000) { // 1 GB
-      // console.log({ sumSize })
-      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
-      sumSize -= sorted[i].size
-    }
+  // // second pass to clean up the cach files based on the total size of files in the cache
+  // for (let i = 0; i < sorted.length; i += 1) {
+  //   if (sumSize > 700 * 1000 * 1000) { // 1 GB
+  //     // console.log({ sumSize })
+  //     FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
+  //     sumSize -= sorted[i].size
+  //   }
 
-    // console.log({ cachedFilesCount })
-    // cachedFilesCount += 1
+  console.log({ 'sorted.length': sorted.length })
+  // second pass to clean up the cach files based on the total number of files in the cache
+  for (let i = 0; sorted.length - i > 500; i += 1) {
+    console.log(sorted[i].modificationTime)
+    FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
   }
 
   // console.log('----------------------------')
