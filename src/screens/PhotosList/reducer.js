@@ -8,7 +8,7 @@ import {
 } from 'native-base'
 
 import {
-  Platform,
+// Platform,
 } from 'react-native'
 
 import * as FileSystem from 'expo-file-system'
