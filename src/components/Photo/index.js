@@ -283,7 +283,7 @@ const Photo = ({ item }) => {
           }}>
           <Spinner
             color={
-              CONST.SECONDARY_COLOR
+              CONST.MAIN_COLOR
             }
           />
         </Footer>
@@ -488,7 +488,7 @@ const Photo = ({ item }) => {
           {!item.comments && (
             <Spinner
               color={
-                CONST.SECONDARY_COLOR
+                CONST.MAIN_COLOR
               }
             />
           )}
