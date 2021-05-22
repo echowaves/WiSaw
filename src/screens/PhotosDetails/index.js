@@ -118,7 +118,7 @@ const PhotosDetails = ({ route }) => {
         // await setIndex(newIndex)
         // setIndex(newIndex)
       }} // otherwise will jump to wrong photo onLayout
-      loadMinimal={false}
+      loadMinimal
       loadMinimalSize={1}
       showsPagination={false}
       pagingEnabled>
