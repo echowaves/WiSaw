@@ -485,6 +485,13 @@ const Photo = ({ item }) => {
               />
             </ReactNativeZoomableView>
           </Row>
+          {!item.comments && (
+            <Spinner
+              color={
+                CONST.SECONDARY_COLOR
+              }
+            />
+          )}
           { item.comments && item.comments.length > 0
                 && (
                   <Row style={{ marginTop: 5 }}>
