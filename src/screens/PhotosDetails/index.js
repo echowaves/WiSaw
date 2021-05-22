@@ -114,10 +114,11 @@ const PhotosDetails = ({ route }) => {
       index={index}
       onIndexChanged={newIndex => {
         // TODO: ugly timeout, when the library fixes the issue the timeout can be removed
-        setTimeout(() => { setIndex(newIndex) }, 10)
+        setTimeout(() => { setIndex(newIndex) }, 1)
+        // await setIndex(newIndex)
         // setIndex(newIndex)
       }} // otherwise will jump to wrong photo onLayout
-      loadMinimal
+      loadMinimal={false}
       loadMinimalSize={1}
       showsPagination={false}
       pagingEnabled>
