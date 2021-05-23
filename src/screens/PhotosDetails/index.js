@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
 
@@ -29,7 +29,7 @@ const PhotosDetails = ({ route }) => {
 
   const { currentPhotoIndex } = route.params
   // console.log(currentPhotoIndex)
-  const [index, setIndex] = useState(currentPhotoIndex)
+  // const [index, setIndex] = useState(currentPhotoIndex)
 
   const photos = useSelector(state => state.photosList.photos)
 
@@ -45,11 +45,11 @@ const PhotosDetails = ({ route }) => {
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (index > photos.length - 5) {
-      dispatch(getPhotos()) // pre-load more photos when nearing the end
-    }
-  }, [index])// eslint-disable-line react-hooks/exhaustive-deps
+  // useEffect(() => {
+  //   if (index > photos.length - 5) {
+  //     dispatch(getPhotos()) // pre-load more photos when nearing the end
+  //   }
+  // }, [index])// eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHeaderLeft = () => (
     <View style={{
@@ -111,12 +111,15 @@ const PhotosDetails = ({ route }) => {
       }}
       nextButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 40 }}>›</Text>}
       prevButton={<Text style={{ color: CONST.MAIN_COLOR, fontSize: 40 }}>‹</Text>}
-      index={index}
+      index={currentPhotoIndex}
       onIndexChanged={newIndex => {
-        // TODO: ugly timeout, when the library fixes the issue the timeout can be removed
-        setTimeout(() => { setIndex(newIndex) }, 1)
-        // await setIndex(newIndex)
-        // setIndex(newIndex)
+        if (newIndex > photos.length - 5) {
+          dispatch(getPhotos()) // pre-load more photos when nearing the end
+        }
+      //   // TODO: ugly timeout, when the library fixes the issue the timeout can be removed
+      //   setTimeout(() => { setIndex(newIndex) }, 1)
+      //   // await setIndex(newIndex)
+      //   // setIndex(newIndex)
       }} // otherwise will jump to wrong photo onLayout
       loadMinimal
       loadMinimalSize={1}
