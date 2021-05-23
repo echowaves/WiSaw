@@ -70,22 +70,22 @@ export default function reducer(state = initialState, action) {
         inputText: '',
         error: '',
       }
-    case ACTION_TYPES.GET_COMMENTS_STARTED:
-      return {
-        ...state,
-      }
-    case ACTION_TYPES.GET_COMMENTS_FINISHED:
-      return {
-        ...state,
-      }
-    case ACTION_TYPES.GET_RECOGNITIONS_STARTED:
-      return {
-        ...state,
-      }
-    case ACTION_TYPES.GET_RECOGNITIONS_FINISHED:
-      return {
-        ...state,
-      }
+    // case ACTION_TYPES.GET_COMMENTS_STARTED:
+    //   return {
+    //     ...state,
+    //   }
+    // case ACTION_TYPES.GET_COMMENTS_FINISHED:
+    //   return {
+    //     ...state,
+    //   }
+    // case ACTION_TYPES.GET_RECOGNITIONS_STARTED:
+    //   return {
+    //     ...state,
+    //   }
+    // case ACTION_TYPES.GET_RECOGNITIONS_FINISHED:
+    //   return {
+    //     ...state,
+    //   }
       // case DELETE_PHOTO:
       // 	return state
     default:
@@ -374,18 +374,18 @@ export function sharePhoto({ item }) {
   }
 }
 
-export function setInputText({ inputText }) {
-  if (inputText.length < 140) {
-    return {
-      type: ACTION_TYPES.SET_INPUT_TEXT,
-      inputText,
-    }
-  }
-  return {
-    type: ACTION_TYPES.SET_INPUT_TEXT,
-    inputText: inputText.substring(0, 140),
-  }
-}
+// export function setInputText({ inputText }) {
+//   if (inputText.length < 140) {
+//     return {
+//       type: ACTION_TYPES.SET_INPUT_TEXT,
+//       inputText,
+//     }
+//   }
+//   return {
+//     type: ACTION_TYPES.SET_INPUT_TEXT,
+//     inputText: inputText.substring(0, 140),
+//   }
+// }
 
 export function submitComment({ inputText, uuid, item }) {
   return async dispatch => {
@@ -447,9 +447,9 @@ export function submitComment({ inputText, uuid, item }) {
 
 export function getComments({ item }) {
   return async (dispatch, getState) => {
-    dispatch({
-      type: ACTION_TYPES.GET_COMMENTS_STARTED,
-    })
+    // dispatch({
+    //   type: ACTION_TYPES.GET_COMMENTS_STARTED,
+    // })
     try {
       const response = await axios({
         method: 'GET',
@@ -464,9 +464,9 @@ export function getComments({ item }) {
 
       if (response.status === 200) {
         // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-        })
+        // dispatch({
+        //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
+        // })
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
           item,
@@ -478,9 +478,9 @@ export function getComments({ item }) {
           ).reverse(),
         })
       } else {
-        dispatch({
-          type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-        })
+        // dispatch({
+        //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
+        // })
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
           item,
@@ -493,9 +493,9 @@ export function getComments({ item }) {
         })
       }
     } catch (err) {
-      dispatch({
-        type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-      })
+      // dispatch({
+      //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
+      // })
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
         item,
@@ -512,9 +512,9 @@ export function getComments({ item }) {
 
 export function getRecognitions({ item }) {
   return async (dispatch, getState) => {
-    dispatch({
-      type: ACTION_TYPES.GET_RECOGNITIONS_STARTED,
-    })
+    // dispatch({
+    //   type: ACTION_TYPES.GET_RECOGNITIONS_STARTED,
+    // })
     try {
       const response = await axios({
         method: 'GET',
@@ -529,18 +529,18 @@ export function getRecognitions({ item }) {
 
       if (response.status === 200) {
         // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-        })
+        // dispatch({
+        //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
+        // })
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
           item,
           recognitions: response.data.recognition,
         })
       } else {
-        dispatch({
-          type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-        })
+        // dispatch({
+        //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
+        // })
         dispatch({
           type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
           item,
@@ -548,9 +548,9 @@ export function getRecognitions({ item }) {
         })
       }
     } catch (err) {
-      dispatch({
-        type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-      })
+      // dispatch({
+      //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
+      // })
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
         item,

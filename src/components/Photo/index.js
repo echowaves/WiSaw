@@ -55,10 +55,18 @@ const Photo = ({ item }) => {
   useFocusEffect( // use this to make the navigastion to a detailed screen faster
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
-        if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
-        if (componentIsMounted) dispatch(reducer.getComments({ item }))
-        if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
-        if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
+        if (componentIsMounted) {
+          Promise.all([
+            dispatch(reducer.getComments({ item })),
+            dispatch(reducer.checkIsPhotoWatched({ item })),
+            dispatch(reducer.getRecognitions({ item })),
+            // dispatch(reducer.setInputText({ inputText: '' })),
+          ])
+        }
+        // if (componentIsMounted) dispatch(reducer.getComments({ item }))
+        // if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
+        // if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
+        // if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
       })
 
       return () => {
