@@ -690,7 +690,7 @@ export const cleanupCache = () => async (dispatch, getState) => {
 
     let position = 0
     let results = []
-    const batchSize = 10
+    const batchSize = 20
 
     // batching promise.all to avoid exxessive promisses call
     while (position < cachedFiles.length) {
@@ -703,7 +703,7 @@ export const cleanupCache = () => async (dispatch, getState) => {
     }
 
     // cleanup cache, leave only 5000 most recent files
-    const sorted = results
+    results
       .sort((a, b) => a.modificationTime - b.modificationTime)
 
     // let's calculate the sum in the first pass
@@ -719,9 +719,9 @@ export const cleanupCache = () => async (dispatch, getState) => {
 
     // alert(`sorted.length ${sorted.length}`)
     // second pass to clean up the cach files based on the total number of files in the cache
-    for (let i = 0; sorted.length - i > 8000; i += 1) { // may need to reduce down to 500
+    for (let i = 0; (results.length - i) > 2000; i += 1) { // may need to reduce down to 500
       // console.log(sorted[i].modificationTime)
-      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
+      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`, { idempotent: true })
     }
 
   // console.log('----------------------------')
