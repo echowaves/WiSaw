@@ -111,6 +111,7 @@ const Photo = ({ item }) => {
             style={{
               color: CONST.MAIN_COLOR,
             }}
+            size={30}
           />
         </View>
       )
@@ -316,9 +317,9 @@ const Photo = ({ item }) => {
             <FontAwesome
               name="trash"
               style={{
-                fontSize: 30,
                 color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
               }}
+              size={30}
             />
             <Text style={{ fontSize: 10 }}>
               Delete
@@ -335,9 +336,9 @@ const Photo = ({ item }) => {
             <FontAwesome
               name="ban"
               style={{
-                fontSize: 30,
                 color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
               }}
+              size={30}
             />
             <Text style={{ fontSize: 10 }}>
               Ban
@@ -349,18 +350,15 @@ const Photo = ({ item }) => {
             key="watch"
             onPress={
               () => handleFlipWatch()
-            }
-            style={{
-              fontSize: 30,
-            }}>
+            }>
             <FontAwesome
               name={item.watched ? "eye" : "eye-slash"}
               style={
                 {
-                  fontSize: 30,
                   color: CONST.MAIN_COLOR,
                 }
               }
+              size={30}
             />
             <Text style={{ fontSize: 10 }}>
               {`${item.watched ? 'UnWatch' : 'Watch'}`}
@@ -380,10 +378,10 @@ const Photo = ({ item }) => {
               name="share"
               style={
                 {
-                  fontSize: 30,
                   color: CONST.MAIN_COLOR,
                 }
               }
+              size={30}
             />
             <Text style={{ fontSize: 10 }}>
               Share
@@ -409,10 +407,10 @@ const Photo = ({ item }) => {
               name="thumbs-up"
               style={
                 {
-                  fontSize: 30,
                   color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
                 }
               }
+              size={30}
             />
             <Text style={{ fontSize: 10 }}>
               Like
