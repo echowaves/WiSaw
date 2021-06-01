@@ -411,7 +411,7 @@ const PhotosList = () => {
                 paddingLeft: 10,
                 paddingRight: 10,
               }}
-              color={activeSegment === 0 ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR}
+              color={activeSegment === 0 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
             />
           </Button>
           <Button
@@ -429,7 +429,7 @@ const PhotosList = () => {
                 paddingLeft: 10,
                 paddingRight: 10,
               }}
-              color={activeSegment === 1 ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR}
+              color={activeSegment === 1 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
             />
           </Button>
           <Button
@@ -447,7 +447,7 @@ const PhotosList = () => {
                 paddingLeft: 10,
                 paddingRight: 10,
               }}
-              color={activeSegment === 2 ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR}
+              color={activeSegment === 2 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
             />
           </Button>
         </Segment>
