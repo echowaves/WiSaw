@@ -9,9 +9,7 @@ import {
   // Image,
 } from 'react-native'
 
-import {
-  Icon,
-} from 'native-base'
+import { FontAwesome } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -59,8 +57,7 @@ const Thumb = props => {
               left: 5,
             }
           }>
-          <Icon
-            type="FontAwesome"
+          <FontAwesome
             name="comment"
             style={
               {
@@ -93,8 +90,7 @@ const Thumb = props => {
               right: 5,
             }
           }>
-          <Icon
-            type="FontAwesome"
+          <FontAwesome
             name="thumbs-up"
             style={
               {

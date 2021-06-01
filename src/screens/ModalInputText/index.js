@@ -7,8 +7,9 @@ import {
   View,
 } from 'react-native'
 
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
+
 import {
-  Icon,
   Container,
   Content,
   Form,
@@ -63,26 +64,29 @@ const ModalInputText = ({ route }) => {
         style={{
           backgroundColor: '#ffffff',
         }}>
-        <Icon
+        <FontAwesome
           name="chevron-left"
-          type="FontAwesome"
-          style={{
-            color: CONST.MAIN_COLOR,
-          }}
+          size={30}
+          style={
+            {
+              marginLeft: 10,
+              color: CONST.MAIN_COLOR,
+            }
+          }
         />
       </Button>
     </View>
   )
 
   const renderHeaderRight = () => (
-    <Icon
+    <Ionicons
       onPress={
         () => {
           handleSubmit()
         }
       }
       name="send"
-      type="MaterialIcons"
+      size={30}
       style={
         {
           marginRight: 10,

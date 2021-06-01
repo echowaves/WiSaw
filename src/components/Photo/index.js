@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux"
 
 import { useDimensions } from '@react-native-community/hooks'
 
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
+
 import {
   // Dimensions,
   View,
@@ -18,7 +20,6 @@ import {
   Content,
   Footer,
   FooterTab,
-  Icon,
   Spinner,
   Button, Card, CardItem, Text,
 } from 'native-base'
@@ -87,7 +88,7 @@ const Photo = ({ item }) => {
           right: 10,
 
         }}>
-          <Icon
+          <FontAwesome
             onPress={
               () => {
                 Alert.alert(
@@ -107,7 +108,6 @@ const Photo = ({ item }) => {
               }
             }
             name="trash"
-            type="FontAwesome"
             style={{
               color: CONST.MAIN_COLOR,
             }}
@@ -313,9 +313,8 @@ const Photo = ({ item }) => {
             onPress={
               () => handleDelete({ item })
             }>
-            <Icon
+            <FontAwesome
               name="trash"
-              type="FontAwesome"
               style={{
                 fontSize: 30,
                 color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
@@ -333,9 +332,8 @@ const Photo = ({ item }) => {
             onPress={
               () => handleBan({ item })
             }>
-            <Icon
+            <FontAwesome
               name="ban"
-              type="FontAwesome"
               style={{
                 fontSize: 30,
                 color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
@@ -355,9 +353,8 @@ const Photo = ({ item }) => {
             style={{
               fontSize: 30,
             }}>
-            <Icon
+            <FontAwesome
               name={item.watched ? "eye" : "eye-slash"}
-              type="FontAwesome"
               style={
                 {
                   fontSize: 30,
@@ -379,8 +376,7 @@ const Photo = ({ item }) => {
                 dispatch(reducer.sharePhoto({ item }))
               }
             }>
-            <Icon
-              type="FontAwesome"
+            <FontAwesome
               name="share"
               style={
                 {
@@ -409,8 +405,7 @@ const Photo = ({ item }) => {
                 <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
               </Badge>
             )}
-            <Icon
-              type="FontAwesome"
+            <FontAwesome
               name="thumbs-up"
               style={
                 {
@@ -551,8 +546,7 @@ const Photo = ({ item }) => {
                   width: 50,
                 }
               }>
-              <Icon
-                type="MaterialIcons"
+              <Ionicons
                 name="add-circle"
                 style={
                   {

@@ -3,11 +3,12 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import {
-  Text,
+  Text, View,
 } from 'react-native'
 
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
+
 import {
-  Icon,
   Container,
   Content,
   Spinner,
@@ -42,17 +43,18 @@ const FeedbackScreen = () => {
       headerTitle: <Text>feedback form</Text>,
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
+      headerLeft: renderHeaderLeft,
       headerBackTitle: <Text />,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHeaderRight = () => (
-    <Icon
+    <Ionicons
       onPress={
         () => handleSubmit()
       }
       name="send"
-      type="MaterialIcons"
+      size={30}
       style={
         {
           marginRight: 10,
@@ -60,6 +62,31 @@ const FeedbackScreen = () => {
         }
       }
     />
+  )
+  const renderHeaderLeft = () => (
+    <View style={{
+      flex: 1,
+      flexDirection: "row",
+    }}>
+      <Button
+        onPress={
+          () => navigation.goBack()
+        }
+        style={{
+          backgroundColor: '#ffffff',
+        }}>
+        <FontAwesome
+          name="chevron-left"
+          size={30}
+          style={
+            {
+              marginLeft: 10,
+              color: CONST.MAIN_COLOR,
+            }
+          }
+        />
+      </Button>
+    </View>
   )
 
   const handleSubmit = () => {
@@ -109,7 +136,7 @@ const FeedbackScreen = () => {
         { errorMessage.length !== 0 && (
           <Item error>
             <Text>{errorMessage}</Text>
-            <Icon name="close-circle" />
+            <Ionicons name="close-circle" />
           </Item>
         )}
         <Form>

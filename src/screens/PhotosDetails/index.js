@@ -4,6 +4,8 @@ import { useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
+
 import {
   View,
 } from 'react-native'
@@ -12,7 +14,6 @@ import { useDispatch, useSelector } from "react-redux"
 
 import {
   Button,
-  Icon,
   Text,
 } from 'native-base'
 
@@ -63,12 +64,15 @@ const PhotosDetails = ({ route }) => {
         style={{
           backgroundColor: '#ffffff',
         }}>
-        <Icon
+        <FontAwesome
           name="chevron-left"
-          type="FontAwesome"
-          style={{
-            color: CONST.MAIN_COLOR,
-          }}
+          size={30}
+          style={
+            {
+              marginLeft: 10,
+              color: CONST.MAIN_COLOR,
+            }
+          }
         />
       </Button>
     </View>
@@ -77,9 +81,9 @@ const PhotosDetails = ({ route }) => {
   const renderHeaderTitle = () => {
     switch (activeSegment) {
       case 0:
-        return (<Icon name="globe" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
+        return (<FontAwesome name="globe" size={30} style={{ color: CONST.SECONDARY_COLOR }} />)
       case 1:
-        return (<Icon name="eye" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
+        return (<FontAwesome name="eye" size={30} style={{ color: CONST.SECONDARY_COLOR }} />)
       case 2:
         return (
           <Text style={{ color: CONST.SECONDARY_COLOR }}>
@@ -87,7 +91,7 @@ const PhotosDetails = ({ route }) => {
           </Text>
         )
       default:
-        return (<Icon name="globe" type="FontAwesome" style={{ color: CONST.SECONDARY_COLOR }} />)
+        return (<FontAwesome name="globe" size={30} style={{ color: CONST.SECONDARY_COLOR }} />)
     }
   }
 

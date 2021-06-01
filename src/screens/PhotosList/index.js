@@ -19,7 +19,10 @@ import {
 } from 'react-native'
 
 import {
-  Icon,
+  FontAwesome, FontAwesome5, MaterialIcons,
+} from '@expo/vector-icons'
+
+import {
   Container,
   Content,
   Body,
@@ -352,6 +355,9 @@ const PhotosList = () => {
               height: 100,
               width: 100,
               backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }
           }
           onPress={
@@ -359,12 +365,11 @@ const PhotosList = () => {
               checkPermissionsForPhotoTaking()
             }
           }>
-          <Icon
-            type="FontAwesome"
+          <FontAwesome
             name="camera"
+            size={60}
             style={
               {
-                fontSize: 60,
                 color: CONST.MAIN_COLOR,
               }
             }
@@ -399,9 +404,14 @@ const PhotosList = () => {
                 await reload()
               }
             }>
-            <Icon
+            <FontAwesome
               name="globe"
-              type="FontAwesome"
+              size={23}
+              style={{
+                paddingLeft: 10,
+                paddingRight: 10,
+              }}
+              color={activeSegment === 0 ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR}
             />
           </Button>
           <Button
@@ -412,9 +422,14 @@ const PhotosList = () => {
                 await reload()
               }
             }>
-            <Icon
+            <FontAwesome
               name="eye"
-              type="FontAwesome"
+              size={23}
+              style={{
+                paddingLeft: 10,
+                paddingRight: 10,
+              }}
+              color={activeSegment === 1 ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR}
             />
           </Button>
           <Button
@@ -425,9 +440,14 @@ const PhotosList = () => {
                 await reload()
               }
             }>
-            <Icon
-              type="MaterialIcons"
+            <FontAwesome
               name="search"
+              size={23}
+              style={{
+                paddingLeft: 10,
+                paddingRight: 10,
+              }}
+              color={activeSegment === 2 ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR}
             />
           </Button>
         </Segment>
@@ -436,7 +456,7 @@ const PhotosList = () => {
   )
 
   const renderHeaderLeft = () => (
-    <Icon
+    <FontAwesome5
       onPress={
         () => {
           // dispatch(reducer.initState())
@@ -444,7 +464,7 @@ const PhotosList = () => {
         }
       }
       name="sync"
-      type="MaterialIcons"
+      size={30}
       style={
         {
           marginLeft: 10,
@@ -455,12 +475,12 @@ const PhotosList = () => {
   )
 
   const renderHeaderRight = () => (
-    <Icon
+    <MaterialIcons
       onPress={
         () => navigation.navigate('FeedbackScreen')
       }
       name="feedback"
-      type="MaterialIcons"
+      size={35}
       style={{
         marginRight: 20,
         color: CONST.MAIN_COLOR,
@@ -504,9 +524,9 @@ const PhotosList = () => {
       </Body>
       <Right>
         <Button transparent>
-          <Icon
-            type="MaterialIcons"
+          <FontAwesome
             name="search"
+            size={30}
             style={
               {
                 color: CONST.MAIN_COLOR,
