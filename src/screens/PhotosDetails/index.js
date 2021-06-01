@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 
 import {
   View,
