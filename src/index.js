@@ -7,7 +7,6 @@ import 'react-native-get-random-values'
 
 // import camera from './screens/Camera/reducer'
 import photosList from './screens/PhotosList/reducer'
-import sharedPhoto from './screens/SharedPhoto/reducer'
 import feedback from './screens/Feedback/reducer'
 import photo from './components/Photo/reducer'
 
@@ -18,9 +17,7 @@ if (__DEV__) {
 }
 
 export const reducers = combineReducers({
-  // camera,
   photosList,
-  sharedPhoto,
   photo,
   feedback,
 })
