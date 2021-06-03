@@ -27,7 +27,6 @@ import { store } from './src'
 
 import PhotosList from './src/screens/PhotosList'
 import PhotosDetails from './src/screens/PhotosDetails'
-import SharedPhoto from './src/screens/SharedPhoto'
 import FeedbackScreen from './src/screens/Feedback'
 import ModalInputText from './src/screens/ModalInputText'
 
@@ -73,11 +72,6 @@ const App = () => {
               <Stack.Screen
                 name="PhotosDetails"
                 component={PhotosDetails}
-                options={{ headerTintColor: CONST.MAIN_COLOR }}
-              />
-              <Stack.Screen
-                name="SharedPhoto"
-                component={SharedPhoto}
                 options={{ headerTintColor: CONST.MAIN_COLOR }}
               />
               <Stack.Screen
