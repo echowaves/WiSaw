@@ -14,16 +14,6 @@ import {
   InteractionManager,
 } from 'react-native'
 
-import {
-  Badge,
-  Container,
-  Content,
-  Footer,
-  FooterTab,
-  Spinner,
-  Button, Card, CardItem, Text,
-} from 'native-base'
-
 import { Col, Row, Grid } from "react-native-easy-grid"
 
 import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'

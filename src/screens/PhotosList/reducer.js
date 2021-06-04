@@ -3,17 +3,10 @@ import axios from 'axios'
 
 import * as SecureStore from 'expo-secure-store'
 
-import {
-  Toast,
-} from 'native-base'
-
-import {
-  Platform,
-} from 'react-native'
-
 import * as FileSystem from 'expo-file-system'
 import moment from 'moment'
 
+import Toast from 'react-native-toast-message'
 import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'

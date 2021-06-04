@@ -1,6 +1,3 @@
-import {
-  Toast,
-} from 'native-base'
 import axios from 'axios'
 
 import * as CONST from '../../consts.js'

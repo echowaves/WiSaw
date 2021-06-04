@@ -1,7 +1,3 @@
-import {
-  Toast,
-} from 'native-base'
-
 // import Branch from '../../util/my-branch'
 import * as SMS from 'expo-sms'
 

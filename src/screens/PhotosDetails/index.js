@@ -12,11 +12,6 @@ import {
 
 import { useDispatch, useSelector } from "react-redux"
 
-import {
-  Button,
-  Text,
-} from 'native-base'
-
 import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'

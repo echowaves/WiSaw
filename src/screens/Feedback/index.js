@@ -8,19 +8,6 @@ import {
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
-import {
-  Container,
-  Content,
-  Spinner,
-  Form,
-  Textarea,
-  Item,
-  Body,
-  Card,
-  CardItem,
-  Button,
-} from 'native-base'
-
 import Modal from "react-native-modal"
 
 import PropTypes from 'prop-types'
