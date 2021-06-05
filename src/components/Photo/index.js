@@ -137,6 +137,10 @@ const Photo = ({ item }) => {
         />
       )
     }
+    if (item.comments.length === 0) {
+      return <Text />
+    }
+
     return (
       <Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR }}>
         {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
@@ -213,6 +217,49 @@ const Photo = ({ item }) => {
       )
     }
   }
+
+  const renderAddCommentsRow = () => (
+    <TouchableOpacity
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+      }}
+      onPress={
+        () => navigation.navigate('ModalInputTextScreen', { item })
+      }>
+      <Col
+        size={2}
+      />
+      <Col
+        size={6}
+        style={
+          {
+            justifyContent: 'center',
+            alignItems: 'center',
+          }
+        }>
+        <Text
+          style={{
+            fontSize: 25,
+            color: CONST.MAIN_COLOR,
+          }}>
+          add comment
+        </Text>
+      </Col>
+      <Col
+        size={2}>
+        <Ionicons
+          name="add-circle"
+          style={
+            {
+              fontSize: 45,
+              color: CONST.MAIN_COLOR,
+            }
+          }
+        />
+      </Col>
+    </TouchableOpacity>
+  )
 
   const renderRecognitions = recognition => {
     const labels = jmespath.search(recognition, "metaData.Labels[]")
@@ -494,61 +541,14 @@ const Photo = ({ item }) => {
         <Row style={{ paddingTop: 5 }}>
           {renderCommentsStats()}
         </Row>
-        <Row style={{ paddingTop: 5 }}>
+        <Row>
           {renderCommentsRows()}
         </Row>
-        { /* <Row
-          style={{
-            width: '100%',
-            marginVertical: 10,
-          }}
-          onPress={
-            () => navigation.navigate('ModalInputTextScreen', { item })
-          }>
-          <Col style={
-            {
-              marginLeft: 30,
-              width: 50,
-            }
-          }
-          />
-          <Col
-            style={
-              {
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 50,
-              }
-            }>
-            <Text
-              style={{
-                fontSize: 25,
-                color: CONST.MAIN_COLOR,
-              }}>
-              add comment
-            </Text>
-          </Col>
-          <Col
-            style={
-              {
-                justifyContent: 'center',
-                height: 50,
-                marginRight: 30,
-                width: 50,
-              }
-            }>
-            <Ionicons
-              name="add-circle"
-              style={
-                {
-                  fontSize: 45,
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-            />
-          </Col>
+        <Row>
+          {renderAddCommentsRow()}
         </Row>
+
+        { /*
         <Row>
           { item.recognitions
                 && (renderRecognitions(item.recognitions))}
