@@ -38,7 +38,6 @@ import {
   Divider,
   Button,
   LinearProgress,
-  Header,
   ButtonGroup,
   SearchBar,
 } from 'react-native-elements'
@@ -71,7 +70,6 @@ const PhotosList = () => {
   const loading = useSelector(state => state.photosList.loading)
 
   const pendingUploadsCount = useSelector(state => state.photosList.pendingUploadsCount)
-  const orientation = useSelector(state => state.photosList.orientation)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
