@@ -40,6 +40,7 @@ import {
   LinearProgress,
   Header,
   ButtonGroup,
+  SearchBar,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
@@ -455,56 +456,24 @@ const PhotosList = () => {
   )
 
   const renderSearchBar = autoFocus => (
-    <Header
-      searchBar rounded
+    <SearchBar
+      placeholder="Type Text Here..."
+      placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+      onChangeText={currentTerm => {
+        dispatch(reducer.setSearchTerm(currentTerm))
+      }}
+      value={searchTerm}
+      onSubmitEditing={
+        () => submitSearch()
+      }
+      autoFocus={autoFocus}
       style={
         {
-          backgroundColor: '#FFFFFF',
-        }
-      }>
-
-      <Body style={
-        {
+          color: CONST.MAIN_COLOR,
           width: '100%',
         }
-      }>
-        <Input
-          placeholder="type text here"
-          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-          style={
-            {
-              color: CONST.MAIN_COLOR,
-              width: '100%',
-            }
-          }
-          onChangeText={currentTerm => {
-            dispatch(reducer.setSearchTerm(currentTerm))
-          }}
-          value={searchTerm}
-          editable
-          onSubmitEditing={
-            () => submitSearch()
-          }
-          autoFocus={autoFocus}
-        />
-      </Body>
-
-      <Button type="outline">
-        <FontAwesome
-          name="search"
-          size={30}
-          style={
-            {
-              color: CONST.MAIN_COLOR,
-            }
-          }
-          onPress={
-            () => submitSearch()
-          }
-        />
-      </Button>
-
-    </Header>
+      }
+    />
   )
 
   const submitSearch = async () => {
