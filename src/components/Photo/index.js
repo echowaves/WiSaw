@@ -12,7 +12,15 @@ import {
   TouchableOpacity,
   Alert,
   InteractionManager,
+  SafeAreaView,
 } from 'react-native'
+
+import {
+  Button,
+  Text,
+  Card,
+  LinearProgress,
+} from 'react-native-elements'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
 
@@ -118,26 +126,21 @@ const Photo = ({ item }) => {
             marginLeft: 5,
             marginRight: 15,
           }}>
-          <Card
-            style={{
-              width: "100%",
-            }}>
-            <TouchableOpacity
-              onPress={
-                () => {
-                  dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
-                }
-              }>
-              <CardItem>
-                <Text
-                  style={{
-                    color: CONST.TEXT_COLOR,
-                  }}>{comment.comment}
-                </Text>
-                {renderCommentButtons({ photo: item, comment })}
-              </CardItem>
-            </TouchableOpacity>
-          </Card>
+          <TouchableOpacity
+            onPress={
+              () => {
+                dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
+              }
+            }>
+            <Card>
+              <Text
+                style={{
+                  color: CONST.TEXT_COLOR,
+                }}>{comment.comment}
+              </Text>
+              {renderCommentButtons({ photo: item, comment })}
+            </Card>
+          </TouchableOpacity>
         </Row>
       ))
     }
@@ -276,197 +279,167 @@ const Photo = ({ item }) => {
   const renderFooter = () => {
     if (item.watched === undefined) {
       return (
-        <Footer
-          style={{
-            backgroundColor: 'white',
-          }}>
-          <Spinner
-            color={
-              CONST.MAIN_COLOR
-            }
-          />
-        </Footer>
+        <Text>Footer</Text>
+        // <Footer
+        //   style={{
+        //     backgroundColor: 'white',
+        //   }}>
+        //   <Spinner
+        //     color={
+        //       CONST.MAIN_COLOR
+        //     }
+        //   />
+        // </Footer>
       )
     }
     return (
-      <Footer
-        style={{
-          backgroundColor: '#fafafa',
-        }}>
-        <FooterTab style={{
-          backgroundColor: '#fafafa',
-        }}>
-
-          {/* delete button */}
-          <Button
-            key="delete"
-            vertical
-            onPress={
-              () => handleDelete({ item })
-            }>
-            <FontAwesome
-              name="trash"
-              style={{
-                color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Delete
-            </Text>
-          </Button>
-
-          {/* ban button */}
-          <Button
-            key="ban"
-            vertical
-            onPress={
-              () => handleBan({ item })
-            }>
-            <FontAwesome
-              name="ban"
-              style={{
-                color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Ban
-            </Text>
-          </Button>
-
-          {/* watch button */}
-          <Button
-            key="watch"
-            onPress={
-              () => handleFlipWatch()
-            }>
-            <FontAwesome
-              name={item.watched ? "eye" : "eye-slash"}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              {`${item.watched ? 'UnWatch' : 'Watch'}`}
-            </Text>
-          </Button>
-
-          {/* share button */}
-          <Button
-            key="share"
-            vertical
-            onPress={
-              () => {
-                dispatch(reducer.sharePhoto({ item }))
-              }
-            }>
-            <FontAwesome
-              name="share"
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Share
-            </Text>
-          </Button>
-
-          {/* likes button */}
-          <Button
-            key="like"
-            vertical
-            badge={item.likes > 0}
-            onPress={
-              () => {
-                handleLike({ item })
-              }
-            }>
-            {item.likes > 0 && (
-              <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
-                <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
-              </Badge>
-            )}
-            <FontAwesome
-              name="thumbs-up"
-              style={
-                {
-                  color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-                }
-              }
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Like
-            </Text>
-          </Button>
-
-        </FooterTab>
-      </Footer>
+      <Text>text2</Text>
+      // <Footer
+      //   style={{
+      //     backgroundColor: '#fafafa',
+      //   }}>
+      //   <FooterTab style={{
+      //     backgroundColor: '#fafafa',
+      //   }}>
+      //
+      //     {/* delete button */}
+      //     <Button
+      //       key="delete"
+      //       vertical
+      //       onPress={
+      //         () => handleDelete({ item })
+      //       }>
+      //       <FontAwesome
+      //         name="trash"
+      //         style={{
+      //           color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+      //         }}
+      //         size={30}
+      //       />
+      //       <Text style={{ fontSize: 10 }}>
+      //         Delete
+      //       </Text>
+      //     </Button>
+      //
+      //     {/* ban button */}
+      //     <Button
+      //       key="ban"
+      //       vertical
+      //       onPress={
+      //         () => handleBan({ item })
+      //       }>
+      //       <FontAwesome
+      //         name="ban"
+      //         style={{
+      //           color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+      //         }}
+      //         size={30}
+      //       />
+      //       <Text style={{ fontSize: 10 }}>
+      //         Ban
+      //       </Text>
+      //     </Button>
+      //
+      //     {/* watch button */}
+      //     <Button
+      //       key="watch"
+      //       onPress={
+      //         () => handleFlipWatch()
+      //       }>
+      //       <FontAwesome
+      //         name={item.watched ? "eye" : "eye-slash"}
+      //         style={
+      //           {
+      //             color: CONST.MAIN_COLOR,
+      //           }
+      //         }
+      //         size={30}
+      //       />
+      //       <Text style={{ fontSize: 10 }}>
+      //         {`${item.watched ? 'UnWatch' : 'Watch'}`}
+      //       </Text>
+      //     </Button>
+      //
+      //     {/* share button */}
+      //     <Button
+      //       key="share"
+      //       vertical
+      //       onPress={
+      //         () => {
+      //           dispatch(reducer.sharePhoto({ item }))
+      //         }
+      //       }>
+      //       <FontAwesome
+      //         name="share"
+      //         style={
+      //           {
+      //             color: CONST.MAIN_COLOR,
+      //           }
+      //         }
+      //         size={30}
+      //       />
+      //       <Text style={{ fontSize: 10 }}>
+      //         Share
+      //       </Text>
+      //     </Button>
+      //
+      //     {/* likes button */}
+      //     <Button
+      //       key="like"
+      //       vertical
+      //       badge={item.likes > 0}
+      //       onPress={
+      //         () => {
+      //           handleLike({ item })
+      //         }
+      //       }>
+      //       {item.likes > 0 && (
+      //         <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
+      //           <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
+      //         </Badge>
+      //       )}
+      //       <FontAwesome
+      //         name="thumbs-up"
+      //         style={
+      //           {
+      //             color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+      //           }
+      //         }
+      //         size={30}
+      //       />
+      //       <Text style={{ fontSize: 10 }}>
+      //         Like
+      //       </Text>
+      //     </Button>
+      //
+      //   </FooterTab>
+      // </Footer>
     )
   }
 
-  // alert(JSON.stringify(navigation))
   return (
-    <Container onLayout={null}>
-      <Content
-        disableKBDismissScroll
-        keyboardDismissMode="on-drag"
-        keyboardShouldPersistTaps="always"
-        enableOnAndroid>
-        <Grid>
-          <Row>
-            <ReactNativeZoomableView
-              maxZoom={3}
-              minZoom={1}
-              zoomStep={3}
-              initialZoom={1}
-              bindToBorders>
+    <SafeAreaView>
+      <Grid>
+        <Row>
+          <ReactNativeZoomableView
+            maxZoom={3}
+            minZoom={1}
+            zoomStep={3}
+            initialZoom={1}
+            bindToBorders>
 
-              <View
-                style={{
-                  flex: 1,
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  right: 0,
-                  left: 0,
-                }}>
-                <CachedImage
-                  source={{ uri: `${item.getThumbUrl}` }}
-                  cacheKey={`${item.id}t`}
-                  backgroundColor="transparent"
-                  resizeMode="contain"
-                  style={{
-                    width,
-                    height: height - 200,
-                  }}
-                />
-                <Spinner
-                  style={{
-                    flex: 1,
-                    width,
-                    height,
-                    position: 'absolute',
-                    top: -50,
-                    bottom: 0,
-                    right: 0,
-                    left: 0,
-                  }}
-                  color={
-                    CONST.MAIN_COLOR
-                  }
-                />
-              </View>
+            <View
+              style={{
+                flex: 1,
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                left: 0,
+              }}>
               <CachedImage
-                source={{ uri: `${item.getImgUrl}` }}
-                cacheKey={`${item.id}i`}
+                source={{ uri: `${item.getThumbUrl}` }}
+                cacheKey={`${item.id}t`}
                 backgroundColor="transparent"
                 resizeMode="contain"
                 style={{
@@ -474,16 +447,49 @@ const Photo = ({ item }) => {
                   height: height - 200,
                 }}
               />
-            </ReactNativeZoomableView>
-          </Row>
-          {!item.comments && (
-            <Spinner
-              color={
+              <LinearProgress color={
                 CONST.MAIN_COLOR
               }
+              // <Spinner
+              //   style={{
+              //     flex: 1,
+              //     width,
+              //     height,
+              //     position: 'absolute',
+              //     top: -50,
+              //     bottom: 0,
+              //     right: 0,
+              //     left: 0,
+              //   }}
+              //   color={
+              //     CONST.MAIN_COLOR
+              //   }
+              // />
+              />
+            </View>
+            <CachedImage
+              source={{ uri: `${item.getImgUrl}` }}
+              cacheKey={`${item.id}i`}
+              backgroundColor="transparent"
+              resizeMode="contain"
+              style={{
+                width,
+                height: height - 200,
+              }}
             />
-          )}
-          { item.comments && item.comments.length > 0
+          </ReactNativeZoomableView>
+        </Row>
+        {!item.comments && (
+          <LinearProgress color={
+            CONST.MAIN_COLOR
+          }
+          // <Spinner
+          //   color={
+          //     CONST.MAIN_COLOR
+          //   }
+          />
+        )}
+        { item.comments && item.comments.length > 0
                 && (
                   <Row style={{ marginTop: 5 }}>
                     <Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR }}>
@@ -491,70 +497,68 @@ const Photo = ({ item }) => {
                     </Text>
                   </Row>
                 )}
-          { item.comments && item.comments.length > 0
+        { item.comments && item.comments.length > 0
                 && (renderComments())}
-          <Row
-            style={{
-              width: '100%',
-              marginVertical: 10,
-            }}
-            onPress={
-              () => navigation.navigate('ModalInputTextScreen', { item })
-            }>
-            <Col style={
+        <Row
+          style={{
+            width: '100%',
+            marginVertical: 10,
+          }}
+          onPress={
+            () => navigation.navigate('ModalInputTextScreen', { item })
+          }>
+          <Col style={
+            {
+              marginLeft: 30,
+              width: 50,
+            }
+          }
+          />
+          <Col
+            style={
               {
-                marginLeft: 30,
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 50,
+              }
+            }>
+            <Text
+              style={{
+                fontSize: 25,
+                color: CONST.MAIN_COLOR,
+              }}>
+              add comment
+            </Text>
+          </Col>
+          <Col
+            style={
+              {
+                justifyContent: 'center',
+                height: 50,
+                marginRight: 30,
                 width: 50,
               }
-            }
-            />
-            <Col
+            }>
+            <Ionicons
+              name="add-circle"
               style={
                 {
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: 50,
-                }
-              }>
-              <Text
-                style={{
-                  fontSize: 25,
+                  fontSize: 45,
                   color: CONST.MAIN_COLOR,
-                }}>
-                add comment
-              </Text>
-            </Col>
-            <Col
-              style={
-                {
-                  justifyContent: 'center',
-                  height: 50,
-                  marginRight: 30,
-                  width: 50,
                 }
-              }>
-              <Ionicons
-                name="add-circle"
-                style={
-                  {
-                    fontSize: 45,
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-              />
-            </Col>
-          </Row>
-          <Row>
-            { item.recognitions
+              }
+            />
+          </Col>
+        </Row>
+        <Row>
+          { item.recognitions
                 && (renderRecognitions(item.recognitions))}
-          </Row>
-          <Row style={{ height: 110 }} />
-        </Grid>
-
-      </Content>
+        </Row>
+        <Row style={{ height: 110 }} />
+      </Grid>
       {renderFooter()}
-    </Container>
+    </SafeAreaView>
   )
 }
 

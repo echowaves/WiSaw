@@ -46,29 +46,20 @@ const ModalInputText = ({ route }) => {
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHeaderLeft = () => (
-    <View style={{
-      flex: 1,
-      flexDirection: "row",
-    }}>
-      <Button
-        onPress={
-          () => navigation.goBack()
-        }
-        style={{
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={
+        {
           backgroundColor: '#ffffff',
-        }}>
-        <FontAwesome
-          name="chevron-left"
-          size={30}
-          style={
-            {
-              marginLeft: 10,
-              color: CONST.MAIN_COLOR,
-            }
-          }
-        />
-      </Button>
-    </View>
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+        }
+      }
+      onPress={
+        () => navigation.goBack()
+      }
+    />
   )
 
   const renderHeaderRight = () => (
