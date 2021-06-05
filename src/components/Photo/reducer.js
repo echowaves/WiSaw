@@ -629,6 +629,10 @@ export function deleteComment({ photo, comment }) {
           photoId: photo.id,
           commentId: comment.id,
         })
+        Toast.show({
+          text1: "Comment deleted.",
+          type: "success",
+        })
       } else {
         Toast.show({
           text1: "Unable to delete comment.",
