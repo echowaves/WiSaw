@@ -14,11 +14,6 @@ export const initialState = {
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case ACTION_TYPES.SET_FEEDBACK_TEXT:
-      return {
-        ...state,
-        feedbackText: action.feedbackText,
-      }
     case ACTION_TYPES.SUBMIT_FEEDBACK_STARTED:
       return {
         ...state,

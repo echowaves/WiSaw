@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
@@ -25,14 +25,23 @@ import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
 
+const maxStringLength = 2000
+
 const FeedbackScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const feedbackText = useSelector(state => state.feedback.feedbackText)
   const loading = useSelector(state => state.feedback.loading)
   const errorMessage = useSelector(state => state.feedback.errorMessage)
   const finished = useSelector(state => state.feedback.finished)
+
+  const [inputText, _setInputText] = useState('')
+
+  const inputTextRef = React.useRef(inputText)
+  const setInputText = data => {
+    inputTextRef.current = data
+    _setInputText(data)
+  }
 
   useEffect(() => {
     navigation.setOptions({
@@ -82,7 +91,7 @@ const FeedbackScreen = () => {
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitFeedback({ feedbackText }))
+    dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
   }
 
   if (finished && errorMessage.length === 0) {
@@ -116,12 +125,14 @@ const FeedbackScreen = () => {
       )}
       <TextInput
         rowSpan={5}
-        onChangeText={feedbackText => dispatch(reducer.setFeedbackText({ feedbackText }))}
+        onChangeText={inputValue => {
+          setInputText(inputValue.slice(0, maxStringLength))
+        }}
         placeholder="Type your feedback here and click send."
         placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
         multiline
         numberOfLines={10}
-        maxLength={1000}
+        maxLength={maxStringLength}
         style={
           {
             color: CONST.MAIN_COLOR,
