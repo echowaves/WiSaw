@@ -14,6 +14,7 @@ import {
   InteractionManager,
   SafeAreaView,
   StyleSheet,
+  ScrollView,
 } from 'react-native'
 
 import {
@@ -25,7 +26,7 @@ import {
 
 import { Col, Row, Grid } from "react-native-easy-grid"
 
-import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
+import ImageZoom from 'react-native-image-pan-zoom'
 
 import PropTypes from 'prop-types'
 
@@ -46,7 +47,7 @@ const Photo = ({ item }) => {
   const dispatch = useDispatch()
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
-
+  const imageHeight = height - 200
   const bans = useSelector(state => state.photo.bans)
   const likes = useSelector(state => state.photo.likes)
 
@@ -79,7 +80,7 @@ const Photo = ({ item }) => {
   const styles = StyleSheet.create({
     photoContainer: {
       width,
-      height: height - 200,
+      height: imageHeight,
       position: 'absolute',
       top: 0,
       bottom: 0,
@@ -87,6 +88,62 @@ const Photo = ({ item }) => {
       left: 0,
     },
   })
+
+  const renderPhotoRow = () => (
+    <ImageZoom
+      cropWidth={width}
+      cropHeight={imageHeight}
+      imageWidth={width}
+      imageHeight={imageHeight}>
+      <CachedImage
+        source={{ uri: `${item.getThumbUrl}` }}
+        cacheKey={`${item.id}t`}
+        backgroundColor="transparent"
+        resizeMode="contain"
+        style={
+          styles.photoContainer
+        }
+      />
+      <LinearProgress
+        color={
+          CONST.MAIN_COLOR
+        }
+        style={{
+          alignSelf: 'center',
+          width: width / 4,
+          position: 'absolute',
+          top: imageHeight / 2,
+
+        }}
+      />
+      <CachedImage
+        source={{ uri: `${item.getImgUrl}` }}
+        cacheKey={`${item.id}i`}
+        backgroundColor="transparent"
+        resizeMode="contain"
+        style={
+          styles.photoContainer
+        }
+      />
+    </ImageZoom>
+  )
+
+  const renderCommentsStats = () => {
+    if (!item.comments) {
+      return (
+        <LinearProgress color={
+          CONST.MAIN_COLOR
+        }
+        />
+      )
+    }
+    return (
+      <Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR }}>
+        {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
+      </Text>
+      // (renderCommentsRows())
+    )
+  }
 
   const renderCommentButtons = ({ photo, comment }) => {
     if (!comment.hiddenButtons) {
@@ -130,7 +187,7 @@ const Photo = ({ item }) => {
     return <View />
   }
 
-  const renderComments = () => {
+  const renderCommentsRows = () => {
     if (item.comments) {
       return item.comments.map((comment, i) => (
         <Row
@@ -431,128 +488,80 @@ const Photo = ({ item }) => {
   }
 
   return (
-    <SafeAreaView>
+    <ScrollView style={{ margin: 1 }}>
       <Grid>
-        <Row
-          style={
-            styles.photoContainer
-          }>
-          <ReactNativeZoomableView
-            maxZoom={3}
-            minZoom={1}
-            zoomStep={3}
-            initialZoom={1}
-            bindToBorders>
-            <CachedImage
-              source={{ uri: `${item.getThumbUrl}` }}
-              cacheKey={`${item.id}t`}
-              backgroundColor="transparent"
-              resizeMode="contain"
-              style={
-                styles.photoContainer
-              }
-            />
-            <LinearProgress
-              color={
-                CONST.MAIN_COLOR
-              }
-              style={{
-                alignSelf: 'center',
-                width: width / 4,
-              }}
-            />
-            <CachedImage
-              source={{ uri: `${item.getImgUrl}` }}
-              cacheKey={`${item.id}i`}
-              backgroundColor="transparent"
-              resizeMode="contain"
-              style={
-                styles.photoContainer
-              }
-            />
-          </ReactNativeZoomableView>
+        <Row>
+          {renderPhotoRow()}
         </Row>
-        {// {!item.comments && (
-        //   <LinearProgress color={
-        //     CONST.MAIN_COLOR
-        //   }
-        //   // <Spinner
-        //   //   color={
-        //   //     CONST.MAIN_COLOR
-        //   //   }
-        //   />
-        // )}
-        // { item.comments && item.comments.length > 0
-        //         && (
-        //           <Row style={{ marginTop: 5 }}>
-        //             <Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR }}>
-        //               {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
-        //             </Text>
-        //           </Row>
-        //         )}
-        // { item.comments && item.comments.length > 0
-        //         && (renderComments())}
-        // <Row
-        //   style={{
-        //     width: '100%',
-        //     marginVertical: 10,
-        //   }}
-        //   onPress={
-        //     () => navigation.navigate('ModalInputTextScreen', { item })
-        //   }>
-        //   <Col style={
-        //     {
-        //       marginLeft: 30,
-        //       width: 50,
-        //     }
-        //   }
-        //   />
-        //   <Col
-        //     style={
-        //       {
-        //         flex: 1,
-        //         justifyContent: 'center',
-        //         alignItems: 'center',
-        //         height: 50,
-        //       }
-        //     }>
-        //     <Text
-        //       style={{
-        //         fontSize: 25,
-        //         color: CONST.MAIN_COLOR,
-        //       }}>
-        //       add comment
-        //     </Text>
-        //   </Col>
-        //   <Col
-        //     style={
-        //       {
-        //         justifyContent: 'center',
-        //         height: 50,
-        //         marginRight: 30,
-        //         width: 50,
-        //       }
-        //     }>
-        //     <Ionicons
-        //       name="add-circle"
-        //       style={
-        //         {
-        //           fontSize: 45,
-        //           color: CONST.MAIN_COLOR,
-        //         }
-        //       }
-        //     />
-        //   </Col>
-        // </Row>
-        // <Row>
-        //   { item.recognitions
-        //         && (renderRecognitions(item.recognitions))}
-        // </Row>
-        // <Row style={{ height: 110 }} />
+        <Row style={{ paddingTop: 5 }}>
+          {renderCommentsStats()}
+        </Row>
+        <Row style={{ paddingTop: 5 }}>
+          {renderCommentsStats()}
+        </Row>
+
+        { /* <Row
+          style={{
+            width: '100%',
+            marginVertical: 10,
+          }}
+          onPress={
+            () => navigation.navigate('ModalInputTextScreen', { item })
+          }>
+          <Col style={
+            {
+              marginLeft: 30,
+              width: 50,
+            }
+          }
+          />
+          <Col
+            style={
+              {
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 50,
+              }
+            }>
+            <Text
+              style={{
+                fontSize: 25,
+                color: CONST.MAIN_COLOR,
+              }}>
+              add comment
+            </Text>
+          </Col>
+          <Col
+            style={
+              {
+                justifyContent: 'center',
+                height: 50,
+                marginRight: 30,
+                width: 50,
+              }
+            }>
+            <Ionicons
+              name="add-circle"
+              style={
+                {
+                  fontSize: 45,
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+            />
+          </Col>
+        </Row>
+        <Row>
+          { item.recognitions
+                && (renderRecognitions(item.recognitions))}
+        </Row>
+        <Row style={{ height: 110 }} />
         }
+        */}
+        {/* renderFooter() */}
       </Grid>
-      {/* renderFooter() */}
-    </SafeAreaView>
+    </ScrollView>
   )
 }
 

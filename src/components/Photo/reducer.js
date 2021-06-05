@@ -5,6 +5,8 @@ import * as FileSystem from 'expo-file-system'
 
 import axios from 'axios'
 
+import Toast from 'react-native-toast-message'
+
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
 import * as CONST from '../../consts'
@@ -164,9 +166,9 @@ export function watchPhoto({ item }) {
         item,
       })
       Toast.show({
-        text: "Unable to watch photo. Potential Network Issue.",
-        buttonText: "OK",
-        type: "warning",
+        text1: 'Unable to watch photo.',
+        text2: 'Potential Network Issue.',
+        type: "error",
       })
     }
   }
@@ -206,9 +208,9 @@ export function unwatchPhoto({ item }) {
         item,
       })
       Toast.show({
-        text: "Unable to unwatch photo. Potential Network Issue.",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Unable to unwatch photo.",
+        text2: "Potential Network Issue.",
+        type: "error",
       })
     }
   }
@@ -243,8 +245,7 @@ export function banPhoto({ item }) {
           photoId: item.id,
         })
         Toast.show({
-          text: "Abusive Photo reported.",
-          buttonText: "OK",
+          text1: "Abusive Photo reported.",
           type: "success",
         })
       } else {
@@ -285,23 +286,22 @@ export function deletePhoto({ item }) {
           photoId: item.id,
         })
         Toast.show({
-          text: "Photo deleted. No one will be able to see it any more.",
-          buttonText: "OK",
-          type: "warning",
-          duration: 5000,
+          text1: "Photo deleted.",
+          text2: "No one will be able to see it any more.",
+          type: "success",
         })
       } else {
         Toast.show({
-          text: "Unable to delete photo. Try again later.",
-          buttonText: "OK",
-          type: "warning",
+          text1: "Unable to delete photo.",
+          text2: "Try again later.",
+          type: "error",
         })
       }
     } catch (err) {
       Toast.show({
-        text: "Unable to delete photo. Potential Network Issue.",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Unable to delete photo.",
+        text2: "Potential Network Issue.",
+        type: "error",
       })
     }
   }
@@ -362,9 +362,9 @@ export function sharePhoto({ item }) {
       )
     } catch (err) {
       Toast.show({
-        text: "Unable to share photo. Sharing may not be supported on your device yet. Try again later.",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Unable to share photo.",
+        text2: "Sharing may not be supported on your device yet. Try again later.",
+        type: "error",
       })
     }
   }
@@ -411,8 +411,7 @@ export function submitComment({ inputText, uuid, item }) {
           comment: response.data.comment,
         })
         Toast.show({
-          text: "Comment submitted.",
-          buttonText: "OK",
+          text1: "Comment submitted.",
           type: "success",
         })
         dispatch(watchPhoto({ item }))
@@ -422,9 +421,9 @@ export function submitComment({ inputText, uuid, item }) {
           error: 'failed submitting comment',
         })
         Toast.show({
-          text: "Unable to submit comment. Try again later.",
-          buttonText: "OK",
-          type: "warning",
+          text1: "Unable to submit comment.",
+          text2: "Try again later.",
+          type: "error",
         })
       }
     } catch (err) {
@@ -433,9 +432,8 @@ export function submitComment({ inputText, uuid, item }) {
         error: JSON.stringify(err),
       })
       Toast.show({
-        text: "Unable to submit comment.",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Unable to submit comment.",
+        type: "error",
       })
     }
   }
@@ -483,9 +481,9 @@ export function getComments({ item }) {
           comments: [],
         })
         Toast.show({
-          text: "Unable to load comments. Try again later.",
-          buttonText: "OK",
-          type: "warning",
+          text1: "Unable to load comments.",
+          text2: "Try again later.",
+          type: "error",
         })
       }
     } catch (err) {
@@ -498,9 +496,9 @@ export function getComments({ item }) {
         comments: [],
       })
       Toast.show({
-        text: "Unable to load comments. Potential Network Issue.",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Unable to load comments.",
+        text2: "Potential Network Issue.",
+        type: "error",
       })
     }
   }
@@ -553,9 +551,9 @@ export function getRecognitions({ item }) {
         recognitions: null,
       })
       Toast.show({
-        text: "Unable to load recognitions. Potential Network Issue.",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Unable to load recognitions.",
+        text2: "Potential Network Issue.",
+        type: "error",
       })
     }
   }
@@ -590,9 +588,9 @@ export function checkIsPhotoWatched({ item }) {
         })
       } else {
         Toast.show({
-          text: "Unable to check if photo is watched. Potential Network Issue.",
-          buttonText: "OK",
-          type: "warning",
+          text1: "Unable to check if photo is watched.",
+          text2: "Potential Network Issue.",
+          type: "error",
         })
       }
     }
@@ -633,16 +631,16 @@ export function deleteComment({ photo, comment }) {
         })
       } else {
         Toast.show({
-          text: "Unable to delete comment. Try again later.",
-          buttonText: "OK",
-          type: "warning",
+          text1: "Unable to delete comment.",
+          text2: "Try again later.",
+          type: "error",
         })
       }
     } catch (err) {
       Toast.show({
-        text: "Unable to delete comment. Potential Network Issue.",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Unable to delete comment.",
+        text2: "Potential Network Issue.",
+        type: "error",
       })
     }
   }
