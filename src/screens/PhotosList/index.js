@@ -208,7 +208,7 @@ const PhotosList = () => {
   const updateNavBar = () => {
     if (netAvailable) {
       navigation.setOptions({
-        headerTitle: renderHeaderTitle(),
+        headerTitle: renderHeaderTitle,
         headerLeft: renderHeaderLeft,
         headerRight: renderHeaderRight,
       })
@@ -373,7 +373,7 @@ const PhotosList = () => {
     <FontAwesome
       name="globe"
       size={23}
-      color={activeSegment === 0 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
+      color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(0))
@@ -387,7 +387,7 @@ const PhotosList = () => {
     <FontAwesome
       name="eye"
       size={23}
-      color={activeSegment === 1 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
+      color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(1))
@@ -401,7 +401,7 @@ const PhotosList = () => {
     <FontAwesome
       name="search"
       size={23}
-      color={activeSegment === 2 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
+      color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(2))
@@ -413,8 +413,8 @@ const PhotosList = () => {
 
   const renderHeaderTitle = () => (
     <ButtonGroup
-      containerStyle={{ width: '100%' }}
-      buttonStyle={{ width: 60, alignSelf: 'center' }}
+      containerStyle={{ width: 150, height: 30 }}
+      buttonStyle={{ alignSelf: 'center' }}
       buttons={[{ element: segment0 }, { element: segment1 }, { element: segment2 }]}
     />
   )
