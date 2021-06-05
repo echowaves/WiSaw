@@ -131,9 +131,10 @@ const Photo = ({ item }) => {
   const renderCommentsStats = () => {
     if (!item.comments) {
       return (
-        <LinearProgress color={
-          CONST.MAIN_COLOR
-        }
+        <LinearProgress
+          color={
+            CONST.MAIN_COLOR
+          }
         />
       )
     }
@@ -142,7 +143,12 @@ const Photo = ({ item }) => {
     }
 
     return (
-      <Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR }}>
+      <Text
+        style={{
+          paddingTop: 5,
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+        }}>
         {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
       </Text>
     )
@@ -152,12 +158,9 @@ const Photo = ({ item }) => {
     if (!comment.hiddenButtons) {
       return (
         <View style={{
-          flex: 1,
-          flexDirection: 'row',
           position: 'absolute',
-          bottom: 10,
-          right: 10,
-
+          right: 1,
+          bottom: 1,
         }}>
           <FontAwesome
             onPress={
@@ -218,48 +221,53 @@ const Photo = ({ item }) => {
     }
   }
 
-  const renderAddCommentsRow = () => (
-    <TouchableOpacity
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-      }}
-      onPress={
-        () => navigation.navigate('ModalInputTextScreen', { item })
-      }>
-      <Col
-        size={2}
-      />
-      <Col
-        size={6}
-        style={
-          {
-            justifyContent: 'center',
-            alignItems: 'center',
-          }
+  const renderAddCommentsRow = () => {
+    if (!item.comments) {
+      return <Text />
+    }
+    return (
+      <TouchableOpacity
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+        }}
+        onPress={
+          () => navigation.navigate('ModalInputTextScreen', { item })
         }>
-        <Text
-          style={{
-            fontSize: 25,
-            color: CONST.MAIN_COLOR,
-          }}>
-          add comment
-        </Text>
-      </Col>
-      <Col
-        size={2}>
-        <Ionicons
-          name="add-circle"
+        <Col
+          size={2}
+        />
+        <Col
+          size={6}
           style={
             {
-              fontSize: 45,
-              color: CONST.MAIN_COLOR,
+              justifyContent: 'center',
+              alignItems: 'center',
             }
-          }
-        />
-      </Col>
-    </TouchableOpacity>
-  )
+          }>
+          <Text
+            style={{
+              fontSize: 25,
+              color: CONST.MAIN_COLOR,
+            }}>
+            add comment
+          </Text>
+        </Col>
+        <Col
+          size={2}>
+          <Ionicons
+            name="add-circle"
+            style={
+              {
+                fontSize: 45,
+                color: CONST.MAIN_COLOR,
+              }
+            }
+          />
+        </Col>
+      </TouchableOpacity>
+    )
+  }
 
   const renderRecognitions = recognition => {
     const labels = jmespath.search(recognition, "metaData.Labels[]")
@@ -538,7 +546,7 @@ const Photo = ({ item }) => {
         <Row>
           {renderPhotoRow()}
         </Row>
-        <Row style={{ paddingTop: 5 }}>
+        <Row>
           {renderCommentsStats()}
         </Row>
         <Row>

@@ -4,8 +4,9 @@ import { useDispatch, useSelector } from "react-redux"
 
 import {
   Text,
-  View,
   TextInput,
+  SafeAreaView,
+  StyleSheet,
 } from 'react-native'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
@@ -44,6 +45,12 @@ const ModalInputText = ({ route }) => {
       headerBackTitle: <Text />,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+  })
 
   const renderHeaderLeft = () => (
     <FontAwesome
@@ -86,51 +93,46 @@ const ModalInputText = ({ route }) => {
   }
 
   return (
-    <Container>
-      <Content
-        padder>
-        <CachedImage
-          source={{ uri: `${item.getThumbUrl}` }}
-          cacheKey={`${item.id}t`}
-          style={{
-            alignSelf: 'center',
-            width: 150,
-            height: 100,
-            borderRadius: 10,
-          }}
-        />
-        <TextInput
-          autoFocus
-          blurOnSubmit={false}
-          rowSpan={5}
-          bordered
-          placeholder="Wanna share any thoughts?"
-          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-          style={
-            {
-              color: CONST.MAIN_COLOR,
-            }
+    <SafeAreaView style={styles.container}>
+      <CachedImage
+        source={{ uri: `${item.getThumbUrl}` }}
+        cacheKey={`${item.id}t`}
+        style={{
+          alignSelf: 'center',
+          width: 150,
+          height: 100,
+          borderRadius: 10,
+        }}
+      />
+      <TextInput
+        autoFocus
+        blurOnSubmit={false}
+        rowSpan={5}
+        bordered
+        placeholder="Wanna share any thoughts?"
+        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+        style={
+          {
+            color: CONST.MAIN_COLOR,
           }
-          onChangeText={inputValue => {
-            setInputText(inputValue.slice(0, maxStringLength))
-          }}
-          value={inputText}
-        />
-        <Text style={{
-          flex: 1,
-          flexDirection: 'row',
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          color: CONST.MAIN_COLOR,
+        }
+        onChangeText={inputValue => {
+          setInputText(inputValue.slice(0, maxStringLength))
+        }}
+        value={inputText}
+      />
+      <Text style={{
+        flex: 1,
+        flexDirection: 'row',
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        color: CONST.MAIN_COLOR,
 
-        }}>
-          {maxStringLength - inputText.length}
-        </Text>
-
-      </Content>
-
-    </Container>
+      }}>
+        {maxStringLength - inputText.length}
+      </Text>
+    </SafeAreaView>
 
   )
 }
