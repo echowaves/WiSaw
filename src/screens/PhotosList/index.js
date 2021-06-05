@@ -146,14 +146,9 @@ const PhotosList = () => {
           "WiSaw just updated over the Air", "Click OK to Reload the app",
           [
             {
-              text: 'OK',
+              text1: 'OK',
               onPress: async () => {
                 await Updates.reloadAsync()
-                // Toast.show({
-                //   text: "WiSaw updated.",
-                //   buttonText: "OK",
-                //   type: "success",
-                // })
               },
             },
           ],
@@ -162,9 +157,10 @@ const PhotosList = () => {
     } catch (error) {
     // handle or log error
       Toast.show({
-        text: `Failed to get over the air update: ${error}`,
-        buttonText: "OK",
-        type: "warning",
+        text1: `Failed to get over the air update:`,
+        text2: `${error}`,
+        type: "error",
+        position: 'bottom',
       })
     }
   }
@@ -293,10 +289,8 @@ const PhotosList = () => {
       } catch (err) {
         position = null
         Toast.show({
-          text: 'unable to get location',
-          buttonText: "OK",
-          type: "danger",
-          duration: 5000,
+          text1: 'Unable to get location',
+          type: "error",
         })
       }
     }
@@ -382,10 +376,6 @@ const PhotosList = () => {
     <FontAwesome
       name="globe"
       size={23}
-      style={{
-        paddingLeft: 10,
-        paddingRight: 10,
-      }}
       color={activeSegment === 0 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
       onPress={
         async () => {
@@ -400,10 +390,6 @@ const PhotosList = () => {
     <FontAwesome
       name="eye"
       size={23}
-      style={{
-        paddingLeft: 10,
-        paddingRight: 10,
-      }}
       color={activeSegment === 1 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
       onPress={
         async () => {
@@ -418,10 +404,6 @@ const PhotosList = () => {
     <FontAwesome
       name="search"
       size={23}
-      style={{
-        paddingLeft: 10,
-        paddingRight: 10,
-      }}
       color={activeSegment === 2 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
       onPress={
         async () => {
@@ -432,12 +414,11 @@ const PhotosList = () => {
     />
   )
 
-  const buttons = [{ element: segment0 }, { element: segment1 }, { element: segment2 }]
-
   const renderHeaderTitle = () => (
-    <Header
-      buttons={buttons}
-      style={{ height: '100%', backgroundColor: 'rgba(0, 0, 0, 0)' }}
+    <ButtonGroup
+      containerStyle={{ width: '100%' }}
+      buttonStyle={{ width: 60, alignSelf: 'center' }}
+      buttons={[{ element: segment0 }, { element: segment1 }, { element: segment2 }]}
     />
   )
 
@@ -535,9 +516,8 @@ const PhotosList = () => {
       }
     } else {
       Toast.show({
-        text: "Search for more than 3 characters",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Search for more than 3 characters",
+        type: "error",
       })
     }
   }
@@ -654,41 +634,47 @@ const PhotosList = () => {
           }>
           <Card containerStyle={{ padding: 0 }}>
             <ListItem style={{ borderRadius: 10 }}>
-              <Text> * When you take a photo with WiSaw app,
+              <Text> When you take a photo with WiSaw app,
                 it will be added to a Photo Album on your phone,
                 as well as posted to global feed in the cloud.
               </Text>
             </ListItem>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text> * People close-by can see your photos.</Text>
-            </ListItem>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text> * You can see other people&#39;s photos too.
-              </Text>
-            </ListItem>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-            </ListItem>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text>* No one will tolerate objectionable content or abusive users.</Text>
-            </ListItem>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text>* The abusive users will be banned from WiSaw by other users.</Text>
-            </ListItem>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
+            <Divider />
+            <ListItem>
+              <Text>People close-by can see your photos.</Text>
             </ListItem>
             <Divider />
-            <ListItem style={{ borderRadius: 10 }}>
+            <ListItem>
+              <Text>You can see other people&#39;s photos too.
+              </Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>No one will tolerate objectionable content or abusive users.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>The abusive users will be banned from WiSaw by other users.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>By using WiSaw I agree to Terms and Conditions.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem style={{ alignItems: 'center' }}>
               <Button
+                title="I Agree"
                 type="outline"
                 onPress={
                   () => {
                     dispatch(reducer.acceptTandC())
                   }
-                }>
-                <Text>  Agree  </Text>
-              </Button>
+                }
+              />
             </ListItem>
           </Card>
         </Modal>

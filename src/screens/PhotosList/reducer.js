@@ -390,7 +390,7 @@ export function getPhotos() {
           errorMessage: err.toString(),
         })
         Toast.show({
-          text: err.toString(),
+          text1: err.toString(),
         })
       }
     }
