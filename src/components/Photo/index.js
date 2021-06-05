@@ -141,7 +141,6 @@ const Photo = ({ item }) => {
       <Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR }}>
         {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
       </Text>
-      // (renderCommentsRows())
     )
   }
 
@@ -189,30 +188,29 @@ const Photo = ({ item }) => {
 
   const renderCommentsRows = () => {
     if (item.comments) {
-      return item.comments.map((comment, i) => (
-        <Row
-          key={comment.id}
-          style={{
-            marginLeft: 5,
-            marginRight: 15,
-          }}>
-          <TouchableOpacity
-            onPress={
-              () => {
-                dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
-              }
-            }>
-            <Card>
-              <Text
-                style={{
-                  color: CONST.TEXT_COLOR,
-                }}>{comment.comment}
-              </Text>
-              {renderCommentButtons({ photo: item, comment })}
-            </Card>
-          </TouchableOpacity>
-        </Row>
-      ))
+      return (
+        <View>
+          {item.comments.map((comment, i) => (
+            <Row key={comment.id}>
+              <TouchableOpacity
+                onPress={
+                  () => {
+                    dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
+                  }
+                }>
+                <Card width={width - 30}>
+                  <Text
+                    style={{
+                      color: CONST.TEXT_COLOR,
+                    }}>{comment.comment}
+                  </Text>
+                  {renderCommentButtons({ photo: item, comment })}
+                </Card>
+              </TouchableOpacity>
+            </Row>
+          ))}
+        </View>
+      )
     }
   }
 
@@ -497,9 +495,8 @@ const Photo = ({ item }) => {
           {renderCommentsStats()}
         </Row>
         <Row style={{ paddingTop: 5 }}>
-          {renderCommentsStats()}
+          {renderCommentsRows()}
         </Row>
-
         { /* <Row
           style={{
             width: '100%',
