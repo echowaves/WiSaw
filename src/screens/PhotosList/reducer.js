@@ -390,7 +390,9 @@ export function getPhotos() {
           errorMessage: err.toString(),
         })
         Toast.show({
-          text1: err.toString(),
+          text1: 'Error',
+          text2: err.toString(),
+          type: "error",
         })
       }
     }
@@ -607,7 +609,7 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
       Toast.show({
-        text: 'Failed to upload file, refresh to try again.',
+        text1: 'Failed to upload file, refresh to try again.',
       })
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())

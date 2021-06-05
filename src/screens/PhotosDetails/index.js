@@ -10,6 +10,11 @@ import {
   View,
 } from 'react-native'
 
+import {
+  Button,
+  Text,
+} from 'react-native-elements'
+
 import { useDispatch, useSelector } from "react-redux"
 
 import Swiper from 'react-native-swiper'
@@ -58,18 +63,20 @@ const PhotosDetails = ({ route }) => {
         }
         style={{
           backgroundColor: '#ffffff',
-        }}>
-        <FontAwesome
-          name="chevron-left"
-          size={30}
-          style={
-            {
-              marginLeft: 10,
-              color: CONST.MAIN_COLOR,
+        }}
+        icon={(
+          <FontAwesome
+            name="chevron-left"
+            size={30}
+            style={
+              {
+                marginLeft: 10,
+                color: CONST.MAIN_COLOR,
+              }
             }
-          }
-        />
-      </Button>
+          />
+        )}
+      />
     </View>
   )
 

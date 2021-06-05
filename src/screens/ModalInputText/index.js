@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux"
 import {
   Text,
   View,
+  TextInput,
 } from 'react-native'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
@@ -107,25 +108,23 @@ const ModalInputText = ({ route }) => {
             borderRadius: 10,
           }}
         />
-        <Form>
-          <Textarea
-            autoFocus
-            blurOnSubmit={false}
-            rowSpan={5}
-            bordered
-            placeholder="Wanna share any thoughts?"
-            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
-              }
+        <TextInput
+          autoFocus
+          blurOnSubmit={false}
+          rowSpan={5}
+          bordered
+          placeholder="Wanna share any thoughts?"
+          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+          style={
+            {
+              color: CONST.MAIN_COLOR,
             }
-            onChangeText={inputValue => {
-              setInputText(inputValue.slice(0, maxStringLength))
-            }}
-            value={inputText}
-          />
-        </Form>
+          }
+          onChangeText={inputValue => {
+            setInputText(inputValue.slice(0, maxStringLength))
+          }}
+          value={inputText}
+        />
         <Text style={{
           flex: 1,
           flexDirection: 'row',

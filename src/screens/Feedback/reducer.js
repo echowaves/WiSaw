@@ -1,4 +1,5 @@
 import axios from 'axios'
+import Toast from 'react-native-toast-message'
 
 import * as CONST from '../../consts.js'
 
@@ -93,7 +94,9 @@ export function submitFeedback({ feedbackText }) {
         errorMessage: err.toString(),
       })
       Toast.show({
-        text: err.toString(),
+        text1: 'Error',
+        text2: err.toString(),
+        type: "error",
       })
     }
   }
