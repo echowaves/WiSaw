@@ -322,29 +322,23 @@ const PhotosList = () => {
           flex: 1,
           position: 'absolute',
         },
-        orientation === 'portrait' && styles.cameraButtonPortrait,
-        orientation === 'landscape' && styles.cameraButtonPortrait,
-        // orientation === 'landscape' && styles.cameraButtonLandscape,
+        styles.cameraButtonPortrait,
       ]
     }>
-      <View>
-        <Button
-          type="clear"
-          style={
-            {
-              height: 100,
-              width: 100,
-              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }
+      <Button
+        type="clear"
+        containerStyle={
+          {
+            height: 100,
+            width: 100,
+            backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 50,
           }
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking()
-            }
-          }>
+        }
+        icon={(
           <FontAwesome
             name="camera"
             size={60}
@@ -354,21 +348,26 @@ const PhotosList = () => {
               }
             }
           />
-        </Button>
-        {pendingUploadsCount > 0 && (
-          <Text
-            style={
-              {
-                position: 'absolute',
-                alignSelf: 'center',
-                color: 'white',
-                backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-              }
-            }>
-            {pendingUploadsCount}
-          </Text>
         )}
-      </View>
+        onPress={
+          () => {
+            checkPermissionsForPhotoTaking()
+          }
+        }
+      />
+      {pendingUploadsCount > 0 && (
+        <Text
+          style={
+            {
+              position: 'absolute',
+              alignSelf: 'center',
+              color: 'white',
+              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+            }
+          }>
+          {pendingUploadsCount}
+        </Text>
+      )}
     </View>
   )
 
