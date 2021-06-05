@@ -269,33 +269,43 @@ const Photo = ({ item }) => {
     )
   }
 
-  const renderRecognitions = recognition => {
-    const labels = jmespath.search(recognition, "metaData.Labels[]")
-    const textDetections = jmespath.search(recognition, "metaData.TextDetections[?Type=='LINE']")
-    const moderationLabels = jmespath.search(recognition, "metaData.ModerationLabels[]")
+  const renderRecognitions = () => {
+    const { recognitions } = item
+    if (!recognitions) {
+      return (<Text />)
+    }
+    const labels = jmespath.search(recognitions, "metaData.Labels[]")
+    const textDetections = jmespath.search(recognitions, "metaData.TextDetections[?Type=='LINE']")
+    const moderationLabels = jmespath.search(recognitions, "metaData.ModerationLabels[]")
 
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (
-          <View style={{ paddingBottom: 20 }}>
+          <Card
+            width={width - 100}
+            style={{ paddingBottom: 20 }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized tags:</Text>
             {labels.map(label => (
               <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
             ))}
-          </View>
+          </Card>
         )}
 
         {textDetections.length > 0 && (
-          <View style={{ paddingBottom: 20 }}>
+          <Card
+            width={width - 100}
+            style={{ paddingBottom: 20 }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized text:</Text>
             {textDetections.map(text => (
               <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{stringifyObject(text.DetectedText).replace(/'/g, '')}</Text>
             ))}
-          </View>
+          </Card>
         )}
 
         {moderationLabels.length > 0 && (
-          <View style={{ paddingBottom: 20 }}>
+          <Card
+            width={width - 100}
+            style={{ paddingBottom: 20 }}>
             <Text style={{
               fontWeight: 'bold', color: 'red', textAlignVertical: "center", textAlign: "center",
             }}>AI moderation tags:
@@ -307,7 +317,7 @@ const Photo = ({ item }) => {
                 }}>{stringifyObject(label.Name).replace(/'/g, '')}
               </Text>
             ))}
-          </View>
+          </Card>
         )}
       </View>
     )
@@ -556,14 +566,12 @@ const Photo = ({ item }) => {
           {renderAddCommentsRow()}
         </Row>
 
-        { /*
         <Row>
-          { item.recognitions
-                && (renderRecognitions(item.recognitions))}
+          {renderRecognitions()}
         </Row>
+
         <Row style={{ height: 110 }} />
-        }
-        */}
+
         {/* renderFooter() */}
       </Grid>
     </ScrollView>
