@@ -12,16 +12,15 @@ import {
   TouchableOpacity,
   Alert,
   InteractionManager,
-  SafeAreaView,
   StyleSheet,
   ScrollView,
 } from 'react-native'
 
 import {
-  Button,
   Text,
   Card,
   LinearProgress,
+  Divider,
 } from 'react-native-elements'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -565,7 +564,7 @@ const Photo = ({ item }) => {
         <Row>
           {renderAddCommentsRow()}
         </Row>
-
+        <Divider />
         <Row>
           {renderRecognitions()}
         </Row>
