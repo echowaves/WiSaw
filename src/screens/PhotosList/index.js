@@ -160,7 +160,6 @@ const PhotosList = () => {
         text1: `Failed to get over the air update:`,
         text2: `${error}`,
         type: "error",
-        position: 'bottom',
       })
     }
   }
