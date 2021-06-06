@@ -21,6 +21,8 @@ import {
   Card,
   LinearProgress,
   Divider,
+  Tab,
+  Button,
 } from 'react-native-elements'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -408,172 +410,178 @@ const Photo = ({ item }) => {
     }
   }
 
-  const renderFooter = () => {
-    if (item.watched === undefined) {
-      return (
-        <Text>Footer</Text>
-        // <Footer
-        //   style={{
-        //     backgroundColor: 'white',
-        //   }}>
-        //   <Spinner
-        //     color={
-        //       CONST.MAIN_COLOR
-        //     }
-        //   />
-        // </Footer>
-      )
-    }
-    return (
-      <Text>text2</Text>
-      // <Footer
-      //   style={{
-      //     backgroundColor: '#fafafa',
-      //   }}>
-      //   <FooterTab style={{
-      //     backgroundColor: '#fafafa',
-      //   }}>
-      //
-      //     {/* delete button */}
-      //     <Button
-      //       key="delete"
-      //       vertical
-      //       onPress={
-      //         () => handleDelete({ item })
-      //       }>
-      //       <FontAwesome
-      //         name="trash"
-      //         style={{
-      //           color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-      //         }}
-      //         size={30}
-      //       />
-      //       <Text style={{ fontSize: 10 }}>
-      //         Delete
-      //       </Text>
-      //     </Button>
-      //
-      //     {/* ban button */}
-      //     <Button
-      //       key="ban"
-      //       vertical
-      //       onPress={
-      //         () => handleBan({ item })
-      //       }>
-      //       <FontAwesome
-      //         name="ban"
-      //         style={{
-      //           color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-      //         }}
-      //         size={30}
-      //       />
-      //       <Text style={{ fontSize: 10 }}>
-      //         Ban
-      //       </Text>
-      //     </Button>
-      //
-      //     {/* watch button */}
-      //     <Button
-      //       key="watch"
-      //       onPress={
-      //         () => handleFlipWatch()
-      //       }>
-      //       <FontAwesome
-      //         name={item.watched ? "eye" : "eye-slash"}
-      //         style={
-      //           {
-      //             color: CONST.MAIN_COLOR,
-      //           }
-      //         }
-      //         size={30}
-      //       />
-      //       <Text style={{ fontSize: 10 }}>
-      //         {`${item.watched ? 'UnWatch' : 'Watch'}`}
-      //       </Text>
-      //     </Button>
-      //
-      //     {/* share button */}
-      //     <Button
-      //       key="share"
-      //       vertical
-      //       onPress={
-      //         () => {
-      //           dispatch(reducer.sharePhoto({ item }))
-      //         }
-      //       }>
-      //       <FontAwesome
-      //         name="share"
-      //         style={
-      //           {
-      //             color: CONST.MAIN_COLOR,
-      //           }
-      //         }
-      //         size={30}
-      //       />
-      //       <Text style={{ fontSize: 10 }}>
-      //         Share
-      //       </Text>
-      //     </Button>
-      //
-      //     {/* likes button */}
-      //     <Button
-      //       key="like"
-      //       vertical
-      //       badge={item.likes > 0}
-      //       onPress={
-      //         () => {
-      //           handleLike({ item })
-      //         }
-      //       }>
-      //       {item.likes > 0 && (
-      //         <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
-      //           <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
-      //         </Badge>
-      //       )}
-      //       <FontAwesome
-      //         name="thumbs-up"
-      //         style={
-      //           {
-      //             color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-      //           }
-      //         }
-      //         size={30}
-      //       />
-      //       <Text style={{ fontSize: 10 }}>
-      //         Like
-      //       </Text>
-      //     </Button>
-      //
-      //   </FooterTab>
-      // </Footer>
-    )
-  }
+  const renderFooter = () => (
+    // if (item.watched === undefined) {
+    <View
+      style={{
+        backgroundColor: 'white',
+        width,
+        height: 50,
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        left: 0,
+      }}>
+      <Tab>
+        <LinearProgress
+          color={
+            CONST.MAIN_COLOR
+          }
+        />
+      </Tab>
+    </View>
+  )
+
+  // }
+  // return (
+  //   <Text>text2</Text>
+  //   // <Footer
+  //   style={{
+  //     backgroundColor: '#fafafa',
+  //   }}>
+  //   <FooterTab style={{
+  //     backgroundColor: '#fafafa',
+  //   }}>
+  //
+  //     {/* delete button */}
+  //     <Button
+  //       key="delete"
+  //       vertical
+  //       onPress={
+  //         () => handleDelete({ item })
+  //       }>
+  //       <FontAwesome
+  //         name="trash"
+  //         style={{
+  //           color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+  //         }}
+  //         size={30}
+  //       />
+  //       <Text style={{ fontSize: 10 }}>
+  //         Delete
+  //       </Text>
+  //     </Button>
+  //
+  //     {/* ban button */}
+  //     <Button
+  //       key="ban"
+  //       vertical
+  //       onPress={
+  //         () => handleBan({ item })
+  //       }>
+  //       <FontAwesome
+  //         name="ban"
+  //         style={{
+  //           color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+  //         }}
+  //         size={30}
+  //       />
+  //       <Text style={{ fontSize: 10 }}>
+  //         Ban
+  //       </Text>
+  //     </Button>
+  //
+  //     {/* watch button */}
+  //     <Button
+  //       key="watch"
+  //       onPress={
+  //         () => handleFlipWatch()
+  //       }>
+  //       <FontAwesome
+  //         name={item.watched ? "eye" : "eye-slash"}
+  //         style={
+  //           {
+  //             color: CONST.MAIN_COLOR,
+  //           }
+  //         }
+  //         size={30}
+  //       />
+  //       <Text style={{ fontSize: 10 }}>
+  //         {`${item.watched ? 'UnWatch' : 'Watch'}`}
+  //       </Text>
+  //     </Button>
+  //
+  //     {/* share button */}
+  //     <Button
+  //       key="share"
+  //       vertical
+  //       onPress={
+  //         () => {
+  //           dispatch(reducer.sharePhoto({ item }))
+  //         }
+  //       }>
+  //       <FontAwesome
+  //         name="share"
+  //         style={
+  //           {
+  //             color: CONST.MAIN_COLOR,
+  //           }
+  //         }
+  //         size={30}
+  //       />
+  //       <Text style={{ fontSize: 10 }}>
+  //         Share
+  //       </Text>
+  //     </Button>
+  //
+  //     {/* likes button */}
+  //     <Button
+  //       key="like"
+  //       vertical
+  //       badge={item.likes > 0}
+  //       onPress={
+  //         () => {
+  //           handleLike({ item })
+  //         }
+  //       }>
+  //       {item.likes > 0 && (
+  //         <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
+  //           <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
+  //         </Badge>
+  //       )}
+  //       <FontAwesome
+  //         name="thumbs-up"
+  //         style={
+  //           {
+  //             color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+  //           }
+  //         }
+  //         size={30}
+  //       />
+  //       <Text style={{ fontSize: 10 }}>
+  //         Like
+  //       </Text>
+  //     </Button>
+  //
+  //   </FooterTab>
+  // </Footer>
+  // )
 
   return (
-    <ScrollView style={{ margin: 1 }}>
-      <Grid>
-        <Row>
-          {renderPhotoRow()}
-        </Row>
-        <Row>
-          {renderCommentsStats()}
-        </Row>
-        <Row>
-          {renderCommentsRows()}
-        </Row>
-        <Row>
-          {renderAddCommentsRow()}
-        </Row>
-        <Divider />
-        <Row>
-          {renderRecognitions()}
-        </Row>
-
-        <Row style={{ height: 110 }} />
-
-        {/* renderFooter() */}
-      </Grid>
-    </ScrollView>
+    <View>
+      <ScrollView style={{ margin: 1 }}>
+        <Grid>
+          <Row>
+            {renderPhotoRow()}
+          </Row>
+          <Row>
+            {renderCommentsStats()}
+          </Row>
+          <Row>
+            {renderCommentsRows()}
+          </Row>
+          <Row>
+            {renderAddCommentsRow()}
+          </Row>
+          <Divider />
+          <Row>
+            {renderRecognitions()}
+          </Row>
+          <Row style={{ height: 110 }} />
+        </Grid>
+      </ScrollView>
+      {renderFooter()}
+    </View>
   )
 }
 

@@ -467,9 +467,11 @@ const PhotosList = () => {
       style={
         {
           color: CONST.MAIN_COLOR,
+          backgroundColor: "white",
           width: '100%',
         }
       }
+      lightTheme
     />
   )
 
