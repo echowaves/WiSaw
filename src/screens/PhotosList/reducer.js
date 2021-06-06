@@ -516,8 +516,6 @@ const _checkUploadDirectory = async () => {
 }
 
 export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
-  await _checkUploadDirectory()
-
   // move file to cacheDir
   await FileSystem.moveAsync({
     from: uri,
@@ -528,7 +526,6 @@ export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
 }
 
 const _getPendingUploadFiles = async () => {
-  await _checkUploadDirectory()
   const files = await FileSystem.readDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
   return files
 }
@@ -671,7 +668,7 @@ const _uploadFile = async ({ item, uuid, location }) => {
 }
 
 export const cleanupCache = () => async (dispatch, getState) => {
-  // _checkUploadDirectory()
+  _checkUploadDirectory()
 
   const cacheDirectory = await FileSystem.getInfoAsync(CONST.IMAGE_CACHE_FOLDER)
   // create cacheDir if does not exist
