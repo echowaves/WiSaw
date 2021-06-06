@@ -21,8 +21,7 @@ import {
   Card,
   LinearProgress,
   Divider,
-  Tab,
-  Button,
+  Badge,
 } from 'react-native-elements'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -114,7 +113,6 @@ const Photo = ({ item }) => {
           width: width / 4,
           position: 'absolute',
           top: imageHeight / 2,
-
         }}
       />
       <CachedImage
@@ -324,6 +322,155 @@ const Photo = ({ item }) => {
     )
   }
 
+  const renderFooter = () => {
+    const { watched } = item
+    return (
+      <View
+        style={{
+          backgroundColor: 'white',
+          width,
+          height: 50,
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          left: 0,
+        }}>
+        <Divider />
+        { watched === undefined && (
+          <LinearProgress
+            color={
+              CONST.MAIN_COLOR
+            }
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              left: 0,
+            }}
+          />
+        )}
+        { watched !== undefined && (
+          <Grid>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* delete button */}
+              <FontAwesome
+                name="trash"
+                style={{
+                  color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+                }}
+                size={30}
+                onPress={
+                  () => handleDelete({ item })
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                Delete
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* ban button */}
+              <FontAwesome
+                name="ban"
+                style={{
+                  color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+                }}
+                size={30}
+                onPress={
+                  () => handleBan({ item })
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                Ban
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* watch button */}
+              <FontAwesome
+                name={item.watched ? "eye" : "eye-slash"}
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
+                }
+                size={30}
+                onPress={
+                  () => handleFlipWatch()
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                {`${item.watched ? 'UnWatch' : 'Watch'}`}
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* share button */}
+              <FontAwesome
+                name="share"
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
+                }
+                size={30}
+                onPress={
+                  () => {
+                    dispatch(reducer.sharePhoto({ item }))
+                  }
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                Share
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* likes button */}
+              <FontAwesome
+                name="thumbs-up"
+                style={
+                  {
+                    color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+                  }
+                }
+                size={30}
+                onPress={
+                  () => {
+                    handleLike({ item })
+                  }
+                }>
+                {item.likes > 0 && (
+                  <Badge
+                    badgeStyle={{
+                      backgroundColor: CONST.MAIN_COLOR,
+
+                    }}
+                    value={item.likes}
+                  />
+                )}
+              </FontAwesome>
+              <Text style={{ fontSize: 10 }}>
+                Like
+              </Text>
+            </Col>
+          </Grid>
+        )}
+      </View>
+    )
+  }
+
   const handleBan = ({ item }) => {
     if (item.watched) {
       Alert.alert(
@@ -409,153 +556,6 @@ const Photo = ({ item }) => {
       dispatch(reducer.watchPhoto({ item, navigation }))
     }
   }
-
-  const renderFooter = () => (
-    // if (item.watched === undefined) {
-    <View
-      style={{
-        backgroundColor: 'white',
-        width,
-        height: 50,
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        left: 0,
-      }}>
-      <Tab>
-        <LinearProgress
-          color={
-            CONST.MAIN_COLOR
-          }
-        />
-      </Tab>
-    </View>
-  )
-
-  // }
-  // return (
-  //   <Text>text2</Text>
-  //   // <Footer
-  //   style={{
-  //     backgroundColor: '#fafafa',
-  //   }}>
-  //   <FooterTab style={{
-  //     backgroundColor: '#fafafa',
-  //   }}>
-  //
-  //     {/* delete button */}
-  //     <Button
-  //       key="delete"
-  //       vertical
-  //       onPress={
-  //         () => handleDelete({ item })
-  //       }>
-  //       <FontAwesome
-  //         name="trash"
-  //         style={{
-  //           color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-  //         }}
-  //         size={30}
-  //       />
-  //       <Text style={{ fontSize: 10 }}>
-  //         Delete
-  //       </Text>
-  //     </Button>
-  //
-  //     {/* ban button */}
-  //     <Button
-  //       key="ban"
-  //       vertical
-  //       onPress={
-  //         () => handleBan({ item })
-  //       }>
-  //       <FontAwesome
-  //         name="ban"
-  //         style={{
-  //           color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-  //         }}
-  //         size={30}
-  //       />
-  //       <Text style={{ fontSize: 10 }}>
-  //         Ban
-  //       </Text>
-  //     </Button>
-  //
-  //     {/* watch button */}
-  //     <Button
-  //       key="watch"
-  //       onPress={
-  //         () => handleFlipWatch()
-  //       }>
-  //       <FontAwesome
-  //         name={item.watched ? "eye" : "eye-slash"}
-  //         style={
-  //           {
-  //             color: CONST.MAIN_COLOR,
-  //           }
-  //         }
-  //         size={30}
-  //       />
-  //       <Text style={{ fontSize: 10 }}>
-  //         {`${item.watched ? 'UnWatch' : 'Watch'}`}
-  //       </Text>
-  //     </Button>
-  //
-  //     {/* share button */}
-  //     <Button
-  //       key="share"
-  //       vertical
-  //       onPress={
-  //         () => {
-  //           dispatch(reducer.sharePhoto({ item }))
-  //         }
-  //       }>
-  //       <FontAwesome
-  //         name="share"
-  //         style={
-  //           {
-  //             color: CONST.MAIN_COLOR,
-  //           }
-  //         }
-  //         size={30}
-  //       />
-  //       <Text style={{ fontSize: 10 }}>
-  //         Share
-  //       </Text>
-  //     </Button>
-  //
-  //     {/* likes button */}
-  //     <Button
-  //       key="like"
-  //       vertical
-  //       badge={item.likes > 0}
-  //       onPress={
-  //         () => {
-  //           handleLike({ item })
-  //         }
-  //       }>
-  //       {item.likes > 0 && (
-  //         <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
-  //           <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
-  //         </Badge>
-  //       )}
-  //       <FontAwesome
-  //         name="thumbs-up"
-  //         style={
-  //           {
-  //             color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-  //           }
-  //         }
-  //         size={30}
-  //       />
-  //       <Text style={{ fontSize: 10 }}>
-  //         Like
-  //       </Text>
-  //     </Button>
-  //
-  //   </FooterTab>
-  // </Footer>
-  // )
 
   return (
     <View>
