@@ -455,7 +455,7 @@ const Photo = ({ item }) => {
                   badgeStyle={{
                     backgroundColor: CONST.MAIN_COLOR,
                   }}
-                  containerStyle={{ position: 'absolute', top: -10, right: `25%` }}
+                  containerStyle={{ position: 'absolute', top: -10, right: -10 }}
                   value={item.likes}
                 />
               )}
