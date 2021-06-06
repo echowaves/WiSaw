@@ -433,6 +433,7 @@ const PhotosList = () => {
         {
           marginLeft: 10,
           color: CONST.MAIN_COLOR,
+          width: 60,
         }
       }
     />
