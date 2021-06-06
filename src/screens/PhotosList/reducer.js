@@ -3,17 +3,10 @@ import axios from 'axios'
 
 import * as SecureStore from 'expo-secure-store'
 
-import {
-  Toast,
-} from 'native-base'
-
-import {
-  Platform,
-} from 'react-native'
-
 import * as FileSystem from 'expo-file-system'
 import moment from 'moment'
 
+import Toast from 'react-native-toast-message'
 import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
@@ -397,7 +390,9 @@ export function getPhotos() {
           errorMessage: err.toString(),
         })
         Toast.show({
-          text: err.toString(),
+          text1: 'Error',
+          text2: err.toString(),
+          type: "error",
         })
       }
     }
@@ -614,7 +609,7 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
       Toast.show({
-        text: 'Failed to upload file, refresh to try again.',
+        text1: 'Failed to upload file, refresh to try again.',
       })
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())

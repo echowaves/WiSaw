@@ -12,21 +12,22 @@ import {
   TouchableOpacity,
   Alert,
   InteractionManager,
+  StyleSheet,
+  ScrollView,
+  SafeAreaView,
 } from 'react-native'
 
 import {
+  Text,
+  Card,
+  LinearProgress,
+  Divider,
   Badge,
-  Container,
-  Content,
-  Footer,
-  FooterTab,
-  Spinner,
-  Button, Card, CardItem, Text,
-} from 'native-base'
+} from 'react-native-elements'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
 
-import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
+import ImageZoom from 'react-native-image-pan-zoom'
 
 import PropTypes from 'prop-types'
 
@@ -47,7 +48,7 @@ const Photo = ({ item }) => {
   const dispatch = useDispatch()
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
-
+  const imageHeight = height - 200
   const bans = useSelector(state => state.photo.bans)
   const likes = useSelector(state => state.photo.likes)
 
@@ -77,16 +78,89 @@ const Photo = ({ item }) => {
     }, [])// eslint-disable-line react-hooks/exhaustive-deps
   )
 
+  const styles = StyleSheet.create({
+    photoContainer: {
+      width,
+      height: imageHeight,
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      left: 0,
+    },
+  })
+
+  const renderPhotoRow = () => (
+    <ImageZoom
+      cropWidth={width}
+      cropHeight={imageHeight}
+      imageWidth={width}
+      imageHeight={imageHeight}>
+      <CachedImage
+        source={{ uri: `${item.getThumbUrl}` }}
+        cacheKey={`${item.id}t`}
+        backgroundColor="transparent"
+        resizeMode="contain"
+        style={
+          styles.photoContainer
+        }
+      />
+      <LinearProgress
+        color={
+          CONST.MAIN_COLOR
+        }
+        style={{
+          alignSelf: 'center',
+          width: width / 4,
+          position: 'absolute',
+          top: imageHeight / 2,
+        }}
+      />
+      <CachedImage
+        source={{ uri: `${item.getImgUrl}` }}
+        cacheKey={`${item.id}i`}
+        backgroundColor="transparent"
+        resizeMode="contain"
+        style={
+          styles.photoContainer
+        }
+      />
+    </ImageZoom>
+  )
+
+  const renderCommentsStats = () => {
+    if (!item.comments) {
+      return (
+        <LinearProgress
+          color={
+            CONST.MAIN_COLOR
+          }
+        />
+      )
+    }
+    if (item.comments.length === 0) {
+      return <Text />
+    }
+
+    return (
+      <Text
+        style={{
+          paddingTop: 5,
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+        }}>
+        {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
+      </Text>
+    )
+  }
+
   const renderCommentButtons = ({ photo, comment }) => {
     if (!comment.hiddenButtons) {
       return (
         <View style={{
-          flex: 1,
-          flexDirection: 'row',
           position: 'absolute',
-          bottom: 10,
-          right: 10,
-
+          right: 1,
+          bottom: 1,
         }}>
           <FontAwesome
             onPress={
@@ -119,67 +193,119 @@ const Photo = ({ item }) => {
     return <View />
   }
 
-  const renderComments = () => {
+  const renderCommentsRows = () => {
     if (item.comments) {
-      return item.comments.map((comment, i) => (
-        <Row
-          key={comment.id}
-          style={{
-            marginLeft: 5,
-            marginRight: 15,
-          }}>
-          <Card
-            style={{
-              width: "100%",
-            }}>
-            <TouchableOpacity
-              onPress={
-                () => {
-                  dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
-                }
-              }>
-              <CardItem>
-                <Text
-                  style={{
-                    color: CONST.TEXT_COLOR,
-                  }}>{comment.comment}
-                </Text>
-                {renderCommentButtons({ photo: item, comment })}
-              </CardItem>
-            </TouchableOpacity>
-          </Card>
-        </Row>
-      ))
+      return (
+        <View>
+          {item.comments.map((comment, i) => (
+            <Row key={comment.id}>
+              <TouchableOpacity
+                onPress={
+                  () => {
+                    dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
+                  }
+                }>
+                <Card width={width - 30}>
+                  <Text
+                    style={{
+                      color: CONST.TEXT_COLOR,
+                    }}>{comment.comment}
+                  </Text>
+                  {renderCommentButtons({ photo: item, comment })}
+                </Card>
+              </TouchableOpacity>
+            </Row>
+          ))}
+        </View>
+      )
     }
   }
 
-  const renderRecognitions = recognition => {
-    const labels = jmespath.search(recognition, "metaData.Labels[]")
-    const textDetections = jmespath.search(recognition, "metaData.TextDetections[?Type=='LINE']")
-    const moderationLabels = jmespath.search(recognition, "metaData.ModerationLabels[]")
+  const renderAddCommentsRow = () => {
+    if (!item.comments) {
+      return <Text />
+    }
+    return (
+      <TouchableOpacity
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+        }}
+        onPress={
+          () => navigation.navigate('ModalInputTextScreen', { item })
+        }>
+        <Col
+          size={2}
+        />
+        <Col
+          size={6}
+          style={
+            {
+              justifyContent: 'center',
+              alignItems: 'center',
+            }
+          }>
+          <Text
+            style={{
+              fontSize: 25,
+              color: CONST.MAIN_COLOR,
+            }}>
+            add comment
+          </Text>
+        </Col>
+        <Col
+          size={2}>
+          <Ionicons
+            name="add-circle"
+            style={
+              {
+                fontSize: 45,
+                color: CONST.MAIN_COLOR,
+              }
+            }
+          />
+        </Col>
+      </TouchableOpacity>
+    )
+  }
+
+  const renderRecognitions = () => {
+    const { recognitions } = item
+    if (!recognitions) {
+      return (<Text />)
+    }
+    const labels = jmespath.search(recognitions, "metaData.Labels[]")
+    const textDetections = jmespath.search(recognitions, "metaData.TextDetections[?Type=='LINE']")
+    const moderationLabels = jmespath.search(recognitions, "metaData.ModerationLabels[]")
 
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (
-          <View style={{ paddingBottom: 20 }}>
+          <Card
+            width={width - 100}
+            style={{ paddingBottom: 20 }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized tags:</Text>
             {labels.map(label => (
               <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
             ))}
-          </View>
+          </Card>
         )}
 
         {textDetections.length > 0 && (
-          <View style={{ paddingBottom: 20 }}>
+          <Card
+            width={width - 100}
+            style={{ paddingBottom: 20 }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized text:</Text>
             {textDetections.map(text => (
               <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{stringifyObject(text.DetectedText).replace(/'/g, '')}</Text>
             ))}
-          </View>
+          </Card>
         )}
 
         {moderationLabels.length > 0 && (
-          <View style={{ paddingBottom: 20 }}>
+          <Card
+            width={width - 100}
+            style={{ paddingBottom: 20 }}>
             <Text style={{
               fontWeight: 'bold', color: 'red', textAlignVertical: "center", textAlign: "center",
             }}>AI moderation tags:
@@ -191,9 +317,158 @@ const Photo = ({ item }) => {
                 }}>{stringifyObject(label.Name).replace(/'/g, '')}
               </Text>
             ))}
-          </View>
+          </Card>
         )}
       </View>
+    )
+  }
+
+  const renderFooter = () => {
+    const { watched } = item
+    return (
+      <SafeAreaView
+        style={{
+          backgroundColor: 'white',
+          width,
+          height: 70,
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          left: 0,
+        }}>
+        <Divider />
+        { watched === undefined && (
+          <LinearProgress
+            color={
+              CONST.MAIN_COLOR
+            }
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              left: 0,
+            }}
+          />
+        )}
+        { watched !== undefined && (
+          <Grid>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* delete button */}
+              <FontAwesome
+                name="trash"
+                style={{
+                  color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+                }}
+                size={30}
+                onPress={
+                  () => handleDelete({ item })
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                Delete
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* ban button */}
+              <FontAwesome
+                name="ban"
+                style={{
+                  color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+                }}
+                size={30}
+                onPress={
+                  () => handleBan({ item })
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                Ban
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* watch button */}
+              <FontAwesome
+                name={item.watched ? "eye" : "eye-slash"}
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
+                }
+                size={30}
+                onPress={
+                  () => handleFlipWatch()
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                {`${item.watched ? 'UnWatch' : 'Watch'}`}
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* share button */}
+              <FontAwesome
+                name="share"
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
+                }
+                size={30}
+                onPress={
+                  () => {
+                    dispatch(reducer.sharePhoto({ item }))
+                  }
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                Share
+              </Text>
+            </Col>
+            <Col style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {/* likes button */}
+              {item.likes > 0 && (
+                <Badge
+                  badgeStyle={{
+                    backgroundColor: CONST.MAIN_COLOR,
+                  }}
+                  containerStyle={{ position: 'absolute', top: -10, right: `25%` }}
+                  value={item.likes}
+                />
+              )}
+              <FontAwesome
+                name="thumbs-up"
+                style={
+                  {
+                    color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+                  }
+                }
+                size={30}
+                onPress={
+                  () => {
+                    handleLike({ item })
+                  }
+                }
+              />
+              <Text style={{ fontSize: 10 }}>
+                Like
+              </Text>
+            </Col>
+          </Grid>
+        )}
+      </SafeAreaView>
     )
   }
 
@@ -283,288 +558,31 @@ const Photo = ({ item }) => {
     }
   }
 
-  const renderFooter = () => {
-    if (item.watched === undefined) {
-      return (
-        <Footer
-          style={{
-            backgroundColor: 'white',
-          }}>
-          <Spinner
-            color={
-              CONST.MAIN_COLOR
-            }
-          />
-        </Footer>
-      )
-    }
-    return (
-      <Footer
-        style={{
-          backgroundColor: '#fafafa',
-        }}>
-        <FooterTab style={{
-          backgroundColor: '#fafafa',
-        }}>
-
-          {/* delete button */}
-          <Button
-            key="delete"
-            vertical
-            onPress={
-              () => handleDelete({ item })
-            }>
-            <FontAwesome
-              name="trash"
-              style={{
-                color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Delete
-            </Text>
-          </Button>
-
-          {/* ban button */}
-          <Button
-            key="ban"
-            vertical
-            onPress={
-              () => handleBan({ item })
-            }>
-            <FontAwesome
-              name="ban"
-              style={{
-                color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Ban
-            </Text>
-          </Button>
-
-          {/* watch button */}
-          <Button
-            key="watch"
-            onPress={
-              () => handleFlipWatch()
-            }>
-            <FontAwesome
-              name={item.watched ? "eye" : "eye-slash"}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              {`${item.watched ? 'UnWatch' : 'Watch'}`}
-            </Text>
-          </Button>
-
-          {/* share button */}
-          <Button
-            key="share"
-            vertical
-            onPress={
-              () => {
-                dispatch(reducer.sharePhoto({ item }))
-              }
-            }>
-            <FontAwesome
-              name="share"
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Share
-            </Text>
-          </Button>
-
-          {/* likes button */}
-          <Button
-            key="like"
-            vertical
-            badge={item.likes > 0}
-            onPress={
-              () => {
-                handleLike({ item })
-              }
-            }>
-            {item.likes > 0 && (
-              <Badge style={{ backgroundColor: CONST.PLACEHOLDER_TEXT_COLOR }}>
-                <Text style={{ color: CONST.MAIN_COLOR }}>{item.likes}</Text>
-              </Badge>
-            )}
-            <FontAwesome
-              name="thumbs-up"
-              style={
-                {
-                  color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-                }
-              }
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              Like
-            </Text>
-          </Button>
-
-        </FooterTab>
-      </Footer>
-    )
-  }
-
-  // alert(JSON.stringify(navigation))
   return (
-    <Container onLayout={null}>
-      <Content
-        disableKBDismissScroll
-        keyboardDismissMode="on-drag"
-        keyboardShouldPersistTaps="always"
-        enableOnAndroid>
+    <View>
+      <ScrollView style={{ margin: 1 }}>
         <Grid>
           <Row>
-            <ReactNativeZoomableView
-              maxZoom={3}
-              minZoom={1}
-              zoomStep={3}
-              initialZoom={1}
-              bindToBorders>
-
-              <View
-                style={{
-                  flex: 1,
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  right: 0,
-                  left: 0,
-                }}>
-                <CachedImage
-                  source={{ uri: `${item.getThumbUrl}` }}
-                  cacheKey={`${item.id}t`}
-                  backgroundColor="transparent"
-                  resizeMode="contain"
-                  style={{
-                    width,
-                    height: height - 200,
-                  }}
-                />
-                <Spinner
-                  style={{
-                    flex: 1,
-                    width,
-                    height,
-                    position: 'absolute',
-                    top: -50,
-                    bottom: 0,
-                    right: 0,
-                    left: 0,
-                  }}
-                  color={
-                    CONST.MAIN_COLOR
-                  }
-                />
-              </View>
-              <CachedImage
-                source={{ uri: `${item.getImgUrl}` }}
-                cacheKey={`${item.id}i`}
-                backgroundColor="transparent"
-                resizeMode="contain"
-                style={{
-                  width,
-                  height: height - 200,
-                }}
-              />
-            </ReactNativeZoomableView>
-          </Row>
-          {!item.comments && (
-            <Spinner
-              color={
-                CONST.MAIN_COLOR
-              }
-            />
-          )}
-          { item.comments && item.comments.length > 0
-                && (
-                  <Row style={{ marginTop: 5 }}>
-                    <Text style={{ marginLeft: 10, color: CONST.MAIN_COLOR }}>
-                      {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
-                    </Text>
-                  </Row>
-                )}
-          { item.comments && item.comments.length > 0
-                && (renderComments())}
-          <Row
-            style={{
-              width: '100%',
-              marginVertical: 10,
-            }}
-            onPress={
-              () => navigation.navigate('ModalInputTextScreen', { item })
-            }>
-            <Col style={
-              {
-                marginLeft: 30,
-                width: 50,
-              }
-            }
-            />
-            <Col
-              style={
-                {
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: 50,
-                }
-              }>
-              <Text
-                style={{
-                  fontSize: 25,
-                  color: CONST.MAIN_COLOR,
-                }}>
-                add comment
-              </Text>
-            </Col>
-            <Col
-              style={
-                {
-                  justifyContent: 'center',
-                  height: 50,
-                  marginRight: 30,
-                  width: 50,
-                }
-              }>
-              <Ionicons
-                name="add-circle"
-                style={
-                  {
-                    fontSize: 45,
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-              />
-            </Col>
+            {renderPhotoRow()}
           </Row>
           <Row>
-            { item.recognitions
-                && (renderRecognitions(item.recognitions))}
+            {renderCommentsStats()}
+          </Row>
+          <Row>
+            {renderCommentsRows()}
+          </Row>
+          <Row>
+            {renderAddCommentsRow()}
+          </Row>
+          <Divider />
+          <Row>
+            {renderRecognitions()}
           </Row>
           <Row style={{ height: 110 }} />
         </Grid>
-
-      </Content>
+      </ScrollView>
       {renderFooter()}
-    </Container>
+    </View>
   )
 }
 

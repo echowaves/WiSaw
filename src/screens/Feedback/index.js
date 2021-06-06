@@ -1,25 +1,21 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import {
-  Text, View,
+  SafeAreaView,
+  TextInput,
+  StyleSheet,
 } from 'react-native'
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
-
 import {
-  Container,
-  Content,
-  Spinner,
-  Form,
-  Textarea,
-  Item,
-  Body,
-  Card,
-  CardItem,
   Button,
-} from 'native-base'
+  Text,
+  Card,
+  LinearProgress,
+} from 'react-native-elements'
+
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
 import Modal from "react-native-modal"
 
@@ -29,14 +25,23 @@ import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
 
+const maxStringLength = 2000
+
 const FeedbackScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const feedbackText = useSelector(state => state.feedback.feedbackText)
   const loading = useSelector(state => state.feedback.loading)
   const errorMessage = useSelector(state => state.feedback.errorMessage)
   const finished = useSelector(state => state.feedback.finished)
+
+  const [inputText, _setInputText] = useState('')
+
+  const inputTextRef = React.useRef(inputText)
+  const setInputText = data => {
+    inputTextRef.current = data
+    _setInputText(data)
+  }
 
   useEffect(() => {
     navigation.setOptions({
@@ -47,6 +52,11 @@ const FeedbackScreen = () => {
       headerBackTitle: <Text />,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+  })
 
   const renderHeaderRight = () => (
     <Ionicons
@@ -64,98 +74,76 @@ const FeedbackScreen = () => {
     />
   )
   const renderHeaderLeft = () => (
-    <View style={{
-      flex: 1,
-      flexDirection: "row",
-    }}>
-      <Button
-        onPress={
-          () => navigation.goBack()
-        }
-        style={{
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={
+        {
           backgroundColor: '#ffffff',
-        }}>
-        <FontAwesome
-          name="chevron-left"
-          size={30}
-          style={
-            {
-              marginLeft: 10,
-              color: CONST.MAIN_COLOR,
-            }
-          }
-        />
-      </Button>
-    </View>
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+        }
+      }
+      onPress={
+        () => navigation.goBack()
+      }
+    />
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitFeedback({ feedbackText }))
+    dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
   }
 
   if (finished && errorMessage.length === 0) {
     return (
-      <Container>
-        <Content padder>
-          <Body>
-            <Modal isVisible>
-              <Content padder>
-                <Card transparent>
-                  <CardItem style={{ borderRadius: 10 }}>
-                    <Text>Thank you for submitting your feedback.
-                    </Text>
-                  </CardItem>
-                  <CardItem footer style={{ borderRadius: 10 }}>
-                    <Body>
-                      <Button
-                        block
-                        bordered
-                        success
-                        small
-                        onPress={
-                          () => {
-                            navigation.goBack()
-                            dispatch(reducer.resetForm())
-                          }
-                        }>
-                        <Text> You are Welcome! </Text>
-                      </Button>
-                    </Body>
-                  </CardItem>
-                </Card>
-              </Content>
-            </Modal>
-          </Body>
-        </Content>
-      </Container>
+      <SafeAreaView style={styles.container}>
+        <Modal isVisible>
+          <Card style={{ borderRadius: 10 }}>
+            <Text>Thank you for submitting your feedback.
+            </Text>
+          </Card>
+          <Card style={{ borderRadius: 10 }}>
+            <Button
+              title="You are Welcome!"
+              type="outline"
+              onPress={
+                () => {
+                  navigation.goBack()
+                  dispatch(reducer.resetForm())
+                }
+              }
+            />
+          </Card>
+        </Modal>
+      </SafeAreaView>
     )
   }
   return (
-    <Container>
-      <Content padder>
-        { errorMessage.length !== 0 && (
-          <Item error>
-            <Text>{errorMessage}</Text>
-            <Ionicons name="close-circle" />
-          </Item>
-        )}
-        <Form>
-          <Textarea
-            rowSpan={5}
-            bordered
-            onChangeText={feedbackText => dispatch(reducer.setFeedbackText({ feedbackText }))}
-            placeholder="Type your feedback here and click send."
-            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
-              }
-            }
-          />
-        </Form>
-      </Content>
+    <SafeAreaView style={styles.container}>
+      { errorMessage.length !== 0 && (
+        <Text>{errorMessage}</Text>
+      )}
+      <TextInput
+        rowSpan={5}
+        onChangeText={inputValue => {
+          setInputText(inputValue.slice(0, maxStringLength))
+        }}
+        placeholder="Type your feedback here and click send."
+        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+        multiline
+        numberOfLines={10}
+        maxLength={maxStringLength}
+        style={
+          {
+            color: CONST.MAIN_COLOR,
+            height: 200,
+            margin: 12,
+            borderWidth: 1,
+          }
+        }
+      />
       { loading && (
-        <Spinner
+        <LinearProgress
           color={
             CONST.MAIN_COLOR
           }
@@ -171,7 +159,7 @@ const FeedbackScreen = () => {
           }
         />
       )}
-    </Container>
+    </SafeAreaView>
   )
 }
 export default FeedbackScreen

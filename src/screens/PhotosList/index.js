@@ -8,6 +8,7 @@ import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
 import * as ImagePicker from 'expo-image-picker'
 import * as Updates from 'expo-updates'
+import Toast from 'react-native-toast-message'
 
 import useKeyboard from '@rnhooks/keyboard'
 
@@ -16,29 +17,12 @@ import {
   Text,
   View,
   Alert,
+  SafeAreaView,
 } from 'react-native'
 
 import {
   FontAwesome, FontAwesome5, MaterialIcons,
 } from '@expo/vector-icons'
-
-import {
-  Container,
-  Content,
-  Body,
-  Spinner,
-  Card,
-  CardItem,
-  Button,
-  Left,
-  Right,
-  Segment,
-  StyleProvider,
-  Toast,
-  Input,
-  Header,
-  // Item,
-} from 'native-base'
 
 import NetInfo from "@react-native-community/netinfo"
 
@@ -48,10 +32,15 @@ import PropTypes from 'prop-types'
 
 import Modal from "react-native-modal"
 
-// import Branch from '../../util/my-branch'
-
-import getTheme from "../../../native-base-theme/components"
-import material from '../../../native-base-theme/variables/material'
+import {
+  Card,
+  ListItem,
+  Divider,
+  Button,
+  LinearProgress,
+  ButtonGroup,
+  SearchBar,
+} from 'react-native-elements'
 
 import * as reducer from './reducer'
 
@@ -81,7 +70,6 @@ const PhotosList = () => {
   const loading = useSelector(state => state.photosList.loading)
 
   const pendingUploadsCount = useSelector(state => state.photosList.pendingUploadsCount)
-  const orientation = useSelector(state => state.photosList.orientation)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
@@ -157,14 +145,9 @@ const PhotosList = () => {
           "WiSaw just updated over the Air", "Click OK to Reload the app",
           [
             {
-              text: 'OK',
+              text1: 'OK',
               onPress: async () => {
                 await Updates.reloadAsync()
-                // Toast.show({
-                //   text: "WiSaw updated.",
-                //   buttonText: "OK",
-                //   type: "success",
-                // })
               },
             },
           ],
@@ -173,9 +156,9 @@ const PhotosList = () => {
     } catch (error) {
     // handle or log error
       Toast.show({
-        text: `Failed to get over the air update: ${error}`,
-        buttonText: "OK",
-        type: "warning",
+        text1: `Failed to get over the air update:`,
+        text2: `${error}`,
+        type: "error",
       })
     }
   }
@@ -200,7 +183,7 @@ const PhotosList = () => {
 
   const styles = StyleSheet.create({
     container: {
-      // flex: 1,
+      flex: 1,
     },
     thumbContainer: {
       // height: thumbDimension,
@@ -225,7 +208,7 @@ const PhotosList = () => {
   const updateNavBar = () => {
     if (netAvailable) {
       navigation.setOptions({
-        headerTitle: renderHeaderTitle(),
+        headerTitle: renderHeaderTitle,
         headerLeft: renderHeaderLeft,
         headerRight: renderHeaderRight,
       })
@@ -304,10 +287,8 @@ const PhotosList = () => {
       } catch (err) {
         position = null
         Toast.show({
-          text: 'unable to get location',
-          buttonText: "OK",
-          type: "danger",
-          duration: 5000,
+          text1: 'Unable to get location',
+          type: "error",
         })
       }
     }
@@ -339,32 +320,23 @@ const PhotosList = () => {
           flex: 1,
           position: 'absolute',
         },
-        orientation === 'portrait' && styles.cameraButtonPortrait,
-        orientation === 'landscape' && styles.cameraButtonPortrait,
-        // orientation === 'landscape' && styles.cameraButtonLandscape,
+        styles.cameraButtonPortrait,
       ]
     }>
-      <View>
-        <Button
-          rounded
-          light
-          transparent
-          bordered
-          style={
-            {
-              height: 100,
-              width: 100,
-              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }
+      <Button
+        type="clear"
+        containerStyle={
+          {
+            height: 100,
+            width: 100,
+            backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 50,
           }
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking()
-            }
-          }>
+        }
+        icon={(
           <FontAwesome
             name="camera"
             size={60}
@@ -374,85 +346,77 @@ const PhotosList = () => {
               }
             }
           />
-        </Button>
-        {pendingUploadsCount > 0 && (
-          <Text
-            style={
-              {
-                position: 'absolute',
-                alignSelf: 'center',
-                color: 'white',
-                backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-              }
-            }>
-            {pendingUploadsCount}
-          </Text>
         )}
-      </View>
+        onPress={
+          () => {
+            checkPermissionsForPhotoTaking()
+          }
+        }
+      />
+      {pendingUploadsCount > 0 && (
+        <Text
+          style={
+            {
+              position: 'absolute',
+              alignSelf: 'center',
+              color: 'white',
+              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+            }
+          }>
+          {pendingUploadsCount}
+        </Text>
+      )}
     </View>
   )
 
+  const segment0 = () => (
+    <FontAwesome
+      name="globe"
+      size={23}
+      color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      onPress={
+        async () => {
+          await dispatch(reducer.setActiveSegment(0))
+          await reload()
+        }
+      }
+    />
+  )
+
+  const segment1 = () => (
+    <FontAwesome
+      name="eye"
+      size={23}
+      color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      onPress={
+        async () => {
+          await dispatch(reducer.setActiveSegment(1))
+          await reload()
+        }
+      }
+    />
+  )
+
+  const segment2 = () => (
+    <FontAwesome
+      name="search"
+      size={23}
+      color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      onPress={
+        async () => {
+          await dispatch(reducer.setActiveSegment(2))
+          await reload()
+        }
+      }
+    />
+  )
+
   const renderHeaderTitle = () => (
-    <Header hasSegment style={{ height: '100%', backgroundColor: 'rgba(0, 0, 0, 0)' }}>{/* without this trick the header segment will not receive click events on android */}
-      <StyleProvider style={getTheme(material)}>{/* withtout this trick the segment will be styled funny on android */}
-        <Segment style={{ marginBottom: 2 }}>
-          <Button
-            first active={activeSegment === 0}
-            onPress={
-              async () => {
-                await dispatch(reducer.setActiveSegment(0))
-                await reload()
-              }
-            }>
-            <FontAwesome
-              name="globe"
-              size={23}
-              style={{
-                paddingLeft: 10,
-                paddingRight: 10,
-              }}
-              color={activeSegment === 0 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
-            />
-          </Button>
-          <Button
-            active={activeSegment === 1}
-            onPress={
-              async () => {
-                await dispatch(reducer.setActiveSegment(1))
-                await reload()
-              }
-            }>
-            <FontAwesome
-              name="eye"
-              size={23}
-              style={{
-                paddingLeft: 10,
-                paddingRight: 10,
-              }}
-              color={activeSegment === 1 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
-            />
-          </Button>
-          <Button
-            last active={activeSegment === 2}
-            onPress={
-              async () => {
-                await dispatch(reducer.setActiveSegment(2))
-                await reload()
-              }
-            }>
-            <FontAwesome
-              name="search"
-              size={23}
-              style={{
-                paddingLeft: 10,
-                paddingRight: 10,
-              }}
-              color={activeSegment === 2 ? CONST.TRANSPARENT_BUTTON_COLOR : CONST.MAIN_COLOR}
-            />
-          </Button>
-        </Segment>
-      </StyleProvider>
-    </Header>
+    <ButtonGroup
+      containerStyle={{ width: 150, height: 30 }}
+      buttonStyle={{ alignSelf: 'center' }}
+      buttons={[{ element: segment0 }, { element: segment1 }, { element: segment2 }]}
+    />
   )
 
   const renderHeaderLeft = () => (
@@ -489,56 +453,26 @@ const PhotosList = () => {
   )
 
   const renderSearchBar = autoFocus => (
-    <Header
-      searchBar rounded
+    <SearchBar
+      placeholder="Type Text Here..."
+      placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+      onChangeText={currentTerm => {
+        dispatch(reducer.setSearchTerm(currentTerm))
+      }}
+      value={searchTerm}
+      onSubmitEditing={
+        () => submitSearch()
+      }
+      autoFocus={autoFocus}
       style={
         {
-          backgroundColor: '#FFFFFF',
-        }
-      }>
-
-      <Body style={
-        {
+          color: CONST.MAIN_COLOR,
+          backgroundColor: "white",
           width: '100%',
         }
-      }>
-        <Input
-          placeholder="type text here"
-          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-          style={
-            {
-              color: CONST.MAIN_COLOR,
-              width: '100%',
-            }
-          }
-          onChangeText={currentTerm => {
-            dispatch(reducer.setSearchTerm(currentTerm))
-          }}
-          value={searchTerm}
-          editable
-          onSubmitEditing={
-            () => submitSearch()
-          }
-          autoFocus={autoFocus}
-        />
-      </Body>
-      <Right>
-        <Button transparent>
-          <FontAwesome
-            name="search"
-            size={30}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
-              }
-            }
-            onPress={
-              () => submitSearch()
-            }
-          />
-        </Button>
-      </Right>
-    </Header>
+      }
+      lightTheme
+    />
   )
 
   const submitSearch = async () => {
@@ -549,9 +483,8 @@ const PhotosList = () => {
       }
     } else {
       Toast.show({
-        text: "Search for more than 3 characters",
-        buttonText: "OK",
-        type: "warning",
+        text1: "Search for more than 3 characters",
+        type: "error",
       })
     }
   }
@@ -608,7 +541,7 @@ const PhotosList = () => {
   && photos.length > 0
   ) {
     return (
-      <Container>
+      <SafeAreaView style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
         {renderPendingPhotos()}
         {/* photos */}
@@ -655,190 +588,162 @@ const PhotosList = () => {
           // viewabilityConfig={viewConfigRef.current}
         />
         {renderPhotoButton()}
-      </Container>
-
+      </SafeAreaView>
     )
   }
 
   if (!isTandcAccepted) {
     return (
-      <Container>
+      <SafeAreaView style={styles.container}>
         <Modal
           isVisible={
             !isTandcAccepted
           }>
-          <Content padder>
-            <Card transparent>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text> * When you take a photo with WiSaw app,
-                  it will be added to a Photo Album on your phone,
-                  as well as posted to global feed in the cloud.
-                </Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text> * People close-by can see your photos.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text> * You can see other people&#39;s photos too.
-                </Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* No one will tolerate objectionable content or abusive users.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* The abusive users will be banned from WiSaw by other users.</Text>
-              </CardItem>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text>* By using WiSaw I agree to Terms and Conditions.</Text>
-              </CardItem>
-              <CardItem footer style={{ borderRadius: 10 }}>
-                <Left />
-                <Button
-                  block
-                  bordered
-                  success
-                  small
-                  onPress={
-                    () => {
-                      dispatch(reducer.acceptTandC())
-                    }
-                  }>
-                  <Text>  Agree  </Text>
-                </Button>
-                <Right />
-              </CardItem>
-            </Card>
-          </Content>
+          <Card containerStyle={{ padding: 0 }}>
+            <ListItem style={{ borderRadius: 10 }}>
+              <Text> When you take a photo with WiSaw app,
+                it will be added to a Photo Album on your phone,
+                as well as posted to global feed in the cloud.
+              </Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>People close-by can see your photos.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>You can see other people&#39;s photos too.
+              </Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>No one will tolerate objectionable content or abusive users.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>The abusive users will be banned from WiSaw by other users.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem>
+              <Text>By using WiSaw I agree to Terms and Conditions.</Text>
+            </ListItem>
+            <Divider />
+            <ListItem style={{ alignItems: 'center' }}>
+              <Button
+                title="I Agree"
+                type="outline"
+                onPress={
+                  () => {
+                    dispatch(reducer.acceptTandC())
+                  }
+                }
+              />
+            </ListItem>
+          </Card>
         </Modal>
-      </Container>
+      </SafeAreaView>
     )
   }
 
   if (!location && !loading) {
     return (
-      <Container>
+      <SafeAreaView style={styles.container}>
         {renderPendingPhotos()}
-        <Content padder>
-          <Body>
-            <Card transparent>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text style={{
-                  fontSize: 20,
-                  textAlign: 'center',
-                  margin: 10,
-                }}>
-                  Acquiring location, make sure to enable Location Service.
-                </Text>
-              </CardItem>
-            </Card>
-          </Body>
-        </Content>
+        <Card style={{ borderRadius: 10 }}>
+          <Text style={{
+            fontSize: 20,
+            textAlign: 'center',
+            margin: 10,
+          }}>
+            Acquiring location, make sure to enable Location Service.
+          </Text>
+        </Card>
         {renderPhotoButton()}
-      </Container>
+      </SafeAreaView>
     )
   }
 
   if (!netAvailable && !loading) {
     return (
-      <Container>
+      <SafeAreaView style={styles.container}>
         {renderPendingPhotos()}
-        <Content padder>
-          <Body>
-            <Card transparent>
-              <CardItem style={{ borderRadius: 10 }}>
-                <Text style={{
-                  fontSize: 20,
-                  textAlign: 'center',
-                  margin: 10,
-                }}>
-                  You are not connected to reliable network.
-                  You can still snap photos.
-                  They will be uploaded later.
-                </Text>
-              </CardItem>
-            </Card>
-          </Body>
-        </Content>
+        <Card style={{ borderRadius: 10 }}>
+          <Text style={{
+            fontSize: 20,
+            textAlign: 'center',
+            margin: 10,
+          }}>
+            You are not connected to reliable network.
+            You can still snap photos.
+            They will be uploaded later.
+          </Text>
+        </Card>
         {renderPhotoButton()}
-      </Container>
+      </SafeAreaView>
     )
   }
 
   if (loading) {
     return (
-      <Container>
+      <SafeAreaView style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
-        <Content padder>
-          <Body>
-            <Spinner color={
-              CONST.MAIN_COLOR
-            }
-            />
-          </Body>
-        </Content>
+        <LinearProgress color={
+          CONST.MAIN_COLOR
+        }
+        />
         {renderPhotoButton()}
-      </Container>
+      </SafeAreaView>
     )
   }
 
   if (photos.length === 0) {
     return (
-      <Container>
+      <SafeAreaView style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
         {renderPendingPhotos()}
-        <Content padder>
-          <Body>
-            {activeSegment === 2 && (
-              <Card transparent>
-                <CardItem>
-                  <Text style={{
-                    fontSize: 20,
-                    textAlign: 'center',
-                    margin: 10,
-                  }}>
-                    No Photos found.
-                    Try to search for something else.
-                    Search string should be more than 3 characters.
-                  </Text>
-                </CardItem>
-              </Card>
-            )}
-            { activeSegment === 0 && (
-              <Card transparent>
-                <CardItem style={{ borderRadius: 10 }}>
-                  <Text style={{
-                    fontSize: 20,
-                    textAlign: 'center',
-                    margin: 10,
-                  }}>
-                    No Photos found in your location.
-                    Try to take some photos.
-                  </Text>
-                </CardItem>
-              </Card>
-            )}
-            {activeSegment === 1 && (
-              <Card transparent>
-                <CardItem style={{ borderRadius: 10 }}>
-                  <Text style={{
-                    fontSize: 20,
-                    textAlign: 'center',
-                    margin: 10,
-                  }}>
-                    You don&apos;t seem to be watching any photos.
-                    Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
-                  </Text>
-                </CardItem>
-              </Card>
-            )}
-
-          </Body>
-        </Content>
+        {activeSegment === 2 && (
+          <Card>
+            <Text style={{
+              fontSize: 20,
+              textAlign: 'center',
+              margin: 10,
+            }}>
+              No Photos found.
+              Try to search for something else.
+              Search string should be more than 3 characters.
+            </Text>
+          </Card>
+        )}
+        { activeSegment === 0 && (
+          <Card style={{ borderRadius: 10 }}>
+            <Text style={{
+              fontSize: 20,
+              textAlign: 'center',
+              margin: 10,
+            }}>
+              No Photos found in your location.
+              Try to take some photos.
+            </Text>
+          </Card>
+        )}
+        {activeSegment === 1 && (
+          <Card style={{ borderRadius: 10 }}>
+            <Text style={{
+              fontSize: 20,
+              textAlign: 'center',
+              margin: 10,
+            }}>
+              You don&apos;t seem to be watching any photos.
+              Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
+            </Text>
+          </Card>
+        )}
         {renderPhotoButton()}
-      </Container>
+      </SafeAreaView>
     )
   }
 }

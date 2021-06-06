@@ -4,18 +4,12 @@ import { useDispatch, useSelector } from "react-redux"
 
 import {
   Text,
-  View,
+  TextInput,
+  SafeAreaView,
+  StyleSheet,
 } from 'react-native'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
-
-import {
-  Container,
-  Content,
-  Form,
-  Textarea,
-  Button,
-} from 'native-base'
 
 import PropTypes from 'prop-types'
 
@@ -52,30 +46,27 @@ const ModalInputText = ({ route }) => {
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  const renderHeaderLeft = () => (
-    <View style={{
+  const styles = StyleSheet.create({
+    container: {
       flex: 1,
-      flexDirection: "row",
-    }}>
-      <Button
-        onPress={
-          () => navigation.goBack()
-        }
-        style={{
+    },
+  })
+
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={
+        {
           backgroundColor: '#ffffff',
-        }}>
-        <FontAwesome
-          name="chevron-left"
-          size={30}
-          style={
-            {
-              marginLeft: 10,
-              color: CONST.MAIN_COLOR,
-            }
-          }
-        />
-      </Button>
-    </View>
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+        }
+      }
+      onPress={
+        () => navigation.goBack()
+      }
+    />
   )
 
   const renderHeaderRight = () => (
@@ -102,53 +93,53 @@ const ModalInputText = ({ route }) => {
   }
 
   return (
-    <Container>
-      <Content
-        padder>
-        <CachedImage
-          source={{ uri: `${item.getThumbUrl}` }}
-          cacheKey={`${item.id}t`}
-          style={{
-            alignSelf: 'center',
-            width: 150,
-            height: 100,
-            borderRadius: 10,
-          }}
-        />
-        <Form>
-          <Textarea
-            autoFocus
-            blurOnSubmit={false}
-            rowSpan={5}
-            bordered
-            placeholder="Wanna share any thoughts?"
-            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
-              }
-            }
-            onChangeText={inputValue => {
-              setInputText(inputValue.slice(0, maxStringLength))
-            }}
-            value={inputText}
-          />
-        </Form>
-        <Text style={{
-          flex: 1,
-          flexDirection: 'row',
-          position: 'absolute',
-          top: 12,
-          right: 12,
-          color: CONST.MAIN_COLOR,
+    <SafeAreaView style={styles.container}>
+      <CachedImage
+        source={{ uri: `${item.getThumbUrl}` }}
+        cacheKey={`${item.id}t`}
+        style={{
+          alignSelf: 'center',
+          width: 150,
+          height: 100,
+          borderRadius: 10,
+        }}
+      />
+      <TextInput
+        autoFocus
+        blurOnSubmit={false}
+        rowSpan={5}
+        multiline
+        numberOfLines={10}
+        placeholder="Wanna share any thoughts?"
+        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+        maxLength={maxStringLength}
+        style={
+          {
+            color: CONST.MAIN_COLOR,
+            height: 200,
+            margin: 12,
+            padding: 10,
+            borderWidth: 1,
+            borderColor: CONST.MAIN_COLOR,
+          }
+        }
+        onChangeText={inputValue => {
+          setInputText(inputValue.slice(0, maxStringLength))
+        }}
+        value={inputText}
+      />
+      <Text style={{
+        flex: 1,
+        flexDirection: 'row',
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        color: CONST.MAIN_COLOR,
 
-        }}>
-          {maxStringLength - inputText.length}
-        </Text>
-
-      </Content>
-
-    </Container>
+      }}>
+        {maxStringLength - inputText.length}
+      </Text>
+    </SafeAreaView>
 
   )
 }

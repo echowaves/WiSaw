@@ -7,10 +7,6 @@
 
 import 'react-native-gesture-handler'
 
-import {
-  Root,
-  Spinner,
-} from 'native-base'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
@@ -19,9 +15,8 @@ import { createStackNavigator } from '@react-navigation/stack'
 
 import { Provider } from 'react-redux'
 
-import { Ionicons } from '@expo/vector-icons'
-import { useFonts } from 'expo-font'
-
+import { ThemeProvider } from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import * as CONST from './src/consts.js'
 import { store } from './src'
 
@@ -32,65 +27,50 @@ import ModalInputText from './src/screens/ModalInputText'
 
 const Stack = createStackNavigator()
 
-const App = () => {
-  const [fontsLoaded] = useFonts({
-    Roboto: require('native-base/Fonts/Roboto.ttf'),// eslint-disable-line
-    Roboto_medium: require('native-base/Fonts/Roboto_medium.ttf'),// eslint-disable-line
-    ...Ionicons.font,
-  })
+const App = () => (
+  <Provider store={store}>
+    <View style={styles.container}>
+      <ThemeProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            mode="modal"
+            // headerMode="none"
+            initialRouteName="PhotosList"
+            screenOptions={{ gestureEnabled: true }}>
 
-  if (!fontsLoaded) {
-    return (
-      <Spinner color={
-        CONST.MAIN_COLOR
-      }
-      />
-    )
-  }
-  return (
-    <Provider store={store}>
-      <View style={styles.container}>
-        <Root>
-          <NavigationContainer>
-            <Stack.Navigator
-              mode="modal"
-              // headerMode="none"
-              initialRouteName="PhotosList"
-              screenOptions={{ gestureEnabled: true }}>
+            <Stack.Screen
+              name="PhotosList"
+              component={PhotosList}
+              options={{
+                headerTintColor: CONST.MAIN_COLOR,
+                headerTitle: null,
+                headerLeft: null,
+                headerRight: null,
+              }}
+            />
 
-              <Stack.Screen
-                name="PhotosList"
-                component={PhotosList}
-                options={{
-                  headerTintColor: CONST.MAIN_COLOR,
-                  headerTitle: null,
-                  headerLeft: null,
-                  headerRight: null,
-                }}
-              />
-
-              <Stack.Screen
-                name="PhotosDetails"
-                component={PhotosDetails}
-                options={{ headerTintColor: CONST.MAIN_COLOR }}
-              />
-              <Stack.Screen
-                name="FeedbackScreen"
-                component={FeedbackScreen}
-                options={{ headerTintColor: CONST.MAIN_COLOR }}
-              />
-              <Stack.Screen
-                name="ModalInputTextScreen"
-                component={ModalInputText}
-                options={{ headerTintColor: CONST.MAIN_COLOR }}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </Root>
-      </View>
-    </Provider>
-  )
-}
+            <Stack.Screen
+              name="PhotosDetails"
+              component={PhotosDetails}
+              options={{ headerTintColor: CONST.MAIN_COLOR }}
+            />
+            <Stack.Screen
+              name="FeedbackScreen"
+              component={FeedbackScreen}
+              options={{ headerTintColor: CONST.MAIN_COLOR }}
+            />
+            <Stack.Screen
+              name="ModalInputTextScreen"
+              component={ModalInputText}
+              options={{ headerTintColor: CONST.MAIN_COLOR }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ThemeProvider>
+      <Toast ref={ref => Toast.setRef(ref)} />
+    </View>
+  </Provider>
+)
 export default App
 
 const styles = StyleSheet.create({

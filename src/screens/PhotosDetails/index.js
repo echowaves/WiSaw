@@ -7,15 +7,14 @@ import PropTypes from 'prop-types'
 import { FontAwesome } from '@expo/vector-icons'
 
 import {
-  View,
+
 } from 'react-native'
 
-import { useDispatch, useSelector } from "react-redux"
-
 import {
-  Button,
   Text,
-} from 'native-base'
+} from 'react-native-elements'
+
+import { useDispatch, useSelector } from "react-redux"
 
 import Swiper from 'react-native-swiper'
 
@@ -41,7 +40,7 @@ const PhotosDetails = ({ route }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: renderHeaderTitle(),
+      headerTitle: renderHeaderTitle,
       headerLeft: renderHeaderLeft,
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
@@ -53,29 +52,20 @@ const PhotosDetails = ({ route }) => {
   // }, [index])// eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHeaderLeft = () => (
-    <View style={{
-      flex: 1,
-      flexDirection: "row",
-    }}>
-      <Button
-        onPress={
-          () => navigation.goBack()
-        }
-        style={{
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={
+        {
           backgroundColor: '#ffffff',
-        }}>
-        <FontAwesome
-          name="chevron-left"
-          size={30}
-          style={
-            {
-              marginLeft: 10,
-              color: CONST.MAIN_COLOR,
-            }
-          }
-        />
-      </Button>
-    </View>
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+        }
+      }
+      onPress={
+        () => navigation.goBack()
+      }
+    />
   )
 
   const renderHeaderTitle = () => {
@@ -120,10 +110,6 @@ const PhotosDetails = ({ route }) => {
         if (newIndex > photos.length - 5) {
           dispatch(getPhotos()) // pre-load more photos when nearing the end
         }
-      //   // TODO: ugly timeout, when the library fixes the issue the timeout can be removed
-      //   setTimeout(() => { setIndex(newIndex) }, 1)
-      //   // await setIndex(newIndex)
-      //   // setIndex(newIndex)
       }} // otherwise will jump to wrong photo onLayout
       loadMinimal
       loadMinimalSize={2}
