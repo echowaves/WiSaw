@@ -676,6 +676,21 @@ export const cleanupCache = () => async (dispatch, getState) => {
     await FileSystem.makeDirectoryAsync(CONST.IMAGE_CACHE_FOLDER)
   }
 
+  // const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
+  //
+  // const cachedUri = `${CONST.IMAGE_CACHE_FOLDER}${cachedFiles[0]}`
+  // console.log({ length: cachedFiles.length })
+  // console.log({ cachedUri })
+  //
+  // for (let i = 0; i < 20000; i += 1) {
+  //   // eslint-disable-next-line no-await-in-loop
+  //   await FileSystem.copyAsync({
+  //     from: cachedUri,
+  //     to: `${cachedUri}_${i}`,
+  //   })
+  // }
+  // console.log('-------------------------------------------DONE-----------------------------------')
+
   // if (Platform.OS === 'ios') {
   //   // cleanup old cached files
   //   const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
