@@ -352,49 +352,56 @@ const Photo = ({ item }) => {
         )}
         { watched !== undefined && (
           <Grid>
-            <Col style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              {/* delete button */}
+            {/* delete button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={
+                () => handleDelete({ item })
+              }>
               <FontAwesome
                 name="trash"
                 style={{
                   color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
                 }}
                 size={30}
-                onPress={
-                  () => handleDelete({ item })
-                }
+
               />
               <Text style={{ fontSize: 10 }}>
                 Delete
               </Text>
             </Col>
-            <Col style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              {/* ban button */}
+            {/* ban button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={
+                () => handleBan({ item })
+              }>
               <FontAwesome
                 name="ban"
                 style={{
                   color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
                 }}
                 size={30}
-                onPress={
-                  () => handleBan({ item })
-                }
               />
               <Text style={{ fontSize: 10 }}>
                 Ban
               </Text>
             </Col>
-            <Col style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              {/* watch button */}
+            {/* watch button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={
+                () => handleFlipWatch()
+              }>
               <FontAwesome
                 name={item.watched ? "eye" : "eye-slash"}
                 style={
@@ -403,19 +410,22 @@ const Photo = ({ item }) => {
                   }
                 }
                 size={30}
-                onPress={
-                  () => handleFlipWatch()
-                }
               />
               <Text style={{ fontSize: 10 }}>
                 {`${item.watched ? 'UnWatch' : 'Watch'}`}
               </Text>
             </Col>
-            <Col style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              {/* share button */}
+            {/* share button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={
+                () => {
+                  dispatch(reducer.sharePhoto({ item }))
+                }
+              }>
               <FontAwesome
                 name="share"
                 style={
@@ -424,21 +434,22 @@ const Photo = ({ item }) => {
                   }
                 }
                 size={30}
-                onPress={
-                  () => {
-                    dispatch(reducer.sharePhoto({ item }))
-                  }
-                }
               />
               <Text style={{ fontSize: 10 }}>
                 Share
               </Text>
             </Col>
-            <Col style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-              {/* likes button */}
+            {/* likes button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={
+                () => {
+                  handleLike({ item })
+                }
+              }>
               {item.likes > 0 && (
                 <Badge
                   badgeStyle={{
@@ -456,11 +467,6 @@ const Photo = ({ item }) => {
                   }
                 }
                 size={30}
-                onPress={
-                  () => {
-                    handleLike({ item })
-                  }
-                }
               />
               <Text style={{ fontSize: 10 }}>
                 Like
