@@ -438,6 +438,15 @@ const Photo = ({ item }) => {
               alignItems: 'center',
             }}>
               {/* likes button */}
+              {item.likes > 0 && (
+                <Badge
+                  badgeStyle={{
+                    backgroundColor: CONST.MAIN_COLOR,
+                  }}
+                  containerStyle={{ position: 'absolute', top: -10, right: `25%` }}
+                  value={item.likes}
+                />
+              )}
               <FontAwesome
                 name="thumbs-up"
                 style={
@@ -450,17 +459,8 @@ const Photo = ({ item }) => {
                   () => {
                     handleLike({ item })
                   }
-                }>
-                {item.likes > 0 && (
-                  <Badge
-                    badgeStyle={{
-                      backgroundColor: CONST.MAIN_COLOR,
-
-                    }}
-                    value={item.likes}
-                  />
-                )}
-              </FontAwesome>
+                }
+              />
               <Text style={{ fontSize: 10 }}>
                 Like
               </Text>
