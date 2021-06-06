@@ -14,6 +14,7 @@ import {
   InteractionManager,
   StyleSheet,
   ScrollView,
+  SafeAreaView,
 } from 'react-native'
 
 import {
@@ -325,11 +326,11 @@ const Photo = ({ item }) => {
   const renderFooter = () => {
     const { watched } = item
     return (
-      <View
+      <SafeAreaView
         style={{
           backgroundColor: 'white',
           width,
-          height: 50,
+          height: 70,
           position: 'absolute',
           bottom: 0,
           right: 0,
@@ -467,7 +468,7 @@ const Photo = ({ item }) => {
             </Col>
           </Grid>
         )}
-      </View>
+      </SafeAreaView>
     )
   }
 
