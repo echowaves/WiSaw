@@ -206,12 +206,19 @@ const Photo = ({ item }) => {
                   }
                 }>
                 <Card
+                  borderRadius={5}
                   width={width - 30}
                   containerStyle={{
                     paddingTop: 5,
                     paddingBottom: 5,
                     marginTop: 5,
                     marginBottom: 5,
+                    borderWidth: 0,
+                    elevation: 0,
+                    shadowColor: 'rgba(0,0,0, .2)',
+                    shadowOffset: { height: 0, width: 0 },
+                    shadowOpacity: 0, // default is 1
+                    shadowRadius: 0, // default is 1
                   }}>
                   <Text
                     style={{
@@ -221,6 +228,7 @@ const Photo = ({ item }) => {
                   </Text>
                   {renderCommentButtons({ photo: item, comment })}
                 </Card>
+                <Divider />
               </TouchableOpacity>
             </Row>
           ))}
@@ -290,7 +298,11 @@ const Photo = ({ item }) => {
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (
           <Card
+            borderRadius={5}
             width={width - 100}
+            containerStyle={{
+              borderWidth: 0,
+            }}
             style={{ paddingBottom: 20 }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized tags:</Text>
             {labels.map(label => (
@@ -301,7 +313,11 @@ const Photo = ({ item }) => {
 
         {textDetections.length > 0 && (
           <Card
+            borderRadius={5}
             width={width - 100}
+            containerStyle={{
+              borderWidth: 0,
+            }}
             style={{ paddingBottom: 20 }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized text:</Text>
             {textDetections.map(text => (
@@ -312,7 +328,11 @@ const Photo = ({ item }) => {
 
         {moderationLabels.length > 0 && (
           <Card
+            borderRadius={5}
             width={width - 100}
+            containerStyle={{
+              borderWidth: 0,
+            }}
             style={{ paddingBottom: 20 }}>
             <Text style={{
               fontWeight: 'bold', color: 'red', textAlignVertical: "center", textAlign: "center",

@@ -470,6 +470,7 @@ const PhotosList = () => {
           color: CONST.MAIN_COLOR,
           backgroundColor: "white",
           width: '100%',
+          paddingLeft: 10,
         }
       }
       lightTheme
@@ -654,7 +655,11 @@ const PhotosList = () => {
     return (
       <SafeAreaView style={styles.container}>
         {renderPendingPhotos()}
-        <Card style={{ borderRadius: 10 }}>
+        <Card
+          borderRadius={5}
+          containerStyle={{
+            borderWidth: 0,
+          }}>
           <Text style={{
             fontSize: 20,
             textAlign: 'center',
@@ -672,7 +677,11 @@ const PhotosList = () => {
     return (
       <SafeAreaView style={styles.container}>
         {renderPendingPhotos()}
-        <Card style={{ borderRadius: 10 }}>
+        <Card
+          borderRadius={5}
+          containerStyle={{
+            borderWidth: 0,
+          }}>
           <Text style={{
             fontSize: 20,
             textAlign: 'center',
@@ -707,7 +716,11 @@ const PhotosList = () => {
         {activeSegment === 2 && renderSearchBar(true)}
         {renderPendingPhotos()}
         {activeSegment === 2 && (
-          <Card>
+          <Card
+            borderRadius={5}
+            containerStyle={{
+              borderWidth: 0,
+            }}>
             <Text style={{
               fontSize: 20,
               textAlign: 'center',
@@ -720,7 +733,11 @@ const PhotosList = () => {
           </Card>
         )}
         { activeSegment === 0 && (
-          <Card style={{ borderRadius: 10 }}>
+          <Card
+            borderRadius={5}
+            containerStyle={{
+              borderWidth: 0,
+            }}>
             <Text style={{
               fontSize: 20,
               textAlign: 'center',
@@ -732,7 +749,11 @@ const PhotosList = () => {
           </Card>
         )}
         {activeSegment === 1 && (
-          <Card style={{ borderRadius: 10 }}>
+          <Card
+            borderRadius={5}
+            containerStyle={{
+              borderWidth: 0,
+            }}>
             <Text style={{
               fontSize: 20,
               textAlign: 'center',
