@@ -206,7 +206,6 @@ const Photo = ({ item }) => {
                   }
                 }>
                 <Card
-                  borderRadius={5}
                   width={width - 30}
                   containerStyle={{
                     paddingTop: 5,
@@ -298,42 +297,56 @@ const Photo = ({ item }) => {
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (
           <Card
-            borderRadius={5}
             width={width - 100}
             containerStyle={{
               borderWidth: 0,
-            }}
-            style={{ paddingBottom: 20 }}>
+              elevation: 0,
+              shadowColor: 'rgba(0,0,0, .2)',
+              shadowOffset: { height: 0, width: 0 },
+              shadowOpacity: 0, // default is 1
+              shadowRadius: 0, // default is 1
+            }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized tags:</Text>
             {labels.map(label => (
               <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{stringifyObject(label.Name).replace(/'/g, '')}</Text>
             ))}
+            <Divider />
           </Card>
         )}
 
         {textDetections.length > 0 && (
           <Card
-            borderRadius={5}
             width={width - 100}
             containerStyle={{
               borderWidth: 0,
-            }}
-            style={{ paddingBottom: 20 }}>
-            <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized text:</Text>
+              elevation: 0,
+              shadowColor: 'rgba(0,0,0, .2)',
+              shadowOffset: { height: 0, width: 0 },
+              shadowOpacity: 0, // default is 1
+              shadowRadius: 0, // default is 1
+            }}>
+            <Text style={{
+              fontWeight: 'bold', textAlignVertical: "center", textAlign: "center",
+            }}>AI recognized text:
+            </Text>
             {textDetections.map(text => (
               <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{stringifyObject(text.DetectedText).replace(/'/g, '')}</Text>
             ))}
+            <Divider />
           </Card>
         )}
 
         {moderationLabels.length > 0 && (
           <Card
-            borderRadius={5}
             width={width - 100}
             containerStyle={{
               borderWidth: 0,
-            }}
-            style={{ paddingBottom: 20 }}>
+              elevation: 0,
+              shadowColor: 'rgba(0,0,0, .2)',
+              shadowOffset: { height: 0, width: 0 },
+              shadowOpacity: 0, // default is 1
+              shadowRadius: 0, // default is 1
+            }}>
             <Text style={{
               fontWeight: 'bold', color: 'red', textAlignVertical: "center", textAlign: "center",
             }}>AI moderation tags:
