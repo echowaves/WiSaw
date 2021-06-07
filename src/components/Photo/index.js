@@ -145,7 +145,6 @@ const Photo = ({ item }) => {
     return (
       <Text
         style={{
-          paddingTop: 5,
           marginLeft: 10,
           color: CONST.MAIN_COLOR,
         }}>
@@ -198,17 +197,26 @@ const Photo = ({ item }) => {
       return (
         <View>
           {item.comments.map((comment, i) => (
-            <Row key={comment.id}>
+            <Row
+              key={comment.id}>
               <TouchableOpacity
                 onPress={
                   () => {
                     dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
                   }
                 }>
-                <Card width={width - 30}>
+                <Card
+                  width={width - 30}
+                  containerStyle={{
+                    paddingTop: 5,
+                    paddingBottom: 5,
+                    marginTop: 5,
+                    marginBottom: 5,
+                  }}>
                   <Text
                     style={{
                       color: CONST.TEXT_COLOR,
+                      fontSize: 20,
                     }}>{comment.comment}
                   </Text>
                   {renderCommentButtons({ photo: item, comment })}
@@ -566,7 +574,7 @@ const Photo = ({ item }) => {
 
   return (
     <View>
-      <ScrollView style={{ margin: 1 }}>
+      <ScrollView style={{ margin: 1, backgroundColor: 'white' }}>
         <Grid>
           <Row>
             {renderPhotoRow()}

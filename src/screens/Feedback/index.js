@@ -139,7 +139,10 @@ const FeedbackScreen = () => {
             color: CONST.MAIN_COLOR,
             height: 200,
             margin: 12,
+            padding: 10,
             borderWidth: 1,
+            borderColor: CONST.MAIN_COLOR,
+            fontSize: 20,
           }
         }
       />
