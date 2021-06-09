@@ -101,7 +101,7 @@ const Photo = ({ item }) => {
         cacheKey={`${item.id}t`}
         backgroundColor="transparent"
         resizeMode="contain"
-        style={
+        containerStyle={
           styles.photoContainer
         }
       />
@@ -121,7 +121,7 @@ const Photo = ({ item }) => {
         cacheKey={`${item.id}i`}
         backgroundColor="transparent"
         resizeMode="contain"
-        style={
+        containerStyle={
           styles.photoContainer
         }
       />

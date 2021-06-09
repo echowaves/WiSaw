@@ -1,6 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, {
+  useEffect, useState, useRef,
+} from 'react'
 
-import { Image } from 'react-native'
+import { Image } from 'react-native-elements'
 
 import * as FileSystem from 'expo-file-system'
 
@@ -11,43 +13,41 @@ import * as CONST from '../../consts.js'
 const CachedImage = props => {
   const { source: { uri }, cacheKey } = props
 
-  const filesystemURI = `${CONST.IMAGE_CACHE_FOLDER}${cacheKey}`
+  const fileURI = `${CONST.IMAGE_CACHE_FOLDER}${cacheKey}`
 
-  const [imgURI, setImgURI] = useState(filesystemURI)
+  const [imgUri, setImgUri] = useState(fileURI)
 
   const componentIsMounted = useRef(true)
 
   useEffect(() => {
-    loadImage({ fileURI: filesystemURI })
+    loadImage()
 
     return () => {
       componentIsMounted.current = false
     }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadImage = async ({ fileURI }) => {
+  const loadImage = async () => {
     try {
       // Use the cached image if it exists
       const metadata = await FileSystem.getInfoAsync(fileURI)
       if (!metadata.exists) {
-        if (componentIsMounted.current) {
-          setImgURI(null)
-        }
         // download to cache
         if (componentIsMounted.current) {
           await FileSystem.downloadAsync(
             uri,
             fileURI
           )
+          await setImgUri(null)
         }
         if (componentIsMounted.current) {
-          setImgURI(fileURI)
+          await setImgUri(fileURI) // deep clone to force re-render
         }
       }
     } catch (err) {
       // console.log({ err })
       if (componentIsMounted.current) {
-        setImgURI(uri)
+        // setImgContents(`data:image/jpeg;base64,`)
       }
     }
   }
@@ -57,7 +57,7 @@ const CachedImage = props => {
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
       source={{
-        uri: imgURI,
+        uri: imgUri,
       }}
     />
   )

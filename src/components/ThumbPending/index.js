@@ -7,8 +7,9 @@ import {
   StyleSheet,
   TouchableHighlight,
   Text,
-  Image,
 } from 'react-native'
+
+import { Image } from 'react-native-elements'
 
 import { FontAwesome } from '@expo/vector-icons'
 
@@ -57,7 +58,7 @@ const ThumbPending = props => {
         ]}>
         <Image
           source={{ uri: `${CONST.PENDING_UPLOADS_FOLDER}${item}` }}
-          style={styles.thumbnail}
+          containerStyle={styles.thumbnail}
         />
       </TouchableHighlight>
       { item.commentsCount > 0 && (

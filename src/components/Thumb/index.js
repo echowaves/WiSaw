@@ -44,7 +44,7 @@ const Thumb = props => {
         <CachedImage
           source={{ uri: `${item.getThumbUrl}` }}
           cacheKey={`${item.id}t`}
-          style={styles.thumbnail}
+          containerStyle={styles.thumbnail}
         />
       </TouchableHighlight>
       { item.commentsCount > 0 && (
