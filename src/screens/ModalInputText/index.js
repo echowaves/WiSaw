@@ -98,11 +98,12 @@ const ModalInputText = ({ route }) => {
       <CachedImage
         source={{ uri: `${item.getThumbUrl}` }}
         cacheKey={`${item.id}t`}
-        style={{
+        containerStyle={{
           alignSelf: 'center',
           width: 150,
-          height: 100,
+          height: 150,
           borderRadius: 10,
+          marginTop: 10,
         }}
       />
       <TextInput

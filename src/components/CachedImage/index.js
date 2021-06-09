@@ -38,7 +38,9 @@ const CachedImage = props => {
             uri,
             fileURI
           )
-          await setImgUri(null)
+          if (componentIsMounted.current) {
+            await setImgUri(null)
+          }
         }
         if (componentIsMounted.current) {
           await setImgUri(fileURI) // deep clone to force re-render
