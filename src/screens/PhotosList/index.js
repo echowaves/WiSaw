@@ -69,7 +69,6 @@ const PhotosList = () => {
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
   const loading = useSelector(state => state.photosList.loading)
 
-  const pendingUploadsCount = useSelector(state => state.photosList.pendingUploadsCount)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
@@ -353,19 +352,6 @@ const PhotosList = () => {
           }
         }
       />
-      {pendingUploadsCount > 0 && (
-        <Text
-          style={
-            {
-              position: 'absolute',
-              alignSelf: 'center',
-              color: 'white',
-              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-            }
-          }>
-          {pendingUploadsCount}
-        </Text>
-      )}
     </View>
   )
 

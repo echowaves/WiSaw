@@ -35,7 +35,6 @@ export const initialState = {
   isLastPage: false,
   netAvailable: false,
   uploadingPhoto: false,
-  pendingUploadsCount: 0,
 }
 
 const reducer = (state = initialState, action) => {
@@ -247,7 +246,6 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.UPDATE_PENDING_PHOTOS:
       return {
         ...state,
-        pendingUploadsCount: action.pendingPhotos.length,
         pendingPhotos: action.pendingPhotos,
       }
 
