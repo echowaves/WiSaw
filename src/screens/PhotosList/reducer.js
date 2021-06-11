@@ -709,27 +709,32 @@ export const cleanupCache = () => async (dispatch, getState) => {
     position += batchSize
   }
 
-  // cleanup cache, leave only 5000 most recent files
+  // cleanup cache, leave only 500mb wirth of most recent files
   results
     .sort((a, b) => a.modificationTime - b.modificationTime)
 
-  // let's calculate the sum in the first pass
-  // const sumSize = sorted.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
+  let sumSize = results.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
 
-  // // second pass to clean up the cach files based on the total size of files in the cache
-  // for (let i = 0; i < sorted.length; i += 1) {
-  //   if (sumSize > 700 * 1000 * 1000) { // 1 GB
-  //     // console.log({ sumSize })
-  //     FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${sorted[i].file}`, { idempotent: true })
-  //     sumSize -= sorted[i].size
-  //   }
+  // let's calculate the sum in the first pass
+  // second pass to clean up the cach files based on the total size of files in the cache
+  for (let i = 0; i < results.length; i += 1) {
+    if (sumSize > 500 * 1000 * 1000) { // 0.5GB
+      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`, { idempotent: true })
+      sumSize -= results[i].size
+    }
+  }
+  // alert(`sumSize:${sumSize} cachedFiles:${cachedFiles.length}`)
 
   // alert(`sorted.length ${sorted.length}`)
   // second pass to clean up the cach files based on the total number of files in the cache
-  for (let i = 0; (results.length - i) > 2000; i += 1) { // may need to reduce down to 500
-    // console.log(sorted[i].modificationTime)
-    FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`, { idempotent: true })
-  }
+
+  // for (let i = 0; (results.length - i) > 1000; i += 1) { // may need to reduce down to 500
+  //   // console.log(sorted[i].modificationTime)
+  //   if (i === 0) {
+  //     alert(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`)
+  //   }
+  //   await FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`, { idempotent: true }) // eslint-disable-line
+  // }
 
   // console.log('----------------------------')
   // console.log({ sumSize })
