@@ -42,6 +42,8 @@ import {
   SearchBar,
 } from 'react-native-elements'
 
+import { initCache } from 'expo-cached-image'
+
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -85,10 +87,8 @@ const PhotosList = () => {
   useEffect(() => {
     const initState = async () => {
       await checkForUpdate()
-
-      await dispatch(reducer.cleanupCache())
-
-      // check permissions and retrieve UUID
+      initCache()
+      // check permissions, retrieve UUID, make sure upload folder exists
       await dispatch(reducer.initState())
 
       await reload()
@@ -296,7 +296,8 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    dispatch(reducer.cleanupCache())
+    // dispatch(reducer.cleanupCache())
+    initCache()
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,

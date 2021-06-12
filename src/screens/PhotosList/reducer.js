@@ -8,6 +8,8 @@ import * as SecureStore from 'expo-secure-store'
 import * as FileSystem from 'expo-file-system'
 import moment from 'moment'
 
+import { addToCache, getContentUri } from 'expo-cached-image'
+
 import Toast from 'react-native-toast-message'
 import * as CONST from '../../consts.js'
 
@@ -256,6 +258,8 @@ const reducer = (state = initialState, action) => {
 
 export function initState() {
   return async (dispatch, getState) => {
+    _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
+
     const uuid = await _getUUID(getState)
     const isTandcAccepted = await _getTancAccepted()
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
@@ -572,24 +576,19 @@ export function uploadPendingPhotos() {
         }
 
         if (responseData.status === 200) {
-          const cachedThumbUri = `${CONST.IMAGE_CACHE_FOLDER}${photo.id}t`
-          const cachedImageUri = `${CONST.IMAGE_CACHE_FOLDER}${photo.id}i`
-          // move file to cacheDir
           // eslint-disable-next-line no-await-in-loop
-          await FileSystem.moveAsync({
-            from: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
-            to: cachedThumbUri,
+          await addToCache({
+            file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
+            key: `${photo.id}`,
           })
 
-          FileSystem.copyAsync({
-            from: cachedThumbUri,
-            to: cachedImageUri,
-          })
+          // eslint-disable-next-line no-await-in-loop
+          FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${item}`)
 
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
 
-          photo.getThumbUrl = cachedThumbUri
+          photo.getThumbUrl = getContentUri({ key: `${photo.id}` })
           photo.fallback = true
 
           // show the photo in the photo list immidiately
@@ -667,74 +666,4 @@ const _uploadFile = async ({ item, uuid, location }) => {
   }
 }
 
-export const cleanupCache = () => async (dispatch, getState) => {
-  await _makeSureDirectoryExists({ directory: CONST.IMAGE_CACHE_FOLDER })
-  await _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
-
-  // const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
-  //
-  // const cachedUri = `${CONST.IMAGE_CACHE_FOLDER}${cachedFiles[0]}`
-  // console.log({ length: cachedFiles.length })
-  // console.log({ cachedUri })
-  //
-  // for (let i = 0; i < 20000; i += 1) {
-  //   // eslint-disable-next-line no-await-in-loop
-  //   await FileSystem.copyAsync({
-  //     from: cachedUri,
-  //     to: `${cachedUri}_${i}`,
-  //   })
-  // }
-  // console.log('-------------------------------------------DONE-----------------------------------')
-
-  // if (Platform.OS === 'ios') {
-  // cleanup old cached files
-  const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
-
-  let position = 0
-  let results = []
-  const batchSize = 20
-
-  // batching promise.all to avoid exxessive promisses call
-  while (position < cachedFiles.length) {
-    const itemsForBatch = cachedFiles.slice(position, position + batchSize)
-      results = [...results, ...await Promise.all(itemsForBatch.map(async file => {// eslint-disable-line
-        const info = await FileSystem.getInfoAsync(`${CONST.IMAGE_CACHE_FOLDER}${file}`)// eslint-disable-line
-      return Promise.resolve({ file, modificationTime: info.modificationTime, size: info.size })
-    }))]
-    position += batchSize
-  }
-
-  // cleanup cache, leave only 500mb wirth of most recent files
-  results
-    .sort((a, b) => a.modificationTime - b.modificationTime)
-
-  let sumSize = results.reduce((accumulator, currentValue) => accumulator + Number(currentValue.size), 0)
-
-  // let's calculate the sum in the first pass
-  // second pass to clean up the cach files based on the total size of files in the cache
-  for (let i = 0; i < results.length; i += 1) {
-    if (sumSize > 400 * 1000 * 1000) { // 0.5GB
-      FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`, { idempotent: true })
-      sumSize -= results[i].size
-    }
-  }
-  // alert(`sumSize:${sumSize} cachedFiles:${cachedFiles.length}`)
-
-  // alert(`sorted.length ${sorted.length}`)
-  // second pass to clean up the cach files based on the total number of files in the cache
-
-  // for (let i = 0; (results.length - i) > 1000; i += 1) { // may need to reduce down to 500
-  //   // console.log(sorted[i].modificationTime)
-  //   if (i === 0) {
-  //     alert(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`)
-  //   }
-  //   await FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`, { idempotent: true }) // eslint-disable-line
-  // }
-
-  // console.log('----------------------------')
-  // console.log({ sumSize })
-  // console.log({ cachedFilesCount })
-  // console.log('----------------------------')
-// }
-}
 export default reducer

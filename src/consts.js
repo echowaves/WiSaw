@@ -11,4 +11,4 @@ export const UNFILLED_COLOR = 'rgba(200, 200, 200, 0.2)'
 export const TRANSPARENT_BUTTON_COLOR = 'rgba(10,10,10,.5)'
 
 export const PENDING_UPLOADS_FOLDER = `${FileSystem.cacheDirectory}pendingUploads/`
-export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
+// export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
