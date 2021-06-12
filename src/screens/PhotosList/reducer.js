@@ -718,7 +718,7 @@ export const cleanupCache = () => async (dispatch, getState) => {
   // let's calculate the sum in the first pass
   // second pass to clean up the cach files based on the total size of files in the cache
   for (let i = 0; i < results.length; i += 1) {
-    if (sumSize > 500 * 1000 * 1000) { // 0.5GB
+    if (sumSize > 400 * 1000 * 1000) { // 0.5GB
       FileSystem.deleteAsync(`${CONST.IMAGE_CACHE_FOLDER}${results[i].file}`, { idempotent: true })
       sumSize -= results[i].size
     }

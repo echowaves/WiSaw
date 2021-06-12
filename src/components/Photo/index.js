@@ -34,7 +34,7 @@ import PropTypes from 'prop-types'
 import stringifyObject from 'stringify-object'
 import jmespath from 'jmespath'
 
-import CachedImage from '../CachedImage'
+import CachedImage from 'expo-cached-image'
 
 import * as reducer from './reducer'
 
