@@ -507,11 +507,11 @@ const _updatePendingPhotos = async dispatch => {
   return pendingFiles
 }
 
-const _checkUploadDirectory = async () => {
-  const cacheDirectory = await FileSystem.getInfoAsync(CONST.PENDING_UPLOADS_FOLDER)
+const _makeSureDirectoryExists = async ({ directory }) => {
+  const tmpDir = await FileSystem.getInfoAsync(directory)
   // create cacheDir if does not exist
-  if (!cacheDirectory.exists) {
-    await FileSystem.makeDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
+  if (!tmpDir.exists) {
+    await FileSystem.makeDirectoryAsync(directory)
   }
 }
 
@@ -668,13 +668,8 @@ const _uploadFile = async ({ item, uuid, location }) => {
 }
 
 export const cleanupCache = () => async (dispatch, getState) => {
-  _checkUploadDirectory()
-
-  const cacheDirectory = await FileSystem.getInfoAsync(CONST.IMAGE_CACHE_FOLDER)
-  // create cacheDir if does not exist
-  if (!cacheDirectory.exists) {
-    await FileSystem.makeDirectoryAsync(CONST.IMAGE_CACHE_FOLDER)
-  }
+  await _makeSureDirectoryExists({ directory: CONST.IMAGE_CACHE_FOLDER })
+  await _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
 
   // const cachedFiles = await FileSystem.readDirectoryAsync(`${CONST.IMAGE_CACHE_FOLDER}`)
   //

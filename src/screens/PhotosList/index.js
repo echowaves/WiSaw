@@ -84,12 +84,13 @@ const PhotosList = () => {
 
   useEffect(() => {
     const initState = async () => {
+      await checkForUpdate()
+
       await dispatch(reducer.cleanupCache())
 
       // check permissions and retrieve UUID
       await dispatch(reducer.initState())
 
-      await checkForUpdate()
       await reload()
     }
     initState()
