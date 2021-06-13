@@ -577,19 +577,25 @@ export function uploadPendingPhotos() {
 
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
-          await addToCache({
+          photo.getImgUrl = await addToCache({
             file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             key: `${photo.id}`,
           })
-
           // eslint-disable-next-line no-await-in-loop
-          FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${item}`)
+          photo.getThumbUrl = await addToCache({
+            file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
+            key: `${photo.id}-thumb`,
+          })
 
+          photo.fallback = true
+          console.log({ photo })
+          // eslint-disable-next-line no-await-in-loop
+          await FileSystem.deleteAsync(
+            `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
+            { idempotent: true }
+          )
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
-
-          photo.getThumbUrl = getContentUri({ key: `${photo.id}` })
-          photo.fallback = true
 
           // show the photo in the photo list immidiately
           dispatch({

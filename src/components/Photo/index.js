@@ -106,7 +106,7 @@ const Photo = ({ item }) => {
       captureEvent={false}>
       <CachedImage
         source={{ uri: `${item.getThumbUrl}` }}
-        cacheKey={`${item.id}t`}
+        cacheKey={`${item.id}-thumb`}
         backgroundColor="transparent"
         resizeMode="contain"
         containerStyle={
@@ -126,7 +126,7 @@ const Photo = ({ item }) => {
       />
       <CachedImage
         source={{ uri: `${item.getImgUrl}` }}
-        cacheKey={`${item.id}i`}
+        cacheKey={`${item.id}`}
         backgroundColor="transparent"
         resizeMode="contain"
         containerStyle={
