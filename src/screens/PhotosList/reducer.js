@@ -8,7 +8,7 @@ import * as SecureStore from 'expo-secure-store'
 import * as FileSystem from 'expo-file-system'
 import moment from 'moment'
 
-import { addToCache } from 'expo-cached-image'
+import * as CachedImage from 'expo-cached-image'
 
 import Toast from 'react-native-toast-message'
 import * as CONST from '../../consts.js'
@@ -577,12 +577,12 @@ export function uploadPendingPhotos() {
 
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
-          photo.getImgUrl = await addToCache({
+          photo.getImgUrl = await CachedImage.addToCache({
             file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             key: `${photo.id}`,
           })
           // eslint-disable-next-line no-await-in-loop
-          photo.getThumbUrl = await addToCache({
+          photo.getThumbUrl = await CachedImage.addToCache({
             file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             key: `${photo.id}-thumb`,
           })

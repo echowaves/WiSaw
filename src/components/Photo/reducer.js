@@ -5,7 +5,7 @@ import axios from 'axios'
 
 import Toast from 'react-native-toast-message'
 
-import { getContentUri } from 'expo-cached-image'
+import * as CachedImage from 'expo-cached-image'
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -347,7 +347,7 @@ export function sharePhoto({ item }) {
       if (!(await SMS.isAvailableAsync())) {
         throw (new Error("SMS is not available."))
       }
-      const uri = await getContentUri({ key: `${item.id}i` })
+      const uri = await CachedImage.getContentUri({ key: `${item.id}i` })
 
       await SMS.sendSMSAsync(
         [],
