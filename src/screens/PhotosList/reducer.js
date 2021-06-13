@@ -8,7 +8,7 @@ import * as SecureStore from 'expo-secure-store'
 import * as FileSystem from 'expo-file-system'
 import moment from 'moment'
 
-import { addToCache, getContentUri } from 'expo-cached-image'
+import { addToCache } from 'expo-cached-image'
 
 import Toast from 'react-native-toast-message'
 import * as CONST from '../../consts.js'
@@ -588,7 +588,6 @@ export function uploadPendingPhotos() {
           })
 
           photo.fallback = true
-          console.log({ photo })
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.deleteAsync(
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
