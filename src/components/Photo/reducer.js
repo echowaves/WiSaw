@@ -5,7 +5,7 @@ import axios from 'axios'
 
 import Toast from 'react-native-toast-message'
 
-import * as CachedImage from 'expo-cached-image'
+import { CacheManager } from 'expo-cached-image'
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -347,7 +347,7 @@ export function sharePhoto({ item }) {
       if (!(await SMS.isAvailableAsync())) {
         throw (new Error("SMS is not available."))
       }
-      const uri = await CachedImage.getContentUri({ key: `${item.id}i` })
+      const uri = await CacheManager.getContentUri({ key: `${item.id}` })
 
       await SMS.sendSMSAsync(
         [],
@@ -363,7 +363,7 @@ export function sharePhoto({ item }) {
     } catch (err) {
       Toast.show({
         text1: "Unable to share photo.",
-        text2: "Sharing may not be supported on your device yet. Try again later.",
+        text2: `${err}`,
         type: "error",
       })
     }
