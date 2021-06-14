@@ -347,7 +347,7 @@ export function sharePhoto({ item }) {
       if (!(await SMS.isAvailableAsync())) {
         throw (new Error("SMS is not available."))
       }
-      const uri = await CacheManager.getContentUri({ key: `${item.id}` })
+      const uri = await CacheManager.getCachedUri({ key: `${item.id}` })
 
       await SMS.sendSMSAsync(
         [],
