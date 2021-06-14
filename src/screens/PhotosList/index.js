@@ -265,7 +265,7 @@ const PhotosList = () => {
       })
 
       if (photoAlbomPermission === 'granted') {
-        takePhoto()
+        await takePhoto()
       }
     }
   }
