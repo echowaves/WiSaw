@@ -85,9 +85,10 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
+    CacheManager.cleanupCache({ size: 500 })
+
     const initState = async () => {
       await checkForUpdate()
-      CacheManager.cleanupCache({ size: 500 })
       // check permissions, retrieve UUID, make sure upload folder exists
       await dispatch(reducer.initState())
 
