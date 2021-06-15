@@ -124,6 +124,7 @@ const ModalInputText = ({ route }) => {
             borderWidth: 1,
             borderColor: CONST.MAIN_COLOR,
             fontSize: 20,
+            textAlignVertical: 'top',
           }
         }
         onChangeText={inputValue => {

@@ -143,6 +143,7 @@ const FeedbackScreen = () => {
             borderWidth: 1,
             borderColor: CONST.MAIN_COLOR,
             fontSize: 20,
+            textAlignVertical: 'top',
           }
         }
       />
