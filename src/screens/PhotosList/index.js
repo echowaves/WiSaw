@@ -42,6 +42,8 @@ import {
   SearchBar,
 } from 'react-native-elements'
 
+import { CacheManager } from 'expo-cached-image'
+
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -83,13 +85,13 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
-    const initState = async () => {
-      await dispatch(reducer.cleanupCache())
+    CacheManager.cleanupCache({ size: 500 })
 
-      // check permissions and retrieve UUID
+    const initState = async () => {
+      await checkForUpdate()
+      // check permissions, retrieve UUID, make sure upload folder exists
       await dispatch(reducer.initState())
 
-      await checkForUpdate()
       await reload()
     }
     initState()
@@ -264,7 +266,7 @@ const PhotosList = () => {
       })
 
       if (photoAlbomPermission === 'granted') {
-        takePhoto()
+        await takePhoto()
       }
     }
   }
@@ -295,7 +297,7 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    dispatch(reducer.cleanupCache())
+    CacheManager.cleanupCache({ size: 400 })
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,

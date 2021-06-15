@@ -13,7 +13,7 @@ import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
-import CachedImage from '../../components/CachedImage'
+import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts.js'
 

@@ -88,7 +88,7 @@ const PhotosDetails = ({ route }) => {
 
   return (
     <Swiper
-      keyboardShouldPersistTaps="always"
+      // keyboardShouldPersistTaps="always"
       autoplay={false}
       horizontal
       loop={false}

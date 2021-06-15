@@ -27,14 +27,14 @@ import {
 
 import { Col, Row, Grid } from "react-native-easy-grid"
 
-import ImageZoom from 'react-native-image-pan-zoom'
+import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
 
 import PropTypes from 'prop-types'
 
 import stringifyObject from 'stringify-object'
 import jmespath from 'jmespath'
 
-import CachedImage from '../CachedImage'
+import CachedImage from 'expo-cached-image'
 
 import * as reducer from './reducer'
 
@@ -91,14 +91,22 @@ const Photo = ({ item }) => {
   })
 
   const renderPhotoRow = () => (
-    <ImageZoom
-      cropWidth={width}
-      cropHeight={imageHeight}
-      imageWidth={width}
-      imageHeight={imageHeight}>
+    <ReactNativeZoomableView
+      style={{
+        flex: 1,
+        height: imageHeight,
+      }}
+      zoomEnabled
+      maxZoom={10.0}
+      minZoom={1.0}
+      zoomStep={0.5}
+      initialZoom={1.0}
+      bindToBorders={false}
+      doubleTapZoomToCenter={false}
+      captureEvent={false}>
       <CachedImage
         source={{ uri: `${item.getThumbUrl}` }}
-        cacheKey={`${item.id}t`}
+        cacheKey={`${item.id}-thumb`}
         backgroundColor="transparent"
         resizeMode="contain"
         containerStyle={
@@ -118,14 +126,14 @@ const Photo = ({ item }) => {
       />
       <CachedImage
         source={{ uri: `${item.getImgUrl}` }}
-        cacheKey={`${item.id}i`}
+        cacheKey={`${item.id}`}
         backgroundColor="transparent"
         resizeMode="contain"
         containerStyle={
           styles.photoContainer
         }
       />
-    </ImageZoom>
+    </ReactNativeZoomableView>
   )
 
   const renderCommentsStats = () => {

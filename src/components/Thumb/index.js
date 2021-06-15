@@ -13,7 +13,7 @@ import { FontAwesome } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
-import CachedImage from '../CachedImage'
+import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts.js'
 
@@ -43,7 +43,7 @@ const Thumb = props => {
         ]}>
         <CachedImage
           source={{ uri: `${item.getThumbUrl}` }}
-          cacheKey={`${item.id}t`}
+          cacheKey={`${item.id}-thumb`}
           containerStyle={styles.thumbnail}
         />
       </TouchableHighlight>
