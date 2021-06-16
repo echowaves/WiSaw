@@ -99,9 +99,9 @@ const Photo = ({ item }) => {
       zoomEnabled
       maxZoom={10.0}
       minZoom={1.0}
-      zoomStep={0.5}
+      zoomStep={1.0}
       initialZoom={1.0}
-      bindToBorders={false}
+      bindToBorders
       doubleTapZoomToCenter={false}
       captureEvent={false}>
       <CachedImage
