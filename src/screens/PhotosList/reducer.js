@@ -578,7 +578,6 @@ export function uploadPendingPhotos() {
         }
 
         if (responseData.status === 200) {
-          console.log({ photo })
           // eslint-disable-next-line no-await-in-loop
           await CacheManager.addToCache({
             file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
