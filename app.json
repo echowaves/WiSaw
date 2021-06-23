@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WiSaw",
-    "version": "5.13.1",
+    "version": "5.13.2",
     "slug": "WiSaw",
     "scheme": "wisaw",
     "icon": "./assets/icon.png",
