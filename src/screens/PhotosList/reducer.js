@@ -258,8 +258,6 @@ const reducer = (state = initialState, action) => {
 
 export function initState() {
   return async (dispatch, getState) => {
-    _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
-
     const uuid = await _getUUID(getState)
     const isTandcAccepted = await _getTancAccepted()
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
@@ -502,6 +500,7 @@ async function _getTancAccepted() {
     return false
   }
 }
+
 const _updatePendingPhotos = async dispatch => {
   const pendingFiles = await _getPendingUploadFiles()
   dispatch({
@@ -517,6 +516,7 @@ const _makeSureDirectoryExists = async ({ directory }) => {
   if (!tmpDir.exists) {
     await FileSystem.makeDirectoryAsync(directory)
   }
+  return Promise.resolve()
 }
 
 export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
@@ -530,6 +530,8 @@ export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
 }
 
 const _getPendingUploadFiles = async () => {
+  await _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
+
   const files = await FileSystem.readDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
   return files
 }
