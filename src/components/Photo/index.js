@@ -87,6 +87,7 @@ const Photo = ({ item }) => {
       bottom: 0,
       right: 0,
       left: 0,
+      backgroundColor: 'transparent',
     },
   })
 
@@ -107,7 +108,6 @@ const Photo = ({ item }) => {
       <CachedImage
         source={{ uri: `${item.getThumbUrl}` }}
         cacheKey={`${item.id}-thumb`}
-        backgroundColor="transparent"
         resizeMode="contain"
         containerStyle={
           styles.photoContainer
@@ -127,7 +127,6 @@ const Photo = ({ item }) => {
       <CachedImage
         source={{ uri: `${item.getImgUrl}` }}
         cacheKey={`${item.id}`}
-        backgroundColor="transparent"
         resizeMode="contain"
         containerStyle={
           styles.photoContainer
