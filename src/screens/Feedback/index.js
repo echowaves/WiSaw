@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
+// import { API } from 'aws-amplify'
+
 import {
   SafeAreaView,
   TextInput,
@@ -27,6 +29,23 @@ import * as reducer from './reducer'
 
 const maxStringLength = 2000
 
+const query = `
+query listAbuseReports {
+  listAbuseReports {
+    createdAt
+    id
+    photoId
+    updatedAt
+    uuid
+  }
+}
+`
+
+async function fetchAbuseReorts() {
+  // const data = await API.graphql({ query })
+  // console.log('data from GraphQL:', data)
+}
+
 const FeedbackScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
@@ -44,6 +63,7 @@ const FeedbackScreen = () => {
   }
 
   useEffect(() => {
+    fetchAbuseReorts()
     navigation.setOptions({
       headerTitle: <Text>feedback form</Text>,
       headerTintColor: CONST.MAIN_COLOR,
