@@ -550,11 +550,11 @@ export function getRecognitions({ item }) {
         item,
         recognitions: null,
       })
-      Toast.show({
-        text1: "Unable to load recognitions.",
-        text2: "Potential Network Issue.",
-        type: "error",
-      })
+      // Toast.show({
+      //   text1: "Unable to load recognitions.",
+      //   text2: "Potential Network Issue.",
+      //   type: "error",
+      // })
     }
   }
 }
