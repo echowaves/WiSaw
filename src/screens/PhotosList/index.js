@@ -85,7 +85,7 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
-    CacheManager.cleanupCache({ size: 500 })
+    CacheManager.cleanupCache({ size: 400 })
 
     const initState = async () => {
       await checkForUpdate()

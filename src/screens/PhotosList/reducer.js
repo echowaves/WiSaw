@@ -589,6 +589,8 @@ export function uploadPendingPhotos() {
             key: `${photo.id}-thumb`,
           })
 
+          CacheManager.cleanupCache({ size: 400 })
+
           photo.fallback = true
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.deleteAsync(
