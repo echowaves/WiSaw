@@ -31,7 +31,7 @@ import * as reducer from './reducer'
 
 const maxStringLength = 2000
 
-const query = gql`
+const GET_ABUSE_REPORTS = gql`
 query listAbuseReports {
   listAbuseReports {
     createdAt
@@ -43,10 +43,25 @@ query listAbuseReports {
 }
 `
 
+const CREATE_ABUSE_REPORT = gql`
+mutaion createAbuseReport(abuseReport:
+  {uuid: "ce0894b9-01e4-46e4-b337-d855dbe656dd", photoId: "123"}
+) {
+    createdAt
+    id
+    updatedAt
+    uuid
+  }
+`
 async function fetchAbuseReorts() {
   const abuseReports = await CONST.gqlClient
-    .query({ query })
+    .query({ GET_ABUSE_REPORTS })
   console.log({ abuseReports })
+}
+
+async function addAbuseReort({}) {
+  const abuseReport = await CONST.gqlClient
+    .mutate({ CREATE_ABUSE_REPORT })
 }
 
 const FeedbackScreen = () => {
