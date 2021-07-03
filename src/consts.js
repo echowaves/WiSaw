@@ -3,13 +3,11 @@ import * as FileSystem from 'expo-file-system'
 import {
   ApolloClient,
   InMemoryCache,
-  ApolloProvider,
-  ApolloLink,
   HttpLink,
   from,
-  useQuery,
-  gql,
 } from "@apollo/client"
+
+import { API_URI, API_KEY } from '@env'
 
 const fetch = require('node-fetch')
 
@@ -26,19 +24,16 @@ export const TRANSPARENT_BUTTON_COLOR = 'rgba(10,10,10,.5)'
 export const PENDING_UPLOADS_FOLDER = `${FileSystem.cacheDirectory}pendingUploads/`
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
 
-const uri = 'https://yrgrmgrlpzhgfglxlaicymwbqe.appsync-api.us-east-1.amazonaws.com/graphql'
-const apiKey = 'da2-7qshjsahijcybkx3myvx3tb5rm'
-
 const httpLink = new HttpLink({
-  uri,
+  uri: API_URI,
   fetch,
   headers: {
-    'X-Api-Key': apiKey,
+    'X-Api-Key': API_KEY,
   },
 })
 
 export const gqlClient = new ApolloClient({
-  uri,
+  uri: API_URI,
   link: from([httpLink]),
   cache: new InMemoryCache(),
 })
