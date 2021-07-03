@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
-// import { API } from 'aws-amplify'
+import {
+  gql,
+} from "@apollo/client"
 
 import {
   SafeAreaView,
@@ -29,7 +31,7 @@ import * as reducer from './reducer'
 
 const maxStringLength = 2000
 
-const query = `
+const query = gql`
 query listAbuseReports {
   listAbuseReports {
     createdAt
@@ -42,8 +44,9 @@ query listAbuseReports {
 `
 
 async function fetchAbuseReorts() {
-  // const data = await API.graphql({ query })
-  // console.log('data from GraphQL:', data)
+  const abuseReports = await CONST.gqlClient
+    .query({ query })
+  console.log({ abuseReports })
 }
 
 const FeedbackScreen = () => {
