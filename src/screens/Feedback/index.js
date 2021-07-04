@@ -44,7 +44,7 @@ query listAbuseReports {
 `
 
 // const CREATE_ABUSE_REPORT = gql`
-// mutaion createAbuseReport(abuseReport:
+// mutation createAbuseReport(abuseReport:
 //   {uuid: "ce0894b9-01e4-46e4-b337-d855dbe656dd", photoId: "123"}
 // ) {
 //     createdAt
@@ -53,9 +53,10 @@ query listAbuseReports {
 //     uuid
 //   }
 // `
+
 async function fetchAbuseReorts() {
   const abuseReports = await CONST.gqlClient
-    .query({ GET_ABUSE_REPORTS })
+    .query({ query: GET_ABUSE_REPORTS })
   console.log({ abuseReports })
 }
 
