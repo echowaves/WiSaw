@@ -43,27 +43,32 @@ query listAbuseReports {
 }
 `
 
-// const CREATE_ABUSE_REPORT = gql`
-// mutation createAbuseReport(abuseReport:
-//   {uuid: "ce0894b9-01e4-46e4-b337-d855dbe656dd", photoId: "123"}
-// ) {
-//     createdAt
-//     id
-//     updatedAt
-//     uuid
-//   }
-// `
-
 async function fetchAbuseReorts() {
   const abuseReports = await CONST.gqlClient
     .query({ query: GET_ABUSE_REPORTS })
-  console.log({ abuseReports })
+  console.log({ abuseReports }, '\n_____________________________________________________')
 }
 
-// async function addAbuseReort() {
-//   const abuseReport = await CONST.gqlClient
-//     .query({ CREATE_ABUSE_REPORT })
-// }
+async function addAbuseReport() {
+  const abuseReport = await CONST.gqlClient
+    .mutate({
+      mutation: gql`
+        mutation createAbuseReport($uuid: String!, $photoId: ID!) {
+          createAbuseReport(uuid: $uuid, photoId: $photoId)
+                 {
+                    createdAt
+                    id
+                    updatedAt
+                    uuid
+                  }
+        }`,
+      variables: {
+        uuid: "ce0894b9-01e4-46e4-b337-d855dbe656dd",
+        photoId: "123",
+      },
+    })
+  console.log({ abuseReport }, '\n__________added___________________________________________')
+}
 
 const FeedbackScreen = () => {
   const navigation = useNavigation()
@@ -131,7 +136,8 @@ const FeedbackScreen = () => {
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
+    addAbuseReport()
+    // dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
   }
 
   if (finished && errorMessage.length === 0) {
