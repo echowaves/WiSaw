@@ -257,6 +257,7 @@ export function banPhoto({ item }) {
         type: "success",
       })
     } catch (err) {
+      // console.error({ err })
       dispatch({
         type: ACTION_TYPES.UNBAN_PHOTO,
         photoId: item.id,
