@@ -521,10 +521,14 @@ const _makeSureDirectoryExists = async ({ directory }) => {
 
 export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
   // move file to cacheDir
-  await FileSystem.moveAsync({
+  await FileSystem.copyAsync({
     from: uri,
     to: `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
   })
+  await FileSystem.deleteAsync(
+    uri,
+    { idempotent: true }
+  )
 
   _updatePendingPhotos(dispatch)
 }
@@ -589,14 +593,15 @@ export function uploadPendingPhotos() {
             key: `${photo.id}-thumb`,
           })
 
-          CacheManager.cleanupCache({ size: 400 })
-
           photo.fallback = true
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.deleteAsync(
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )
+          // eslint-disable-next-line no-await-in-loop
+          await CacheManager.cleanupCache({ size: 400 })
+
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
 
