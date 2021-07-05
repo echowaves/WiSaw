@@ -3,10 +3,6 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import {
-  gql,
-} from "@apollo/client"
-
-import {
   SafeAreaView,
   TextInput,
   StyleSheet,
@@ -31,45 +27,6 @@ import * as reducer from './reducer'
 
 const maxStringLength = 2000
 
-const GET_ABUSE_REPORTS = gql`
-query listAbuseReports {
-  listAbuseReports {
-    createdAt
-    id
-    photoId
-    updatedAt
-    uuid
-  }
-}
-`
-
-async function fetchAbuseReorts() {
-  const abuseReports = await CONST.gqlClient
-    .query({ query: GET_ABUSE_REPORTS })
-  console.log({ abuseReports }, '\n_____________________________________________________')
-}
-
-async function addAbuseReport() {
-  const abuseReport = await CONST.gqlClient
-    .mutate({
-      mutation: gql`
-        mutation createAbuseReport($uuid: String!, $photoId: ID!) {
-          createAbuseReport(uuid: $uuid, photoId: $photoId)
-                 {
-                    createdAt
-                    id
-                    updatedAt
-                    uuid
-                  }
-        }`,
-      variables: {
-        uuid: "ce0894b9-01e4-46e4-b337-d855dbe656dd",
-        photoId: "123",
-      },
-    })
-  console.log({ abuseReport }, '\n__________added___________________________________________')
-}
-
 const FeedbackScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
@@ -87,7 +44,6 @@ const FeedbackScreen = () => {
   }
 
   useEffect(() => {
-    fetchAbuseReorts()
     navigation.setOptions({
       headerTitle: <Text>feedback form</Text>,
       headerTintColor: CONST.MAIN_COLOR,
@@ -136,8 +92,7 @@ const FeedbackScreen = () => {
   )
 
   const handleSubmit = () => {
-    addAbuseReport()
-    // dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
+    dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
   }
 
   if (finished && errorMessage.length === 0) {

@@ -7,6 +7,10 @@ import Toast from 'react-native-toast-message'
 
 import { CacheManager } from 'expo-cached-image'
 
+import {
+  gql,
+} from "@apollo/client"
+
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
 import * as CONST from '../../consts'
@@ -226,34 +230,32 @@ export function banPhoto({ item }) {
     })
 
     try {
-      const response = await axios({
-        method: 'POST',
-        url: `${CONST.HOST}/abusereport`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-          photoId: item.id,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation createAbuseReport($uuid: String!, $photoId: ID!) {
+              createAbuseReport(uuid: $uuid, photoId: $photoId)
+                     {
+                        createdAt
+                        id
+                        updatedAt
+                        uuid
+                      }
+            }`,
+          variables: {
+            uuid,
+            photoId: item.id,
+          },
+        })
+
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
+        photoId: item.id,
       })
-      // const responseJson = await response.json()
-      if (response.status === 201) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
-          photoId: item.id,
-        })
-        Toast.show({
-          text1: "Abusive Photo reported.",
-          type: "success",
-        })
-      } else {
-        dispatch({
-          type: ACTION_TYPES.UNBAN_PHOTO,
-          photoId: item.id,
-        })
-      }
+      Toast.show({
+        text1: `Abusive Photo reported`,
+        type: "success",
+      })
     } catch (err) {
       dispatch({
         type: ACTION_TYPES.UNBAN_PHOTO,
