@@ -568,8 +568,8 @@ export function uploadPendingPhotos() {
         })
         if (responseData === "banned") {
           alert("Sorry, you've been banned.")
-
-          FileSystem.deleteAsync(
+          // eslint-disable-next-line no-await-in-loop
+          await FileSystem.deleteAsync(
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )

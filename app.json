@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WiSaw",
-    "version": "5.13.2",
+    "version": "5.14.1",
     "slug": "WiSaw",
     "scheme": "wisaw",
     "icon": "./assets/icon.png",
@@ -24,7 +24,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.echowaves",
-      "buildNumber": "153",
+      "buildNumber": "154",
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This will allow you to take photos with WiSaw app. When you take a photo with WiSaw, it will be stored in your photo album on your device and will be shared with other near-by users of the app. Any user who finds content objectionable or abusive will be able to remove it permanently, so that no one will be able to see it any more.",
@@ -43,7 +43,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.echowaves.wisaw",
-      "versionCode": 153,
+      "versionCode": 154,
       "permissions": [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",
