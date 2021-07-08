@@ -7,7 +7,7 @@ import {
   from,
 } from "@apollo/client"
 
-import { API_URI, API_KEY } from '@env'
+import { API_URI, API_KEY } from "@env"
 
 const fetch = require('node-fetch')
 
@@ -37,3 +37,4 @@ export const gqlClient = new ApolloClient({
   link: from([httpLink]),
   cache: new InMemoryCache(),
 })
+// console.log({ API_URI }, { API_KEY })

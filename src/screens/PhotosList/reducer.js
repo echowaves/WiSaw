@@ -11,6 +11,9 @@ import moment from 'moment'
 import { CacheManager } from 'expo-cached-image'
 
 import Toast from 'react-native-toast-message'
+
+import { gql } from "@apollo/client"
+
 import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
@@ -637,46 +640,64 @@ export function uploadPendingPhotos() {
 const _uploadFile = async ({ item, uuid, location }) => {
   const assetUri = `${CONST.PENDING_UPLOADS_FOLDER}${item}`
   try {
-    const response = await axios({
-      method: 'POST',
-      url: `${CONST.HOST}/photos`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        uuid,
-        location: {
-          type: 'Point',
-          coordinates: [
-            location.coords.latitude,
-            location.coords.longitude,
-          ],
-        },
-      },
-    })
-    if (response.status === 401) {
-      // alert("Sorry, looks like you have been banned from WiSaw.")
-      return { responseData: "banned" }
-    }
-    if (response.status === 201
-    // || response.status === 401 // todo: implement better banned logic
-    ) {
-      const { uploadURL, photo } = response.data
-
-      const responseData = await FileSystem.uploadAsync(
-        uploadURL,
-        assetUri,
-        {
-          httpMethod: 'PUT',
-          headers: {
-            "Content-Type": "image/jpeg",
-          },
+    const newPhoto = (await CONST.gqlClient
+      .mutate({
+        mutation: gql`
+        mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String! ) {
+          createPhoto(lat: $lat, lon: $lon, uuid: $uuid ) {
+            active
+            commentsCount
+            createdAt
+            id
+            imgUrl
+            likes
+            location
+            thumbUrl
+            updatedAt
+            uuid
         }
-      )
-      return { responseData, photo }
+      }`,
+        variables: {
+          lat: location.coords.latitude,
+          lon: location.coords.longitude,
+          uuid,
+        },
+      })).data.createPhoto
+
+    // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n', { newPhoto })
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n', newPhoto.id)
+
+    const uploadUrl = (await CONST.gqlClient
+      .query({
+        query: gql`
+        query generateUploadUrl($photoId: ID!) {
+          generateUploadUrl(photoId: $photoId)
+        }`,
+        variables: {
+          photoId: newPhoto.id,
+        },
+      })).data.generateUploadUrl
+
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! uploadUrl: ', uploadUrl)
+
+    const responseData = await FileSystem.uploadAsync(
+      uploadUrl,
+      assetUri,
+      {
+        httpMethod: 'PUT',
+        headers: {
+          "Content-Type": "image/jpeg",
+        },
+      }
+    )
+    console.log({ responseData })
+    return { responseData, newPhoto }
+  } catch (err) {
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n', { err })
+    if (err === 'banned') {
+      return { responseData: "banned", err }
     }
-  } catch (error) {
-    // console.log({ error })// eslint-disable-line no-console
+    return { responseData: "something bad happened, unable to upload", err }
   }
 }
 

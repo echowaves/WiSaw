@@ -7,9 +7,7 @@ import Toast from 'react-native-toast-message'
 
 import { CacheManager } from 'expo-cached-image'
 
-import {
-  gql,
-} from "@apollo/client"
+import { gql } from "@apollo/client"
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -230,7 +228,7 @@ export function banPhoto({ item }) {
     })
 
     try {
-      await CONST.gqlClient
+      const abuseReport = await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation createAbuseReport($uuid: String!, $photoId: ID!) {
@@ -248,6 +246,7 @@ export function banPhoto({ item }) {
           },
         })
 
+      console.log({ abuseReport })
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
         photoId: item.id,
@@ -257,7 +256,7 @@ export function banPhoto({ item }) {
         type: "success",
       })
     } catch (err) {
-      // console.error({ err })
+      console.error({ err })
       dispatch({
         type: ACTION_TYPES.UNBAN_PHOTO,
         photoId: item.id,
