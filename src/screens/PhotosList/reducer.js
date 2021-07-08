@@ -664,9 +664,6 @@ const _uploadFile = async ({ item, uuid, location }) => {
         },
       })).data.createPhoto
 
-    // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n', { newPhoto })
-    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n', newPhoto.id)
-
     const uploadUrl = (await CONST.gqlClient
       .query({
         query: gql`
@@ -678,8 +675,6 @@ const _uploadFile = async ({ item, uuid, location }) => {
         },
       })).data.generateUploadUrl
 
-    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! uploadUrl: ', uploadUrl)
-
     const responseData = await FileSystem.uploadAsync(
       uploadUrl,
       assetUri,
@@ -690,10 +685,8 @@ const _uploadFile = async ({ item, uuid, location }) => {
         },
       }
     )
-    console.log({ responseData })
     return { responseData, photo: newPhoto }
   } catch (err) {
-    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n', { err })
     if (err === 'banned') {
       return { responseData: "banned", err }
     }
