@@ -691,7 +691,7 @@ const _uploadFile = async ({ item, uuid, location }) => {
       }
     )
     console.log({ responseData })
-    return { responseData, newPhoto }
+    return { responseData, photo: newPhoto }
   } catch (err) {
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n', { err })
     if (err === 'banned') {
