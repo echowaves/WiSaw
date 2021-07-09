@@ -6828,20 +6828,20 @@ expo-structured-headers@~1.1.1:
   resolved "https://registry.yarnpkg.com/expo-structured-headers/-/expo-structured-headers-1.1.1.tgz#95e28ff8686a2c06fe6ad1decdbb94cc44716683"
   integrity sha512-OxDsWTDxwAhfW82DDXYTcT9UzSk2fYUb3YHiz/tQ1MObQMh0QVHgxcTe9vvtzguc6O4A2Y+f8tO1g3LcUEN2lg==
 
-expo-updates-interface@~0.2.1:
+expo-updates-interface@~0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/expo-updates-interface/-/expo-updates-interface-0.2.2.tgz#f754ce2c562f427d87893a9d22a4cbab39e0defd"
   integrity sha512-Gvjk/6DntlPfkoRrrmbl9jzD2YtlNVa9jV9/T1+zdvg9XvO7H+BUgAQ1NYFFx/3Wdk03z+xfCYugRWk9X5nZ5A==
 
-expo-updates@~0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.8.0.tgz#81e177811b3b70a40a0554d2cba820776eec4541"
-  integrity sha512-9V/MF7+oJjxASs15mXVYlW8zJE4RnZkUUva/xopPuoYcCVkbCKHKRQGjAlhD638JNjQL7/D8PO8Dd2GNQwj6ww==
+expo-updates@~0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.8.1.tgz#784833a89503173a3ee9ae09eafd10e89d0706a0"
+  integrity sha512-DRD9kAfx5Y3spbYSIqKtvFrTIE60d+jDlSv96uZP/wf1V//tNHvENx2ZPJCGhfBs+8tH8/33iJ/MxLB/TvJWyA==
   dependencies:
     "@expo/config-plugins" "^3.0.0"
     "@expo/metro-config" "^0.1.70"
     expo-structured-headers "~1.1.1"
-    expo-updates-interface "~0.2.1"
+    expo-updates-interface "~0.2.2"
     fbemitter "^2.1.1"
     resolve-from "^5.0.0"
     uuid "^3.4.0"

@@ -40,7 +40,7 @@
     "expo-secure-store": "~10.2.0",
     "expo-sms": "~9.2.3",
     "expo-status-bar": "~1.0.4",
-    "expo-updates": "~0.8.0",
+    "expo-updates": "~0.8.1",
     "global": "^4.4.0",
     "graphql": "^15.5.1",
     "jmespath": "0.15.0",
