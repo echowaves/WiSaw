@@ -14,6 +14,7 @@ import {
   Card,
   LinearProgress,
 } from 'react-native-elements'
+import * as FileSystem from 'expo-file-system'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
@@ -34,6 +35,8 @@ const FeedbackScreen = () => {
   const loading = useSelector(state => state.feedback.loading)
   const errorMessage = useSelector(state => state.feedback.errorMessage)
   const finished = useSelector(state => state.feedback.finished)
+  const [diskSpace, setDiskSpace] = useState('')
+  const [diskCapacity, setDiskCapacity] = useState('')
 
   const [inputText, _setInputText] = useState('')
 
@@ -51,6 +54,12 @@ const FeedbackScreen = () => {
       headerLeft: renderHeaderLeft,
       headerBackTitle: <Text />,
     })
+
+    const initState = async () => {
+      setDiskSpace(await FileSystem.getFreeDiskStorageAsync())
+      setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
+    }
+    initState()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
   const styles = StyleSheet.create({
     container: {
@@ -121,6 +130,8 @@ const FeedbackScreen = () => {
   }
   return (
     <SafeAreaView style={styles.container}>
+      <Text>{diskSpace / 1000 / 1000}</Text>
+      <Text>{diskCapacity / 1000 / 1000}</Text>
       { errorMessage.length !== 0 && (
         <Text>{errorMessage}</Text>
       )}

@@ -17,6 +17,7 @@ import { Provider } from 'react-redux'
 
 import { ThemeProvider } from 'react-native-elements'
 import Toast from 'react-native-toast-message'
+
 import * as CONST from './src/consts.js'
 import { store } from './src'
 

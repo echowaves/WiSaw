@@ -11,6 +11,9 @@ import moment from 'moment'
 import { CacheManager } from 'expo-cached-image'
 
 import Toast from 'react-native-toast-message'
+
+import { gql } from "@apollo/client"
+
 import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
@@ -521,10 +524,14 @@ const _makeSureDirectoryExists = async ({ directory }) => {
 
 export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
   // move file to cacheDir
-  await FileSystem.moveAsync({
+  await FileSystem.copyAsync({
     from: uri,
     to: `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
   })
+  await FileSystem.deleteAsync(
+    uri,
+    { idempotent: true }
+  )
 
   _updatePendingPhotos(dispatch)
 }
@@ -568,8 +575,8 @@ export function uploadPendingPhotos() {
         })
         if (responseData === "banned") {
           alert("Sorry, you've been banned.")
-
-          FileSystem.deleteAsync(
+          // eslint-disable-next-line no-await-in-loop
+          await FileSystem.deleteAsync(
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )
@@ -589,14 +596,15 @@ export function uploadPendingPhotos() {
             key: `${photo.id}-thumb`,
           })
 
-          CacheManager.cleanupCache({ size: 400 })
-
           photo.fallback = true
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.deleteAsync(
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )
+          // eslint-disable-next-line no-await-in-loop
+          await CacheManager.cleanupCache({ size: 400 })
+
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
 
@@ -632,46 +640,57 @@ export function uploadPendingPhotos() {
 const _uploadFile = async ({ item, uuid, location }) => {
   const assetUri = `${CONST.PENDING_UPLOADS_FOLDER}${item}`
   try {
-    const response = await axios({
-      method: 'POST',
-      url: `${CONST.HOST}/photos`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        uuid,
-        location: {
-          type: 'Point',
-          coordinates: [
-            location.coords.latitude,
-            location.coords.longitude,
-          ],
-        },
-      },
-    })
-    if (response.status === 401) {
-      // alert("Sorry, looks like you have been banned from WiSaw.")
-      return { responseData: "banned" }
-    }
-    if (response.status === 201
-    // || response.status === 401 // todo: implement better banned logic
-    ) {
-      const { uploadURL, photo } = response.data
-
-      const responseData = await FileSystem.uploadAsync(
-        uploadURL,
-        assetUri,
-        {
-          httpMethod: 'PUT',
-          headers: {
-            "Content-Type": "image/jpeg",
-          },
+    const newPhoto = (await CONST.gqlClient
+      .mutate({
+        mutation: gql`
+        mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String! ) {
+          createPhoto(lat: $lat, lon: $lon, uuid: $uuid ) {
+            active
+            commentsCount
+            createdAt
+            id
+            imgUrl
+            likes
+            location
+            thumbUrl
+            updatedAt
+            uuid
         }
-      )
-      return { responseData, photo }
+      }`,
+        variables: {
+          lat: location.coords.latitude,
+          lon: location.coords.longitude,
+          uuid,
+        },
+      })).data.createPhoto
+
+    const uploadUrl = (await CONST.gqlClient
+      .query({
+        query: gql`
+        query generateUploadUrl($photoId: ID!) {
+          generateUploadUrl(photoId: $photoId)
+        }`,
+        variables: {
+          photoId: newPhoto.id,
+        },
+      })).data.generateUploadUrl
+
+    const responseData = await FileSystem.uploadAsync(
+      uploadUrl,
+      assetUri,
+      {
+        httpMethod: 'PUT',
+        headers: {
+          "Content-Type": "image/jpeg",
+        },
+      }
+    )
+    return { responseData, photo: newPhoto }
+  } catch (err) {
+    if (err === 'banned') {
+      return { responseData: "banned", err }
     }
-  } catch (error) {
-    // console.log({ error })// eslint-disable-line no-console
+    return { responseData: "something bad happened, unable to upload", err }
   }
 }
 

@@ -85,9 +85,9 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
-    CacheManager.cleanupCache({ size: 400 })
-
     const initState = async () => {
+      await CacheManager.cleanupCache({ size: 400 })
+
       await checkForUpdate()
       // check permissions, retrieve UUID, make sure upload folder exists
       await dispatch(reducer.initState())
@@ -297,7 +297,7 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    CacheManager.cleanupCache({ size: 400 })
+    await CacheManager.cleanupCache({ size: 400 })
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
