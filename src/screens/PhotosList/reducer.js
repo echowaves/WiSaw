@@ -671,7 +671,7 @@ const _uploadFile = async ({ item, uuid, location }) => {
           generateUploadUrl(photoId: $photoId)
         }`,
         variables: {
-          photoId: newPhoto.id,
+          photoId: `${newPhoto.id}.upload`,
         },
       })).data.generateUploadUrl
 
