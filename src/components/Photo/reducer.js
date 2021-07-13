@@ -318,7 +318,7 @@ export function sharePhoto({ item }) {
       //   {
       //     title: 'What I saw today:',
       //     contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
-      //     contentImageUrl: item.getImgUrl,
+      //     contentImageUrl: item.imgUrl,
       //     publiclyIndex: true,
       //     locallyIndex: true,
       //   }

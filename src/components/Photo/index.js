@@ -106,7 +106,7 @@ const Photo = ({ item }) => {
       doubleTapZoomToCenter={false}
       captureEvent={false}>
       <CachedImage
-        source={{ uri: `${item.getThumbUrl}` }}
+        source={{ uri: `${item.thumbUrl}` }}
         cacheKey={`${item.id}-thumb`}
         resizeMode="contain"
         containerStyle={
@@ -125,7 +125,7 @@ const Photo = ({ item }) => {
         }}
       />
       <CachedImage
-        source={{ uri: `${item.getImgUrl}` }}
+        source={{ uri: `${item.imgUrl}` }}
         cacheKey={`${item.id}`}
         resizeMode="contain"
         containerStyle={

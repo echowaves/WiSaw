@@ -73,10 +73,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        isLastPage:
-         (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
-        || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
-        || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+        isLastPage: action.noMoreData
+
+        //  (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
+        // || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+        // || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
         ,
       }
     case ACTION_TYPES.RESET_STATE:
@@ -275,30 +276,45 @@ export function initState() {
 
 async function _requestGeoPhotos(getState) {
   const {
-    pageNumber, uuid, batch, location: { latitude, longitude },
+    pageNumber, batch, location: { coords: { latitude, longitude } },
   } = getState().photosList
+  const whenToStop = moment().add(1, 'days').subtract(5, 'days')
+  try {
+    const response = (await CONST.gqlClient
+      .query({
+        query: gql`
+      query feedByDate($batch: Long!, $daysAgo: Int!, $lat: Float!, $lon: Float!, $whenToStop: AWSDateTime!) {
+        feedByDate(batch: $batch, daysAgo: $daysAgo, lat: $lat, lon: $lon, whenToStop: $whenToStop){
+          photos {
+                  id
+                  imgUrl
+                  thumbUrl
+                  commentsCount
+                  likes
+                }
+          batch,
+          noMoreData
+        }
+      }`,
+        variables: {
+          batch,
+          daysAgo: pageNumber,
+          lat: latitude,
+          lon: longitude,
+          whenToStop,
+        },
+      }))
 
-  const response = await axios({
-    method: 'POST',
-    url: `${CONST.HOST}/photos/feedByDate`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: {
-      uuid,
-      location: {
-        type: 'Point',
-        coordinates: [
-          latitude,
-          longitude,
-        ],
-      },
-      daysAgo: pageNumber,
-      batch,
-    },
-  })
+    // console.log({ response })
 
-  return response.data
+    return {
+      photos: response.data.feedByDate.photos,
+      batch: response.data.feedByDate.batch,
+      noMoreData: response.data.feedByDate.noMoreData,
+    }
+  } catch (err) {
+    console.log({ err })
+  }
 }
 
 async function _requestWatchedPhotos(getState) {
@@ -353,6 +369,8 @@ export function getPhotos() {
       location, netAvailable, searchTerm,
     } = getState().photosList
 
+    let noMoreData = false
+
     if (!location
     || netAvailable === false
     || (getState().photosList.activeSegment === 2
@@ -375,9 +393,10 @@ export function getPhotos() {
         } else if (getState().photosList.activeSegment === 2) {
           responseJson = await _requestSearchedPhotos(getState)
         }
-
+        // console.log({ responseJson })
+        noMoreData = responseJson?.noMoreData
         if (responseJson.batch === getState().photosList.batch) {
-          if (responseJson.photos && responseJson.photos.length > 0) {
+          if (responseJson?.photos?.length > 0) {
             dispatch({
               type: ACTION_TYPES.GET_PHOTOS_SUCCESS,
               photos: responseJson.photos,
@@ -403,6 +422,7 @@ export function getPhotos() {
     }
     dispatch({
       type: ACTION_TYPES.GET_PHOTOS_FINISHED,
+      noMoreData,
     })
   }
 }
