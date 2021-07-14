@@ -1,7 +1,6 @@
 // import { Platform } from 'react-native'
 
 import { v4 as uuidv4 } from 'uuid'
-import axios from 'axios'
 
 import * as SecureStore from 'expo-secure-store'
 
@@ -281,6 +280,8 @@ export function initState() {
   }
 }
 
+// this function return the time of the very first photo stored in the backend,
+// so that we can tell when to stop requesting new photos while paging through the results
 export function zeroMoment() {
   return async (dispatch, getState) => {
     const { zeroMoment } = (await CONST.gqlClient
@@ -307,8 +308,8 @@ async function _requestGeoPhotos(getState) {
     const response = (await CONST.gqlClient
       .query({
         query: gql`
-      query feedByDate($batch: Long!, $daysAgo: Int!, $lat: Float!, $lon: Float!, $whenToStop: AWSDateTime!) {
-        feedByDate(batch: $batch, daysAgo: $daysAgo, lat: $lat, lon: $lon, whenToStop: $whenToStop){
+      query feedByDate($daysAgo: Int!, $lat: Float!, $lon: Float!, $batch: Long!, $whenToStop: AWSDateTime!) {
+        feedByDate(daysAgo: $daysAgo, lat: $lat, lon: $lon, batch: $batch, whenToStop: $whenToStop){
           photos {
                   id
                   imgUrl
@@ -341,43 +342,74 @@ async function _requestGeoPhotos(getState) {
 
 async function _requestWatchedPhotos(getState) {
   const { pageNumber, uuid, batch } = getState().photosList
-  // console.log(`_requestWatchedPhotos(${pageNumber})`)
-  const response = await axios({
-    method: 'POST',
-    url: `${CONST.HOST}/photos/feedForWatcher`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: {
-      uuid,
-      pageNumber,
-      batch,
-    },
-  })
+  try {
+    const response = (await CONST.gqlClient
+      .query({
+        query: gql`
+      query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: Long!) {
+        feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch){
+          photos {
+                  id
+                  imgUrl
+                  thumbUrl
+                  commentsCount
+                  likes
+                }
+          batch,
+          noMoreData
+        }
+      }`,
+        variables: {
+          uuid,
+          pageNumber,
+          batch,
+        },
+      }))
 
-  return response.data
+    return {
+      photos: response.data.feedForWatcher.photos,
+      batch: response.data.feedForWatcher.batch,
+      noMoreData: response.data.feedForWatcher.noMoreData,
+    }
+  } catch (err) {
+    console.log({ err })// eslint-disable-line
+  }
 }
 
 async function _requestSearchedPhotos(getState) {
   const { pageNumber, searchTerm, batch } = getState().photosList
-  // console.log(`_requestSearchedPhotos(${pageNumber})`)
-  const { uuid } = getState().photosList
+  try {
+    const response = (await CONST.gqlClient
+      .query({
+        query: gql`
+      query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: Long!) {
+        feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch){
+          photos {
+                  id
+                  imgUrl
+                  thumbUrl
+                  commentsCount
+                  likes
+                }
+          batch,
+          noMoreData
+        }
+      }`,
+        variables: {
+          searchTerm,
+          batch,
+          pageNumber,
+        },
+      }))
 
-  const response = await axios({
-    method: 'POST',
-    url: `${CONST.HOST}/photos/feedForTextSearch`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: {
-      uuid,
-      searchTerm,
-      pageNumber,
-      batch,
-    },
-  })
-
-  return response.data
+    return {
+      photos: response.data.feedForTextSearch.photos,
+      batch: response.data.feedForTextSearch.batch,
+      noMoreData: response.data.feedForTextSearch.noMoreData,
+    }
+  } catch (err) {
+    console.log({ err })// eslint-disable-line
+  }
 }
 
 export function getPhotos() {
