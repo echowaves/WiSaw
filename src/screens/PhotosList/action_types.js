@@ -29,3 +29,5 @@ export const UPDATE_PENDING_PHOTOS = 'wisaw/photosList/UPDATE_PENDING_PHOTOS'
 
 export const PHOTO_WATCHED = 'wisaw/photosList/PHOTO_WATCHED'
 export const PHOTO_UNWATCHED = 'wisaw/photosList/PHOTO_UNWATCHED'
+
+export const ZERO_MOMEMT = 'wisaw/photosList/ZERO_MOMEMT'

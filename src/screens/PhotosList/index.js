@@ -89,8 +89,9 @@ const PhotosList = () => {
       await CacheManager.cleanupCache({ size: 400 })
 
       await checkForUpdate()
-      // check permissions, retrieve UUID, make sure upload folder exists
       await dispatch(reducer.initState())
+      // check permissions, retrieve UUID, make sure upload folder exists
+      await dispatch(reducer.zeroMoment())
 
       await reload()
     }

@@ -40,6 +40,7 @@ export const initialState = {
   isLastPage: false,
   netAvailable: false,
   uploadingPhoto: false,
+  zeroMoment: moment().format("YYYY-MM-DD-HH-mm-ss-SSS"),
 }
 
 const reducer = (state = initialState, action) => {
@@ -180,6 +181,12 @@ const reducer = (state = initialState, action) => {
         photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: false } : item)),
       }
 
+    case ACTION_TYPES.ZERO_MOMEMT:
+      return {
+        ...state,
+        zeroMoment: action.zeroMoment,
+      }
+
     case ACTION_TYPES.TOGGLE_COMMENT_BUTTONS:
       return {
         ...state,
@@ -274,11 +281,28 @@ export function initState() {
   }
 }
 
+export function zeroMoment() {
+  return async (dispatch, getState) => {
+    const { zeroMoment } = (await CONST.gqlClient
+      .query({
+        query: gql`
+        query zeroMoment {
+          zeroMoment
+        }`,
+      })).data
+    // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
+    dispatch({
+      type: ACTION_TYPES.ZERO_MOMEMT,
+      zeroMoment,
+    })
+  }
+}
+
 async function _requestGeoPhotos(getState) {
   const {
-    pageNumber, batch, location: { coords: { latitude, longitude } },
+    pageNumber, batch, zeroMoment, location: { coords: { latitude, longitude } },
   } = getState().photosList
-  const whenToStop = moment().add(1, 'days').subtract(5, 'days')
+  const whenToStop = moment(zeroMoment)
   try {
     const response = (await CONST.gqlClient
       .query({
@@ -305,7 +329,7 @@ async function _requestGeoPhotos(getState) {
         },
       }))
 
-    // console.log({ response })
+    console.log({ response })
 
     return {
       photos: response.data.feedByDate.photos,
@@ -313,7 +337,7 @@ async function _requestGeoPhotos(getState) {
       noMoreData: response.data.feedByDate.noMoreData,
     }
   } catch (err) {
-    console.log({ err })
+    console.log({ err })// eslint-disable-line
   }
 }
 
