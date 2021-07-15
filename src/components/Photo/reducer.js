@@ -228,7 +228,8 @@ export function banPhoto({ item }) {
     })
 
     try {
-      const abuseReport = await CONST.gqlClient
+      // const abuseReport =
+      await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation createAbuseReport($uuid: String!, $photoId: ID!) {
@@ -246,7 +247,7 @@ export function banPhoto({ item }) {
           },
         })
 
-      console.log({ abuseReport })
+      // console.log({ abuseReport })
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
         photoId: item.id,

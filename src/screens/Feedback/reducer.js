@@ -1,5 +1,6 @@
-import axios from 'axios'
 import Toast from 'react-native-toast-message'
+
+import { gql } from "@apollo/client"
 
 import * as CONST from '../../consts.js'
 
@@ -61,28 +62,30 @@ export function submitFeedback({ feedbackText }) {
       type: ACTION_TYPES.SUBMIT_FEEDBACK_STARTED,
     })
     try {
-      const response = await axios({
-        method: 'POST',
-        url: `${CONST.HOST}/contactform`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-          description: feedbackText,
-        },
-      })
+      // const contactForm =
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation createContactForm($uuid: String!, $description: String!) {
+              createContactForm(uuid: $uuid, description: $description)
+                     {
+                        createdAt
+                        id
+                        updatedAt
+                        uuid
+                      }
+            }`,
+          variables: {
+            uuid,
+            description: feedbackText,
+          },
+        })
 
-      if (response.status === 201) {
-        dispatch({
-          type: ACTION_TYPES.SUBMIT_FEEDBACK_FINISHED,
-        })
-      } else {
-        dispatch({
-          type: ACTION_TYPES.SUBMIT_FEEDBACK_FAIL,
-          errorMessage: 'Something went wrong. Try again later.',
-        })
-      }
+      // console.log({ contactForm })
+
+      dispatch({
+        type: ACTION_TYPES.SUBMIT_FEEDBACK_FINISHED,
+      })
     } catch (err) {
       dispatch({
         type: ACTION_TYPES.SUBMIT_FEEDBACK_FAIL,
