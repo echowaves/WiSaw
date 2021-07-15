@@ -329,7 +329,6 @@ async function _requestGeoPhotos(getState) {
           whenToStop,
         },
       }))
-
     return {
       photos: response.data.feedByDate.photos,
       batch: response.data.feedByDate.batch,

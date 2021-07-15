@@ -103,29 +103,26 @@ export function likePhoto({ photoId }) {
     })
 
     try {
-      const response = await axios({
-        method: 'PUT',
-        url: `${CONST.HOST}/photos/${photoId}/like`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation likePhoto($photoId: ID!, $uuid: String!) {
+              likePhoto(photoId: $photoId, uuid: $uuid)
+                     {
+                        id
+                      }
+            }`,
+          variables: {
+            photoId,
+            uuid,
+          },
+        })
+
+      // lets update the state in the photos collection so it renders the right number of likes in the list
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_LIKED,
+        photoId,
       })
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_LIKED,
-          photoId,
-        })
-      } else {
-        dispatch({
-          type: ACTION_TYPES.UNLIKE_PHOTO,
-          photoId,
-        })
-      }
     } catch (err) {
       dispatch({
         type: ACTION_TYPES.UNLIKE_PHOTO,
