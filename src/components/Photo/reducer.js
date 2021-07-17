@@ -342,8 +342,8 @@ export function submitComment({ inputText, uuid, item }) {
       const comment = await CONST.gqlClient
         .mutate({
           mutation: gql`
-            mutation commentPhoto($photoId: ID!, $uuid: String!, $description: String!) {
-              commentPhoto(photoId: $photoId, uuid: $uuid, description: $description)
+            mutation createComment($photoId: ID!, $uuid: String!, $description: String!) {
+              createComment(photoId: $photoId, uuid: $uuid, description: $description)
             }`,
           variables: {
             photoId: item.id,
@@ -550,36 +550,28 @@ export function deleteComment({ photo, comment }) {
     const { uuid } = getState().photosList
 
     try {
-      const response = await axios({
-        method: 'DELETE',
-        url: `${CONST.HOST}/comments/${comment.id}`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          deactivatedBy: uuid,
-        },
-      })
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation deleteComment($commentId: ID!, $uuid: String!) {
+              deleteComment(commentId: $commentId, uuid: $uuid)
+            }`,
+          variables: {
+            commentId: comment.id,
+            uuid,
+          },
+        })
 
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.COMMENT_DELETED,
-          photoId: photo.id,
-          commentId: comment.id,
-        })
-        Toast.show({
-          text1: "Comment deleted.",
-          type: "success",
-        })
-      } else {
-        Toast.show({
-          text1: "Unable to delete comment.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
+      // lets update the state in the photos collection so it renders the right number of likes in the list
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.COMMENT_DELETED,
+        photoId: photo.id,
+        commentId: comment.id,
+      })
+      Toast.show({
+        text1: "Comment deleted.",
+        type: "success",
+      })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete comment.",
