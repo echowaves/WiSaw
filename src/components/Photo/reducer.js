@@ -136,29 +136,22 @@ export function watchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      const response = await axios({
-        method: 'POST',
-        url: `${CONST.HOST}/photos/${item.id}/watchers`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
-      })
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation watchPhoto($photoId: ID!, $uuid: String!) {
+              watchPhoto(photoId: $photoId, uuid: $uuid)
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+        })
 
-      // const responseJson = await response.json()
-      if (response.status === 201) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-          item,
-        })
-      } else {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-          item,
-        })
-      }
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
+        item,
+      })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
@@ -176,31 +169,22 @@ export function watchPhoto({ item }) {
 export function unwatchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-
     try {
-      const response = await axios({
-        method: 'DELETE',
-        url: `${CONST.HOST}/photos/${item.id}/watchers`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation unwatchPhoto($photoId: ID!, $uuid: String!) {
+              unwatchPhoto(photoId: $photoId, uuid: $uuid)
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+        })
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
+        item,
       })
-
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-          item,
-        })
-      } else {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-          item,
-        })
-      }
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
@@ -254,7 +238,7 @@ export function banPhoto({ item }) {
         type: "success",
       })
     } catch (err) {
-      console.error({ err })
+      // console.error({ err })
       dispatch({
         type: ACTION_TYPES.UNBAN_PHOTO,
         photoId: item.id,
