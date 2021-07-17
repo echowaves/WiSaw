@@ -252,35 +252,26 @@ export function deletePhoto({ item }) {
     const { uuid } = getState().photosList
 
     try {
-      const response = await axios({
-        method: 'DELETE',
-        url: `${CONST.HOST}/photos/${item.id}`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation deletePhoto($photoId: ID!, $uuid: String!) {
+              deletePhoto(photoId: $photoId, uuid: $uuid)
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+        })
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DELETED,
+        photoId: item.id,
       })
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DELETED,
-          photoId: item.id,
-        })
-        Toast.show({
-          text1: "Photo deleted.",
-          text2: "No one will be able to see it any more.",
-          type: "success",
-        })
-      } else {
-        Toast.show({
-          text1: "Unable to delete photo.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
+      Toast.show({
+        text1: "Photo deleted.",
+        text2: "No one will be able to see it any more.",
+        type: "success",
+      })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete photo.",
@@ -294,18 +285,6 @@ export function deletePhoto({ item }) {
 export function sharePhoto({ item }) {
   return async (dispatch, getState) => {
     try {
-      // only canonicalIdentifier is required
-      // const branchUniversalObject = await Branch.createBranchUniversalObject(
-      //   `photo/${item.id}`,
-      //   {
-      //     title: 'What I saw today:',
-      //     contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
-      //     contentImageUrl: item.imgUrl,
-      //     publiclyIndex: true,
-      //     locallyIndex: true,
-      //   }
-      // )
-
       let messageBody = 'Check out what I saw today:'
       // const messageHeader = 'Check out what I saw today:'
       // const emailSubject = 'WiSaw: Check out what I saw today'
