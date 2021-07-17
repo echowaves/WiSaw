@@ -333,62 +333,39 @@ export function sharePhoto({ item }) {
   }
 }
 
-// export function setInputText({ inputText }) {
-//   if (inputText.length < 140) {
-//     return {
-//       type: ACTION_TYPES.SET_INPUT_TEXT,
-//       inputText,
-//     }
-//   }
-//   return {
-//     type: ACTION_TYPES.SET_INPUT_TEXT,
-//     inputText: inputText.substring(0, 140),
-//   }
-// }
-
 export function submitComment({ inputText, uuid, item }) {
   return async dispatch => {
     dispatch({
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
     })
     try {
-      const response = await axios({
-        method: 'POST',
-        url: `${CONST.HOST}/photos/${item.id}/comments`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-          comment: inputText,
-        },
+      const comment = await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation commentPhoto($photoId: ID!, $uuid: String!, $description: String!) {
+              commentPhoto(photoId: $photoId, uuid: $uuid, description: $description)
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+            description: inputText,
+          },
+        })
+
+      // lets update the state in the photos collection so it renders the right number of likes in the list
+      dispatch({
+        type: ACTION_TYPES.SUBMIT_COMMENT_FINISHED,
       })
-      if (response.status === 201) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: ACTION_TYPES.SUBMIT_COMMENT_FINISHED,
-        })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.COMMENT_POSTED,
-          photoId: item.id,
-          comment: response.data.comment,
-        })
-        Toast.show({
-          text1: "Comment submitted.",
-          type: "success",
-        })
-        dispatch(watchPhoto({ item }))
-      } else {
-        dispatch({
-          type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
-          error: 'failed submitting comment',
-        })
-        Toast.show({
-          text1: "Unable to submit comment.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.COMMENT_POSTED,
+        photoId: item.id,
+        comment,
+      })
+      Toast.show({
+        text1: "Comment submitted.",
+        type: "success",
+      })
+      dispatch(watchPhoto({ item }))
     } catch (err) {
       dispatch({
         type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
