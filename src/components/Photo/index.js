@@ -287,7 +287,6 @@ const Photo = ({ item }) => {
     if (!recognitions) {
       return (<Text />)
     }
-    recognitions.replace('\\', '')
     console.log({ recognitions })
     const labels = jmespath.search(recognitions, "metaData.Labels[]")
     const textDetections = jmespath.search(recognitions, "metaData.TextDetections[?Type=='LINE']")
