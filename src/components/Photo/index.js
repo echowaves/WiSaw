@@ -32,7 +32,6 @@ import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/R
 import PropTypes from 'prop-types'
 
 import stringifyObject from 'stringify-object'
-import jmespath from 'jmespath'
 
 import CachedImage from 'expo-cached-image'
 
@@ -284,14 +283,14 @@ const Photo = ({ item }) => {
 
   const renderRecognitions = () => {
     const { recognitions } = item
-    if (!recognitions) {
+    if (!recognitions || recognitions.length === 0) {
       return (<Text />)
     }
-    console.log({ recognitions })
-    const labels = jmespath.search(recognitions, "metaData.Labels[]")
-    const textDetections = jmespath.search(recognitions, "metaData.TextDetections[?Type=='LINE']")
-    const moderationLabels = jmespath.search(recognitions, "metaData.ModerationLabels[]")
-    console.log({ labels })
+
+    const labels = JSON.parse(recognitions[0].metaData).Labels
+    const textDetections = JSON.parse(recognitions[0].metaData).TextDetections
+      .filter(text => text.Type === 'LINE')
+    const moderationLabels = JSON.parse(recognitions[0].metaData).ModerationLabels
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (

@@ -68,24 +68,7 @@ export default function reducer(state = initialState, action) {
         inputText: '',
         error: '',
       }
-    // case ACTION_TYPES.GET_COMMENTS_STARTED:
-    //   return {
-    //     ...state,
-    //   }
-    // case ACTION_TYPES.GET_COMMENTS_FINISHED:
-    //   return {
-    //     ...state,
-    //   }
-    // case ACTION_TYPES.GET_RECOGNITIONS_STARTED:
-    //   return {
-    //     ...state,
-    //   }
-    // case ACTION_TYPES.GET_RECOGNITIONS_FINISHED:
-    //   return {
-    //     ...state,
-    //   }
-      // case DELETE_PHOTO:
-      // 	return state
+
     default:
       return state
   }
@@ -391,8 +374,10 @@ export function getPhotoDetails({ item }) {
                   comment
                   createdAt
                 }
-                recognitions {
+                recognitions{
                   metaData
+                  id
+                  createdAt
                 }
                 isPhotoWatched
               }

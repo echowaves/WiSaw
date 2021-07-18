@@ -43,7 +43,6 @@
     "expo-updates": "~0.8.1",
     "global": "^4.4.0",
     "graphql": "^15.5.1",
-    "jmespath": "0.15.0",
     "moment": "2.29.1",
     "prop-types": "15.7.2",
     "react": "^17.0.2",
