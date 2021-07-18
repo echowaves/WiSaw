@@ -324,7 +324,12 @@ export function submitComment({ inputText, uuid, item }) {
         .mutate({
           mutation: gql`
             mutation createComment($photoId: ID!, $uuid: String!, $description: String!) {
-              createComment(photoId: $photoId, uuid: $uuid, description: $description)
+              createComment(photoId: $photoId, uuid: $uuid, description: $description) {
+                id
+                active
+                comment
+                createdAt
+              }
             }`,
           variables: {
             photoId: item.id,
@@ -332,7 +337,7 @@ export function submitComment({ inputText, uuid, item }) {
             description: inputText,
           },
         })
-
+      console.log({ comment })
       // lets update the state in the photos collection so it renders the right number of likes in the list
       dispatch({
         type: ACTION_TYPES.SUBMIT_COMMENT_FINISHED,
@@ -348,6 +353,7 @@ export function submitComment({ inputText, uuid, item }) {
       })
       dispatch(watchPhoto({ item }))
     } catch (err) {
+      console.log({ err })
       dispatch({
         type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
         error: JSON.stringify(err),
@@ -371,13 +377,11 @@ export function getPhotoDetails({ item }) {
         query getPhotoDetails($photoId: ID!, $uuid: String!) {
           getPhotoDetails(photoId: $photoId, uuid: $uuid,) {
             comments {
+                  id
                   comment
-                  createdAt
                 }
                 recognitions{
                   metaData
-                  id
-                  createdAt
                 }
                 isPhotoWatched
               }
@@ -386,6 +390,7 @@ export function getPhotoDetails({ item }) {
             photoId: item.id,
             uuid,
           },
+          fetchPolicy: "network-only",
         }))
 
       const {
