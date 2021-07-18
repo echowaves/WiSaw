@@ -157,11 +157,12 @@ const PhotosList = () => {
       }
     } catch (error) {
     // handle or log error
-      Toast.show({
-        text1: `Failed to get over the air update:`,
-        text2: `${error}`,
-        type: "error",
-      })
+      // Toast.show({
+      //   text1: `Failed to get over the air update:`,
+      //   text2: `${error}`,
+      //   type: "error",
+      //   topOffset: 200,
+      // })
     }
   }
 
@@ -291,6 +292,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'Unable to get location',
           type: "error",
+          topOffset: 200,
         })
       }
     }
@@ -476,6 +478,7 @@ const PhotosList = () => {
       Toast.show({
         text1: "Search for more than 3 characters",
         type: "error",
+        topOffset: 200,
       })
     }
   }

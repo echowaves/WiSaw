@@ -449,6 +449,7 @@ export function getPhotos() {
           text1: 'Error',
           text2: err.toString(),
           type: "error",
+          topOffset: 200,
         })
       }
     }
@@ -528,6 +529,7 @@ async function _getUUID(getState) {
       //   text: err.toString(),
       //   buttonText: "OK23",
       //   duration: 15000,
+      // topOffset: 200,
       // })
     }
     // no uuid in the store, generate a new one and store
@@ -541,6 +543,7 @@ async function _getUUID(getState) {
         //   text: err.toString(),
         //   buttonText: "OK",
         //   duration: 15000,
+        // topOffset: 200,
         // })
       }
     }
@@ -666,7 +669,12 @@ export function uploadPendingPhotos() {
             photo,
           })
         } else {
-          alert("Error uploading file, try again.")
+          // alert("Error uploading file, try again.")
+          Toast.show({
+            text1: 'Unable to upload file, refresh to try again.',
+            text2: 'Network issue?',
+            topOffset: 200,
+          })
         }
       }
     } catch (error) {
@@ -675,6 +683,8 @@ export function uploadPendingPhotos() {
       })
       Toast.show({
         text1: 'Failed to upload file, refresh to try again.',
+        text2: 'Network issue?',
+        topOffset: 200,
       })
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())

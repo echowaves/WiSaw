@@ -95,6 +95,7 @@ export function submitFeedback({ feedbackText }) {
         text1: 'Error',
         text2: err.toString(),
         type: "error",
+        topOffset: 200,
       })
     }
   }

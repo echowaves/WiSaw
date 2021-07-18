@@ -133,8 +133,9 @@ export function watchPhoto({ item }) {
       })
       Toast.show({
         text1: 'Unable to watch photo.',
-        text2: 'Potential Network Issue.',
+        text2: 'Network Issue?',
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -166,8 +167,9 @@ export function unwatchPhoto({ item }) {
       })
       Toast.show({
         text1: "Unable to unwatch photo.",
-        text2: "Potential Network Issue.",
+        text2: "Maybe Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -202,7 +204,6 @@ export function banPhoto({ item }) {
           },
         })
 
-      // console.log({ abuseReport })
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
         photoId: item.id,
@@ -210,6 +211,7 @@ export function banPhoto({ item }) {
       Toast.show({
         text1: `Abusive Photo reported`,
         type: "success",
+        topOffset: 200,
       })
     } catch (err) {
       // console.error({ err })
@@ -242,15 +244,17 @@ export function deletePhoto({ item }) {
         photoId: item.id,
       })
       Toast.show({
-        text1: "Photo deleted.",
+        text1: "Photo deleted from the Cloud.",
         text2: "No one will be able to see it any more.",
         type: "success",
+        topOffset: 200,
       })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete photo.",
-        text2: "Potential Network Issue.",
+        text2: "Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -300,8 +304,9 @@ export function sharePhoto({ item }) {
     } catch (err) {
       Toast.show({
         text1: "Unable to share photo.",
-        text2: `${err}`,
+        text2: "Wait for a bit and try again...",
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -313,7 +318,7 @@ export function submitComment({ inputText, uuid, item }) {
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
     })
     try {
-      const comment = await CONST.gqlClient
+      await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation createComment($photoId: ID!, $uuid: String!, $description: String!) {
@@ -330,7 +335,6 @@ export function submitComment({ inputText, uuid, item }) {
             description: inputText,
           },
         })
-      console.log({ comment })
       // lets update the state in the photos collection so it renders the right number of likes in the list
 
       Toast.show({
@@ -340,14 +344,16 @@ export function submitComment({ inputText, uuid, item }) {
       })
       dispatch(watchPhoto({ item }))
     } catch (err) {
-      console.log({ err })
+      console.log({ err })// eslint-disable-line
       dispatch({
         type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
         error: JSON.stringify(err),
       })
       Toast.show({
         text1: "Unable to submit comment.",
+        text2: "Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -438,12 +444,14 @@ export function deleteComment({ photo, comment }) {
       Toast.show({
         text1: "Comment deleted.",
         type: "success",
+        topOffset: 200,
       })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete comment.",
-        text2: "Potential Network Issue.",
+        text2: "Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }
