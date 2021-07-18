@@ -1,8 +1,6 @@
 // import Branch from '../../util/my-branch'
 import * as SMS from 'expo-sms'
 
-import axios from 'axios'
-
 import Toast from 'react-native-toast-message'
 
 import { CacheManager } from 'expo-cached-image'
@@ -379,160 +377,47 @@ export function submitComment({ inputText, uuid, item }) {
   }
 }
 
-export function getComments({ item }) {
-  return async (dispatch, getState) => {
-    // dispatch({
-    //   type: ACTION_TYPES.GET_COMMENTS_STARTED,
-    // })
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: `${CONST.HOST}/photos/${item.id}/comments`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // data: {
-        //   uuid,
-        // },
-      })
-
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        // dispatch({
-        //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
-          item,
-          comments: response.data.comments.map(
-            comment => ({
-              ...comment,
-              hiddenButtons: true,
-            })
-          ).reverse(),
-        })
-      } else {
-        // dispatch({
-        //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
-          item,
-          comments: [],
-        })
-        Toast.show({
-          text1: "Unable to load comments.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
-    } catch (err) {
-      // dispatch({
-      //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-      // })
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
-        item,
-        comments: [],
-      })
-      Toast.show({
-        text1: "Unable to load comments.",
-        text2: "Potential Network Issue.",
-        type: "error",
-      })
-    }
-  }
-}
-
-export function getRecognitions({ item }) {
-  return async (dispatch, getState) => {
-    // dispatch({
-    //   type: ACTION_TYPES.GET_RECOGNITIONS_STARTED,
-    // })
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: `${CONST.HOST}/photos/${item.id}/recognitions`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // data: {
-        //   uuid,
-        // },
-      })
-
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        // dispatch({
-        //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
-          item,
-          recognitions: response.data.recognition,
-        })
-      } else {
-        // dispatch({
-        //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
-          item,
-          recognitions: null,
-        })
-      }
-    } catch (err) {
-      // dispatch({
-      //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-      // })
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
-        item,
-        recognitions: null,
-      })
-      // Toast.show({
-      //   text1: "Unable to load recognitions.",
-      //   text2: "Potential Network Issue.",
-      //   type: "error",
-      // })
-    }
-  }
-}
-
-export function checkIsPhotoWatched({ item }) {
+export function getPhotoDetails({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
+
     try {
-      const response = await axios({
-        method: 'GET',
-        url: `${CONST.HOST}/photos/${item.id}/watchers/${uuid}`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // data: {
-        //   uuid,
-        // },
+      const response = (await CONST.gqlClient
+        .query({
+          query: gql`
+        query getPhotoDetails($photoId: ID!, $uuid: String!) {
+          getPhotoDetails(photoId: $photoId, uuid: $uuid,) {
+            comments {
+                  comment
+                  createdAt
+                }
+                recognitions {
+                  metaData
+                }
+                isPhotoWatched
+              }
+        }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+        }))
+
+      const {
+        comments,
+        recognitions,
+        isPhotoWatched,
+      } = response.data.getPhotoDetails
+
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DETAILS_LOADED,
+        item,
+        comments,
+        recognitions,
+        isPhotoWatched,
       })
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-          item,
-        })
-      }
     } catch (err) {
-      if (err.response.status === 404) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-          item,
-        })
-      } else {
-        Toast.show({
-          text1: "Unable to check if photo is watched.",
-          text2: "Potential Network Issue.",
-          type: "error",
-        })
-      }
+      console.log({ err })// eslint-disable-line
     }
   }
 }

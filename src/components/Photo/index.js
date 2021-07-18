@@ -58,17 +58,8 @@ const Photo = ({ item }) => {
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
         if (componentIsMounted) {
-          Promise.all([
-            dispatch(reducer.getComments({ item })),
-            dispatch(reducer.checkIsPhotoWatched({ item })),
-            dispatch(reducer.getRecognitions({ item })),
-            // dispatch(reducer.setInputText({ inputText: '' })),
-          ])
+          dispatch(reducer.getPhotoDetails({ item }))
         }
-        // if (componentIsMounted) dispatch(reducer.getComments({ item }))
-        // if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
-        // if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
-        // if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
       })
 
       return () => {
@@ -296,10 +287,12 @@ const Photo = ({ item }) => {
     if (!recognitions) {
       return (<Text />)
     }
+    recognitions.replace('\\', '')
+    console.log({ recognitions })
     const labels = jmespath.search(recognitions, "metaData.Labels[]")
     const textDetections = jmespath.search(recognitions, "metaData.TextDetections[?Type=='LINE']")
     const moderationLabels = jmespath.search(recognitions, "metaData.ModerationLabels[]")
-
+    console.log({ labels })
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (

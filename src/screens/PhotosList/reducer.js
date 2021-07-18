@@ -128,16 +128,12 @@ const reducer = (state = initialState, action) => {
         ...state,
         photos: state.photos.filter(item => (item.id !== action.photoId)),
       }
-    case ACTION_TYPES.PHOTO_COMMENTS_LOADED:
+    case ACTION_TYPES.PHOTO_DETAILS_LOADED:
       return {
         ...state,
-        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, comments: action.comments } : item)),
-      }
-
-    case ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED:
-      return {
-        ...state,
-        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, recognitions: action.recognitions } : item)),
+        photos: state.photos.map(item => ((item.id === action.item.id) ? {
+          ...item, comments: action.comments, recognitions: action.recognitions, watched: action.isPhotoWatched,
+        } : item)),
       }
 
     case ACTION_TYPES.PHOTO_UPLOADED_PREPEND:
