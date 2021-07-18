@@ -132,7 +132,10 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos: state.photos.map(item => ((item.id === action.item.id) ? {
-          ...item, comments: action.comments, recognitions: action.recognitions, watched: action.isPhotoWatched,
+          ...item,
+          comments: action.comments,
+          recognitions: action.recognitions,
+          watched: action.isPhotoWatched,
         } : item)),
       }
 
@@ -143,26 +146,6 @@ const reducer = (state = initialState, action) => {
         [action.photo,
           ...state.photos,
         ],
-      }
-    case ACTION_TYPES.COMMENT_POSTED:
-      return {
-        ...state,
-        photos: state.photos.map(
-          item => ((item.id === action.photoId)
-            ? {
-              ...item,
-              comments:
-              [
-                ...item.comments,
-                {
-                  ...action.comment,
-                  hiddenButtons: true,
-                },
-              ],
-              commentsCount: item.comments.length + 1,
-            }
-            : item)
-        ),
       }
 
     case ACTION_TYPES.PHOTO_WATCHED:

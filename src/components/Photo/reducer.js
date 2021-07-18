@@ -61,13 +61,6 @@ export default function reducer(state = initialState, action) {
         commentsSubmitting: false,
         error: action.error,
       }
-    case ACTION_TYPES.SUBMIT_COMMENT_FINISHED:
-      return {
-        ...state,
-        commentsSubmitting: false,
-        inputText: '',
-        error: '',
-      }
 
     default:
       return state
@@ -339,17 +332,11 @@ export function submitComment({ inputText, uuid, item }) {
         })
       console.log({ comment })
       // lets update the state in the photos collection so it renders the right number of likes in the list
-      dispatch({
-        type: ACTION_TYPES.SUBMIT_COMMENT_FINISHED,
-      })
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.COMMENT_POSTED,
-        photoId: item.id,
-        comment,
-      })
+
       Toast.show({
         text1: "Comment submitted.",
         type: "success",
+        topOffset: 200,
       })
       dispatch(watchPhoto({ item }))
     } catch (err) {
@@ -394,10 +381,15 @@ export function getPhotoDetails({ item }) {
         }))
 
       const {
-        comments,
         recognitions,
         isPhotoWatched,
       } = response.data.getPhotoDetails
+
+      const comments = response.data.getPhotoDetails.comments.map(comment => ({
+        ...comment,
+        hiddenButtons: true,
+
+      }))
 
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DETAILS_LOADED,
