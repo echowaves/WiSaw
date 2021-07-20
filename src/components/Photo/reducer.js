@@ -1,11 +1,11 @@
 // import Branch from '../../util/my-branch'
 import * as SMS from 'expo-sms'
 
-import axios from 'axios'
-
 import Toast from 'react-native-toast-message'
 
 import { CacheManager } from 'expo-cached-image'
+
+import { gql } from "@apollo/client"
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -61,31 +61,7 @@ export default function reducer(state = initialState, action) {
         commentsSubmitting: false,
         error: action.error,
       }
-    case ACTION_TYPES.SUBMIT_COMMENT_FINISHED:
-      return {
-        ...state,
-        commentsSubmitting: false,
-        inputText: '',
-        error: '',
-      }
-    // case ACTION_TYPES.GET_COMMENTS_STARTED:
-    //   return {
-    //     ...state,
-    //   }
-    // case ACTION_TYPES.GET_COMMENTS_FINISHED:
-    //   return {
-    //     ...state,
-    //   }
-    // case ACTION_TYPES.GET_RECOGNITIONS_STARTED:
-    //   return {
-    //     ...state,
-    //   }
-    // case ACTION_TYPES.GET_RECOGNITIONS_FINISHED:
-    //   return {
-    //     ...state,
-    //   }
-      // case DELETE_PHOTO:
-      // 	return state
+
     default:
       return state
   }
@@ -101,29 +77,26 @@ export function likePhoto({ photoId }) {
     })
 
     try {
-      const response = await axios({
-        method: 'PUT',
-        url: `${CONST.HOST}/photos/${photoId}/like`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation likePhoto($photoId: ID!, $uuid: String!) {
+              likePhoto(photoId: $photoId, uuid: $uuid)
+                     {
+                        id
+                      }
+            }`,
+          variables: {
+            photoId,
+            uuid,
+          },
+        })
+
+      // lets update the state in the photos collection so it renders the right number of likes in the list
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_LIKED,
+        photoId,
       })
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_LIKED,
-          photoId,
-        })
-      } else {
-        dispatch({
-          type: ACTION_TYPES.UNLIKE_PHOTO,
-          photoId,
-        })
-      }
     } catch (err) {
       dispatch({
         type: ACTION_TYPES.UNLIKE_PHOTO,
@@ -137,29 +110,22 @@ export function watchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      const response = await axios({
-        method: 'POST',
-        url: `${CONST.HOST}/photos/${item.id}/watchers`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
-      })
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation watchPhoto($photoId: ID!, $uuid: String!) {
+              watchPhoto(photoId: $photoId, uuid: $uuid)
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+        })
 
-      // const responseJson = await response.json()
-      if (response.status === 201) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-          item,
-        })
-      } else {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-          item,
-        })
-      }
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
+        item,
+      })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
@@ -167,8 +133,9 @@ export function watchPhoto({ item }) {
       })
       Toast.show({
         text1: 'Unable to watch photo.',
-        text2: 'Potential Network Issue.',
+        text2: 'Network Issue?',
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -177,31 +144,22 @@ export function watchPhoto({ item }) {
 export function unwatchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-
     try {
-      const response = await axios({
-        method: 'DELETE',
-        url: `${CONST.HOST}/photos/${item.id}/watchers`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation unwatchPhoto($photoId: ID!, $uuid: String!) {
+              unwatchPhoto(photoId: $photoId, uuid: $uuid)
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+        })
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
+        item,
       })
-
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-          item,
-        })
-      } else {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-          item,
-        })
-      }
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
@@ -209,8 +167,9 @@ export function unwatchPhoto({ item }) {
       })
       Toast.show({
         text1: "Unable to unwatch photo.",
-        text2: "Potential Network Issue.",
+        text2: "Maybe Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -226,35 +185,36 @@ export function banPhoto({ item }) {
     })
 
     try {
-      const response = await axios({
-        method: 'POST',
-        url: `${CONST.HOST}/abusereport`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-          photoId: item.id,
-        },
+      // const abuseReport =
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation createAbuseReport($uuid: String!, $photoId: ID!) {
+              createAbuseReport(uuid: $uuid, photoId: $photoId)
+                     {
+                        createdAt
+                        id
+                        updatedAt
+                        uuid
+                      }
+            }`,
+          variables: {
+            uuid,
+            photoId: item.id,
+          },
+        })
+
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
+        photoId: item.id,
       })
-      // const responseJson = await response.json()
-      if (response.status === 201) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
-          photoId: item.id,
-        })
-        Toast.show({
-          text1: "Abusive Photo reported.",
-          type: "success",
-        })
-      } else {
-        dispatch({
-          type: ACTION_TYPES.UNBAN_PHOTO,
-          photoId: item.id,
-        })
-      }
+      Toast.show({
+        text1: `Abusive Photo reported`,
+        type: "success",
+        topOffset: 200,
+      })
     } catch (err) {
+      // console.error({ err })
       dispatch({
         type: ACTION_TYPES.UNBAN_PHOTO,
         photoId: item.id,
@@ -268,40 +228,33 @@ export function deletePhoto({ item }) {
     const { uuid } = getState().photosList
 
     try {
-      const response = await axios({
-        method: 'DELETE',
-        url: `${CONST.HOST}/photos/${item.id}`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation deletePhoto($photoId: ID!, $uuid: String!) {
+              deletePhoto(photoId: $photoId, uuid: $uuid)
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+        })
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DELETED,
+        photoId: item.id,
       })
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DELETED,
-          photoId: item.id,
-        })
-        Toast.show({
-          text1: "Photo deleted.",
-          text2: "No one will be able to see it any more.",
-          type: "success",
-        })
-      } else {
-        Toast.show({
-          text1: "Unable to delete photo.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
+      Toast.show({
+        text1: "Photo deleted from the Cloud.",
+        text2: "No one will be able to see it any more.",
+        type: "success",
+        topOffset: 200,
+      })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete photo.",
-        text2: "Potential Network Issue.",
+        text2: "Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -310,18 +263,6 @@ export function deletePhoto({ item }) {
 export function sharePhoto({ item }) {
   return async (dispatch, getState) => {
     try {
-      // only canonicalIdentifier is required
-      // const branchUniversalObject = await Branch.createBranchUniversalObject(
-      //   `photo/${item.id}`,
-      //   {
-      //     title: 'What I saw today:',
-      //     contentDescription: `Cool Photo ${item.id} ${item.likes > 0 ? ` liked ${item.likes} times.` : ''}`,
-      //     contentImageUrl: item.getImgUrl,
-      //     publiclyIndex: true,
-      //     locallyIndex: true,
-      //   }
-      // )
-
       let messageBody = 'Check out what I saw today:'
       // const messageHeader = 'Check out what I saw today:'
       // const emailSubject = 'WiSaw: Check out what I saw today'
@@ -363,25 +304,13 @@ export function sharePhoto({ item }) {
     } catch (err) {
       Toast.show({
         text1: "Unable to share photo.",
-        text2: `${err}`,
+        text2: "Wait for a bit and try again...",
         type: "error",
+        topOffset: 200,
       })
     }
   }
 }
-
-// export function setInputText({ inputText }) {
-//   if (inputText.length < 140) {
-//     return {
-//       type: ACTION_TYPES.SET_INPUT_TEXT,
-//       inputText,
-//     }
-//   }
-//   return {
-//     type: ACTION_TYPES.SET_INPUT_TEXT,
-//     inputText: inputText.substring(0, 140),
-//   }
-// }
 
 export function submitComment({ inputText, uuid, item }) {
   return async dispatch => {
@@ -389,210 +318,94 @@ export function submitComment({ inputText, uuid, item }) {
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
     })
     try {
-      const response = await axios({
-        method: 'POST',
-        url: `${CONST.HOST}/photos/${item.id}/comments`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          uuid,
-          comment: inputText,
-        },
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation createComment($photoId: ID!, $uuid: String!, $description: String!) {
+              createComment(photoId: $photoId, uuid: $uuid, description: $description) {
+                id
+                active
+                comment
+                createdAt
+              }
+            }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+            description: inputText,
+          },
+        })
+      // lets update the state in the photos collection so it renders the right number of likes in the list
+
+      Toast.show({
+        text1: "Comment submitted.",
+        type: "success",
+        topOffset: 200,
       })
-      if (response.status === 201) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: ACTION_TYPES.SUBMIT_COMMENT_FINISHED,
-        })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.COMMENT_POSTED,
-          photoId: item.id,
-          comment: response.data.comment,
-        })
-        Toast.show({
-          text1: "Comment submitted.",
-          type: "success",
-        })
-        dispatch(watchPhoto({ item }))
-      } else {
-        dispatch({
-          type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
-          error: 'failed submitting comment',
-        })
-        Toast.show({
-          text1: "Unable to submit comment.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
+      dispatch(watchPhoto({ item }))
     } catch (err) {
+      console.log({ err })// eslint-disable-line
       dispatch({
         type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
         error: JSON.stringify(err),
       })
       Toast.show({
         text1: "Unable to submit comment.",
+        text2: "Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }
 }
 
-export function getComments({ item }) {
-  return async (dispatch, getState) => {
-    // dispatch({
-    //   type: ACTION_TYPES.GET_COMMENTS_STARTED,
-    // })
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: `${CONST.HOST}/photos/${item.id}/comments`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // data: {
-        //   uuid,
-        // },
-      })
-
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        // dispatch({
-        //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
-          item,
-          comments: response.data.comments.map(
-            comment => ({
-              ...comment,
-              hiddenButtons: true,
-            })
-          ).reverse(),
-        })
-      } else {
-        // dispatch({
-        //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
-          item,
-          comments: [],
-        })
-        Toast.show({
-          text1: "Unable to load comments.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
-    } catch (err) {
-      // dispatch({
-      //   type: ACTION_TYPES.GET_COMMENTS_FINISHED,
-      // })
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_COMMENTS_LOADED,
-        item,
-        comments: [],
-      })
-      Toast.show({
-        text1: "Unable to load comments.",
-        text2: "Potential Network Issue.",
-        type: "error",
-      })
-    }
-  }
-}
-
-export function getRecognitions({ item }) {
-  return async (dispatch, getState) => {
-    // dispatch({
-    //   type: ACTION_TYPES.GET_RECOGNITIONS_STARTED,
-    // })
-    try {
-      const response = await axios({
-        method: 'GET',
-        url: `${CONST.HOST}/photos/${item.id}/recognitions`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // data: {
-        //   uuid,
-        // },
-      })
-
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        // dispatch({
-        //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
-          item,
-          recognitions: response.data.recognition,
-        })
-      } else {
-        // dispatch({
-        //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-        // })
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
-          item,
-          recognitions: null,
-        })
-      }
-    } catch (err) {
-      // dispatch({
-      //   type: ACTION_TYPES.GET_RECOGNITIONS_FINISHED,
-      // })
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED,
-        item,
-        recognitions: null,
-      })
-      // Toast.show({
-      //   text1: "Unable to load recognitions.",
-      //   text2: "Potential Network Issue.",
-      //   type: "error",
-      // })
-    }
-  }
-}
-
-export function checkIsPhotoWatched({ item }) {
+export function getPhotoDetails({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
+
     try {
-      const response = await axios({
-        method: 'GET',
-        url: `${CONST.HOST}/photos/${item.id}/watchers/${uuid}`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // data: {
-        //   uuid,
-        // },
+      const response = (await CONST.gqlClient
+        .query({
+          query: gql`
+        query getPhotoDetails($photoId: ID!, $uuid: String!) {
+          getPhotoDetails(photoId: $photoId, uuid: $uuid,) {
+            comments {
+                  id
+                  comment
+                }
+                recognitions{
+                  metaData
+                }
+                isPhotoWatched
+              }
+        }`,
+          variables: {
+            photoId: item.id,
+            uuid,
+          },
+          fetchPolicy: "network-only",
+        }))
+
+      const {
+        recognitions,
+        isPhotoWatched,
+      } = response.data.getPhotoDetails
+
+      const comments = response.data.getPhotoDetails.comments.map(comment => ({
+        ...comment,
+        hiddenButtons: true,
+
+      }))
+
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DETAILS_LOADED,
+        item,
+        comments,
+        recognitions,
+        isPhotoWatched,
       })
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-          item,
-        })
-      }
     } catch (err) {
-      if (err.response.status === 404) {
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-          item,
-        })
-      } else {
-        Toast.show({
-          text1: "Unable to check if photo is watched.",
-          text2: "Potential Network Issue.",
-          type: "error",
-        })
-      }
+      console.log({ err })// eslint-disable-line
     }
   }
 }
@@ -610,41 +423,35 @@ export function deleteComment({ photo, comment }) {
     const { uuid } = getState().photosList
 
     try {
-      const response = await axios({
-        method: 'DELETE',
-        url: `${CONST.HOST}/comments/${comment.id}`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          deactivatedBy: uuid,
-        },
-      })
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation deleteComment($commentId: ID!, $uuid: String!) {
+              deleteComment(commentId: $commentId, uuid: $uuid)
+            }`,
+          variables: {
+            commentId: comment.id,
+            uuid,
+          },
+        })
 
-      // const responseJson = await response.json()
-      if (response.status === 200) {
-        // lets update the state in the photos collection so it renders the right number of likes in the list
-        dispatch({
-          type: PHOTOS_LIST_ACTION_TYPES.COMMENT_DELETED,
-          photoId: photo.id,
-          commentId: comment.id,
-        })
-        Toast.show({
-          text1: "Comment deleted.",
-          type: "success",
-        })
-      } else {
-        Toast.show({
-          text1: "Unable to delete comment.",
-          text2: "Try again later.",
-          type: "error",
-        })
-      }
+      // lets update the state in the photos collection so it renders the right number of likes in the list
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.COMMENT_DELETED,
+        photoId: photo.id,
+        commentId: comment.id,
+      })
+      Toast.show({
+        text1: "Comment deleted.",
+        type: "success",
+        topOffset: 200,
+      })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete comment.",
-        text2: "Potential Network Issue.",
+        text2: "Network Issue?",
         type: "error",
+        topOffset: 200,
       })
     }
   }

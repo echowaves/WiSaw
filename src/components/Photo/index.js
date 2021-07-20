@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 
 import { useDimensions } from '@react-native-community/hooks'
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 
 import {
   // Dimensions,
@@ -32,7 +32,6 @@ import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/R
 import PropTypes from 'prop-types'
 
 import stringifyObject from 'stringify-object'
-import jmespath from 'jmespath'
 
 import CachedImage from 'expo-cached-image'
 
@@ -58,17 +57,8 @@ const Photo = ({ item }) => {
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
         if (componentIsMounted) {
-          Promise.all([
-            dispatch(reducer.getComments({ item })),
-            dispatch(reducer.checkIsPhotoWatched({ item })),
-            dispatch(reducer.getRecognitions({ item })),
-            // dispatch(reducer.setInputText({ inputText: '' })),
-          ])
+          dispatch(reducer.getPhotoDetails({ item }))
         }
-        // if (componentIsMounted) dispatch(reducer.getComments({ item }))
-        // if (componentIsMounted) dispatch(reducer.checkIsPhotoWatched({ item }))
-        // if (componentIsMounted) dispatch(reducer.getRecognitions({ item }))
-        // if (componentIsMounted) dispatch(reducer.setInputText({ inputText: '' }))
       })
 
       return () => {
@@ -106,7 +96,7 @@ const Photo = ({ item }) => {
       doubleTapZoomToCenter={false}
       captureEvent={false}>
       <CachedImage
-        source={{ uri: `${item.getThumbUrl}` }}
+        source={{ uri: `${item.thumbUrl}` }}
         cacheKey={`${item.id}-thumb`}
         resizeMode="contain"
         containerStyle={
@@ -125,7 +115,7 @@ const Photo = ({ item }) => {
         }}
       />
       <CachedImage
-        source={{ uri: `${item.getImgUrl}` }}
+        source={{ uri: `${item.imgUrl}` }}
         cacheKey={`${item.id}`}
         resizeMode="contain"
         containerStyle={
@@ -293,13 +283,14 @@ const Photo = ({ item }) => {
 
   const renderRecognitions = () => {
     const { recognitions } = item
-    if (!recognitions) {
+    if (!recognitions || recognitions.length === 0) {
       return (<Text />)
     }
-    const labels = jmespath.search(recognitions, "metaData.Labels[]")
-    const textDetections = jmespath.search(recognitions, "metaData.TextDetections[?Type=='LINE']")
-    const moderationLabels = jmespath.search(recognitions, "metaData.ModerationLabels[]")
 
+    const labels = JSON.parse(recognitions[0].metaData).Labels
+    const textDetections = JSON.parse(recognitions[0].metaData).TextDetections
+      .filter(text => text.Type === 'LINE')
+    const moderationLabels = JSON.parse(recognitions[0].metaData).ModerationLabels
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (
@@ -450,8 +441,8 @@ const Photo = ({ item }) => {
               onPress={
                 () => handleFlipWatch()
               }>
-              <FontAwesome
-                name={item.watched ? "eye" : "eye-slash"}
+              <AntDesign
+                name={item.watched ? "star" : "staro"}
                 style={
                   {
                     color: CONST.MAIN_COLOR,
@@ -460,7 +451,7 @@ const Photo = ({ item }) => {
                 size={30}
               />
               <Text style={{ fontSize: 10 }}>
-                {`${item.watched ? 'UnWatch' : 'Watch'}`}
+                {`${item.watched ? 'unStar' : 'Star'}`}
               </Text>
             </Col>
             {/* share button */}

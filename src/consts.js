@@ -1,5 +1,16 @@
 import * as FileSystem from 'expo-file-system'
 
+import {
+  ApolloClient,
+  InMemoryCache,
+  HttpLink,
+  from,
+} from "@apollo/client"
+
+import { API_URI, API_KEY } from "@env"
+
+const fetch = require('node-fetch')
+
 export const HOST = "https://api.wisaw.com"
 // export const HOST = "https://testapi.wisaw.com"
 
@@ -10,5 +21,20 @@ export const PLACEHOLDER_TEXT_COLOR = "#ececec"
 export const UNFILLED_COLOR = 'rgba(200, 200, 200, 0.2)'
 export const TRANSPARENT_BUTTON_COLOR = 'rgba(10,10,10,.5)'
 
-export const PENDING_UPLOADS_FOLDER = `${FileSystem.cacheDirectory}pendingUploads/`
+export const PENDING_UPLOADS_FOLDER = `${FileSystem.documentDirectory}pendingUploads/`
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
+
+const httpLink = new HttpLink({
+  uri: API_URI,
+  fetch,
+  headers: {
+    'X-Api-Key': API_KEY,
+  },
+})
+
+export const gqlClient = new ApolloClient({
+  uri: API_URI,
+  link: from([httpLink]),
+  cache: new InMemoryCache(),
+})
+// console.log({ API_URI }, { API_KEY })

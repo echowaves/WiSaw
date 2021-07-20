@@ -1,7 +1,6 @@
 // import { Platform } from 'react-native'
 
 import { v4 as uuidv4 } from 'uuid'
-import axios from 'axios'
 
 import * as SecureStore from 'expo-secure-store'
 
@@ -11,6 +10,9 @@ import moment from 'moment'
 import { CacheManager } from 'expo-cached-image'
 
 import Toast from 'react-native-toast-message'
+
+import { gql } from "@apollo/client"
+
 import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
@@ -37,6 +39,7 @@ export const initialState = {
   isLastPage: false,
   netAvailable: false,
   uploadingPhoto: false,
+  zeroMoment: moment().format("YYYY-MM-DD-HH-mm-ss-SSS"),
 }
 
 const reducer = (state = initialState, action) => {
@@ -70,10 +73,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        isLastPage:
-         (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
-        || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
-        || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+        isLastPage: action.noMoreData
+
+        //  (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
+        // || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+        // || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
         ,
       }
     case ACTION_TYPES.RESET_STATE:
@@ -124,16 +128,15 @@ const reducer = (state = initialState, action) => {
         ...state,
         photos: state.photos.filter(item => (item.id !== action.photoId)),
       }
-    case ACTION_TYPES.PHOTO_COMMENTS_LOADED:
+    case ACTION_TYPES.PHOTO_DETAILS_LOADED:
       return {
         ...state,
-        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, comments: action.comments } : item)),
-      }
-
-    case ACTION_TYPES.PHOTO_RECOGNITIONS_LOADED:
-      return {
-        ...state,
-        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, recognitions: action.recognitions } : item)),
+        photos: state.photos.map(item => ((item.id === action.item.id) ? {
+          ...item,
+          comments: action.comments,
+          recognitions: action.recognitions,
+          watched: action.isPhotoWatched,
+        } : item)),
       }
 
     case ACTION_TYPES.PHOTO_UPLOADED_PREPEND:
@@ -143,26 +146,6 @@ const reducer = (state = initialState, action) => {
         [action.photo,
           ...state.photos,
         ],
-      }
-    case ACTION_TYPES.COMMENT_POSTED:
-      return {
-        ...state,
-        photos: state.photos.map(
-          item => ((item.id === action.photoId)
-            ? {
-              ...item,
-              comments:
-              [
-                ...item.comments,
-                {
-                  ...action.comment,
-                  hiddenButtons: true,
-                },
-              ],
-              commentsCount: item.comments.length + 1,
-            }
-            : item)
-        ),
       }
 
     case ACTION_TYPES.PHOTO_WATCHED:
@@ -174,6 +157,12 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: false } : item)),
+      }
+
+    case ACTION_TYPES.ZERO_MOMEMT:
+      return {
+        ...state,
+        zeroMoment: action.zeroMoment,
       }
 
     case ACTION_TYPES.TOGGLE_COMMENT_BUTTONS:
@@ -270,73 +259,135 @@ export function initState() {
   }
 }
 
+// this function return the time of the very first photo stored in the backend,
+// so that we can tell when to stop requesting new photos while paging through the results
+export function zeroMoment() {
+  return async (dispatch, getState) => {
+    const { zeroMoment } = (await CONST.gqlClient
+      .query({
+        query: gql`
+        query zeroMoment {
+          zeroMoment
+        }`,
+      })).data
+    // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
+    dispatch({
+      type: ACTION_TYPES.ZERO_MOMEMT,
+      zeroMoment,
+    })
+  }
+}
+
 async function _requestGeoPhotos(getState) {
   const {
-    pageNumber, uuid, batch, location: { latitude, longitude },
+    pageNumber, batch, zeroMoment, location: { coords: { latitude, longitude } },
   } = getState().photosList
-
-  const response = await axios({
-    method: 'POST',
-    url: `${CONST.HOST}/photos/feedByDate`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: {
-      uuid,
-      location: {
-        type: 'Point',
-        coordinates: [
-          latitude,
-          longitude,
-        ],
-      },
-      daysAgo: pageNumber,
-      batch,
-    },
-  })
-
-  return response.data
+  const whenToStop = moment(zeroMoment)
+  try {
+    const response = (await CONST.gqlClient
+      .query({
+        query: gql`
+      query feedByDate($daysAgo: Int!, $lat: Float!, $lon: Float!, $batch: Long!, $whenToStop: AWSDateTime!) {
+        feedByDate(daysAgo: $daysAgo, lat: $lat, lon: $lon, batch: $batch, whenToStop: $whenToStop){
+          photos {
+                  id
+                  imgUrl
+                  thumbUrl
+                  commentsCount
+                  likes
+                }
+          batch,
+          noMoreData
+        }
+      }`,
+        variables: {
+          batch,
+          daysAgo: pageNumber,
+          lat: latitude,
+          lon: longitude,
+          whenToStop,
+        },
+      }))
+    return {
+      photos: response.data.feedByDate.photos,
+      batch: response.data.feedByDate.batch,
+      noMoreData: response.data.feedByDate.noMoreData,
+    }
+  } catch (err) {
+    console.log({ err })// eslint-disable-line
+  }
 }
 
 async function _requestWatchedPhotos(getState) {
   const { pageNumber, uuid, batch } = getState().photosList
-  // console.log(`_requestWatchedPhotos(${pageNumber})`)
-  const response = await axios({
-    method: 'POST',
-    url: `${CONST.HOST}/photos/feedForWatcher`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: {
-      uuid,
-      pageNumber,
-      batch,
-    },
-  })
+  try {
+    const response = (await CONST.gqlClient
+      .query({
+        query: gql`
+      query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: Long!) {
+        feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch){
+          photos {
+                  id
+                  imgUrl
+                  thumbUrl
+                  commentsCount
+                  likes
+                }
+          batch,
+          noMoreData
+        }
+      }`,
+        variables: {
+          uuid,
+          pageNumber,
+          batch,
+        },
+      }))
 
-  return response.data
+    return {
+      photos: response.data.feedForWatcher.photos,
+      batch: response.data.feedForWatcher.batch,
+      noMoreData: response.data.feedForWatcher.noMoreData,
+    }
+  } catch (err) {
+    console.log({ err })// eslint-disable-line
+  }
 }
 
 async function _requestSearchedPhotos(getState) {
   const { pageNumber, searchTerm, batch } = getState().photosList
-  // console.log(`_requestSearchedPhotos(${pageNumber})`)
-  const { uuid } = getState().photosList
+  try {
+    const response = (await CONST.gqlClient
+      .query({
+        query: gql`
+      query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: Long!) {
+        feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch){
+          photos {
+                  id
+                  imgUrl
+                  thumbUrl
+                  commentsCount
+                  likes
+                }
+          batch,
+          noMoreData
+        }
+      }`,
+        variables: {
+          searchTerm,
+          batch,
+          pageNumber,
+        },
+      }))
 
-  const response = await axios({
-    method: 'POST',
-    url: `${CONST.HOST}/photos/feedForTextSearch`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: {
-      uuid,
-      searchTerm,
-      pageNumber,
-      batch,
-    },
-  })
-
-  return response.data
+    return {
+      photos: response.data.feedForTextSearch.photos,
+      batch: response.data.feedForTextSearch.batch,
+      noMoreData: response.data.feedForTextSearch.noMoreData,
+    }
+  } catch (err) {
+    console.log({ err })// eslint-disable-line
+  }
 }
 
 export function getPhotos() {
@@ -349,6 +400,8 @@ export function getPhotos() {
     const {
       location, netAvailable, searchTerm,
     } = getState().photosList
+
+    let noMoreData = false
 
     if (!location
     || netAvailable === false
@@ -372,9 +425,10 @@ export function getPhotos() {
         } else if (getState().photosList.activeSegment === 2) {
           responseJson = await _requestSearchedPhotos(getState)
         }
-
+        // console.log({ responseJson })
+        noMoreData = responseJson?.noMoreData
         if (responseJson.batch === getState().photosList.batch) {
-          if (responseJson.photos && responseJson.photos.length > 0) {
+          if (responseJson?.photos?.length > 0) {
             dispatch({
               type: ACTION_TYPES.GET_PHOTOS_SUCCESS,
               photos: responseJson.photos,
@@ -395,11 +449,13 @@ export function getPhotos() {
           text1: 'Error',
           text2: err.toString(),
           type: "error",
+          topOffset: 200,
         })
       }
     }
     dispatch({
       type: ACTION_TYPES.GET_PHOTOS_FINISHED,
+      noMoreData,
     })
   }
 }
@@ -473,6 +529,7 @@ async function _getUUID(getState) {
       //   text: err.toString(),
       //   buttonText: "OK23",
       //   duration: 15000,
+      // topOffset: 200,
       // })
     }
     // no uuid in the store, generate a new one and store
@@ -486,6 +543,7 @@ async function _getUUID(getState) {
         //   text: err.toString(),
         //   buttonText: "OK",
         //   duration: 15000,
+        // topOffset: 200,
         // })
       }
     }
@@ -521,10 +579,14 @@ const _makeSureDirectoryExists = async ({ directory }) => {
 
 export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
   // move file to cacheDir
-  await FileSystem.moveAsync({
+  await FileSystem.copyAsync({
     from: uri,
     to: `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
   })
+  await FileSystem.deleteAsync(
+    uri,
+    { idempotent: true }
+  )
 
   _updatePendingPhotos(dispatch)
 }
@@ -568,8 +630,8 @@ export function uploadPendingPhotos() {
         })
         if (responseData === "banned") {
           alert("Sorry, you've been banned.")
-
-          FileSystem.deleteAsync(
+          // eslint-disable-next-line no-await-in-loop
+          await FileSystem.deleteAsync(
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )
@@ -589,14 +651,15 @@ export function uploadPendingPhotos() {
             key: `${photo.id}-thumb`,
           })
 
-          CacheManager.cleanupCache({ size: 400 })
-
           photo.fallback = true
           // eslint-disable-next-line no-await-in-loop
           await FileSystem.deleteAsync(
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )
+          // eslint-disable-next-line no-await-in-loop
+          await CacheManager.cleanupCache({ size: 400 })
+
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
 
@@ -606,7 +669,12 @@ export function uploadPendingPhotos() {
             photo,
           })
         } else {
-          alert("Error uploading file, try again.")
+          // alert("Error uploading file, try again.")
+          Toast.show({
+            text1: 'Unable to upload file, refresh to try again.',
+            text2: 'Network issue?',
+            topOffset: 200,
+          })
         }
       }
     } catch (error) {
@@ -615,6 +683,8 @@ export function uploadPendingPhotos() {
       })
       Toast.show({
         text1: 'Failed to upload file, refresh to try again.',
+        text2: 'Network issue?',
+        topOffset: 200,
       })
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())
@@ -632,46 +702,57 @@ export function uploadPendingPhotos() {
 const _uploadFile = async ({ item, uuid, location }) => {
   const assetUri = `${CONST.PENDING_UPLOADS_FOLDER}${item}`
   try {
-    const response = await axios({
-      method: 'POST',
-      url: `${CONST.HOST}/photos`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        uuid,
-        location: {
-          type: 'Point',
-          coordinates: [
-            location.coords.latitude,
-            location.coords.longitude,
-          ],
-        },
-      },
-    })
-    if (response.status === 401) {
-      // alert("Sorry, looks like you have been banned from WiSaw.")
-      return { responseData: "banned" }
-    }
-    if (response.status === 201
-    // || response.status === 401 // todo: implement better banned logic
-    ) {
-      const { uploadURL, photo } = response.data
-
-      const responseData = await FileSystem.uploadAsync(
-        uploadURL,
-        assetUri,
-        {
-          httpMethod: 'PUT',
-          headers: {
-            "Content-Type": "image/jpeg",
-          },
+    const newPhoto = (await CONST.gqlClient
+      .mutate({
+        mutation: gql`
+        mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String! ) {
+          createPhoto(lat: $lat, lon: $lon, uuid: $uuid ) {
+            active
+            commentsCount
+            createdAt
+            id
+            imgUrl
+            likes
+            location
+            thumbUrl
+            updatedAt
+            uuid
         }
-      )
-      return { responseData, photo }
+      }`,
+        variables: {
+          lat: location.coords.latitude,
+          lon: location.coords.longitude,
+          uuid,
+        },
+      })).data.createPhoto
+
+    const uploadUrl = (await CONST.gqlClient
+      .query({
+        query: gql`
+        query generateUploadUrl($photoId: ID!) {
+          generateUploadUrl(photoId: $photoId)
+        }`,
+        variables: {
+          photoId: `${newPhoto.id}.upload`,
+        },
+      })).data.generateUploadUrl
+
+    const responseData = await FileSystem.uploadAsync(
+      uploadUrl,
+      assetUri,
+      {
+        httpMethod: 'PUT',
+        headers: {
+          "Content-Type": "image/jpeg",
+        },
+      }
+    )
+    return { responseData, photo: newPhoto }
+  } catch (err) {
+    if (err === 'banned') {
+      return { responseData: "banned", err }
     }
-  } catch (error) {
-    // console.log({ error })// eslint-disable-line no-console
+    return { responseData: "something bad happened, unable to upload", err }
   }
 }
 

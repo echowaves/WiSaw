@@ -18,10 +18,11 @@ import {
   View,
   Alert,
   SafeAreaView,
+  ScrollView,
 } from 'react-native'
 
 import {
-  FontAwesome, FontAwesome5, MaterialIcons,
+  FontAwesome, FontAwesome5, MaterialIcons, AntDesign,
 } from '@expo/vector-icons'
 
 import NetInfo from "@react-native-community/netinfo"
@@ -29,8 +30,6 @@ import NetInfo from "@react-native-community/netinfo"
 import FlatGrid from 'react-native-super-grid'
 
 import PropTypes from 'prop-types'
-
-import Modal from "react-native-modal"
 
 import {
   Card,
@@ -40,6 +39,7 @@ import {
   LinearProgress,
   ButtonGroup,
   SearchBar,
+  Overlay,
 } from 'react-native-elements'
 
 import { CacheManager } from 'expo-cached-image'
@@ -85,12 +85,13 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
-    CacheManager.cleanupCache({ size: 400 })
-
     const initState = async () => {
+      await CacheManager.cleanupCache({ size: 400 })
+
       await checkForUpdate()
-      // check permissions, retrieve UUID, make sure upload folder exists
       await dispatch(reducer.initState())
+      // check permissions, retrieve UUID, make sure upload folder exists
+      await dispatch(reducer.zeroMoment())
 
       await reload()
     }
@@ -156,11 +157,12 @@ const PhotosList = () => {
       }
     } catch (error) {
     // handle or log error
-      Toast.show({
-        text1: `Failed to get over the air update:`,
-        text2: `${error}`,
-        type: "error",
-      })
+      // Toast.show({
+      //   text1: `Failed to get over the air update:`,
+      //   text2: `${error}`,
+      //   type: "error",
+      //   topOffset: 200,
+      // })
     }
   }
 
@@ -290,6 +292,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'Unable to get location',
           type: "error",
+          topOffset: 200,
         })
       }
     }
@@ -297,7 +300,7 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    CacheManager.cleanupCache({ size: 400 })
+    await CacheManager.cleanupCache({ size: 400 })
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
@@ -372,8 +375,8 @@ const PhotosList = () => {
   )
 
   const segment1 = () => (
-    <FontAwesome
-      name="eye"
+    <AntDesign
+      name="star"
       size={23}
       color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
       onPress={
@@ -475,6 +478,7 @@ const PhotosList = () => {
       Toast.show({
         text1: "Search for more than 3 characters",
         type: "error",
+        topOffset: 200,
       })
     }
   }
@@ -585,56 +589,56 @@ const PhotosList = () => {
   if (!isTandcAccepted) {
     return (
       <SafeAreaView style={styles.container}>
-        <Modal
-          isVisible={
-            !isTandcAccepted
-          }>
-          <Card containerStyle={{ padding: 0 }}>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text> When you take a photo with WiSaw app,
-                it will be added to a Photo Album on your phone,
-                as well as posted to global feed in the cloud.
-              </Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>People close-by can see your photos.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>You can see other people&#39;s photos too.
-              </Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>No one will tolerate objectionable content or abusive users.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>The abusive users will be banned from WiSaw by other users.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>By using WiSaw I agree to Terms and Conditions.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem style={{ alignItems: 'center' }}>
-              <Button
-                title="I Agree"
-                type="outline"
-                onPress={
-                  () => {
-                    dispatch(reducer.acceptTandC())
+        <Overlay isVisible>
+          <ScrollView>
+            <Card containerStyle={{ padding: 0 }}>
+              <ListItem style={{ borderRadius: 10 }}>
+                <Text> When you take a photo with WiSaw app,
+                  it will be added to a Photo Album on your phone,
+                  as well as posted to global feed in the cloud.
+                </Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>Everyone close-by can see your photos.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>You can see other&#39;s photos too.
+                </Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>No one will tolerate objectionable content or abusive users.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>The abusive users will be banned from WiSaw by other users.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>By using WiSaw I agree to Terms and Conditions.</Text>
+              </ListItem>
+              <Divider />
+
+              <ListItem style={{ alignItems: 'center' }}>
+                <Button
+                  title="I Agree"
+                  type="outline"
+                  onPress={
+                    () => {
+                      dispatch(reducer.acceptTandC())
+                    }
                   }
-                }
-              />
-            </ListItem>
-          </Card>
-        </Modal>
+                />
+              </ListItem>
+            </Card>
+          </ScrollView>
+        </Overlay>
       </SafeAreaView>
     )
   }

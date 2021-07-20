@@ -10,9 +10,9 @@ export const SET_ORIENTATION = 'wisaw/photosList/SET_ORIENTATION'
 export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
 export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
 export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
-export const PHOTO_COMMENTS_LOADED = 'wisaw/photosList/PHOTO_COMMENTS_LOADED'
-export const PHOTO_RECOGNITIONS_LOADED = 'wisaw/photosList/PHOTO_RECOGNITIONS_LOADED'
-export const COMMENT_POSTED = 'wisaw/photosList/COMMENT_POSTED'
+
+export const PHOTO_DETAILS_LOADED = 'wisaw/photosList/PHOTO_DETAILS_LOADED'
+
 export const TOGGLE_COMMENT_BUTTONS = 'wisaw/photosList/TOGGLE_COMMENT_BUTTONS'
 export const COMMENT_DELETED = 'wisaw/photosList/COMMENT_DELETED'
 
@@ -29,3 +29,5 @@ export const UPDATE_PENDING_PHOTOS = 'wisaw/photosList/UPDATE_PENDING_PHOTOS'
 
 export const PHOTO_WATCHED = 'wisaw/photosList/PHOTO_WATCHED'
 export const PHOTO_UNWATCHED = 'wisaw/photosList/PHOTO_UNWATCHED'
+
+export const ZERO_MOMEMT = 'wisaw/photosList/ZERO_MOMEMT'

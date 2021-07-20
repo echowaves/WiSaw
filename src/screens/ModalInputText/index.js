@@ -96,7 +96,7 @@ const ModalInputText = ({ route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <CachedImage
-        source={{ uri: `${item.getThumbUrl}` }}
+        source={{ uri: `${item.thumbUrl}` }}
         cacheKey={`${item.id}t`}
         containerStyle={{
           alignSelf: 'center',
