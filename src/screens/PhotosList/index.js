@@ -18,6 +18,7 @@ import {
   View,
   Alert,
   SafeAreaView,
+  ScrollView,
 } from 'react-native'
 
 import {
@@ -30,8 +31,6 @@ import FlatGrid from 'react-native-super-grid'
 
 import PropTypes from 'prop-types'
 
-import Modal from "react-native-modal"
-
 import {
   Card,
   ListItem,
@@ -40,6 +39,7 @@ import {
   LinearProgress,
   ButtonGroup,
   SearchBar,
+  Overlay,
 } from 'react-native-elements'
 
 import { CacheManager } from 'expo-cached-image'
@@ -589,56 +589,56 @@ const PhotosList = () => {
   if (!isTandcAccepted) {
     return (
       <SafeAreaView style={styles.container}>
-        <Modal
-          isVisible={
-            !isTandcAccepted
-          }>
-          <Card containerStyle={{ padding: 0 }}>
-            <ListItem style={{ borderRadius: 10 }}>
-              <Text> When you take a photo with WiSaw app,
-                it will be added to a Photo Album on your phone,
-                as well as posted to global feed in the cloud.
-              </Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>People close-by can see your photos.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>You can see other people&#39;s photos too.
-              </Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>No one will tolerate objectionable content or abusive users.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>The abusive users will be banned from WiSaw by other users.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem>
-              <Text>By using WiSaw I agree to Terms and Conditions.</Text>
-            </ListItem>
-            <Divider />
-            <ListItem style={{ alignItems: 'center' }}>
-              <Button
-                title="I Agree"
-                type="outline"
-                onPress={
-                  () => {
-                    dispatch(reducer.acceptTandC())
+        <Overlay isVisible>
+          <ScrollView>
+            <Card containerStyle={{ padding: 0 }}>
+              <ListItem style={{ borderRadius: 10 }}>
+                <Text> When you take a photo with WiSaw app,
+                  it will be added to a Photo Album on your phone,
+                  as well as posted to global feed in the cloud.
+                </Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>Everyone close-by can see your photos.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>You can see other&#39;s photos too.
+                </Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>No one will tolerate objectionable content or abusive users.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>The abusive users will be banned from WiSaw by other users.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>By using WiSaw I agree to Terms and Conditions.</Text>
+              </ListItem>
+              <Divider />
+
+              <ListItem style={{ alignItems: 'center' }}>
+                <Button
+                  title="I Agree"
+                  type="outline"
+                  onPress={
+                    () => {
+                      dispatch(reducer.acceptTandC())
+                    }
                   }
-                }
-              />
-            </ListItem>
-          </Card>
-        </Modal>
+                />
+              </ListItem>
+            </Card>
+          </ScrollView>
+        </Overlay>
       </SafeAreaView>
     )
   }
