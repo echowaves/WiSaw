@@ -451,7 +451,7 @@ const Photo = ({ item }) => {
                 size={30}
               />
               <Text style={{ fontSize: 10 }}>
-                {`${item.watched ? 'unStar' : 'Star'}`}
+                {`${item.watched ? 'un-Star' : 'Star'}`}
               </Text>
             </Col>
             {/* share button */}
@@ -552,8 +552,8 @@ const Photo = ({ item }) => {
   const handleDelete = ({ item }) => {
     if (item.watched) {
       Alert.alert(
-        'Unable to delete watched photo.',
-        'Unwatch photo first.',
+        'Unable to delete starred photo.',
+        'Un-star photo first.',
         [
           { text: 'OK', onPress: () => null, style: 'cancel' },
         ],
