@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 
 import { useDimensions } from '@react-native-community/hooks'
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 
 import {
   // Dimensions,
@@ -441,8 +441,8 @@ const Photo = ({ item }) => {
               onPress={
                 () => handleFlipWatch()
               }>
-              <FontAwesome
-                name={item.watched ? "eye" : "eye-slash"}
+              <AntDesign
+                name={item.watched ? "star" : "staro"}
                 style={
                   {
                     color: CONST.MAIN_COLOR,
@@ -451,7 +451,7 @@ const Photo = ({ item }) => {
                 size={30}
               />
               <Text style={{ fontSize: 10 }}>
-                {`${item.watched ? 'UnWatch' : 'Watch'}`}
+                {`${item.watched ? 'unStar' : 'Star'}`}
               </Text>
             </Col>
             {/* share button */}
