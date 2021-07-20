@@ -520,8 +520,8 @@ const Photo = ({ item }) => {
   const handleBan = ({ item }) => {
     if (item.watched) {
       Alert.alert(
-        'Unable to ban watched photo.',
-        'Unwatch photo first.',
+        'Unable to ban Starred photo.',
+        'Un-Star photo first.',
         [
           { text: 'OK', onPress: () => null },
         ],
@@ -552,8 +552,8 @@ const Photo = ({ item }) => {
   const handleDelete = ({ item }) => {
     if (item.watched) {
       Alert.alert(
-        'Unable to delete starred photo.',
-        'Un-star photo first.',
+        'Unable to delete Starred photo.',
+        'Un-Star photo first.',
         [
           { text: 'OK', onPress: () => null, style: 'cancel' },
         ],
