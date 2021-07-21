@@ -127,16 +127,7 @@ const Photo = ({ item }) => {
   )
 
   const renderCommentsStats = () => {
-    if (!item.comments) {
-      return (
-        <LinearProgress
-          color={
-            CONST.MAIN_COLOR
-          }
-        />
-      )
-    }
-    if (item.comments.length === 0) {
+    if (!item.comments || item.comments.length === 0) {
       return <Text />
     }
 
