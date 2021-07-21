@@ -15,6 +15,7 @@ export const PHOTO_DETAILS_LOADED = 'wisaw/photosList/PHOTO_DETAILS_LOADED'
 
 export const TOGGLE_COMMENT_BUTTONS = 'wisaw/photosList/TOGGLE_COMMENT_BUTTONS'
 export const COMMENT_DELETED = 'wisaw/photosList/COMMENT_DELETED'
+export const COMMENT_ADDED = 'wisaw/photosList/COMMENT_ADDED'
 
 export const PHOTO_UPLOADED_PREPEND = 'wisaw/photosList/PHOTO_UPLOADED_PREPEND'
 

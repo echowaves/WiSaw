@@ -205,6 +205,19 @@ const reducer = (state = initialState, action) => {
             : item)
         ),
       }
+
+    case ACTION_TYPES.COMMENT_ADDED:
+      return {
+        ...state,
+        photos: state.photos.map(
+          item => ((item.id === action.photoId)
+            ? {
+              ...item,
+              commentsCount: item.comments.length + 1,
+            }
+            : item)
+        ),
+      }
     case ACTION_TYPES.SET_ACTIVE_SEGMENT:
       return {
         ...state,

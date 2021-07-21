@@ -318,7 +318,7 @@ export function submitComment({ inputText, uuid, item }) {
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
     })
     try {
-      await CONST.gqlClient
+      const comment = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation createComment($photoId: ID!, $uuid: String!, $description: String!) {
@@ -334,8 +334,14 @@ export function submitComment({ inputText, uuid, item }) {
             uuid,
             description: inputText,
           },
-        })
+        })).data.createComment
+
       // lets update the state in the photos collection so it renders the right number of likes in the list
+      dispatch({
+        type: PHOTOS_LIST_ACTION_TYPES.COMMENT_ADDED,
+        photoId: item.id,
+        commentId: comment.id,
+      })
 
       Toast.show({
         text1: "Comment submitted.",
