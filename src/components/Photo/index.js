@@ -58,7 +58,6 @@ const Photo = ({ item }) => {
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
         if (componentIsMounted) {
-          console.log({ item })
           dispatch(reducer.getPhotoDetails({ item }))
         }
       })
