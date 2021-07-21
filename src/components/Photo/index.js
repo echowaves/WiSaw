@@ -524,7 +524,7 @@ const Photo = ({ item }) => {
         text1: 'Unable to ban Starred photo.',
         text2: 'Un-Star photo first.',
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
       return
     }
@@ -533,7 +533,7 @@ const Photo = ({ item }) => {
         text1: 'Looks like you already reported this Photo',
         text2: 'You can only report same Photo once.',
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
     } else {
       Alert.alert(
@@ -554,7 +554,7 @@ const Photo = ({ item }) => {
         text1: 'Unable to delete Starred photo.',
         text2: 'Un-Star photo first.',
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
       return
     }

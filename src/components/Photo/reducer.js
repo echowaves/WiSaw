@@ -135,7 +135,7 @@ export function watchPhoto({ item }) {
         text1: 'Unable to watch photo.',
         text2: 'Network Issue?',
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
     }
   }
@@ -169,7 +169,7 @@ export function unwatchPhoto({ item }) {
         text1: "Unable to unwatch photo.",
         text2: "Maybe Network Issue?",
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
     }
   }
@@ -211,7 +211,7 @@ export function banPhoto({ item }) {
       Toast.show({
         text1: `Abusive Photo reported`,
         type: "success",
-        topOffset: 200,
+        topOffset: 70,
       })
     } catch (err) {
       // console.error({ err })
@@ -247,14 +247,14 @@ export function deletePhoto({ item }) {
         text1: "Photo deleted from the Cloud.",
         text2: "No one will be able to see it any more.",
         type: "success",
-        topOffset: 200,
+        topOffset: 70,
       })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete photo.",
         text2: "Network Issue?",
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
     }
   }
@@ -306,7 +306,7 @@ export function sharePhoto({ item }) {
         text1: "Unable to share photo.",
         text2: "Wait for a bit and try again...",
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
     }
   }
@@ -340,7 +340,7 @@ export function submitComment({ inputText, uuid, item }) {
       Toast.show({
         text1: "Comment submitted.",
         type: "success",
-        topOffset: 200,
+        topOffset: 70,
       })
       dispatch(watchPhoto({ item }))
     } catch (err) {
@@ -353,7 +353,7 @@ export function submitComment({ inputText, uuid, item }) {
         text1: "Unable to submit comment.",
         text2: "Network Issue?",
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
     }
   }
@@ -443,14 +443,14 @@ export function deleteComment({ photo, comment }) {
       Toast.show({
         text1: "Comment deleted.",
         type: "success",
-        topOffset: 200,
+        topOffset: 70,
       })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete comment.",
         text2: "Network Issue?",
         type: "error",
-        topOffset: 200,
+        topOffset: 70,
       })
     }
   }
