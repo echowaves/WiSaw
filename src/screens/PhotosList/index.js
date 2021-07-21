@@ -22,7 +22,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, FontAwesome5, MaterialIcons, AntDesign,
+  FontAwesome, FontAwesome5, MaterialIcons, AntDesign, Ionicons,
 } from '@expo/vector-icons'
 
 import NetInfo from "@react-native-community/netinfo"
@@ -445,27 +445,52 @@ const PhotosList = () => {
   )
 
   const renderSearchBar = autoFocus => (
-    <SearchBar
-      placeholder="Type Text Here..."
-      placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-      onChangeText={currentTerm => {
-        dispatch(reducer.setSearchTerm(currentTerm))
-      }}
-      value={searchTerm}
-      onSubmitEditing={
-        () => submitSearch()
-      }
-      autoFocus={autoFocus}
-      style={
-        {
-          color: CONST.MAIN_COLOR,
-          backgroundColor: "white",
-          width: '100%',
-          paddingLeft: 10,
+    <View style={{
+      flexDirection: 'row',
+    }}>
+      <SearchBar
+        placeholder="Type Text Here..."
+        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+        onChangeText={currentTerm => {
+          dispatch(reducer.setSearchTerm(currentTerm))
+        }}
+        value={searchTerm}
+        onSubmitEditing={
+          () => submitSearch()
         }
-      }
-      lightTheme
-    />
+        autoFocus={autoFocus}
+        containerStyle={{
+          width: width - 60,
+        }}
+        style={
+          {
+            color: CONST.MAIN_COLOR,
+            backgroundColor: "white",
+            paddingLeft: 10,
+            paddingRight: 10,
+          }
+        }
+        rightIconContainerStyle={{
+          margin: 10,
+        }}
+        lightTheme
+      />
+      <Ionicons
+        onPress={
+          () => submitSearch()
+        }
+        name="send"
+        size={30}
+        style={
+          {
+            margin: 10,
+            color: CONST.MAIN_COLOR,
+            alignSelf: 'center',
+
+          }
+        }
+      />
+    </View>
   )
 
   const submitSearch = async () => {
@@ -751,8 +776,8 @@ const PhotosList = () => {
               textAlign: 'center',
               margin: 10,
             }}>
-              You don&apos;t seem to be watching any photos.
-              Try to take some photos, comment on other&apos;s photos, or start watching somebody else&apos;s photos.
+              Don&apos;t have anything Starred?
+              Try to take a photo, comment on other&apos;s photos, or Star somebody else&apos;s photo -- they will all appear here.
             </Text>
           </Card>
         )}
