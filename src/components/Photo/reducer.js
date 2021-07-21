@@ -390,7 +390,6 @@ export function getPhotoDetails({ item }) {
         recognitions,
         isPhotoWatched,
       } = response.data.getPhotoDetails
-
       const comments = response.data.getPhotoDetails.comments.map(comment => ({
         ...comment,
         hiddenButtons: true,

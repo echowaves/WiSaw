@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { useDimensions } from '@react-native-community/hooks'
 
 import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
+import Toast from 'react-native-toast-message'
 
 import {
   // Dimensions,
@@ -57,6 +58,7 @@ const Photo = ({ item }) => {
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(() => {
         if (componentIsMounted) {
+          console.log({ item })
           dispatch(reducer.getPhotoDetails({ item }))
         }
       })
@@ -519,23 +521,21 @@ const Photo = ({ item }) => {
 
   const handleBan = ({ item }) => {
     if (item.watched) {
-      Alert.alert(
-        'Unable to ban Starred photo.',
-        'Un-Star photo first.',
-        [
-          { text: 'OK', onPress: () => null },
-        ],
-      )
+      Toast.show({
+        text1: 'Unable to ban Starred photo.',
+        text2: 'Un-Star photo first.',
+        type: "error",
+        topOffset: 200,
+      })
       return
     }
     if (isPhotoBannedByMe({ photoId: item.id })) {
-      Alert.alert(
-        'Looks like you already reported this Photo',
-        'You can only report same Photo once.',
-        [
-          { text: 'OK', onPress: () => null },
-        ],
-      )
+      Toast.show({
+        text1: 'Looks like you already reported this Photo',
+        text2: 'You can only report same Photo once.',
+        type: "error",
+        topOffset: 200,
+      })
     } else {
       Alert.alert(
         'Report abusive Photo?',
@@ -551,14 +551,12 @@ const Photo = ({ item }) => {
 
   const handleDelete = ({ item }) => {
     if (item.watched) {
-      Alert.alert(
-        'Unable to delete Starred photo.',
-        'Un-Star photo first.',
-        [
-          { text: 'OK', onPress: () => null, style: 'cancel' },
-        ],
-        { cancelable: true }
-      )
+      Toast.show({
+        text1: 'Unable to delete Starred photo.',
+        text2: 'Un-Star photo first.',
+        type: "error",
+        topOffset: 200,
+      })
       return
     }
     Alert.alert(
