@@ -86,7 +86,7 @@ const PhotosList = () => {
 
   useEffect(() => {
     const initState = async () => {
-      await CacheManager.cleanupCache({ size: 400 })
+      CacheManager.cleanupCache({ size: 800 })
 
       await checkForUpdate()
       await dispatch(reducer.initState())
@@ -300,7 +300,7 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    await CacheManager.cleanupCache({ size: 400 })
+    CacheManager.cleanupCache({ size: 800 })
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
@@ -618,7 +618,7 @@ const PhotosList = () => {
           <ScrollView>
             <Card containerStyle={{ padding: 0 }}>
               <ListItem style={{ borderRadius: 10 }}>
-                <Text> When you take a photo with WiSaw app,
+                <Text>When you take a photo with WiSaw app,
                   it will be added to a Photo Album on your phone,
                   as well as posted to global feed in the cloud.
                 </Text>

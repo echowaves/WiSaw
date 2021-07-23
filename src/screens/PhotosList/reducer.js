@@ -671,7 +671,7 @@ export function uploadPendingPhotos() {
             { idempotent: true }
           )
           // eslint-disable-next-line no-await-in-loop
-          await CacheManager.cleanupCache({ size: 400 })
+          CacheManager.cleanupCache({ size: 800 })
 
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
