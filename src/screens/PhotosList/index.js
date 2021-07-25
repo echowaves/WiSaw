@@ -87,14 +87,14 @@ const PhotosList = () => {
 
   useEffect(() => {
     const initState = async () => {
-      /// //////////////////////////////////////
-      // cleanup cache folder
-      const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
-      files.forEach(file => {
-        FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
-      })
-      // cleanup cache folder
-      /// //////////////////////////////////////
+      // /// //////////////////////////////////////
+      // // cleanup cache folder
+      // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
+      // files.forEach(file => {
+      //   FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
+      // })
+      // // cleanup cache folder
+      // /// //////////////////////////////////////
 
       CacheManager.cleanupCache({ size: 800 })
 
