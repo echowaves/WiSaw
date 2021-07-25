@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
-import * as FileSystem from 'expo-file-system'
+// import * as FileSystem from 'expo-file-system'
 
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
