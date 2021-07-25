@@ -130,6 +130,7 @@ const FeedbackScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* <Text>{diskSpace / 1000 / 1000}</Text> */}
+      {/* <Text>{diskSpace}</Text> */}
       {/* <Text>{diskCapacity / 1000 / 1000}</Text> */}
       { errorMessage.length !== 0 && (
         <Text>{errorMessage}</Text>

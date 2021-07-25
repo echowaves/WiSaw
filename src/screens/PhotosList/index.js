@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
+import * as FileSystem from 'expo-file-system'
 
 import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
@@ -86,6 +87,15 @@ const PhotosList = () => {
 
   useEffect(() => {
     const initState = async () => {
+      /// //////////////////////////////////////
+      // cleanup cache folder
+      const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
+      files.forEach(file => {
+        FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
+      })
+      // cleanup cache folder
+      /// //////////////////////////////////////
+
       CacheManager.cleanupCache({ size: 800 })
 
       await checkForUpdate()
