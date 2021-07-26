@@ -550,9 +550,7 @@ const PhotosList = () => {
             horizontal={
               false
             }
-            refreshing={
-              false
-            }
+            fixed
           />
         </View>
       )

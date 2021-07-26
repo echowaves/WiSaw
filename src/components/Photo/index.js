@@ -100,7 +100,7 @@ const Photo = ({ item }) => {
         source={{ uri: `${item.thumbUrl}` }}
         cacheKey={`${item.id}-thumb`}
         resizeMode="contain"
-        containerStyle={
+        style={
           styles.photoContainer
         }
       />
@@ -119,7 +119,7 @@ const Photo = ({ item }) => {
         source={{ uri: `${item.imgUrl}` }}
         cacheKey={`${item.id}`}
         resizeMode="contain"
-        containerStyle={
+        style={
           styles.photoContainer
         }
       />

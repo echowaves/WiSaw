@@ -6667,10 +6667,10 @@ expo-asset@~8.3.3:
     path-browserify "^1.0.0"
     url-parse "^1.4.4"
 
-expo-cached-image@1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/expo-cached-image/-/expo-cached-image-1.0.11.tgz#5c315eb6940dca771393b3886084d81de5b452ec"
-  integrity sha512-C+bPWOJL1+ml2HGcdbSan+UWlzUTHIh4YbyZUmbexLgaluVRf+ejRwFHzCZjae34toLYcXLi4f3AEm6jUsnhJA==
+expo-cached-image@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/expo-cached-image/-/expo-cached-image-1.1.0.tgz#0ec8701cc7a34912c517b3d9cd382432862ad089"
+  integrity sha512-7H9ZkdymiulZoKHYV4FpEMYVPF/wywTX/FwxzwqHIV9W8LVD02cFUoJcpTKlk684rxxKTlAyTYOb5ElrQ7f7AQ==
 
 expo-cli@^4.7.3:
   version "4.8.1"
