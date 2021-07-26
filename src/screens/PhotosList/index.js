@@ -96,8 +96,8 @@ const PhotosList = () => {
       // // cleanup cache folder
       // /// //////////////////////////////////////
 
-      CacheManager.cleanupCache({ size: 800 })
-
+      // CacheManager.cleanupCache({ size: 800 })
+      await CacheManager.initCacheFolder()
       await checkForUpdate()
       await dispatch(reducer.initState())
       // check permissions, retrieve UUID, make sure upload folder exists
@@ -310,7 +310,7 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    CacheManager.cleanupCache({ size: 800 })
+    // CacheManager.cleanupCache({ size: 800 })
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,

@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid'
 import * as SecureStore from 'expo-secure-store'
 
 import * as FileSystem from 'expo-file-system'
+import * as ImageManipulator from 'expo-image-manipulator'
+
 import moment from 'moment'
 
 import { CacheManager } from 'expo-cached-image'
@@ -658,9 +660,17 @@ export function uploadPendingPhotos() {
             file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             key: `${photo.id}`,
           })
+
+          // eslint-disable-next-line no-await-in-loop
+          const locallyResizedImage = await ImageManipulator.manipulateAsync(
+            `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
+            [{ resize: { height: 300 } }],
+            { compress: 0, format: ImageManipulator.SaveFormat.PNG }
+          )
+
           // eslint-disable-next-line no-await-in-loop
           await CacheManager.addToCache({
-            file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
+            file: locallyResizedImage.uri,
             key: `${photo.id}-thumb`,
           })
 
@@ -671,7 +681,7 @@ export function uploadPendingPhotos() {
             { idempotent: true }
           )
           // eslint-disable-next-line no-await-in-loop
-          CacheManager.cleanupCache({ size: 800 })
+          // CacheManager.cleanupCache({ size: 800 })
 
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
