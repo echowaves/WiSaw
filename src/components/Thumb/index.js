@@ -9,7 +9,7 @@ import {
   // Image,
 } from 'react-native'
 
-import { FontAwesome } from '@expo/vector-icons'
+import { FontAwesome, AntDesign } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -53,7 +53,7 @@ const Thumb = props => {
             {
               fontSize: 30,
               position: 'absolute',
-              bottom: 2,
+              bottom: -10,
               left: 5,
             }
           }>
@@ -71,27 +71,26 @@ const Thumb = props => {
               {
                 fontSize: 10,
                 color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                right: 8,
-                top: 12,
+                textAlign: 'center',
+                bottom: 20,
               }
             }>
             {item.commentsCount > 99 ? '+99' : item.commentsCount}
           </Text>
         </View>
       )}
-      { item.likes > 0 && (
+      { item.watchersCount > 0 && (
         <View
           style={
             {
               fontSize: 30,
               position: 'absolute',
-              bottom: 2,
+              bottom: -10,
               right: 5,
             }
           }>
-          <FontAwesome
-            name="thumbs-up"
+          <AntDesign
+            name="star"
             style={
               {
                 fontSize: 30,
@@ -104,12 +103,11 @@ const Thumb = props => {
               {
                 fontSize: 10,
                 color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                right: 5,
-                top: 12,
+                textAlign: 'center',
+                bottom: 20,
               }
             }>
-            {item.likes > 99 ? '+ 99' : item.likes}
+            {item.watchersCount > 99 ? '+ 99' : item.watchersCount}
           </Text>
         </View>
       )}

@@ -7,7 +7,6 @@ export const INIT_STATE = 'wisaw/photosList/INIT_STATE'
 export const SET_IS_TANDC_ACCEPTED = 'wisaw/photosList/SET_IS_TANDC_ACCEPTED'
 export const SET_ERROR = 'wisaw/photosList/SET_ERROR'
 export const SET_ORIENTATION = 'wisaw/photosList/SET_ORIENTATION'
-export const PHOTO_LIKED = 'wisaw/photosList/PHOTO_LIKED'
 export const PHOTO_BANNED = 'wisaw/photosList/PHOTO_BANNED'
 export const PHOTO_DELETED = 'wisaw/photosList/PHOTO_DELETED'
 

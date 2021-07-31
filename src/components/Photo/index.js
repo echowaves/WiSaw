@@ -50,7 +50,6 @@ const Photo = ({ item }) => {
   const { width, height } = useDimensions().window
   const imageHeight = height - 200
   const bans = useSelector(state => state.photo.bans)
-  const likes = useSelector(state => state.photo.likes)
 
   // const error = useSelector(state => state.photo.error)
 
@@ -433,6 +432,15 @@ const Photo = ({ item }) => {
               onPress={
                 () => handleFlipWatch()
               }>
+              {item.watchersCount > 0 && (
+                <Badge
+                  badgeStyle={{
+                    backgroundColor: CONST.MAIN_COLOR,
+                  }}
+                  containerStyle={{ position: 'absolute', top: -10, right: -10 }}
+                  value={item.watchersCount}
+                />
+              )}
               <AntDesign
                 name={item.watched ? "star" : "staro"}
                 style={
@@ -468,39 +476,6 @@ const Photo = ({ item }) => {
               />
               <Text style={{ fontSize: 10 }}>
                 Share
-              </Text>
-            </Col>
-            {/* likes button */}
-            <Col
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              onPress={
-                () => {
-                  handleLike({ item })
-                }
-              }>
-              {item.likes > 0 && (
-                <Badge
-                  badgeStyle={{
-                    backgroundColor: CONST.MAIN_COLOR,
-                  }}
-                  containerStyle={{ position: 'absolute', top: -10, right: -10 }}
-                  value={item.likes}
-                />
-              )}
-              <FontAwesome
-                name="thumbs-up"
-                style={
-                  {
-                    color: isPhotoLikedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-                  }
-                }
-                size={30}
-              />
-              <Text style={{ fontSize: 10 }}>
-                Like
               </Text>
             </Col>
           </Grid>
@@ -567,21 +542,6 @@ const Photo = ({ item }) => {
   }
 
   const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
-  const isPhotoLikedByMe = ({ photoId }) => likes.includes(photoId)
-
-  const handleLike = ({ item }) => {
-    if (isPhotoLikedByMe({ photoId: item.id })) {
-      Alert.alert(
-        'You already liked this photo.',
-        'Try to like some other photo.',
-        [
-          { text: 'OK', onPress: () => null },
-        ],
-      )
-      return
-    }
-    dispatch(reducer.likePhoto({ photoId: item.id }))
-  }
 
   const handleFlipWatch = () => {
     if (item.watched) {

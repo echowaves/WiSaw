@@ -94,39 +94,6 @@ const ThumbPending = props => {
           </Text>
         </View>
       )}
-      { item.likes > 0 && (
-        <View
-          style={
-            {
-              fontSize: 30,
-              position: 'absolute',
-              bottom: 2,
-              right: 5,
-            }
-          }>
-          <FontAwesome
-            name="thumbs-up"
-            style={
-              {
-                fontSize: 30,
-                color: CONST.PLACEHOLDER_TEXT_COLOR,
-              }
-            }
-          />
-          <Text
-            style={
-              {
-                fontSize: 10,
-                color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                right: 5,
-                top: 12,
-              }
-            }>
-            {item.likes > 99 ? '+ 99' : item.likes}
-          </Text>
-        </View>
-      )}
     </View>
   )
 }

@@ -115,11 +115,6 @@ const reducer = (state = initialState, action) => {
         ...state,
         orientation: action.orientation,
       }
-    case ACTION_TYPES.PHOTO_LIKED:
-      return {
-        ...state,
-        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, likes: item.likes + 1 } : item)),
-      }
     case ACTION_TYPES.PHOTO_BANNED:
       return {
         ...state,
@@ -153,12 +148,12 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.PHOTO_WATCHED:
       return {
         ...state,
-        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: true } : item)),
+        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, watchersCount: item.watchersCount } : item)),
       }
     case ACTION_TYPES.PHOTO_UNWATCHED:
       return {
         ...state,
-        photos: state.photos.map(item => ((item.id === action.item.id) ? { ...item, watched: false } : item)),
+        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, watchersCount: item.watchersCount } : item)),
       }
 
     case ACTION_TYPES.ZERO_MOMEMT:
@@ -309,7 +304,7 @@ async function _requestGeoPhotos(getState) {
                   imgUrl
                   thumbUrl
                   commentsCount
-                  likes
+                  watchersCount
                 }
           batch,
           noMoreData
@@ -346,7 +341,7 @@ async function _requestWatchedPhotos(getState) {
                   imgUrl
                   thumbUrl
                   commentsCount
-                  likes
+                  watchersCount
                 }
           batch,
           noMoreData
@@ -382,7 +377,7 @@ async function _requestSearchedPhotos(getState) {
                   imgUrl
                   thumbUrl
                   commentsCount
-                  likes
+                  watchersCount
                 }
           batch,
           noMoreData
@@ -732,12 +727,13 @@ const _uploadFile = async ({ item, uuid, location }) => {
           createPhoto(lat: $lat, lon: $lon, uuid: $uuid ) {
             active
             commentsCount
+            watchersCount
             createdAt
             id
             imgUrl
-            likes
-            location
+            imgUrl
             thumbUrl
+            location
             updatedAt
             uuid
         }

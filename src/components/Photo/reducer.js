@@ -15,7 +15,6 @@ import * as ACTION_TYPES from './action_types'
 
 export const initialState = {
   photo: {},
-  likes: [],
   bans: [],
   inputText: '',
   commentsSubmitting: false,
@@ -24,16 +23,6 @@ export const initialState = {
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case ACTION_TYPES.LIKE_PHOTO:
-      return {
-        ...state,
-        likes: state.likes.concat(action.photoId),
-      }
-    case ACTION_TYPES.UNLIKE_PHOTO:
-      return {
-        ...state,
-        likes: state.likes.filter(item => item !== action.photoId),
-      }
     case ACTION_TYPES.BAN_PHOTO:
       return {
         ...state,
@@ -64,45 +53,6 @@ export default function reducer(state = initialState, action) {
 
     default:
       return state
-  }
-}
-
-export function likePhoto({ photoId }) {
-  return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
-
-    dispatch({
-      type: ACTION_TYPES.LIKE_PHOTO,
-      photoId,
-    })
-
-    try {
-      await CONST.gqlClient
-        .mutate({
-          mutation: gql`
-            mutation likePhoto($photoId: ID!, $uuid: String!) {
-              likePhoto(photoId: $photoId, uuid: $uuid)
-                     {
-                        id
-                      }
-            }`,
-          variables: {
-            photoId,
-            uuid,
-          },
-        })
-
-      // lets update the state in the photos collection so it renders the right number of likes in the list
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_LIKED,
-        photoId,
-      })
-    } catch (err) {
-      dispatch({
-        type: ACTION_TYPES.UNLIKE_PHOTO,
-        photoId,
-      })
-    }
   }
 }
 
@@ -274,7 +224,7 @@ export function sharePhoto({ item }) {
             comment => (
               comment.comment
             )
-          ).join('\n\n')}\n\n${item.likes > 0 ? `Thumbs Up: ${item.likes}\n\n` : ''}`
+          ).join('\n\n')}\n\n${item.watchersCount > 0 ? `Thumbs Up: ${item.watchersCount}\n\n` : ''}`
       }
       messageBody = `${messageBody}\nhttps://www.wisaw.com/photos/${item.id}`
       // const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing' }
