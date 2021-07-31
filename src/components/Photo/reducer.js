@@ -60,7 +60,7 @@ export function watchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      await CONST.gqlClient
+      const watchersCount = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation watchPhoto($photoId: ID!, $uuid: String!) {
@@ -70,16 +70,17 @@ export function watchPhoto({ item }) {
             photoId: item.id,
             uuid,
           },
-        })
-
+        })).data.watchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        item,
+        photoId: item.id,
+        watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        item,
+        photoId: item.id,
+        watchersCount: item.watchersCount,
       })
       Toast.show({
         text1: 'Unable to watch photo.',
@@ -95,7 +96,7 @@ export function unwatchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      await CONST.gqlClient
+      const watchersCount = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation unwatchPhoto($photoId: ID!, $uuid: String!) {
@@ -105,15 +106,17 @@ export function unwatchPhoto({ item }) {
             photoId: item.id,
             uuid,
           },
-        })
+        })).data.unwatchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        item,
+        photoId: item.id,
+        watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        item,
+        photoId: item.id,
+        watchersCount: item.watchersCount,
       })
       Toast.show({
         text1: "Unable to unwatch photo.",
