@@ -15,7 +15,6 @@ import * as ACTION_TYPES from './action_types'
 
 export const initialState = {
   photo: {},
-  likes: [],
   bans: [],
   inputText: '',
   commentsSubmitting: false,
@@ -24,16 +23,6 @@ export const initialState = {
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case ACTION_TYPES.LIKE_PHOTO:
-      return {
-        ...state,
-        likes: state.likes.concat(action.photoId),
-      }
-    case ACTION_TYPES.UNLIKE_PHOTO:
-      return {
-        ...state,
-        likes: state.likes.filter(item => item !== action.photoId),
-      }
     case ACTION_TYPES.BAN_PHOTO:
       return {
         ...state,
@@ -67,50 +56,11 @@ export default function reducer(state = initialState, action) {
   }
 }
 
-export function likePhoto({ photoId }) {
-  return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
-
-    dispatch({
-      type: ACTION_TYPES.LIKE_PHOTO,
-      photoId,
-    })
-
-    try {
-      await CONST.gqlClient
-        .mutate({
-          mutation: gql`
-            mutation likePhoto($photoId: ID!, $uuid: String!) {
-              likePhoto(photoId: $photoId, uuid: $uuid)
-                     {
-                        id
-                      }
-            }`,
-          variables: {
-            photoId,
-            uuid,
-          },
-        })
-
-      // lets update the state in the photos collection so it renders the right number of likes in the list
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_LIKED,
-        photoId,
-      })
-    } catch (err) {
-      dispatch({
-        type: ACTION_TYPES.UNLIKE_PHOTO,
-        photoId,
-      })
-    }
-  }
-}
-
 export function watchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      await CONST.gqlClient
+      const watchersCount = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation watchPhoto($photoId: ID!, $uuid: String!) {
@@ -120,16 +70,17 @@ export function watchPhoto({ item }) {
             photoId: item.id,
             uuid,
           },
-        })
-
+        })).data.watchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        item,
+        photoId: item.id,
+        watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        item,
+        photoId: item.id,
+        watchersCount: item.watchersCount,
       })
       Toast.show({
         text1: 'Unable to watch photo.',
@@ -145,7 +96,7 @@ export function unwatchPhoto({ item }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
-      await CONST.gqlClient
+      const watchersCount = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation unwatchPhoto($photoId: ID!, $uuid: String!) {
@@ -155,15 +106,17 @@ export function unwatchPhoto({ item }) {
             photoId: item.id,
             uuid,
           },
-        })
+        })).data.unwatchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        item,
+        photoId: item.id,
+        watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        item,
+        photoId: item.id,
+        watchersCount: item.watchersCount,
       })
       Toast.show({
         text1: "Unable to unwatch photo.",
@@ -274,7 +227,7 @@ export function sharePhoto({ item }) {
             comment => (
               comment.comment
             )
-          ).join('\n\n')}\n\n${item.likes > 0 ? `Thumbs Up: ${item.likes}\n\n` : ''}`
+          ).join('\n\n')}\n\n${item.watchersCount > 0 ? `Thumbs Up: ${item.watchersCount}\n\n` : ''}`
       }
       messageBody = `${messageBody}\nhttps://www.wisaw.com/photos/${item.id}`
       // const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing' }
