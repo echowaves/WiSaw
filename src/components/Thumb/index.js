@@ -41,6 +41,7 @@ const Thumb = props => {
           styles.container,
           thumbWidthStyles,
         ]}>
+
         <CachedImage
           source={{ uri: `${item.thumbUrl}` }}
           cacheKey={`${item.id}-thumb`}

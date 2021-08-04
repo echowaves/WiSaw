@@ -342,6 +342,7 @@ async function _requestWatchedPhotos(getState) {
                   thumbUrl
                   commentsCount
                   watchersCount
+                  lastComment
                 }
           batch,
           noMoreData
@@ -378,6 +379,7 @@ async function _requestSearchedPhotos(getState) {
                   thumbUrl
                   commentsCount
                   watchersCount
+                  lastComment
                 }
           batch,
           noMoreData
