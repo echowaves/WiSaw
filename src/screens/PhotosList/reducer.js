@@ -196,8 +196,8 @@ const reducer = (state = initialState, action) => {
               commentsCount: item.comments.length - 1,
               comments: item.comments.filter(
                 comment => (comment.id !== action.commentId)
-              )
-              ,
+              ),
+              lastComment: action.lastComment,
             }
             : item)
         ),
@@ -211,6 +211,7 @@ const reducer = (state = initialState, action) => {
             ? {
               ...item,
               commentsCount: item.comments.length + 1,
+              lastComment: action.lastComment,
             }
             : item)
         ),
