@@ -49,6 +49,7 @@ import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
+import ThumbWithComments from '../../components/ThumbWithComments'
 import ThumbPending from '../../components/ThumbPending'
 
 const PhotosList = () => {
@@ -327,6 +328,97 @@ const PhotosList = () => {
     }
   }
 
+  const renderThumbs = () => (
+    <FlatGrid
+      itemDimension={
+        thumbDimension
+      }
+      spacing={3}
+      data={
+        photos
+      }
+      renderItem={
+        ({ item, index }) => (
+          <Thumb
+            item={
+              item
+            }
+            index={
+              index
+            }
+            thumbDimension={thumbDimension}
+          />
+        )
+      }
+      keyExtractor={item => item.id}
+      style={
+        styles.container
+      }
+      showsVerticalScrollIndicator={
+        false
+      }
+      horizontal={
+        false
+      }
+      refreshing={
+        false
+      }
+      onRefresh={
+        () => {
+          reload()
+        }
+      }
+      onViewableItemsChanged={onViewRef.current}
+      // viewabilityConfig={viewConfigRef.current}
+    />
+  )
+
+  const renderThumbsWithComments = () => (
+    <FlatGrid
+      itemDimension={
+        width
+      }
+      spacing={3}
+      data={
+        photos
+      }
+      renderItem={
+        ({ item, index }) => (
+          <ThumbWithComments
+            item={
+              item
+            }
+            index={
+              index
+            }
+            thumbDimension={thumbDimension}
+            screenWidth={width}
+          />
+        )
+      }
+      keyExtractor={item => item.id}
+      style={
+        styles.container
+      }
+      showsVerticalScrollIndicator={
+        false
+      }
+      horizontal={
+        false
+      }
+      refreshing={
+        false
+      }
+      onRefresh={
+        () => {
+          reload()
+        }
+      }
+      onViewableItemsChanged={onViewRef.current}
+      // viewabilityConfig={viewConfigRef.current}
+    />
+  )
+
   const renderPhotoButton = () => (
     <View style={
       [
@@ -572,48 +664,9 @@ const PhotosList = () => {
         {activeSegment === 2 && renderSearchBar(false)}
         {renderPendingPhotos()}
         {/* photos */}
-        <FlatGrid
-          itemDimension={
-            thumbDimension
-          }
-          spacing={3}
-          data={
-            photos
-          }
-          renderItem={
-            ({ item, index }) => (
-              <Thumb
-                item={
-                  item
-                }
-                index={
-                  index
-                }
-                thumbDimension={thumbDimension}
-              />
-            )
-          }
-          keyExtractor={item => item.id}
-          style={
-            styles.container
-          }
-          showsVerticalScrollIndicator={
-            false
-          }
-          horizontal={
-            false
-          }
-          refreshing={
-            false
-          }
-          onRefresh={
-            () => {
-              reload()
-            }
-          }
-          onViewableItemsChanged={onViewRef.current}
-          // viewabilityConfig={viewConfigRef.current}
-        />
+        {activeSegment === 0 && renderThumbs()}
+        {activeSegment === 1 && renderThumbsWithComments()}
+        {activeSegment === 2 && renderThumbsWithComments()}
         {renderPhotoButton()}
       </SafeAreaView>
     )

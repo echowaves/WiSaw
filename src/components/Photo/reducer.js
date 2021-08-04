@@ -294,6 +294,7 @@ export function submitComment({ inputText, uuid, item }) {
         type: PHOTOS_LIST_ACTION_TYPES.COMMENT_ADDED,
         photoId: item.id,
         commentId: comment.id,
+        lastComment: comment.comment,
       })
 
       Toast.show({
@@ -381,7 +382,7 @@ export function deleteComment({ photo, comment }) {
     const { uuid } = getState().photosList
 
     try {
-      await CONST.gqlClient
+      const lastComment = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation deleteComment($commentId: ID!, $uuid: String!) {
@@ -391,13 +392,14 @@ export function deleteComment({ photo, comment }) {
             commentId: comment.id,
             uuid,
           },
-        })
+        })).data.deleteComment
 
       // lets update the state in the photos collection so it renders the right number of likes in the list
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.COMMENT_DELETED,
         photoId: photo.id,
         commentId: comment.id,
+        lastComment,
       })
       Toast.show({
         text1: "Comment deleted.",
