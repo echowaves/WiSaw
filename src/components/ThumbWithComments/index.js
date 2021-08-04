@@ -123,6 +123,7 @@ const ThumbWithComments = props => {
         </View>
         <View style={{
           flex: 1,
+          justifyContent: 'center',
           width: screenWidth - thumbDimension - 15,
           height: thumbDimension,
           position: 'absolute',
