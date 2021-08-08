@@ -6,6 +6,7 @@ import { useDimensions } from '@react-native-community/hooks'
 
 import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
+import moment from 'moment'
 
 import {
   // Dimensions,
@@ -124,20 +125,51 @@ const Photo = ({ item }) => {
       />
     </ReactNativeZoomableView>
   )
+  const renderCurrentDateTime = dateString => {
+    const dateTime = moment(new Date(dateString), "YYYY-MM-DD-HH-mm-ss-SSS").format("LLL")
+    return dateTime
+  }
 
   const renderCommentsStats = () => {
     if (!item.comments || item.comments.length === 0) {
-      return <Text />
+      return (
+        <View style={{ flex: 1, flexDirection: 'row' }}>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                marginRight: 10,
+                color: CONST.MAIN_COLOR,
+                textAlign: 'right',
+              }}>
+              {renderCurrentDateTime(item.createdAt)}
+            </Text>
+          </View>
+        </View>
+      )
     }
 
     return (
-      <Text
-        style={{
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-        }}>
-        {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
-      </Text>
+      <View style={{ flex: 1, flexDirection: 'row' }}>
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              marginLeft: 10,
+              color: CONST.MAIN_COLOR,
+            }}>
+            {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
+          </Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text
+            style={{
+              marginRight: 10,
+              color: CONST.MAIN_COLOR,
+              textAlign: 'right',
+            }}>
+            {renderCurrentDateTime(item.createdAt)}
+          </Text>
+        </View>
+      </View>
     )
   }
 

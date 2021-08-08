@@ -306,6 +306,7 @@ async function _requestGeoPhotos(getState) {
                   thumbUrl
                   commentsCount
                   watchersCount
+                  createdAt
                 }
           batch,
           noMoreData
@@ -344,6 +345,7 @@ async function _requestWatchedPhotos(getState) {
                   commentsCount
                   watchersCount
                   lastComment
+                  createdAt
                 }
           batch,
           noMoreData
@@ -381,6 +383,7 @@ async function _requestSearchedPhotos(getState) {
                   commentsCount
                   watchersCount
                   lastComment
+                  createdAt
                 }
           batch,
           noMoreData
