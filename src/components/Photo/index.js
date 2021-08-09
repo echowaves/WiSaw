@@ -125,7 +125,7 @@ const Photo = ({ item }) => {
       />
     </ReactNativeZoomableView>
   )
-  const renderCurrentDateTime = dateString => {
+  const renderDateTime = dateString => {
     const dateTime = moment(new Date(dateString), "YYYY-MM-DD-HH-mm-ss-SSS").format("LLL")
     return dateTime
   }
@@ -141,7 +141,7 @@ const Photo = ({ item }) => {
                 color: CONST.MAIN_COLOR,
                 textAlign: 'right',
               }}>
-              {renderCurrentDateTime(item.createdAt)}
+              {renderDateTime(item.createdAt)}
             </Text>
           </View>
         </View>
@@ -166,7 +166,7 @@ const Photo = ({ item }) => {
               color: CONST.MAIN_COLOR,
               textAlign: 'right',
             }}>
-            {renderCurrentDateTime(item.createdAt)}
+            {renderDateTime(item.createdAt)}
           </Text>
         </View>
       </View>
@@ -247,6 +247,18 @@ const Photo = ({ item }) => {
                   </Text>
                   {renderCommentButtons({ photo: item, comment })}
                 </Card>
+                <View style={{ flex: 1, flexDirection: 'row' }}>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        marginRight: 10,
+                        color: CONST.MAIN_COLOR,
+                        textAlign: 'right',
+                      }}>
+                      {renderDateTime(comment.updatedAt)}
+                    </Text>
+                  </View>
+                </View>
                 <Divider />
               </TouchableOpacity>
             </Row>

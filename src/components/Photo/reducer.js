@@ -332,6 +332,7 @@ export function getPhotoDetails({ item }) {
             comments {
                   id
                   comment
+                  updatedAt
                 }
                 recognitions{
                   metaData
