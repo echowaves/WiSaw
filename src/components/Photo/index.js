@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 
 import { useDimensions } from '@react-native-community/hooks'
 
-import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import moment from 'moment'
 
@@ -473,8 +473,8 @@ const Photo = ({ item }) => {
                   value={item.watchersCount}
                 />
               )}
-              <AntDesign
-                name={item.watched ? "star" : "staro"}
+              <FontAwesome
+                name={item.watched ? "star" : "star-o"}
                 style={
                   {
                     color: CONST.MAIN_COLOR,

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
-import { FontAwesome, AntDesign } from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 
 import {
 
@@ -74,7 +74,7 @@ const PhotosDetails = ({ route }) => {
       case 0:
         return (<FontAwesome name="globe" size={30} style={{ color: CONST.SECONDARY_COLOR }} />)
       case 1:
-        return (<AntDesign name="star" size={30} style={{ color: CONST.SECONDARY_COLOR }} />)
+        return (<FontAwesome name="star" size={30} style={{ color: CONST.SECONDARY_COLOR }} />)
       case 2:
         return (
           <Text style={{ color: CONST.SECONDARY_COLOR }}>

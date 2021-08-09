@@ -8,7 +8,7 @@ import {
   // Image,
 } from 'react-native'
 
-import { FontAwesome, AntDesign } from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -98,7 +98,7 @@ const ThumbWithComments = props => {
                   left: thumbDimension - 35,
                 }
               }>
-              <AntDesign
+              <FontAwesome
                 name="star"
                 style={
                   {

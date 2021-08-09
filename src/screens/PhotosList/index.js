@@ -23,7 +23,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, FontAwesome5, MaterialIcons, AntDesign, Ionicons,
+  FontAwesome, FontAwesome5, MaterialIcons, Ionicons,
 } from '@expo/vector-icons'
 
 import NetInfo from "@react-native-community/netinfo"
@@ -477,7 +477,7 @@ const PhotosList = () => {
   )
 
   const segment1 = () => (
-    <AntDesign
+    <FontAwesome
       name="star"
       size={23}
       color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
