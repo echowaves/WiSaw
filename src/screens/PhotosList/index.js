@@ -454,10 +454,13 @@ const PhotosList = () => {
     }>
       <Switch
         value={cameraType === 'video'}
-        color={CONST.EMPHASIZED_COLOR}
         style={{
           alignSelf: 'center',
         }}
+        thumbColor={CONST.SECONDARY_COLOR}
+        // color={cameraType === 'video' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
+        trackColor={{ true: CONST.EMPHASIZED_COLOR, false: CONST.MAIN_COLOR }}
+        ios_backgroundColor={CONST.MAIN_COLOR}
         onValueChange={() => {
           if (cameraType === 'camera') {
             setCameraType('video')
