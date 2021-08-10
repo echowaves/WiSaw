@@ -247,18 +247,20 @@ const Photo = ({ item }) => {
                   </Text>
                   {renderCommentButtons({ photo: item, comment })}
                 </Card>
-                <View style={{ flex: 1, flexDirection: 'row' }}>
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        marginRight: 10,
-                        color: CONST.MAIN_COLOR,
-                        textAlign: 'right',
-                      }}>
-                      {renderDateTime(comment.updatedAt)}
-                    </Text>
+                {!comment.hiddenButtons && (
+                  <View style={{ flex: 1, flexDirection: 'row' }}>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          marginRight: 10,
+                          color: CONST.MAIN_COLOR,
+                          textAlign: 'right',
+                        }}>
+                        {renderDateTime(comment.updatedAt)}
+                      </Text>
+                    </View>
                   </View>
-                </View>
+                )}
                 <Divider />
               </TouchableOpacity>
             </Row>
