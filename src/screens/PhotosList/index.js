@@ -503,7 +503,7 @@ const PhotosList = () => {
     <FontAwesome
       name="globe"
       size={23}
-      color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(0))
@@ -517,7 +517,7 @@ const PhotosList = () => {
     <AntDesign
       name="star"
       size={23}
-      color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(1))
@@ -531,7 +531,7 @@ const PhotosList = () => {
     <FontAwesome
       name="search"
       size={23}
-      color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(2))
