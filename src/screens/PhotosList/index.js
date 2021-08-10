@@ -457,7 +457,7 @@ const PhotosList = () => {
         style={{
           alignSelf: 'center',
         }}
-        thumbColor={CONST.SECONDARY_COLOR}
+        thumbColor={CONST.TRANSPARENT_BUTTON_COLOR}
         // color={cameraType === 'video' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
         trackColor={{ true: CONST.EMPHASIZED_COLOR, false: CONST.MAIN_COLOR }}
         ios_backgroundColor={CONST.MAIN_COLOR}
@@ -469,7 +469,7 @@ const PhotosList = () => {
           }
         }}
       />
-      <View><Text /></View>
+      <View style={{ padding: 3 }} />
       <Icon
         name={cameraType}
         type="font-awesome-5"
