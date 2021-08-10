@@ -219,7 +219,7 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.SET_ACTIVE_SEGMENT:
       return {
         ...state,
-        isLastPage: false,
+        photos: [],
         searchTerm: '',
         activeSegment: action.activeSegment,
       }

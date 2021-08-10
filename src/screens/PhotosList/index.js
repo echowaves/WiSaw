@@ -470,7 +470,7 @@ const PhotosList = () => {
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(0))
-          await reload()
+          reload()
         }
       }
     />
@@ -484,7 +484,7 @@ const PhotosList = () => {
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(1))
-          await reload()
+          reload()
         }
       }
     />
@@ -498,7 +498,7 @@ const PhotosList = () => {
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(2))
-          await reload()
+          reload()
         }
       }
     />
@@ -775,7 +775,7 @@ const PhotosList = () => {
     )
   }
 
-  if (loading) {
+  if (loading || photos === null) {
     return (
       <SafeAreaView style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
