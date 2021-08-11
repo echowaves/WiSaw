@@ -729,7 +729,21 @@ const PhotosList = () => {
     )
   }
 
-  if (!location && !loading) {
+  if (loading && photos?.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        {activeSegment === 2 && renderSearchBar(false)}
+        <LinearProgress color={
+          CONST.MAIN_COLOR
+        }
+        />
+        {renderPendingPhotos()}
+        {renderPhotoButton()}
+      </SafeAreaView>
+    )
+  }
+
+  if (!location) {
     return (
       <SafeAreaView style={styles.container}>
         {renderPendingPhotos()}
@@ -751,44 +765,7 @@ const PhotosList = () => {
     )
   }
 
-  if (!netAvailable && !loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        {renderPendingPhotos()}
-        <Card
-          borderRadius={5}
-          containerStyle={{
-            borderWidth: 0,
-          }}>
-          <Text style={{
-            fontSize: 20,
-            textAlign: 'center',
-            margin: 10,
-          }}>
-            You are not connected to reliable network.
-            You can still snap photos.
-            They will be uploaded later.
-          </Text>
-        </Card>
-        {renderPhotoButton()}
-      </SafeAreaView>
-    )
-  }
-
-  if (loading || photos === null) {
-    return (
-      <SafeAreaView style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
-        <LinearProgress color={
-          CONST.MAIN_COLOR
-        }
-        />
-        {renderPhotoButton()}
-      </SafeAreaView>
-    )
-  }
-
-  if (photos.length === 0) {
+  if (photos.length === 0 && isLastPage && !loading) {
     return (
       <SafeAreaView style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
@@ -845,6 +822,13 @@ const PhotosList = () => {
       </SafeAreaView>
     )
   }
+  return (
+    <SafeAreaView style={styles.container}>
+      {activeSegment === 2 && renderSearchBar(false)}
+      {renderPendingPhotos()}
+      {renderPhotoButton()}
+    </SafeAreaView>
+  )
 }
 
 export default PhotosList
