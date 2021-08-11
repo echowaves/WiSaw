@@ -746,7 +746,6 @@ const PhotosList = () => {
   if (!location) {
     return (
       <SafeAreaView style={styles.container}>
-        {renderPendingPhotos()}
         <Card
           borderRadius={5}
           containerStyle={{
@@ -760,6 +759,29 @@ const PhotosList = () => {
             Acquiring location, make sure to enable Location Service.
           </Text>
         </Card>
+        {renderPendingPhotos()}
+        {renderPhotoButton()}
+      </SafeAreaView>
+    )
+  }
+
+  if (!netAvailable) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Card
+          borderRadius={5}
+          containerStyle={{
+            borderWidth: 0,
+          }}>
+          <Text style={{
+            fontSize: 20,
+            textAlign: 'center',
+            margin: 10,
+          }}>
+            No network available, you can still snap photos -- they will be uploaded later.
+          </Text>
+        </Card>
+        {renderPendingPhotos()}
         {renderPhotoButton()}
       </SafeAreaView>
     )
@@ -769,7 +791,6 @@ const PhotosList = () => {
     return (
       <SafeAreaView style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
-        {renderPendingPhotos()}
         {activeSegment === 2 && (
           <Card
             borderRadius={5}
@@ -818,6 +839,7 @@ const PhotosList = () => {
             </Text>
           </Card>
         )}
+        {renderPendingPhotos()}
         {renderPhotoButton()}
       </SafeAreaView>
     )
