@@ -239,6 +239,8 @@ const PhotosList = () => {
   }
 
   const reload = async () => {
+    await dispatch(reducer.initState())
+
     const location = await _getLocation()
     await dispatch(reducer.resetState(location))
     await dispatch(reducer.uploadPendingPhotos())
