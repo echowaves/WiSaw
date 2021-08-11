@@ -23,7 +23,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, FontAwesome5, MaterialIcons, Ionicons,
+  FontAwesome, FontAwesome5, MaterialIcons, Ionicons, AntDesign,
 } from '@expo/vector-icons'
 
 import NetInfo from "@react-native-community/netinfo"
@@ -219,8 +219,11 @@ const PhotosList = () => {
 
   })
 
-  const updateNavBar = () => {
+  const updateNavBar = async () => {
     if (netAvailable) {
+      // const location = await _getLocation()
+      // await dispatch(reducer.resetState(location))
+
       navigation.setOptions({
         headerTitle: renderHeaderTitle,
         headerLeft: renderHeaderLeft,
@@ -233,9 +236,6 @@ const PhotosList = () => {
         headerRight: null,
       })
     }
-    // if (!location) {
-    //   reload()
-    // }
   }
 
   const reload = async () => {
@@ -477,7 +477,7 @@ const PhotosList = () => {
   )
 
   const segment1 = () => (
-    <FontAwesome
+    <AntDesign
       name="star"
       size={23}
       color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
