@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
 
-import { useDeviceOrientation, useDimensions } from '@react-native-community/hooks'
+import { useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
 import * as ImagePicker from 'expo-image-picker'
@@ -57,7 +57,7 @@ const PhotosList = () => {
 
   const dispatch = useDispatch()
 
-  const deviceOrientation = useDeviceOrientation()
+  // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
 
   const [thumbDimension, setThumbDimension] = useState(100)
@@ -86,27 +86,31 @@ const PhotosList = () => {
     setLastViewableRow(lastViewableItem.index)
   })
 
-  useEffect(() => {
-    const initState = async () => {
-      // /// //////////////////////////////////////
-      // // cleanup cache folder
-      // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
-      // files.forEach(file => {
-      //   FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
-      // })
-      // // cleanup cache folder
-      // /// //////////////////////////////////////
+  const initState = async () => {
+    // /// //////////////////////////////////////
+    // // cleanup cache folder
+    // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
+    // files.forEach(file => {
+    //   FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
+    // })
+    // // cleanup cache folder
+    // /// //////////////////////////////////////
+    const thumbsCount = Math.floor(width / 90)
+    setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2)
 
-      // CacheManager.cleanupCache({ size: 800 })
-      await CacheManager.initCacheFolder()
-      await checkForUpdate()
-      await dispatch(reducer.initState())
+    await Promise.all([
+      CacheManager.initCacheFolder(),
+      checkForUpdate(),
+      dispatch(reducer.initState()),
       // check permissions, retrieve UUID, make sure upload folder exists
-      await dispatch(reducer.zeroMoment())
+      dispatch(reducer.zeroMoment()),
+    ])
 
-      await reload()
-    }
-    initState()
+    reload()
+  }
+
+  useEffect(() => {
+    // initState()
 
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
@@ -117,26 +121,14 @@ const PhotosList = () => {
     return () => unsubscribeNetInfo()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  // when screen orientation changes
-  useEffect(() => {
-    dispatch(reducer.setOrientation(deviceOrientation.portrait ? 'portrait' : 'landscape'))
-  }, [deviceOrientation]) // eslint-disable-line react-hooks/exhaustive-deps
-
   // re-render title on  state chage
   useEffect(() => {
     updateNavBar()
     if (netAvailable) {
+      initState()
       dispatch(reducer.uploadPendingPhotos())
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // when width of screen changes
-  useEffect(() => {
-    // const tmpWidth = width < height ? width : height
-    const thumbsCount = Math.floor(width / 90)
-    setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2)
-    // setThumbDimension(Math.floor(tmpWidth / 4) - 4)
-  }, [width])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (wantToLoadMore()) {
@@ -221,8 +213,8 @@ const PhotosList = () => {
 
   const updateNavBar = async () => {
     if (netAvailable) {
-      // const location = await _getLocation()
-      // await dispatch(reducer.resetState(location))
+      const location = await _getLocation()
+      await dispatch(reducer.resetState(location))
 
       navigation.setOptions({
         headerTitle: renderHeaderTitle,
@@ -238,11 +230,17 @@ const PhotosList = () => {
     }
   }
 
+  // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+
   const reload = async () => {
+    await dispatch(reducer.initState())
     const location = await _getLocation()
     await dispatch(reducer.resetState(location))
-    await dispatch(reducer.uploadPendingPhotos())
+
+    // await sleep(10000)// this is a hack to ensure there is nothing pending from prefious  load before start loading from the beginning
+
     await dispatch(reducer.getPhotos())
+    await dispatch(reducer.uploadPendingPhotos())
   }
 
   async function _checkPermission({ permissionFunction, alertHeader, alertBody }) {
@@ -596,7 +594,7 @@ const PhotosList = () => {
   )
 
   const submitSearch = async () => {
-    await reload()
+    reload()
     if (searchTerm && searchTerm.length >= 3) {
       if (keyboardVisible) {
         dismissKeyboard()
@@ -729,10 +727,23 @@ const PhotosList = () => {
     )
   }
 
-  if (!location && !loading) {
+  if (loading && photos?.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
+        {activeSegment === 2 && renderSearchBar(false)}
+        <LinearProgress color={
+          CONST.MAIN_COLOR
+        }
+        />
         {renderPendingPhotos()}
+        {renderPhotoButton()}
+      </SafeAreaView>
+    )
+  }
+
+  if (!location) {
+    return (
+      <SafeAreaView style={styles.container}>
         <Card
           borderRadius={5}
           containerStyle={{
@@ -746,15 +757,15 @@ const PhotosList = () => {
             Acquiring location, make sure to enable Location Service.
           </Text>
         </Card>
+        {renderPendingPhotos()}
         {renderPhotoButton()}
       </SafeAreaView>
     )
   }
 
-  if (!netAvailable && !loading) {
+  if (!netAvailable) {
     return (
       <SafeAreaView style={styles.container}>
-        {renderPendingPhotos()}
         <Card
           borderRadius={5}
           containerStyle={{
@@ -765,34 +776,19 @@ const PhotosList = () => {
             textAlign: 'center',
             margin: 10,
           }}>
-            You are not connected to reliable network.
-            You can still snap photos.
-            They will be uploaded later.
+            No network available, you can still snap photos -- they will be uploaded later.
           </Text>
         </Card>
+        {renderPendingPhotos()}
         {renderPhotoButton()}
       </SafeAreaView>
     )
   }
 
-  if (loading || photos === null) {
-    return (
-      <SafeAreaView style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
-        <LinearProgress color={
-          CONST.MAIN_COLOR
-        }
-        />
-        {renderPhotoButton()}
-      </SafeAreaView>
-    )
-  }
-
-  if (photos.length === 0) {
+  if (photos.length === 0 && isLastPage && !loading) {
     return (
       <SafeAreaView style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
-        {renderPendingPhotos()}
         {activeSegment === 2 && (
           <Card
             borderRadius={5}
@@ -841,10 +837,18 @@ const PhotosList = () => {
             </Text>
           </Card>
         )}
+        {renderPendingPhotos()}
         {renderPhotoButton()}
       </SafeAreaView>
     )
   }
+  return (
+    <SafeAreaView style={styles.container}>
+      {activeSegment === 2 && renderSearchBar(false)}
+      {renderPendingPhotos()}
+      {renderPhotoButton()}
+    </SafeAreaView>
+  )
 }
 
 export default PhotosList

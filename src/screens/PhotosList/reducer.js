@@ -87,8 +87,8 @@ const reducer = (state = initialState, action) => {
         ...state,
         location: action.location,
         photos: [],
-        loading: false,
-        loadMore: false,
+        loading: true,
+        loadMore: true,
         errorMessage: '',
         pageNumber: -1,
         isLastPage: false,
@@ -258,8 +258,14 @@ const reducer = (state = initialState, action) => {
 
 export function initState() {
   return async (dispatch, getState) => {
-    const uuid = await _getUUID(getState)
-    const isTandcAccepted = await _getTancAccepted()
+    const [
+      uuid,
+      isTandcAccepted,
+    ] = await Promise.all([
+      _getUUID(getState),
+      _getTancAccepted(),
+    ])
+
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
     dispatch({
       type: ACTION_TYPES.INIT_STATE,
