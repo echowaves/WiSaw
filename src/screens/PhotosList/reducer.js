@@ -449,7 +449,7 @@ export function getPhotos() {
         }
         // console.log({ responseJson })
         noMoreData = responseJson?.noMoreData
-        if (responseJson.batch === getState().photosList.batch) {
+        if (responseJson?.batch === getState()?.photosList?.batch) {
           if (responseJson?.photos?.length > 0) {
             dispatch({
               type: ACTION_TYPES.GET_PHOTOS_SUCCESS,
