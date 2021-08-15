@@ -41,7 +41,7 @@ export const initialState = {
   isLastPage: false,
   netAvailable: false,
   uploadingPhoto: false,
-  zeroMoment: moment().format("YYYY-MM-DD-HH-mm-ss-SSS"),
+  zeroMoment: null,
 }
 
 const reducer = (state = initialState, action) => {
@@ -596,16 +596,17 @@ const _makeSureDirectoryExists = async ({ directory }) => {
   if (!tmpDir.exists) {
     await FileSystem.makeDirectoryAsync(directory)
   }
-  return Promise.resolve()
 }
 
-export const queueFileForUpload = ({ uri }) => async (dispatch, getState) => {
-  // move file to cacheDir
+export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, getState) => {
+  const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`
+  // copy file to cacheDir
   await FileSystem.copyAsync({
     from: uri,
-    to: `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
+    to: quedFileName,
   })
-  await FileSystem.deleteAsync(
+
+  FileSystem.deleteAsync(
     uri,
     { idempotent: true }
   )
@@ -687,8 +688,6 @@ export function uploadPendingPhotos() {
             `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
             { idempotent: true }
           )
-          // eslint-disable-next-line no-await-in-loop
-          // CacheManager.cleanupCache({ size: 800 })
 
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)

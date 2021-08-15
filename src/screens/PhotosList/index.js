@@ -43,8 +43,6 @@ import {
   Overlay,
 } from 'react-native-elements'
 
-import { CacheManager } from 'expo-cached-image'
-
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -71,6 +69,9 @@ const PhotosList = () => {
   const isLastPage = useSelector(state => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
+  const uuid = useSelector(state => state.photosList.uuid)
+  const zeroMoment = useSelector(state => state.photosList.zeroMoment)
+
   const loading = useSelector(state => state.photosList.loading)
 
   const activeSegment = useSelector(state => state.photosList.activeSegment)
@@ -86,9 +87,8 @@ const PhotosList = () => {
     setLastViewableRow(lastViewableItem.index)
   })
 
-  const initState = async () => {
+  const _initState = async () => {
     // /// //////////////////////////////////////
-    // // cleanup cache folder
     // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
     // files.forEach(file => {
     //   FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
@@ -99,18 +99,15 @@ const PhotosList = () => {
     setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2)
 
     await Promise.all([
-      CacheManager.initCacheFolder(),
       checkForUpdate(),
-      dispatch(reducer.initState()),
       // check permissions, retrieve UUID, make sure upload folder exists
+      dispatch(reducer.initState()),
       dispatch(reducer.zeroMoment()),
     ])
-
-    reload()
   }
 
   useEffect(() => {
-    // initState()
+    _initState()
 
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
@@ -121,11 +118,16 @@ const PhotosList = () => {
     return () => unsubscribeNetInfo()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (uuid && zeroMoment) {
+      _reload() // initially load only when zero moment is loaded and uuid is assigned
+    }
+  }, [uuid, zeroMoment])// eslint-disable-line react-hooks/exhaustive-deps
+
   // re-render title on  state chage
   useEffect(() => {
-    updateNavBar()
+    _updateNavBar()
     if (netAvailable) {
-      initState()
       dispatch(reducer.uploadPendingPhotos())
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -137,7 +139,7 @@ const PhotosList = () => {
   }, [lastViewableRow, loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    updateNavBar()
+    _updateNavBar()
   }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkForUpdate = async () => {
@@ -211,11 +213,8 @@ const PhotosList = () => {
 
   })
 
-  const updateNavBar = async () => {
+  const _updateNavBar = async () => {
     if (netAvailable) {
-      const location = await _getLocation()
-      await dispatch(reducer.resetState(location))
-
       navigation.setOptions({
         headerTitle: renderHeaderTitle,
         headerLeft: renderHeaderLeft,
@@ -232,15 +231,19 @@ const PhotosList = () => {
 
   // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
-  const reload = async () => {
-    await dispatch(reducer.initState())
-    const location = await _getLocation()
-    await dispatch(reducer.resetState(location))
+  const _reload = async () => {
+    const updatedLocation = await _getLocation()
+    if (updatedLocation) {
+      dispatch(reducer.resetState(updatedLocation))
+    } else {
+      if (!location) {
+        return // if no location -- don't do anything
+      }
+      dispatch(reducer.resetState(location))
+    }
 
-    // await sleep(10000)// this is a hack to ensure there is nothing pending from prefious  load before start loading from the beginning
-
-    await dispatch(reducer.getPhotos())
-    await dispatch(reducer.uploadPendingPhotos())
+    // dispatch(reducer.getPhotos())
+    dispatch(reducer.uploadPendingPhotos())
   }
 
   async function _checkPermission({ permissionFunction, alertHeader, alertBody }) {
@@ -309,7 +312,6 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    // CacheManager.cleanupCache({ size: 800 })
     const cameraReturn = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
@@ -321,7 +323,7 @@ const PhotosList = () => {
     if (cameraReturn.cancelled === false) {
       await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
       // have to wait, otherwise the upload will not start
-      await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri }))
+      await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri, type: cameraReturn.type, location }))
       dispatch(reducer.uploadPendingPhotos())
     }
   }
@@ -363,7 +365,7 @@ const PhotosList = () => {
       }
       onRefresh={
         () => {
-          reload()
+          _reload()
         }
       }
       onViewableItemsChanged={onViewRef.current}
@@ -409,7 +411,7 @@ const PhotosList = () => {
       }
       onRefresh={
         () => {
-          reload()
+          _reload()
         }
       }
       onViewableItemsChanged={onViewRef.current}
@@ -427,36 +429,38 @@ const PhotosList = () => {
         styles.cameraButtonPortrait,
       ]
     }>
-      <Button
-        type="clear"
-        containerStyle={
-          {
-            height: 100,
-            width: 100,
-            backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 50,
-          }
-        }
-        icon={(
-          <FontAwesome
-            name="camera"
-            size={60}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
-              }
+      {location && (
+        <Button
+          type="clear"
+          containerStyle={
+            {
+              height: 100,
+              width: 100,
+              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 50,
             }
-          />
-        )}
-        onPress={
-          () => {
-            checkPermissionsForPhotoTaking()
           }
-        }
-      />
+          icon={(
+            <FontAwesome
+              name="camera"
+              size={60}
+              style={
+                {
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+            />
+          )}
+          onPress={
+            () => {
+              checkPermissionsForPhotoTaking()
+            }
+          }
+        />
+      )}
     </View>
   )
 
@@ -468,7 +472,7 @@ const PhotosList = () => {
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(0))
-          reload()
+          _reload()
         }
       }
     />
@@ -482,7 +486,7 @@ const PhotosList = () => {
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(1))
-          reload()
+          _reload()
         }
       }
     />
@@ -496,7 +500,7 @@ const PhotosList = () => {
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(2))
-          reload()
+          _reload()
         }
       }
     />
@@ -514,8 +518,7 @@ const PhotosList = () => {
     <FontAwesome5
       onPress={
         () => {
-          // dispatch(reducer.initState())
-          reload()
+          _reload()
         }
       }
       name="sync"
@@ -594,7 +597,7 @@ const PhotosList = () => {
   )
 
   const submitSearch = async () => {
-    reload()
+    _reload()
     if (searchTerm && searchTerm.length >= 3) {
       if (keyboardVisible) {
         dismissKeyboard()
