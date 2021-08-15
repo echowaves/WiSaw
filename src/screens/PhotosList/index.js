@@ -126,9 +126,15 @@ const PhotosList = () => {
 
   // re-render title on  state chage
   useEffect(() => {
+    // defining this function for special case, when network becomes available after the app has started
+    const initandreload = async () => {
+      await _initState()
+      await _reload()
+    }
+
     _updateNavBar()
     if (netAvailable) {
-      dispatch(reducer.uploadPendingPhotos())
+      initandreload()
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -296,9 +302,10 @@ const PhotosList = () => {
 
     if (locationPermission === 'granted') {
       try {
-        position = await Location.getCurrentPositionAsync({
-          accuracy: 5000,
-        })
+        position = await Location.getLastKnownPositionAsync({}) // works faster this way, don't really need the accuracy, let's see if it really works
+        // await Location.getCurrentPositionAsync({
+        //   accuracy: Location.Accuracy.Lowest,
+        // })
       } catch (err) {
         position = null
         Toast.show({
