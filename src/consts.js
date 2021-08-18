@@ -23,6 +23,7 @@ export const TRANSPARENT_BUTTON_COLOR = 'rgba(10,10,10,.5)'
 
 export const PENDING_UPLOADS_FOLDER = `${FileSystem.documentDirectory}pendingUploads/`
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
+export const PENDING_UPLOADS_KEY = "@PENDING_UPLOADS"
 
 const httpLink = new HttpLink({
   uri: API_URI,

@@ -10,6 +10,7 @@ import * as ImageManipulator from 'expo-image-manipulator'
 import moment from 'moment'
 
 import { CacheManager } from 'expo-cached-image'
+import { Storage } from 'expo-storage'
 
 import Toast from 'react-native-toast-message'
 
@@ -598,8 +599,85 @@ const _makeSureDirectoryExists = async ({ directory }) => {
   }
 }
 
+const _addToQueue = async image => {
+  // const {quedFileName, cacheKey, type, location } = image
+  let pendingImagesBefore = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+  )
+
+  if (!pendingImagesBefore) {
+    pendingImagesBefore = []
+  }
+
+  const pendingImagesAfter = pendingImagesBefore.push(image)
+
+  console.log("pushing:", pendingImagesBefore.length, pendingImagesAfter.length)
+
+  await Storage.setItem({
+    key: CONST.PENDING_UPLOADS_KEY,
+    value: JSON.stringify(pendingImagesAfter),
+  })
+}
+
+// returns an array that has everything needed for rendering
+const _getQueue = async () => {
+  // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
+  const filesInStorage = await _getPendingUploadFiles()
+
+  let imagesInQueue = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+  )
+
+  // remove images from the queue if corresponding file does not exist
+  imagesInQueue.forEach(image => {
+    if (!filesInStorage.some(f => f === image.cacheKey)) {
+      _removeFromQueue(image)
+    }
+  })
+
+  // get images in queue again after filtering
+  imagesInQueue = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+  )
+
+  // remove image from storage if corresponding recorsd does not exist in the queue
+  filesInStorage.forEach(file => {
+    if (!imagesInQueue.some(i => i.cacheKey === file)) {
+      FileSystem.deleteAsync(
+        `${CONST.PENDING_UPLOADS_FOLDER}${file}`,
+        { idempotent: true }
+      )
+    }
+  })
+
+  return imagesInQueue
+}
+
+const _removeFromQueue = async imageToRemove => {
+  let pendingImagesBefore = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+  )
+
+  if (!pendingImagesBefore) {
+    pendingImagesBefore = []
+  }
+
+  const pendingImagesAfter = pendingImagesBefore.filter(imageInTheQueue => JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove))
+
+  console.log("popping:", pendingImagesBefore.length, pendingImagesAfter.length)
+  await Storage.setItem({
+    key: CONST.PENDING_UPLOADS_KEY,
+    value: JSON.stringify(pendingImagesAfter),
+  })
+  FileSystem.deleteAsync(
+    `${CONST.PENDING_UPLOADS_FOLDER}${imageToRemove.cacheKey}`,
+    { idempotent: true }
+  )
+}
+
 export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, getState) => {
-  const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}/${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`
+  const cacheKey = moment().format("YYYY-MM-DD-HH-mm-ss-SSS") // current moment will be used as a unique key
+  const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}/${cacheKey}`
   // copy file to cacheDir
   await FileSystem.copyAsync({
     from: uri,
@@ -610,6 +688,10 @@ export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, 
     uri,
     { idempotent: true }
   )
+
+  _addToQueue({
+    quedFileName, cacheKey, type, location,
+  })
 
   _updatePendingPhotos(dispatch)
 }
@@ -626,7 +708,18 @@ export function uploadPendingPhotos() {
     const { location, uuid } = getState().photosList
 
     const pendingFiles = await _updatePendingPhotos(dispatch)
-
+    /// ///////////////////////////////////////////////////////////
+    // remove me
+    /// ///////////////////////////////////////////////////////////
+    Toast.show({
+      text1: moment(),
+      text2: 'uploading',
+      topOffset: 70,
+    })
+    /// ///////////////////////////////////////////////////////////
+    // remove me
+    /// ///////////////////////////////////////////////////////////
+    console.log(moment(), 'uploading')
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
     }
