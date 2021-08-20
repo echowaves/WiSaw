@@ -341,7 +341,7 @@ const Photo = ({ item }) => {
             }}>
             <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized tags:</Text>
             {labels.map(label => (
-              <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{JSON.stringify(label.Name)}</Text>
+              <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{label.Name}</Text>
             ))}
             <Divider />
           </Card>
@@ -363,7 +363,7 @@ const Photo = ({ item }) => {
             }}>AI recognized text:
             </Text>
             {textDetections.map(text => (
-              <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{JSON.stringify(text.DetectedText).replace(/'/g, '')}</Text>
+              <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{text.DetectedText}</Text>
             ))}
             <Divider />
           </Card>
@@ -388,7 +388,7 @@ const Photo = ({ item }) => {
               <Text
                 key={label.Name} style={{
                   fontSize: label.Confidence / 5, color: 'red', textAlignVertical: "center", textAlign: "center",
-                }}>{JSON.stringify(label.Name).replace(/'/g, '')}
+                }}>{label.Name}
               </Text>
             ))}
           </Card>
