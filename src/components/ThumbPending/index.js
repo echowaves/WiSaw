@@ -1,4 +1,7 @@
-import React from 'react'
+import React, {
+  useEffect, useState,
+} from 'react'
+
 import { useDispatch } from "react-redux"
 
 import {
@@ -6,12 +9,9 @@ import {
   View,
   StyleSheet,
   TouchableHighlight,
-  Text,
 } from 'react-native'
 
-import { Image } from 'react-native-elements'
-
-import { FontAwesome } from '@expo/vector-icons'
+import CachedImage, { CacheManager } from 'expo-cached-image'
 
 import PropTypes from 'prop-types'
 
@@ -26,6 +26,26 @@ const ThumbPending = props => {
 
   const dispatch = useDispatch()
 
+  const [uri, setUri] = useState(null)
+
+  useEffect(() => {
+    preloadImage()
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  const preloadImage = async () => {
+    try {
+      // Use the cached image if it exists
+      const u = await CacheManager.getCachedUri({ key: item.cacheKey })
+      if (u) {
+        setUri(u)
+      } else {
+        setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
+      }
+    } catch (err) {
+      setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
+    }
+  }
+
   const onThumbPress = item => {
     Alert.alert(
       'This photo is uploading',
@@ -35,7 +55,7 @@ const ThumbPending = props => {
         {
           text: 'Yes',
           onPress: () => {
-            dispatch(cancelPendingUpload({ fileName: item }))
+            dispatch(cancelPendingUpload(item))
           },
         },
       ],
@@ -48,6 +68,8 @@ const ThumbPending = props => {
     height: thumbDimension,
   }
 
+  // console.log({ uri })
+  // console.log(item.cacheKey)
   return (
     <View>
       <TouchableHighlight
@@ -56,44 +78,12 @@ const ThumbPending = props => {
           styles.container,
           thumbWidthStyles,
         ]}>
-        <Image
-          source={{ uri: `${CONST.PENDING_UPLOADS_FOLDER}${item}` }}
-          containerStyle={styles.thumbnail}
+        <CachedImage
+          source={{ uri }}
+          cacheKey={item.cacheKey}
+          style={styles.thumbnail}
         />
       </TouchableHighlight>
-      { item.commentsCount > 0 && (
-        <View
-          style={
-            {
-              fontSize: 30,
-              position: 'absolute',
-              bottom: 2,
-              left: 5,
-            }
-          }>
-          <FontAwesome
-            name="comment"
-            style={
-              {
-                fontSize: 30,
-                color: CONST.PLACEHOLDER_TEXT_COLOR,
-              }
-            }
-          />
-          <Text
-            style={
-              {
-                fontSize: 10,
-                color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                right: 8,
-                top: 12,
-              }
-            }>
-            {item.commentsCount > 99 ? '+99' : item.commentsCount}
-          </Text>
-        </View>
-      )}
     </View>
   )
 }
@@ -114,7 +104,7 @@ const styles = StyleSheet.create({
 })
 
 ThumbPending.propTypes = {
-  item: PropTypes.string.isRequired,
+  item: PropTypes.object.isRequired,
   thumbDimension: PropTypes.number,
 }
 

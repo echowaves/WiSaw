@@ -498,9 +498,9 @@ export function acceptTandC() {
   }
 }
 
-export function cancelPendingUpload({ fileName }) {
+export function cancelPendingUpload(item) {
   return async dispatch => {
-    await FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${fileName}`, { idempotent: true })
+    await _removeFromQueue(item)
 
     _updatePendingPhotos(dispatch)
   }
@@ -583,7 +583,7 @@ async function _getTancAccepted() {
 }
 
 const _updatePendingPhotos = async dispatch => {
-  const pendingFiles = await _getPendingUploadFiles()
+  const pendingFiles = await _getQueue()
   dispatch({
     type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
     pendingPhotos: pendingFiles,
@@ -601,33 +601,38 @@ const _makeSureDirectoryExists = async ({ directory }) => {
 
 const _addToQueue = async image => {
   // const {quedFileName, cacheKey, type, location } = image
-  let pendingImagesBefore = JSON.parse(
+  let pendingImages = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
   )
-
-  if (!pendingImagesBefore) {
-    pendingImagesBefore = []
+  if (!pendingImages) {
+    pendingImages = []
   }
-
-  const pendingImagesAfter = pendingImagesBefore.push(image)
-
-  console.log("pushing:", pendingImagesBefore.length, pendingImagesAfter.length)
+  pendingImages.push(image)
 
   await Storage.setItem({
     key: CONST.PENDING_UPLOADS_KEY,
-    value: JSON.stringify(pendingImagesAfter),
+    value: JSON.stringify(pendingImages),
   })
 }
 
 // returns an array that has everything needed for rendering
 const _getQueue = async () => {
   // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
-  const filesInStorage = await _getPendingUploadFiles()
+  await _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
+
+  const filesInStorage = await FileSystem.readDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
 
   let imagesInQueue = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
   )
 
+  if (!imagesInQueue) {
+    imagesInQueue = []
+    await Storage.setItem({
+      key: CONST.PENDING_UPLOADS_KEY,
+      value: JSON.stringify([]),
+    })
+  }
   // remove images from the queue if corresponding file does not exist
   imagesInQueue.forEach(image => {
     if (!filesInStorage.some(f => f === image.cacheKey)) {
@@ -639,6 +644,9 @@ const _getQueue = async () => {
   imagesInQueue = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
   )
+  if (!imagesInQueue) {
+    imagesInQueue = []
+  }
 
   // remove image from storage if corresponding recorsd does not exist in the queue
   filesInStorage.forEach(file => {
@@ -664,7 +672,6 @@ const _removeFromQueue = async imageToRemove => {
 
   const pendingImagesAfter = pendingImagesBefore.filter(imageInTheQueue => JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove))
 
-  console.log("popping:", pendingImagesBefore.length, pendingImagesAfter.length)
   await Storage.setItem({
     key: CONST.PENDING_UPLOADS_KEY,
     value: JSON.stringify(pendingImagesAfter),
@@ -677,7 +684,7 @@ const _removeFromQueue = async imageToRemove => {
 
 export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, getState) => {
   const cacheKey = moment().format("YYYY-MM-DD-HH-mm-ss-SSS") // current moment will be used as a unique key
-  const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}/${cacheKey}`
+  const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}${cacheKey}`
   // copy file to cacheDir
   await FileSystem.copyAsync({
     from: uri,
@@ -696,23 +703,16 @@ export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, 
   _updatePendingPhotos(dispatch)
 }
 
-const _getPendingUploadFiles = async () => {
-  await _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
-
-  const files = await FileSystem.readDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
-  return files
-}
-
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
-    const { location, uuid } = getState().photosList
+    const { uuid } = getState().photosList
 
     const pendingFiles = await _updatePendingPhotos(dispatch)
     /// ///////////////////////////////////////////////////////////
     // remove me
     /// ///////////////////////////////////////////////////////////
     Toast.show({
-      text1: moment(),
+      text1: `${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
       text2: 'uploading',
       topOffset: 70,
     })
@@ -742,46 +742,20 @@ export function uploadPendingPhotos() {
         const { responseData, photo } = await _uploadFile({
           item,
           uuid,
-          location,
         })
+
         if (responseData === "banned") {
           alert("Sorry, you've been banned.")
           // eslint-disable-next-line no-await-in-loop
-          await FileSystem.deleteAsync(
-            `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
-            { idempotent: true }
-          )
-          // dispatch(uploadPendingPhotos())
+          await _removeFromQueue(item)
+          // eslint-disable-next-line no-await-in-loop
+          await _updatePendingPhotos(dispatch)
+
           return Promise.resolve()
         }
-
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({
-            file: `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
-            key: `${photo.id}`,
-          })
-
-          // eslint-disable-next-line no-await-in-loop
-          const locallyResizedImage = await ImageManipulator.manipulateAsync(
-            `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
-            [{ resize: { height: 300 } }],
-            { compress: 0, format: ImageManipulator.SaveFormat.PNG }
-          )
-
-          // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({
-            file: locallyResizedImage.uri,
-            key: `${photo.id}-thumb`,
-          })
-
-          photo.fallback = true
-          // eslint-disable-next-line no-await-in-loop
-          await FileSystem.deleteAsync(
-            `${CONST.PENDING_UPLOADS_FOLDER}${item}`,
-            { idempotent: true }
-          )
-
+          await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
 
@@ -794,7 +768,7 @@ export function uploadPendingPhotos() {
           // alert("Error uploading file, try again.")
           Toast.show({
             text1: 'Unable to upload file, refresh to try again.',
-            text2: 'Network issue?',
+            text2: 'Network issue...?',
             topOffset: 70,
           })
         }
@@ -805,7 +779,7 @@ export function uploadPendingPhotos() {
       })
       Toast.show({
         text1: 'Failed to upload file, refresh to try again.',
-        text2: 'Network issue?',
+        text2: 'Network issue?...',
         topOffset: 70,
       })
       // console.log({ error }) // eslint-disable-line no-console
@@ -815,14 +789,17 @@ export function uploadPendingPhotos() {
       type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
     })
 
-    if ((await _getPendingUploadFiles()).length > 0) {
+    // sleep for 1 second before re-trying
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
+    if ((await _getQueue()).length > 0) {
       dispatch(uploadPendingPhotos())
     }
   }
 }
 
-const _uploadFile = async ({ item, uuid, location }) => {
-  const assetUri = `${CONST.PENDING_UPLOADS_FOLDER}${item}`
+const _uploadFile = async ({ item, uuid }) => {
+  const assetUri = `${item.quedFileName}`
   try {
     const newPhoto = (await CONST.gqlClient
       .mutate({
@@ -843,8 +820,8 @@ const _uploadFile = async ({ item, uuid, location }) => {
         }
       }`,
         variables: {
-          lat: location.coords.latitude,
-          lon: location.coords.longitude,
+          lat: item.location.coords.latitude,
+          lon: item.location.coords.longitude,
           uuid,
         },
       })).data.createPhoto
