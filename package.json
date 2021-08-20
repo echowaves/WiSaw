@@ -62,8 +62,7 @@
     "react-timer-mixin": "^0.13.4",
     "redux": "^4.1.0",
     "redux-thunk": "^2.3.0",
-    "stringify-object": "^3.3.0",
-    "expo-storage": "file:../expo-storage",
+    "expo-storage": "1.0.1",
     "expo-cached-image": "2.0.0",
     "uuid": "^8.3.2"
   },
