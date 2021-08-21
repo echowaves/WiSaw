@@ -600,18 +600,31 @@ const _makeSureDirectoryExists = async ({ directory }) => {
 }
 
 const _addToQueue = async image => {
-  // const {quedFileName, cacheKey, type, location } = image
+  // const {quedFileName, cacheKey, type, location, thumbUrl } = image
+
   let pendingImages = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
   )
   if (!pendingImages) {
     pendingImages = []
   }
-  pendingImages.push(image)
+
+  const manipResult = await ImageManipulator.manipulateAsync(
+    image.quedFileName,
+    [{ resize: { height: 300 } }],
+    { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+  )
+
+  const resultObj = {
+    ...image,
+    thumbUri: manipResult.uri, // add thumbUri to the qued objects
+  }
+
+  await CacheManager.addToCache({ file: manipResult.uri, key: image.cacheKey })
 
   await Storage.setItem({
     key: CONST.PENDING_UPLOADS_KEY,
-    value: JSON.stringify(pendingImages),
+    value: JSON.stringify([...pendingImages, resultObj]),
   })
 }
 
@@ -621,7 +634,6 @@ const _getQueue = async () => {
   await _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
 
   const filesInStorage = await FileSystem.readDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
-
   let imagesInQueue = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
   )
@@ -696,7 +708,7 @@ export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, 
     { idempotent: true }
   )
 
-  _addToQueue({
+  await _addToQueue({
     quedFileName, cacheKey, type, location,
   })
 
@@ -708,17 +720,7 @@ export function uploadPendingPhotos() {
     const { uuid } = getState().photosList
 
     const pendingFiles = await _updatePendingPhotos(dispatch)
-    /// ///////////////////////////////////////////////////////////
-    // remove me
-    /// ///////////////////////////////////////////////////////////
-    Toast.show({
-      text1: `${moment().format("YYYY-MM-DD-HH-mm-ss-SSS")}`,
-      text2: 'uploading',
-      topOffset: 70,
-    })
-    /// ///////////////////////////////////////////////////////////
-    // remove me
-    /// ///////////////////////////////////////////////////////////
+
     console.log(moment(), 'uploading')
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
@@ -755,11 +757,15 @@ export function uploadPendingPhotos() {
         }
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
+          await CacheManager.addToCache({ file: item.thumbUri, key: `${photo.id}-thumb` })
+
+          // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
           await _updatePendingPhotos(dispatch)
 
           // show the photo in the photo list immidiately
+
           dispatch({
             type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
             photo,

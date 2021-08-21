@@ -640,7 +640,7 @@ const PhotosList = () => {
                 />
               )
             }
-            keyExtractor={item => item}
+            keyExtractor={item => item.cacheKey}
             style={
               styles.thumbContainer
             }

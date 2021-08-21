@@ -26,25 +26,25 @@ const ThumbPending = props => {
 
   const dispatch = useDispatch()
 
-  const [uri, setUri] = useState(null)
+  // const [uri, setUri] = useState(null)
 
-  useEffect(() => {
-    preloadImage()
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  // useEffect(() => {
+  //   preloadImage()
+  // }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  const preloadImage = async () => {
-    try {
-      // Use the cached image if it exists
-      const u = await CacheManager.getCachedUri({ key: item.cacheKey })
-      if (u) {
-        setUri(u)
-      } else {
-        setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
-      }
-    } catch (err) {
-      setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
-    }
-  }
+  // const preloadImage = async () => {
+  //   try {
+  //     // Use the cached image if it exists
+  //     const u = await CacheManager.getCachedUri({ key: item.cacheKey })
+  //     if (u) {
+  //       setUri(u)
+  //     } else {
+  //       setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
+  //     }
+  //   } catch (err) {
+  //     setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
+  //   }
+  // }
 
   const onThumbPress = item => {
     Alert.alert(
@@ -68,7 +68,6 @@ const ThumbPending = props => {
     height: thumbDimension,
   }
 
-  // console.log({ uri })
   // console.log(item.cacheKey)
   return (
     <View>
@@ -79,7 +78,7 @@ const ThumbPending = props => {
           thumbWidthStyles,
         ]}>
         <CachedImage
-          source={{ uri }}
+          source={{ uri: item.thumbUri }}
           cacheKey={item.cacheKey}
           style={styles.thumbnail}
         />
