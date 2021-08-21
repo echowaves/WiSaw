@@ -721,7 +721,6 @@ export function uploadPendingPhotos() {
 
     const pendingFiles = await _updatePendingPhotos(dispatch)
 
-    console.log(moment(), 'uploading')
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
     }
