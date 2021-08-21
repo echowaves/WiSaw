@@ -841,6 +841,7 @@ const _uploadFile = async ({ item, uuid }) => {
         },
       })).data.generateUploadUrl
 
+    console.log({ item })
     const responseData = await FileSystem.uploadAsync(
       uploadUrl,
       assetUri,
