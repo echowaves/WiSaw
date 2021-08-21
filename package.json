@@ -81,7 +81,7 @@
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-react-native": "^3.11.0",
-    "expo-cli": "4.10.0",
+    "expo-cli": "4.10.1",
     "jest": "^27.0.6",
     "jetifier": "^2.0.0",
     "metro-react-native-babel-preset": "^0.66.2",
