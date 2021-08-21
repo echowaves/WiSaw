@@ -702,7 +702,6 @@ export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, 
     from: uri,
     to: quedFileName,
   })
-
   FileSystem.deleteAsync(
     uri,
     { idempotent: true }

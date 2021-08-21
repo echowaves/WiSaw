@@ -41,6 +41,8 @@ import {
   ButtonGroup,
   SearchBar,
   Overlay,
+  Icon,
+  Switch,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
@@ -60,6 +62,7 @@ const PhotosList = () => {
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
+  const [cameraType, setCameraType] = useState("camera")
   // const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
@@ -205,7 +208,7 @@ const PhotosList = () => {
       // marginBottom: 10,
     },
     cameraButtonPortrait: {
-      flexDirection: 'row',
+      flexDirection: 'column',
       bottom: 20,
       alignSelf: 'center',
       justifyContent: 'center',
@@ -319,14 +322,27 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    const cameraReturn = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      // allowsEditing: true,
-      quality: 1.0,
-      exif: false,
-    })
-    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
+    let cameraReturn
+    if (cameraType === "camera") {
+      // launch photo capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // allowsEditing: true,
+        quality: 1.0,
+        exif: false,
+      })
+    } else {
+      // launch video capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        // allowsEditing: true,
+        videoMaxDuration: 5,
+        quality: 1.0,
+        exif: false,
+      })
+    }
 
+    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
     if (cameraReturn.cancelled === false) {
       await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
       // have to wait, otherwise the upload will not start
@@ -436,38 +452,47 @@ const PhotosList = () => {
         styles.cameraButtonPortrait,
       ]
     }>
-      {location && (
-        <Button
-          type="clear"
-          containerStyle={
-            {
-              height: 100,
-              width: 100,
-              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 50,
-            }
+      <Switch
+        value={cameraType === 'video'}
+        color={CONST.EMPHASIZED_COLOR}
+        style={{
+          alignSelf: 'center',
+        }}
+        onValueChange={() => {
+          if (cameraType === 'camera') {
+            setCameraType('video')
+          } else {
+            setCameraType('camera')
           }
-          icon={(
-            <FontAwesome
-              name="camera"
-              size={60}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-            />
-          )}
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking()
-            }
+        }}
+      />
+      <View><Text /></View>
+      <Icon
+        name={cameraType}
+        type="font-awesome-5"
+        color={cameraType === 'camera' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
+        backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
+        size={60}
+        style={{
+          alignSelf: 'center',
+        }}
+        containerStyle={
+          {
+            height: 90,
+            width: 90,
+            backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 45,
           }
-        />
-      )}
+        }
+        onPress={
+          () => {
+            checkPermissionsForPhotoTaking()
+          }
+        }
+      />
     </View>
   )
 
