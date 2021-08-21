@@ -1,6 +1,4 @@
-import React, {
-  useEffect, useState,
-} from 'react'
+import React from 'react'
 
 import { useDispatch } from "react-redux"
 
@@ -11,7 +9,7 @@ import {
   TouchableHighlight,
 } from 'react-native'
 
-import CachedImage, { CacheManager } from 'expo-cached-image'
+import CachedImage from 'expo-cached-image'
 
 import PropTypes from 'prop-types'
 
@@ -25,26 +23,6 @@ const ThumbPending = props => {
   } = props
 
   const dispatch = useDispatch()
-
-  // const [uri, setUri] = useState(null)
-
-  // useEffect(() => {
-  //   preloadImage()
-  // }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  // const preloadImage = async () => {
-  //   try {
-  //     // Use the cached image if it exists
-  //     const u = await CacheManager.getCachedUri({ key: item.cacheKey })
-  //     if (u) {
-  //       setUri(u)
-  //     } else {
-  //       setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
-  //     }
-  //   } catch (err) {
-  //     setUri(await CacheManager.addToCache({ file: item.quedFileName, key: item.cacheKey }))
-  //   }
-  // }
 
   const onThumbPress = item => {
     Alert.alert(
