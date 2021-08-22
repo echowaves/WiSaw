@@ -452,50 +452,54 @@ const PhotosList = () => {
         styles.cameraButtonPortrait,
       ]
     }>
-      <Switch
-        value={cameraType === 'video'}
-        style={{
-          alignSelf: 'center',
-        }}
-        thumbColor={CONST.TRANSPARENT_BUTTON_COLOR}
-        // color={cameraType === 'video' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
-        trackColor={{ true: CONST.EMPHASIZED_COLOR, false: CONST.MAIN_COLOR }}
-        ios_backgroundColor={CONST.MAIN_COLOR}
-        onValueChange={() => {
-          if (cameraType === 'camera') {
-            setCameraType('video')
-          } else {
-            setCameraType('camera')
-          }
-        }}
-      />
-      <View style={{ padding: 3 }} />
-      <Icon
-        name={cameraType}
-        type="font-awesome-5"
-        color={cameraType === 'camera' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
-        backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
-        size={60}
-        style={{
-          alignSelf: 'center',
-        }}
-        containerStyle={
-          {
-            height: 90,
-            width: 90,
-            backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 45,
-          }
-        }
-        onPress={
-          () => {
-            checkPermissionsForPhotoTaking()
-          }
-        }
-      />
+      {location && (
+        <View>
+          <Switch
+            value={cameraType === 'video'}
+            style={{
+              alignSelf: 'center',
+            }}
+            thumbColor={CONST.TRANSPARENT_BUTTON_COLOR}
+            // color={cameraType === 'video' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
+            trackColor={{ true: CONST.EMPHASIZED_COLOR, false: CONST.MAIN_COLOR }}
+            ios_backgroundColor={CONST.MAIN_COLOR}
+            onValueChange={() => {
+              if (cameraType === 'camera') {
+                setCameraType('video')
+              } else {
+                setCameraType('camera')
+              }
+            }}
+          />
+          <View style={{ padding: 3 }} />
+          <Icon
+            name={cameraType}
+            type="font-awesome-5"
+            color={cameraType === 'camera' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
+            backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
+            size={60}
+            style={{
+              alignSelf: 'center',
+            }}
+            containerStyle={
+              {
+                height: 90,
+                width: 90,
+                backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 45,
+              }
+            }
+            onPress={
+              () => {
+                checkPermissionsForPhotoTaking()
+              }
+            }
+          />
+        </View>
+      )}
     </View>
   )
 
