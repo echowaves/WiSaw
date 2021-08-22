@@ -3,8 +3,9 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import * as SecureStore from 'expo-secure-store'
-
 import * as FileSystem from 'expo-file-system'
+import * as VideoThumbnails from 'expo-video-thumbnails'
+
 import * as ImageManipulator from 'expo-image-manipulator'
 
 import moment from 'moment'
@@ -609,15 +610,37 @@ const _addToQueue = async image => {
     pendingImages = []
   }
 
-  const manipResult = await ImageManipulator.manipulateAsync(
-    image.quedFileName,
-    [{ resize: { height: 300 } }],
-    { compress: 1, format: ImageManipulator.SaveFormat.PNG }
-  )
+  let manipResult
+  let resultObj
 
-  const resultObj = {
-    ...image,
-    thumbUri: manipResult.uri, // add thumbUri to the qued objects
+  if (image.type === 'image') {
+    manipResult = await ImageManipulator.manipulateAsync(
+      image.quedFileName,
+      [{ resize: { height: 300 } }],
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+    )
+
+    resultObj = {
+      ...image,
+      thumbUri: manipResult.uri, // add thumbUri to the qued objects
+    }
+  } else { // if video
+    const { uri } = await VideoThumbnails.getThumbnailAsync(
+      image.quedFileName
+    )
+
+    manipResult = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { height: 300 } }],
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+    )
+
+    resultObj = {
+      ...image,
+      videoUri: image.quedFileName,
+      thumbUri: manipResult.uri, // add thumbUri to the qued objects
+      quedFileName: uri,
+    }
   }
 
   await CacheManager.addToCache({ file: manipResult.uri, key: image.cacheKey })
@@ -695,17 +718,19 @@ const _removeFromQueue = async imageToRemove => {
 }
 
 export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, getState) => {
-  const cacheKey = moment().format("YYYY-MM-DD-HH-mm-ss-SSS") // current moment will be used as a unique key
+  const cacheKey = uri.substr(uri.lastIndexOf('/') + 1)
+
   const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}${cacheKey}`
   // copy file to cacheDir
-  await FileSystem.copyAsync({
+  await FileSystem.moveAsync({
     from: uri,
     to: quedFileName,
   })
-  FileSystem.deleteAsync(
-    uri,
-    { idempotent: true }
-  )
+
+  // await FileSystem.deleteAsync(
+  //   uri,
+  //   { idempotent: true }
+  // )
 
   await _addToQueue({
     quedFileName, cacheKey, type, location,

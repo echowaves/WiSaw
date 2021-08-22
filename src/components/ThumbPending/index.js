@@ -22,6 +22,8 @@ const ThumbPending = props => {
     item, thumbDimension,
   } = props
 
+  console.log({ item })
+
   const dispatch = useDispatch()
 
   const onThumbPress = item => {
