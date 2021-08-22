@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
+import { useDimensions } from '@react-native-community/hooks'
 
 import {
   Text,
@@ -25,6 +26,7 @@ const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const { item } = route.params
+  const { height } = useDimensions().window
 
   const uuid = useSelector(state => state.photosList.uuid)
 
@@ -100,8 +102,8 @@ const ModalInputText = ({ route }) => {
         cacheKey={`${item.id}t`}
         style={{
           alignSelf: 'center',
-          width: 150,
-          height: 150,
+          width: height < 700 ? 100 : 150,
+          height: height < 700 ? 100 : 150,
           borderRadius: 10,
           marginTop: 10,
         }}
@@ -118,7 +120,7 @@ const ModalInputText = ({ route }) => {
         style={
           {
             color: CONST.MAIN_COLOR,
-            height: 200,
+            height: height < 700 ? 150 : 200,
             margin: 12,
             padding: 10,
             borderWidth: 1,
