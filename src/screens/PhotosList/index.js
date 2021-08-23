@@ -346,7 +346,7 @@ const PhotosList = () => {
     if (cameraReturn.cancelled === false) {
       await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
       // have to wait, otherwise the upload will not start
-      await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri, type: cameraReturn.type, location }))
+      await dispatch(reducer.queueFileForUpload({ cameraImgUrl: cameraReturn.uri, type: cameraReturn.type, location }))
       dispatch(reducer.uploadPendingPhotos())
     }
   }
@@ -672,7 +672,7 @@ const PhotosList = () => {
                 />
               )
             }
-            keyExtractor={item => item.cacheKey}
+            keyExtractor={item => item.localImageName}
             style={
               styles.thumbContainer
             }

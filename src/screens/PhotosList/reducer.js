@@ -601,7 +601,7 @@ const _makeSureDirectoryExists = async ({ directory }) => {
 }
 
 const _addToQueue = async image => {
-  // const {quedFileName, cacheKey, type, location, thumbUrl } = image
+  // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
 
   let pendingImages = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
@@ -615,18 +615,18 @@ const _addToQueue = async image => {
 
   if (image.type === 'image') {
     manipResult = await ImageManipulator.manipulateAsync(
-      image.quedFileName,
+      image.localImgUrl,
       [{ resize: { height: 300 } }],
       { compress: 1, format: ImageManipulator.SaveFormat.PNG }
     )
 
     resultObj = {
       ...image,
-      thumbUri: manipResult.uri, // add thumbUri to the qued objects
+      localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
     }
   } else { // if video
     const { uri } = await VideoThumbnails.getThumbnailAsync(
-      image.quedFileName
+      image.localImgUrl
     )
 
     manipResult = await ImageManipulator.manipulateAsync(
@@ -637,13 +637,14 @@ const _addToQueue = async image => {
 
     resultObj = {
       ...image,
-      videoUri: image.quedFileName,
-      thumbUri: manipResult.uri, // add thumbUri to the qued objects
-      quedFileName: uri,
+      localVideoUrl: image.localImgUrl,
+      localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
+      localImgUrl: uri,
     }
   }
 
-  await CacheManager.addToCache({ file: manipResult.uri, key: image.cacheKey })
+  // this is needed to render pending thumb
+  await CacheManager.addToCache({ file: resultObj.localThumbUrl, key: resultObj.localImageName })
 
   await Storage.setItem({
     key: CONST.PENDING_UPLOADS_KEY,
@@ -670,7 +671,7 @@ const _getQueue = async () => {
   }
   // remove images from the queue if corresponding file does not exist
   imagesInQueue.forEach(image => {
-    if (!filesInStorage.some(f => f === image.cacheKey)) {
+    if (!filesInStorage.some(f => f === image.localImageName)) {
       _removeFromQueue(image)
     }
   })
@@ -685,7 +686,7 @@ const _getQueue = async () => {
 
   // remove image from storage if corresponding recorsd does not exist in the queue
   filesInStorage.forEach(file => {
-    if (!imagesInQueue.some(i => i.cacheKey === file)) {
+    if (!imagesInQueue.some(i => i.localImageName === file)) {
       FileSystem.deleteAsync(
         `${CONST.PENDING_UPLOADS_FOLDER}${file}`,
         { idempotent: true }
@@ -712,28 +713,23 @@ const _removeFromQueue = async imageToRemove => {
     value: JSON.stringify(pendingImagesAfter),
   })
   FileSystem.deleteAsync(
-    `${CONST.PENDING_UPLOADS_FOLDER}${imageToRemove.cacheKey}`,
+    `${CONST.PENDING_UPLOADS_FOLDER}${imageToRemove.localImageName}`,
     { idempotent: true }
   )
 }
 
-export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, getState) => {
-  const cacheKey = uri.substr(uri.lastIndexOf('/') + 1)
+export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (dispatch, getState) => {
+  const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
 
-  const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}${cacheKey}`
+  const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
   // copy file to cacheDir
   await FileSystem.moveAsync({
-    from: uri,
-    to: quedFileName,
+    from: cameraImgUrl,
+    to: localImgUrl,
   })
 
-  // await FileSystem.deleteAsync(
-  //   uri,
-  //   { idempotent: true }
-  // )
-
   await _addToQueue({
-    quedFileName, cacheKey, type, location,
+    localImgUrl, localImageName, type, location,
   })
 
   _updatePendingPhotos(dispatch)
@@ -780,7 +776,9 @@ export function uploadPendingPhotos() {
         }
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({ file: item.thumbUri, key: `${photo.id}-thumb` })
+          await CacheManager.addToCache({ file: item.localThumbUrl, key: `${photo.id}-thumb` })
+          // eslint-disable-next-line no-await-in-loop
+          await CacheManager.addToCache({ file: item.localImgUrl, key: `${photo.id}` })
 
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
@@ -828,7 +826,7 @@ export function uploadPendingPhotos() {
 }
 
 const _uploadFile = async ({ item, uuid }) => {
-  const assetUri = `${item.quedFileName}`
+  const assetUri = `${item.localImgUrl}`
   try {
     const newPhoto = (await CONST.gqlClient
       .mutate({
