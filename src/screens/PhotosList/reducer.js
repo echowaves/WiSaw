@@ -712,10 +712,6 @@ const _removeFromQueue = async imageToRemove => {
     key: CONST.PENDING_UPLOADS_KEY,
     value: JSON.stringify(pendingImagesAfter),
   })
-  FileSystem.deleteAsync(
-    `${CONST.PENDING_UPLOADS_FOLDER}${imageToRemove.localImageName}`,
-    { idempotent: true }
-  )
 }
 
 export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (dispatch, getState) => {
