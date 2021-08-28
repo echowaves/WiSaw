@@ -335,6 +335,11 @@ async function _requestGeoPhotos(getState) {
     }
   } catch (err) {
     console.log({ err })// eslint-disable-line
+    return {
+      photos: [],
+      batch,
+      noMoreData: true,
+    }
   }
 }
 
@@ -467,11 +472,11 @@ export function getPhotos() {
       } catch (err) {
         dispatch({
           type: ACTION_TYPES.GET_PHOTOS_FAIL,
-          errorMessage: err.toString(),
+          errorMessage: `${err}`,
         })
         Toast.show({
           text1: 'Error',
-          text2: err.toString(),
+          text2: `${err}`,
           type: "error",
           topOffset: 70,
         })
@@ -760,7 +765,7 @@ export function uploadPendingPhotos() {
           item,
           uuid,
         })
-
+        console.log({ responseData })
         if (responseData === "banned") {
           alert("Sorry, you've been banned.")
           // eslint-disable-next-line no-await-in-loop
@@ -797,6 +802,7 @@ export function uploadPendingPhotos() {
         }
       }
     } catch (error) {
+      console.log({ error })
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
@@ -822,13 +828,14 @@ export function uploadPendingPhotos() {
 }
 
 const _uploadFile = async ({ item, uuid }) => {
-  const assetUri = `${item.localImgUrl}`
+  const assetUri = item.type === "video" ? item.localVideoUrl : item.localImgUrl
   try {
+    // console.log({ item })
     const newPhoto = (await CONST.gqlClient
       .mutate({
         mutation: gql`
-        mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String! ) {
-          createPhoto(lat: $lat, lon: $lon, uuid: $uuid ) {
+        mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String!, $video: Boolean ) {
+          createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video ) {
             active
             commentsCount
             watchersCount
@@ -846,21 +853,22 @@ const _uploadFile = async ({ item, uuid }) => {
           lat: item.location.coords.latitude,
           lon: item.location.coords.longitude,
           uuid,
+          video: item?.type === "video",
         },
       })).data.createPhoto
 
     const uploadUrl = (await CONST.gqlClient
       .query({
         query: gql`
-        query generateUploadUrl($photoId: ID!) {
-          generateUploadUrl(photoId: $photoId)
+        query generateUploadUrl($assetKey: String!, $contentType: String!) {
+          generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
         }`,
         variables: {
-          photoId: `${newPhoto.id}.upload`,
+          assetKey: `${newPhoto.id}.upload`,
+          contentType: "image/jpeg",
         },
       })).data.generateUploadUrl
 
-    console.log({ item })
     const responseData = await FileSystem.uploadAsync(
       uploadUrl,
       assetUri,
@@ -873,6 +881,7 @@ const _uploadFile = async ({ item, uuid }) => {
     )
     return { responseData, photo: newPhoto }
   } catch (err) {
+    console.log({ err })
     if (err === 'banned') {
       return { responseData: "banned", err }
     }

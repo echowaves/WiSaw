@@ -157,17 +157,12 @@ const PhotosList = () => {
       if (update.isAvailable) {
         await Updates.fetchUpdateAsync()
 
-        Alert.alert(
-          "WiSaw just updated over the Air", "Click OK to Reload the app",
-          [
-            {
-              text1: 'OK',
-              onPress: async () => {
-                await Updates.reloadAsync()
-              },
-            },
-          ],
-        )
+        Toast.show({
+          text1: 'WiSaw just updated over the Air',
+          text2: "Restart in 3 seconds.",
+          topOffset: 70,
+        })
+        setTimeout(() => { Updates.reloadAsync() }, 3000)
       }
     } catch (error) {
     // handle or log error
