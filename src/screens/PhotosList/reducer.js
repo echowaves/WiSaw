@@ -761,7 +761,7 @@ export function uploadPendingPhotos() {
       for (; i < pendingFiles.length; i += 1) {
         const item = pendingFiles[i]
         // eslint-disable-next-line no-await-in-loop
-        const { responseData, photo } = await _uploadFile({
+        const { responseData, photo } = await _uploadItem({
           item,
           uuid,
         })
@@ -827,7 +827,7 @@ export function uploadPendingPhotos() {
   }
 }
 
-const _uploadFile = async ({ item, uuid }) => {
+const _uploadItem = async ({ item, uuid }) => {
   const assetUri = item.type === "video" ? item.localVideoUrl : item.localImgUrl
   try {
     // console.log({ item })
@@ -857,29 +857,14 @@ const _uploadFile = async ({ item, uuid }) => {
         },
       })).data.createPhoto
 
-    const uploadUrl = (await CONST.gqlClient
-      .query({
-        query: gql`
-        query generateUploadUrl($assetKey: String!, $contentType: String!) {
-          generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
-        }`,
-        variables: {
-          assetKey: `${newPhoto.id}.upload`,
-          contentType: "image/jpeg",
-        },
-      })).data.generateUploadUrl
+    // console.log({ newPhoto })
 
-    const responseData = await FileSystem.uploadAsync(
-      uploadUrl,
+    const response = await _uploadFile({
+      assetKey: `${newPhoto.id}.upload`,
+      contentType: "image/jpeg",
       assetUri,
-      {
-        httpMethod: 'PUT',
-        headers: {
-          "Content-Type": "image/jpeg",
-        },
-      }
-    )
-    return { responseData, photo: newPhoto }
+    })
+    return { responseData: response.responseData, photo: newPhoto }
   } catch (err) {
     console.log({ err })
     if (err === 'banned') {
@@ -887,6 +872,33 @@ const _uploadFile = async ({ item, uuid }) => {
     }
     return { responseData: "something bad happened, unable to upload", err }
   }
+}
+
+const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
+  console.log({ assetKey })
+  const uploadUrl = (await CONST.gqlClient
+    .query({
+      query: gql`
+      query generateUploadUrl($assetKey: String!, $contentType: String!) {
+        generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
+      }`,
+      variables: {
+        assetKey,
+        contentType,
+      },
+    })).data.generateUploadUrl
+
+  const responseData = await FileSystem.uploadAsync(
+    uploadUrl,
+    assetUri,
+    {
+      httpMethod: 'PUT',
+      headers: {
+        "Content-Type": "image/jpeg",
+      },
+    }
+  )
+  return { responseData }
 }
 
 export default reducer
