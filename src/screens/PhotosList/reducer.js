@@ -839,8 +839,8 @@ const _uploadItem = async ({ item, uuid }) => {
     // if video -- upload video file in addition to the image
     if (item.type === "video") {
       const videoResponse = await _uploadFile({
-        assetKey: `${photo.id}.mov`,
-        contentType: "video/mov",
+        assetKey: `${photo.id}.vid`,
+        contentType: "video",
         assetUri: item.localVideoUrl,
       })
     }
