@@ -333,8 +333,8 @@ async function _requestGeoPhotos(getState) {
       batch: response.data.feedByDate.batch,
       noMoreData: response.data.feedByDate.noMoreData,
     }
-  } catch (err) {
-    console.log({ err })// eslint-disable-line
+  } catch (err4) {
+    console.log({ err4 })// eslint-disable-line
     return {
       photos: [],
       batch,
@@ -376,8 +376,8 @@ async function _requestWatchedPhotos(getState) {
       batch: response.data.feedForWatcher.batch,
       noMoreData: response.data.feedForWatcher.noMoreData,
     }
-  } catch (err) {
-    console.log({ err })// eslint-disable-line
+  } catch (err5) {
+    console.log({ err5 })// eslint-disable-line
   }
 }
 
@@ -414,8 +414,8 @@ async function _requestSearchedPhotos(getState) {
       batch: response.data.feedForTextSearch.batch,
       noMoreData: response.data.feedForTextSearch.noMoreData,
     }
-  } catch (err) {
-    console.log({ err })// eslint-disable-line
+  } catch (err6) {
+    console.log({ err6 })// eslint-disable-line
   }
 }
 
@@ -605,6 +605,36 @@ const _makeSureDirectoryExists = async ({ directory }) => {
   }
 }
 
+const _genLocalThumbs = async image => {
+  if (image.type === 'image') {
+    const manipResult = await ImageManipulator.manipulateAsync(
+      image.localImgUrl,
+      [{ resize: { height: 300 } }],
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+    )
+    return {
+      ...image,
+      localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
+    }
+  } // if video
+  const { uri } = await VideoThumbnails.getThumbnailAsync(
+    image.localImgUrl
+  )
+
+  const manipResult = await ImageManipulator.manipulateAsync(
+    uri,
+    [{ resize: { height: 300 } }],
+    { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+  )
+
+  return {
+    ...image,
+    localVideoUrl: image.localImgUrl,
+    localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
+    localImgUrl: uri,
+  }
+}
+
 const _addToQueue = async image => {
   // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
 
@@ -615,45 +645,9 @@ const _addToQueue = async image => {
     pendingImages = []
   }
 
-  let manipResult
-  let resultObj
-
-  if (image.type === 'image') {
-    manipResult = await ImageManipulator.manipulateAsync(
-      image.localImgUrl,
-      [{ resize: { height: 300 } }],
-      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
-    )
-
-    resultObj = {
-      ...image,
-      localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
-    }
-  } else { // if video
-    const { uri } = await VideoThumbnails.getThumbnailAsync(
-      image.localImgUrl
-    )
-
-    manipResult = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { height: 300 } }],
-      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
-    )
-
-    resultObj = {
-      ...image,
-      localVideoUrl: image.localImgUrl,
-      localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
-      localImgUrl: uri,
-    }
-  }
-
-  // this is needed to render pending thumb
-  await CacheManager.addToCache({ file: resultObj.localThumbUrl, key: resultObj.localImageName })
-
   await Storage.setItem({
     key: CONST.PENDING_UPLOADS_KEY,
-    value: JSON.stringify([...pendingImages, resultObj]),
+    value: JSON.stringify([...pendingImages, image]),
   })
 }
 
@@ -729,9 +723,13 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
     to: localImgUrl,
   })
 
-  await _addToQueue({
+  const image = {
     localImgUrl, localImageName, type, location,
-  })
+  }
+  const thumbEnhansedImage = await _genLocalThumbs(image)
+  CacheManager.addToCache({ file: thumbEnhansedImage.localThumbUrl, key: thumbEnhansedImage.localImageName })
+
+  await _addToQueue(thumbEnhansedImage)
 
   _updatePendingPhotos(dispatch)
 }
@@ -756,30 +754,60 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.START_PHOTO_UPLOADING,
       })
 
-      let i = 0
-      // here let's iterate over the items to upload and upload one file at a time
-      for (; i < pendingFiles.length; i += 1) {
+      let i
+      // here let's iterate over the items and upload one file at a time
+
+      // first pass iteration to generate photos ID and the photo record on the backend
+      for (i = 0; i < pendingFiles.length; i += 1) {
         const item = pendingFiles[i]
+        try {
         // eslint-disable-next-line no-await-in-loop
-        const { responseData, photo } = await _uploadItem({
-          item,
-          uuid,
-        })
-        if (responseData === "banned") {
-          alert("Sorry, you've been banned.")
+          const photo = await _generatePhoto({
+            uuid,
+            lat: item.location.coords.latitude,
+            lon: item.location.coords.longitude,
+            video: item?.type === "video",
+          })
+          // eslint-disable-next-line no-await-in-loop
+          CacheManager.addToCache({ file: item.localThumbUrl, key: `${photo.id}-thumb` })
+          // eslint-disable-next-line no-await-in-loop
+          CacheManager.addToCache({ file: item.localImgUrl, key: `${photo.id}` })
+
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
-          await _updatePendingPhotos(dispatch)
-
-          return Promise.resolve()
+          await _addToQueue({
+            ...item,
+            photo,
+          })
+        } catch (err1) {
+          console.log({ err1 })
+          if (`${err1}`.includes('banned')) {
+            // eslint-disable-next-line no-await-in-loop
+            await _removeFromQueue(item)
+            Toast.show({
+              text1: "Sorry, you've been banned.",
+              text2: "Try again later",
+              type: "error",
+              topOffset: 70,
+            })
+          }
         }
-        if (responseData.status === 200) {
-          // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({ file: item.localThumbUrl, key: `${photo.id}-thumb` })
-          // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({ file: item.localImgUrl, key: `${photo.id}` })
+      }
 
+      // uploadQueue will only contain item with photo generated on the backend
+      const uploadQueue = (await _getQueue())
+        .filter(image => image.photo)
+      // second pass -- upload files
+      for (i = 0; i < uploadQueue.length; i += 1) {
+        const item = uploadQueue[i]
+
+        // eslint-disable-next-line no-await-in-loop
+        const { responseData } = await _uploadItem({
+          item,
+        })
+
+        if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
@@ -789,7 +817,7 @@ export function uploadPendingPhotos() {
 
           dispatch({
             type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
-            photo,
+            photo: item.photo,
           })
         } else {
           // alert("Error uploading file, try again.")
@@ -800,8 +828,8 @@ export function uploadPendingPhotos() {
           })
         }
       }
-    } catch (error) {
-      console.log({ error })
+    } catch (err2) {
+      console.log({ err2 })
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
@@ -826,37 +854,26 @@ export function uploadPendingPhotos() {
   }
 }
 
-const _uploadItem = async ({ item, uuid }) => {
+const _uploadItem = async ({ item }) => {
   try {
-    console.log({ item })
-    const photo = await _generatePhoto({
-      uuid,
-      lat: item.location.coords.latitude,
-      lon: item.location.coords.longitude,
-      video: item?.type === "video",
-    })
-
     // if video -- upload video file in addition to the image
     if (item.type === "video") {
       const videoResponse = await _uploadFile({
-        assetKey: `${photo.id}.vid`,
-        contentType: "video",
+        assetKey: `${item.photo.id}.vid`,
+        contentType: "video/mov",
         assetUri: item.localVideoUrl,
       })
     }
 
     const response = await _uploadFile({
-      assetKey: `${photo.id}.upload`,
+      assetKey: `${item.photo.id}.upload`,
       contentType: "image/jpeg",
       assetUri: item.localImgUrl,
     })
-    return { responseData: response.responseData, photo }
-  } catch (err) {
-    console.log({ err })
-    if (err === 'banned') {
-      return { responseData: "banned", err }
-    }
-    return { responseData: "something bad happened, unable to upload", err }
+    return { responseData: response.responseData }
+  } catch (err3) {
+    console.log({ err3 })
+    return { responseData: "something bad happened, unable to upload", err3 }
   }
 }
 
