@@ -334,6 +334,7 @@ async function _requestGeoPhotos(getState) {
       noMoreData: response.data.feedByDate.noMoreData,
     }
   } catch (err4) {
+    // eslint-disable-next-line no-console
     console.log({ err4 })// eslint-disable-line
     return {
       photos: [],
@@ -377,6 +378,7 @@ async function _requestWatchedPhotos(getState) {
       noMoreData: response.data.feedForWatcher.noMoreData,
     }
   } catch (err5) {
+    // eslint-disable-next-line no-console
     console.log({ err5 })// eslint-disable-line
   }
 }
@@ -415,6 +417,7 @@ async function _requestSearchedPhotos(getState) {
       noMoreData: response.data.feedForTextSearch.noMoreData,
     }
   } catch (err6) {
+    // eslint-disable-next-line no-console
     console.log({ err6 })// eslint-disable-line
   }
 }
@@ -454,6 +457,7 @@ export function getPhotos() {
         } else if (getState().photosList.activeSegment === 2) {
           responseJson = await _requestSearchedPhotos(getState)
         }
+        // eslint-disable-next-line no-console
         // console.log({ responseJson })
         noMoreData = responseJson?.noMoreData
         if (responseJson?.batch === getState()?.photosList?.batch) {
@@ -785,6 +789,7 @@ export function uploadPendingPhotos() {
             photo,
           })
         } catch (err1) {
+          // eslint-disable-next-line no-console
           console.log({ err1 })
           if (`${err1}`.includes('banned')) {
             // eslint-disable-next-line no-await-in-loop
@@ -833,6 +838,7 @@ export function uploadPendingPhotos() {
         }
       }
     } catch (err2) {
+      // eslint-disable-next-line no-console
       console.log({ err2 })
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
@@ -862,6 +868,7 @@ const _uploadItem = async ({ item }) => {
   try {
     // if video -- upload video file in addition to the image
     if (item.type === "video") {
+      // eslint-disable-next-line
       const videoResponse = await _uploadFile({
         assetKey: `${item.photo.id}.vid`,
         contentType: "video/mov",
@@ -876,6 +883,7 @@ const _uploadItem = async ({ item }) => {
     })
     return { responseData: response.responseData }
   } catch (err3) {
+    // eslint-disable-next-line no-console
     console.log({ err3 })
     return { responseData: "something bad happened, unable to upload", err3 }
   }
