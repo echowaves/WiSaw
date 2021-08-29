@@ -765,7 +765,6 @@ export function uploadPendingPhotos() {
           item,
           uuid,
         })
-        console.log({ responseData })
         if (responseData === "banned") {
           alert("Sorry, you've been banned.")
           // eslint-disable-next-line no-await-in-loop
@@ -828,12 +827,48 @@ export function uploadPendingPhotos() {
 }
 
 const _uploadItem = async ({ item, uuid }) => {
-  const assetUri = item.type === "video" ? item.localVideoUrl : item.localImgUrl
   try {
-    // console.log({ item })
-    const newPhoto = (await CONST.gqlClient
-      .mutate({
-        mutation: gql`
+    console.log({ item })
+    const photo = await _generatePhoto({
+      uuid,
+      lat: item.location.coords.latitude,
+      lon: item.location.coords.longitude,
+      video: item?.type === "video",
+    })
+
+    // if video -- upload video file in addition to the image
+    if (item.type === "video") {
+      const videoResponse = await _uploadFile({
+        assetKey: `${photo.id}.mov`,
+        contentType: "video/mov",
+        assetUri: item.localVideoUrl,
+      })
+    }
+
+    const response = await _uploadFile({
+      assetKey: `${photo.id}.upload`,
+      contentType: "image/jpeg",
+      assetUri: item.localImgUrl,
+    })
+    return { responseData: response.responseData, photo }
+  } catch (err) {
+    console.log({ err })
+    if (err === 'banned') {
+      return { responseData: "banned", err }
+    }
+    return { responseData: "something bad happened, unable to upload", err }
+  }
+}
+
+const _generatePhoto = async ({
+  uuid,
+  lat,
+  lon,
+  video,
+}) => {
+  const photo = (await CONST.gqlClient
+    .mutate({
+      mutation: gql`
         mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String!, $video: Boolean ) {
           createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video ) {
             active
@@ -849,33 +884,19 @@ const _uploadItem = async ({ item, uuid }) => {
             uuid
         }
       }`,
-        variables: {
-          lat: item.location.coords.latitude,
-          lon: item.location.coords.longitude,
-          uuid,
-          video: item?.type === "video",
-        },
-      })).data.createPhoto
+      variables: {
+        uuid,
+        lat,
+        lon,
+        video,
+      },
+    })).data.createPhoto
 
-    // console.log({ newPhoto })
-
-    const response = await _uploadFile({
-      assetKey: `${newPhoto.id}.upload`,
-      contentType: "image/jpeg",
-      assetUri,
-    })
-    return { responseData: response.responseData, photo: newPhoto }
-  } catch (err) {
-    console.log({ err })
-    if (err === 'banned') {
-      return { responseData: "banned", err }
-    }
-    return { responseData: "something bad happened, unable to upload", err }
-  }
+  return photo
 }
 
 const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
-  console.log({ assetKey })
+  // console.log({ assetKey })
   const uploadUrl = (await CONST.gqlClient
     .query({
       query: gql`
@@ -894,7 +915,7 @@ const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
     {
       httpMethod: 'PUT',
       headers: {
-        "Content-Type": "image/jpeg",
+        "Content-Type": contentType,
       },
     }
   )
