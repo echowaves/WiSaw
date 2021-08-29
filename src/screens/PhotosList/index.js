@@ -342,6 +342,7 @@ const PhotosList = () => {
       await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
       // have to wait, otherwise the upload will not start
       await dispatch(reducer.queueFileForUpload({ cameraImgUrl: cameraReturn.uri, type: cameraReturn.type, location }))
+
       dispatch(reducer.uploadPendingPhotos())
     }
   }

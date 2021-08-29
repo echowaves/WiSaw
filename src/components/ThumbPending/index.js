@@ -60,7 +60,6 @@ const ThumbPending = props => {
     width: thumbDimension,
     height: thumbDimension,
   }
-
   return (
     <View>
       <TouchableHighlight
@@ -71,7 +70,7 @@ const ThumbPending = props => {
         ]}>
         <CachedImage
           source={{ uri: item.localThumbUrl }}
-          cacheKey={item.localImageName}
+          cacheKey={item.localCacheKey}
           style={styles.thumbnail}
         />
       </TouchableHighlight>

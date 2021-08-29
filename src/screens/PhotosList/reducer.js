@@ -594,7 +594,6 @@ const _updatePendingPhotos = async dispatch => {
     type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
     pendingPhotos: pendingFiles,
   })
-  return pendingFiles
 }
 
 const _makeSureDirectoryExists = async ({ directory }) => {
@@ -616,7 +615,9 @@ const _genLocalThumbs = async image => {
       ...image,
       localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
     }
-  } // if video
+  }
+
+  // if video
   const { uri } = await VideoThumbnails.getThumbnailAsync(
     image.localImgUrl
   )
@@ -632,6 +633,7 @@ const _genLocalThumbs = async image => {
     localVideoUrl: image.localImgUrl,
     localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
     localImgUrl: uri,
+    // localImageName: manipResult.uri.substr(manipResult.uri.lastIndexOf('/') + 1),
   }
 }
 
@@ -715,6 +717,7 @@ const _removeFromQueue = async imageToRemove => {
 
 export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (dispatch, getState) => {
   const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
+  const localCacheKey = localImageName.split('.')[0]
 
   const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
   // copy file to cacheDir
@@ -724,10 +727,10 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
   })
 
   const image = {
-    localImgUrl, localImageName, type, location,
+    localImgUrl, localImageName, type, location, localCacheKey,
   }
   const thumbEnhansedImage = await _genLocalThumbs(image)
-  CacheManager.addToCache({ file: thumbEnhansedImage.localThumbUrl, key: thumbEnhansedImage.localImageName })
+  await CacheManager.addToCache({ file: thumbEnhansedImage.localThumbUrl, key: thumbEnhansedImage.localCacheKey })
 
   await _addToQueue(thumbEnhansedImage)
 
@@ -737,8 +740,6 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-
-    const pendingFiles = await _updatePendingPhotos(dispatch)
 
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
@@ -757,9 +758,13 @@ export function uploadPendingPhotos() {
       let i
       // here let's iterate over the items and upload one file at a time
 
+      // generatePhotoQueue will only contain item with undefined photo
+      const generatePhotoQueue = (await _getQueue())
+        .filter(image => !image.photo)
+
       // first pass iteration to generate photos ID and the photo record on the backend
-      for (i = 0; i < pendingFiles.length; i += 1) {
-        const item = pendingFiles[i]
+      for (i = 0; i < generatePhotoQueue.length; i += 1) {
+        const item = generatePhotoQueue[i]
         try {
         // eslint-disable-next-line no-await-in-loop
           const photo = await _generatePhoto({
@@ -772,7 +777,6 @@ export function uploadPendingPhotos() {
           CacheManager.addToCache({ file: item.localThumbUrl, key: `${photo.id}-thumb` })
           // eslint-disable-next-line no-await-in-loop
           CacheManager.addToCache({ file: item.localImgUrl, key: `${photo.id}` })
-
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
