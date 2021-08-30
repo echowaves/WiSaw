@@ -312,6 +312,8 @@ async function _requestGeoPhotos(getState) {
                   id
                   imgUrl
                   thumbUrl
+                  videoUrl
+                  video
                   commentsCount
                   watchersCount
                   createdAt
@@ -356,6 +358,8 @@ async function _requestWatchedPhotos(getState) {
                   id
                   imgUrl
                   thumbUrl
+                  videoUrl
+                  video
                   commentsCount
                   watchersCount
                   lastComment
@@ -395,6 +399,8 @@ async function _requestSearchedPhotos(getState) {
                   id
                   imgUrl
                   thumbUrl
+                  videoUrl
+                  video
                   commentsCount
                   watchersCount
                   lastComment
@@ -870,7 +876,7 @@ const _uploadItem = async ({ item }) => {
     if (item.type === "video") {
       // eslint-disable-next-line
       const videoResponse = await _uploadFile({
-        assetKey: `${item.photo.id}.vid`,
+        assetKey: `${item.photo.id}.mov`,
         contentType: "video/mov",
         assetUri: item.localVideoUrl,
       })
@@ -911,6 +917,7 @@ const _generatePhoto = async ({
             location
             updatedAt
             uuid
+            video
         }
       }`,
       variables: {

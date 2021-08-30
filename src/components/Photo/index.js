@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
@@ -33,6 +33,8 @@ import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/R
 
 import PropTypes from 'prop-types'
 
+import { Video } from 'expo-av'
+
 import CachedImage from 'expo-cached-image'
 
 import * as reducer from './reducer'
@@ -41,6 +43,12 @@ import * as CONST from '../../consts.js'
 
 const Photo = ({ item }) => {
   const componentIsMounted = useRef(true)
+
+  // const videoRef = React.useRef(null)
+
+  const videoRef = useRef(null)
+
+  const [status, setStatus] = useState({})
 
   const navigation = useNavigation()
 
@@ -67,6 +75,14 @@ const Photo = ({ item }) => {
     }, [])// eslint-disable-line react-hooks/exhaustive-deps
   )
 
+  // useEffect(() => {
+  //   if (videoRef?.current) {
+  //     // console.log({ videoRef })
+  //     // videoRef.current.presentFullscreenPlayer()
+  //     // videoRef.current.playAsync()
+  //   }
+  // }, [videoRef])// eslint-disable-line react-hooks/exhaustive-deps
+
   const styles = StyleSheet.create({
     photoContainer: {
       width,
@@ -80,49 +96,80 @@ const Photo = ({ item }) => {
     },
   })
 
-  const renderPhotoRow = () => (
-    <ReactNativeZoomableView
-      style={{
-        flex: 1,
-        height: imageHeight,
-      }}
-      zoomEnabled
-      maxZoom={10.0}
-      minZoom={1.0}
-      zoomStep={1.0}
-      initialZoom={1.0}
-      bindToBorders
-      doubleTapZoomToCenter={false}
-      captureEvent={false}>
-      <CachedImage
-        source={{ uri: `${item.thumbUrl}` }}
-        cacheKey={`${item.id}-thumb`}
-        resizeMode="contain"
-        style={
-          styles.photoContainer
-        }
-      />
-      <LinearProgress
-        color={
-          CONST.MAIN_COLOR
-        }
+  const renderPhotoRow = () => {
+    if (!item.video) {
+      return (
+        <ReactNativeZoomableView
+          style={{
+            flex: 1,
+            height: imageHeight,
+          }}
+          zoomEnabled
+          maxZoom={10.0}
+          minZoom={1.0}
+          zoomStep={1.0}
+          initialZoom={1.0}
+          bindToBorders
+          doubleTapZoomToCenter={false}
+          captureEvent={false}>
+
+          <CachedImage
+            source={{ uri: `${item.thumbUrl}` }}
+            cacheKey={`${item.id}-thumb`}
+            resizeMode="contain"
+            style={
+              styles.photoContainer
+            }
+          />
+          <LinearProgress
+            color={
+              CONST.MAIN_COLOR
+            }
+            style={{
+              alignSelf: 'center',
+              width: width / 4,
+              position: 'absolute',
+              top: imageHeight / 2,
+            }}
+          />
+          <CachedImage
+            source={{ uri: `${item.imgUrl}` }}
+            cacheKey={`${item.id}`}
+            resizeMode="contain"
+            style={
+              styles.photoContainer
+            }
+          />
+        </ReactNativeZoomableView>
+      )
+    }
+    return (
+      <View
         style={{
-          alignSelf: 'center',
-          width: width / 4,
-          position: 'absolute',
-          top: imageHeight / 2,
-        }}
-      />
-      <CachedImage
-        source={{ uri: `${item.imgUrl}` }}
-        cacheKey={`${item.id}`}
-        resizeMode="contain"
-        style={
-          styles.photoContainer
-        }
-      />
-    </ReactNativeZoomableView>
-  )
+          flex: 1,
+          height: imageHeight,
+        }}>
+
+        <Video
+          ref={videoRef}
+          style={
+            styles.photoContainer
+          }
+          source={{
+            uri: `${item.videoUrl}`,
+          }}
+          useNativeControls
+          // overrideFileExtensionAndroid
+          resizeMode="contain"
+          onPlaybackStatusUpdate={status => setStatus(() => status)}
+          usePoster={false}
+          posterSource={{ uri: `${item.thumbUrl}` }}
+        />
+      </View>
+
+    )
+  }
+
   const renderDateTime = dateString => {
     const dateTime = moment(new Date(dateString), "YYYY-MM-DD-HH-mm-ss-SSS").format("LLL")
     return dateTime

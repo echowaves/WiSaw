@@ -6391,6 +6391,14 @@ expo-asset@~8.3.3:
     path-browserify "^1.0.0"
     url-parse "^1.4.4"
 
+expo-av@~9.2.3:
+  version "9.2.3"
+  resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-9.2.3.tgz#aa54da9c0bc1c3eb0251c1da17f5123f15d4f82f"
+  integrity sha512-If6+JqB2mqMKJxHgN8UAx75CWH4kPAzx2EyP+MFmcPVpcSBJZ/Fj+EfI+GJnk3tHPSB2Eld1IFEYOIJCkN/26Q==
+  dependencies:
+    "@expo/config-plugins" "^3.0.0"
+    expo-modules-core "~0.2.0"
+
 expo-cached-image@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/expo-cached-image/-/expo-cached-image-2.0.0.tgz#fa7999c36dcda68cc95cd922e56bf53767f71372"
