@@ -8,7 +8,7 @@ import {
   // Image,
 } from 'react-native'
 
-import { FontAwesome, AntDesign } from '@expo/vector-icons'
+import { FontAwesome, AntDesign, FontAwesome5 } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -118,6 +118,32 @@ const ThumbWithComments = props => {
                 }>
                 {item.watchersCount > 99 ? '+ 99' : item.watchersCount}
               </Text>
+            </View>
+          )}
+          { item?.video && (
+            <View
+              style={
+                {
+                  fontSize: 30,
+                  position: 'absolute',
+                  bottom: 35,
+                  left: 35,
+                }
+              }>
+              <TouchableHighlight
+                onPress={() => onThumbPress(item)}>
+                <FontAwesome5
+                  name="play-circle"
+                  onClick={() => onThumbPress(item)}
+                  style={
+                    {
+                      fontSize: 30,
+                      color: CONST.PLACEHOLDER_TEXT_COLOR,
+                    }
+                  }
+                />
+              </TouchableHighlight>
+
             </View>
           )}
         </View>

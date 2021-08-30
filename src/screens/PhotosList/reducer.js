@@ -3,8 +3,9 @@
 import { v4 as uuidv4 } from 'uuid'
 
 import * as SecureStore from 'expo-secure-store'
-
 import * as FileSystem from 'expo-file-system'
+import * as VideoThumbnails from 'expo-video-thumbnails'
+
 import * as ImageManipulator from 'expo-image-manipulator'
 
 import moment from 'moment'
@@ -311,6 +312,8 @@ async function _requestGeoPhotos(getState) {
                   id
                   imgUrl
                   thumbUrl
+                  videoUrl
+                  video
                   commentsCount
                   watchersCount
                   createdAt
@@ -332,8 +335,14 @@ async function _requestGeoPhotos(getState) {
       batch: response.data.feedByDate.batch,
       noMoreData: response.data.feedByDate.noMoreData,
     }
-  } catch (err) {
-    console.log({ err })// eslint-disable-line
+  } catch (err4) {
+    // eslint-disable-next-line no-console
+    console.log({ err4 })// eslint-disable-line
+    return {
+      photos: [],
+      batch,
+      noMoreData: true,
+    }
   }
 }
 
@@ -349,6 +358,8 @@ async function _requestWatchedPhotos(getState) {
                   id
                   imgUrl
                   thumbUrl
+                  videoUrl
+                  video
                   commentsCount
                   watchersCount
                   lastComment
@@ -370,8 +381,9 @@ async function _requestWatchedPhotos(getState) {
       batch: response.data.feedForWatcher.batch,
       noMoreData: response.data.feedForWatcher.noMoreData,
     }
-  } catch (err) {
-    console.log({ err })// eslint-disable-line
+  } catch (err5) {
+    // eslint-disable-next-line no-console
+    console.log({ err5 })// eslint-disable-line
   }
 }
 
@@ -387,6 +399,8 @@ async function _requestSearchedPhotos(getState) {
                   id
                   imgUrl
                   thumbUrl
+                  videoUrl
+                  video
                   commentsCount
                   watchersCount
                   lastComment
@@ -408,8 +422,9 @@ async function _requestSearchedPhotos(getState) {
       batch: response.data.feedForTextSearch.batch,
       noMoreData: response.data.feedForTextSearch.noMoreData,
     }
-  } catch (err) {
-    console.log({ err })// eslint-disable-line
+  } catch (err6) {
+    // eslint-disable-next-line no-console
+    console.log({ err6 })// eslint-disable-line
   }
 }
 
@@ -448,6 +463,7 @@ export function getPhotos() {
         } else if (getState().photosList.activeSegment === 2) {
           responseJson = await _requestSearchedPhotos(getState)
         }
+        // eslint-disable-next-line no-console
         // console.log({ responseJson })
         noMoreData = responseJson?.noMoreData
         if (responseJson?.batch === getState()?.photosList?.batch) {
@@ -466,11 +482,11 @@ export function getPhotos() {
       } catch (err) {
         dispatch({
           type: ACTION_TYPES.GET_PHOTOS_FAIL,
-          errorMessage: err.toString(),
+          errorMessage: `${err}`,
         })
         Toast.show({
           text1: 'Error',
-          text2: err.toString(),
+          text2: `${err}`,
           type: "error",
           topOffset: 70,
         })
@@ -588,7 +604,6 @@ const _updatePendingPhotos = async dispatch => {
     type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
     pendingPhotos: pendingFiles,
   })
-  return pendingFiles
 }
 
 const _makeSureDirectoryExists = async ({ directory }) => {
@@ -599,8 +614,41 @@ const _makeSureDirectoryExists = async ({ directory }) => {
   }
 }
 
+const _genLocalThumbs = async image => {
+  if (image.type === 'image') {
+    const manipResult = await ImageManipulator.manipulateAsync(
+      image.localImgUrl,
+      [{ resize: { height: 300 } }],
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+    )
+    return {
+      ...image,
+      localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
+    }
+  }
+
+  // if video
+  const { uri } = await VideoThumbnails.getThumbnailAsync(
+    image.localImgUrl
+  )
+
+  const manipResult = await ImageManipulator.manipulateAsync(
+    uri,
+    [{ resize: { height: 300 } }],
+    { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+  )
+
+  return {
+    ...image,
+    localVideoUrl: image.localImgUrl,
+    localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
+    localImgUrl: uri,
+    // localImageName: manipResult.uri.substr(manipResult.uri.lastIndexOf('/') + 1),
+  }
+}
+
 const _addToQueue = async image => {
-  // const {quedFileName, cacheKey, type, location, thumbUrl } = image
+  // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
 
   let pendingImages = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
@@ -609,22 +657,9 @@ const _addToQueue = async image => {
     pendingImages = []
   }
 
-  const manipResult = await ImageManipulator.manipulateAsync(
-    image.quedFileName,
-    [{ resize: { height: 300 } }],
-    { compress: 1, format: ImageManipulator.SaveFormat.PNG }
-  )
-
-  const resultObj = {
-    ...image,
-    thumbUri: manipResult.uri, // add thumbUri to the qued objects
-  }
-
-  await CacheManager.addToCache({ file: manipResult.uri, key: image.cacheKey })
-
   await Storage.setItem({
     key: CONST.PENDING_UPLOADS_KEY,
-    value: JSON.stringify([...pendingImages, resultObj]),
+    value: JSON.stringify([...pendingImages, image]),
   })
 }
 
@@ -647,7 +682,7 @@ const _getQueue = async () => {
   }
   // remove images from the queue if corresponding file does not exist
   imagesInQueue.forEach(image => {
-    if (!filesInStorage.some(f => f === image.cacheKey)) {
+    if (!filesInStorage.some(f => f === image.localImageName)) {
       _removeFromQueue(image)
     }
   })
@@ -662,7 +697,7 @@ const _getQueue = async () => {
 
   // remove image from storage if corresponding recorsd does not exist in the queue
   filesInStorage.forEach(file => {
-    if (!imagesInQueue.some(i => i.cacheKey === file)) {
+    if (!imagesInQueue.some(i => i.localImageName === file)) {
       FileSystem.deleteAsync(
         `${CONST.PENDING_UPLOADS_FOLDER}${file}`,
         { idempotent: true }
@@ -688,29 +723,26 @@ const _removeFromQueue = async imageToRemove => {
     key: CONST.PENDING_UPLOADS_KEY,
     value: JSON.stringify(pendingImagesAfter),
   })
-  FileSystem.deleteAsync(
-    `${CONST.PENDING_UPLOADS_FOLDER}${imageToRemove.cacheKey}`,
-    { idempotent: true }
-  )
 }
 
-export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, getState) => {
-  const cacheKey = moment().format("YYYY-MM-DD-HH-mm-ss-SSS") // current moment will be used as a unique key
-  const quedFileName = `${CONST.PENDING_UPLOADS_FOLDER}${cacheKey}`
+export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (dispatch, getState) => {
+  const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
+  const localCacheKey = localImageName.split('.')[0]
+
+  const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
   // copy file to cacheDir
-  await FileSystem.copyAsync({
-    from: uri,
-    to: quedFileName,
+  await FileSystem.moveAsync({
+    from: cameraImgUrl,
+    to: localImgUrl,
   })
 
-  FileSystem.deleteAsync(
-    uri,
-    { idempotent: true }
-  )
+  const image = {
+    localImgUrl, localImageName, type, location, localCacheKey,
+  }
+  const thumbEnhansedImage = await _genLocalThumbs(image)
+  await CacheManager.addToCache({ file: thumbEnhansedImage.localThumbUrl, key: thumbEnhansedImage.localCacheKey })
 
-  await _addToQueue({
-    quedFileName, cacheKey, type, location,
-  })
+  await _addToQueue(thumbEnhansedImage)
 
   _updatePendingPhotos(dispatch)
 }
@@ -718,8 +750,6 @@ export const queueFileForUpload = ({ uri, type, location }) => async (dispatch, 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-
-    const pendingFiles = await _updatePendingPhotos(dispatch)
 
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
@@ -735,29 +765,64 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.START_PHOTO_UPLOADING,
       })
 
-      let i = 0
-      // here let's iterate over the items to upload and upload one file at a time
-      for (; i < pendingFiles.length; i += 1) {
-        const item = pendingFiles[i]
-        // eslint-disable-next-line no-await-in-loop
-        const { responseData, photo } = await _uploadFile({
-          item,
-          uuid,
-        })
+      let i
+      // here let's iterate over the items and upload one file at a time
 
-        if (responseData === "banned") {
-          alert("Sorry, you've been banned.")
+      // generatePhotoQueue will only contain item with undefined photo
+      const generatePhotoQueue = (await _getQueue())
+        .filter(image => !image.photo)
+
+      // first pass iteration to generate photos ID and the photo record on the backend
+      for (i = 0; i < generatePhotoQueue.length; i += 1) {
+        const item = generatePhotoQueue[i]
+        try {
+        // eslint-disable-next-line no-await-in-loop
+          const photo = await _generatePhoto({
+            uuid,
+            lat: item.location.coords.latitude,
+            lon: item.location.coords.longitude,
+            video: item?.type === "video",
+          })
+          // eslint-disable-next-line no-await-in-loop
+          CacheManager.addToCache({ file: item.localThumbUrl, key: `${photo.id}-thumb` })
+          // eslint-disable-next-line no-await-in-loop
+          CacheManager.addToCache({ file: item.localImgUrl, key: `${photo.id}` })
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
-          await _updatePendingPhotos(dispatch)
-
-          return Promise.resolve()
+          await _addToQueue({
+            ...item,
+            photo,
+          })
+        } catch (err1) {
+          // eslint-disable-next-line no-console
+          console.log({ err1 })
+          if (`${err1}`.includes('banned')) {
+            // eslint-disable-next-line no-await-in-loop
+            await _removeFromQueue(item)
+            Toast.show({
+              text1: "Sorry, you've been banned.",
+              text2: "Try again later",
+              type: "error",
+              topOffset: 70,
+            })
+          }
         }
-        if (responseData.status === 200) {
-          // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({ file: item.thumbUri, key: `${photo.id}-thumb` })
+      }
 
+      // uploadQueue will only contain item with photo generated on the backend
+      const uploadQueue = (await _getQueue())
+        .filter(image => image.photo)
+      // second pass -- upload files
+      for (i = 0; i < uploadQueue.length; i += 1) {
+        const item = uploadQueue[i]
+
+        // eslint-disable-next-line no-await-in-loop
+        const { responseData } = await _uploadItem({
+          item,
+        })
+
+        if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
@@ -767,7 +832,7 @@ export function uploadPendingPhotos() {
 
           dispatch({
             type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
-            photo,
+            photo: item.photo,
           })
         } else {
           // alert("Error uploading file, try again.")
@@ -778,7 +843,9 @@ export function uploadPendingPhotos() {
           })
         }
       }
-    } catch (error) {
+    } catch (err2) {
+      // eslint-disable-next-line no-console
+      console.log({ err2 })
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
@@ -803,14 +870,42 @@ export function uploadPendingPhotos() {
   }
 }
 
-const _uploadFile = async ({ item, uuid }) => {
-  const assetUri = `${item.quedFileName}`
+const _uploadItem = async ({ item }) => {
   try {
-    const newPhoto = (await CONST.gqlClient
-      .mutate({
-        mutation: gql`
-        mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String! ) {
-          createPhoto(lat: $lat, lon: $lon, uuid: $uuid ) {
+    // if video -- upload video file in addition to the image
+    if (item.type === "video") {
+      // eslint-disable-next-line
+      const videoResponse = await _uploadFile({
+        assetKey: `${item.photo.id}.mov`,
+        contentType: "video/mov",
+        assetUri: item.localVideoUrl,
+      })
+    }
+
+    const response = await _uploadFile({
+      assetKey: `${item.photo.id}.upload`,
+      contentType: "image/jpeg",
+      assetUri: item.localImgUrl,
+    })
+    return { responseData: response.responseData }
+  } catch (err3) {
+    // eslint-disable-next-line no-console
+    console.log({ err3 })
+    return { responseData: "something bad happened, unable to upload", err3 }
+  }
+}
+
+const _generatePhoto = async ({
+  uuid,
+  lat,
+  lon,
+  video,
+}) => {
+  const photo = (await CONST.gqlClient
+    .mutate({
+      mutation: gql`
+        mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String!, $video: Boolean ) {
+          createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video ) {
             active
             commentsCount
             watchersCount
@@ -822,43 +917,45 @@ const _uploadFile = async ({ item, uuid }) => {
             location
             updatedAt
             uuid
+            video
         }
       }`,
-        variables: {
-          lat: item.location.coords.latitude,
-          lon: item.location.coords.longitude,
-          uuid,
-        },
-      })).data.createPhoto
+      variables: {
+        uuid,
+        lat,
+        lon,
+        video,
+      },
+    })).data.createPhoto
 
-    const uploadUrl = (await CONST.gqlClient
-      .query({
-        query: gql`
-        query generateUploadUrl($photoId: ID!) {
-          generateUploadUrl(photoId: $photoId)
-        }`,
-        variables: {
-          photoId: `${newPhoto.id}.upload`,
-        },
-      })).data.generateUploadUrl
+  return photo
+}
 
-    const responseData = await FileSystem.uploadAsync(
-      uploadUrl,
-      assetUri,
-      {
-        httpMethod: 'PUT',
-        headers: {
-          "Content-Type": "image/jpeg",
-        },
-      }
-    )
-    return { responseData, photo: newPhoto }
-  } catch (err) {
-    if (err === 'banned') {
-      return { responseData: "banned", err }
+const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
+  // console.log({ assetKey })
+  const uploadUrl = (await CONST.gqlClient
+    .query({
+      query: gql`
+      query generateUploadUrl($assetKey: String!, $contentType: String!) {
+        generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
+      }`,
+      variables: {
+        assetKey,
+        contentType,
+      },
+    })).data.generateUploadUrl
+
+  const responseData = await FileSystem.uploadAsync(
+    uploadUrl,
+    assetUri,
+    {
+      httpMethod: 'PUT',
+      headers: {
+        "Content-Type": contentType,
+      },
     }
-    return { responseData: "something bad happened, unable to upload", err }
-  }
+  )
+  return { responseData }
 }
 
 export default reducer

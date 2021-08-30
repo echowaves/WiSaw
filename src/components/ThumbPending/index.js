@@ -24,6 +24,21 @@ const ThumbPending = props => {
 
   const dispatch = useDispatch()
 
+  const styles = StyleSheet.create({
+    container: {
+      borderRadius: 5,
+      borderWidth: 2,
+      borderColor: item.type === 'image' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR,
+    },
+    thumbnail: {
+      flex: 1,
+      alignSelf: 'stretch',
+      width: '100%',
+      height: '100%',
+      borderRadius: 4,
+    },
+  })
+
   const onThumbPress = item => {
     Alert.alert(
       'This photo is uploading',
@@ -45,8 +60,6 @@ const ThumbPending = props => {
     width: thumbDimension,
     height: thumbDimension,
   }
-
-  // console.log(item.cacheKey)
   return (
     <View>
       <TouchableHighlight
@@ -56,29 +69,14 @@ const ThumbPending = props => {
           thumbWidthStyles,
         ]}>
         <CachedImage
-          source={{ uri: item.thumbUri }}
-          cacheKey={item.cacheKey}
+          source={{ uri: item.localThumbUrl }}
+          cacheKey={item.localCacheKey}
           style={styles.thumbnail}
         />
       </TouchableHighlight>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: CONST.MAIN_COLOR,
-  },
-  thumbnail: {
-    flex: 1,
-    alignSelf: 'stretch',
-    width: '100%',
-    height: '100%',
-    borderRadius: 4,
-  },
-})
 
 ThumbPending.propTypes = {
   item: PropTypes.object.isRequired,

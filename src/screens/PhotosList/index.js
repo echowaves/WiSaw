@@ -41,6 +41,8 @@ import {
   ButtonGroup,
   SearchBar,
   Overlay,
+  Icon,
+  Switch,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
@@ -60,6 +62,7 @@ const PhotosList = () => {
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
+  const [cameraType, setCameraType] = useState("camera")
   // const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
@@ -154,17 +157,12 @@ const PhotosList = () => {
       if (update.isAvailable) {
         await Updates.fetchUpdateAsync()
 
-        Alert.alert(
-          "WiSaw just updated over the Air", "Click OK to Reload the app",
-          [
-            {
-              text1: 'OK',
-              onPress: async () => {
-                await Updates.reloadAsync()
-              },
-            },
-          ],
-        )
+        Toast.show({
+          text1: 'WiSaw just updated over the Air',
+          text2: "Restart in 3 seconds.",
+          topOffset: 70,
+        })
+        setTimeout(() => { Updates.reloadAsync() }, 3000)
       }
     } catch (error) {
     // handle or log error
@@ -205,7 +203,7 @@ const PhotosList = () => {
       // marginBottom: 10,
     },
     cameraButtonPortrait: {
-      flexDirection: 'row',
+      flexDirection: 'column',
       bottom: 20,
       alignSelf: 'center',
       justifyContent: 'center',
@@ -319,18 +317,32 @@ const PhotosList = () => {
   }
 
   const takePhoto = async () => {
-    const cameraReturn = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      // allowsEditing: true,
-      quality: 1.0,
-      exif: false,
-    })
-    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
+    let cameraReturn
+    if (cameraType === "camera") {
+      // launch photo capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // allowsEditing: true,
+        quality: 1.0,
+        exif: false,
+      })
+    } else {
+      // launch video capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        // allowsEditing: true,
+        videoMaxDuration: 5,
+        quality: 1.0,
+        exif: false,
+      })
+    }
 
+    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
     if (cameraReturn.cancelled === false) {
       await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
       // have to wait, otherwise the upload will not start
-      await dispatch(reducer.queueFileForUpload({ uri: cameraReturn.uri, type: cameraReturn.type, location }))
+      await dispatch(reducer.queueFileForUpload({ cameraImgUrl: cameraReturn.uri, type: cameraReturn.type, location }))
+
       dispatch(reducer.uploadPendingPhotos())
     }
   }
@@ -437,36 +449,52 @@ const PhotosList = () => {
       ]
     }>
       {location && (
-        <Button
-          type="clear"
-          containerStyle={
-            {
-              height: 100,
-              width: 100,
-              backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: 50,
-            }
-          }
-          icon={(
-            <FontAwesome
-              name="camera"
-              size={60}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
+        <View>
+          <Switch
+            value={cameraType === 'video'}
+            style={{
+              alignSelf: 'center',
+            }}
+            thumbColor={CONST.TRANSPARENT_BUTTON_COLOR}
+            // color={cameraType === 'video' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
+            trackColor={{ true: CONST.EMPHASIZED_COLOR, false: CONST.MAIN_COLOR }}
+            ios_backgroundColor={CONST.MAIN_COLOR}
+            onValueChange={() => {
+              if (cameraType === 'camera') {
+                setCameraType('video')
+              } else {
+                setCameraType('camera')
               }
-            />
-          )}
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking()
+            }}
+          />
+          <View style={{ padding: 3 }} />
+          <Icon
+            name={cameraType}
+            type="font-awesome-5"
+            color={cameraType === 'camera' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
+            backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
+            size={60}
+            style={{
+              alignSelf: 'center',
+            }}
+            containerStyle={
+              {
+                height: 90,
+                width: 90,
+                backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 45,
+              }
             }
-          }
-        />
+            onPress={
+              () => {
+                checkPermissionsForPhotoTaking()
+              }
+            }
+          />
+        </View>
       )}
     </View>
   )
@@ -475,7 +503,7 @@ const PhotosList = () => {
     <FontAwesome
       name="globe"
       size={23}
-      color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(0))
@@ -489,7 +517,7 @@ const PhotosList = () => {
     <AntDesign
       name="star"
       size={23}
-      color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(1))
@@ -503,7 +531,7 @@ const PhotosList = () => {
     <FontAwesome
       name="search"
       size={23}
-      color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_BUTTON_COLOR}
+      color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
       onPress={
         async () => {
           await dispatch(reducer.setActiveSegment(2))
@@ -640,7 +668,7 @@ const PhotosList = () => {
                 />
               )
             }
-            keyExtractor={item => item.cacheKey}
+            keyExtractor={item => item.localImageName}
             style={
               styles.thumbContainer
             }
