@@ -182,7 +182,9 @@ const Photo = ({ photo }) => {
                     {
                       text: 'Yes',
                       onPress: async () => {
+                        // update commentsCount in global reduce store
                         await dispatch(reducer.deleteComment({ photo, comment }))
+                        // bruit force reload comments to re-render in the photo details screen
                         const photoDetails = await reducer.getPhotoDetails({ photoId: photo.id, uuid })
                         setPhotoDetails(photoDetails)
                       },
