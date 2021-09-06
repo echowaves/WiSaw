@@ -461,15 +461,15 @@ const Photo = ({ photo }) => {
               alignItems: 'center',
             }}
             onPress={
-              () => handleFlipWatch({ photoDetails })
+              async () => setPhotoDetails(await handleFlipWatch({ photoDetails }))
             }>
-            {photoDetails?.watchersCount > 0 && (
+            {photo?.watchersCount > 0 && (
               <Badge
                 badgeStyle={{
                   backgroundColor: CONST.MAIN_COLOR,
                 }}
                 containerStyle={{ position: 'absolute', top: -10, right: -10 }}
-                value={photoDetails?.watchersCount}
+                value={photo?.watchersCount}
               />
             )}
             <AntDesign
@@ -573,11 +573,24 @@ const Photo = ({ photo }) => {
 
   const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
 
-  const handleFlipWatch = ({ photoDetails }) => {
-    if (handleFlipWatch?.isPhotoWatched) {
-      dispatch(reducer.unwatchPhoto({ photo, navigation }))
-    } else {
-      dispatch(reducer.watchPhoto({ photo, navigation }))
+  const handleFlipWatch = async ({ photoDetails }) => {
+    try {
+      if (photoDetails?.isPhotoWatched) {
+        dispatch(reducer.unwatchPhoto({ photo, navigation }))
+      } else {
+        dispatch(reducer.watchPhoto({ photo, navigation }))
+      }
+      return {
+        ...photoDetails,
+        isPhotoWatched: !photoDetails?.isPhotoWatched,
+      }
+    } catch (err) {
+      Toast.show({
+        text1: 'Unable to complete.',
+        text2: 'Network issue? Try again later.',
+        type: "error",
+        topOffset: 70,
+      })
     }
   }
 
