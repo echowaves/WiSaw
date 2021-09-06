@@ -58,7 +58,7 @@ export default function reducer(state = initialState, action) {
   }
 }
 
-export function watchPhoto({ item }) {
+export function watchPhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
@@ -69,20 +69,20 @@ export function watchPhoto({ item }) {
               watchPhoto(photoId: $photoId, uuid: $uuid)
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
           },
         })).data.watchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        photoId: item.id,
+        photoId: photo.id,
         watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        photoId: item.id,
-        watchersCount: item.watchersCount,
+        photoId: photo.id,
+        watchersCount: photo.watchersCount,
       })
       Toast.show({
         text1: 'Unable to watch photo.',
@@ -94,7 +94,7 @@ export function watchPhoto({ item }) {
   }
 }
 
-export function unwatchPhoto({ item }) {
+export function unwatchPhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
@@ -105,20 +105,20 @@ export function unwatchPhoto({ item }) {
               unwatchPhoto(photoId: $photoId, uuid: $uuid)
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
           },
         })).data.unwatchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        photoId: item.id,
+        photoId: photo.id,
         watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        photoId: item.id,
-        watchersCount: item.watchersCount,
+        photoId: photo.id,
+        watchersCount: photo.watchersCount,
       })
       Toast.show({
         text1: "Unable to unwatch photo.",
@@ -273,7 +273,7 @@ export function sharePhoto({ item, branchUniversalObject }) {
   }
 }
 
-export function submitComment({ inputText, uuid, item }) {
+export function submitComment({ inputText, uuid, photo }) {
   return async dispatch => {
     dispatch({
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
@@ -291,7 +291,7 @@ export function submitComment({ inputText, uuid, item }) {
               }
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
             description: inputText,
           },
@@ -300,9 +300,10 @@ export function submitComment({ inputText, uuid, item }) {
       // lets update the state in the photos collection so it renders the right number of likes in the list
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.COMMENT_ADDED,
-        photoId: item.id,
+        photoId: photo.id,
         commentId: comment.id,
         lastComment: comment.comment,
+        commentsCount: photo.commentsCount,
       })
 
       Toast.show({
@@ -310,7 +311,7 @@ export function submitComment({ inputText, uuid, item }) {
         type: "success",
         topOffset: 70,
       })
-      dispatch(watchPhoto({ item }))
+      dispatch(watchPhoto({ photo }))
     } catch (err) {
       console.log({ err })// eslint-disable-line
       dispatch({
@@ -391,7 +392,7 @@ export function toggleCommentButtons({ photoDetails, commentId }) {
   }
 }
 
-export function deleteComment({ photo, comment }) {
+export function deleteComment({ photo, photoDetails, comment }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
 
@@ -414,12 +415,17 @@ export function deleteComment({ photo, comment }) {
         photoId: photo.id,
         commentId: comment.id,
         lastComment,
+        commentsCount: photo.commentsCount,
       })
       Toast.show({
         text1: "Comment deleted.",
         type: "success",
         topOffset: 70,
       })
+      return {
+        ...photoDetails,
+
+      }
     } catch (err) {
       Toast.show({
         text1: "Unable to delete comment.",

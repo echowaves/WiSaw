@@ -94,7 +94,6 @@ const Photo = ({ photo }) => {
     // eslint-disable-next-line
     if (!__DEV__) {
       // import Branch, { BranchEvent } from 'expo-branch'
-      console.log(2)
       const ExpoBranch = await import('expo-branch')
       const Branch = ExpoBranch.default
 
@@ -182,8 +181,10 @@ const Photo = ({ photo }) => {
                     { text: 'No', onPress: () => null, style: 'cancel' },
                     {
                       text: 'Yes',
-                      onPress: () => {
-                        dispatch(reducer.deleteComment({ photo, comment }))
+                      onPress: async () => {
+                        await dispatch(reducer.deleteComment({ photo, comment }))
+                        const photoDetails = await reducer.getPhotoDetails({ photoId: photo.id, uuid })
+                        setPhotoDetails(photoDetails)
                       },
                     },
                   ],

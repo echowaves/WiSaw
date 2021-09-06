@@ -160,10 +160,7 @@ const reducer = (state = initialState, action) => {
           item => ((item.id === action.photoId)
             ? {
               ...item,
-              commentsCount: item.comments.length - 1,
-              comments: item.comments.filter(
-                comment => (comment.id !== action.commentId)
-              ),
+              commentsCount: action.commentsCount - 1,
               lastComment: action.lastComment,
             }
             : item)
@@ -177,7 +174,7 @@ const reducer = (state = initialState, action) => {
           item => ((item.id === action.photoId)
             ? {
               ...item,
-              commentsCount: item.comments.length + 1,
+              commentsCount: action.commentsCount + 1,
               lastComment: action.lastComment,
             }
             : item)

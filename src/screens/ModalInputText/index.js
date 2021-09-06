@@ -25,7 +25,7 @@ const maxStringLength = 140
 const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const { item } = route.params
+  const { photo } = route.params
   const { height } = useDimensions().window
 
   const uuid = useSelector(state => state.photosList.uuid)
@@ -91,15 +91,15 @@ const ModalInputText = ({ route }) => {
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitComment({ inputText: inputTextRef.current.trim(), uuid, item }))
+    dispatch(reducer.submitComment({ inputText: inputTextRef.current.trim(), uuid, photo }))
     navigation.pop()
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <CachedImage
-        source={{ uri: `${item.thumbUrl}` }}
-        cacheKey={`${item.id}t`}
+        source={{ uri: `${photo.thumbUrl}` }}
+        cacheKey={`${photo.id}t`}
         style={{
           alignSelf: 'center',
           width: height < 700 ? 100 : 150,
@@ -150,11 +150,11 @@ const ModalInputText = ({ route }) => {
   )
 }
 ModalInputText.defaultProps = {
-  item: {},
+  photo: {},
 }
 
 ModalInputText.propTypes = {
-  item: PropTypes.object,
+  photo: PropTypes.object,
   route: PropTypes.object.isRequired,
 }
 
