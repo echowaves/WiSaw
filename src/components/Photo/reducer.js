@@ -178,7 +178,7 @@ export function banPhoto({ item }) {
   }
 }
 
-export function deletePhoto({ item }) {
+export function deletePhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
 
@@ -190,13 +190,13 @@ export function deletePhoto({ item }) {
               deletePhoto(photoId: $photoId, uuid: $uuid)
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
           },
         })
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DELETED,
-        photoId: item.id,
+        photoId: photo.id,
       })
       Toast.show({
         text1: "Photo deleted from the Cloud.",
@@ -215,17 +215,17 @@ export function deletePhoto({ item }) {
   }
 }
 
-export function sharePhoto({ item, branchUniversalObject }) {
+export function sharePhoto({ photo, branchUniversalObject }) {
   return async (dispatch, getState) => {
     try {
       let messageBody = 'Check out what I saw today:'
       // const messageHeader = 'Check out what I saw today:'
       const emailSubject = 'WiSaw: Check out what I saw today'
 
-      if (item.comments) {
+      if (photo.comments) {
         // get only the 3 comments
         messageBody = `${messageBody}\n\n${
-          item.comments.slice(0, 3).map(
+          photo.comments.slice(0, 3).map(
             comment => (
               comment.comment
             )
@@ -263,6 +263,7 @@ export function sharePhoto({ item, branchUniversalObject }) {
       //   }
       // )
     } catch (err) {
+      // console.log({ err })
       Toast.show({
         text1: "Unable to share photo.",
         text2: "Wait for a bit and try again...",

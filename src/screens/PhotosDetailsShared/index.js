@@ -19,7 +19,7 @@ import * as CONST from '../../consts.js'
 const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
-  console.log(JSON.stringify(route.params))
+
   const { photoId } = route.params
 
   useEffect(() => {
@@ -87,7 +87,7 @@ const PhotosDetailsShared = ({ route }) => {
       <Photo photo={item} key={item.id} />
     )
   }
-  return <Text>loading...</Text>
+  return <Text />
 }
 
 PhotosDetailsShared.propTypes = {
