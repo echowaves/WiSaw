@@ -130,13 +130,13 @@ export function unwatchPhoto({ photo }) {
   }
 }
 
-export function banPhoto({ item }) {
+export function banPhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
 
     dispatch({
       type: ACTION_TYPES.BAN_PHOTO,
-      photoId: item.id,
+      photoId: photo.id,
     })
 
     try {
@@ -155,13 +155,13 @@ export function banPhoto({ item }) {
             }`,
           variables: {
             uuid,
-            photoId: item.id,
+            photoId: photo.id,
           },
         })
 
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
-        photoId: item.id,
+        photoId: photo.id,
       })
       Toast.show({
         text1: `Abusive Photo reported`,
@@ -172,7 +172,7 @@ export function banPhoto({ item }) {
       // console.error({ err })
       dispatch({
         type: ACTION_TYPES.UNBAN_PHOTO,
-        photoId: item.id,
+        photoId: photo.id,
       })
     }
   }
