@@ -35,20 +35,24 @@ import PropTypes from 'prop-types'
 
 import { Video } from 'expo-av'
 
+// import Branch, { /* BranchEvent */ } from 'expo-branch'
+
 import CachedImage from 'expo-cached-image'
 
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
 
-const Photo = ({ item }) => {
+const Photo = ({ photo }) => {
   const componentIsMounted = useRef(true)
+  const uuid = useSelector(state => state.photosList.uuid)
 
   // const videoRef = React.useRef(null)
 
   const videoRef = useRef(null)
 
   const [status, setStatus] = useState({})
+  const [photoDetails, setPhotoDetails] = useState(null)
 
   const navigation = useNavigation()
 
@@ -57,14 +61,17 @@ const Photo = ({ item }) => {
   const { width, height } = useDimensions().window
   const imageHeight = height - 200
   const bans = useSelector(state => state.photo.bans)
+  const [branchUniversalObject, setBranchUniversalObject] = useState({})
 
   // const error = useSelector(state => state.photo.error)
 
   useFocusEffect( // use this to make the navigastion to a detailed screen faster
     React.useCallback(() => {
-      const task = InteractionManager.runAfterInteractions(() => {
+      const task = InteractionManager.runAfterInteractions(async () => {
         if (componentIsMounted) {
-          dispatch(reducer.getPhotoDetails({ item }))
+          const photoDetails = await reducer.getPhotoDetails({ photoId: photo.id, uuid })
+          setPhotoDetails(photoDetails)
+          createBranchUniversalObject({ photo })
         }
       })
 
@@ -83,91 +90,29 @@ const Photo = ({ item }) => {
   //   }
   // }, [videoRef])// eslint-disable-line react-hooks/exhaustive-deps
 
-  const styles = StyleSheet.create({
-    photoContainer: {
-      width,
-      height: imageHeight,
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      left: 0,
-      backgroundColor: 'transparent',
-    },
-  })
+  const createBranchUniversalObject = async ({ photo }) => {
+    // eslint-disable-next-line
+    if (!__DEV__) {
+      // import Branch, { BranchEvent } from 'expo-branch'
+      const ExpoBranch = await import('expo-branch')
+      const Branch = ExpoBranch.default
 
-  const renderPhotoRow = () => {
-    if (!item.video) {
-      return (
-        <ReactNativeZoomableView
-          style={{
-            flex: 1,
-            height: imageHeight,
-          }}
-          zoomEnabled
-          maxZoom={10.0}
-          minZoom={1.0}
-          zoomStep={1.0}
-          initialZoom={1.0}
-          bindToBorders
-          doubleTapZoomToCenter={false}
-          captureEvent={false}>
-
-          <CachedImage
-            source={{ uri: `${item.thumbUrl}` }}
-            cacheKey={`${item.id}-thumb`}
-            resizeMode="contain"
-            style={
-              styles.photoContainer
-            }
-          />
-          <LinearProgress
-            color={
-              CONST.MAIN_COLOR
-            }
-            style={{
-              alignSelf: 'center',
-              width: width / 4,
-              position: 'absolute',
-              top: imageHeight / 2,
-            }}
-          />
-          <CachedImage
-            source={{ uri: `${item.imgUrl}` }}
-            cacheKey={`${item.id}`}
-            resizeMode="contain"
-            style={
-              styles.photoContainer
-            }
-          />
-        </ReactNativeZoomableView>
+      const _branchUniversalObject = await Branch.createBranchUniversalObject(
+        `${photo.id}`,
+        {
+        // title: article.title,
+          contentImageUrl: photo.imgUrl,
+          // contentDescription: article.description,
+          // This metadata can be used to easily navigate back to this screen
+          // when implementing deep linking with `Branch.subscribe`.
+          metadata: {
+            screen: 'photoScreen',
+            params: JSON.stringify({ photoId: photo.id }),
+          },
+        }
       )
+      setBranchUniversalObject(_branchUniversalObject)
     }
-    return (
-      <View
-        style={{
-          flex: 1,
-          height: imageHeight,
-        }}>
-
-        <Video
-          ref={videoRef}
-          style={
-            styles.photoContainer
-          }
-          source={{
-            uri: `${item.videoUrl}`,
-          }}
-          useNativeControls
-          // overrideFileExtensionAndroid
-          resizeMode="contain"
-          onPlaybackStatusUpdate={status => setStatus(() => status)}
-          usePoster={false}
-          posterSource={{ uri: `${item.thumbUrl}` }}
-        />
-      </View>
-
-    )
   }
 
   const renderDateTime = dateString => {
@@ -175,8 +120,8 @@ const Photo = ({ item }) => {
     return dateTime
   }
 
-  const renderCommentsStats = () => {
-    if (!item.comments || item.comments.length === 0) {
+  const renderCommentsStats = ({ photo, photoDetails }) => {
+    if (!photoDetails?.comments || photoDetails?.comments?.length === 0) {
       return (
         <View style={{ flex: 1, flexDirection: 'row' }}>
           <View style={{ flex: 1 }}>
@@ -186,7 +131,7 @@ const Photo = ({ item }) => {
                 color: CONST.MAIN_COLOR,
                 textAlign: 'right',
               }}>
-              {renderDateTime(item.createdAt)}
+              {renderDateTime(photo.createdAt)}
             </Text>
           </View>
         </View>
@@ -201,7 +146,7 @@ const Photo = ({ item }) => {
               marginLeft: 10,
               color: CONST.MAIN_COLOR,
             }}>
-            {item.comments ? item.comments.length : 0} Comment{(item.comments ? item.comments.length : 0) !== 1 ? 's' : ''}
+            {photoDetails?.comments ? photoDetails?.comments.length : 0} Comment{(photoDetails?.comments ? photoDetails?.comments.length : 0) !== 1 ? 's' : ''}
           </Text>
         </View>
         <View style={{ flex: 1 }}>
@@ -211,7 +156,7 @@ const Photo = ({ item }) => {
               color: CONST.MAIN_COLOR,
               textAlign: 'right',
             }}>
-            {renderDateTime(item.createdAt)}
+            {renderDateTime(photo.createdAt)}
           </Text>
         </View>
       </View>
@@ -219,7 +164,7 @@ const Photo = ({ item }) => {
   }
 
   const renderCommentButtons = ({ photo, comment }) => {
-    if (!comment.hiddenButtons) {
+    if (!comment?.hiddenButtons) {
       return (
         <View style={{
           position: 'absolute',
@@ -236,8 +181,12 @@ const Photo = ({ item }) => {
                     { text: 'No', onPress: () => null, style: 'cancel' },
                     {
                       text: 'Yes',
-                      onPress: () => {
-                        dispatch(reducer.deleteComment({ photo, comment }))
+                      onPress: async () => {
+                        // update commentsCount in global reduce store
+                        await dispatch(reducer.deleteComment({ photo, comment }))
+                        // bruit force reload comments to re-render in the photo details screen
+                        const photoDetails = await reducer.getPhotoDetails({ photoId: photo.id, uuid })
+                        setPhotoDetails(photoDetails)
                       },
                     },
                   ],
@@ -257,17 +206,17 @@ const Photo = ({ item }) => {
     return <View />
   }
 
-  const renderCommentsRows = () => {
-    if (item.comments) {
+  const renderCommentsRows = ({ photo, photoDetails }) => {
+    if (photoDetails?.comments) {
       return (
         <View>
-          {item.comments.map((comment, i) => (
+          {photoDetails?.comments.map((comment, i) => (
             <Row
               key={comment.id}>
               <TouchableOpacity
                 onPress={
                   () => {
-                    dispatch(reducer.toggleCommentButtons({ photoId: item.id, commentId: comment.id }))
+                    setPhotoDetails(reducer.toggleCommentButtons({ photoDetails, commentId: comment.id }))
                   }
                 }>
                 <Card
@@ -290,7 +239,7 @@ const Photo = ({ item }) => {
                       fontSize: 20,
                     }}>{comment.comment}
                   </Text>
-                  {renderCommentButtons({ photo: item, comment })}
+                  {renderCommentButtons({ photo, comment })}
                 </Card>
                 {!comment.hiddenButtons && (
                   <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -315,8 +264,8 @@ const Photo = ({ item }) => {
     }
   }
 
-  const renderAddCommentsRow = () => {
-    if (!item.comments) {
+  const renderAddCommentsRow = ({ photo, photoDetails }) => {
+    if (!photoDetails?.comments) {
       return <Text />
     }
     return (
@@ -326,19 +275,13 @@ const Photo = ({ item }) => {
           flexDirection: 'row',
         }}
         onPress={
-          () => navigation.navigate('ModalInputTextScreen', { item })
+          () => navigation.navigate('ModalInputTextScreen', { photo })
         }>
         <Col
           size={2}
         />
         <Col
-          size={6}
-          style={
-            {
-              justifyContent: 'center',
-              alignItems: 'center',
-            }
-          }>
+          size={6}>
           <Text
             style={{
               fontSize: 25,
@@ -363,16 +306,15 @@ const Photo = ({ item }) => {
     )
   }
 
-  const renderRecognitions = () => {
-    const { recognitions } = item
-    if (!recognitions || recognitions.length === 0) {
-      return (<Text />)
+  const renderRecognitions = ({ photoDetails }) => {
+    if (!photoDetails || !photoDetails?.recognitions || photoDetails?.recognitions?.length === 0) {
+      return <Text />
     }
 
-    const labels = JSON.parse(recognitions[0].metaData).Labels
-    const textDetections = JSON.parse(recognitions[0].metaData).TextDetections
+    const labels = JSON.parse(photoDetails?.recognitions[0].metaData).Labels
+    const textDetections = JSON.parse(photoDetails?.recognitions[0].metaData).TextDetections
       .filter(text => text.Type === 'LINE')
-    const moderationLabels = JSON.parse(recognitions[0].metaData).ModerationLabels
+    const moderationLabels = JSON.parse(photoDetails?.recognitions[0].metaData).ModerationLabels
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         {labels.length > 0 && (
@@ -444,139 +386,136 @@ const Photo = ({ item }) => {
     )
   }
 
-  const renderFooter = () => {
-    const { watched } = item
-    return (
-      <SafeAreaView
-        style={{
-          backgroundColor: 'white',
-          width,
-          height: 70,
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          left: 0,
-        }}>
-        <Divider />
-        { watched === undefined && (
-          <LinearProgress
-            color={
-              CONST.MAIN_COLOR
-            }
+  const renderFooter = ({ photo, photoDetails }) => (
+    <SafeAreaView
+      style={{
+        backgroundColor: 'white',
+        width,
+        height: 70,
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        left: 0,
+      }}>
+      <Divider />
+      { photoDetails?.isPhotoWatched === undefined && (
+        <LinearProgress
+          color={
+            CONST.MAIN_COLOR
+          }
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            left: 0,
+          }}
+        />
+      )}
+      { photoDetails?.isPhotoWatched !== undefined && (
+        <Grid>
+          {/* delete button */}
+          <Col
             style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              left: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
-          />
-        )}
-        { watched !== undefined && (
-          <Grid>
-            {/* delete button */}
-            <Col
+            onPress={
+              () => handleDelete({ photo, photoDetails })
+            }>
+            <FontAwesome
+              name="trash"
               style={{
-                justifyContent: 'center',
-                alignItems: 'center',
+                color: photoDetails?.isPhotoWatched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
               }}
-              onPress={
-                () => handleDelete({ item })
-              }>
-              <FontAwesome
-                name="trash"
-                style={{
-                  color: item.watched ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
-                }}
-                size={30}
+              size={30}
 
-              />
-              <Text style={{ fontSize: 10 }}>
-                Delete
-              </Text>
-            </Col>
-            {/* ban button */}
-            <Col
+            />
+            <Text style={{ fontSize: 10 }}>
+              Delete
+            </Text>
+          </Col>
+          {/* ban button */}
+          <Col
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={
+              () => handleBan({ photo, photoDetails })
+            }>
+            <FontAwesome
+              name="ban"
               style={{
-                justifyContent: 'center',
-                alignItems: 'center',
+                color: photoDetails?.isPhotoWatched || isPhotoBannedByMe({ photoId: photo?.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
               }}
-              onPress={
-                () => handleBan({ item })
-              }>
-              <FontAwesome
-                name="ban"
-                style={{
-                  color: item.watched || isPhotoBannedByMe({ photoId: item.id }) ? CONST.SECONDARY_COLOR : CONST.MAIN_COLOR,
+              size={30}
+            />
+            <Text style={{ fontSize: 10 }}>
+              Ban
+            </Text>
+          </Col>
+          {/* watch button */}
+          <Col
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={
+              async () => setPhotoDetails(await handleFlipWatch({ photoDetails }))
+            }>
+            {photo?.watchersCount > 0 && (
+              <Badge
+                badgeStyle={{
+                  backgroundColor: CONST.MAIN_COLOR,
                 }}
-                size={30}
+                containerStyle={{ position: 'absolute', top: -10, right: -10 }}
+                value={photo?.watchersCount}
               />
-              <Text style={{ fontSize: 10 }}>
-                Ban
-              </Text>
-            </Col>
-            {/* watch button */}
-            <Col
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              onPress={
-                () => handleFlipWatch()
-              }>
-              {item.watchersCount > 0 && (
-                <Badge
-                  badgeStyle={{
-                    backgroundColor: CONST.MAIN_COLOR,
-                  }}
-                  containerStyle={{ position: 'absolute', top: -10, right: -10 }}
-                  value={item.watchersCount}
-                />
-              )}
-              <AntDesign
-                name={item.watched ? "star" : "staro"}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
+            )}
+            <AntDesign
+              name={photoDetails?.isPhotoWatched ? "star" : "staro"}
+              style={
+                {
+                  color: CONST.MAIN_COLOR,
                 }
-                size={30}
-              />
-              <Text style={{ fontSize: 10 }}>
-                {`${item.watched ? 'un-Star' : 'Star'}`}
-              </Text>
-            </Col>
-            {/* share button */}
-            <Col
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              onPress={
-                () => {
-                  dispatch(reducer.sharePhoto({ item }))
+              }
+              size={30}
+            />
+            <Text style={{ fontSize: 10 }}>
+              {`${photoDetails?.isPhotoWatched ? 'un-Star' : 'Star'}`}
+            </Text>
+          </Col>
+          {/* share button */}
+          <Col
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={
+              () => {
+                dispatch(reducer.sharePhoto({ photo, branchUniversalObject }))
+              }
+            }>
+            <FontAwesome
+              name="share"
+              style={
+                {
+                  color: CONST.MAIN_COLOR,
                 }
-              }>
-              <FontAwesome
-                name="share"
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-                size={30}
-              />
-              <Text style={{ fontSize: 10 }}>
-                Share
-              </Text>
-            </Col>
-          </Grid>
-        )}
-      </SafeAreaView>
-    )
-  }
+              }
+              size={30}
+            />
+            <Text style={{ fontSize: 10 }}>
+              Share
+            </Text>
+          </Col>
+        </Grid>
+      )}
+    </SafeAreaView>
+  )
 
-  const handleBan = ({ item }) => {
-    if (item.watched) {
+  const handleBan = ({ photo, photoDetails }) => {
+    if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: 'Unable to ban Starred photo.',
         text2: 'Un-Star photo first.',
@@ -585,7 +524,7 @@ const Photo = ({ item }) => {
       })
       return
     }
-    if (isPhotoBannedByMe({ photoId: item.id })) {
+    if (isPhotoBannedByMe({ photoId: photo?.id })) {
       Toast.show({
         text1: 'Looks like you already reported this Photo',
         text2: 'You can only report same Photo once.',
@@ -598,15 +537,15 @@ const Photo = ({ item }) => {
         'The user who posted this photo will be banned. Are you sure?',
         [
           { text: 'No', onPress: () => null, style: 'cancel' },
-          { text: 'Yes', onPress: () => dispatch(reducer.banPhoto({ item })) },
+          { text: 'Yes', onPress: () => dispatch(reducer.banPhoto({ photo })) },
         ],
         { cancelable: true }
       )
     }
   }
 
-  const handleDelete = ({ item }) => {
-    if (item.watched) {
+  const handleDelete = ({ photo, photoDetails }) => {
+    if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: 'Unable to delete Starred photo.',
         text2: 'Un-Star photo first.',
@@ -623,7 +562,7 @@ const Photo = ({ item }) => {
         {
           text: 'Yes',
           onPress: () => {
-            dispatch(reducer.deletePhoto({ item }))
+            dispatch(reducer.deletePhoto({ photo }))
             navigation.goBack()
           },
         },
@@ -634,12 +573,113 @@ const Photo = ({ item }) => {
 
   const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
 
-  const handleFlipWatch = () => {
-    if (item.watched) {
-      dispatch(reducer.unwatchPhoto({ item, navigation }))
-    } else {
-      dispatch(reducer.watchPhoto({ item, navigation }))
+  const handleFlipWatch = async ({ photoDetails }) => {
+    try {
+      if (photoDetails?.isPhotoWatched) {
+        dispatch(reducer.unwatchPhoto({ photo, navigation }))
+      } else {
+        dispatch(reducer.watchPhoto({ photo, navigation }))
+      }
+      return {
+        ...photoDetails,
+        isPhotoWatched: !photoDetails?.isPhotoWatched,
+      }
+    } catch (err) {
+      Toast.show({
+        text1: 'Unable to complete.',
+        text2: 'Network issue? Try again later.',
+        type: "error",
+        topOffset: 70,
+      })
     }
+  }
+
+  const styles = StyleSheet.create({
+    photoContainer: {
+      width,
+      height: imageHeight,
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      left: 0,
+      backgroundColor: 'transparent',
+    },
+  })
+
+  const renderPhotoRow = ({ photo }) => {
+    if (!photo.video) {
+      return (
+        <ReactNativeZoomableView
+          style={{
+            flex: 1,
+            height: imageHeight,
+          }}
+          zoomEnabled
+          maxZoom={10.0}
+          minZoom={1.0}
+          zoomStep={1.0}
+          initialZoom={1.0}
+          bindToBorders
+          doubleTapZoomToCenter={false}
+          captureEvent={false}>
+
+          <CachedImage
+            source={{ uri: `${photo.thumbUrl}` }}
+            cacheKey={`${photo.id}-thumb`}
+            resizeMode="contain"
+            style={
+              styles.photoContainer
+            }
+          />
+          <LinearProgress
+            color={
+              CONST.MAIN_COLOR
+            }
+            style={{
+              alignSelf: 'center',
+              width: width / 4,
+              position: 'absolute',
+              top: imageHeight / 2,
+            }}
+          />
+          <CachedImage
+            source={{ uri: `${photo.imgUrl}` }}
+            cacheKey={`${photo.id}`}
+            resizeMode="contain"
+            style={
+              styles.photoContainer
+            }
+          />
+        </ReactNativeZoomableView>
+      )
+    }
+    return (
+      <View
+        style={{
+          flex: 1,
+          height: imageHeight,
+        }}>
+
+        <Video
+          ref={videoRef}
+          style={
+            styles.photoContainer
+          }
+          source={{
+            uri: `${photo.videoUrl}`,
+          }}
+          useNativeControls
+          // overrideFileExtensionAndroid
+          resizeMode="contain"
+          onPlaybackStatusUpdate={status => setStatus(() => status)}
+          usePoster={false}
+          posterSource={{ uri: `${photo.thumbUrl}` }}
+          isLooping
+        />
+      </View>
+
+    )
   }
 
   return (
@@ -647,31 +687,31 @@ const Photo = ({ item }) => {
       <ScrollView style={{ margin: 1, backgroundColor: 'white' }}>
         <Grid>
           <Row>
-            {renderPhotoRow()}
+            {renderPhotoRow({ photo })}
           </Row>
           <Row>
-            {renderCommentsStats()}
+            {renderCommentsStats({ photo, photoDetails }) }
           </Row>
           <Row>
-            {renderCommentsRows()}
+            { renderCommentsRows({ photo, photoDetails }) }
           </Row>
           <Row>
-            {renderAddCommentsRow()}
+            { renderAddCommentsRow({ photo, photoDetails }) }
           </Row>
           <Divider />
           <Row>
-            {renderRecognitions()}
+            {renderRecognitions({ photoDetails }) }
           </Row>
           <Row style={{ height: 110 }} />
         </Grid>
       </ScrollView>
-      {renderFooter()}
+      {renderFooter({ photo, photoDetails })}
     </View>
   )
 }
 
 Photo.propTypes = {
-  item: PropTypes.object.isRequired,
+  photo: PropTypes.object.isRequired,
 }
 
 export default (Photo)

@@ -116,8 +116,8 @@ const PhotosDetails = ({ route }) => {
       loadMinimalSize={1}
       showsPagination={false}
       pagingEnabled>
-      {photos.map(item => (
-        <Photo item={item} key={item.id} />
+      {photos.map(photo => (
+        <Photo photo={photo} key={photo.id} />
       ))}
     </Swiper>
   )

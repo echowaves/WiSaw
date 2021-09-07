@@ -107,6 +107,23 @@ const PhotosList = () => {
       dispatch(reducer.initState()),
       dispatch(reducer.zeroMoment()),
     ])
+
+    // eslint-disable-next-line
+    if (!__DEV__) {
+      // import Branch, { BranchEvent } from 'expo-branch'
+      console.log(1)
+      const ExpoBranch = await import('expo-branch')
+      const Branch = ExpoBranch.default
+
+      console.log('...................................................................................1')
+      console.log({ Branch })
+      Branch.subscribe(bundle => {
+        if (bundle && bundle.params && bundle?.params?.$canonical_identifier && !bundle.error) {
+          // `bundle.params` contains all the info about the link.
+          navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
+        }
+      })
+    }
   }
 
   useEffect(() => {

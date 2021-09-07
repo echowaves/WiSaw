@@ -1,11 +1,13 @@
 // import Branch from '../../util/my-branch'
-import * as SMS from 'expo-sms'
+// import * as SMS from 'expo-sms'
 
 import Toast from 'react-native-toast-message'
 
-import { CacheManager } from 'expo-cached-image'
+// import { CacheManager } from 'expo-cached-image'
 
 import { gql } from "@apollo/client"
+
+// import Branch, { BranchEvent } from 'expo-branch'
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -56,7 +58,7 @@ export default function reducer(state = initialState, action) {
   }
 }
 
-export function watchPhoto({ item }) {
+export function watchPhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
@@ -67,20 +69,20 @@ export function watchPhoto({ item }) {
               watchPhoto(photoId: $photoId, uuid: $uuid)
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
           },
         })).data.watchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        photoId: item.id,
+        photoId: photo.id,
         watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        photoId: item.id,
-        watchersCount: item.watchersCount,
+        photoId: photo.id,
+        watchersCount: photo.watchersCount,
       })
       Toast.show({
         text1: 'Unable to watch photo.',
@@ -92,7 +94,7 @@ export function watchPhoto({ item }) {
   }
 }
 
-export function unwatchPhoto({ item }) {
+export function unwatchPhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
     try {
@@ -103,20 +105,20 @@ export function unwatchPhoto({ item }) {
               unwatchPhoto(photoId: $photoId, uuid: $uuid)
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
           },
         })).data.unwatchPhoto
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
-        photoId: item.id,
+        photoId: photo.id,
         watchersCount,
       })
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,
-        photoId: item.id,
-        watchersCount: item.watchersCount,
+        photoId: photo.id,
+        watchersCount: photo.watchersCount,
       })
       Toast.show({
         text1: "Unable to unwatch photo.",
@@ -128,13 +130,13 @@ export function unwatchPhoto({ item }) {
   }
 }
 
-export function banPhoto({ item }) {
+export function banPhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
 
     dispatch({
       type: ACTION_TYPES.BAN_PHOTO,
-      photoId: item.id,
+      photoId: photo.id,
     })
 
     try {
@@ -153,13 +155,13 @@ export function banPhoto({ item }) {
             }`,
           variables: {
             uuid,
-            photoId: item.id,
+            photoId: photo.id,
           },
         })
 
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_BANNED,
-        photoId: item.id,
+        photoId: photo.id,
       })
       Toast.show({
         text1: `Abusive Photo reported`,
@@ -170,13 +172,13 @@ export function banPhoto({ item }) {
       // console.error({ err })
       dispatch({
         type: ACTION_TYPES.UNBAN_PHOTO,
-        photoId: item.id,
+        photoId: photo.id,
       })
     }
   }
 }
 
-export function deletePhoto({ item }) {
+export function deletePhoto({ photo }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
 
@@ -188,13 +190,13 @@ export function deletePhoto({ item }) {
               deletePhoto(photoId: $photoId, uuid: $uuid)
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
           },
         })
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DELETED,
-        photoId: item.id,
+        photoId: photo.id,
       })
       Toast.show({
         text1: "Photo deleted from the Cloud.",
@@ -213,48 +215,55 @@ export function deletePhoto({ item }) {
   }
 }
 
-export function sharePhoto({ item }) {
+export function sharePhoto({ photo, branchUniversalObject }) {
   return async (dispatch, getState) => {
     try {
       let messageBody = 'Check out what I saw today:'
       // const messageHeader = 'Check out what I saw today:'
-      // const emailSubject = 'WiSaw: Check out what I saw today'
+      const emailSubject = 'WiSaw: Check out what I saw today'
 
-      if (item.comments) {
+      if (photo.comments) {
         // get only the 3 comments
         messageBody = `${messageBody}\n\n${
-          item.comments.slice(0, 3).map(
+          photo.comments.slice(0, 3).map(
             comment => (
               comment.comment
             )
-          ).join('\n\n')}\n\n${item.watchersCount > 0 ? `Thumbs Up: ${item.watchersCount}\n\n` : ''}`
+          ).join('\n\n')}\n\n`
       }
-      messageBody = `${messageBody}\nhttps://www.wisaw.com/photos/${item.id}`
-      // const linkProperties = { feature: 'sharing', channel: 'direct', campaign: 'photo sharing' }
-      // const controlParams = { $photo_id: item.id, $item: item }
-      //
-      // const shareOptions = { messageHeader, emailSubject, messageBody }
-      //
-      // const { channel, completed, error, } =
-      // await branchUniversalObject.showShareSheet(shareOptions, linkProperties, controlParams)
 
-      if (!(await SMS.isAvailableAsync())) {
-        throw (new Error("SMS is not available."))
-      }
-      const uri = await CacheManager.getCachedUri({ key: `${item.id}` })
-
-      await SMS.sendSMSAsync(
-        [],
+      const shareOptions = {
+        messageHeader: "What I Saw today...",
         messageBody,
-        {
-          attachments: {
-            uri,
-            mimeType: 'image/jpeg',
-            filename: `${item.id}i.jpg`,
-          },
-        }
-      )
+        emailSubject,
+        // attachments: {
+        //   uri: branchUniversalObject.canonicalUrl,
+        //   mimeType: 'image/jpeg',
+        //   // filename: `${item.id}ii.jpg`,
+        // },
+
+      }
+      await branchUniversalObject.showShareSheet(shareOptions)
+
+      //
+      // if (!(await SMS.isAvailableAsync())) {
+      //   throw (new Error("SMS is not available."))
+      // }
+      // const uri = await CacheManager.getCachedUri({ key: `${item.id}` })
+      //
+      // await SMS.sendSMSAsync(
+      //   [],
+      //   messageBody,
+      //   {
+      //     attachments: {
+      //       uri,
+      //       mimeType: 'image/jpeg',
+      //       filename: `${item.id}i.jpg`,
+      //     },
+      //   }
+      // )
     } catch (err) {
+      // console.log({ err })
       Toast.show({
         text1: "Unable to share photo.",
         text2: "Wait for a bit and try again...",
@@ -265,7 +274,7 @@ export function sharePhoto({ item }) {
   }
 }
 
-export function submitComment({ inputText, uuid, item }) {
+export function submitComment({ inputText, uuid, photo }) {
   return async dispatch => {
     dispatch({
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
@@ -283,7 +292,7 @@ export function submitComment({ inputText, uuid, item }) {
               }
             }`,
           variables: {
-            photoId: item.id,
+            photoId: photo.id,
             uuid,
             description: inputText,
           },
@@ -292,9 +301,10 @@ export function submitComment({ inputText, uuid, item }) {
       // lets update the state in the photos collection so it renders the right number of likes in the list
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.COMMENT_ADDED,
-        photoId: item.id,
+        photoId: photo.id,
         commentId: comment.id,
         lastComment: comment.comment,
+        commentsCount: photo.commentsCount,
       })
 
       Toast.show({
@@ -302,7 +312,7 @@ export function submitComment({ inputText, uuid, item }) {
         type: "success",
         topOffset: 70,
       })
-      dispatch(watchPhoto({ item }))
+      dispatch(watchPhoto({ photo }))
     } catch (err) {
       console.log({ err })// eslint-disable-line
       dispatch({
@@ -319,14 +329,11 @@ export function submitComment({ inputText, uuid, item }) {
   }
 }
 
-export function getPhotoDetails({ item }) {
-  return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
-
-    try {
-      const response = (await CONST.gqlClient
-        .query({
-          query: gql`
+export const getPhotoDetails = async ({ photoId, uuid }) => {
+  try {
+    const response = (await CONST.gqlClient
+      .query({
+        query: gql`
         query getPhotoDetails($photoId: ID!, $uuid: String!) {
           getPhotoDetails(photoId: $photoId, uuid: $uuid,) {
             comments {
@@ -340,45 +347,53 @@ export function getPhotoDetails({ item }) {
                 isPhotoWatched
               }
         }`,
-          variables: {
-            photoId: item.id,
-            uuid,
-          },
-          fetchPolicy: "network-only",
-        }))
-
-      const {
-        recognitions,
-        isPhotoWatched,
-      } = response.data.getPhotoDetails
-      const comments = response.data.getPhotoDetails.comments.map(comment => ({
-        ...comment,
-        hiddenButtons: true,
-
+        variables: {
+          photoId,
+          uuid,
+        },
+        fetchPolicy: "network-only",
       }))
 
-      dispatch({
-        type: PHOTOS_LIST_ACTION_TYPES.PHOTO_DETAILS_LOADED,
-        item,
-        comments,
-        recognitions,
-        isPhotoWatched,
-      })
-    } catch (err) {
-      console.log({ err })// eslint-disable-line
+    const {
+      recognitions,
+      isPhotoWatched,
+    } = response.data.getPhotoDetails
+
+    const comments = response.data.getPhotoDetails.comments.map(comment => ({
+      ...comment,
+      hiddenButtons: true,
+    }))
+    return {
+      comments,
+      recognitions,
+      isPhotoWatched,
     }
+  } catch (err) {
+      console.log({ err })// eslint-disable-line
   }
 }
 
-export function toggleCommentButtons({ photoId, commentId }) {
+export function toggleCommentButtons({ photoDetails, commentId }) {
+  const comments = photoDetails.comments.map(
+    comment => ((comment.id === commentId)
+      ? {
+        ...comment,
+        hiddenButtons: !comment.hiddenButtons,
+      }
+      : {
+        ...comment,
+        hiddenButtons: true,
+      }
+    )
+  )
+
   return {
-    type: PHOTOS_LIST_ACTION_TYPES.TOGGLE_COMMENT_BUTTONS,
-    photoId,
-    commentId,
+    ...photoDetails,
+    comments,
   }
 }
 
-export function deleteComment({ photo, comment }) {
+export function deleteComment({ photo, photoDetails, comment }) {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
 
@@ -401,12 +416,17 @@ export function deleteComment({ photo, comment }) {
         photoId: photo.id,
         commentId: comment.id,
         lastComment,
+        commentsCount: photo.commentsCount,
       })
       Toast.show({
         text1: "Comment deleted.",
         type: "success",
         topOffset: 70,
       })
+      return {
+        ...photoDetails,
+
+      }
     } catch (err) {
       Toast.show({
         text1: "Unable to delete comment.",

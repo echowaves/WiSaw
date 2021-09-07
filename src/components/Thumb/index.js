@@ -26,6 +26,8 @@ const Thumb = props => {
 
   const onThumbPress = item => {
     navigation.navigate('PhotosDetails', { currentPhotoIndex: index })
+    // console.log(item.id)
+    // navigation.navigate('PhotosDetailsShared', { photoId: item.id })
   }
 
   const thumbWidthStyles = {

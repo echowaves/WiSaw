@@ -127,16 +127,6 @@ const reducer = (state = initialState, action) => {
         ...state,
         photos: state.photos.filter(item => (item.id !== action.photoId)),
       }
-    case ACTION_TYPES.PHOTO_DETAILS_LOADED:
-      return {
-        ...state,
-        photos: state.photos.map(item => ((item.id === action.item.id) ? {
-          ...item,
-          comments: action.comments,
-          recognitions: action.recognitions,
-          watched: action.isPhotoWatched,
-        } : item)),
-      }
 
     case ACTION_TYPES.PHOTO_UPLOADED_PREPEND:
       return {
@@ -163,31 +153,6 @@ const reducer = (state = initialState, action) => {
         ...state,
         zeroMoment: action.zeroMoment,
       }
-
-    case ACTION_TYPES.TOGGLE_COMMENT_BUTTONS:
-      return {
-        ...state,
-        photos: state.photos.map(
-          item => ((item.id === action.photoId)
-            ? {
-              ...item,
-              comments: item.comments.map(
-                comment => ((comment.id === action.commentId)
-                  ? {
-                    ...comment,
-                    hiddenButtons: !comment.hiddenButtons,
-                  }
-                  : {
-                    ...comment,
-                    hiddenButtons: true,
-                  }
-                )
-              )
-              ,
-            }
-            : item)
-        ),
-      }
     case ACTION_TYPES.COMMENT_DELETED:
       return {
         ...state,
@@ -195,10 +160,7 @@ const reducer = (state = initialState, action) => {
           item => ((item.id === action.photoId)
             ? {
               ...item,
-              commentsCount: item.comments.length - 1,
-              comments: item.comments.filter(
-                comment => (comment.id !== action.commentId)
-              ),
+              commentsCount: action.commentsCount - 1,
               lastComment: action.lastComment,
             }
             : item)
@@ -212,7 +174,7 @@ const reducer = (state = initialState, action) => {
           item => ((item.id === action.photoId)
             ? {
               ...item,
-              commentsCount: item.comments.length + 1,
+              commentsCount: action.commentsCount + 1,
               lastComment: action.lastComment,
             }
             : item)
