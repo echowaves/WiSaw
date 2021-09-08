@@ -92,6 +92,27 @@ const PhotosList = () => {
     setLastViewableRow(lastViewableItem.index)
   })
 
+  const _initBranch = async () => {
+  // eslint-disable-next-line
+  if (!__DEV__) {
+      const ExpoBranch = await import('expo-branch')
+      const Branch = ExpoBranch.default
+
+      // console.log('...................................................................................1')
+      // console.log({ Branch })
+      // alert(JSON.stringify(Branch))
+      Branch.subscribe(bundle => {
+        if (bundle && bundle.params && bundle?.params?.$canonical_identifier && !bundle.error) {
+        // `bundle.params` contains all the info about the link.
+
+          // alert(JSON.stringify(bundle))
+
+          navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
+        }
+      })
+    }
+  }
+
   const _initState = async () => {
     // /// //////////////////////////////////////
     // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
@@ -109,28 +130,10 @@ const PhotosList = () => {
       dispatch(reducer.initState()),
       dispatch(reducer.zeroMoment()),
     ])
-
-    // eslint-disable-next-line
-    if (!__DEV__) {
-      const ExpoBranch = await import('expo-branch')
-      const Branch = ExpoBranch.default
-
-      // console.log('...................................................................................1')
-      // console.log({ Branch })
-      // alert(JSON.stringify(Branch))
-      Branch.subscribe(bundle => {
-        if (bundle && bundle.params && bundle?.params?.$canonical_identifier && !bundle.error) {
-          // `bundle.params` contains all the info about the link.
-
-          // alert(JSON.stringify(bundle))
-
-          navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
-        }
-      })
-    }
   }
 
   useEffect(() => {
+    _initBranch()
     _initState()
 
     // add network availability listener
