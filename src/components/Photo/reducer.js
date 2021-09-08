@@ -215,17 +215,17 @@ export function deletePhoto({ photo }) {
   }
 }
 
-export function sharePhoto({ photo, branchUniversalObject }) {
+export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
   return async (dispatch, getState) => {
     try {
       let messageBody = 'Check out what I saw today:'
       // const messageHeader = 'Check out what I saw today:'
       const emailSubject = 'WiSaw: Check out what I saw today'
 
-      if (photo.comments) {
+      if (photoDetails.comments) {
         // get only the 3 comments
         messageBody = `${messageBody}\n\n${
-          photo.comments.slice(0, 3).map(
+          photoDetails.comments.slice(0, 3).map(
             comment => (
               comment.comment
             )
@@ -241,7 +241,6 @@ export function sharePhoto({ photo, branchUniversalObject }) {
         //   mimeType: 'image/jpeg',
         //   // filename: `${item.id}ii.jpg`,
         // },
-
       }
       await branchUniversalObject.showShareSheet(shareOptions)
 

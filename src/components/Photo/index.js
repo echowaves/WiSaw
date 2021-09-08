@@ -493,7 +493,7 @@ const Photo = ({ photo }) => {
             }}
             onPress={
               () => {
-                dispatch(reducer.sharePhoto({ photo, branchUniversalObject }))
+                dispatch(reducer.sharePhoto({ photo, photoDetails, branchUniversalObject }))
               }
             }>
             <FontAwesome

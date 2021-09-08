@@ -11,6 +11,8 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Updates from 'expo-updates'
 import Toast from 'react-native-toast-message'
 
+// import Branch, { BranchEvent } from 'expo-branch'
+
 import useKeyboard from '@rnhooks/keyboard'
 
 import {
@@ -110,12 +112,12 @@ const PhotosList = () => {
 
     // eslint-disable-next-line
     if (!__DEV__) {
-      // import Branch, { BranchEvent } from 'expo-branch'
       const ExpoBranch = await import('expo-branch')
       const Branch = ExpoBranch.default
 
-      console.log('...................................................................................1')
-      console.log({ Branch })
+      // console.log('...................................................................................1')
+      // console.log({ Branch })
+      // alert(JSON.stringify(Branch))
       Branch.subscribe(bundle => {
         if (bundle && bundle.params && bundle?.params?.$canonical_identifier && !bundle.error) {
           // `bundle.params` contains all the info about the link.
