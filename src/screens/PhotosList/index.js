@@ -111,7 +111,6 @@ const PhotosList = () => {
     // eslint-disable-next-line
     if (!__DEV__) {
       // import Branch, { BranchEvent } from 'expo-branch'
-      console.log(1)
       const ExpoBranch = await import('expo-branch')
       const Branch = ExpoBranch.default
 
@@ -267,8 +266,10 @@ const PhotosList = () => {
     dispatch(reducer.uploadPendingPhotos())
   }
 
-  async function _checkPermission({ permissionFunction, alertHeader, alertBody }) {
-    const { status } = await permissionFunction()
+  async function _checkPermission({
+    permissionFunction, alertHeader, alertBody, permissionFunctionArgument,
+  }) {
+    const { status } = await permissionFunction(permissionFunctionArgument)
     if (status !== 'granted') {
       Alert.alert(
         alertHeader,
@@ -298,6 +299,7 @@ const PhotosList = () => {
         permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
         alertHeader: 'Do you want to save photo on your device?',
         alertBody: 'Why don\'t you enable the permission?',
+        permissionFunctionArgument: true,
       })
 
       if (photoAlbomPermission === 'granted') {
