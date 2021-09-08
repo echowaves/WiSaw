@@ -287,7 +287,8 @@ const Photo = ({ photo }) => {
           size={2}
         />
         <Col
-          size={6}>
+          size={6}
+          style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
           <Text
             style={{
               fontSize: 25,
@@ -338,6 +339,7 @@ const Photo = ({ photo }) => {
             {labels.map(label => (
               <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{label.Name}</Text>
             ))}
+            <Text />
             <Divider />
           </Card>
         )}
@@ -360,6 +362,7 @@ const Photo = ({ photo }) => {
             {textDetections.map(text => (
               <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{text.DetectedText}</Text>
             ))}
+            <Text />
             <Divider />
           </Card>
         )}
