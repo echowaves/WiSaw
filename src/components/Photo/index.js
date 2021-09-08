@@ -70,7 +70,10 @@ const Photo = ({ photo }) => {
       const task = InteractionManager.runAfterInteractions(async () => {
         if (componentIsMounted) {
           const photoDetails = await reducer.getPhotoDetails({ photoId: photo.id, uuid })
-          setPhotoDetails(photoDetails)
+          setPhotoDetails({
+            ...photoDetails,
+            watchersCount: photo.watchersCount,
+          })
           createBranchUniversalObject({ photo })
         }
       })
@@ -185,8 +188,11 @@ const Photo = ({ photo }) => {
                         // update commentsCount in global reduce store
                         await dispatch(reducer.deleteComment({ photo, comment }))
                         // bruit force reload comments to re-render in the photo details screen
-                        const photoDetails = await reducer.getPhotoDetails({ photoId: photo.id, uuid })
-                        setPhotoDetails(photoDetails)
+                        const updatedPhotoDetails = await reducer.getPhotoDetails({ photoId: photo.id, uuid })
+                        setPhotoDetails({
+                          ...photoDetails,
+                          ...updatedPhotoDetails,
+                        })
                       },
                     },
                   ],
@@ -461,15 +467,17 @@ const Photo = ({ photo }) => {
               alignItems: 'center',
             }}
             onPress={
-              async () => setPhotoDetails(await handleFlipWatch({ photoDetails }))
+              async () => {
+                handleFlipWatch({ photoDetails, photo })
+              }
             }>
-            {photo?.watchersCount > 0 && (
+            {photoDetails.watchersCount > 0 && (
               <Badge
                 badgeStyle={{
                   backgroundColor: CONST.MAIN_COLOR,
                 }}
                 containerStyle={{ position: 'absolute', top: -10, right: -10 }}
-                value={photo?.watchersCount}
+                value={photoDetails.watchersCount}
               />
             )}
             <AntDesign
@@ -573,16 +581,20 @@ const Photo = ({ photo }) => {
 
   const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
 
-  const handleFlipWatch = async ({ photoDetails }) => {
+  const handleFlipWatch = async ({ photoDetails, photo }) => {
     try {
       if (photoDetails?.isPhotoWatched) {
-        dispatch(reducer.unwatchPhoto({ photo, navigation }))
+        setPhotoDetails({
+          ...photoDetails,
+          watchersCount: await dispatch(reducer.unwatchPhoto({ photo })),
+          isPhotoWatched: !photoDetails?.isPhotoWatched,
+        })
       } else {
-        dispatch(reducer.watchPhoto({ photo, navigation }))
-      }
-      return {
-        ...photoDetails,
-        isPhotoWatched: !photoDetails?.isPhotoWatched,
+        setPhotoDetails({
+          ...photoDetails,
+          watchersCount: await dispatch(reducer.watchPhoto({ photo })),
+          isPhotoWatched: !photoDetails?.isPhotoWatched,
+        })
       }
     } catch (err) {
       Toast.show({

@@ -78,6 +78,7 @@ export function watchPhoto({ photo }) {
         photoId: photo.id,
         watchersCount,
       })
+      return watchersCount
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_UNWATCHED,
@@ -114,6 +115,7 @@ export function unwatchPhoto({ photo }) {
         photoId: photo.id,
         watchersCount,
       })
+      return watchersCount
     } catch (err) {
       dispatch({
         type: PHOTOS_LIST_ACTION_TYPES.PHOTO_WATCHED,

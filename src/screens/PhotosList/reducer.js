@@ -140,12 +140,12 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.PHOTO_WATCHED:
       return {
         ...state,
-        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, watchersCount: action.watchersCount, watched: true } : item)),
+        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, watchersCount: action.watchersCount } : item)),
       }
     case ACTION_TYPES.PHOTO_UNWATCHED:
       return {
         ...state,
-        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, watchersCount: action.watchersCount, watched: false } : item)),
+        photos: state.photos.map(item => ((item.id === action.photoId) ? { ...item, watchersCount: action.watchersCount } : item)),
       }
 
     case ACTION_TYPES.ZERO_MOMEMT:
