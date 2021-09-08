@@ -121,6 +121,9 @@ const PhotosList = () => {
       Branch.subscribe(bundle => {
         if (bundle && bundle.params && bundle?.params?.$canonical_identifier && !bundle.error) {
           // `bundle.params` contains all the info about the link.
+
+          // alert(JSON.stringify(bundle))
+
           navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
         }
       })
