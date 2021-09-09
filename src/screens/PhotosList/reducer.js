@@ -842,6 +842,10 @@ const _uploadItem = async ({ item }) => {
         contentType: "video/mov",
         assetUri: item.localVideoUrl,
       })
+
+      if (videoResponse?.responseData?.status !== 200) {
+        return { responseData: "something bad happened during video upload, unable to upload.", status: videoResponse.responseData.status }
+      }
     }
 
     const response = await _uploadFile({
