@@ -398,7 +398,7 @@ const Photo = ({ photo }) => {
   const renderFooter = ({ photo, photoDetails }) => (
     <SafeAreaView
       style={{
-        backgroundColor: 'white',
+        backgroundColor: CONST.NAV_COLOR,
         width,
         height: 70,
         position: 'absolute',

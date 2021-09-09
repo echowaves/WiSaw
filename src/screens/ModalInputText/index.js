@@ -45,6 +45,9 @@ const ModalInputText = ({ route }) => {
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerBackTitle: <Text />,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -60,7 +63,6 @@ const ModalInputText = ({ route }) => {
       size={30}
       style={
         {
-          backgroundColor: '#ffffff',
           marginLeft: 10,
           color: CONST.MAIN_COLOR,
           width: 60,

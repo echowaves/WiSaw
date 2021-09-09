@@ -28,6 +28,8 @@ import {
   FontAwesome, FontAwesome5, MaterialIcons, Ionicons, AntDesign,
 } from '@expo/vector-icons'
 
+import { Col, Row, Grid } from "react-native-easy-grid"
+
 import NetInfo from "@react-native-community/netinfo"
 
 import FlatGrid from 'react-native-super-grid'
@@ -64,7 +66,6 @@ const PhotosList = () => {
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
-  const [cameraType, setCameraType] = useState("camera")
   // const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
@@ -205,18 +206,6 @@ const PhotosList = () => {
       // paddingBottom: 10,
       // marginBottom: 10,
     },
-    cameraButtonPortrait: {
-      flexDirection: 'column',
-      bottom: 20,
-      alignSelf: 'center',
-      justifyContent: 'center',
-    },
-
-    cameraButtonLandscape: {
-      flexDirection: 'column',
-      right: 20,
-      top: width < height ? width * 0.5 - 50 - 32 : height * 0.5 - 50 - 32,
-    },
 
   })
 
@@ -226,12 +215,18 @@ const PhotosList = () => {
         headerTitle: renderHeaderTitle,
         headerLeft: renderHeaderLeft,
         headerRight: renderHeaderRight,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
       })
     } else {
       navigation.setOptions({
         headerTitle: null,
         headerLeft: null,
         headerRight: null,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
       })
     }
   }
@@ -274,7 +269,7 @@ const PhotosList = () => {
     return status
   }
 
-  const checkPermissionsForPhotoTaking = async () => {
+  const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
     const cameraPermission = await _checkPermission({
       permissionFunction: ImagePicker.requestCameraPermissionsAsync,
       alertHeader: 'Do you want to take photo with wisaw?',
@@ -290,7 +285,7 @@ const PhotosList = () => {
       })
 
       if (photoAlbomPermission === 'granted') {
-        await takePhoto()
+        await takePhoto({ cameraType })
       }
     }
   }
@@ -322,7 +317,7 @@ const PhotosList = () => {
     return position
   }
 
-  const takePhoto = async () => {
+  const takePhoto = async ({ cameraType }) => {
     let cameraReturn
     if (cameraType === "camera") {
       // launch photo capturing
@@ -445,64 +440,87 @@ const PhotosList = () => {
   )
 
   const renderPhotoButton = () => (
-    <View style={
-      [
-        {
-          flex: 1,
-          position: 'absolute',
-        },
-        styles.cameraButtonPortrait,
-      ]
-    }>
-      {location && (
-        <View>
-          <Switch
-            value={cameraType === 'video'}
-            style={{
-              alignSelf: 'center',
-            }}
-            thumbColor={CONST.TRANSPARENT_BUTTON_COLOR}
-            // color={cameraType === 'video' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
-            trackColor={{ true: CONST.EMPHASIZED_COLOR, false: CONST.MAIN_COLOR }}
-            ios_backgroundColor={CONST.MAIN_COLOR}
-            onValueChange={() => {
-              if (cameraType === 'camera') {
-                setCameraType('video')
-              } else {
-                setCameraType('camera')
-              }
-            }}
-          />
-          <View style={{ padding: 3 }} />
+    <SafeAreaView
+      style={{
+        backgroundColor: CONST.FOOTER_COLOR,
+        width,
+        height: 70,
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        left: 0,
+      }}>
+      <Divider />
+      <Grid>
+        {/* video button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
           <Icon
-            name={cameraType}
+            name="video"
             type="font-awesome-5"
-            color={cameraType === 'camera' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
+            color={CONST.EMPHASIZED_COLOR}
             backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
-            size={60}
+            size={30}
             style={{
               alignSelf: 'center',
             }}
+            onPress={
+              () => {
+                checkPermissionsForPhotoTaking({ cameraType: 'video' })
+              }
+            }
             containerStyle={
               {
-                height: 90,
-                width: 90,
-                backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+                height: 50,
+                width: 80,
+                backgroundColor: 'white',
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 borderRadius: 45,
               }
             }
+          />
+        </Col>
+        {/* photo button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Icon
+            name="camera"
+            type="font-awesome-5"
+            color={CONST.MAIN_COLOR}
+            backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
+            size={30}
+            style={{
+              alignSelf: 'center',
+            }}
             onPress={
               () => {
-                checkPermissionsForPhotoTaking()
+                checkPermissionsForPhotoTaking({ cameraType: 'camera' })
+              }
+            }
+            containerStyle={
+              {
+                height: 50,
+                width: 80,
+                backgroundColor: 'white',
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 45,
               }
             }
           />
-        </View>
-      )}
-    </View>
+        </Col>
+
+      </Grid>
+    </SafeAreaView>
   )
 
   const segment0 = () => (

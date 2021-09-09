@@ -42,6 +42,9 @@ const PhotosDetails = ({ route }) => {
     navigation.setOptions({
       headerTitle: renderHeaderTitle,
       headerLeft: renderHeaderLeft,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -57,7 +60,6 @@ const PhotosDetails = ({ route }) => {
       size={30}
       style={
         {
-          backgroundColor: '#ffffff',
           marginLeft: 10,
           color: CONST.MAIN_COLOR,
           width: 60,
