@@ -439,7 +439,7 @@ const PhotosList = () => {
     />
   )
 
-  const renderPhotoButton = () => (
+  const renderPhotoButton = () => location && (
     <SafeAreaView
       style={{
         backgroundColor: CONST.FOOTER_COLOR,
