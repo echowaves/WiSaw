@@ -50,7 +50,7 @@ const Thumb = props => {
           style={styles.thumbnail}
         />
       </TouchableHighlight>
-      { item.commentsCount > 0 && (
+      { item.commentsCount > 0 && false && (
         <View
           style={
             {
@@ -82,7 +82,7 @@ const Thumb = props => {
           </Text>
         </View>
       )}
-      { item.watchersCount > 0 && (
+      { item.watchersCount > 0 && false && (
         <View
           style={
             {
