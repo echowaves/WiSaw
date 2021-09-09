@@ -114,7 +114,7 @@ const Thumb = props => {
           </Text>
         </View>
       )}
-      { item?.video && (
+      { item?.video && false && (
         <View
           style={
             {
