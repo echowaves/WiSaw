@@ -1,6 +1,6 @@
 {
   "name": "WiSaw",
-  "version": "5.14.5",
+  "version": "5.14.7",
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "node_modules/expo/AppEntry.js",
