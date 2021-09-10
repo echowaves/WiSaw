@@ -95,17 +95,11 @@ const PhotosDetails = ({ route }) => {
       bounces
       autoplay={false}
       horizontal
-      loop={false}
+      loop
       index={currentPhotoIndex}
       onIndexChanged={newIndex => {
         if (newIndex > photos.length - 5) {
           dispatch(getPhotos()) // pre-load more photos when nearing the end
-        }
-        if (newIndex === 0) {
-          Toast.show({
-            text1: `There are no more photos`,
-            topOffset: 70,
-          })
         }
       }} // otherwise will jump to wrong photo onLayout
       loadMinimal

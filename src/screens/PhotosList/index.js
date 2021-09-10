@@ -371,9 +371,10 @@ const PhotosList = () => {
         )
       }
       keyExtractor={item => item.id}
-      style={
-        styles.container
-      }
+      style={{
+        ...styles.container,
+        marginBottom: 70,
+      }}
       showsVerticalScrollIndicator={
         false
       }
@@ -417,9 +418,10 @@ const PhotosList = () => {
         )
       }
       keyExtractor={item => item.id}
-      style={
-        styles.container
-      }
+      style={{
+        ...styles.container,
+        marginBottom: 70,
+      }}
       showsVerticalScrollIndicator={
         false
       }
@@ -457,21 +459,20 @@ const PhotosList = () => {
           style={{
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+          onPress={
+            () => {
+              checkPermissionsForPhotoTaking({ cameraType: 'video' })
+            }
+          }>
           <Icon
             name="video"
             type="font-awesome-5"
             color={CONST.EMPHASIZED_COLOR}
-            backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
             size={30}
             style={{
               alignSelf: 'center',
             }}
-            onPress={
-              () => {
-                checkPermissionsForPhotoTaking({ cameraType: 'video' })
-              }
-            }
             containerStyle={
               {
                 height: 50,
@@ -490,21 +491,20 @@ const PhotosList = () => {
           style={{
             justifyContent: 'center',
             alignItems: 'center',
-          }}>
+          }}
+          onPress={
+            () => {
+              checkPermissionsForPhotoTaking({ cameraType: 'camera' })
+            }
+          }>
           <Icon
             name="camera"
             type="font-awesome-5"
             color={CONST.MAIN_COLOR}
-            backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
             size={30}
             style={{
               alignSelf: 'center',
             }}
-            onPress={
-              () => {
-                checkPermissionsForPhotoTaking({ cameraType: 'camera' })
-              }
-            }
             containerStyle={
               {
                 height: 50,
@@ -693,9 +693,10 @@ const PhotosList = () => {
               )
             }
             keyExtractor={item => item.localImageName}
-            style={
-              styles.thumbContainer
-            }
+            style={{
+              ...styles.container,
+              marginBottom: 70,
+            }}
             showsVerticalScrollIndicator={
               false
             }
