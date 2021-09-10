@@ -163,10 +163,10 @@ const PhotosList = () => {
 
         Toast.show({
           text1: 'WiSaw just updated over the Air',
-          text2: "Restart in 3 seconds.",
+          text2: "You'll see updates after the restart.",
           topOffset: 70,
         })
-        setTimeout(() => { Updates.reloadAsync() }, 3000)
+        // setTimeout(() => { Updates.reloadAsync() }, 3000)
       }
     } catch (error) {
     // handle or log error
