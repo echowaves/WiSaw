@@ -163,7 +163,7 @@ const PhotosList = () => {
 
         Toast.show({
           text1: 'WiSaw just updated over the Air',
-          text2: "You'll see updates after the restart.",
+          text2: "Reload the app to get the latest version.",
           topOffset: 70,
         })
         // setTimeout(() => { Updates.reloadAsync() }, 3000)
@@ -373,7 +373,7 @@ const PhotosList = () => {
       keyExtractor={item => item.id}
       style={{
         ...styles.container,
-        marginBottom: 70,
+        marginBottom: 80,
       }}
       showsVerticalScrollIndicator={
         false
@@ -446,7 +446,7 @@ const PhotosList = () => {
       style={{
         backgroundColor: CONST.FOOTER_COLOR,
         width,
-        height: 70,
+        height: 80,
         position: 'absolute',
         bottom: 0,
         right: 0,

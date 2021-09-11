@@ -712,7 +712,6 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
     }
