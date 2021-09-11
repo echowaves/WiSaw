@@ -213,8 +213,8 @@ const PhotosList = () => {
     if (netAvailable) {
       navigation.setOptions({
         headerTitle: renderHeaderTitle,
-        headerLeft: renderHeaderLeft,
-        headerRight: renderHeaderRight,
+        // headerLeft: renderHeaderLeft,
+        // headerRight: renderHeaderRight,
         headerStyle: {
           backgroundColor: CONST.NAV_COLOR,
         },
@@ -373,7 +373,7 @@ const PhotosList = () => {
       keyExtractor={item => item.id}
       style={{
         ...styles.container,
-        marginBottom: 80,
+        marginBottom: 95,
       }}
       showsVerticalScrollIndicator={
         false
@@ -420,7 +420,7 @@ const PhotosList = () => {
       keyExtractor={item => item.id}
       style={{
         ...styles.container,
-        marginBottom: 70,
+        marginBottom: 95,
       }}
       showsVerticalScrollIndicator={
         false
@@ -446,7 +446,7 @@ const PhotosList = () => {
       style={{
         backgroundColor: CONST.FOOTER_COLOR,
         width,
-        height: 80,
+        height: 95,
         position: 'absolute',
         bottom: 0,
         right: 0,
@@ -454,7 +454,28 @@ const PhotosList = () => {
       }}>
       <Divider />
       <Grid>
-        {/* video button */}
+        {/* feedback button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <MaterialIcons
+            onPress={
+              () => navigation.navigate('FeedbackScreen')
+            }
+            name="feedback"
+            size={25}
+            style={{
+              // marginRight: 20,
+              color: CONST.MAIN_COLOR,
+              position: 'absolute',
+              bottom: 10,
+              left: 10,
+            }}
+          />
+        </Col>
+        {/*  video button */}
         <Col
           style={{
             justifyContent: 'center',
@@ -518,7 +539,18 @@ const PhotosList = () => {
             }
           />
         </Col>
-
+        {/* empty button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={
+            () => {
+              checkPermissionsForPhotoTaking({ cameraType: 'video' })
+            }
+          }
+        />
       </Grid>
     </SafeAreaView>
   )
@@ -573,38 +605,38 @@ const PhotosList = () => {
     />
   )
 
-  const renderHeaderLeft = () => (
-    <FontAwesome5
-      onPress={
-        () => {
-          _reload()
-        }
-      }
-      name="sync"
-      size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-    />
-  )
+  // const renderHeaderLeft = () => (
+  //   <FontAwesome5
+  //     onPress={
+  //       () => {
+  //         _reload()
+  //       }
+  //     }
+  //     name="sync"
+  //     size={30}
+  //     style={
+  //       {
+  //         marginLeft: 10,
+  //         color: CONST.MAIN_COLOR,
+  //         width: 60,
+  //       }
+  //     }
+  //   />
+  // )
 
-  const renderHeaderRight = () => (
-    <MaterialIcons
-      onPress={
-        () => navigation.navigate('FeedbackScreen')
-      }
-      name="feedback"
-      size={35}
-      style={{
-        marginRight: 20,
-        color: CONST.MAIN_COLOR,
-      }}
-    />
-  )
+  // const renderHeaderRight = () => (
+  //   <MaterialIcons
+  //     onPress={
+  //       () => navigation.navigate('FeedbackScreen')
+  //     }
+  //     name="feedback"
+  //     size={35}
+  //     style={{
+  //       marginRight: 20,
+  //       color: CONST.MAIN_COLOR,
+  //     }}
+  //   />
+  // )
 
   const renderSearchBar = autoFocus => (
     <View style={{
@@ -695,7 +727,7 @@ const PhotosList = () => {
             keyExtractor={item => item.localImageName}
             style={{
               ...styles.container,
-              marginBottom: 70,
+              marginBottom: 95,
             }}
             showsVerticalScrollIndicator={
               false
@@ -735,7 +767,7 @@ const PhotosList = () => {
 
   if (!isTandcAccepted) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Overlay isVisible>
           <ScrollView>
             <Card containerStyle={{ padding: 0 }}>
@@ -786,13 +818,13 @@ const PhotosList = () => {
             </Card>
           </ScrollView>
         </Overlay>
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (loading && photos?.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
         <LinearProgress color={
           CONST.MAIN_COLOR
@@ -800,13 +832,13 @@ const PhotosList = () => {
         />
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (!location) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Card
           borderRadius={5}
           containerStyle={{
@@ -822,13 +854,13 @@ const PhotosList = () => {
         </Card>
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (!netAvailable) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Card
           borderRadius={5}
           containerStyle={{
@@ -844,13 +876,13 @@ const PhotosList = () => {
         </Card>
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (photos.length === 0 && isLastPage && !loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
         {activeSegment === 2 && (
           <Card
@@ -902,15 +934,15 @@ const PhotosList = () => {
         )}
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {activeSegment === 2 && renderSearchBar(false)}
       {renderPendingPhotos()}
       {renderPhotoButton()}
-    </SafeAreaView>
+    </View>
   )
 }
 
