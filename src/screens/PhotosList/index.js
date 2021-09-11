@@ -721,7 +721,7 @@ const PhotosList = () => {
   && photos.length > 0
   ) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
         {renderPendingPhotos()}
         {/* photos */}
@@ -729,7 +729,7 @@ const PhotosList = () => {
         {activeSegment === 1 && renderThumbsWithComments()}
         {activeSegment === 2 && renderThumbsWithComments()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
