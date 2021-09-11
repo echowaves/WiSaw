@@ -712,7 +712,6 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-    return Promise.resolve()
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
     }
@@ -797,7 +796,7 @@ export function uploadPendingPhotos() {
             photo: item.photo,
           })
         } else {
-          // alert("Error uploading file, try again.")
+          // alert(JSON.stringify({ responseData }))
           Toast.show({
             text1: 'Unable to upload file, refresh to try again.',
             text2: 'Network issue...?',
@@ -807,7 +806,7 @@ export function uploadPendingPhotos() {
       }
     } catch (err2) {
       // eslint-disable-next-line no-console
-      console.log({ err2 })
+      // console.log({ err2 })
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
@@ -857,7 +856,7 @@ const _uploadItem = async ({ item }) => {
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.log({ err3 })
-    return { responseData: "something bad happened, unable to upload", err3 }
+    return { responseData: `something bad happened, unable to upload ${JSON.stringify(err3)}` }
   }
 }
 

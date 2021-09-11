@@ -46,7 +46,6 @@ import {
   SearchBar,
   Overlay,
   Icon,
-  Switch,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
