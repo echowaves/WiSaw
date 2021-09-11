@@ -699,7 +699,9 @@ const Photo = ({ photo }) => {
 
   return (
     <View>
-      <ScrollView style={{ margin: 1, backgroundColor: 'white' }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ margin: 1, backgroundColor: 'white' }}>
         <Grid>
           <Row>
             {renderPhotoRow({ photo })}

@@ -725,10 +725,6 @@ const PhotosList = () => {
               )
             }
             keyExtractor={item => item.localImageName}
-            style={{
-              ...styles.container,
-              marginBottom: 95,
-            }}
             showsVerticalScrollIndicator={
               false
             }
