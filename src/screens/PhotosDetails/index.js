@@ -103,7 +103,7 @@ const PhotosDetails = ({ route }) => {
         }
         if (newIndex === 0) {
           Toast.show({
-            text1: 'The last item...',
+            text1: 'No scrolling beyond this item...',
             topOffset: 70,
           })
         }
