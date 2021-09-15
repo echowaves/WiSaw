@@ -105,6 +105,7 @@ const PhotosDetails = ({ route }) => {
           Toast.show({
             text1: 'No scrolling beyond this item...',
             topOffset: 70,
+            duration: 2000,
           })
         }
       }} // otherwise will jump to wrong photo onLayout
