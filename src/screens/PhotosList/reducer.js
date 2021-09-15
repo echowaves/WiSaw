@@ -529,7 +529,7 @@ async function _getUUID(getState) {
       // Toast.show({
       //   text: err.toString(),
       //   buttonText: "OK23",
-      //   duration: 15000,
+      //   visibilityTime: 15000,
       // topOffset: 70,
       // })
     }
@@ -543,7 +543,7 @@ async function _getUUID(getState) {
         // Toast.show({
         //   text: err.toString(),
         //   buttonText: "OK",
-        //   duration: 15000,
+        //   visibilityTime: 15000,
         // topOffset: 70,
         // })
       }
