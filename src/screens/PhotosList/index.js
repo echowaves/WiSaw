@@ -293,13 +293,16 @@ const PhotosList = () => {
             accuracy: Location.Accuracy.Lowest,
             timeInterval: 10000,
             distanceInterval: 3000,
-          }, loc => {
+          }, async loc => {
             // Toast.show({
             //   text1: 'location udated',
             //   type: "error",
             //   topOffset: 70,
             // })
-            dispatch(reducer.setLocation(loc))
+            await dispatch(reducer.setLocation(loc))
+            if (photos.length === 0) {
+              _reload()
+            }
           }
         )
       } catch (err) {
@@ -455,21 +458,24 @@ const PhotosList = () => {
             justifyContent: 'center',
             alignItems: 'center',
           }}>
-          <MaterialIcons
-            onPress={
-              () => navigation.navigate('FeedbackScreen')
-            }
-            name="feedback"
-            size={25}
-            style={{
+          {netAvailable && (
+            <MaterialIcons
+              onPress={
+                () => navigation.navigate('FeedbackScreen')
+              }
+              name="feedback"
+              size={25}
+              style={{
               // marginRight: 20,
-              color: CONST.MAIN_COLOR,
-              position: 'absolute',
-              bottom: 10,
-              left: 10,
-            }}
-          />
+                color: CONST.MAIN_COLOR,
+                position: 'absolute',
+                bottom: 10,
+                left: 10,
+              }}
+            />
+          )}
         </Col>
+
         {/*  video button */}
         <Col
           style={{
