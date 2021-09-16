@@ -52,6 +52,9 @@ const FeedbackScreen = () => {
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
       headerBackTitle: <Text />,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
     })
 
     const initState = async () => {
@@ -87,7 +90,6 @@ const FeedbackScreen = () => {
       size={30}
       style={
         {
-          backgroundColor: '#ffffff',
           marginLeft: 10,
           color: CONST.MAIN_COLOR,
           width: 60,

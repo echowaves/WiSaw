@@ -84,10 +84,21 @@ const reducer = (state = initialState, action) => {
         // || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
         ,
       }
-    case ACTION_TYPES.RESET_STATE:
+    case ACTION_TYPES.SET_LOCATION:
       return {
         ...state,
         location: action.location,
+        // photos: [],
+        // loading: true,
+        // loadMore: true,
+        // errorMessage: '',
+        // pageNumber: -1,
+        // isLastPage: false,
+        // batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+      }
+    case ACTION_TYPES.RESET_STATE:
+      return {
+        ...state,
         photos: [],
         loading: true,
         loadMore: true,
@@ -484,10 +495,16 @@ export function cancelPendingUpload(item) {
   }
 }
 
-export function resetState(location) {
+export function setLocation(location) {
+  return {
+    type: ACTION_TYPES.SET_LOCATION,
+    location,
+  }
+}
+
+export function resetState() {
   return {
     type: ACTION_TYPES.RESET_STATE,
-    location,
   }
 }
 
@@ -529,7 +546,7 @@ async function _getUUID(getState) {
       // Toast.show({
       //   text: err.toString(),
       //   buttonText: "OK23",
-      //   duration: 15000,
+      //   visibilityTime: 15000,
       // topOffset: 70,
       // })
     }
@@ -543,7 +560,7 @@ async function _getUUID(getState) {
         // Toast.show({
         //   text: err.toString(),
         //   buttonText: "OK",
-        //   duration: 15000,
+        //   visibilityTime: 15000,
         // topOffset: 70,
         // })
       }
@@ -712,7 +729,6 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
-
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
     }
@@ -797,7 +813,7 @@ export function uploadPendingPhotos() {
             photo: item.photo,
           })
         } else {
-          // alert("Error uploading file, try again.")
+          // alert(JSON.stringify({ responseData }))
           Toast.show({
             text1: 'Unable to upload file, refresh to try again.',
             text2: 'Network issue...?',
@@ -807,7 +823,7 @@ export function uploadPendingPhotos() {
       }
     } catch (err2) {
       // eslint-disable-next-line no-console
-      console.log({ err2 })
+      // console.log({ err2 })
       dispatch({
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
@@ -857,7 +873,7 @@ const _uploadItem = async ({ item }) => {
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.log({ err3 })
-    return { responseData: "something bad happened, unable to upload", err3 }
+    return { responseData: `something bad happened, unable to upload ${JSON.stringify(err3)}` }
   }
 }
 

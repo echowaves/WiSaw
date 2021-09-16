@@ -25,8 +25,10 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, FontAwesome5, MaterialIcons, Ionicons, AntDesign,
+  FontAwesome, /* FontAwesome5, */ MaterialIcons, Ionicons, AntDesign,
 } from '@expo/vector-icons'
+
+import { Col, /* Row, */ Grid } from "react-native-easy-grid"
 
 import NetInfo from "@react-native-community/netinfo"
 
@@ -44,7 +46,6 @@ import {
   SearchBar,
   Overlay,
   Icon,
-  Switch,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
@@ -64,7 +65,6 @@ const PhotosList = () => {
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
-  const [cameraType, setCameraType] = useState("camera")
   // const [loadMore, setLoadMore] = useState(false)
 
   const photos = useSelector(state => state.photosList.photos)
@@ -110,10 +110,15 @@ const PhotosList = () => {
       dispatch(reducer.zeroMoment()),
     ])
   }
+  const _initandreload = async () => {
+    await _initState()
+    await _reload()
+  }
 
   useEffect(() => {
     _initBranch({ navigation })
-    _initState()
+    _getLocation()
+    _initandreload()
 
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
@@ -133,14 +138,9 @@ const PhotosList = () => {
   // re-render title on  state chage
   useEffect(() => {
     // defining this function for special case, when network becomes available after the app has started
-    const initandreload = async () => {
-      await _initState()
-      await _reload()
-    }
-
     _updateNavBar()
     if (netAvailable) {
-      initandreload()
+      _initandreload()
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -162,10 +162,10 @@ const PhotosList = () => {
 
         Toast.show({
           text1: 'WiSaw just updated over the Air',
-          text2: "Restart in 3 seconds.",
+          text2: "Reload the app to get the latest version.",
           topOffset: 70,
         })
-        setTimeout(() => { Updates.reloadAsync() }, 3000)
+        // setTimeout(() => { Updates.reloadAsync() }, 3000)
       }
     } catch (error) {
     // handle or log error
@@ -205,18 +205,6 @@ const PhotosList = () => {
       // paddingBottom: 10,
       // marginBottom: 10,
     },
-    cameraButtonPortrait: {
-      flexDirection: 'column',
-      bottom: 20,
-      alignSelf: 'center',
-      justifyContent: 'center',
-    },
-
-    cameraButtonLandscape: {
-      flexDirection: 'column',
-      right: 20,
-      top: width < height ? width * 0.5 - 50 - 32 : height * 0.5 - 50 - 32,
-    },
 
   })
 
@@ -224,14 +212,20 @@ const PhotosList = () => {
     if (netAvailable) {
       navigation.setOptions({
         headerTitle: renderHeaderTitle,
-        headerLeft: renderHeaderLeft,
-        headerRight: renderHeaderRight,
+        // headerLeft: renderHeaderLeft,
+        // headerRight: renderHeaderRight,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
       })
     } else {
       navigation.setOptions({
         headerTitle: null,
         headerLeft: null,
         headerRight: null,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
       })
     }
   }
@@ -239,17 +233,7 @@ const PhotosList = () => {
   // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
   const _reload = async () => {
-    const updatedLocation = await _getLocation()
-    if (updatedLocation) {
-      dispatch(reducer.resetState(updatedLocation))
-    } else {
-      if (!location) {
-        return // if no location -- don't do anything
-      }
-      dispatch(reducer.resetState(location))
-    }
-
-    // dispatch(reducer.getPhotos())
+    dispatch(reducer.resetState())
     dispatch(reducer.uploadPendingPhotos())
   }
 
@@ -274,7 +258,7 @@ const PhotosList = () => {
     return status
   }
 
-  const checkPermissionsForPhotoTaking = async () => {
+  const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
     const cameraPermission = await _checkPermission({
       permissionFunction: ImagePicker.requestCameraPermissionsAsync,
       alertHeader: 'Do you want to take photo with wisaw?',
@@ -290,14 +274,12 @@ const PhotosList = () => {
       })
 
       if (photoAlbomPermission === 'granted') {
-        await takePhoto()
+        await takePhoto({ cameraType })
       }
     }
   }
 
   async function _getLocation() {
-    let position = null
-
     const locationPermission = await _checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
       alertHeader: 'How am I supposed to show you the near-by photos?',
@@ -306,12 +288,24 @@ const PhotosList = () => {
 
     if (locationPermission === 'granted') {
       try {
-        position = await Location.getLastKnownPositionAsync({}) // works faster this way, don't really need the accuracy, let's see if it really works
-        // await Location.getCurrentPositionAsync({
-        //   accuracy: Location.Accuracy.Lowest,
-        // })
+        Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Lowest,
+            timeInterval: 10000,
+            distanceInterval: 3000,
+          }, async loc => {
+            // Toast.show({
+            //   text1: 'location udated',
+            //   type: "error",
+            //   topOffset: 70,
+            // })
+            await dispatch(reducer.setLocation(loc))
+            if (photos.length === 0) {
+              _reload()
+            }
+          }
+        )
       } catch (err) {
-        position = null
         Toast.show({
           text1: 'Unable to get location',
           type: "error",
@@ -319,10 +313,9 @@ const PhotosList = () => {
         })
       }
     }
-    return position
   }
 
-  const takePhoto = async () => {
+  const takePhoto = async ({ cameraType }) => {
     let cameraReturn
     if (cameraType === "camera") {
       // launch photo capturing
@@ -376,9 +369,10 @@ const PhotosList = () => {
         )
       }
       keyExtractor={item => item.id}
-      style={
-        styles.container
-      }
+      style={{
+        ...styles.container,
+        marginBottom: 95,
+      }}
       showsVerticalScrollIndicator={
         false
       }
@@ -422,9 +416,10 @@ const PhotosList = () => {
         )
       }
       keyExtractor={item => item.id}
-      style={
-        styles.container
-      }
+      style={{
+        ...styles.container,
+        marginBottom: 95,
+      }}
       showsVerticalScrollIndicator={
         false
       }
@@ -444,65 +439,121 @@ const PhotosList = () => {
     />
   )
 
-  const renderPhotoButton = () => (
-    <View style={
-      [
-        {
-          flex: 1,
-          position: 'absolute',
-        },
-        styles.cameraButtonPortrait,
-      ]
-    }>
-      {location && (
-        <View>
-          <Switch
-            value={cameraType === 'video'}
-            style={{
-              alignSelf: 'center',
-            }}
-            thumbColor={CONST.TRANSPARENT_BUTTON_COLOR}
-            // color={cameraType === 'video' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
-            trackColor={{ true: CONST.EMPHASIZED_COLOR, false: CONST.MAIN_COLOR }}
-            ios_backgroundColor={CONST.MAIN_COLOR}
-            onValueChange={() => {
-              if (cameraType === 'camera') {
-                setCameraType('video')
-              } else {
-                setCameraType('camera')
+  const renderPhotoButton = () => location && (
+    <SafeAreaView
+      style={{
+        backgroundColor: CONST.FOOTER_COLOR,
+        width,
+        height: 95,
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        left: 0,
+      }}>
+      <Divider />
+      <Grid>
+        {/* feedback button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          {netAvailable && (
+            <MaterialIcons
+              onPress={
+                () => navigation.navigate('FeedbackScreen')
               }
-            }}
-          />
-          <View style={{ padding: 3 }} />
+              name="feedback"
+              size={25}
+              style={{
+              // marginRight: 20,
+                color: CONST.MAIN_COLOR,
+                position: 'absolute',
+                bottom: 10,
+                left: 10,
+              }}
+            />
+          )}
+        </Col>
+
+        {/*  video button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={
+            () => {
+              checkPermissionsForPhotoTaking({ cameraType: 'video' })
+            }
+          }>
           <Icon
-            name={cameraType}
+            name="video"
             type="font-awesome-5"
-            color={cameraType === 'camera' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR}
-            backgroundColor={CONST.TRANSPARENT_BUTTON_COLOR}
-            size={60}
+            color={CONST.EMPHASIZED_COLOR}
+            size={30}
             style={{
               alignSelf: 'center',
             }}
             containerStyle={
               {
-                height: 90,
-                width: 90,
-                backgroundColor: CONST.TRANSPARENT_BUTTON_COLOR,
+                height: 50,
+                width: 80,
+                backgroundColor: 'white',
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 borderRadius: 45,
               }
             }
-            onPress={
-              () => {
-                checkPermissionsForPhotoTaking()
+          />
+        </Col>
+        {/* photo button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={
+            () => {
+              checkPermissionsForPhotoTaking({ cameraType: 'camera' })
+            }
+          }>
+          <Icon
+            name="camera"
+            type="font-awesome-5"
+            color={CONST.MAIN_COLOR}
+            size={30}
+            style={{
+              alignSelf: 'center',
+            }}
+            containerStyle={
+              {
+                height: 50,
+                width: 80,
+                backgroundColor: 'white',
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 45,
               }
             }
           />
-        </View>
-      )}
-    </View>
+        </Col>
+        {/* empty button */}
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={
+            () => {
+              checkPermissionsForPhotoTaking({ cameraType: 'video' })
+            }
+          }
+        />
+      </Grid>
+    </SafeAreaView>
   )
 
   const segment0 = () => (
@@ -555,38 +606,38 @@ const PhotosList = () => {
     />
   )
 
-  const renderHeaderLeft = () => (
-    <FontAwesome5
-      onPress={
-        () => {
-          _reload()
-        }
-      }
-      name="sync"
-      size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-    />
-  )
+  // const renderHeaderLeft = () => (
+  //   <FontAwesome5
+  //     onPress={
+  //       () => {
+  //         _reload()
+  //       }
+  //     }
+  //     name="sync"
+  //     size={30}
+  //     style={
+  //       {
+  //         marginLeft: 10,
+  //         color: CONST.MAIN_COLOR,
+  //         width: 60,
+  //       }
+  //     }
+  //   />
+  // )
 
-  const renderHeaderRight = () => (
-    <MaterialIcons
-      onPress={
-        () => navigation.navigate('FeedbackScreen')
-      }
-      name="feedback"
-      size={35}
-      style={{
-        marginRight: 20,
-        color: CONST.MAIN_COLOR,
-      }}
-    />
-  )
+  // const renderHeaderRight = () => (
+  //   <MaterialIcons
+  //     onPress={
+  //       () => navigation.navigate('FeedbackScreen')
+  //     }
+  //     name="feedback"
+  //     size={35}
+  //     style={{
+  //       marginRight: 20,
+  //       color: CONST.MAIN_COLOR,
+  //     }}
+  //   />
+  // )
 
   const renderSearchBar = autoFocus => (
     <View style={{
@@ -675,9 +726,6 @@ const PhotosList = () => {
               )
             }
             keyExtractor={item => item.localImageName}
-            style={
-              styles.thumbContainer
-            }
             showsVerticalScrollIndicator={
               false
             }
@@ -702,7 +750,7 @@ const PhotosList = () => {
   && photos.length > 0
   ) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
         {renderPendingPhotos()}
         {/* photos */}
@@ -710,13 +758,13 @@ const PhotosList = () => {
         {activeSegment === 1 && renderThumbsWithComments()}
         {activeSegment === 2 && renderThumbsWithComments()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (!isTandcAccepted) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Overlay isVisible>
           <ScrollView>
             <Card containerStyle={{ padding: 0 }}>
@@ -767,13 +815,13 @@ const PhotosList = () => {
             </Card>
           </ScrollView>
         </Overlay>
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (loading && photos?.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
         <LinearProgress color={
           CONST.MAIN_COLOR
@@ -781,13 +829,13 @@ const PhotosList = () => {
         />
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (!location) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Card
           borderRadius={5}
           containerStyle={{
@@ -803,13 +851,13 @@ const PhotosList = () => {
         </Card>
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (!netAvailable) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Card
           borderRadius={5}
           containerStyle={{
@@ -825,13 +873,13 @@ const PhotosList = () => {
         </Card>
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
 
   if (photos.length === 0 && isLastPage && !loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
         {activeSegment === 2 && (
           <Card
@@ -883,15 +931,15 @@ const PhotosList = () => {
         )}
         {renderPendingPhotos()}
         {renderPhotoButton()}
-      </SafeAreaView>
+      </View>
     )
   }
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {activeSegment === 2 && renderSearchBar(false)}
       {renderPendingPhotos()}
       {renderPhotoButton()}
-    </SafeAreaView>
+    </View>
   )
 }
 

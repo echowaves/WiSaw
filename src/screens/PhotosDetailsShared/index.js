@@ -29,6 +29,9 @@ const PhotosDetailsShared = ({ route }) => {
     navigation.setOptions({
       headerTitle: renderHeaderTitle,
       headerLeft: renderHeaderLeft,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
     })
     loadPhoto(photoId)
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
@@ -71,7 +74,6 @@ const PhotosDetailsShared = ({ route }) => {
       size={30}
       style={
         {
-          backgroundColor: '#ffffff',
           marginLeft: 10,
           color: CONST.MAIN_COLOR,
           width: 60,
