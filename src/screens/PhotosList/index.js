@@ -25,10 +25,10 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, FontAwesome5, MaterialIcons, Ionicons, AntDesign,
+  FontAwesome, /* FontAwesome5, */ MaterialIcons, Ionicons, AntDesign,
 } from '@expo/vector-icons'
 
-import { Col, Row, Grid } from "react-native-easy-grid"
+import { Col, /* Row, */ Grid } from "react-native-easy-grid"
 
 import NetInfo from "@react-native-community/netinfo"
 
@@ -110,10 +110,15 @@ const PhotosList = () => {
       dispatch(reducer.zeroMoment()),
     ])
   }
+  const _initandreload = async () => {
+    await _initState()
+    await _reload()
+  }
 
   useEffect(() => {
     _initBranch({ navigation })
-    _initState()
+    _getLocation()
+    _initandreload()
 
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
@@ -133,14 +138,9 @@ const PhotosList = () => {
   // re-render title on  state chage
   useEffect(() => {
     // defining this function for special case, when network becomes available after the app has started
-    const initandreload = async () => {
-      await _initState()
-      await _reload()
-    }
-
     _updateNavBar()
     if (netAvailable) {
-      initandreload()
+      _initandreload()
     }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -233,17 +233,7 @@ const PhotosList = () => {
   // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
   const _reload = async () => {
-    const updatedLocation = await _getLocation()
-    if (updatedLocation) {
-      dispatch(reducer.resetState(updatedLocation))
-    } else {
-      if (!location) {
-        return // if no location -- don't do anything
-      }
-      dispatch(reducer.resetState(location))
-    }
-
-    // dispatch(reducer.getPhotos())
+    dispatch(reducer.resetState())
     dispatch(reducer.uploadPendingPhotos())
   }
 
@@ -290,8 +280,6 @@ const PhotosList = () => {
   }
 
   async function _getLocation() {
-    let position = null
-
     const locationPermission = await _checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
       alertHeader: 'How am I supposed to show you the near-by photos?',
@@ -300,12 +288,21 @@ const PhotosList = () => {
 
     if (locationPermission === 'granted') {
       try {
-        position = await Location.getLastKnownPositionAsync({}) // works faster this way, don't really need the accuracy, let's see if it really works
-        // await Location.getCurrentPositionAsync({
-        //   accuracy: Location.Accuracy.Lowest,
-        // })
+        Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Lowest,
+            timeInterval: 10000,
+            distanceInterval: 3000,
+          }, loc => {
+            // Toast.show({
+            //   text1: 'location udated',
+            //   type: "error",
+            //   topOffset: 70,
+            // })
+            dispatch(reducer.setLocation(loc))
+          }
+        )
       } catch (err) {
-        position = null
         Toast.show({
           text1: 'Unable to get location',
           type: "error",
@@ -313,7 +310,6 @@ const PhotosList = () => {
         })
       }
     }
-    return position
   }
 
   const takePhoto = async ({ cameraType }) => {

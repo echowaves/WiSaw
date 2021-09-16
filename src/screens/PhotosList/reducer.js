@@ -84,10 +84,21 @@ const reducer = (state = initialState, action) => {
         // || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
         ,
       }
-    case ACTION_TYPES.RESET_STATE:
+    case ACTION_TYPES.SET_LOCATION:
       return {
         ...state,
         location: action.location,
+        // photos: [],
+        // loading: true,
+        // loadMore: true,
+        // errorMessage: '',
+        // pageNumber: -1,
+        // isLastPage: false,
+        // batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+      }
+    case ACTION_TYPES.RESET_STATE:
+      return {
+        ...state,
         photos: [],
         loading: true,
         loadMore: true,
@@ -484,10 +495,16 @@ export function cancelPendingUpload(item) {
   }
 }
 
-export function resetState(location) {
+export function setLocation(location) {
+  return {
+    type: ACTION_TYPES.SET_LOCATION,
+    location,
+  }
+}
+
+export function resetState() {
   return {
     type: ACTION_TYPES.RESET_STATE,
-    location,
   }
 }
 
