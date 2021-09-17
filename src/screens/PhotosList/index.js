@@ -586,7 +586,10 @@ const PhotosList = () => {
   const renderHeaderTitle = () => (
     <ButtonGroup
       onPress={updateIndex}
-      containerStyle={{ width: 150, height: 30 }}
+      containerStyle={{
+        width: 200,
+        height: 35,
+      }}
       buttonStyle={{ alignSelf: 'center' }}
       buttons={[{ element: segment0 }, { element: segment1 }, { element: segment2 }]}
     />
