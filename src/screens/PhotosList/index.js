@@ -559,12 +559,6 @@ const PhotosList = () => {
       name="globe"
       size={23}
       color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
-      onPress={
-        async () => {
-          await dispatch(reducer.setActiveSegment(0))
-          _reload()
-        }
-      }
     />
   )
 
@@ -573,12 +567,6 @@ const PhotosList = () => {
       name="star"
       size={23}
       color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
-      onPress={
-        async () => {
-          await dispatch(reducer.setActiveSegment(1))
-          _reload()
-        }
-      }
     />
   )
 
@@ -587,17 +575,17 @@ const PhotosList = () => {
       name="search"
       size={23}
       color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
-      onPress={
-        async () => {
-          await dispatch(reducer.setActiveSegment(2))
-          _reload()
-        }
-      }
     />
   )
 
+  const updateIndex = async index => {
+    await dispatch(reducer.setActiveSegment(index))
+    _reload()
+  }
+
   const renderHeaderTitle = () => (
     <ButtonGroup
+      onPress={updateIndex}
       containerStyle={{ width: 150, height: 30 }}
       buttonStyle={{ alignSelf: 'center' }}
       buttons={[{ element: segment0 }, { element: segment1 }, { element: segment2 }]}
