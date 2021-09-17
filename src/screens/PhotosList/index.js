@@ -78,6 +78,7 @@ const PhotosList = () => {
   const zeroMoment = useSelector(state => state.photosList.zeroMoment)
 
   const loading = useSelector(state => state.photosList.loading)
+  const pageNumber = useSelector(state => state.photosList.pageNumber)
 
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
@@ -300,9 +301,6 @@ const PhotosList = () => {
             //   topOffset: 70,
             // })
             await dispatch(reducer.setLocation(loc))
-            if (photos.length === 0) {
-              _reload()
-            }
           }
         )
       } catch (err) {
@@ -819,14 +817,22 @@ const PhotosList = () => {
     )
   }
 
-  if (loading && photos?.length === 0) {
+  if (!netAvailable) {
     return (
       <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
-        <LinearProgress color={
-          CONST.MAIN_COLOR
-        }
-        />
+        <Card
+          borderRadius={5}
+          containerStyle={{
+            borderWidth: 0,
+          }}>
+          <Text style={{
+            fontSize: 20,
+            textAlign: 'center',
+            margin: 10,
+          }}>
+            No network available, you can still snap photos -- they will be uploaded later.
+          </Text>
+        </Card>
         {renderPendingPhotos()}
         {renderPhotoButton()}
       </View>
@@ -855,29 +861,21 @@ const PhotosList = () => {
     )
   }
 
-  if (!netAvailable) {
+  if (photos.length === 0 && loading) {
     return (
       <View style={styles.container}>
-        <Card
-          borderRadius={5}
-          containerStyle={{
-            borderWidth: 0,
-          }}>
-          <Text style={{
-            fontSize: 20,
-            textAlign: 'center',
-            margin: 10,
-          }}>
-            No network available, you can still snap photos -- they will be uploaded later.
-          </Text>
-        </Card>
+        {activeSegment === 2 && renderSearchBar(false)}
+        <LinearProgress color={
+          CONST.MAIN_COLOR
+        }
+        />
         {renderPendingPhotos()}
         {renderPhotoButton()}
       </View>
     )
   }
 
-  if (photos.length === 0 && isLastPage && !loading) {
+  if (photos.length === 0 && !loading && isLastPage) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
@@ -929,6 +927,32 @@ const PhotosList = () => {
             </Text>
           </Card>
         )}
+        {renderPendingPhotos()}
+        {renderPhotoButton()}
+      </View>
+    )
+  }
+
+  if (photos.length === 0 && !loading && !isLastPage && pageNumber === -1) {
+    return (
+      <View style={styles.container}>
+        {activeSegment === 2 && renderSearchBar(false)}
+        <Ionicons
+          onPress={
+            () => _reload()
+          }
+          name="reload"
+          size={100}
+          style={
+            {
+              margin: 10,
+              color: CONST.MAIN_COLOR,
+              alignSelf: 'center',
+
+            }
+          }
+        />
+
         {renderPendingPhotos()}
         {renderPhotoButton()}
       </View>

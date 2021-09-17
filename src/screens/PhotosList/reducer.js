@@ -40,7 +40,7 @@ export const initialState = {
   activeSegment: 0,
   searchTerm: '',
   batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
-  isLastPage: false,
+  isLastPage: true,
   netAvailable: false,
   uploadingPhoto: false,
   zeroMoment: null,
