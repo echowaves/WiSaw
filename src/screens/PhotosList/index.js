@@ -440,16 +440,19 @@ const PhotosList = () => {
   const renderPhotoButton = () => location && (
     <SafeAreaView
       style={{
-        backgroundColor: CONST.FOOTER_COLOR,
+        backgroundColor: CONST.NAV_COLOR,
         width,
-        height: 95,
+        height: 85,
         position: 'absolute',
         bottom: 0,
         right: 0,
         left: 0,
       }}>
-      <Divider />
-      <Grid>
+      <Grid style={{
+        position: 'absolute',
+        right: 0,
+        left: 0,
+      }}>
         {/* feedback button */}
         <Col
           style={{
@@ -467,7 +470,7 @@ const PhotosList = () => {
               // marginRight: 20,
                 color: CONST.MAIN_COLOR,
                 position: 'absolute',
-                bottom: 10,
+                bottom: 0,
                 left: 10,
               }}
             />
