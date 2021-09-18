@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState /* useEffect */ } from 'react'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
@@ -51,7 +51,7 @@ const Photo = ({ photo }) => {
 
   const videoRef = useRef(null)
 
-  const [status, setStatus] = useState({})
+  // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
 
   const navigation = useNavigation()
@@ -693,7 +693,7 @@ const Photo = ({ photo }) => {
           useNativeControls
           // overrideFileExtensionAndroid
           resizeMode="contain"
-          onPlaybackStatusUpdate={status => setStatus(() => status)}
+          // onPlaybackStatusUpdate={status => setStatus(() => status)}
           usePoster={false}
           posterSource={{ uri: `${photo.thumbUrl}` }}
           isLooping
