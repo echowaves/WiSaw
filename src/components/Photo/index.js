@@ -400,7 +400,7 @@ const Photo = ({ photo }) => {
       style={{
         backgroundColor: CONST.NAV_COLOR,
         width,
-        height: 70,
+        height: 85,
         position: 'absolute',
         bottom: 0,
         right: 0,
@@ -421,7 +421,13 @@ const Photo = ({ photo }) => {
         />
       )}
       { photoDetails?.isPhotoWatched !== undefined && (
-        <Grid>
+        <Grid
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 0,
+            left: 0,
+          }}>
           {/* delete button */}
           <Col
             style={{
@@ -479,7 +485,7 @@ const Photo = ({ photo }) => {
                 badgeStyle={{
                   backgroundColor: CONST.MAIN_COLOR,
                 }}
-                containerStyle={{ position: 'absolute', top: -10, right: -10 }}
+                containerStyle={{ position: 'absolute', top: -7, right: -7 }}
                 value={photoDetails.watchersCount}
               />
             )}
