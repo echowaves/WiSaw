@@ -78,7 +78,7 @@ const PhotosList = () => {
   const zeroMoment = useSelector(state => state.photosList.zeroMoment)
 
   const loading = useSelector(state => state.photosList.loading)
-  const pageNumber = useSelector(state => state.photosList.pageNumber)
+  // const pageNumber = useSelector(state => state.photosList.pageNumber)
 
   const activeSegment = useSelector(state => state.photosList.activeSegment)
   const searchTerm = useSelector(state => state.photosList.searchTerm)
@@ -283,8 +283,8 @@ const PhotosList = () => {
   async function _getLocation() {
     const locationPermission = await _checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
-      alertHeader: 'How am I supposed to show you the near-by photos?',
-      alertBody: 'Why don\'t you enable Location in Settings and Try Again?',
+      alertHeader: 'WiSaw shows you near-by photos based on your current location.',
+      alertBody: 'You need to enable Location in Settings and Try Again.',
     })
 
     if (locationPermission === 'granted') {

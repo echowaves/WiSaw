@@ -41,7 +41,7 @@
     "expo-secure-store": "~10.2.0",
     "expo-sms": "~9.2.3",
     "expo-status-bar": "~1.0.4",
-    "expo-storage": "1.0.1",
+    "expo-storage": "1.0.2",
     "expo-updates": "~0.8.1",
     "expo-video-thumbnails": "~5.2.1",
     "graphql": "^15.5.1",
