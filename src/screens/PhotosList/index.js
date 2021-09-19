@@ -927,31 +927,34 @@ const PhotosList = () => {
     )
   }
 
-  if (photos.length === 0 && !loading && !isLastPage && pageNumber === -1) {
-    return (
-      <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
-        <Ionicons
-          onPress={
-            () => _reload()
-          }
-          name="reload"
-          size={100}
-          style={
-            {
-              margin: 10,
-              color: CONST.MAIN_COLOR,
-              alignSelf: 'center',
+  // if (photos.length === 0 && !loading && !isLastPage && pageNumber === -1) {
+  //   return (
+  //     <View style={styles.container}>
+  //       {activeSegment === 2 && renderSearchBar(false)}
+  //       <Ionicons
+  //         onPress={
+  //           () => _reload()
+  //         }
+  //         name="reload"
+  //         size={100}
+  //         style={
+  //           {
+  //             margin: 10,
+  //             color: CONST.MAIN_COLOR,
+  //             alignSelf: 'center',
+  //
+  //           }
+  //         }
+  //       />
+  //
+  //       {renderPendingPhotos()}
+  //       {renderPhotoButton()}
+  //     </View>
+  //   )
+  // }
+  //
 
-            }
-          }
-        />
-
-        {renderPendingPhotos()}
-        {renderPhotoButton()}
-      </View>
-    )
-  }
+  dispatch(reducer.getPhotos())
   return (
     <View style={styles.container}>
       {activeSegment === 2 && renderSearchBar(false)}
