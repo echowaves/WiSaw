@@ -578,10 +578,10 @@ async function _getTancAccepted() {
 }
 
 const _updatePendingPhotos = async dispatch => {
-  const pendingFiles = await _getQueue()
+  const pendingPhotos = await _getQueue()
   dispatch({
     type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
-    pendingPhotos: pendingFiles,
+    pendingPhotos,
   })
 }
 
@@ -729,6 +729,8 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { uuid } = getState().photosList
+    _updatePendingPhotos(dispatch)
+
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
     }
