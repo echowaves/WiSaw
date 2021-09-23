@@ -289,6 +289,12 @@ const PhotosList = () => {
 
     if (locationPermission === 'granted') {
       try {
+        // initially set the location that is last known -- works much faster this way
+        await dispatch(reducer.setLocation(await Location.getLastKnownPositionAsync({
+          maxAge: 86400000,
+          requiredAccuracy: 5000,
+        })))
+
         Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.Lowest,
