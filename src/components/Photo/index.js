@@ -485,7 +485,7 @@ const Photo = ({ photo }) => {
                 badgeStyle={{
                   backgroundColor: CONST.MAIN_COLOR,
                 }}
-                containerStyle={{ position: 'absolute', top: -7, right: -7 }}
+                containerStyle={{ position: 'absolute', top: -9, right: -9 }}
                 value={photoDetails.watchersCount}
               />
             )}
