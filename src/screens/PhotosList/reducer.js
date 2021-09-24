@@ -59,8 +59,8 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos:
-        [...state.photos, ...action.photos],
-        // .sort((a, b) => b.id - a.id),
+        [...state.photos, ...action.photos]
+          .sort((a, b) => a.row_number - b.row_number),
         // this really stinks, need to figure out why there are duplicates in the first place
         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
         // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
@@ -282,6 +282,7 @@ async function _requestGeoPhotos(getState) {
       query feedByDate($daysAgo: Int!, $lat: Float!, $lon: Float!, $batch: Long!, $whenToStop: AWSDateTime!) {
         feedByDate(daysAgo: $daysAgo, lat: $lat, lon: $lon, batch: $batch, whenToStop: $whenToStop){
           photos {
+                  row_number
                   id
                   imgUrl
                   thumbUrl
@@ -328,6 +329,7 @@ async function _requestWatchedPhotos(getState) {
       query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: Long!) {
         feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch){
           photos {
+                  row_number
                   id
                   imgUrl
                   thumbUrl
@@ -369,6 +371,7 @@ async function _requestSearchedPhotos(getState) {
       query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: Long!) {
         feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch){
           photos {
+                  row_number
                   id
                   imgUrl
                   thumbUrl
