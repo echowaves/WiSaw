@@ -59,7 +59,7 @@ const Photo = ({ photo }) => {
   const dispatch = useDispatch()
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
-  const imageHeight = height - 200
+  const imageHeight = height - 250
   const bans = useSelector(state => state.photo.bans)
   const [branchUniversalObject, setBranchUniversalObject] = useState({})
 
