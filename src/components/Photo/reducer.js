@@ -220,7 +220,7 @@ export function deletePhoto({ photo }) {
 export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
   return async (dispatch, getState) => {
     try {
-      let messageBody = 'Check out what I saw today:'
+      let messageBody = `Check out what I saw today${photo?.video ? " (video)" : ''}:`
       // const messageHeader = 'Check out what I saw today:'
       const emailSubject = 'WiSaw: Check out what I saw today'
 
