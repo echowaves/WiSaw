@@ -60,7 +60,7 @@ export default function reducer(state = initialState, action) {
 
 export function watchPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+    const { uuid, headerHeight } = getState().photosList
     try {
       const watchersCount = (await CONST.gqlClient
         .mutate({
@@ -89,7 +89,7 @@ export function watchPhoto({ photo }) {
         text1: 'Unable to watch photo.',
         text2: 'Network Issue?',
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }
@@ -97,7 +97,7 @@ export function watchPhoto({ photo }) {
 
 export function unwatchPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+    const { uuid, headerHeight } = getState().photosList
     try {
       const watchersCount = (await CONST.gqlClient
         .mutate({
@@ -126,7 +126,7 @@ export function unwatchPhoto({ photo }) {
         text1: "Unable to unwatch photo.",
         text2: "Maybe Network Issue?",
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }
@@ -134,7 +134,7 @@ export function unwatchPhoto({ photo }) {
 
 export function banPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+    const { uuid, headerHeight } = getState().photosList
 
     dispatch({
       type: ACTION_TYPES.BAN_PHOTO,
@@ -168,7 +168,7 @@ export function banPhoto({ photo }) {
       Toast.show({
         text1: `Abusive Photo reported`,
         type: "success",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     } catch (err) {
       // console.error({ err })
@@ -182,7 +182,7 @@ export function banPhoto({ photo }) {
 
 export function deletePhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+    const { uuid, headerHeight } = getState().photosList
 
     try {
       await CONST.gqlClient
@@ -204,14 +204,14 @@ export function deletePhoto({ photo }) {
         text1: "Photo deleted from the Cloud.",
         text2: "No one will be able to see it any more.",
         type: "success",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete photo.",
         text2: "Network Issue?",
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }
@@ -219,6 +219,8 @@ export function deletePhoto({ photo }) {
 
 export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
   return async (dispatch, getState) => {
+    const { headerHeight } = getState().photosList
+
     try {
       let messageBody = `Check out what I saw today${photo?.video ? " (video)" : ''}:`
       // const messageHeader = 'Check out what I saw today:'
@@ -269,14 +271,16 @@ export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
         text1: "Unable to share photo.",
         text2: "Wait for a bit and try again...",
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }
 }
 
 export function submitComment({ inputText, uuid, photo }) {
-  return async dispatch => {
+  return async (dispatch, getState) => {
+    const { headerHeight } = getState().photosList
+
     dispatch({
       type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
     })
@@ -311,7 +315,7 @@ export function submitComment({ inputText, uuid, photo }) {
       Toast.show({
         text1: "Comment submitted.",
         type: "success",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
       dispatch(watchPhoto({ photo }))
     } catch (err) {
@@ -324,7 +328,7 @@ export function submitComment({ inputText, uuid, photo }) {
         text1: "Unable to submit comment.",
         text2: "Network Issue?",
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }
@@ -396,7 +400,7 @@ export function toggleCommentButtons({ photoDetails, commentId }) {
 
 export function deleteComment({ photo, photoDetails, comment }) {
   return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+    const { uuid, headerHeight } = getState().photosList
 
     try {
       const lastComment = (await CONST.gqlClient
@@ -422,7 +426,7 @@ export function deleteComment({ photo, photoDetails, comment }) {
       Toast.show({
         text1: "Comment deleted.",
         type: "success",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
       return {
         ...photoDetails,
@@ -433,7 +437,7 @@ export function deleteComment({ photo, photoDetails, comment }) {
         text1: "Unable to delete comment.",
         text2: "Network Issue?",
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }

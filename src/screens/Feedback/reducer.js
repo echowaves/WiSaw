@@ -57,7 +57,7 @@ export function resetForm() {
 
 export function submitFeedback({ feedbackText }) {
   return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+    const { uuid, headerHeight } = getState().photosList
     dispatch({
       type: ACTION_TYPES.SUBMIT_FEEDBACK_STARTED,
     })
@@ -95,7 +95,7 @@ export function submitFeedback({ feedbackText }) {
         text1: 'Error',
         text2: err.toString(),
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }

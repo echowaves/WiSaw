@@ -35,7 +35,6 @@ const App = () => (
       <ThemeProvider>
         <NavigationContainer>
           <Stack.Navigator
-            mode="modal"
             // headerMode="none"
             initialRouteName="PhotosList"
             screenOptions={{ gestureEnabled: true }}>

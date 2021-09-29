@@ -44,6 +44,7 @@ export const initialState = {
   netAvailable: false,
   uploadingPhoto: false,
   zeroMoment: null,
+  headerHeight: 100,
 }
 
 const reducer = (state = initialState, action) => {
@@ -111,6 +112,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         isTandcAccepted: action.isTandcAccepted,
+      }
+    case ACTION_TYPES.SET_HEADER_HEIGHT:
+      return {
+        ...state,
+        headerHeight: action.headerHeight,
       }
     case ACTION_TYPES.INIT_STATE:
       return {
@@ -412,7 +418,7 @@ export function getPhotos() {
     // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
     await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
     const {
-      location, netAvailable, searchTerm,
+      location, netAvailable, searchTerm, headerHeight,
     } = getState().photosList
 
     let noMoreData = false
@@ -464,7 +470,7 @@ export function getPhotos() {
           text1: 'Error',
           text2: `${err}`,
           type: "error",
-          topOffset: 70,
+          topOffset: headerHeight + 15,
         })
       }
     }
@@ -487,6 +493,13 @@ export function acceptTandC() {
       type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
       isTandcAccepted: false,
     }
+  }
+}
+
+export function setHeaderHeight(headerHeight) {
+  return {
+    type: ACTION_TYPES.SET_HEADER_HEIGHT,
+    headerHeight,
   }
 }
 
@@ -550,7 +563,7 @@ async function _getUUID(getState) {
       //   text: err.toString(),
       //   buttonText: "OK23",
       //   visibilityTime: 15000,
-      // topOffset: 70,
+      // topOffset: headerHeight + 15,
       // })
     }
     // no uuid in the store, generate a new one and store
@@ -564,7 +577,7 @@ async function _getUUID(getState) {
         //   text: err.toString(),
         //   buttonText: "OK",
         //   visibilityTime: 15000,
-        // topOffset: 70,
+        // topOffset: headerHeight + 15,
         // })
       }
     }
@@ -731,7 +744,7 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
-    const { uuid } = getState().photosList
+    const { uuid, headerHeight } = getState().photosList
     _updatePendingPhotos(dispatch)
 
     if (getState().photosList.netAvailable === false) {
@@ -787,7 +800,7 @@ export function uploadPendingPhotos() {
               text1: "Sorry, you've been banned.",
               text2: "Try again later",
               type: "error",
-              topOffset: 70,
+              topOffset: headerHeight + 15,
             })
           }
         }
@@ -822,7 +835,7 @@ export function uploadPendingPhotos() {
           Toast.show({
             text1: 'Unable to upload file, refresh to try again.',
             text2: 'Network issue...?',
-            topOffset: 70,
+            topOffset: headerHeight + 15,
           })
         }
       }
@@ -835,7 +848,7 @@ export function uploadPendingPhotos() {
       Toast.show({
         text1: 'Failed to upload file, refresh to try again.',
         text2: 'Network issue?...',
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import { useHeaderHeight } from '@react-navigation/elements'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
@@ -62,6 +63,7 @@ const PhotosList = () => {
 
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
+  const headerHeight = useSelector(state => state.photosList.headerHeight)
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
@@ -116,7 +118,11 @@ const PhotosList = () => {
     await _reload()
   }
 
+  const heightOfHeader = useHeaderHeight()
+
   useEffect(() => {
+    dispatch(reducer.setHeaderHeight(heightOfHeader))
+
     _initBranch({ navigation })
     _getLocation()
     _initandreload()
@@ -143,6 +149,12 @@ const PhotosList = () => {
     if (netAvailable) {
       _initandreload()
     }
+    // else {
+    //   (async () => {
+    //     await navigation.popToTop()
+    //     await _updateNavBar()
+    //   })()
+    // }
   }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -164,7 +176,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'WiSaw just updated over the Air',
           text2: "Reload the app to get the latest version.",
-          topOffset: 70,
+          topOffset: headerHeight + 15,
         })
         // setTimeout(() => { Updates.reloadAsync() }, 3000)
       }
@@ -174,7 +186,7 @@ const PhotosList = () => {
       //   text1: `Failed to get over the air update:`,
       //   text2: `${error}`,
       //   type: "error",
-      //   topOffset: 70,
+      // topOffset: headerHeight + 15,
       // })
     }
   }
@@ -304,7 +316,7 @@ const PhotosList = () => {
             // Toast.show({
             //   text1: 'location udated',
             //   type: "error",
-            //   topOffset: 70,
+            // topOffset: headerHeight + 15,
             // })
             await dispatch(reducer.setLocation(loc))
           }
@@ -313,7 +325,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'Unable to get location',
           type: "error",
-          topOffset: 70,
+          topOffset: headerHeight + 15,
         })
       }
     }
@@ -696,7 +708,7 @@ const PhotosList = () => {
       Toast.show({
         text1: "Search for more than 3 characters",
         type: "error",
-        topOffset: 70,
+        topOffset: headerHeight + 15,
       })
     }
   }
