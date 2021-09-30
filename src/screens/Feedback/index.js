@@ -47,11 +47,11 @@ const FeedbackScreen = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: <Text>feedback</Text>,
+      headerTitle: 'feedback',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
-      headerBackTitle: <Text />,
+      headerBackTitle: '',
       headerStyle: {
         backgroundColor: CONST.NAV_COLOR,
       },

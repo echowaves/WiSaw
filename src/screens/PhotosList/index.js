@@ -233,9 +233,9 @@ const PhotosList = () => {
       })
     } else {
       navigation.setOptions({
-        headerTitle: null,
-        headerLeft: null,
-        headerRight: null,
+        headerTitle: '',
+        headerLeft: '',
+        headerRight: '',
         headerStyle: {
           backgroundColor: CONST.NAV_COLOR,
         },

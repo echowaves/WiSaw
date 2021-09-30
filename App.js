@@ -44,9 +44,9 @@ const App = () => (
               component={PhotosList}
               options={{
                 headerTintColor: CONST.MAIN_COLOR,
-                headerTitle: null,
-                headerLeft: null,
-                headerRight: null,
+                headerTitle: '',
+                headerLeft: '',
+                headerRight: '',
               }}
             />
 

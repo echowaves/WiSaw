@@ -41,10 +41,10 @@ const ModalInputText = ({ route }) => {
   useEffect(() => {
     navigation.setOptions({
       headerLeft: renderHeaderLeft,
-      headerTitle: <Text>Enter comment</Text>,
+      headerTitle: 'Enter comment',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
-      headerBackTitle: <Text />,
+      headerBackTitle: '',
       headerStyle: {
         backgroundColor: CONST.NAV_COLOR,
       },
