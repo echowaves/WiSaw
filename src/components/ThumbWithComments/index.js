@@ -8,11 +8,11 @@ import {
   // Image,
 } from 'react-native'
 
-import { FontAwesome, AntDesign, FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome, AntDesign } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
-import CachedImage from 'expo-cached-image'
+// import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts.js'
 import Thumb from '../Thumb'
@@ -28,24 +28,24 @@ const ThumbWithComments = props => {
     navigation.navigate('PhotosDetails', { currentPhotoIndex: index })
   }
 
-  const styles = {
-    container: {
-      width: thumbDimension,
-      height: thumbDimension,
-
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: 'rgba(100,100,100,0.1)',
-    },
-    thumbnail: {
-      flex: 1,
-      alignSelf: 'stretch',
-      width: thumbDimension,
-      height: thumbDimension,
-      borderRadius: 10,
-      margin: 1,
-    },
-  }
+  // const styles = {
+  //   container: {
+  //     width: thumbDimension,
+  //     height: thumbDimension,
+  //
+  //     borderRadius: 10,
+  //     borderWidth: 1,
+  //     borderColor: 'rgba(100,100,100,0.1)',
+  //   },
+  //   thumbnail: {
+  //     flex: 1,
+  //     alignSelf: 'stretch',
+  //     width: thumbDimension,
+  //     height: thumbDimension,
+  //     borderRadius: 10,
+  //     margin: 1,
+  //   },
+  // }
 
   return (
     <View>
