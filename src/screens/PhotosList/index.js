@@ -56,6 +56,8 @@ import Thumb from '../../components/Thumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
 import ThumbPending from '../../components/ThumbPending'
 
+const FOOTER_HEIGHT = 90
+
 const PhotosList = () => {
   const navigation = useNavigation()
 
@@ -212,6 +214,7 @@ const PhotosList = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: CONST.BG_COLOR,
     },
     thumbContainer: {
       // height: thumbDimension,
@@ -387,7 +390,7 @@ const PhotosList = () => {
       keyExtractor={item => item.id}
       style={{
         ...styles.container,
-        marginBottom: 95,
+        marginBottom: FOOTER_HEIGHT,
       }}
       showsVerticalScrollIndicator={
         false
@@ -460,7 +463,7 @@ const PhotosList = () => {
       style={{
         backgroundColor: CONST.NAV_COLOR,
         width,
-        height: 85,
+        height: FOOTER_HEIGHT,
         position: 'absolute',
         bottom: 0,
         right: 0,
@@ -468,6 +471,7 @@ const PhotosList = () => {
       }}>
       <Grid style={{
         position: 'absolute',
+        top: 5,
         right: 0,
         left: 0,
       }}>
@@ -652,6 +656,7 @@ const PhotosList = () => {
   const renderSearchBar = autoFocus => (
     <View style={{
       flexDirection: 'row',
+      backgroundColor: CONST.NAV_COLOR,
     }}>
       <SearchBar
         placeholder="Type Text Here..."
@@ -691,7 +696,6 @@ const PhotosList = () => {
             margin: 10,
             color: CONST.MAIN_COLOR,
             alignSelf: 'center',
-
           }
         }
       />

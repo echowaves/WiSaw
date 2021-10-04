@@ -18,6 +18,8 @@ export const MAIN_COLOR = "#EA5E3D"
 export const EMPHASIZED_COLOR = "#0000CD"
 export const SECONDARY_COLOR = "#C0C0C0"
 export const NAV_COLOR = "#f0f0f0"
+export const BG_COLOR = "#ffffff"
+
 export const FOOTER_COLOR = 'rgba(240,240,240,.9)'
 
 export const TEXT_COLOR = "#555f61"
