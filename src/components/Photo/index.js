@@ -535,8 +535,8 @@ const Photo = ({ photo }) => {
   const handleBan = ({ photo, photoDetails }) => {
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
-        text1: 'Unable to ban Starred photo.',
-        text2: 'Un-Star photo first.',
+        text1: 'Unable to ban Starred photo',
+        text2: 'Un-Star photo first',
         type: "error",
         topOffset: headerHeight + 15,
       })
@@ -544,8 +544,8 @@ const Photo = ({ photo }) => {
     }
     if (isPhotoBannedByMe({ photoId: photo?.id })) {
       Toast.show({
-        text1: 'Looks like you already reported this Photo',
-        text2: 'You can only report same Photo once.',
+        text1: 'Looks like you already Banned this Photo',
+        text2: 'You can only Ban same Photo once',
         type: "error",
         topOffset: headerHeight + 15,
       })
@@ -565,8 +565,8 @@ const Photo = ({ photo }) => {
   const handleDelete = ({ photo, photoDetails }) => {
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
-        text1: 'Unable to delete Starred photo.',
-        text2: 'Un-Star photo first.',
+        text1: 'Unable to delete Starred photo',
+        text2: 'Un-Star photo first',
         type: "error",
         topOffset: headerHeight + 15,
       })
@@ -608,8 +608,8 @@ const Photo = ({ photo }) => {
       }
     } catch (err) {
       Toast.show({
-        text1: 'Unable to complete.',
-        text2: 'Network issue? Try again later.',
+        text1: 'Unable to complete',
+        text2: 'Network issue? Try again later',
         type: "error",
         topOffset: headerHeight + 15,
       })

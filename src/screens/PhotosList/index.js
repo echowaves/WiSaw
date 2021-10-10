@@ -177,7 +177,7 @@ const PhotosList = () => {
 
         Toast.show({
           text1: 'WiSaw just updated over the Air',
-          text2: "Reload the app to get the latest version.",
+          text2: "See changes afte re-staring WiSaw",
           topOffset: headerHeight + 15,
         })
         // setTimeout(() => { Updates.reloadAsync() }, 3000)

@@ -797,7 +797,7 @@ export function uploadPendingPhotos() {
             // eslint-disable-next-line no-await-in-loop
             await _removeFromQueue(item)
             Toast.show({
-              text1: "Sorry, you've been banned.",
+              text1: "Sorry, you've been banned",
               text2: "Try again later",
               type: "error",
               topOffset: headerHeight + 15,
@@ -833,7 +833,7 @@ export function uploadPendingPhotos() {
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({
-            text1: 'Unable to upload file, refresh to try again.',
+            text1: 'Unable to upload, refresh to try again',
             text2: 'Network issue...?',
             topOffset: headerHeight + 15,
           })
@@ -846,7 +846,7 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
       Toast.show({
-        text1: 'Failed to upload file, refresh to try again.',
+        text1: 'Failed to upload, refresh to try again',
         text2: 'Network issue?...',
         topOffset: headerHeight + 15,
       })

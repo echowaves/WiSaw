@@ -86,7 +86,7 @@ export function watchPhoto({ photo }) {
         watchersCount: photo.watchersCount,
       })
       Toast.show({
-        text1: 'Unable to watch photo.',
+        text1: 'Unable to Star photo',
         text2: 'Network Issue?',
         type: "error",
         topOffset: headerHeight + 15,
@@ -123,7 +123,7 @@ export function unwatchPhoto({ photo }) {
         watchersCount: photo.watchersCount,
       })
       Toast.show({
-        text1: "Unable to unwatch photo.",
+        text1: "Unable to un-Star photo",
         text2: "Maybe Network Issue?",
         type: "error",
         topOffset: headerHeight + 15,
@@ -201,14 +201,14 @@ export function deletePhoto({ photo }) {
         photoId: photo.id,
       })
       Toast.show({
-        text1: "Photo deleted from the Cloud.",
-        text2: "No one will be able to see it any more.",
+        text1: "Photo deleted",
+        text2: "for everyone",
         type: "success",
         topOffset: headerHeight + 15,
       })
     } catch (err) {
       Toast.show({
-        text1: "Unable to delete photo.",
+        text1: "Unable to delete photo",
         text2: "Network Issue?",
         type: "error",
         topOffset: headerHeight + 15,
@@ -268,8 +268,8 @@ export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
     } catch (err) {
       // console.log({ err })
       Toast.show({
-        text1: "Unable to share photo.",
-        text2: "Wait for a bit and try again...",
+        text1: "Unable to share photo",
+        text2: "Wait a bit and try again",
         type: "error",
         topOffset: headerHeight + 15,
       })
@@ -313,7 +313,7 @@ export function submitComment({ inputText, uuid, photo }) {
       })
 
       Toast.show({
-        text1: "Comment submitted.",
+        text1: "Comment posted",
         type: "success",
         topOffset: headerHeight + 15,
       })
@@ -325,7 +325,7 @@ export function submitComment({ inputText, uuid, photo }) {
         error: JSON.stringify(err),
       })
       Toast.show({
-        text1: "Unable to submit comment.",
+        text1: "Unable to post comment",
         text2: "Network Issue?",
         type: "error",
         topOffset: headerHeight + 15,
@@ -424,7 +424,7 @@ export function deleteComment({ photo, photoDetails, comment }) {
         commentsCount: photo.commentsCount,
       })
       Toast.show({
-        text1: "Comment deleted.",
+        text1: "Comment deleted",
         type: "success",
         topOffset: headerHeight + 15,
       })
@@ -434,7 +434,7 @@ export function deleteComment({ photo, photoDetails, comment }) {
       }
     } catch (err) {
       Toast.show({
-        text1: "Unable to delete comment.",
+        text1: "Unable to delete comment",
         text2: "Network Issue?",
         type: "error",
         topOffset: headerHeight + 15,
