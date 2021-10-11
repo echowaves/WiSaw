@@ -48,103 +48,104 @@ const ThumbWithComments = props => {
   // }
 
   return (
-    <View>
-      <TouchableHighlight
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          width: screenWidth - thumbDimension + 9,
-          height: thumbDimension,
-          position: 'absolute',
-          left: thumbDimension - 15,
-          backgroundColor: "white",
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: 'rgba(100,100,100,0.1)',
-        }}
-        onPress={() => onThumbPress(item)}>
-        <Text
-          style={{ paddingLeft: 20 }}>
-          {item.lastComment}
-        </Text>
-      </TouchableHighlight>
-
-      <Thumb
-        item={
-          item
-        }
-        index={
-          index
-        }
-        thumbDimension={thumbDimension}
-      />
-
-      { item.commentsCount > 0 && (
+    <TouchableHighlight onPress={() => onThumbPress(item)}>
+      <View>
         <View
-          style={
-            {
-              fontSize: 30,
-              position: 'absolute',
-              bottom: -10,
-              left: thumbDimension + 15,
-            }
-          }>
-          <FontAwesome
-            name="comment"
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            width: screenWidth - thumbDimension + 9,
+            height: thumbDimension,
+            position: 'absolute',
+            left: thumbDimension - 15,
+            backgroundColor: "white",
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: 'rgba(100,100,100,0.1)',
+          }}>
+          <Text
+            style={{ paddingLeft: 20 }}>
+            {item.lastComment}
+          </Text>
+        </View>
+
+        <Thumb
+          item={
+            item
+          }
+          index={
+            index
+          }
+          thumbDimension={thumbDimension}
+        />
+
+        { item.commentsCount > 0 && (
+          <View
             style={
               {
                 fontSize: 30,
-                color: CONST.PLACEHOLDER_TEXT_COLOR,
-              }
-            }
-          />
-          <Text
-            style={
-              {
-                fontSize: 10,
-                color: CONST.MAIN_COLOR,
-                textAlign: 'center',
-                bottom: 20,
+                position: 'absolute',
+                bottom: -10,
+                left: thumbDimension + 15,
               }
             }>
-            {item.commentsCount > 99 ? '+99' : item.commentsCount}
-          </Text>
-        </View>
-      )}
+            <FontAwesome
+              name="comment"
+              style={
+                {
+                  fontSize: 30,
+                  color: CONST.PLACEHOLDER_TEXT_COLOR,
+                }
+              }
+            />
+            <Text
+              style={
+                {
+                  fontSize: 10,
+                  color: CONST.MAIN_COLOR,
+                  textAlign: 'center',
+                  bottom: 20,
+                }
+              }>
+              {item.commentsCount > 99 ? '+99' : item.commentsCount}
+            </Text>
+          </View>
+        )}
 
-      { item.watchersCount > 0 && (
-        <View
-          style={
-            {
-              fontSize: 30,
-              position: 'absolute',
-              bottom: -10,
-              right: 10,
-            }
-          }>
-          <AntDesign
-            name="star"
+        { item.watchersCount > 0 && (
+          <View
             style={
               {
                 fontSize: 30,
-                color: CONST.PLACEHOLDER_TEXT_COLOR,
-              }
-            }
-          />
-          <Text
-            style={
-              {
-                fontSize: 10,
-                color: CONST.MAIN_COLOR,
-                textAlign: 'center',
-                bottom: 20,
+                position: 'absolute',
+                bottom: -10,
+                right: 10,
               }
             }>
-            {item.watchersCount > 99 ? '+ 99' : item.watchersCount}
-          </Text>
-        </View>
-      )}
-    </View>
+            <AntDesign
+              name="star"
+              style={
+                {
+                  fontSize: 30,
+                  color: CONST.PLACEHOLDER_TEXT_COLOR,
+                }
+              }
+            />
+            <Text
+              style={
+                {
+                  fontSize: 10,
+                  color: CONST.MAIN_COLOR,
+                  textAlign: 'center',
+                  bottom: 20,
+                }
+              }>
+              {item.watchersCount > 99 ? '+ 99' : item.watchersCount}
+            </Text>
+          </View>
+        )}
+      </View>
+    </TouchableHighlight>
   )
 }
 
