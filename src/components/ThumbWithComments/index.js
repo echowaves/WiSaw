@@ -49,6 +49,26 @@ const ThumbWithComments = props => {
 
   return (
     <View>
+      <TouchableHighlight
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          width: screenWidth - thumbDimension + 9,
+          height: thumbDimension,
+          position: 'absolute',
+          left: thumbDimension - 15,
+          backgroundColor: "white",
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: 'rgba(100,100,100,0.1)',
+        }}
+        onPress={() => onThumbPress(item)}>
+        <Text
+          style={{ paddingLeft: 20 }}>
+          {item.lastComment}
+        </Text>
+      </TouchableHighlight>
+
       <Thumb
         item={
           item
@@ -58,26 +78,6 @@ const ThumbWithComments = props => {
         }
         thumbDimension={thumbDimension}
       />
-
-      <TouchableHighlight
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          width: screenWidth - thumbDimension - 15,
-          height: thumbDimension,
-          position: 'absolute',
-          left: thumbDimension + 7,
-          backgroundColor: "white",
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: 'rgba(100,100,100,0.1)',
-        }}
-        onPress={() => onThumbPress(item)}>
-        <Text
-          style={{ padding: 5 }}>
-          {item.lastComment}
-        </Text>
-      </TouchableHighlight>
 
       { item.commentsCount > 0 && (
         <View
