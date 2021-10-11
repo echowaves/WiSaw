@@ -48,7 +48,11 @@ const ThumbWithComments = props => {
   // }
 
   return (
-    <TouchableHighlight onPress={() => onThumbPress(item)}>
+    <TouchableHighlight
+      onPress={() => onThumbPress(item)}
+      style={{
+        borderRadius: 10,
+      }}>
       <View>
         <View
           style={{
