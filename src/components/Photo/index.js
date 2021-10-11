@@ -573,8 +573,8 @@ const Photo = ({ photo }) => {
       return
     }
     Alert.alert(
-      'Delete Photo?',
-      'The photo will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
+      'Will delete photo for everyone!',
+      'This can\'t be undone. Are you sure? ',
       [
         { text: 'No', onPress: () => null, style: 'cancel' },
         {
