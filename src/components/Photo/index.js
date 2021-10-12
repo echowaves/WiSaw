@@ -180,7 +180,7 @@ const Photo = ({ photo }) => {
               () => {
                 Alert.alert(
                   'Delete Comment?',
-                  'The comment will be deleted from the cloud and will never be seeing again by anyone. Are you sure?',
+                  'This can\'t be undone. Are you sure? ',
                   [
                     { text: 'No', onPress: () => null, style: 'cancel' },
                     {
