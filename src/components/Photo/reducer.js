@@ -313,7 +313,7 @@ export function submitComment({ inputText, uuid, photo }) {
       })
 
       Toast.show({
-        text1: "Comment posted",
+        text1: "Comment added",
         type: "success",
         topOffset: headerHeight + 15,
       })
@@ -325,7 +325,7 @@ export function submitComment({ inputText, uuid, photo }) {
         error: JSON.stringify(err),
       })
       Toast.show({
-        text1: "Unable to post comment",
+        text1: "Unable to add comment",
         text2: "Network Issue?",
         type: "error",
         topOffset: headerHeight + 15,
