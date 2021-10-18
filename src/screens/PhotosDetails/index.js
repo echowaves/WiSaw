@@ -27,8 +27,9 @@ import * as CONST from '../../consts.js'
 
 const PhotosDetails = ({ route }) => {
   const navigation = useNavigation()
+  const currentIndex = useSelector(state => state.photosList.currentIndex)
 
-  const { currentPhotoIndex } = route.params
+  // const { currentPhotoIndex } = route.params
   // console.log(currentPhotoIndex)
   // const [index, setIndex] = useState(currentPhotoIndex)
 
@@ -50,12 +51,6 @@ const PhotosDetails = ({ route }) => {
       },
     })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  // useEffect(() => {
-  //   if (index > photos.length - 5) {
-  //     dispatch(getPhotos()) // pre-load more photos when nearing the end
-  //   }
-  // }, [index])// eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHeaderLeft = () => (
     <FontAwesome
@@ -98,7 +93,7 @@ const PhotosDetails = ({ route }) => {
       autoplay={false}
       horizontal
       loop={false}
-      index={currentPhotoIndex}
+      index={currentIndex}
       onIndexChanged={newIndex => {
         if (newIndex > photos.length - 5) {
           dispatch(getPhotos()) // pre-load more photos when nearing the end
@@ -123,11 +118,9 @@ const PhotosDetails = ({ route }) => {
 }
 
 PhotosDetails.defaultProps = {
-  currentPhotoIndex: 0,
 }
 
 PhotosDetails.propTypes = {
-  currentPhotoIndex: PropTypes.number,
   route: PropTypes.object.isRequired,
 }
 

@@ -201,14 +201,13 @@ export function deletePhoto({ photo }) {
         photoId: photo.id,
       })
       Toast.show({
-        text1: "Photo deleted",
-        text2: "for everyone",
+        text1: `${photo.video ? 'Video' : 'Photo'} deleted`,
         type: "success",
         topOffset: headerHeight + 15,
       })
     } catch (err) {
       Toast.show({
-        text1: "Unable to delete photo",
+        text1: "Unable to delete",
         text2: "Network Issue?",
         type: "error",
         topOffset: headerHeight + 15,

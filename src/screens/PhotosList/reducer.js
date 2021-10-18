@@ -45,6 +45,7 @@ export const initialState = {
   uploadingPhoto: false,
   zeroMoment: null,
   headerHeight: 100,
+  currentIndex: 0,
 }
 
 const reducer = (state = initialState, action) => {
@@ -152,6 +153,7 @@ const reducer = (state = initialState, action) => {
         [action.photo,
           ...state.photos,
         ],
+        currentIndex: state.currentIndex + 1,
       }
 
     case ACTION_TYPES.PHOTO_WATCHED:
@@ -231,7 +233,11 @@ const reducer = (state = initialState, action) => {
         ...state,
         pendingPhotos: action.pendingPhotos,
       }
-
+    case ACTION_TYPES.CURRENT_INDEX:
+      return {
+        ...state,
+        currentIndex: action.currentIndex,
+      }
     default:
       return state
   }
@@ -744,7 +750,7 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { uuid, headerHeight, currentIndex } = getState().photosList
     _updatePendingPhotos(dispatch)
 
     if (getState().photosList.netAvailable === false) {
@@ -826,9 +832,15 @@ export function uploadPendingPhotos() {
 
           // show the photo in the photo list immidiately
 
+          // eslint-disable-next-line no-await-in-loop
           dispatch({
             type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
             photo: item.photo,
+          })
+          Toast.show({
+            text1: `${item.photo.video ? 'Video' : 'Photo'} uploaded`,
+            topOffset: headerHeight + 15,
+            visibilityTime: 500,
           })
         } else {
           // alert(JSON.stringify({ responseData }))
@@ -956,6 +968,13 @@ const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
     }
   )
   return { responseData }
+}
+
+export function setCurrentIndex(currentIndex) {
+  return {
+    type: ACTION_TYPES.CURRENT_INDEX,
+    currentIndex,
+  }
 }
 
 export default reducer

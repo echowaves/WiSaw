@@ -10,22 +10,28 @@ import {
 } from 'react-native'
 
 import { FontAwesome, AntDesign, FontAwesome5 } from '@expo/vector-icons'
+import { useDispatch } from "react-redux"
 
 import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
 
+import * as reducer from '../../screens/PhotosList/reducer'
+
 import * as CONST from '../../consts.js'
 
 const Thumb = props => {
   const navigation = useNavigation()
+  const dispatch = useDispatch()
 
   const {
     index, item, thumbDimension,
   } = props
 
   const onThumbPress = item => {
-    navigation.navigate('PhotosDetails', { currentPhotoIndex: index })
+    dispatch(reducer.setCurrentIndex(index))
+
+    navigation.navigate('PhotosDetails')
     // console.log(item.id)
     // navigation.navigate('PhotosDetailsShared', { photoId: item.id })
   }
