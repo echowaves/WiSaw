@@ -26,7 +26,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, /* FontAwesome5, */ MaterialIcons, Ionicons, AntDesign,
+  FontAwesome, MaterialIcons, Ionicons, AntDesign,
 } from '@expo/vector-icons'
 
 import { Col, /* Row, */ Grid } from "react-native-easy-grid"

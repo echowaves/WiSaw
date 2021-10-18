@@ -1,5 +1,5 @@
 {
-  "name": "WiSaw",
+  "name": "wisaw",
   "version": "5.14.10",
   "author": "Echowaves Corp.",
   "license": "MIT",
@@ -10,7 +10,6 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject",
     "reset:simulator": "xcrun simctl erase all",
     "build:ios": "expo build:ios --release-channel prod_$npm_package_version",
     "build:android": "expo build:android --release-channel prod_$npm_package_version",
