@@ -29,10 +29,6 @@ const PhotosDetails = ({ route }) => {
   const navigation = useNavigation()
   const currentIndex = useSelector(state => state.photosList.currentIndex)
 
-  // const { currentPhotoIndex } = route.params
-  // console.log(currentPhotoIndex)
-  // const [index, setIndex] = useState(currentPhotoIndex)
-
   const photos = useSelector(state => state.photosList.photos)
 
   const searchTerm = useSelector(state => state.photosList.searchTerm)
