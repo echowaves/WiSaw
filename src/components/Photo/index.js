@@ -401,13 +401,15 @@ const Photo = ({ photo }) => {
       style={{
         backgroundColor: CONST.NAV_COLOR,
         width,
+        borderWidth: 0.5,
+        borderColor: 'rgba(100,100,100,0.1)',
         height: 85,
         position: 'absolute',
         bottom: 0,
         right: 0,
         left: 0,
       }}>
-      <Divider />
+
       { photoDetails?.isPhotoWatched === undefined && (
         <LinearProgress
           color={
