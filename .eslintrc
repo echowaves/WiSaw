@@ -3,8 +3,8 @@
 		"eslint:recommended",
 		"plugin:import/errors",
 		"plugin:import/warnings",
-    "plugin:react-hooks/recommended",
-    "airbnb"
+	    "plugin:react-hooks/recommended",
+	    "airbnb"
 	],
 	"plugins": [
 		"react",
@@ -25,7 +25,7 @@
 		"jquery": true,
 		"mocha": true,
 		"node": true,
-		"jest": true,
+		"jest": true
 	},
 	"rules": {
 		"jest/no-disabled-tests": "warn",
@@ -49,7 +49,7 @@
 		"jsx-quotes": 1,
 		"linebreak-style": 0,
 		"max-len":0,
-    "new-cap":0,
+    	"new-cap":0,
 		"no-alert": 0,
 		"no-console": 1,
 		"no-debugger": 1,
@@ -75,7 +75,7 @@
 		"react/jsx-curly-spacing": 1,
 		"react/jsx-filename-extension": 0,
 		"react/jsx-indent": ["error", 2],
-    "react/jsx-one-expression-per-line": [0, "always"],
+    	"react/jsx-one-expression-per-line": [0, "always"],
 		"react/jsx-indent-props": 0,
 		"react/jsx-key": 1,
 		"react/jsx-max-props-per-line": [1, { "maximum": 5 }],
@@ -104,8 +104,8 @@
 		"react/require-extension": 0,
 		"react/self-closing-comp": 1,
 		"react/sort-comp": 1,
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn", 
+	    "react-hooks/rules-of-hooks": "error",
+	    "react-hooks/exhaustive-deps": "warn", 
 		"semi": [1, "never"]
 	},
 	"settings": {
@@ -113,5 +113,5 @@
 			"pragma": "React",
 			"version": "15.3.2"
 		}
-	},
+	}
 }
