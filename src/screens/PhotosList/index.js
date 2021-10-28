@@ -458,7 +458,7 @@ const PhotosList = () => {
     />
   )
 
-  const renderPhotoButton = () => location && (
+  const renderFooter = () => location && (
     <SafeAreaView
       style={{
         backgroundColor: CONST.NAV_COLOR,
@@ -771,7 +771,7 @@ const PhotosList = () => {
         {activeSegment === 0 && renderThumbs()}
         {activeSegment === 1 && renderThumbsWithComments()}
         {activeSegment === 2 && renderThumbsWithComments()}
-        {renderPhotoButton()}
+        {renderFooter()}
       </View>
     )
   }
@@ -850,7 +850,7 @@ const PhotosList = () => {
           </Text>
         </Card>
         {renderPendingPhotos()}
-        {renderPhotoButton()}
+        {renderFooter()}
       </View>
     )
   }
@@ -872,7 +872,7 @@ const PhotosList = () => {
           </Text>
         </Card>
         {renderPendingPhotos()}
-        {renderPhotoButton()}
+        {renderFooter()}
       </View>
     )
   }
@@ -886,7 +886,7 @@ const PhotosList = () => {
         }
         />
         {renderPendingPhotos()}
-        {renderPhotoButton()}
+        {renderFooter()}
       </View>
     )
   }
@@ -944,7 +944,7 @@ const PhotosList = () => {
           </Card>
         )}
         {renderPendingPhotos()}
-        {renderPhotoButton()}
+        {renderFooter()}
       </View>
     )
   }
@@ -981,7 +981,7 @@ const PhotosList = () => {
     <View style={styles.container}>
       {activeSegment === 2 && renderSearchBar(false)}
       {renderPendingPhotos()}
-      {renderPhotoButton()}
+      {renderFooter()}
     </View>
   )
 }
