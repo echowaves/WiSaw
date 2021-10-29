@@ -6135,10 +6135,10 @@ expo-updates-interface@~0.4.0:
   resolved "https://registry.yarnpkg.com/expo-updates-interface/-/expo-updates-interface-0.4.0.tgz#20961f2cb4bd068a74c29434affa08791dbaa240"
   integrity sha512-EUJaLnDAePikGEQT8w6gjCY3m/dlGgjZKVn5XBaxZMkHzOy3PDQo6QOcK/bcMdkA3CyNrvo6NCe+/7RHrgmK4A==
 
-expo-updates@~0.10.6:
-  version "0.10.6"
-  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.10.6.tgz#002a900c1274fbf1b56c70af71843abf50dae181"
-  integrity sha512-vQfEBkQ+erXoO0jtyeyaMg/Sv2m7glsH5yRs+OGnmGuL1oD+n10CRCgj38j50NeOQt4oxdNH1swXwZ8G64fzIg==
+expo-updates@~0.10.9:
+  version "0.10.9"
+  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.10.9.tgz#17ed869fe0bbc506f53ff8af4283def2fc08242c"
+  integrity sha512-DOFZ/P23hDrVQ53zJ8/ayWJbrwO/WuOV9puSo3nGDsp3Hbd0ubWha2NCwYegIJdR4VIPyJgK/EXUOAciOjxhNg==
   dependencies:
     "@expo/config" "^5.0.9"
     "@expo/config-plugins" "^4.0.2"

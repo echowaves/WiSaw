@@ -484,7 +484,7 @@ const PhotosList = () => {
           {netAvailable && (
             <MaterialIcons
               onPress={
-                () => navigation.navigate('FeedbackScreen')
+                () => navigation.navigate('DrawerScreen')
               }
               name="feedback"
               size={25}

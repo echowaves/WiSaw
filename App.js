@@ -12,6 +12,7 @@ import { StyleSheet, View } from 'react-native'
 
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
+import { createDrawerNavigator } from '@react-navigation/drawer'
 
 import { Provider } from 'react-redux'
 
@@ -28,55 +29,66 @@ import FeedbackScreen from './src/screens/Feedback'
 import ModalInputText from './src/screens/ModalInputText'
 
 const Stack = createStackNavigator()
+const Drawer = createDrawerNavigator()
 
-const App = () => (
-  <Provider store={store}>
-    <View style={styles.container}>
-      <ThemeProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            // headerMode="none"
-            initialRouteName="PhotosList"
-            screenOptions={{ gestureEnabled: true }}>
+const App = () => {
+  // eslint-disable-next-line react/no-multi-comp
+  const StackScreen = () => (
+    <Stack.Navigator
+      // headerMode="none"
+      initialRouteName="PhotosList"
+      screenOptions={{ gestureEnabled: true }}>
+      <Stack.Screen
+        name="PhotosList"
+        component={PhotosList}
+        options={{
+          headerTintColor: CONST.MAIN_COLOR,
+          headerTitle: '',
+          headerLeft: '',
+          headerRight: '',
+        }}
+      />
+      <Stack.Screen
+        name="PhotosDetails"
+        component={PhotosDetails}
+        options={{ headerTintColor: CONST.MAIN_COLOR }}
+      />
+      <Stack.Screen
+        name="PhotosDetailsShared"
+        component={PhotosDetailsShared}
+        options={{ headerTintColor: CONST.MAIN_COLOR }}
+      />
+      <Stack.Screen
+        name="FeedbackScreen"
+        component={FeedbackScreen}
+        options={{ headerTintColor: CONST.MAIN_COLOR }}
+      />
+      <Stack.Screen
+        name="ModalInputTextScreen"
+        component={ModalInputText}
+        options={{ headerTintColor: CONST.MAIN_COLOR }}
+      />
+    </Stack.Navigator>
+  )
 
-            <Stack.Screen
-              name="PhotosList"
-              component={PhotosList}
-              options={{
-                headerTintColor: CONST.MAIN_COLOR,
-                headerTitle: '',
-                headerLeft: '',
-                headerRight: '',
-              }}
-            />
+  return (
+    <Provider store={store}>
+      <View style={styles.container}>
+        <ThemeProvider>
+          <NavigationContainer>
+            <Drawer.Navigator headerMode="none">
+              <Drawer.Screen name="Home" component={StackScreen} headerMode="none" />
+              <Drawer.Screen name="Feedback" component={FeedbackScreen} />
+            </Drawer.Navigator>
 
-            <Stack.Screen
-              name="PhotosDetails"
-              component={PhotosDetails}
-              options={{ headerTintColor: CONST.MAIN_COLOR }}
-            />
-            <Stack.Screen
-              name="PhotosDetailsShared"
-              component={PhotosDetailsShared}
-              options={{ headerTintColor: CONST.MAIN_COLOR }}
-            />
-            <Stack.Screen
-              name="FeedbackScreen"
-              component={FeedbackScreen}
-              options={{ headerTintColor: CONST.MAIN_COLOR }}
-            />
-            <Stack.Screen
-              name="ModalInputTextScreen"
-              component={ModalInputText}
-              options={{ headerTintColor: CONST.MAIN_COLOR }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ThemeProvider>
-      <Toast ref={ref => Toast.setRef(ref)} />
-    </View>
-  </Provider>
-)
+          </NavigationContainer>
+        </ThemeProvider>
+        <Toast ref={ref => Toast.setRef(ref)} />
+      </View>
+    </Provider>
+  )
+}
+
 export default App
 
 const styles = StyleSheet.create({
