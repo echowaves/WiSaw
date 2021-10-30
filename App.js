@@ -10,7 +10,7 @@ import 'react-native-gesture-handler'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons'
+import { FontAwesome, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 
 import { NavigationContainer } from '@react-navigation/native'
 
@@ -25,6 +25,7 @@ import * as CONST from './src/consts.js'
 import { store } from './src'
 
 import FeedbackScreen from './src/screens/Feedback'
+import ProfileScreen from './src/screens/Profile'
 
 import StackNavigator from './src/nav/stackNavigator.js'
 
@@ -42,8 +43,7 @@ const App = () => (
               component={StackNavigator}
               options={{
                 drawerIcon:
-                  // eslint-disable-next-line react/no-multi-comp
-                  () => (
+                  config => (
                     <FontAwesome
                       name="chevron-left"
                       size={30}
@@ -60,12 +60,33 @@ const App = () => (
               }}
             />
             <Drawer.Screen
+              name="ProfileScreen"
+              component={ProfileScreen}
+              options={{
+                drawerIcon:
+                config => (
+                  <MaterialCommunityIcons
+                    name="incognito"
+                    size={30}
+                    style={
+                      {
+                        marginLeft: 10,
+                        color: CONST.MAIN_COLOR,
+                        width: 60,
+                      }
+                    }
+                  />
+                ),
+                drawerLabel: 'identity',
+                headerShown: true,
+              }}
+            />
+            <Drawer.Screen
               name="Feedback"
               component={FeedbackScreen}
               options={{
                 drawerIcon:
-                // eslint-disable-next-line react/no-multi-comp
-                () => (
+                config => (
                   <MaterialIcons
                     name="feedback"
                     size={30}

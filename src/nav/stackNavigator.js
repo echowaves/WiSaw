@@ -9,6 +9,8 @@ import PhotosList from '../screens/PhotosList'
 import PhotosDetails from '../screens/PhotosDetails'
 import PhotosDetailsShared from '../screens/PhotosDetailsShared'
 import FeedbackScreen from '../screens/Feedback'
+import ProfileScreen from '../screens/Profile'
+
 import ModalInputText from '../screens/ModalInputText'
 
 const Stack = createStackNavigator()
@@ -38,11 +40,16 @@ const StackNavigator = props => (
       component={PhotosDetailsShared}
       options={{ headerTintColor: CONST.MAIN_COLOR }}
     />
-    <Stack.Screen
+    {/* <Stack.Screen
+      name="ProfileScreen"
+      component={ProfileScreen}
+      options={{ headerTintColor: CONST.MAIN_COLOR }}
+    /> */}
+    {/* <Stack.Screen
       name="FeedbackScreen"
       component={FeedbackScreen}
       options={{ headerTintColor: CONST.MAIN_COLOR }}
-    />
+    /> */}
     <Stack.Screen
       name="ModalInputTextScreen"
       component={ModalInputText}
