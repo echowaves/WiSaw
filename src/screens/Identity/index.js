@@ -27,15 +27,12 @@ import * as reducer from './reducer'
 
 const maxStringLength = 2000
 
-const ProfileScreen = () => {
+const IdentityScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
   const loading = useSelector(state => state.feedback.loading)
-  const errorMessage = useSelector(state => state.feedback.errorMessage)
   const finished = useSelector(state => state.feedback.finished)
-  // const [diskSpace, setDiskSpace] = useState('')
-  // const [diskCapacity, setDiskCapacity] = useState('')
 
   const [inputText, _setInputText] = useState('')
 
@@ -47,7 +44,7 @@ const ProfileScreen = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'feedback',
+      headerTitle: 'identity',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -105,38 +102,9 @@ const ProfileScreen = () => {
     dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
   }
 
-  if (finished && errorMessage.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Overlay isVisible>
-          <Card style={{ borderRadius: 10 }}>
-            <Text>Thank you for submitting your feedback.
-            </Text>
-          </Card>
-          <Card style={{ borderRadius: 10 }}>
-            <Button
-              title="You are Welcome!"
-              type="outline"
-              onPress={
-                () => {
-                  navigation.goBack()
-                  dispatch(reducer.resetForm())
-                }
-              }
-            />
-          </Card>
-        </Overlay>
-      </SafeAreaView>
-    )
-  }
   return (
     <SafeAreaView style={styles.container}>
-      {/* <Text>{diskSpace / 1000 / 1000}</Text> */}
-      {/* <Text>{diskSpace}</Text> */}
-      {/* <Text>{diskCapacity / 1000 / 1000}</Text> */}
-      { errorMessage.length !== 0 && (
-        <Text>{errorMessage}</Text>
-      )}
+
       <TextInput
         rowSpan={5}
         onChangeText={inputValue => {
@@ -180,4 +148,4 @@ const ProfileScreen = () => {
     </SafeAreaView>
   )
 }
-export default ProfileScreen
+export default IdentityScreen

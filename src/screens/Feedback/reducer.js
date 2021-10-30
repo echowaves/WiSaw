@@ -62,6 +62,9 @@ export function submitFeedback({ feedbackText }) {
       type: ACTION_TYPES.SUBMIT_FEEDBACK_STARTED,
     })
     try {
+      if (feedbackText.trim().length < 5) {
+        throw Error("unable to submit empty feedback")
+      }
       // const contactForm =
       await CONST.gqlClient
         .mutate({
