@@ -482,11 +482,11 @@ const PhotosList = () => {
             alignItems: 'center',
           }}>
           {netAvailable && (
-            <MaterialIcons
+            <FontAwesome
               onPress={
-                () => navigation.navigate('DrawerScreen')
+                () => navigation.openDrawer()
               }
-              name="feedback"
+              name="navicon"
               size={25}
               style={{
               // marginRight: 20,
