@@ -748,6 +748,17 @@ const PhotosList = () => {
             }
             fixed
           />
+          <LinearProgress
+            color={
+              CONST.MAIN_COLOR
+            }
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              left: 0,
+            }}
+          />
         </View>
       )
     }
