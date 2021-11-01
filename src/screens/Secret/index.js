@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux"
 
 import {
   SafeAreaView,
-  TextInput,
   StyleSheet,
 } from 'react-native'
 
@@ -27,7 +26,7 @@ import * as reducer from './reducer'
 
 const maxStringLength = 2000
 
-const IdentityScreen = () => {
+const SecretScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
@@ -113,43 +112,52 @@ const IdentityScreen = () => {
           </Text>
         </ListItem>
       </Card>
-
       <Input
-        placeholder="Password"
-        secureTextEntry
+        placeholder="User Name"
         leftIcon={(
           <FontAwesome
-            name="lock"
+            name="user"
             size={24}
             color="black"
           />
         )}
       />
 
+      <Input
+        placeholder="User Secret"
+        secureTextEntry
+        leftIcon={(
+          <FontAwesome
+            name="user-secret"
+            size={24}
+            color="black"
+          />
+        )}
+      />
+
+      <Input
+        placeholder="Confirm Secret"
+        secureTextEntry
+        leftIcon={(
+          <FontAwesome
+            name="user-secret"
+            size={24}
+            color="black"
+          />
+        )}
+      />
       <LinearProgress color="primary" />
-
-      <Input
-        placeholder="Confirm Password"
-        secureTextEntry
-        leftIcon={(
-          <FontAwesome
-            name="lock"
-            size={24}
-            color="black"
-          />
-        )}
-      />
 
       <Card containerStyle={{ padding: 0 }}>
         <ListItem>
           <Text style={{
             color: "red",
             fontSize: 12,
-          }}>Make sure to use only strong passwods.
+          }}>Make sure to use only strong secrets.
 
             Write it down and store in secure location.
-            We will not be able to help you to re-cover it from the system,
-            because we never collect your explicit identity in any form (like your email or mobile phone number).
+            We will not be able to help you to re-cover it,
+            because we never collect your explicit identity in any form (like your email or mobile phone number), we would not know how to send it to you.
           </Text>
         </ListItem>
       </Card>
@@ -180,4 +188,4 @@ const IdentityScreen = () => {
     </SafeAreaView>
   )
 }
-export default IdentityScreen
+export default SecretScreen

@@ -29,7 +29,7 @@ import PhotosList from './src/screens/PhotosList'
 import PhotosDetails from './src/screens/PhotosDetails'
 import PhotosDetailsShared from './src/screens/PhotosDetailsShared'
 import FeedbackScreen from './src/screens/Feedback'
-import IdentityScreen from './src/screens/Identity'
+import IdentityScreen from './src/screens/Secret'
 import ModalInputText from './src/screens/ModalInputText'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
@@ -97,7 +97,7 @@ const App = () => (
               )}
             </Drawer.Screen>
             <Drawer.Screen
-              name="IdentityScreen"
+              name="SecretScreen"
               component={IdentityScreen}
               options={{
                 drawerIcon:

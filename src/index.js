@@ -8,7 +8,7 @@ import 'react-native-get-random-values'
 // import camera from './screens/Camera/reducer'
 import photosList from './screens/PhotosList/reducer'
 import feedback from './screens/Feedback/reducer'
-import identity from './screens/Identity/reducer'
+import secret from './screens/Secret/reducer'
 import photo from './components/Photo/reducer'
 
 let composeEnhancers = compose
@@ -20,7 +20,7 @@ if (__DEV__) {
 export const reducers = combineReducers({
   photosList,
   photo,
-  identity,
+  secret,
   feedback,
 })
 
