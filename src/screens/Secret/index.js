@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch } from "react-redux"
 
@@ -20,6 +20,8 @@ import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
+import zxcvbn from '../../zxcvbn'
+
 import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
@@ -33,6 +35,9 @@ const SecretScreen = () => {
   const [userName, setUserName] = useState('')
   const [secret, setSecret] = useState('')
   const [secretConfirm, setSecretConfirm] = useState('')
+  const [strength, setStrength] = useState(0)
+
+  const strengthColors = ['red', 'orangered', 'orange', 'yellowgreen', 'green']
 
   useEffect(() => {
     navigation.setOptions({
@@ -55,8 +60,12 @@ const SecretScreen = () => {
 
   useEffect(() => {
     if (secret?.length > 4 && secret === secretConfirm) {
-      console.log('QWE')
+      console.log(`is good`)
     }
+
+    setStrength(zxcvbn(secret).score / 4)
+
+    console.log(`strength:${strength} color:${strengthColors[strength * 4]}`)
   }, [secret, secretConfirm])
 
   const styles = StyleSheet.create({
@@ -156,7 +165,11 @@ const SecretScreen = () => {
           setSecretConfirm(text)
         }}
       />
-      <LinearProgress color="primary" />
+      <LinearProgress
+        value={strength}
+        color={strengthColors[strength * 4]}
+        variant="determinate"
+      />
 
       <Card containerStyle={{ padding: 0 }}>
         <ListItem>
