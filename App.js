@@ -102,8 +102,8 @@ const App = () => (
               options={{
                 drawerIcon:
                 config => (
-                  <MaterialCommunityIcons
-                    name="incognito"
+                  <FontAwesome
+                    name="user-secret"
                     size={30}
                     style={
                       {
@@ -114,7 +114,7 @@ const App = () => (
                     }
                   />
                 ),
-                drawerLabel: 'identity',
+                drawerLabel: 'secret',
                 headerShown: true,
               }}
             />

@@ -26,7 +26,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, Ionicons, AntDesign,
+  FontAwesome, Ionicons, AntDesign, FontAwesome5,
 } from '@expo/vector-icons'
 
 import { Col, /* Row, */ Grid } from "react-native-easy-grid"
@@ -46,7 +46,6 @@ import {
   ButtonGroup,
   SearchBar,
   Overlay,
-  Icon,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
@@ -504,15 +503,19 @@ const PhotosList = () => {
           style={{
             justifyContent: 'center',
             alignItems: 'center',
+            borderRadius: 45,
+            backgroundColor: 'white',
+            height: 50,
+            width: 80,
+
           }}
           onPress={
             () => {
               checkPermissionsForPhotoTaking({ cameraType: 'video' })
             }
           }>
-          <Icon
+          <FontAwesome5
             name="video"
-            type="font-awesome-5"
             color={CONST.EMPHASIZED_COLOR}
             size={30}
             style={{
@@ -520,31 +523,40 @@ const PhotosList = () => {
             }}
             containerStyle={
               {
-                height: 50,
-                width: 80,
-                backgroundColor: 'white',
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                borderRadius: 45,
               }
             }
           />
         </Col>
+        <Col
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 50,
+            width: 25,
+
+          }}
+        />
         {/* photo button */}
         <Col
           style={{
             justifyContent: 'center',
             alignItems: 'center',
+            height: 50,
+            width: 80,
+            backgroundColor: 'white',
+            borderRadius: 45,
+
           }}
           onPress={
             () => {
               checkPermissionsForPhotoTaking({ cameraType: 'camera' })
             }
           }>
-          <Icon
+          <FontAwesome5
             name="camera"
-            type="font-awesome-5"
             color={CONST.MAIN_COLOR}
             size={30}
             style={{
@@ -552,13 +564,9 @@ const PhotosList = () => {
             }}
             containerStyle={
               {
-                height: 50,
-                width: 80,
-                backgroundColor: 'white',
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                borderRadius: 45,
               }
             }
           />

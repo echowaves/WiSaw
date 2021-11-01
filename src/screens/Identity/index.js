@@ -9,11 +9,11 @@ import {
 } from 'react-native'
 
 import {
-  Button,
   Text,
-  Card,
+  Input,
   LinearProgress,
-  Overlay,
+  Card,
+  ListItem,
 } from 'react-native-elements'
 // import * as FileSystem from 'expo-file-system'
 
@@ -31,20 +31,17 @@ const IdentityScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const loading = useSelector(state => state.feedback.loading)
-  const finished = useSelector(state => state.feedback.finished)
+  // const [inputText, _setInputText] = useState('')
 
-  const [inputText, _setInputText] = useState('')
-
-  const inputTextRef = React.useRef(inputText)
-  const setInputText = data => {
-    inputTextRef.current = data
-    _setInputText(data)
-  }
+  // const inputTextRef = React.useRef(inputText)
+  // const setInputText = data => {
+  //   inputTextRef.current = data
+  //   _setInputText(data)
+  // }
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'identity',
+      headerTitle: 'my secret',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -54,11 +51,11 @@ const IdentityScreen = () => {
       },
     })
 
-    const initState = async () => {
-      // setDiskSpace(await FileSystem.getFreeDiskStorageAsync())
-      // setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
-    }
-    initState()
+    // const initState = async () => {
+    //   // setDiskSpace(await FileSystem.getFreeDiskStorageAsync())
+    //   // setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
+    // }
+    // initState()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
   const styles = StyleSheet.create({
     container: {
@@ -99,16 +96,68 @@ const IdentityScreen = () => {
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
+    // dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
   }
 
   return (
     <SafeAreaView style={styles.container}>
 
-      <TextInput
+      <Card containerStyle={{ padding: 0 }}>
+        <ListItem>
+          <Text style={
+            {
+              color: CONST.MAIN_COLOR,
+              fontSize: 20,
+            }
+          }>The secret allows you to carry incognito identity to a different device, or restore it from another phone.
+          </Text>
+        </ListItem>
+      </Card>
+
+      <Input
+        placeholder="Password"
+        secureTextEntry
+        leftIcon={(
+          <FontAwesome
+            name="lock"
+            size={24}
+            color="black"
+          />
+        )}
+      />
+
+      <LinearProgress color="primary" />
+
+      <Input
+        placeholder="Confirm Password"
+        secureTextEntry
+        leftIcon={(
+          <FontAwesome
+            name="lock"
+            size={24}
+            color="black"
+          />
+        )}
+      />
+
+      <Card containerStyle={{ padding: 0 }}>
+        <ListItem>
+          <Text style={{
+            color: "red",
+            fontSize: 12,
+          }}>Make sure to use only strong passwods.
+
+            Write it down and store in secure location.
+            We will not be able to help you to re-cover it from the system,
+            because we never collect your explicit identity in any form (like your email or mobile phone number).
+          </Text>
+        </ListItem>
+      </Card>
+
+      {/* <TextInput
         rowSpan={5}
         onChangeText={inputValue => {
-          setInputText(inputValue.slice(0, maxStringLength))
+          // setInputText(inputValue.slice(0, maxStringLength))
         }}
         placeholder="Type your feedback here and click send."
         placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
@@ -127,24 +176,7 @@ const IdentityScreen = () => {
             textAlignVertical: 'top',
           }
         }
-      />
-      { loading && (
-        <LinearProgress
-          color={
-            CONST.MAIN_COLOR
-          }
-          style={
-            {
-              flex: 1,
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              right: 0,
-              left: 0,
-            }
-          }
-        />
-      )}
+      /> */}
     </SafeAreaView>
   )
 }
