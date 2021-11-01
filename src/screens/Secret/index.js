@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 
 import {
   SafeAreaView,
@@ -30,13 +30,9 @@ const SecretScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  // const [inputText, _setInputText] = useState('')
-
-  // const inputTextRef = React.useRef(inputText)
-  // const setInputText = data => {
-  //   inputTextRef.current = data
-  //   _setInputText(data)
-  // }
+  const [userName, setUserName] = useState('')
+  const [secret, setSecret] = useState('')
+  const [secretConfirm, setSecretConfirm] = useState('')
 
   useEffect(() => {
     navigation.setOptions({
@@ -56,6 +52,13 @@ const SecretScreen = () => {
     // }
     // initState()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (secret?.length > 4 && secret === secretConfirm) {
+      console.log('QWE')
+    }
+  }, [secret, secretConfirm])
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -113,7 +116,8 @@ const SecretScreen = () => {
         </ListItem>
       </Card>
       <Input
-        placeholder="User Name"
+        placeholder={userName || "User Name"}
+        disabled={!!userName}
         leftIcon={(
           <FontAwesome
             name="user"
@@ -133,6 +137,9 @@ const SecretScreen = () => {
             color="black"
           />
         )}
+        onChangeText={text => {
+          setSecret(text)
+        }}
       />
 
       <Input
@@ -145,6 +152,9 @@ const SecretScreen = () => {
             color="black"
           />
         )}
+        onChangeText={text => {
+          setSecretConfirm(text)
+        }}
       />
       <LinearProgress color="primary" />
 
@@ -162,29 +172,6 @@ const SecretScreen = () => {
         </ListItem>
       </Card>
 
-      {/* <TextInput
-        rowSpan={5}
-        onChangeText={inputValue => {
-          // setInputText(inputValue.slice(0, maxStringLength))
-        }}
-        placeholder="Type your feedback here and click send."
-        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-        multiline
-        numberOfLines={10}
-        maxLength={maxStringLength}
-        style={
-          {
-            color: CONST.MAIN_COLOR,
-            height: 200,
-            margin: 12,
-            padding: 10,
-            borderWidth: 1,
-            borderColor: CONST.MAIN_COLOR,
-            fontSize: 20,
-            textAlignVertical: 'top',
-          }
-        }
-      /> */}
     </SafeAreaView>
   )
 }
