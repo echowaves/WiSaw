@@ -37,7 +37,20 @@ const SecretScreen = () => {
   const [secretConfirm, setSecretConfirm] = useState('')
   const [strength, setStrength] = useState(0)
 
-  const strengthColors = ['red', 'orangered', 'orange', 'yellowgreen', 'green']
+  const strengthColors = [
+    'red',
+    'orangered',
+    'orange',
+    'yellowgreen',
+    'green',
+  ]
+  const strengthLabel = [
+    'not a secret at all',
+    'weak secret easy to guess',
+    'takes some effort to guess',
+    'takes time but can be guessed eventually',
+    'almost impossible to guess',
+  ]
 
   useEffect(() => {
     navigation.setOptions({
@@ -63,14 +76,13 @@ const SecretScreen = () => {
       console.log(`is good`)
     }
 
-    setStrength(zxcvbn(secret).score / 4)
-
-    console.log(`strength:${strength} color:${strengthColors[strength * 4]}`)
+    setStrength(zxcvbn(secret).score) // from 0 to
   }, [secret, secretConfirm])
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      alignItems: 'center',
     },
   })
 
@@ -165,9 +177,11 @@ const SecretScreen = () => {
           setSecretConfirm(text)
         }}
       />
+      <Text>{`${strengthLabel[strength]}`}</Text>
       <LinearProgress
-        value={strength}
-        color={strengthColors[strength * 4]}
+        value={strength / 4}
+        color={strengthColors[strength]}
+        // trackColor={CONST.MAIN_COLOR}
         variant="determinate"
       />
 
