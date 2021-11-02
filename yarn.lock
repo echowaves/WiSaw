@@ -2031,14 +2031,6 @@
   resolved "https://registry.yarnpkg.com/@react-navigation/elements/-/elements-1.2.1.tgz#86f19781c6f34a5c9dd25dca99915e0306f477d1"
   integrity sha512-EnmAbKMsptrliRKf95rdgS6BhMjML+mIns06+G1Vdih6BrEo7/0iytThUv3WBf99AI76dyEq/cqLUwHPiFzXWg==
 
-"@react-navigation/native-stack@^6.2.5":
-  version "6.2.5"
-  resolved "https://registry.yarnpkg.com/@react-navigation/native-stack/-/native-stack-6.2.5.tgz#bfa19516cf434f831e6d4ba28d32b9bc5436d181"
-  integrity sha512-XCtwl4LEr06nzxMG4aXbYfbO/pAjyhGOR3QtBVBq/uGfVGkeK8utKUe925reqd1x099CiEfSJLpgeR2KzzYp+Q==
-  dependencies:
-    "@react-navigation/elements" "^1.2.1"
-    warn-once "^0.1.0"
-
 "@react-navigation/native@^6.0.6":
   version "6.0.6"
   resolved "https://registry.yarnpkg.com/@react-navigation/native/-/native-6.0.6.tgz#0f2577358d73d7b21ff5b2455f0a2d51b1ad2837"
@@ -5890,13 +5882,13 @@ expo-asset@~8.4.3:
     path-browserify "^1.0.0"
     url-parse "^1.4.4"
 
-expo-av@~10.1.2:
-  version "10.1.2"
-  resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-10.1.2.tgz#93d675d441ba663dc634fffb870533b3564de8d8"
-  integrity sha512-uJ3ArN/bJvTFk5uvcj0Vu+OZ2Q8orXtslpCJza+UuT5p5k0nE/KCrfrnH0vbSecI1ZY3G9yYPlNeeWqlMumKqA==
+expo-av@~10.1.3:
+  version "10.1.3"
+  resolved "https://registry.yarnpkg.com/expo-av/-/expo-av-10.1.3.tgz#a010443d7f82398d789a89824f1d512d8b407e3c"
+  integrity sha512-zYhpYthdQ5UPuhNn3XWaMJu94XyXUNw6WEifRnKH5xUHo0Oy0XrV5JAk8iO+7WDgfGo9oHlgvnSWrMNQsbF80A==
   dependencies:
     "@expo/config-plugins" "^4.0.2"
-    expo-modules-core "~0.4.4"
+    expo-modules-core "~0.4.7"
 
 expo-branch@~5.0.3:
   version "5.0.3"
@@ -6143,10 +6135,10 @@ expo-updates-interface@~0.4.0:
   resolved "https://registry.yarnpkg.com/expo-updates-interface/-/expo-updates-interface-0.4.0.tgz#20961f2cb4bd068a74c29434affa08791dbaa240"
   integrity sha512-EUJaLnDAePikGEQT8w6gjCY3m/dlGgjZKVn5XBaxZMkHzOy3PDQo6QOcK/bcMdkA3CyNrvo6NCe+/7RHrgmK4A==
 
-expo-updates@~0.10.9:
-  version "0.10.9"
-  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.10.9.tgz#17ed869fe0bbc506f53ff8af4283def2fc08242c"
-  integrity sha512-DOFZ/P23hDrVQ53zJ8/ayWJbrwO/WuOV9puSo3nGDsp3Hbd0ubWha2NCwYegIJdR4VIPyJgK/EXUOAciOjxhNg==
+expo-updates@~0.10.10:
+  version "0.10.10"
+  resolved "https://registry.yarnpkg.com/expo-updates/-/expo-updates-0.10.10.tgz#67ab467073c7f762430008d965f1199ceaac7a77"
+  integrity sha512-7xrNCE6qXlg40G8PHfmuMWHAJMmrny4OqeXP+k3w9XukuH1wI4ikqg1wxMn4kg7G7OAoG47YoZZiokzOxodkTQ==
   dependencies:
     "@expo/config" "^5.0.9"
     "@expo/config-plugins" "^4.0.2"
