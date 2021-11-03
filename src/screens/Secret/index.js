@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch } from "react-redux"
 
@@ -27,7 +27,7 @@ import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
 
-const maxStringLength = 2000
+const maxStringLength = 512
 
 const SecretScreen = () => {
   const navigation = useNavigation()
@@ -139,7 +139,8 @@ const SecretScreen = () => {
     const errors = new Map()
 
     if (userName?.length < 5) errors.set('userName', 'User Name too short.')
-    if (secret?.length < 5) errors.set('secret', 'Secret too short.')
+    if (secret?.length < 5) errors.set('secret', `Secret too short.`)
+    if (secret?.length > maxStringLength) errors.set('secret', `Secret too long -- Can not save.`)
     if (secret !== secretConfirm) errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
     if (strength < 3) errors.set('strength', 'Secret is not secure.')
 
@@ -198,7 +199,7 @@ const SecretScreen = () => {
           )}
           onChangeText={text => setSecret(text)}
           errorStyle={{ color: strengthColors[strength] }}
-          errorMessage={strengthLabel[strength]}
+          errorMessage={`${strengthLabel[strength]} ${errorsMap.get('secret') || ''} `}
         />
         <Input
           placeholder="Confirm Secret"
