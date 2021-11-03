@@ -39,6 +39,8 @@ const SecretScreen = () => {
   const [strength, setStrength] = useState(0)
   const [canSubmit, setCanSubmit] = useState(false)
 
+  const [errorsMap, setErrorsMap] = useState(new Map())
+
   const strengthColors = [
     'red',
     'orangered',
@@ -47,31 +49,30 @@ const SecretScreen = () => {
     'green',
   ]
   const strengthLabel = [
-    'not a secret at all',
-    'weak secret easy to guess',
-    'takes some effort to guess',
-    'takes time but can be guessed eventually',
-    'almost impossible to guess',
+    'This Secret is too obvious -- keep typing.',
+    'This Secret is still too weak -- easy to guess.',
+    'This Secret takes some effort to guess.',
+    'Almost perfect Secret -- can be guessed eventually.',
+    'The best Secret -- almost impossible to guess.',
   ]
 
   useEffect(() => {
-
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+    setStrength(zxcvbn(secret).score) // from 0 to 4
+  }, [secret])
 
   useEffect(() => {
-    if (
-      userName?.length > 4
-      && secret?.length > 4
-      && secret === secretConfirm
-      && strength > 2
-    ) {
+    validate()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userName, secret, secretConfirm, strength])
+
+  useEffect(() => {
+    if (errorsMap.size === 0) {
       setCanSubmit(true)
     } else {
       setCanSubmit(false)
     }
-
-    setStrength(zxcvbn(secret).score) // from 0 to 4
-  }, [secret, secretConfirm])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [errorsMap])
 
   useEffect(() => {
     navigation.setOptions({
@@ -84,7 +85,8 @@ const SecretScreen = () => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-  }, [canSubmit, strength])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canSubmit])
 
   const styles = StyleSheet.create({
     container: {
@@ -92,7 +94,7 @@ const SecretScreen = () => {
     },
     scrollView: {
       alignItems: 'center',
-      marginHorizontal: 10,
+      marginHorizontal: 0,
       paddingBottom: 300,
     },
   })
@@ -133,6 +135,17 @@ const SecretScreen = () => {
     // dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
   }
 
+  const validate = () => {
+    const errors = new Map()
+
+    if (userName?.length < 5) errors.set('userName', 'User Name too short.')
+    if (secret?.length < 5) errors.set('secret', 'Secret too short.')
+    if (secret !== secretConfirm) errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
+    if (strength < 3) errors.set('strength', 'Secret is not secure.')
+
+    setErrorsMap(errors)
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -152,7 +165,7 @@ const SecretScreen = () => {
           </ListItem>
         </Card>
         <Input
-          placeholder={userName || "User Name"}
+          placeholder="User Name"
           // disabled={!!userName}
           leftIcon={(
             <FontAwesome
@@ -161,15 +174,18 @@ const SecretScreen = () => {
               color="black"
             />
           )}
+          value={userName}
           onChangeText={text => setUserName(text)}
+          errorStyle={{ color: 'red' }}
+          errorMessage={errorsMap.get('userName')}
         />
-        <Text
-          style={{
-            color: 'red',
-            marginTop: -18,
-          }}>
-          {`${userName?.length > 4 ? '' : 'too short'}`}
-        </Text>
+
+        <LinearProgress
+          value={strength / 4}
+          color={strengthColors[strength]}
+          variant="determinate"
+        />
+
         <Input
           placeholder="User Secret"
           secureTextEntry
@@ -181,21 +197,9 @@ const SecretScreen = () => {
             />
           )}
           onChangeText={text => setSecret(text)}
+          errorStyle={{ color: strengthColors[strength] }}
+          errorMessage={strengthLabel[strength]}
         />
-        <Text
-          style={{
-            color: strengthColors[strength],
-            marginTop: -18,
-          }}>
-          {`${strengthLabel[strength]}`}
-        </Text>
-        <LinearProgress
-          value={strength / 4}
-          color={strengthColors[strength]}
-          // trackColor={CONST.MAIN_COLOR}
-          variant="determinate"
-        />
-
         <Input
           placeholder="Confirm Secret"
           secureTextEntry
@@ -207,13 +211,9 @@ const SecretScreen = () => {
             />
           )}
           onChangeText={text => setSecretConfirm(text)}
+          errorStyle={{ color: 'red' }}
+          errorMessage={errorsMap.get('secretConfirm')}
         />
-        <Text
-          style={{
-            color: 'red',
-            marginTop: -18,
-          }}>{`${secret === secretConfirm ? (strength > 2 ? '' : "not strong enough") : 'must match secret'}`}
-        </Text>
 
         <Card containerStyle={{ padding: 0 }}>
           <ListItem>
