@@ -14,10 +14,11 @@ import {
   LinearProgress,
   Card,
   ListItem,
+  Button,
 } from 'react-native-elements'
 // import * as FileSystem from 'expo-file-system'
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -228,6 +229,37 @@ const SecretScreen = () => {
               because we never collect your explicit identity in any form (like your email or mobile phone number), we would not know how to send it to you.
             </Text>
           </ListItem>
+        </Card>
+        <Card containerStyle={{ padding: 10 }}>
+          <Text style={{
+            color: "red",
+            fontSize: 12,
+            paddingBottom: 10,
+          }}>
+            Generating new Secret will reset your device. You can restore the secret if you
+          </Text>
+
+          <Button
+            type="outline"
+            titleStyle={
+              {
+                color: CONST.MAIN_COLOR,
+              }
+            }
+            icon={(
+              <MaterialIcons
+                name="delete-forever"
+                size={30}
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
+                }
+              />
+
+            )}
+            title="Generate New Secret"
+          />
         </Card>
       </ScrollView>
     </SafeAreaView>
