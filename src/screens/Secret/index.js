@@ -33,7 +33,7 @@ const SecretScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const [userName, setUserName] = useState('')
+  const [nickName, setNickName] = useState('')
   const [secret, setSecret] = useState('')
   const [secretConfirm, setSecretConfirm] = useState('')
   const [strength, setStrength] = useState(0)
@@ -63,7 +63,7 @@ const SecretScreen = () => {
   useEffect(() => {
     validate()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userName, secret, secretConfirm, strength])
+  }, [nickName, secret, secretConfirm, strength])
 
   useEffect(() => {
     if (errorsMap.size === 0) {
@@ -138,7 +138,7 @@ const SecretScreen = () => {
   const validate = () => {
     const errors = new Map()
 
-    if (userName?.length < 5) errors.set('userName', 'User Name too short.')
+    if (nickName?.length < 5) errors.set('nickName', 'Nickname too short.')
     if (secret?.length < 5) errors.set('secret', `Secret too short.`)
     if (secret?.length > maxStringLength) errors.set('secret', `Secret too long -- Can not save.`)
     if (secret !== secretConfirm) errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
@@ -166,8 +166,8 @@ const SecretScreen = () => {
           </ListItem>
         </Card>
         <Input
-          placeholder="User Name"
-          // disabled={!!userName}
+          placeholder="Nickname"
+          // disabled={!!nickName}
           leftIcon={(
             <FontAwesome
               name="user"
@@ -175,10 +175,10 @@ const SecretScreen = () => {
               color="black"
             />
           )}
-          value={userName}
-          onChangeText={text => setUserName(text)}
+          value={nickName}
+          onChangeText={text => setNickName(text)}
           errorStyle={{ color: 'red' }}
-          errorMessage={errorsMap.get('userName')}
+          errorMessage={errorsMap.get('nickName')}
         />
 
         <LinearProgress
@@ -188,7 +188,7 @@ const SecretScreen = () => {
         />
 
         <Input
-          placeholder="User Secret"
+          placeholder="My Secret"
           secureTextEntry
           leftIcon={(
             <FontAwesome
