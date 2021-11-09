@@ -7,15 +7,11 @@ import * as CONST from '../../consts.js'
 import * as ACTION_TYPES from './action_types'
 
 export const initialState = {
-  feedbackText: '',
-  loading: false,
-  errorMessage: '',
-  finished: false,
 }
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case ACTION_TYPES.SUBMIT_FEEDBACK_STARTED:
+    case ACTION_TYPES.REGISTER_SECRET:
       return {
         ...state,
         loading: true,
