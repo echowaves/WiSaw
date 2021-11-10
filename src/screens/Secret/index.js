@@ -28,7 +28,8 @@ import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
 
-const maxStringLength = 512
+const maxNickNameLength = 100 // will also use this parameter for the secret length
+const minNickNameLength = 5 // will also use this parameter for the secret length
 
 const SecretScreen = () => {
   const navigation = useNavigation()
@@ -139,10 +140,11 @@ const SecretScreen = () => {
   const validate = () => {
     const errors = new Map()
 
-    if (!/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,255}$/.test(nickName.toLowerCase())) errors.set('nickName', 'Nickname wrong format.')
-    // if (nickName?.length < 5) errors.set('nickName', 'Nickname too short.')
-    if (secret?.length < 5) errors.set('secret', `Secret too short.`)
-    if (secret?.length > maxStringLength) errors.set('secret', `Secret too long -- Can not save.`)
+    if (!/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickName.toLowerCase())) errors.set('nickName', 'Nickname wrong format.')
+    if (nickName?.length < minNickNameLength) errors.set('nickName', 'Nickname too short.')
+    if (nickName?.length > maxNickNameLength) errors.set('nickName', 'Nickname too long.')
+    if (secret?.length < minNickNameLength) errors.set('secret', `Secret too short.`)
+    if (secret?.length > maxNickNameLength) errors.set('secret', `Secret too long.`)
     if (secret !== secretConfirm) errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
     if (strength < 3) errors.set('strength', 'Secret is not secure.')
 
@@ -224,10 +226,9 @@ const SecretScreen = () => {
               color: "red",
               fontSize: 12,
             }}>Make sure to use only strong secrets.
-
-              Write it down and store in secure location.
-              We will not be able to help you to re-cover it,
-              because we never collect your explicit identity in any form (like your email or mobile phone number), we would not know how to send it to you.
+              Write it down and store in secure place.
+              If you loose it -- we will not be able to help you to re-cover it,
+              because we never collect your explicit identity in any form (like your email or mobile phone number).
             </Text>
           </ListItem>
         </Card>
@@ -237,7 +238,8 @@ const SecretScreen = () => {
             fontSize: 12,
             paddingBottom: 10,
           }}>
-            Generating new Secret will reset your device. You can restore the secret if you
+            Generating new Secret will disconnect your current incognito identity from this devise.
+            Write down your current Secret, before clicking the button below.
           </Text>
 
           <Button
