@@ -77,7 +77,7 @@ const PhotosList = () => {
   const isLastPage = useSelector(state => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
   const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
-  const uuid = useSelector(state => state.photosList.uuid)
+  const uuid = useSelector(state => state.secret.uuid)
   const zeroMoment = useSelector(state => state.photosList.zeroMoment)
 
   const loading = useSelector(state => state.photosList.loading)

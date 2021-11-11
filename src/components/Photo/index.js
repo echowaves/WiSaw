@@ -45,7 +45,7 @@ import * as CONST from '../../consts.js'
 
 const Photo = ({ photo }) => {
   const componentIsMounted = useRef(true)
-  const uuid = useSelector(state => state.photosList.uuid)
+  const uuid = useSelector(state => state.secret.uuid)
 
   // const videoRef = React.useRef(null)
 

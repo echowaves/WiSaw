@@ -57,7 +57,8 @@ export function resetForm() {
 
 export function submitFeedback({ feedbackText }) {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { headerHeight } = getState().photosList
+    const { uuid } = getState().secret
     dispatch({
       type: ACTION_TYPES.SUBMIT_FEEDBACK_STARTED,
     })

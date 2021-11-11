@@ -28,7 +28,7 @@ const ModalInputText = ({ route }) => {
   const { photo } = route.params
   const { height } = useDimensions().window
 
-  const uuid = useSelector(state => state.photosList.uuid)
+  const uuid = useSelector(state => state.secret.uuid)
 
   const [inputText, _setInputText] = useState('')
 

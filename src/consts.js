@@ -5,7 +5,7 @@ import {
   InMemoryCache,
   HttpLink,
   from,
-} from "@apollo/client"
+  } from "@apollo/client"
 
 import { API_URI, API_KEY } from "@env"
 
