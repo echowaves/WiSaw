@@ -7,7 +7,6 @@ import 'react-native-get-random-values'
 
 // import camera from './screens/Camera/reducer'
 import photosList from './screens/PhotosList/reducer'
-import feedback from './screens/Feedback/reducer'
 import secret from './screens/Secret/reducer'
 import photo from './components/Photo/reducer'
 
@@ -21,7 +20,6 @@ export const reducers = combineReducers({
   photosList,
   photo,
   secret,
-  feedback,
 })
 
 export const store = createStore(reducers, composeEnhancers(applyMiddleware(ReduxThunk)))

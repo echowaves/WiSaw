@@ -1,7 +1,5 @@
 // import { Platform } from 'react-native'
 
-import { v4 as uuidv4 } from 'uuid'
-
 import * as SecureStore from 'expo-secure-store'
 import * as FileSystem from 'expo-file-system'
 import * as VideoThumbnails from 'expo-video-thumbnails'
@@ -20,8 +18,9 @@ import { gql } from "@apollo/client"
 import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
+import { INIT_UUID } from '../Secret/action_types'
 
-const UUID_KEY = 'wisaw_device_uuid'
+import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
@@ -29,7 +28,6 @@ const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
   isTandcAccepted: true,
-  uuid: null,
   location: null,
   photos: [],
   pendingPhotos: [],
@@ -122,7 +120,6 @@ const reducer = (state = initialState, action) => {
     case ACTION_TYPES.INIT_STATE:
       return {
         ...state,
-        uuid: action.uuid,
         isTandcAccepted: action.isTandcAccepted,
       }
     case ACTION_TYPES.SET_ERROR:
@@ -249,15 +246,17 @@ export function initState() {
       uuid,
       isTandcAccepted,
     ] = await Promise.all([
-      _getUUID(getState),
+      getUUID(),
       _getTancAccepted(),
     ])
-
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
     dispatch({
       type: ACTION_TYPES.INIT_STATE,
-      uuid,
       isTandcAccepted,
+    })
+    dispatch({
+      type: INIT_UUID,
+      uuid,
     })
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
   }
@@ -333,7 +332,8 @@ async function _requestGeoPhotos(getState) {
 }
 
 async function _requestWatchedPhotos(getState) {
-  const { pageNumber, uuid, batch } = getState().photosList
+  const { uuid } = getState().secret
+  const { pageNumber, batch } = getState().photosList
   try {
     const response = (await CONST.gqlClient
       .query({
@@ -558,39 +558,6 @@ export function setNetAvailable(netAvailable) {
   })
 }
 
-async function _getUUID(getState) {
-  let { uuid } = getState().photosList
-  if (uuid === null) {
-    // try to retreive from secure store
-    try {
-      uuid = await SecureStore.getItemAsync(UUID_KEY)
-    } catch (err) {
-      // Toast.show({
-      //   text: err.toString(),
-      //   buttonText: "OK23",
-      //   visibilityTime: 15000,
-      // topOffset: headerHeight + 15,
-      // })
-    }
-    // no uuid in the store, generate a new one and store
-
-    if (uuid === '' || uuid === null) {
-      uuid = uuidv4()
-      try {
-        await SecureStore.setItemAsync(UUID_KEY, uuid)
-      } catch (err) {
-        // Toast.show({
-        //   text: err.toString(),
-        //   buttonText: "OK",
-        //   visibilityTime: 15000,
-        // topOffset: headerHeight + 15,
-        // })
-      }
-    }
-  }
-  return uuid
-}
-
 async function _getTancAccepted() {
   try {
     return await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY) === "true"
@@ -611,7 +578,7 @@ const _makeSureDirectoryExists = async ({ directory }) => {
   const tmpDir = await FileSystem.getInfoAsync(directory)
   // create cacheDir if does not exist
   if (!tmpDir.exists) {
-    await FileSystem.makeDirectoryAsync(directory)
+    await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
   }
 }
 
@@ -750,7 +717,8 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { headerHeight } = getState().photosList
+    const { uuid } = getState().secret
     _updatePendingPhotos(dispatch)
 
     if (getState().photosList.netAvailable === false) {

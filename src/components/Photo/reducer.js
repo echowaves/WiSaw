@@ -60,7 +60,8 @@ export default function reducer(state = initialState, action) {
 
 export function watchPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { headerHeight } = getState().photosList
+    const { uuid } = getState().secret
     try {
       const watchersCount = (await CONST.gqlClient
         .mutate({
@@ -97,7 +98,8 @@ export function watchPhoto({ photo }) {
 
 export function unwatchPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { headerHeight } = getState().photosList
+    const { uuid } = getState().secret
     try {
       const watchersCount = (await CONST.gqlClient
         .mutate({
@@ -134,7 +136,8 @@ export function unwatchPhoto({ photo }) {
 
 export function banPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { headerHeight } = getState().photosList
+    const { uuid } = getState().secret
 
     dispatch({
       type: ACTION_TYPES.BAN_PHOTO,
@@ -182,7 +185,8 @@ export function banPhoto({ photo }) {
 
 export function deletePhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { headerHeight } = getState().photosList
+    const { uuid } = getState().secret
 
     try {
       await CONST.gqlClient
@@ -399,7 +403,8 @@ export function toggleCommentButtons({ photoDetails, commentId }) {
 
 export function deleteComment({ photo, photoDetails, comment }) {
   return async (dispatch, getState) => {
-    const { uuid, headerHeight } = getState().photosList
+    const { headerHeight } = getState().photosList
+    const { uuid } = getState().secret
 
     try {
       const lastComment = (await CONST.gqlClient

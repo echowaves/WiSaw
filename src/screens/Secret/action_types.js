@@ -1,4 +1,3 @@
-export const SUBMIT_FEEDBACK_STARTED = 'wisaw/feedback/SUBMIT_FEEDBACK_STARTED'
-export const SUBMIT_FEEDBACK_FAIL = 'wisaw/feedback/SUBMIT_FEEDBACK_FAIL'
-export const SUBMIT_FEEDBACK_FINISHED = 'wisaw/feedback/SUBMIT_FEEDBACK_FINISHED'
-export const RESET_FEEDBACK_FORM = 'wisaw/feedback/RESET_FEEDBACK_FORM'
+export const INIT_UUID = 'wisaw/secret/INIT_UUID'
+export const REGISTER_SECRET = 'wisaw/secret/REGISTER_SECRET'
+export const RESET_STATE = 'wisaw/secret/RESET_STATE'
