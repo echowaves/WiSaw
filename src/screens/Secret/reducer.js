@@ -15,20 +15,26 @@ const NICK_NAME_KEY = 'wisaw_nick_name'
 
 export const initialState = {
   uuid: null,
-  nickNmae: null,
+  nickName: '',
 }
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
+    case ACTION_TYPES.INIT_UUID:
+      return {
+        ...state,
+        uuid: action.uuid,
+      }
     case ACTION_TYPES.REGISTER_SECRET:
       return {
         ...state,
         nickName: action.nickName,
         uuid: action.uuid,
       }
-    case ACTION_TYPES.INIT_UUID:
+    case ACTION_TYPES.RESET_STATE:
       return {
         ...state,
+        nickName: null,
         uuid: action.uuid,
       }
     default:
@@ -36,18 +42,21 @@ export default function reducer(state = initialState, action) {
   }
 }
 
-export function resiterSecret({ nickName, secret, uuid }) {
+export function registerSecret({ nickName, secret, uuid }) {
+  // console.log({ nickName })
   return async (dispatch, getState) => {
     const {
       headerHeight,
     } = getState().photosList
 
+    // console.log({ nickName, secret, uuid })
+
     try {
-      const returnedSecret = await CONST.gqlClient
+      const returnedSecret = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation 
-            registerSecret(nickName: String!, secret: String!, uuid: String!) {
+            registerSecret($nickName: String!, $secret: String!, $uuid: String!) {
               registerSecret(nickName: $nickName, secret: $secret, uuid: $uuid)
                      {
                         uuid
@@ -59,17 +68,118 @@ export function resiterSecret({ nickName, secret, uuid }) {
             secret,
             uuid,
           },
-        })
+        })).data.registerSecret
 
-      console.log({ returnedSecret })
+      // console.log({ returnedSecret })
+      // console.log(returnedSecret.uuid)
+      // console.log(returnedSecret.nickName)
+
+      await Promise.all([
+        _storeUUID(returnedSecret.uuid),
+        _storeNickName(returnedSecret.nickName),
+      ])
 
       dispatch({
-        type: ACTION_TYPES.SUBMIT_FEEDBACK_FINISHED,
-        nickName,
+        type: ACTION_TYPES.REGISTER_SECRET,
+        uuid: returnedSecret.uuid,
+        nickName: returnedSecret.nickName,
+      })
+
+      Toast.show({
+        text1: 'Secret attached to this device.',
+        topOffset: headerHeight + 15,
       })
     } catch (err) {
+      // console.log({ err })
       Toast.show({
         text1: 'Unable to store Secret',
+        text2: err.toString(),
+        type: "error",
+        topOffset: headerHeight + 15,
+      })
+    }
+  }
+}
+
+export function updateSecret({
+  nickName, oldSecret, secret, uuid,
+}) {
+  return async (dispatch, getState) => {
+    const {
+      headerHeight,
+    } = getState().photosList
+
+    try {
+      const updatedSecret = (await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation 
+            updateSecret($nickName: String!, $secret: String!, $newSecret: String!, $uuid: String!) {
+              updateSecret(nickName: $nickName, secret: $secret, newSecret: $newSecret, uuid: $uuid)
+                     {
+                        uuid
+                        nickName
+                      }
+            }`,
+          variables: {
+            nickName,
+            secret: oldSecret,
+            newSecret: secret,
+            uuid,
+          },
+        })).data.updateSecret
+
+      await Promise.all([
+        _storeUUID(updatedSecret.uuid),
+        _storeNickName(updatedSecret.nickName),
+      ])
+
+      dispatch({
+        type: ACTION_TYPES.REGISTER_SECRET,
+        uuid: updatedSecret.uuid,
+        nickName: updatedSecret.nickName,
+      })
+
+      Toast.show({
+        text1: 'Secret updated.',
+        topOffset: headerHeight + 15,
+      })
+
+      // console.log({ updatedSecret })
+    } catch (err) {
+      // console.log({ err })
+      Toast.show({
+        text1: 'Unable to update Secret',
+        text2: err.toString(),
+        type: "error",
+        topOffset: headerHeight + 15,
+      })
+    }
+  }
+}
+
+export function resetSecret() {
+  // console.log({ nickName })
+  return async (dispatch, getState) => {
+    const {
+      headerHeight,
+    } = getState().photosList
+    try {
+      await Promise.all([
+        SecureStore.deleteItemAsync(UUID_KEY),
+        SecureStore.deleteItemAsync(NICK_NAME_KEY),
+      ])
+      const uuid = await getUUID()
+      await _storeUUID(uuid)
+
+      dispatch({
+        type: ACTION_TYPES.RESET_STATE,
+        uuid,
+      })
+    } catch (err) {
+      // console.log({ err })
+      Toast.show({
+        text1: 'Unable to reset Secret',
         text2: err.toString(),
         type: "error",
         topOffset: headerHeight + 15,
@@ -90,17 +200,37 @@ export async function getUUID() {
 
     if (uuid === '' || uuid === null) {
       uuid = uuidv4()
-      try {
-        await SecureStore.setItemAsync(UUID_KEY, uuid)
-      } catch (err) {
-        // Toast.show({
-        //   text: err.toString(),
-        //   buttonText: "OK",
-        //   visibilityTime: 15000,
-        // topOffset: headerHeight + 15,
-        // })
-      }
+      await _storeUUID(uuid)
     }
   }
   return uuid
+}
+
+const _storeUUID = async uuid => {
+  try {
+    await SecureStore.setItemAsync(UUID_KEY, uuid)
+  } catch (err) {
+    Toast.show({
+      text1: 'Unable to store UUID',
+      text2: err.toString(),
+      type: "error",
+    })
+  }
+}
+
+const _storeNickName = async nickName => {
+  try {
+    await SecureStore.setItemAsync(NICK_NAME_KEY, nickName)
+  } catch (err) {
+    Toast.show({
+      text1: 'Unable to store NickName',
+      text2: err.toString(),
+      type: "error",
+    })
+  }
+}
+
+export async function getStoredNickName() {
+  const nickName = await SecureStore.getItemAsync(NICK_NAME_KEY)
+  return nickName || ''
 }
