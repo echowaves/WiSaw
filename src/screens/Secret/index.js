@@ -95,7 +95,7 @@ const SecretScreen = () => {
   }, [nickName, secret, secretConfirm, strength])
 
   useEffect(() => {
-    if (errorsMap.size === 0) {
+    if (errorsMap.size === 0 && secret.length > 0) {
       setCanSubmit(true)
     } else {
       setCanSubmit(false)
@@ -183,6 +183,9 @@ const SecretScreen = () => {
   const validate = () => {
     const errors = new Map()
 
+    if (secret.length === 0) {
+      return
+    }
     if (!/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickName.toLowerCase())) errors.set('nickName', 'Nickname wrong format.')
     if (nickName?.length < minNickNameLength) errors.set('nickName', 'Nickname too short.')
     if (nickName?.length > maxNickNameLength) errors.set('nickName', 'Nickname too long.')
@@ -214,6 +217,7 @@ const SecretScreen = () => {
         </Card>
         <Input
           placeholder="Nickname"
+          autoCorrect={false}
           autoCapitalize="none"
           autoComplete="off"
           disabled={nickNameEntered}
@@ -233,6 +237,7 @@ const SecretScreen = () => {
         {nickNameEntered && (
           <Input
             placeholder="Current Secret"
+            autoCorrect={false}
             autoCapitalize="none"
             autoComplete="off"
             secureTextEntry
@@ -248,14 +253,17 @@ const SecretScreen = () => {
           />
         )}
 
-        <LinearProgress
-          value={strength / 4}
-          color={strengthColors[strength]}
-          variant="determinate"
-        />
+        {secret.length > 0 && (
+          <LinearProgress
+            value={strength / 4}
+            color={strengthColors[strength]}
+            variant="determinate"
+          />
+        )}
 
         <Input
           placeholder="My Secret"
+          autoCorrect={false}
           autoCapitalize="none"
           autoComplete="off"
           secureTextEntry
@@ -269,10 +277,11 @@ const SecretScreen = () => {
           value={secret}
           onChangeText={text => setSecret(text)}
           errorStyle={{ color: strengthColors[strength] }}
-          errorMessage={`${strengthLabel[strength]} ${errorsMap.get('secret') || ''} `}
+          errorMessage={secret.length === 0 ? '' : `${strengthLabel[strength]} ${errorsMap.get('secret') || ''}`}
         />
         <Input
           placeholder="Confirm Secret"
+          autoCorrect={false}
           autoCapitalize="none"
           autoComplete="off"
           secureTextEntry
