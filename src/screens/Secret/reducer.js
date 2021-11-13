@@ -144,8 +144,6 @@ export function updateSecret({
         text1: 'Secret updated.',
         topOffset: headerHeight + 15,
       })
-
-      // console.log({ updatedSecret })
     } catch (err) {
       // console.log({ err })
       Toast.show({

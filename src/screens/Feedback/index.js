@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 
 import {
   SafeAreaView,
@@ -8,14 +8,8 @@ import {
   StyleSheet,
 } from 'react-native'
 
-import {
-  Button,
-  Text,
-  Card,
-  LinearProgress,
-  Overlay,
-} from 'react-native-elements'
-// import * as FileSystem from 'expo-file-system'
+import { gql } from "@apollo/client"
+import Toast from 'react-native-toast-message'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
@@ -23,17 +17,14 @@ import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts.js'
 
-import * as reducer from './reducer'
-
 const maxStringLength = 2000
 
 const FeedbackScreen = () => {
   const navigation = useNavigation()
-  const dispatch = useDispatch()
 
-  const loading = useSelector(state => state.feedback.loading)
-  const errorMessage = useSelector(state => state.feedback.errorMessage)
-  const finished = useSelector(state => state.feedback.finished)
+  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const uuid = useSelector(state => state.secret.uuid)
+
   // const [diskSpace, setDiskSpace] = useState('')
   // const [diskCapacity, setDiskCapacity] = useState('')
 
@@ -57,11 +48,11 @@ const FeedbackScreen = () => {
       },
     })
 
-    const initState = async () => {
-      // setDiskSpace(await FileSystem.getFreeDiskStorageAsync())
-      // setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
-    }
-    initState()
+    // const initState = async () => {
+    //   // setDiskSpace(await FileSystem.getFreeDiskStorageAsync())
+    //   // setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
+    // }
+    // initState()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
   const styles = StyleSheet.create({
     container: {
@@ -102,41 +93,54 @@ const FeedbackScreen = () => {
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitFeedback({ feedbackText: inputTextRef.current.trim() }))
+    _submitFeedback({ feedbackText: inputTextRef.current.trim() })
+  }
+  const _submitFeedback = async ({ feedbackText }) => {
+    try {
+      if (feedbackText.trim().length < 5) {
+        throw Error("unable to submit empty feedback")
+      }
+      // const contactForm =
+      await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+              mutation createContactForm($uuid: String!, $description: String!) {
+                createContactForm(uuid: $uuid, description: $description)
+                       {
+                          createdAt
+                          id
+                          updatedAt
+                          uuid
+                        }
+              }`,
+          variables: {
+            uuid,
+            description: feedbackText,
+          },
+        })
+
+      navigation.goBack()
+      Toast.show({
+        text1: 'Feedback submitted.',
+        topOffset: headerHeight + 15,
+      })
+      // console.log({ contactForm })
+    } catch (err) {
+      Toast.show({
+        text1: 'Error',
+        text2: err.toString(),
+        type: "error",
+        topOffset: headerHeight + 15,
+      })
+    }
   }
 
-  if (finished && errorMessage.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Overlay isVisible>
-          <Card style={{ borderRadius: 10 }}>
-            <Text>Thank you for submitting your feedback.
-            </Text>
-          </Card>
-          <Card style={{ borderRadius: 10 }}>
-            <Button
-              title="You are Welcome!"
-              type="outline"
-              onPress={
-                () => {
-                  navigation.goBack()
-                  dispatch(reducer.resetForm())
-                }
-              }
-            />
-          </Card>
-        </Overlay>
-      </SafeAreaView>
-    )
-  }
   return (
     <SafeAreaView style={styles.container}>
       {/* <Text>{diskSpace / 1000 / 1000}</Text> */}
       {/* <Text>{diskSpace}</Text> */}
       {/* <Text>{diskCapacity / 1000 / 1000}</Text> */}
-      { errorMessage.length !== 0 && (
-        <Text>{errorMessage}</Text>
-      )}
+
       <TextInput
         rowSpan={5}
         onChangeText={inputValue => {
@@ -160,24 +164,8 @@ const FeedbackScreen = () => {
           }
         }
       />
-      { loading && (
-        <LinearProgress
-          color={
-            CONST.MAIN_COLOR
-          }
-          style={
-            {
-              flex: 1,
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              right: 0,
-              left: 0,
-            }
-          }
-        />
-      )}
     </SafeAreaView>
   )
 }
+
 export default FeedbackScreen
