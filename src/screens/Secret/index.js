@@ -262,7 +262,7 @@ const SecretScreen = () => {
         )}
 
         <Input
-          placeholder="My Secret"
+          placeholder="My New Secret"
           autoCorrect={false}
           autoCapitalize="none"
           autoComplete="off"
