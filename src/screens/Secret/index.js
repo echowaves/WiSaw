@@ -20,7 +20,7 @@ import {
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
-import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -319,7 +319,7 @@ const SecretScreen = () => {
               paddingBottom: 10,
             }}>
               You secret is attached to this device.
-              Generating new Secret will disconnect your current incognito identity from this phone.
+              Wiping the Secret will disconnect your current incognito identity from this phone.
               Before clicking the button below, write down your current Secret.
             </Text>
 
@@ -331,8 +331,8 @@ const SecretScreen = () => {
                 }
               }
               icon={(
-                <MaterialIcons
-                  name="delete-forever"
+                <MaterialCommunityIcons
+                  name="wiper"
                   size={30}
                   style={
                     {
@@ -342,10 +342,10 @@ const SecretScreen = () => {
                 />
 
               )}
-              title="Reset Secret"
+              title="Wipe Secret"
               onPress={() => {
                 Alert.alert(
-                  'Do you want to use another NickName?',
+                  'Do you really want to use another NickName?',
                   `It will allow you to create new incognito identity on this device or carry the idenity from another phone. 
 Remember to store old NickName and Secret in secure place if you ever intend to get back to it. Are you sure you want to proceed?`,
                   [
