@@ -183,12 +183,13 @@ const SecretScreen = () => {
   const validate = () => {
     const errors = new Map()
 
-    if (secret.length === 0) {
-      return
-    }
     if (!/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickName.toLowerCase())) errors.set('nickName', 'Nickname wrong format.')
     if (nickName?.length < minNickNameLength) errors.set('nickName', 'Nickname too short.')
     if (nickName?.length > maxNickNameLength) errors.set('nickName', 'Nickname too long.')
+    if (secret.length === 0) {
+      setErrorsMap(errors)
+      return
+    }
     if (secret?.length < minNickNameLength) errors.set('secret', `Secret too short.`)
     if (secret?.length > maxNickNameLength) errors.set('secret', `Secret too long.`)
     if (secret !== secretConfirm) errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
