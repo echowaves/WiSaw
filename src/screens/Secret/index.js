@@ -310,50 +310,54 @@ const SecretScreen = () => {
             </Text>
           </ListItem>
         </Card>
-        <Card containerStyle={{ padding: 10 }}>
-          <Text style={{
-            color: "red",
-            fontSize: 12,
-            paddingBottom: 10,
-          }}>
-            Generating new Secret will disconnect your current incognito identity from this devise.
-            Write down your current Secret, before clicking the button below.
-          </Text>
 
-          <Button
-            type="outline"
-            titleStyle={
-              {
-                color: CONST.MAIN_COLOR,
-              }
-            }
-            icon={(
-              <MaterialIcons
-                name="delete-forever"
-                size={30}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
+        {nickNameEntered && (
+          <Card containerStyle={{ padding: 10 }}>
+            <Text style={{
+              color: "red",
+              fontSize: 12,
+              paddingBottom: 10,
+            }}>
+              You secret is attached to this device.
+              Generating new Secret will disconnect your current incognito identity from this phone.
+              Before clicking the button below, write down your current Secret.
+            </Text>
+
+            <Button
+              type="outline"
+              titleStyle={
+                {
+                  color: CONST.MAIN_COLOR,
                 }
-              />
+              }
+              icon={(
+                <MaterialIcons
+                  name="delete-forever"
+                  size={30}
+                  style={
+                    {
+                      color: CONST.MAIN_COLOR,
+                    }
+                  }
+                />
 
-            )}
-            title="Reset Secret"
-            onPress={() => {
-              Alert.alert(
-                'Do you want to use another NickName?',
-                `It will allow you to create new incognito identity on this device or carry the idenity from another phone. 
+              )}
+              title="Reset Secret"
+              onPress={() => {
+                Alert.alert(
+                  'Do you want to use another NickName?',
+                  `It will allow you to create new incognito identity on this device or carry the idenity from another phone. 
 Remember to store old NickName and Secret in secure place if you ever intend to get back to it. Are you sure you want to proceed?`,
-                [
-                  { text: 'No', onPress: () => null, style: 'cancel' },
-                  { text: 'Yes', onPress: () => handleReset() },
-                ],
-                { cancelable: true }
-              )
-            }}
-          />
-        </Card>
+                  [
+                    { text: 'No', onPress: () => null, style: 'cancel' },
+                    { text: 'Yes', onPress: () => handleReset() },
+                  ],
+                  { cancelable: true }
+                )
+              }}
+            />
+          </Card>
+        )}
       </ScrollView>
     </SafeAreaView>
   )
