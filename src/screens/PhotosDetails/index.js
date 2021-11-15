@@ -94,7 +94,7 @@ const PhotosDetails = ({ route }) => {
         if (newIndex > photos.length - 5) {
           dispatch(getPhotos()) // pre-load more photos when nearing the end
         }
-        if (newIndex === 0) {
+        if (newIndex === 0 || newIndex === (photos.length - 1)) {
           Toast.show({
             text1: 'No scrolling beyond this point',
             topOffset: headerHeight + 15,
