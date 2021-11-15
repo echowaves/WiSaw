@@ -19,7 +19,6 @@ export const initialState = {
   photo: {},
   bans: [],
   inputText: '',
-  commentsSubmitting: false,
   error: '',
 }
 
@@ -40,19 +39,6 @@ export default function reducer(state = initialState, action) {
         ...state,
         inputText: action.inputText,
       }
-    case ACTION_TYPES.SUBMIT_COMMENT_STARTED:
-      return {
-        ...state,
-        commentsSubmitting: true,
-        error: '',
-      }
-    case ACTION_TYPES.SUBMIT_COMMENT_FAILED:
-      return {
-        ...state,
-        commentsSubmitting: false,
-        error: action.error,
-      }
-
     default:
       return state
   }
@@ -284,9 +270,6 @@ export function submitComment({ inputText, uuid, photo }) {
   return async (dispatch, getState) => {
     const { headerHeight } = getState().photosList
 
-    dispatch({
-      type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
-    })
     try {
       const comment = (await CONST.gqlClient
         .mutate({
@@ -314,23 +297,19 @@ export function submitComment({ inputText, uuid, photo }) {
         lastComment: comment.comment,
         commentsCount: photo.commentsCount,
       })
+      dispatch(watchPhoto({ photo }))
 
       Toast.show({
         text1: "Comment added",
         type: "success",
         topOffset: headerHeight + 15,
       })
-      dispatch(watchPhoto({ photo }))
     } catch (err) {
-      console.log({ err })// eslint-disable-line
-      dispatch({
-        type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
-        error: JSON.stringify(err),
-      })
+      // console.log({ err })// eslint-disable-line
       Toast.show({
         text1: "Unable to add comment",
-        text2: "Network Issue?",
-        type: "error",
+        text2: `${err}`,
+        type: 'error',
         topOffset: headerHeight + 15,
       })
     }
