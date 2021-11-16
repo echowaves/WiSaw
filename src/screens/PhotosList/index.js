@@ -26,7 +26,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, Ionicons, AntDesign, FontAwesome5,
+  FontAwesome, Ionicons, AntDesign, FontAwesome5, MaterialCommunityIcons,
 } from '@expo/vector-icons'
 
 import { Col, /* Row, */ Grid } from "react-native-easy-grid"
@@ -474,7 +474,7 @@ const PhotosList = () => {
         right: 0,
         left: 0,
       }}>
-        {/* feedback button */}
+        {/* drawer button */}
         <Col
           style={{
             justifyContent: 'center',
@@ -488,11 +488,10 @@ const PhotosList = () => {
               name="navicon"
               size={25}
               style={{
-              // marginRight: 20,
                 color: CONST.MAIN_COLOR,
                 position: 'absolute',
                 bottom: 0,
-                left: 10,
+                left: 15,
               }}
             />
           )}
@@ -571,18 +570,29 @@ const PhotosList = () => {
             }
           />
         </Col>
-        {/* empty button */}
+        {/* drawer button */}
         <Col
           style={{
             justifyContent: 'center',
             alignItems: 'center',
-          }}
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking({ cameraType: 'video' })
-            }
-          }
-        />
+          }}>
+          {netAvailable && (
+            <MaterialCommunityIcons
+              onPress={
+                () => navigation.navigate('ChatList')
+              }
+              name="chat"
+              size={35}
+              style={{
+                color: CONST.MAIN_COLOR,
+                position: 'absolute',
+                bottom: 0,
+                right: 15,
+              }}
+            />
+          )}
+        </Col>
+
       </Grid>
     </SafeAreaView>
   )

@@ -32,6 +32,9 @@ import FeedbackScreen from './src/screens/Feedback'
 import IdentityScreen from './src/screens/Secret'
 import ModalInputText from './src/screens/ModalInputText'
 
+import ChatList from './src/screens/ChatList'
+import Chat from './src/screens/Chat'
+
 // import StackNavigator from './src/nav/stackNavigator.js'
 
 const Drawer = createDrawerNavigator()
@@ -91,6 +94,16 @@ const App = () => (
                   <Stack.Screen
                     name="ModalInputTextScreen"
                     component={ModalInputText}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ChatList"
+                    component={ChatList}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="Chat"
+                    component={Chat}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                 </Stack.Navigator>
