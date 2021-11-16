@@ -10,7 +10,7 @@ import 'react-native-gesture-handler'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { FontAwesome, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons'
 
 import { NavigationContainer } from '@react-navigation/native'
 

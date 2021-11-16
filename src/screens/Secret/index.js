@@ -79,6 +79,16 @@ const SecretScreen = () => {
 
   useEffect(() => {
     resetFields()
+    navigation.setOptions({
+      headerTitle: 'my secret',
+      headerTintColor: CONST.MAIN_COLOR,
+      headerRight: renderHeaderRight,
+      headerLeft: renderHeaderLeft,
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
