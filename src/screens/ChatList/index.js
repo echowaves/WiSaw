@@ -37,9 +37,6 @@ const ChatList = () => {
   const uuid = useSelector(state => state.secret.uuid)
 
   useEffect(() => {
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
     navigation.setOptions({
       headerTitle: 'my chats',
       headerTintColor: CONST.MAIN_COLOR,

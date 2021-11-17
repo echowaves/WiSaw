@@ -34,7 +34,8 @@
         "NSMotionUsageDescription": "This will help us to improve the relevance of posts that you can see related to you location.",
         "NSPhotoLibraryAddUsageDescription": "In order to store Photos and Videos taken with WiSaw on your device, you need to allow access to Photos in settings.",
         "NSPhotoLibraryUsageDescription": "This will allow to store photos you take with WiSaw in photo album on your device.",
-        "NSMicrophoneUsageDescription": "WiSaw allows your to record video with sound. In order for the sound to be captured, you need to allow access to the microphone."
+        "NSMicrophoneUsageDescription": "WiSaw allows your to record video with sound. In order for the sound to be captured, you need to allow access to the microphone.",
+        "NSContactsUsageDescription": "WiSaw wants to use contacts to help you connect with people you know. WiSaw will never store any of your contacts in the cloud."
       },
       "associatedDomains": [
         "applinks:link.wisaw.com"

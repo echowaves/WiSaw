@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
+import * as Contacts from 'expo-contacts'
+
 import {
   Alert,
   SafeAreaView,
@@ -17,7 +19,9 @@ import {
   ListItem,
   Button,
 } from 'react-native-elements'
-// import * as FileSystem from 'expo-file-system'
+import * as Linking from 'expo-linking'
+
+import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
@@ -28,7 +32,7 @@ import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
 
-const ChatList = () => {
+const ChatAdd = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
@@ -37,13 +41,14 @@ const ChatList = () => {
   const uuid = useSelector(state => state.secret.uuid)
 
   useEffect(() => {
+    _requestContactPermissions()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     navigation.setOptions({
       headerTitle: 'add chat',
       headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
+      // headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
       headerBackTitle: '',
       headerStyle: {
@@ -64,35 +69,40 @@ const ChatList = () => {
     },
   })
 
-  const renderHeaderRight = () => (
-    <Ionicons
-      name="add-circle"
-      size={30}
-      style={
-        {
-          marginRight: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => _handleAddChat()
-      }
-    />
-    // <Ionicons
-    //   onPress={
-    //     () => handleSubmit()
-    //   }
-    //   name="send"
-    //   size={30}
-    //   style={
-    //     {
-    //       marginRight: 10,
-    //       color: canSubmit ? CONST.MAIN_COLOR : CONST.SECONDARY_COLOR,
-    //     }
-    //   }
-    // />
-  )
+  const _requestContactPermissions = async () => {
+    const { status } = await Contacts.requestPermissionsAsync()
+    if (status !== 'granted') {
+      Alert.alert(
+        "Do you want to chat with people you know?",
+        "Why don't you enable contancst permission?",
+        [
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              Linking.openSettings()
+            },
+          },
+        ],
+      )
+    }
+  }
+
+  // const renderHeaderRight = () => (
+  //   <Ionicons
+  //     name="add-circle"
+  //     size={30}
+  //     style={
+  //       {
+  //         marginRight: 10,
+  //         color: CONST.MAIN_COLOR,
+  //         width: 60,
+  //       }
+  //     }
+  //     onPress={
+  //       () => _handleAddChat()
+  //     }
+  //   />
+  // )
 
   const renderHeaderLeft = () => (
     <FontAwesome
@@ -133,4 +143,4 @@ const ChatList = () => {
     </SafeAreaView>
   )
 }
-export default ChatList
+export default ChatAdd
