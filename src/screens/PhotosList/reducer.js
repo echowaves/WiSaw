@@ -813,8 +813,9 @@ export function uploadPendingPhotos() {
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({
-            text1: 'Unable to upload, refresh to try again',
-            text2: 'Network issue...?',
+            text1: 'Upload is going slooooow...',
+            text2: 'Still trying to upload.',
+            visibilityTime: 500,
             topOffset: headerHeight + 15,
           })
         }
@@ -826,8 +827,9 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
       Toast.show({
-        text1: 'Failed to upload, refresh to try again',
-        text2: 'Network issue?...',
+        text1: 'Upload is slow...',
+        text2: 'Still trying to upload.',
+        visibilityTime: 500,
         topOffset: headerHeight + 15,
       })
       // console.log({ error }) // eslint-disable-line no-console
