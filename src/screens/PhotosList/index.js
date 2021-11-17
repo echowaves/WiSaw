@@ -18,7 +18,6 @@ import useKeyboard from '@rnhooks/keyboard'
 
 import {
   StyleSheet,
-  Text,
   View,
   Alert,
   SafeAreaView,
@@ -46,6 +45,7 @@ import {
   ButtonGroup,
   SearchBar,
   Overlay,
+  Text,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'

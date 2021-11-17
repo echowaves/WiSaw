@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   StyleSheet,
   ScrollView,
+  View,
 } from 'react-native'
 
 import {
@@ -18,6 +19,7 @@ import {
   Card,
   ListItem,
   Button,
+  SearchBar,
 } from 'react-native-elements'
 import * as Linking from 'expo-linking'
 
@@ -25,6 +27,7 @@ import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { useDimensions } from '@react-native-community/hooks'
 
 import PropTypes from 'prop-types'
 
@@ -36,9 +39,14 @@ const ChatAdd = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
+  const { width, height } = useDimensions().window
+
   const headerHeight = useSelector(state => state.photosList.headerHeight)
 
   const uuid = useSelector(state => state.secret.uuid)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [contacts, setContacts] = useState([])
 
   useEffect(() => {
     _requestContactPermissions()
@@ -125,6 +133,17 @@ const ChatAdd = () => {
     console.log('handling')
   }
 
+  const _submitSearch = async searchString => {
+    if (!searchString || searchString.trim().length === 0) return []
+    const { data } = await Contacts.getContactsAsync({
+      // fields: [Contacts.Fields.Emails],
+      name: searchString,
+    })
+    console.log({ data })
+    // if (!data) return []
+    return data
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -132,13 +151,64 @@ const ChatAdd = () => {
         showsVerticalScrollIndicator={
           false
         }>
-        <Card containerStyle={{ padding: 0 }}>
-          <ListItem>
-            <Text>
-              chats
-            </Text>
-          </ListItem>
-        </Card>
+        <View style={{
+          flexDirection: 'row',
+          backgroundColor: CONST.NAV_COLOR,
+        }}>
+          <SearchBar
+            placeholder="Find Existing Contact..."
+            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+            onChangeText={async currentTerm => {
+              setSearchTerm(currentTerm)
+              setContacts(await _submitSearch(currentTerm))
+            }}
+            value={searchTerm}
+            onSubmitEditing={
+              async () => setContacts(await _submitSearch(searchTerm))
+            }
+            autoFocus
+            containerStyle={{
+              width: width - 60,
+            }}
+            style={
+              {
+                color: CONST.MAIN_COLOR,
+                backgroundColor: "white",
+                paddingLeft: 10,
+                paddingRight: 10,
+              }
+            }
+            rightIconContainerStyle={{
+              margin: 10,
+            }}
+            lightTheme
+          />
+          <Ionicons
+            onPress={
+              async () => setContacts(await _submitSearch(searchTerm))
+            }
+            name="send"
+            size={30}
+            style={
+              {
+                margin: 10,
+                color: CONST.MAIN_COLOR,
+                alignSelf: 'center',
+              }
+            }
+          />
+        </View>
+        {
+          contacts.map((l, i) => (
+            <ListItem key={i} bottomDivider>
+              {/* <Avatar source={{ uri: l.avatar_url }} /> */}
+              <ListItem.Content>
+                <ListItem.Title>{l.name}</ListItem.Title>
+                <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem>
+          ))
+        }
       </ScrollView>
     </SafeAreaView>
   )
