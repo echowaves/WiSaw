@@ -33,6 +33,7 @@ import IdentityScreen from './src/screens/Secret'
 import ModalInputText from './src/screens/ModalInputText'
 
 import ChatList from './src/screens/ChatList'
+import ChatAdd from './src/screens/ChatAdd'
 import Chat from './src/screens/Chat'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
@@ -99,6 +100,11 @@ const App = () => (
                   <Stack.Screen
                     name="ChatList"
                     component={ChatList}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ChatAdd"
+                    component={ChatAdd}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                   <Stack.Screen

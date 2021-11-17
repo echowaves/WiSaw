@@ -41,7 +41,7 @@ const ChatList = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'my chats',
+      headerTitle: 'add chat',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -112,7 +112,7 @@ const ChatList = () => {
   )
 
   const _handleAddChat = () => {
-    navigation.navigate('ChatAdd')
+    console.log('handling')
   }
 
   return (
