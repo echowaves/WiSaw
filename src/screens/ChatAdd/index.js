@@ -139,7 +139,7 @@ const ChatAdd = () => {
       // fields: [Contacts.Fields.Emails],
       name: searchString,
     })
-    console.log({ data })
+    // console.log({ data })
     // if (!data) return []
     return data
   }
@@ -199,16 +199,18 @@ const ChatAdd = () => {
           />
         </View>
         {
-          contacts.map((l, i) => (
-            <ListItem key={i} bottomDivider>
+          contacts.map((item, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <ListItem key={index} bottomDivider style={{ paddingTop: 5, width: '95%', height: 70 }}>
               {/* <Avatar source={{ uri: l.avatar_url }} /> */}
               <ListItem.Content>
-                <ListItem.Title>{l.name}</ListItem.Title>
-                <ListItem.Subtitle>{l.subtitle}</ListItem.Subtitle>
+                <ListItem.Title>{item.firstName}</ListItem.Title>
+                <ListItem.Subtitle>{item.lastName}</ListItem.Subtitle>
               </ListItem.Content>
             </ListItem>
           ))
         }
+        {console.log('------------------------------------')}
       </ScrollView>
     </SafeAreaView>
   )
