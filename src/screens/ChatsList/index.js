@@ -28,7 +28,7 @@ import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
 
-const ChatList = () => {
+const ChatsList = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
@@ -38,7 +38,7 @@ const ChatList = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'my chats',
+      headerTitle: 'chats',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -130,4 +130,4 @@ const ChatList = () => {
     </SafeAreaView>
   )
 }
-export default ChatList
+export default ChatsList
