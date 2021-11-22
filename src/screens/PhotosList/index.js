@@ -577,11 +577,11 @@ const PhotosList = () => {
             alignItems: 'center',
           }}>
           {netAvailable && (
-            <MaterialCommunityIcons
+            <FontAwesome5
               onPress={
-                () => navigation.navigate('ChatsList')
+                () => navigation.navigate('FriendsList')
               }
-              name="chat"
+              name="user-friends"
               size={35}
               style={{
                 color: CONST.MAIN_COLOR,
