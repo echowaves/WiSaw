@@ -579,7 +579,7 @@ const PhotosList = () => {
           {netAvailable && (
             <MaterialCommunityIcons
               onPress={
-                () => navigation.navigate('ChatList')
+                () => navigation.navigate('ChatsList')
               }
               name="chat"
               size={35}

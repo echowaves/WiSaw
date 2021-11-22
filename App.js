@@ -10,7 +10,9 @@ import 'react-native-gesture-handler'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons'
+import {
+  FontAwesome, FontAwesome5, MaterialIcons, MaterialCommunityIcons,
+} from '@expo/vector-icons'
 
 import { NavigationContainer } from '@react-navigation/native'
 
@@ -32,9 +34,8 @@ import FeedbackScreen from './src/screens/Feedback'
 import IdentityScreen from './src/screens/Secret'
 import ModalInputText from './src/screens/ModalInputText'
 
-import ChatList from './src/screens/ChatList'
-import ChatAdd from './src/screens/ChatAdd'
-import Chat from './src/screens/Chat'
+import ChatsList from './src/screens/ChatsList'
+import FriendsList from './src/screens/FriendsList'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
 
@@ -98,18 +99,13 @@ const App = () => (
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                   <Stack.Screen
-                    name="ChatList"
-                    component={ChatList}
+                    name="ChatsList"
+                    component={ChatsList}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                   <Stack.Screen
-                    name="ChatAdd"
-                    component={ChatAdd}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                  <Stack.Screen
-                    name="Chat"
-                    component={Chat}
+                    name="FriendsList"
+                    component={FriendsList}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                 </Stack.Navigator>
@@ -137,6 +133,52 @@ const App = () => (
                 headerShown: true,
               }}
             />
+            <Drawer.Screen
+              name="FriendsList"
+              component={FriendsList}
+              options={{
+                drawerIcon:
+                config => (
+                  <FontAwesome5
+                    name="user-friends"
+                    size={30}
+                    style={
+                      {
+                        marginLeft: 10,
+                        color: CONST.MAIN_COLOR,
+                        width: 60,
+                      }
+                    }
+                  />
+                ),
+                drawerLabel: 'friends',
+                headerShown: true,
+              }}
+            />
+
+            <Drawer.Screen
+              name="ChatsList"
+              component={ChatsList}
+              options={{
+                drawerIcon:
+                config => (
+                  <MaterialCommunityIcons
+                    name="chat"
+                    size={30}
+                    style={
+                      {
+                        marginLeft: 10,
+                        color: CONST.MAIN_COLOR,
+                        width: 60,
+                      }
+                    }
+                  />
+                ),
+                drawerLabel: 'chats',
+                headerShown: true,
+              }}
+            />
+
             <Drawer.Screen
               name="Feedback"
               component={FeedbackScreen}
