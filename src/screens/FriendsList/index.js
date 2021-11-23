@@ -32,7 +32,7 @@ const FriendsList = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  // const headerHeight = useSelector(state => state.photosList.headerHeight)
 
   const uuid = useSelector(state => state.secret.uuid)
 
@@ -73,22 +73,9 @@ const FriendsList = () => {
         }
       }
       onPress={
-        () => _handleAddChat()
+        () => _handleAddFriend()
       }
     />
-    // <Ionicons
-    //   onPress={
-    //     () => handleSubmit()
-    //   }
-    //   name="send"
-    //   size={30}
-    //   style={
-    //     {
-    //       marginRight: 10,
-    //       color: canSubmit ? CONST.MAIN_COLOR : CONST.SECONDARY_COLOR,
-    //     }
-    //   }
-    // />
   )
 
   const renderHeaderLeft = () => (
@@ -108,8 +95,8 @@ const FriendsList = () => {
     />
   )
 
-  const _handleAddChat = () => {
-    navigation.navigate('ChatAdd')
+  const _handleAddFriend = () => {
+    dispatch(reducer.createFriendship({ uuid }))
   }
 
   return (

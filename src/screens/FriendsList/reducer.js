@@ -10,12 +10,7 @@ import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
 
-const UUID_KEY = 'wisaw_device_uuid'
-const NICK_NAME_KEY = 'wisaw_nick_name'
-
 export const initialState = {
-  uuid: null,
-  nickName: '',
 }
 
 export default function reducer(state = initialState, action) {
@@ -42,193 +37,74 @@ export default function reducer(state = initialState, action) {
   }
 }
 
-export function registerSecret({ nickName, secret, uuid }) {
-  // console.log({ nickName })
+export function createFriendship({ uuid }) {
   return async (dispatch, getState) => {
     const {
       headerHeight,
     } = getState().photosList
-
+    console.log({ uuid })
     // console.log({ nickName, secret, uuid })
 
     try {
-      const returnedSecret = (await CONST.gqlClient
+      const returned = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation 
-            registerSecret($nickName: String!, $secret: String!, $uuid: String!) {
-              registerSecret(nickName: $nickName, secret: $secret, uuid: $uuid)
-                     {
-                        uuid
-                        nickName
-                      }
+            createFriendship($uuid: String!) {
+              createFriendship(uuid: $uuid) {
+                chat {
+                  chatUuid
+                  createdAt
+                }
+                chatUser {
+                  chatUuid
+                  createdAt
+                  invitedByUuid
+                  lastReadAt
+                  uuid
+                }
+                friend {
+                  createdAt
+                  friendshipUuid
+                  uuid
+                }
+                friendship {
+                  chatUuid
+                  createdAt
+                  friendshipUuid
+                }
+              }
             }`,
           variables: {
-            nickName,
-            secret,
             uuid,
           },
-        })).data.registerSecret
+        })).data.createFriendship
 
-      // console.log({ returnedSecret })
-      // console.log(returnedSecret.uuid)
-      // console.log(returnedSecret.nickName)
+      console.log({ returned })
 
-      await Promise.all([
-        _storeUUID(returnedSecret.uuid),
-        _storeNickName(returnedSecret.nickName),
-      ])
+      // await Promise.all([
+      //   _storeUUID(returnedSecret.uuid),
+      //   _storeNickName(returnedSecret.nickName),
+      // ])
 
-      dispatch({
-        type: ACTION_TYPES.REGISTER_SECRET,
-        uuid: returnedSecret.uuid,
-        nickName: returnedSecret.nickName,
-      })
+      // dispatch({
+      //   type: ACTION_TYPES.REGISTER_SECRET,
+      //   uuid: returnedSecret.uuid,
+      //   nickName: returnedSecret.nickName,
+      // })
 
       Toast.show({
-        text1: 'Secret attached to this device.',
+        text1: 'New Friend created.',
         topOffset: headerHeight + 15,
       })
     } catch (err) {
-      // console.log({ err })
+      console.log({ err })
       Toast.show({
-        text1: 'Unable to store Secret',
+        text1: 'Unable to create Friend',
         text2: err.toString(),
         type: "error",
         topOffset: headerHeight + 15,
       })
     }
   }
-}
-
-export function updateSecret({
-  nickName, oldSecret, secret, uuid,
-}) {
-  return async (dispatch, getState) => {
-    const {
-      headerHeight,
-    } = getState().photosList
-
-    try {
-      const updatedSecret = (await CONST.gqlClient
-        .mutate({
-          mutation: gql`
-            mutation 
-            updateSecret($nickName: String!, $secret: String!, $newSecret: String!, $uuid: String!) {
-              updateSecret(nickName: $nickName, secret: $secret, newSecret: $newSecret, uuid: $uuid)
-                     {
-                        uuid
-                        nickName
-                      }
-            }`,
-          variables: {
-            nickName,
-            secret: oldSecret,
-            newSecret: secret,
-            uuid,
-          },
-        })).data.updateSecret
-
-      await Promise.all([
-        _storeUUID(updatedSecret.uuid),
-        _storeNickName(updatedSecret.nickName),
-      ])
-
-      dispatch({
-        type: ACTION_TYPES.REGISTER_SECRET,
-        uuid: updatedSecret.uuid,
-        nickName: updatedSecret.nickName,
-      })
-
-      Toast.show({
-        text1: 'Secret updated.',
-        topOffset: headerHeight + 15,
-      })
-    } catch (err) {
-      // console.log({ err })
-      Toast.show({
-        text1: 'Unable to update Secret',
-        text2: err.toString(),
-        type: "error",
-        topOffset: headerHeight + 15,
-      })
-    }
-  }
-}
-
-export function resetSecret() {
-  // console.log({ nickName })
-  return async (dispatch, getState) => {
-    const {
-      headerHeight,
-    } = getState().photosList
-    try {
-      await Promise.all([
-        SecureStore.deleteItemAsync(UUID_KEY),
-        SecureStore.deleteItemAsync(NICK_NAME_KEY),
-      ])
-      const uuid = await getUUID()
-      await _storeUUID(uuid)
-
-      dispatch({
-        type: ACTION_TYPES.RESET_STATE,
-        uuid,
-      })
-    } catch (err) {
-      // console.log({ err })
-      Toast.show({
-        text1: 'Unable to reset Secret',
-        text2: err.toString(),
-        type: "error",
-        topOffset: headerHeight + 15,
-      })
-    }
-  }
-}
-
-export async function getUUID() {
-  let uuid
-  try {
-    uuid = await SecureStore.getItemAsync(UUID_KEY)
-  } catch (err) {
-    uuid = null
-  }
-  if (uuid === null) {
-    // no uuid in the store, generate a new one and store
-
-    if (uuid === '' || uuid === null) {
-      uuid = uuidv4()
-      await _storeUUID(uuid)
-    }
-  }
-  return uuid
-}
-
-const _storeUUID = async uuid => {
-  try {
-    await SecureStore.setItemAsync(UUID_KEY, uuid)
-  } catch (err) {
-    Toast.show({
-      text1: 'Unable to store UUID',
-      text2: err.toString(),
-      type: "error",
-    })
-  }
-}
-
-const _storeNickName = async nickName => {
-  try {
-    await SecureStore.setItemAsync(NICK_NAME_KEY, nickName)
-  } catch (err) {
-    Toast.show({
-      text1: 'Unable to store NickName',
-      text2: err.toString(),
-      type: "error",
-    })
-  }
-}
-
-export async function getStoredNickName() {
-  const nickName = await SecureStore.getItemAsync(NICK_NAME_KEY)
-  return nickName || ''
 }

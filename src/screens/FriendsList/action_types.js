@@ -1,3 +1,2 @@
-export const INIT_UUID = 'wisaw/secret/INIT_UUID'
-export const REGISTER_SECRET = 'wisaw/secret/REGISTER_SECRET'
-export const RESET_STATE = 'wisaw/secret/RESET_STATE'
+export const ADDED_FRIEND_REQUEST = 'wisaw/friendsList/ADDED_FRIEND_REQUEST'
+export const ACCEPTED_FRIEND_REQUEST = 'wisaw/friendsList/ACCEPTED_FRIEND_REQUEST'

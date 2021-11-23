@@ -109,7 +109,7 @@ const ChatsList = () => {
   )
 
   const _handleAddChat = () => {
-    navigation.navigate('ChatAdd')
+
   }
 
   return (
