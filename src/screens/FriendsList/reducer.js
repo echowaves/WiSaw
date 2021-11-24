@@ -11,26 +11,15 @@ import * as CONST from '../../consts.js'
 import * as ACTION_TYPES from './action_types'
 
 export const initialState = {
+  friendsList: [],
 }
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
-    case ACTION_TYPES.INIT_UUID:
+    case ACTION_TYPES.LIST_OF_FRIENDS:
       return {
         ...state,
-        uuid: action.uuid,
-      }
-    case ACTION_TYPES.REGISTER_SECRET:
-      return {
-        ...state,
-        nickName: action.nickName,
-        uuid: action.uuid,
-      }
-    case ACTION_TYPES.RESET_STATE:
-      return {
-        ...state,
-        nickName: null,
-        uuid: action.uuid,
+        friendsList: action.friendsList,
       }
     default:
       return state
@@ -77,7 +66,7 @@ export function createFriendship({ uuid }) {
           },
         })).data.createFriendship
 
-      console.log({ returned })
+      // console.log({ returned })
 
       // await Promise.all([
       //   _storeUUID(returnedSecret.uuid),
@@ -103,5 +92,37 @@ export function createFriendship({ uuid }) {
         topOffset: headerHeight + 15,
       })
     }
+  }
+}
+
+export function getListOfFriends({ uuid }) {
+  return async (dispatch, getState) => {
+    let friendsList = []
+    try {
+      friendsList = (await CONST.gqlClient
+        .query({
+          query: gql`
+        query getfriendshipsList($uuid: String!) {
+          getfriendshipsList(uuid: $uuid){
+            chatUuid
+            createdAt
+            friendshipUuid
+            uuid1
+            uuid2
+          }
+        }`,
+          variables: {
+            uuid,
+          },
+        })).data.getfriendshipsList
+    } catch (err5) {
+      // eslint-disable-next-line no-console
+      console.log({ err5 })// eslint-disable-line      
+    }
+    // console.log({ friendsList })
+    dispatch({
+      type: ACTION_TYPES.LIST_OF_FRIENDS,
+      friendsList,
+    })
   }
 }
