@@ -55,6 +55,10 @@ const FriendsList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  useEffect(() => {
+    console.log(`friends list updated: ${friendsList.length}`)
+  }, [friendsList])
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,

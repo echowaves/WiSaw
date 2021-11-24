@@ -21,6 +21,12 @@ export default function reducer(state = initialState, action) {
         ...state,
         friendsList: action.friendsList,
       }
+    case ACTION_TYPES.ADD_TO_FRIENDSHIP:
+      return {
+        ...state,
+        friendsList: [...state.friendsList, action.friendship],
+      }
+
     default:
       return state
   }
@@ -35,7 +41,7 @@ export function createFriendship({ uuid }) {
     // console.log({ nickName, secret, uuid })
 
     try {
-      const returned = (await CONST.gqlClient
+      const { friendship } = (await CONST.gqlClient
         .mutate({
           mutation: gql`
             mutation 
@@ -72,13 +78,11 @@ export function createFriendship({ uuid }) {
       //   _storeUUID(returnedSecret.uuid),
       //   _storeNickName(returnedSecret.nickName),
       // ])
-
-      // dispatch({
-      //   type: ACTION_TYPES.REGISTER_SECRET,
-      //   uuid: returnedSecret.uuid,
-      //   nickName: returnedSecret.nickName,
-      // })
-
+      // console.log({ friendship })
+      dispatch({
+        type: ACTION_TYPES.ADD_TO_FRIENDSHIP,
+        friendship,
+      })
       Toast.show({
         text1: 'New Friend created.',
         topOffset: headerHeight + 15,
@@ -119,7 +123,7 @@ export function getListOfFriends({ uuid }) {
       // eslint-disable-next-line no-console
       console.log({ err5 })// eslint-disable-line      
     }
-    // console.log({ friendsList })
+    // console.log(friendsList.length)
     dispatch({
       type: ACTION_TYPES.LIST_OF_FRIENDS,
       friendsList,
