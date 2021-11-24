@@ -62,16 +62,13 @@ export function createFriendship({ uuid }) {
                   invitedByUuid
                   lastReadAt
                   uuid
-                }
-                friend {
-                  createdAt
-                  friendshipUuid
-                  uuid
-                }
+                }                
                 friendship {
                   chatUuid
                   createdAt
                   friendshipUuid
+                  uuid1
+                  uuid2
                 }
               }
             }`,
