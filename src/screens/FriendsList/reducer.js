@@ -92,6 +92,7 @@ export function createFriendship({ uuid }) {
         text1: 'New Friend created.',
         topOffset: headerHeight + 15,
       })
+      return friendship
     } catch (err) {
       console.log({ err })
       Toast.show({
