@@ -168,11 +168,11 @@ const FriendsList = () => {
 
   const _handleAddFriend = async () => {
     const friend = await dispatch(reducer.createFriendship({ uuid }))
-    navigation.navigate('Contacts', { friendshipUuid: friend.friendshipUuid })
+    navigation.navigate('LocalContacts', { friendshipUuid: friend.friendshipUuid })
   }
 
   const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
-    navigation.navigate('Contacts', { friendshipUuid })
+    navigation.navigate('LocalContacts', { friendshipUuid })
   }
 
   const _handleRemoveFriend = ({ friendshipUuid }) => {

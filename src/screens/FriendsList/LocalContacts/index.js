@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import { useDimensions } from '@react-native-community/hooks'
+import * as Linking from 'expo-linking'
+import * as Contacts from 'expo-contacts'
 
 import {
   View,
@@ -36,10 +38,11 @@ import * as CONST from '../../../consts.js'
 
 import * as reducer from '../reducer'
 
-const Contacts = ({ route }) => {
+const LocalContacts = ({ route }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const [searchTerm, setSearchTerm] = useState('')
+  const [permissionGranted, setPermissionGranted] = useState(false)
 
   const { width, height } = useDimensions().window
 
@@ -61,6 +64,7 @@ const Contacts = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
+    _checkPermission()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -74,6 +78,27 @@ const Contacts = ({ route }) => {
       paddingBottom: 300,
     },
   })
+
+  const _checkPermission = async () => {
+    if (!permissionGranted) {
+      const { status } = await Contacts.requestPermissionsAsync()
+      if (status !== 'granted') {
+        Alert.alert(
+          "In order to establish p4p identity, WiSaw needs to access contacts in your phone book.",
+          "You need to enable Contacts in Settings and Try Again",
+          [
+            {
+              text: 'Open Settings',
+              onPress: () => {
+                Linking.openSettings()
+              },
+            },
+          ],
+        )
+      }
+      setPermissionGranted(status === 'granted')
+    }
+  }
 
   const renderHeaderRight = () => {}
 
@@ -159,8 +184,8 @@ const Contacts = ({ route }) => {
   )
 }
 
-Contacts.propTypes = {
+LocalContacts.propTypes = {
   route: PropTypes.object.isRequired,
 }
 
-export default Contacts
+export default LocalContacts
