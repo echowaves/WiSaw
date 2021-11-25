@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import {
+  View,
   Alert,
   SafeAreaView,
   StyleSheet,
@@ -23,6 +24,8 @@ import Toast from 'react-native-toast-message'
 import {
   FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons,
 } from '@expo/vector-icons'
+
+import { Col, Row, Grid } from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
@@ -55,9 +58,9 @@ const FriendsList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => {
-    console.log(`friends list updated: ${friendsList.length}`)
-  }, [friendsList])
+  // useEffect(() => {
+  //   console.log(`friends list updated: ${friendsList.length}`)
+  // }, [friendsList])
 
   const styles = StyleSheet.create({
     container: {
@@ -104,8 +107,71 @@ const FriendsList = () => {
     />
   )
 
+  const _renderFriend = ({ friend }) => ( // eslint-disable-line react/no-multi-comp, react/prop-types
+    <Grid>
+      <Row>
+        <Col
+          style={{
+
+          }}>
+          <Text>
+            {`${friend.friendshipUuid}`}
+          </Text>
+        </Col>
+        <Col style={{ width: 30, marginRight: 10, marginLeft: 10 }}>
+          <FontAwesome
+            name="address-card"
+            size={30}
+            style={
+              {
+                color: CONST.MAIN_COLOR,
+              }
+            }
+            onPress={
+              () => {
+                // _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
+              }
+            }
+          />
+        </Col>
+        <Col style={{ width: 30, marginRight: 10, marginLeft: 10 }}>
+          <SimpleLineIcons
+            name="user-unfollow"
+            size={30}
+            style={
+              {
+                color: CONST.MAIN_COLOR,
+              }
+            }
+            onPress={
+              () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
+            }
+          />
+        </Col>
+        <Col style={{ width: 30, marginRight: -10, marginLeft: 10 }}>
+          <FontAwesome
+            name="chevron-right"
+            size={30}
+            style={
+              {
+                color: CONST.MAIN_COLOR,
+              }
+            }
+            onPress={
+              () => navigation.goBack()
+            }
+          />
+        </Col>
+      </Row>
+    </Grid>
+  )
+
   const _handleAddFriend = () => {
     dispatch(reducer.createFriendship({ uuid }))
+  }
+
+  const _handleRemoveFriend = ({ friendshipUuid }) => {
+    dispatch(reducer.deleteFriendship({ friendshipUuid }))
   }
 
   return (
@@ -115,15 +181,23 @@ const FriendsList = () => {
         showsVerticalScrollIndicator={
           false
         }>
-        <Card containerStyle={{ padding: 0 }}>
-          <ListItem>
-            <Text>
-              chats
-            </Text>
-          </ListItem>
-        </Card>
+        {
+          friendsList.map((friend, index) => (
+            <ListItem
+              key={friend.friendshipUuid}
+              style={{
+                paddingBottom: 5,
+                paddingLeft: 10,
+                paddingRight: 10,
+                width: '100%',
+              }}>
+              {_renderFriend({ friend })}
+            </ListItem>
+          ))
+        }
       </ScrollView>
     </SafeAreaView>
   )
 }
+
 export default FriendsList

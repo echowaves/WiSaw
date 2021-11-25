@@ -26,6 +26,11 @@ export default function reducer(state = initialState, action) {
         ...state,
         friendsList: [...state.friendsList, action.friendship],
       }
+    case ACTION_TYPES.DELETE_FRIENDSHIP:
+      return {
+        ...state,
+        friendsList: [...state.friendsList.filter(friendship => friendship.friendshipUuid !== action.friendshipUuid)],
+      }
 
     default:
       return state
@@ -37,7 +42,7 @@ export function createFriendship({ uuid }) {
     const {
       headerHeight,
     } = getState().photosList
-    console.log({ uuid })
+    // console.log({ uuid })
     // console.log({ nickName, secret, uuid })
 
     try {
@@ -91,6 +96,57 @@ export function createFriendship({ uuid }) {
       console.log({ err })
       Toast.show({
         text1: 'Unable to create Friend',
+        text2: err.toString(),
+        type: "error",
+        topOffset: headerHeight + 15,
+      })
+    }
+  }
+}
+
+export function deleteFriendship({ friendshipUuid }) {
+  return async (dispatch, getState) => {
+    const {
+      headerHeight,
+    } = getState().photosList
+    // console.log({ uuid })
+    // console.log({ nickName, secret, uuid })
+
+    try {
+      const { deleteFriendship } = (await CONST.gqlClient
+        .mutate({
+          mutation: gql`
+            mutation 
+            deleteFriendship($friendshipUuid: String!) {
+              deleteFriendship(friendshipUuid: $friendshipUuid)                 
+            }`,
+          variables: {
+            friendshipUuid,
+          },
+        })).data
+
+      // console.log({ deleteFriendship })
+
+      if (deleteFriendship !== "OK") {
+        throw Error("Deleting Friendship failed")
+      }
+      // await Promise.all([
+      //   _storeUUID(returnedSecret.uuid),
+      //   _storeNickName(returnedSecret.nickName),
+      // ])
+      // console.log({ friendship })
+      dispatch({
+        type: ACTION_TYPES.DELETE_FRIENDSHIP,
+        friendshipUuid,
+      })
+      Toast.show({
+        text1: 'Friendship deleted.',
+        topOffset: headerHeight + 15,
+      })
+    } catch (err) {
+      console.log({ err })
+      Toast.show({
+        text1: 'Unable to delete Friendship',
         text2: err.toString(),
         type: "error",
         topOffset: headerHeight + 15,
