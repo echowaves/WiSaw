@@ -22,7 +22,7 @@ import {
 import Toast from 'react-native-toast-message'
 
 import {
-  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons,
+  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign,
 } from '@expo/vector-icons'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -119,8 +119,8 @@ const FriendsList = () => {
           </Text>
         </Col>
         <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-          <FontAwesome
-            name="address-card"
+          <AntDesign
+            name="contacts"
             size={30}
             style={
               {
@@ -129,7 +129,7 @@ const FriendsList = () => {
             }
             onPress={
               () => {
-                // _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
+                _handleAssociateLocalFriend({ friendshipUuid: friend.friendshipUuid })
               }
             }
           />
@@ -168,6 +168,10 @@ const FriendsList = () => {
 
   const _handleAddFriend = () => {
     dispatch(reducer.createFriendship({ uuid }))
+  }
+
+  const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
+
   }
 
   const _handleRemoveFriend = ({ friendshipUuid }) => {
