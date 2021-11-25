@@ -96,7 +96,7 @@ const PhotosDetailsShared = ({ route }) => {
 }
 
 PhotosDetailsShared.propTypes = {
-  photoId: PropTypes.number.isRequired,
+  // photoId: PropTypes.number.isRequired,
   route: PropTypes.object.isRequired,
 }
 

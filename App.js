@@ -36,6 +36,7 @@ import ModalInputText from './src/screens/ModalInputText'
 
 import ChatsList from './src/screens/ChatsList'
 import FriendsList from './src/screens/FriendsList'
+import Contacts from './src/screens/FriendsList/Contacts'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
 
@@ -106,6 +107,11 @@ const App = () => (
                   <Stack.Screen
                     name="FriendsList"
                     component={FriendsList}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="Contacts"
+                    component={Contacts}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                 </Stack.Navigator>

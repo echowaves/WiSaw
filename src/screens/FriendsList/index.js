@@ -171,7 +171,7 @@ const FriendsList = () => {
   }
 
   const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
-
+    navigation.navigate('Contacts', { friendshipUuid })
   }
 
   const _handleRemoveFriend = ({ friendshipUuid }) => {
