@@ -144,7 +144,7 @@ export function deleteFriendship({ friendshipUuid }) {
         topOffset: headerHeight + 15,
       })
     } catch (err) {
-      console.log({ err })
+      // console.log({ err })
       Toast.show({
         text1: 'Unable to delete Friendship',
         text2: err.toString(),

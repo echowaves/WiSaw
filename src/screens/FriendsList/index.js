@@ -118,7 +118,7 @@ const FriendsList = () => {
             {`${friend.friendshipUuid}`}
           </Text>
         </Col>
-        <Col style={{ width: 30, marginRight: 10, marginLeft: 10 }}>
+        <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
           <FontAwesome
             name="address-card"
             size={30}
@@ -134,7 +134,7 @@ const FriendsList = () => {
             }
           />
         </Col>
-        <Col style={{ width: 30, marginRight: 10, marginLeft: 10 }}>
+        <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
           <SimpleLineIcons
             name="user-unfollow"
             size={30}
@@ -148,7 +148,7 @@ const FriendsList = () => {
             }
           />
         </Col>
-        <Col style={{ width: 30, marginRight: -10, marginLeft: 10 }}>
+        <Col style={{ width: 40, marginRight: 0, marginLeft: 10 }}>
           <FontAwesome
             name="chevron-right"
             size={30}
@@ -171,7 +171,20 @@ const FriendsList = () => {
   }
 
   const _handleRemoveFriend = ({ friendshipUuid }) => {
-    dispatch(reducer.deleteFriendship({ friendshipUuid }))
+    Alert.alert(
+      'Delete Friendship?',
+      'This can\'t be undone. Are you sure? ',
+      [
+        { text: 'No', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: () => {
+            dispatch(reducer.deleteFriendship({ friendshipUuid }))
+          },
+        },
+      ],
+      { cancelable: true }
+    )
   }
 
   return (
