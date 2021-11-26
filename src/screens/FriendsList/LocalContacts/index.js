@@ -213,7 +213,10 @@ const LocalContacts = () => {
           }}
           onPress={
             async () => {
-              await Contacts.presentFormAsync(null, null, { isNew: true })
+              await Contacts.presentFormAsync(null, {}, {
+                isNew: true,
+                allowsActions: false,
+              })
               _submitSearch(searchTerm)
             }
           }>
