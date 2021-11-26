@@ -34,7 +34,7 @@ const PhotosDetails = ({ route }) => {
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
 
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const dispatch = useDispatch()
 
@@ -97,7 +97,7 @@ const PhotosDetails = ({ route }) => {
         if (newIndex === 0 || newIndex === (photos.length - 1)) {
           Toast.show({
             text1: 'No scrolling beyond this point',
-            topOffset: headerHeight + 15,
+            topOffset,
             visibilityTime: 500,
           })
         }

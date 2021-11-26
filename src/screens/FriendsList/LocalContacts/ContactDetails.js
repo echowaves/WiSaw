@@ -45,7 +45,7 @@ const ContactDetails = ({ route }) => {
 
   const { pickedContact } = route.params
 
-  // const headerHeight = useSelector(state => state.photosList.headerHeight)
+  // const topOffset = useSelector(state => state.photosList.topOffset)
 
   const uuid = useSelector(state => state.secret.uuid)
 
@@ -103,38 +103,9 @@ const ContactDetails = ({ route }) => {
         <Text>
           Pick where do you want to send your invitation to.
         </Text>
+
         {
-          pickedContact.emails.map((email, index) => (
-            <ListItem
-              bottomDivider
-              key={email.id}
-              style={{
-                paddingBottom: 5,
-                paddingLeft: 10,
-                paddingRight: 10,
-                width: '100%',
-              }}
-              onPress={() => {
-                console.log(email.id)
-              }}>
-              <ListItem.Content>
-                <ListItem.Title>{email.email}</ListItem.Title>
-                <ListItem.Subtitle>{email.label}</ListItem.Subtitle>
-              </ListItem.Content>
-              <FontAwesome
-                name="chevron-right"
-                size={30}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-              />
-            </ListItem>
-          ))
-        }
-        {
-          pickedContact.phoneNumbers.map((phone, index) => (
+          pickedContact.phoneNumbers?.map((phone, index) => (
             <ListItem
               bottomDivider
               key={phone.id}
@@ -163,6 +134,37 @@ const ContactDetails = ({ route }) => {
             </ListItem>
           ))
 
+        }
+
+        {
+          pickedContact.emails?.map((email, index) => (
+            <ListItem
+              bottomDivider
+              key={email.id}
+              style={{
+                paddingBottom: 5,
+                paddingLeft: 10,
+                paddingRight: 10,
+                width: '100%',
+              }}
+              onPress={() => {
+                console.log(email.id)
+              }}>
+              <ListItem.Content>
+                <ListItem.Title>{email.email}</ListItem.Title>
+                <ListItem.Subtitle>{email.label}</ListItem.Subtitle>
+              </ListItem.Content>
+              <FontAwesome
+                name="chevron-right"
+                size={30}
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
+                }
+              />
+            </ListItem>
+          ))
         }
       </ScrollView>
     </SafeAreaView>

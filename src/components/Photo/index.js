@@ -53,7 +53,7 @@ const Photo = ({ photo }) => {
 
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const navigation = useNavigation()
 
@@ -540,7 +540,7 @@ const Photo = ({ photo }) => {
         text1: 'Unable to ban Starred photo',
         text2: 'Un-Star photo first',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       return
     }
@@ -549,7 +549,7 @@ const Photo = ({ photo }) => {
         text1: 'Looks like you already Banned this Photo',
         text2: 'You can only Ban same Photo once',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     } else {
       Alert.alert(
@@ -570,7 +570,7 @@ const Photo = ({ photo }) => {
         text1: 'Unable to delete Starred photo',
         text2: 'Un-Star photo first',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       return
     }
@@ -613,7 +613,7 @@ const Photo = ({ photo }) => {
         text1: 'Unable to complete',
         text2: 'Network issue? Try again later',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }

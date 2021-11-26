@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useHeaderHeight } from '@react-navigation/elements'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
@@ -64,7 +63,7 @@ const PhotosList = () => {
 
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
@@ -119,10 +118,8 @@ const PhotosList = () => {
     await _reload()
   }
 
-  const heightOfHeader = useHeaderHeight()
-
   useEffect(() => {
-    dispatch(reducer.setHeaderHeight(heightOfHeader))
+    dispatch(reducer.settopOffset(height / 3))
 
     _initBranch({ navigation })
     _getLocation()
@@ -177,7 +174,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'WiSaw updated',
           text2: "Restart to see changes",
-          topOffset: headerHeight + 15,
+          topOffset,
         })
         // setTimeout(() => { Updates.reloadAsync() }, 3000)
       }
@@ -187,7 +184,7 @@ const PhotosList = () => {
       //   text1: `Failed to get over the air update:`,
       //   text2: `${error}`,
       //   type: "error",
-      // topOffset: headerHeight + 15,
+      // topOffset: topOffset,
       // })
     }
   }
@@ -318,7 +315,7 @@ const PhotosList = () => {
             // Toast.show({
             //   text1: 'location udated',
             //   type: "error",
-            // topOffset: headerHeight + 15,
+            // topOffset: topOffset,
             // })
             await dispatch(reducer.setLocation(loc))
           }
@@ -327,7 +324,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'Unable to get location',
           type: "error",
-          topOffset: headerHeight + 15,
+          topOffset,
         })
       }
     }
@@ -730,7 +727,7 @@ const PhotosList = () => {
       Toast.show({
         text1: "Search for more than 3 characters",
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }

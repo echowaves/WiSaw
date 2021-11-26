@@ -32,7 +32,7 @@ const ChatsList = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const uuid = useSelector(state => state.secret.uuid)
 

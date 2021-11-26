@@ -42,7 +42,7 @@ export const initialState = {
   netAvailable: false,
   uploadingPhoto: false,
   zeroMoment: null,
-  headerHeight: 100,
+  toastOffset: 100,
   currentIndex: 0,
 }
 
@@ -112,10 +112,10 @@ const reducer = (state = initialState, action) => {
         ...state,
         isTandcAccepted: action.isTandcAccepted,
       }
-    case ACTION_TYPES.SET_HEADER_HEIGHT:
+    case ACTION_TYPES.SET_TOP_OFFSET:
       return {
         ...state,
-        headerHeight: action.headerHeight,
+        topOffset: action.topOffset,
       }
     case ACTION_TYPES.INIT_STATE:
       return {
@@ -424,7 +424,7 @@ export function getPhotos() {
     // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
     await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
     const {
-      location, netAvailable, searchTerm, headerHeight,
+      location, netAvailable, searchTerm, topOffset,
     } = getState().photosList
 
     let noMoreData = false
@@ -476,7 +476,7 @@ export function getPhotos() {
           text1: 'Error',
           text2: `${err}`,
           type: "error",
-          topOffset: headerHeight + 15,
+          topOffset,
         })
       }
     }
@@ -502,10 +502,10 @@ export function acceptTandC() {
   }
 }
 
-export function setHeaderHeight(headerHeight) {
+export function settopOffset(topOffset) {
   return {
-    type: ACTION_TYPES.SET_HEADER_HEIGHT,
-    headerHeight,
+    type: ACTION_TYPES.SET_TOP_OFFSET,
+    topOffset,
   }
 }
 
@@ -717,7 +717,7 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
     const { uuid } = getState().secret
     _updatePendingPhotos(dispatch)
 
@@ -774,7 +774,7 @@ export function uploadPendingPhotos() {
               text1: "Sorry, you've been banned",
               text2: "Try again later",
               type: "error",
-              topOffset: headerHeight + 15,
+              topOffset,
             })
           }
         }
@@ -807,7 +807,7 @@ export function uploadPendingPhotos() {
           })
           Toast.show({
             text1: `${item.photo.video ? 'Video' : 'Photo'} uploaded`,
-            topOffset: headerHeight + 15,
+            topOffset,
             visibilityTime: 500,
           })
         } else {
@@ -816,7 +816,7 @@ export function uploadPendingPhotos() {
             text1: 'Upload is going slooooow...',
             text2: 'Still trying to upload.',
             visibilityTime: 500,
-            topOffset: headerHeight + 15,
+            topOffset,
           })
         }
       }
@@ -830,7 +830,7 @@ export function uploadPendingPhotos() {
         text1: 'Upload is slow...',
         text2: 'Still trying to upload.',
         visibilityTime: 500,
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())

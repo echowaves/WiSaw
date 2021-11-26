@@ -40,7 +40,7 @@ export default function reducer(state = initialState, action) {
 export function createFriendship({ uuid }) {
   return async (dispatch, getState) => {
     const {
-      headerHeight,
+      topOffset,
     } = getState().photosList
     // console.log({ uuid })
     // console.log({ nickName, secret, uuid })
@@ -90,7 +90,7 @@ export function createFriendship({ uuid }) {
       })
       Toast.show({
         text1: 'New Friend created.',
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       return friendship
     } catch (err) {
@@ -99,7 +99,7 @@ export function createFriendship({ uuid }) {
         text1: 'Unable to create Friend',
         text2: err.toString(),
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -108,7 +108,7 @@ export function createFriendship({ uuid }) {
 export function deleteFriendship({ friendshipUuid }) {
   return async (dispatch, getState) => {
     const {
-      headerHeight,
+      topOffset,
     } = getState().photosList
     // console.log({ uuid })
     // console.log({ nickName, secret, uuid })
@@ -142,7 +142,7 @@ export function deleteFriendship({ friendshipUuid }) {
       })
       Toast.show({
         text1: 'Friendship deleted.',
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     } catch (err) {
       // console.log({ err })
@@ -150,7 +150,7 @@ export function deleteFriendship({ friendshipUuid }) {
         text1: 'Unable to delete Friendship',
         text2: err.toString(),
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
