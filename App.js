@@ -37,6 +37,7 @@ import ModalInputText from './src/screens/ModalInputText'
 import ChatsList from './src/screens/ChatsList'
 import FriendsList from './src/screens/FriendsList'
 import LocalContacts from './src/screens/FriendsList/LocalContacts'
+import ContactDetails from './src/screens/FriendsList/LocalContacts/ContactDetails'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
 
@@ -112,6 +113,11 @@ const App = () => (
                   <Stack.Screen
                     name="LocalContacts"
                     component={LocalContacts}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ContactDetails"
+                    component={ContactDetails}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                 </Stack.Navigator>

@@ -157,9 +157,9 @@ const FriendsList = () => {
                 color: CONST.MAIN_COLOR,
               }
             }
-            onPress={
-              () => navigation.goBack()
-            }
+            // onPress={
+            // () => navigation.goBack()
+            // }
           />
         </Col>
       </Row>

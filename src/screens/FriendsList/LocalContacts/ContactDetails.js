@@ -37,25 +37,21 @@ import * as CONST from '../../../consts.js'
 
 import * as reducer from '../reducer'
 
-const LocalContacts = ({ route }) => {
+const ContactDetails = ({ route }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [contacts, setContacts] = useState([])
-  const [permissionGranted, setPermissionGranted] = useState(false)
 
   const { width, height } = useDimensions().window
 
-  const { friendshipUuid } = route.params
+  const { pickedContact } = route.params
 
   // const headerHeight = useSelector(state => state.photosList.headerHeight)
 
   const uuid = useSelector(state => state.secret.uuid)
-  const friendsList = useSelector(state => state.friendsList.friendsList)
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'Local Contacts',
+      headerTitle: 'Pick Phone or Email',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -64,7 +60,6 @@ const LocalContacts = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-    _checkPermission()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -78,27 +73,6 @@ const LocalContacts = ({ route }) => {
       paddingBottom: 300,
     },
   })
-
-  const _checkPermission = async () => {
-    if (!permissionGranted) {
-      const { status } = await Contacts.requestPermissionsAsync()
-      if (status !== 'granted') {
-        Alert.alert(
-          "In order to establish p4p identity, WiSaw needs to access contacts in your phone book.",
-          "You need to enable Contacts in Settings and Try Again",
-          [
-            {
-              text: 'Open Settings',
-              onPress: () => {
-                Linking.openSettings()
-              },
-            },
-          ],
-        )
-      }
-      setPermissionGranted(status === 'granted')
-    }
-  }
 
   const renderHeaderRight = () => {}
 
@@ -119,21 +93,6 @@ const LocalContacts = ({ route }) => {
     />
   )
 
-  const _submitSearch = async searchString => {
-    if (searchString.length === 0) {
-      return
-    }
-    console.log('--------------------------------------------------')
-    // console.log({ searchString })
-    const { data } = await Contacts.getContactsAsync({
-      name: searchString,
-      fields: [Contacts.Fields.Emails, Contacts.Fields.PhoneNumbers],
-    })
-    console.log({ data })
-    console.log(data.length)
-    setContacts(data.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase()))
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -142,46 +101,13 @@ const LocalContacts = ({ route }) => {
           false
         }>
         <Text>
-          Find your friend in contacts.
+          Pick where do you want to send your invitation to.
         </Text>
-        <View style={{
-          flexDirection: 'row',
-          backgroundColor: CONST.NAV_COLOR,
-        }}>
-          <SearchBar
-            placeholder="Type Contact Name..."
-            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-            onChangeText={currentTerm => {
-              setSearchTerm(currentTerm)
-              _submitSearch(currentTerm)
-            }}
-            value={searchTerm}
-            // onSubmitEditing={
-            //   () => _submitSearch()
-            // }
-            autoFocus
-            containerStyle={{
-              width,
-            }}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
-                backgroundColor: "white",
-                paddingLeft: 10,
-                paddingRight: 10,
-              }
-            }
-            rightIconContainerStyle={{
-              margin: 10,
-            }}
-            lightTheme
-          />
-        </View>
         {
-          contacts.map((contact, index) => (
+          pickedContact.emails.map((email, index) => (
             <ListItem
               bottomDivider
-              key={contact.id}
+              key={email.id}
               style={{
                 paddingBottom: 5,
                 paddingLeft: 10,
@@ -189,12 +115,11 @@ const LocalContacts = ({ route }) => {
                 width: '100%',
               }}
               onPress={() => {
-                console.log(contact.id)
-                navigation.navigate('ContactDetails', { pickedContact: contact })
+                console.log(email.id)
               }}>
               <ListItem.Content>
-                <ListItem.Title>{contact.name}</ListItem.Title>
-                {/* <ListItem.Subtitle>{JSON.stringify(contact.emails)}{JSON.stringify(contact.phoneNumbers)}</ListItem.Subtitle> */}
+                <ListItem.Title>{email.email}</ListItem.Title>
+                <ListItem.Subtitle>{email.label}</ListItem.Subtitle>
               </ListItem.Content>
               <FontAwesome
                 name="chevron-right"
@@ -208,13 +133,44 @@ const LocalContacts = ({ route }) => {
             </ListItem>
           ))
         }
+        {
+          pickedContact.phoneNumbers.map((phone, index) => (
+            <ListItem
+              bottomDivider
+              key={phone.id}
+              style={{
+                paddingBottom: 5,
+                paddingLeft: 10,
+                paddingRight: 10,
+                width: '100%',
+              }}
+              onPress={() => {
+                console.log(phone.id)
+              }}>
+              <ListItem.Content>
+                <ListItem.Title>{phone.number}</ListItem.Title>
+                <ListItem.Subtitle>{phone.label}</ListItem.Subtitle>
+              </ListItem.Content>
+              <FontAwesome
+                name="chevron-right"
+                size={30}
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
+                }
+              />
+            </ListItem>
+          ))
+
+        }
       </ScrollView>
     </SafeAreaView>
   )
 }
 
-LocalContacts.propTypes = {
+ContactDetails.propTypes = {
   route: PropTypes.object.isRequired,
 }
 
-export default LocalContacts
+export default ContactDetails
