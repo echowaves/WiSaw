@@ -37,7 +37,7 @@ import * as CONST from '../../../consts.js'
 
 import * as reducer from '../reducer'
 
-const LocalContacts = ({ route }) => {
+const LocalContacts = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const [searchTerm, setSearchTerm] = useState('')
@@ -45,8 +45,6 @@ const LocalContacts = ({ route }) => {
   const [permissionGranted, setPermissionGranted] = useState(false)
 
   const { width, height } = useDimensions().window
-
-  const { friendshipUuid } = route.params
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
 

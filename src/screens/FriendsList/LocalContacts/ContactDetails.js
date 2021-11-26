@@ -26,7 +26,7 @@ import {
 import Toast from 'react-native-toast-message'
 
 import {
-  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign,
+  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign, MaterialIcons,
 } from '@expo/vector-icons'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -48,6 +48,11 @@ const ContactDetails = ({ route }) => {
   // const topOffset = useSelector(state => state.photosList.topOffset)
 
   const uuid = useSelector(state => state.secret.uuid)
+
+  const [addedEmail, setAddedEmail] = useState('')
+  const [addedPhone, setAddedPhone] = useState('')
+  const [addedEmailError, setAddedEmailError] = useState('')
+  const [addedPhoneError, setAddedPhoneError] = useState('')
 
   useEffect(() => {
     navigation.setOptions({
@@ -92,6 +97,12 @@ const ContactDetails = ({ route }) => {
       }
     />
   )
+  const _addPhone = ({ addedEmail }) => {
+
+  }
+  const _addEmail = ({ addedEmail }) => {
+
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -101,7 +112,10 @@ const ContactDetails = ({ route }) => {
           false
         }>
         <Text>
-          Pick where do you want to send your invitation to.
+          Pick where you want to send your invitation for:
+        </Text>
+        <Text h3>
+          {pickedContact.name}
         </Text>
 
         {
@@ -133,8 +147,42 @@ const ContactDetails = ({ route }) => {
               />
             </ListItem>
           ))
-
         }
+
+        <Input
+          placeholder="(555) 555-5555"
+          autoCorrect={false}
+          autoCapitalize="none"
+          autoComplete="off"
+          leftIcon={(
+            <MaterialIcons
+              name="phone"
+              size={24}
+              color="black"
+            />
+          )}
+          rightIcon={(
+            <Ionicons
+              name="add-circle"
+              style={
+                {
+                  fontSize: 30,
+                  marginEnd: 20,
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+              onPress={() => _addPhone({ addedPhone })}
+            />
+          )}
+          value={addedPhone}
+          onChangeText={text => {
+            setAddedPhoneError('')
+            setAddedPhone(text)
+          }}
+          onSubmitEditing={text => _addPhone({ addedPhone })}
+          errorStyle={{ color: 'red' }}
+          errorMessage={addedPhoneError}
+        />
 
         {
           pickedContact.emails?.map((email, index) => (
@@ -166,6 +214,41 @@ const ContactDetails = ({ route }) => {
             </ListItem>
           ))
         }
+        <Input
+          placeholder="email@address.com"
+          autoCorrect={false}
+          autoCapitalize="none"
+          autoComplete="off"
+          leftIcon={(
+            <MaterialIcons
+              name="email"
+              size={24}
+              color="black"
+            />
+          )}
+          rightIcon={(
+            <Ionicons
+              name="add-circle"
+              style={
+                {
+                  fontSize: 30,
+                  marginEnd: 20,
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+              onPress={() => _addEmail({ addedEmail })}
+            />
+          )}
+          value={addedEmail}
+          onChangeText={text => {
+            setAddedEmailError('')
+            setAddedEmail(text)
+          }}
+          onSubmitEditing={text => _addEmail({ addedEmail })}
+          errorStyle={{ color: 'red' }}
+          errorMessage={addedEmailError}
+        />
+
       </ScrollView>
     </SafeAreaView>
   )

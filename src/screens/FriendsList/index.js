@@ -166,9 +166,9 @@ const FriendsList = () => {
     </Grid>
   )
 
-  const _handleAddFriend = async () => {
-    const friend = await dispatch(reducer.createFriendship({ uuid }))
-    navigation.navigate('LocalContacts', { friendshipUuid: friend.friendshipUuid })
+  const _handleAddFriend = () => {
+    // const friend = await dispatch(reducer.createFriendship({ uuid }))
+    navigation.navigate('LocalContacts')
   }
 
   const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
