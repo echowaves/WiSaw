@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux"
 import { useDimensions } from '@react-native-community/hooks'
 import * as Linking from 'expo-linking'
 import * as Contacts from 'expo-contacts'
+import validator from 'validator'
+import { phone } from 'phone'
 
 import {
   View,
@@ -97,11 +99,23 @@ const ContactDetails = ({ route }) => {
       }
     />
   )
-  const _addPhone = ({ addedEmail }) => {
+  const _addPhone = ({ addedPhone }) => {
+    const resultPhone = phone(addedPhone)
+    console.log({ resultPhone })
 
+    if (resultPhone.isValid) {
+      console.log({ addedPhone })
+    } else {
+      setAddedPhoneError('Not a valid phone number')
+    }
   }
-  const _addEmail = ({ addedEmail }) => {
 
+  const _addEmail = ({ addedEmail }) => {
+    if (validator.isEmail(addedEmail)) {
+      console.log({ addedEmail })
+    } else {
+      setAddedEmailError('Not a valid email')
+    }
   }
 
   return (
@@ -150,7 +164,7 @@ const ContactDetails = ({ route }) => {
         }
 
         <Input
-          placeholder="(555) 555-5555"
+          placeholder="(555)555-5555"
           autoCorrect={false}
           autoCapitalize="none"
           autoComplete="off"
