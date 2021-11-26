@@ -122,14 +122,14 @@ const LocalContacts = () => {
     if (searchString.length === 0) {
       return
     }
-    console.log('--------------------------------------------------')
+    // console.log('--------------------------------------------------')
     // console.log({ searchString })
     const { data } = await Contacts.getContactsAsync({
       name: searchString,
       fields: [Contacts.Fields.Emails, Contacts.Fields.PhoneNumbers],
     })
-    console.log({ data })
-    console.log(data.length)
+    // console.log({ data })
+    // console.log(data.length)
     setContacts(data.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase()))
   }
 
@@ -188,8 +188,7 @@ const LocalContacts = () => {
                 width: '100%',
               }}
               onPress={() => {
-                console.log(contact.id)
-                navigation.navigate('ContactDetails', { pickedContact: contact })
+                navigation.navigate('ContactDetails', { contactId: contact.id })
               }}>
               <ListItem.Content>
                 <ListItem.Title>{contact.name}</ListItem.Title>
@@ -213,7 +212,10 @@ const LocalContacts = () => {
             flexDirection: 'row',
           }}
           onPress={
-            () => Contacts.presentFormAsync(null, null, { isNew: true })
+            async () => {
+              await Contacts.presentFormAsync(null, null, { isNew: true })
+              _submitSearch(searchTerm)
+            }
           }>
           <Col
             size={1}
@@ -249,7 +251,7 @@ const LocalContacts = () => {
 }
 
 LocalContacts.propTypes = {
-  route: PropTypes.object.isRequired,
+  // route: PropTypes.object.isRequired,
 }
 
 export default LocalContacts

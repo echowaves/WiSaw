@@ -46,7 +46,8 @@ const ContactDetails = ({ route }) => {
 
   const { width, height } = useDimensions().window
 
-  const { pickedContact } = route.params
+  const { contactId } = route.params
+  const [contact, setContact] = useState(null)
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
 
@@ -63,6 +64,7 @@ const ContactDetails = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
+    _reloadContact()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -76,6 +78,10 @@ const ContactDetails = ({ route }) => {
       paddingBottom: 300,
     },
   })
+
+  const _reloadContact = async () => {
+    setContact(await Contacts.getContactByIdAsync(contactId))
+  }
 
   const renderHeaderRight = () => {}
 
@@ -95,24 +101,6 @@ const ContactDetails = ({ route }) => {
       }
     />
   )
-  const _addPhone = ({ addedPhone }) => {
-    const resultPhone = phone(addedPhone)
-    console.log({ resultPhone })
-
-    if (resultPhone.isValid) {
-      console.log({ addedPhone })
-    } else {
-      setAddedPhoneError('Not a valid phone number')
-    }
-  }
-
-  const _addEmail = ({ addedEmail }) => {
-    if (validator.isEmail(addedEmail)) {
-      console.log({ addedEmail })
-    } else {
-      setAddedEmailError('Not a valid email')
-    }
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -125,11 +113,11 @@ const ContactDetails = ({ route }) => {
           Pick where you want to send your invitation for:
         </Text>
         <Text h3>
-          {pickedContact.name}
+          {contact?.name}
         </Text>
 
         {
-          pickedContact.phoneNumbers?.map((phone, index) => (
+          contact?.phoneNumbers?.map((phone, index) => (
             <ListItem
               bottomDivider
               key={phone.id}
@@ -159,7 +147,7 @@ const ContactDetails = ({ route }) => {
           ))
         }
         {
-          pickedContact.emails?.map((email, index) => (
+          contact?.emails?.map((email, index) => (
             <ListItem
               bottomDivider
               key={email.id}
@@ -194,7 +182,10 @@ const ContactDetails = ({ route }) => {
             flexDirection: 'row',
           }}
           onPress={
-            () => Contacts.presentFormAsync(pickedContact.id)
+            async () => {
+              const contact = await Contacts.presentFormAsync(contactId)
+              setContact(await Contacts.getContactByIdAsync(contactId))
+            }
           }>
           <Col
             size={1}
