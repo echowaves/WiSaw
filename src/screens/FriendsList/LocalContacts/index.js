@@ -11,6 +11,7 @@ import {
   SafeAreaView,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native'
 
 import {
@@ -26,7 +27,7 @@ import {
 import Toast from 'react-native-toast-message'
 
 import {
-  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign,
+  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign, MaterialIcons,
 } from '@expo/vector-icons'
 
 import { Col, Row, Grid } from "react-native-easy-grid"
@@ -53,7 +54,7 @@ const LocalContacts = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'Local Contacts',
+      headerTitle: 'Phone Book',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -206,6 +207,42 @@ const LocalContacts = () => {
             </ListItem>
           ))
         }
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+          }}
+          onPress={
+            () => Contacts.presentFormAsync(null, null, { isNew: true })
+          }>
+          <Col
+            size={1}
+          />
+          <Col
+            size={10}
+            style={{ flex: 5, justifyContent: "center", alignItems: "center" }}>
+            <Text
+              style={{
+                fontSize: 25,
+                color: CONST.MAIN_COLOR,
+              }}>
+              Add new contact to Phone book
+            </Text>
+          </Col>
+          <Col
+            size={1}>
+            <Ionicons
+              name="add-circle"
+              style={
+                {
+                  fontSize: 45,
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+            />
+          </Col>
+        </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   )

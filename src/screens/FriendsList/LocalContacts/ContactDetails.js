@@ -13,6 +13,7 @@ import {
   SafeAreaView,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native'
 
 import {
@@ -50,11 +51,6 @@ const ContactDetails = ({ route }) => {
   // const topOffset = useSelector(state => state.photosList.topOffset)
 
   const uuid = useSelector(state => state.secret.uuid)
-
-  const [addedEmail, setAddedEmail] = useState('')
-  const [addedPhone, setAddedPhone] = useState('')
-  const [addedEmailError, setAddedEmailError] = useState('')
-  const [addedPhoneError, setAddedPhoneError] = useState('')
 
   useEffect(() => {
     navigation.setOptions({
@@ -162,42 +158,6 @@ const ContactDetails = ({ route }) => {
             </ListItem>
           ))
         }
-
-        <Input
-          placeholder="(555)555-5555"
-          autoCorrect={false}
-          autoCapitalize="none"
-          autoComplete="off"
-          leftIcon={(
-            <MaterialIcons
-              name="phone"
-              size={24}
-              color="black"
-            />
-          )}
-          rightIcon={(
-            <Ionicons
-              name="add-circle"
-              style={
-                {
-                  fontSize: 30,
-                  marginEnd: 20,
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              onPress={() => _addPhone({ addedPhone })}
-            />
-          )}
-          value={addedPhone}
-          onChangeText={text => {
-            setAddedPhoneError('')
-            setAddedPhone(text)
-          }}
-          onSubmitEditing={text => _addPhone({ addedPhone })}
-          errorStyle={{ color: 'red' }}
-          errorMessage={addedPhoneError}
-        />
-
         {
           pickedContact.emails?.map((email, index) => (
             <ListItem
@@ -228,40 +188,40 @@ const ContactDetails = ({ route }) => {
             </ListItem>
           ))
         }
-        <Input
-          placeholder="email@address.com"
-          autoCorrect={false}
-          autoCapitalize="none"
-          autoComplete="off"
-          leftIcon={(
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+          }}
+          onPress={
+            () => Contacts.presentFormAsync(pickedContact.id)
+          }>
+          <Col
+            size={1}
+          />
+          <Col
+            size={10}
+            style={{ flex: 5, justifyContent: "center", alignItems: "center" }}>
+            <Text
+              style={{
+                fontSize: 25,
+                color: CONST.MAIN_COLOR,
+              }}>
+              Edit contact in Phone book
+            </Text>
+          </Col>
+          <Col
+            size={1}>
             <MaterialIcons
-              name="email"
-              size={24}
-              color="black"
-            />
-          )}
-          rightIcon={(
-            <Ionicons
-              name="add-circle"
-              style={
+              name="update" style={
                 {
-                  fontSize: 30,
-                  marginEnd: 20,
+                  fontSize: 45,
                   color: CONST.MAIN_COLOR,
                 }
               }
-              onPress={() => _addEmail({ addedEmail })}
             />
-          )}
-          value={addedEmail}
-          onChangeText={text => {
-            setAddedEmailError('')
-            setAddedEmail(text)
-          }}
-          onSubmitEditing={text => _addEmail({ addedEmail })}
-          errorStyle={{ color: 'red' }}
-          errorMessage={addedEmailError}
-        />
+          </Col>
+        </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
