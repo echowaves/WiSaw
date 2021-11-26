@@ -119,8 +119,18 @@ const LocalContacts = ({ route }) => {
     />
   )
 
-  const _submitSearch = () => {
-    console.log({ searchTerm })
+  const _submitSearch = async searchString => {
+    if (searchString.length === 0) {
+      return
+    }
+    console.log('--------------------------------------------------')
+    console.log({ searchString })
+    const { data } = await Contacts.getContactsAsync({
+      name: searchString,
+      fields: [Contacts.Fields.Emails],
+    })
+    console.log({ data })
+    console.log(data.length)
   }
 
   return (
@@ -142,14 +152,15 @@ const LocalContacts = ({ route }) => {
             placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
             onChangeText={currentTerm => {
               setSearchTerm(currentTerm)
+              _submitSearch(currentTerm)
             }}
             value={searchTerm}
-            onSubmitEditing={
-              () => _submitSearch()
-            }
+            // onSubmitEditing={
+            //   () => _submitSearch()
+            // }
             autoFocus
             containerStyle={{
-              width: width - 60,
+              width,
             }}
             style={
               {
@@ -164,7 +175,7 @@ const LocalContacts = ({ route }) => {
             }}
             lightTheme
           />
-          <Ionicons
+          {/* <Ionicons
             onPress={
               () => _submitSearch()
             }
@@ -177,7 +188,7 @@ const LocalContacts = ({ route }) => {
                 alignSelf: 'center',
               }
             }
-          />
+          /> */}
         </View>
       </ScrollView>
     </SafeAreaView>
