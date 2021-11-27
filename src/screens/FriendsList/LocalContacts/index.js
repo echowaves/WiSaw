@@ -126,7 +126,7 @@ const LocalContacts = () => {
     // console.log({ searchString })
     const { data } = await Contacts.getContactsAsync({
       name: searchString,
-      fields: [Contacts.Fields.Emails, Contacts.Fields.PhoneNumbers],
+      fields: [/* Contacts.Fields.Emails, */Contacts.Fields.PhoneNumbers],
     })
     // console.log({ data })
     // console.log(data.length)

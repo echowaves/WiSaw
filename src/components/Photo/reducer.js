@@ -1,5 +1,4 @@
 // import Branch from '../../util/my-branch'
-// import * as SMS from 'expo-sms'
 
 import Toast from 'react-native-toast-message'
 

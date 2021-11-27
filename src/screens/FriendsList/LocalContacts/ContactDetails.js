@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import { useDimensions } from '@react-native-community/hooks'
-import * as Linking from 'expo-linking'
+import * as SMS from 'expo-sms'
 import * as Contacts from 'expo-contacts'
 import validator from 'validator'
 import { phone } from 'phone'
@@ -14,6 +14,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from 'react-native'
 
 import {
@@ -43,6 +44,8 @@ import * as reducer from '../reducer'
 const ContactDetails = ({ route }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
+
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const { width, height } = useDimensions().window
 
@@ -102,6 +105,34 @@ const ContactDetails = ({ route }) => {
     />
   )
 
+  const _openSms = async phoneNumber => {
+    const isAvailable = await SMS.isAvailableAsync()
+    if (isAvailable) {
+      const { result } = await SMS.sendSMSAsync(
+        [phoneNumber],
+        'My sample HelloWorld message',
+        {
+          // attachments: {
+          //   uri: 'path/myfile.png',
+          //   mimeType: 'image/png',
+          //   filename: 'myfile.png',
+          // },
+        }
+      )
+      // console.log({ result })
+      if (result === "sent") {
+
+      }
+    } else {
+      // misfortune... there's no SMS available on this device
+      Toast.show({
+        text1: "SMS is not available on this devise",
+        type: "error",
+        topOffset,
+      })
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -128,41 +159,12 @@ const ContactDetails = ({ route }) => {
                 width: '100%',
               }}
               onPress={() => {
-                console.log({ phone })
+                // console.log({ phone })
+                _openSms(phone.number)
               }}>
               <ListItem.Content>
                 <ListItem.Title>{phone.number}</ListItem.Title>
                 <ListItem.Subtitle>{phone.label}</ListItem.Subtitle>
-              </ListItem.Content>
-              <FontAwesome
-                name="chevron-right"
-                size={30}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-              />
-            </ListItem>
-          ))
-        }
-        {
-          contact?.emails?.map((email, index) => (
-            <ListItem
-              bottomDivider
-              key={email.id}
-              style={{
-                paddingBottom: 5,
-                paddingLeft: 10,
-                paddingRight: 10,
-                width: '100%',
-              }}
-              onPress={() => {
-                console.log({ email })
-              }}>
-              <ListItem.Content>
-                <ListItem.Title>{email.email}</ListItem.Title>
-                <ListItem.Subtitle>{email.label}</ListItem.Subtitle>
               </ListItem.Content>
               <FontAwesome
                 name="chevron-right"
