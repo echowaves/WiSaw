@@ -55,7 +55,7 @@ const ContactDetails = ({ route }) => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'Pick Phone or Email',
+      headerTitle: 'Phone book contact',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -128,7 +128,7 @@ const ContactDetails = ({ route }) => {
                 width: '100%',
               }}
               onPress={() => {
-                console.log(phone.id)
+                console.log({ phone })
               }}>
               <ListItem.Content>
                 <ListItem.Title>{phone.number}</ListItem.Title>
@@ -158,7 +158,7 @@ const ContactDetails = ({ route }) => {
                 width: '100%',
               }}
               onPress={() => {
-                console.log(email.id)
+                console.log({ email })
               }}>
               <ListItem.Content>
                 <ListItem.Title>{email.email}</ListItem.Title>
