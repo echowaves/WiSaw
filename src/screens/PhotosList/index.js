@@ -1027,6 +1027,13 @@ if (!__DEV__) {
 
         // alert(JSON.stringify(bundle))
         navigation.popToTop()
+        if (bundle?.params?.photoId) {
+          // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
+        }
+        if (bundle?.params?.friendshipUuid) {
+          // alert(JSON.stringify({ friendshipUuid: bundle?.params?.friendshipUuid }))
+        }
+
         navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
       }
     })

@@ -94,7 +94,7 @@ export function createFriendship({ uuid }) {
       })
       return friendship
     } catch (err) {
-      console.log({ err })
+      // console.log({ err })
       Toast.show({
         text1: 'Unable to create Friend',
         text2: err.toString(),

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { useDimensions } from '@react-native-community/hooks'
 import * as SMS from 'expo-sms'
 import * as Contacts from 'expo-contacts'
+
 import validator from 'validator'
 import { phone } from 'phone'
 
@@ -40,6 +41,8 @@ import PropTypes from 'prop-types'
 import * as CONST from '../../../consts.js'
 
 import * as reducer from '../reducer'
+
+import * as friendsHelper from '../friends_helper'
 
 const ContactDetails = ({ route }) => {
   const navigation = useNavigation()
@@ -108,9 +111,17 @@ const ContactDetails = ({ route }) => {
   const _openSms = async phoneNumber => {
     const isAvailable = await SMS.isAvailableAsync()
     if (isAvailable) {
+      const friendship = await dispatch(reducer.createFriendship({ uuid }))
+
+      const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship.friendshipUuid })
+
+      // alert(JSON.stringify(_branchUniversalObject))
+
+      const { url } = await _branchUniversalObject.generateShortUrl({}, {})
+
       const { result } = await SMS.sendSMSAsync(
         [phoneNumber],
-        'My sample HelloWorld message',
+        `To confirm freidnship follow the url: ${url}`,
         {
           // attachments: {
           //   uri: 'path/myfile.png',
@@ -121,7 +132,10 @@ const ContactDetails = ({ route }) => {
       )
       // console.log({ result })
       if (result === "sent") {
+        // console.log({ result })
+        // enhanse friendship locally
 
+        // const { url } = await branchUniversalObject.generateShortUrl(linkProperties, controlParams)
       }
     } else {
       // misfortune... there's no SMS available on this device
@@ -131,6 +145,46 @@ const ContactDetails = ({ route }) => {
         topOffset,
       })
     }
+  }
+
+  const _createBranchUniversalObject = async ({ friendshipUuid }) => {
+    // eslint-disable-next-line
+    if (!__DEV__) {
+      // import Branch, { BranchEvent } from 'expo-branch'
+      const ExpoBranch = await import('expo-branch')
+      const Branch = ExpoBranch.default
+
+      // console.log({ friendship })
+
+      const _branchUniversalObject = await Branch.createBranchUniversalObject(
+
+        `${friendshipUuid}`,
+        {
+
+          // title: article.title,
+          // contentImageUrl: photo.imgUrl,
+          // contentDescription: article.description,
+          // This metadata can be used to easily navigate back to this screen
+          // when implementing deep linking with `Branch.subscribe`.
+          contentMetadata: {
+            customMetadata: {
+              friendshipUuid, // your userId field would be defined under customMetadata
+            },
+          },
+          // metadata: {
+          //   // screen: 'friendshipScreen',
+          //   params: { friendshipUuid },
+          // },
+        }
+      )
+      return _branchUniversalObject
+    }
+    Toast.show({
+      text1: "Branch is not available in DEV mode",
+      type: "error",
+      topOffset,
+    })
+    return null
   }
 
   return (

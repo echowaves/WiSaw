@@ -39,6 +39,7 @@ import { Video } from 'expo-av'
 
 import CachedImage from 'expo-cached-image'
 
+import { async } from 'regenerator-runtime'
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -62,7 +63,7 @@ const Photo = ({ photo }) => {
   const { width, height } = useDimensions().window
   const imageHeight = height - 250
   const bans = useSelector(state => state.photo.bans)
-  const [branchUniversalObject, setBranchUniversalObject] = useState({})
+  // const [branchUniversalObject, setBranchUniversalObject] = useState({})
 
   // const error = useSelector(state => state.photo.error)
 
@@ -75,7 +76,7 @@ const Photo = ({ photo }) => {
             ...photoDetails,
             watchersCount: photo.watchersCount,
           })
-          createBranchUniversalObject({ photo })
+          // createBranchUniversalObject({ photo })
         }
       })
 
@@ -109,13 +110,19 @@ const Photo = ({ photo }) => {
           // contentDescription: article.description,
           // This metadata can be used to easily navigate back to this screen
           // when implementing deep linking with `Branch.subscribe`.
+          contentMetadata: {
+            customMetadata: {
+              photoId: photo.id, // your userId field would be defined under customMetadata
+            },
+          },
           metadata: {
-            screen: 'photoScreen',
-            params: JSON.stringify({ photoId: photo.id }),
+            // screen: 'photoScreen',
+            params: { photoId: photo.id },
           },
         }
       )
-      setBranchUniversalObject(_branchUniversalObject)
+      // setBranchUniversalObject(_branchUniversalObject)
+      return _branchUniversalObject
     }
   }
 
@@ -512,7 +519,8 @@ const Photo = ({ photo }) => {
               alignItems: 'center',
             }}
             onPress={
-              () => {
+              async () => {
+                const branchUniversalObject = await createBranchUniversalObject(({ photo }))
                 dispatch(reducer.sharePhoto({ photo, photoDetails, branchUniversalObject }))
               }
             }>

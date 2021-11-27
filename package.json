@@ -1,6 +1,6 @@
 {
   "name": "wisaw",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "node_modules/expo/AppEntry.js",
