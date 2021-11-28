@@ -38,6 +38,7 @@ import ChatsList from './src/screens/ChatsList'
 import FriendsList from './src/screens/FriendsList'
 import LocalContacts from './src/screens/FriendsList/LocalContacts'
 import ContactDetails from './src/screens/FriendsList/LocalContacts/ContactDetails'
+import ConfirmFriendship from './src/screens/FriendsList/LocalContacts/ConfirmFriendship'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
 
@@ -118,6 +119,11 @@ const App = () => (
                   <Stack.Screen
                     name="ContactDetails"
                     component={ContactDetails}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ConfirmFriendship"
+                    component={ConfirmFriendship}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                 </Stack.Navigator>

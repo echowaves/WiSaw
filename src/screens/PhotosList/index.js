@@ -1029,12 +1029,14 @@ if (!__DEV__) {
         navigation.popToTop()
         if (bundle?.params?.photoId) {
           // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
+          navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.photoId })
         }
         if (bundle?.params?.friendshipUuid) {
           // alert(JSON.stringify({ friendshipUuid: bundle?.params?.friendshipUuid }))
+          navigation.navigate('ConfirmFriendship', { friendshipUuid: bundle?.params?.friendshipUuid })
         }
 
-        navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
+        // navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
       }
     })
   }
