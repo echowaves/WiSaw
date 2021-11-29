@@ -121,7 +121,7 @@ const ContactDetails = ({ route }) => {
 
       const { result } = await SMS.sendSMSAsync(
         [phoneNumber],
-        `You've got friendship request from WiSaw.
+        `You've got WiSaw friendship request.
 To confirm, follow the url: 
 ${url}`,
         {
