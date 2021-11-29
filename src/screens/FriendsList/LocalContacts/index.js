@@ -38,6 +38,8 @@ import * as CONST from '../../../consts.js'
 
 import * as reducer from '../reducer'
 
+import * as friendsHelper from '../friends_helper'
+
 const LocalContacts = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()

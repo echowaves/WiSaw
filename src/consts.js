@@ -5,7 +5,7 @@ import {
   InMemoryCache,
   HttpLink,
   from,
-  } from "@apollo/client"
+} from "@apollo/client"
 
 import { API_URI, API_KEY } from "@env"
 
@@ -31,6 +31,8 @@ export const TRANSPARENT_ICONS_COLOR = 'rgba(10,10,10,.5)'
 export const PENDING_UPLOADS_FOLDER = `${FileSystem.documentDirectory}pendingUploads/`
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
 export const PENDING_UPLOADS_KEY = "@PENDING_UPLOADS"
+
+export const CONTACTS_KEY = "@CONTACTS_KEY"
 
 const httpLink = new HttpLink({
   uri: API_URI,

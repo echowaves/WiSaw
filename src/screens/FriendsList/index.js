@@ -20,6 +20,8 @@ import {
 } from 'react-native-elements'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
+import FlatGrid from 'react-native-super-grid'
+import { useDimensions } from '@react-native-community/hooks'
 
 import {
   FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign,
@@ -36,6 +38,7 @@ import * as reducer from './reducer'
 const FriendsList = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
+  const { width, height } = useDimensions().window
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
 
@@ -53,11 +56,13 @@ const FriendsList = () => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-
-    dispatch(reducer.getListOfFriends({ uuid }))
+    _reload()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const _reload = () => {
+    dispatch(reducer.getListOfFriends({ uuid }))
+  }
   // useEffect(() => {
   //   console.log(`friends list updated: ${friendsList.length}`)
   // }, [friendsList])
@@ -66,11 +71,11 @@ const FriendsList = () => {
     container: {
       flex: 1,
     },
-    scrollView: {
-      alignItems: 'center',
-      marginHorizontal: 0,
-      paddingBottom: 300,
-    },
+    // scrollView: {
+    //   alignItems: 'center',
+    //   marginHorizontal: 0,
+    //   paddingBottom: 300,
+    // },
   })
 
   const renderHeaderRight = () => (
@@ -108,62 +113,70 @@ const FriendsList = () => {
   )
 
   const _renderFriend = ({ friend }) => ( // eslint-disable-line react/no-multi-comp, react/prop-types
-    <Grid>
-      <Row>
-        <Col
-          style={{
+    <ListItem
+      style={{
+        paddingBottom: 5,
+        paddingLeft: 10,
+        paddingRight: 10,
+        width: '100%',
+      }}>
+      <Grid>
+        <Row>
+          <Col
+            style={{
 
-          }}>
-          <Text>
-            {`${friend.friendshipUuid}`}
-          </Text>
-        </Col>
-        <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-          <AntDesign
-            name="contacts"
-            size={30}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
+            }}>
+            <Text>
+              {`${friend.friendshipUuid}`}
+            </Text>
+          </Col>
+          <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
+            <AntDesign
+              name="contacts"
+              size={30}
+              style={
+                {
+                  color: CONST.MAIN_COLOR,
+                }
               }
-            }
-            onPress={
-              () => {
-                _handleAssociateLocalFriend({ friendshipUuid: friend.friendshipUuid })
+              onPress={
+                () => {
+                  _handleAssociateLocalFriend({ friendshipUuid: friend.friendshipUuid })
+                }
               }
-            }
-          />
-        </Col>
-        <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-          <SimpleLineIcons
-            name="user-unfollow"
-            size={30}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
+            />
+          </Col>
+          <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
+            <SimpleLineIcons
+              name="user-unfollow"
+              size={30}
+              style={
+                {
+                  color: CONST.MAIN_COLOR,
+                }
               }
-            }
-            onPress={
-              () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
-            }
-          />
-        </Col>
-        <Col style={{ width: 40, marginRight: 0, marginLeft: 10 }}>
-          <FontAwesome
-            name="chevron-right"
-            size={30}
-            style={
-              {
-                color: CONST.MAIN_COLOR,
+              onPress={
+                () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
               }
-            }
+            />
+          </Col>
+          <Col style={{ width: 40, marginRight: 0, marginLeft: 10 }}>
+            <FontAwesome
+              name="chevron-right"
+              size={30}
+              style={
+                {
+                  color: CONST.MAIN_COLOR,
+                }
+              }
             // onPress={
             // () => navigation.goBack()
             // }
-          />
-        </Col>
-      </Row>
-    </Grid>
+            />
+          </Col>
+        </Row>
+      </Grid>
+    </ListItem>
   )
 
   const _handleAddFriend = () => {
@@ -193,28 +206,39 @@ const FriendsList = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollView}
+    <View style={styles.container}>
+      <FlatGrid
+        itemDimension={
+          width
+        }
+        // spacing={3}
+        data={
+          friendsList
+        }
+        renderItem={
+          ({ item }) => _renderFriend({ friend: item })
+        }
+        keyExtractor={item => item.friendshipUuid}
+        style={{
+          ...styles.container,
+          marginBottom: 95,
+        }}
         showsVerticalScrollIndicator={
           false
-        }>
-        {
-          friendsList.map((friend, index) => (
-            <ListItem
-              key={friend.friendshipUuid}
-              style={{
-                paddingBottom: 5,
-                paddingLeft: 10,
-                paddingRight: 10,
-                width: '100%',
-              }}>
-              {_renderFriend({ friend })}
-            </ListItem>
-          ))
         }
-      </ScrollView>
-    </SafeAreaView>
+        horizontal={
+          false
+        }
+        refreshing={
+          false
+        }
+        onRefresh={
+          () => {
+            _reload()
+          }
+        }
+      />
+    </View>
   )
 }
 

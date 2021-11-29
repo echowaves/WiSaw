@@ -1,14 +1,12 @@
 import Toast from 'react-native-toast-message'
 
-import { v4 as uuidv4 } from 'uuid'
-
 import { gql } from "@apollo/client"
-
-import * as SecureStore from 'expo-secure-store'
 
 import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
+
+import * as friendsHelper from './friends_helper'
 
 export const initialState = {
   friendsList: [],
@@ -75,6 +73,7 @@ export function createFriendship({ uuid }) {
           variables: {
             uuid,
           },
+
         })).data.createFriendship
 
       // console.log({ returned })
@@ -158,32 +157,16 @@ export function deleteFriendship({ friendshipUuid }) {
 
 export function getListOfFriends({ uuid }) {
   return async (dispatch, getState) => {
-    let friendsList = []
     try {
-      friendsList = (await CONST.gqlClient
-        .query({
-          query: gql`
-        query getfriendshipsList($uuid: String!) {
-          getfriendshipsList(uuid: $uuid){
-            chatUuid
-            createdAt
-            friendshipUuid
-            uuid1
-            uuid2
-          }
-        }`,
-          variables: {
-            uuid,
-          },
-        })).data.getfriendshipsList
+      const friendsList = await friendsHelper.getEnhancedListOfFriendships({ uuid })
+      dispatch({
+        type: ACTION_TYPES.LIST_OF_FRIENDS,
+        friendsList,
+      })
+      // console.log(friendsList.length)
     } catch (err5) {
       // eslint-disable-next-line no-console
       console.log({ err5 })// eslint-disable-line      
     }
-    // console.log(friendsList.length)
-    dispatch({
-      type: ACTION_TYPES.LIST_OF_FRIENDS,
-      friendsList,
-    })
   }
 }
