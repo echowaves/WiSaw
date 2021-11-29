@@ -7,11 +7,13 @@ export const addFriendshipLocally = async ({ friendshipUuid, contactId }) => {
   const localFriends = JSON.parse(
     await Storage.getItem({ key: CONST.CONTACTS_KEY })
   )
-  const updatedLocalFriends = [...localFriends, { friendshipUuid, contactId }]
+  // remove duplicate friends before adding
+  const updatedLocalFriends = [...localFriends.filter(friend => friend.friendshipUuid === friendshipUuid), { friendshipUuid, contactId }]
   await Storage.setItem({
     key: CONST.CONTACTS_KEY,
     value: JSON.stringify(updatedLocalFriends),
   })
+  alert(updatedLocalFriends.length)
   return updatedLocalFriends
 }
 

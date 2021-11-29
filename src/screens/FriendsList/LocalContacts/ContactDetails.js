@@ -109,8 +109,8 @@ const ContactDetails = ({ route }) => {
   )
 
   const _sendFriendshipRequest = async phoneNumber => {
-    const isAvailable = await SMS.isAvailableAsync()
-    if (!isAvailable) {
+    const isSmsAvailable = await SMS.isAvailableAsync()
+    if (isSmsAvailable) {
       const friendship = await dispatch(reducer.createFriendship({ uuid }))
 
       const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship.friendshipUuid })
@@ -136,7 +136,7 @@ ${url}`,
       if (result === "sent") {
         // console.log({ result })
         // enhanse friendship locally
-        friendsHelper.updateFriendship({ friendship, contact })
+        friendsHelper.addFriendshipLocally({ friendship, contact })
       }
     } else {
       // misfortune... there's no SMS available on this device
