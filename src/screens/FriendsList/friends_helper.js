@@ -47,14 +47,14 @@ export const deleteFriendship = async ({ friendshipUuid }) => {
 
 export const getEnhancedListOfFriendships = async ({ uuid }) => {
   const remoteFriendships = await _getRemoteListOfFriendships({ uuid })
-  console.log({ remoteFriendships })
+  // console.log({ remoteFriendships })
 
   const enhancedFriendships = await Promise.all(// not sure if this is going to scale
     remoteFriendships.map(async friendship => {
       const { friendshipUuid } = friendship
       const contact = await _getLocalContact({ friendshipUuid })
       const localContact = { ...friendship, key: friendship.friendshipUuid, contact }
-      console.log({ localContact })
+      // console.log({ localContact })
       return localContact
     })
   )
