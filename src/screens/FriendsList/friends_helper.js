@@ -4,17 +4,28 @@ import { Storage } from 'expo-storage'
 import * as CONST from '../../consts.js'
 
 export const addFriendshipLocally = async ({ friendshipUuid, contactId }) => {
+  // console.log(JSON.stringify({ friendshipUuid, contactId }))
   const localFriends = JSON.parse(
-    await Storage.getItem({ key: CONST.CONTACTS_KEY })
+    (await Storage.getItem({ key: CONST.CONTACTS_KEY })) || '[]'
   )
   // remove duplicate friends before adding
-  const updatedLocalFriends = [...localFriends.filter(friend => friend.friendshipUuid === friendshipUuid), { friendshipUuid, contactId }]
+  const updatedLocalFriends = [
+    ...(localFriends.filter(friend => friend.friendshipUuid !== friendshipUuid)),
+    { friendshipUuid, contactId },
+  ]
+
   await Storage.setItem({
     key: CONST.CONTACTS_KEY,
     value: JSON.stringify(updatedLocalFriends),
   })
-  alert(updatedLocalFriends.length)
   return updatedLocalFriends
+}
+
+export const getLocalFriendships = async () => {
+  const localFriends = JSON.parse(
+    (await Storage.getItem({ key: CONST.CONTACTS_KEY })) || '[]'
+  )
+  return localFriends
 }
 
 export const getFriendship = ({ friendshipUuid }) => {

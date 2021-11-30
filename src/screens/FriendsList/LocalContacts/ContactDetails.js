@@ -136,7 +136,7 @@ ${url}`,
       if (result === "sent") {
         // console.log({ result })
         // enhanse friendship locally
-        friendsHelper.addFriendshipLocally({ friendship, contact })
+        friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
       }
     } else {
       // misfortune... there's no SMS available on this device
@@ -146,6 +146,8 @@ ${url}`,
         topOffset,
       })
     }
+    await navigation.pop()
+    await navigation.pop()
   }
 
   const _createBranchUniversalObject = async ({ friendshipUuid }) => {

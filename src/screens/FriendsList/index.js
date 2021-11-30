@@ -35,6 +35,8 @@ import * as CONST from '../../consts.js'
 
 import * as reducer from './reducer'
 
+import * as friendsHelper from './friends_helper'
+
 const FriendsList = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
@@ -60,8 +62,10 @@ const FriendsList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const _reload = () => {
-    dispatch(reducer.getListOfFriends({ uuid }))
+  const _reload = async () => {
+    await dispatch(reducer.getListOfFriends({ uuid }))
+    const localFriendships = await friendsHelper.getLocalFriendships()
+    alert(JSON.stringify(localFriendships))
   }
   // useEffect(() => {
   //   console.log(`friends list updated: ${friendsList.length}`)
