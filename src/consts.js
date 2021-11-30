@@ -32,7 +32,7 @@ export const PENDING_UPLOADS_FOLDER = `${FileSystem.documentDirectory}pendingUpl
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
 export const PENDING_UPLOADS_KEY = "@PENDING_UPLOADS"
 
-export const CONTACTS_KEY = "@CONTACTS_KEY"
+export const FRIENDSHIP_PREFIX = "@FRIENDSHIP"
 
 const httpLink = new HttpLink({
   uri: API_URI,
