@@ -38,11 +38,11 @@ import { Col, Row, Grid } from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
-import * as CONST from '../../../consts.js'
+import * as CONST from '../../consts.js'
 
-import * as reducer from '../reducer'
+import * as reducer from './reducer'
 
-import * as friendsHelper from '../friends_helper'
+import * as friendsHelper from './friends_helper'
 
 const ConfirmFriendship = ({ route }) => {
   const navigation = useNavigation()
@@ -133,7 +133,8 @@ const ConfirmFriendship = ({ route }) => {
       // console.log({ result })
       if (result === "sent") {
         // console.log({ result })
-        // enhanse friendship locally
+        // store local contact association for the friendship
+        await friendsHelper.addFriendshipLocally({ freindshipUuid: friendship.friendshipUuid, contactId: contact.id })
 
         // const { url } = await branchUniversalObject.generateShortUrl(linkProperties, controlParams)
       }

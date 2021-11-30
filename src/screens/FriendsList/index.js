@@ -63,9 +63,7 @@ const FriendsList = () => {
   }, [])
 
   const _reload = async () => {
-    await dispatch(reducer.getListOfFriends({ uuid }))
-    const localFriendships = await friendsHelper.getLocalFriendships()
-    alert(JSON.stringify(localFriendships))
+    dispatch(reducer.reloadListOfFriends({ uuid }))
   }
   // useEffect(() => {
   //   console.log(`friends list updated: ${friendsList.length}`)

@@ -73,7 +73,6 @@ export function createFriendship({ uuid }) {
           variables: {
             uuid,
           },
-
         })).data.createFriendship
 
       // console.log({ returned })
@@ -113,28 +112,8 @@ export function deleteFriendship({ friendshipUuid }) {
     // console.log({ nickName, secret, uuid })
 
     try {
-      const { deleteFriendship } = (await CONST.gqlClient
-        .mutate({
-          mutation: gql`
-            mutation 
-            deleteFriendship($friendshipUuid: String!) {
-              deleteFriendship(friendshipUuid: $friendshipUuid)                 
-            }`,
-          variables: {
-            friendshipUuid,
-          },
-        })).data
+      friendsHelper.deleteFriendship({ friendshipUuid })
 
-      // console.log({ deleteFriendship })
-
-      if (deleteFriendship !== "OK") {
-        throw Error("Deleting Friendship failed")
-      }
-      // await Promise.all([
-      //   _storeUUID(returnedSecret.uuid),
-      //   _storeNickName(returnedSecret.nickName),
-      // ])
-      // console.log({ friendship })
       dispatch({
         type: ACTION_TYPES.DELETE_FRIENDSHIP,
         friendshipUuid,
@@ -144,7 +123,7 @@ export function deleteFriendship({ friendshipUuid }) {
         topOffset,
       })
     } catch (err) {
-      // console.log({ err })
+    // console.log({ err })
       Toast.show({
         text1: 'Unable to delete Friendship',
         text2: err.toString(),
@@ -155,7 +134,7 @@ export function deleteFriendship({ friendshipUuid }) {
   }
 }
 
-export function getListOfFriends({ uuid }) {
+export function reloadListOfFriends({ uuid }) {
   return async (dispatch, getState) => {
     try {
       const friendsList = await friendsHelper.getEnhancedListOfFriendships({ uuid })

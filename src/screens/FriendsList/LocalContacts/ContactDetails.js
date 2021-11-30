@@ -108,7 +108,7 @@ const ContactDetails = ({ route }) => {
     />
   )
 
-  const _sendFriendshipRequest = async phoneNumber => {
+  const _sendFriendshipRequest = async ({ contact, phone }) => {
     const isSmsAvailable = await SMS.isAvailableAsync()
     if (isSmsAvailable) {
       const friendship = await dispatch(reducer.createFriendship({ uuid }))
@@ -120,7 +120,7 @@ const ContactDetails = ({ route }) => {
       const { url } = await _branchUniversalObject.generateShortUrl({}, {})
 
       const { result } = await SMS.sendSMSAsync(
-        [phoneNumber],
+        [phone.number],
         `You've got WiSaw friendship request.
 To confirm, follow the url: 
 ${url}`,
@@ -136,7 +136,8 @@ ${url}`,
       if (result === "sent") {
         // console.log({ result })
         // enhanse friendship locally
-        friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
+        await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
+        dispatch(reducer.reloadListOfFriends({ uuid }))
       }
     } else {
       // misfortune... there's no SMS available on this device
@@ -217,7 +218,7 @@ ${url}`,
               }}
               onPress={() => {
                 // console.log({ phone })
-                _sendFriendshipRequest(phone.number)
+                _sendFriendshipRequest({ contact, phone })
               }}>
               <ListItem.Content>
                 <ListItem.Title>{phone.number}</ListItem.Title>

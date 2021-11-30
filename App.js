@@ -38,7 +38,7 @@ import ChatsList from './src/screens/ChatsList'
 import FriendsList from './src/screens/FriendsList'
 import LocalContacts from './src/screens/FriendsList/LocalContacts'
 import ContactDetails from './src/screens/FriendsList/LocalContacts/ContactDetails'
-import ConfirmFriendship from './src/screens/FriendsList/LocalContacts/ConfirmFriendship'
+import ConfirmFriendship from './src/screens/FriendsList/ConfirmFriendship'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
 

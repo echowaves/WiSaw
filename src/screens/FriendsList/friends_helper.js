@@ -11,25 +11,71 @@ export const addFriendshipLocally = async ({ friendshipUuid, contactId }) => {
 }
 
 export const cleanupAbandonedFriendships = async ({ uuid }) => {
-  const remoteFriendships = _getRemoteListOfFriendships({ uuid })
+  const remoteFriendships = await _getRemoteListOfFriendships({ uuid })
+  await Promise.all(remoteFriendships.map(async friendship => {
+    const { friendshipUuid } = friendship
+    const contact = await _getLocalContact({ friendshipUuid })
+    if (!contact) {
+      deleteFriendship({ friendshipUuid })
+    }
+  }))
+}
+
+export const deleteFriendship = async ({ friendshipUuid }) => {
+  // cleanup local contact
+  const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
+  await Storage.removeItem({ key })
+
+  const { deleteFriendship } = (await CONST.gqlClient
+    .mutate({
+      mutation: gql`
+          mutation 
+          deleteFriendship($friendshipUuid: String!) {
+            deleteFriendship(friendshipUuid: $friendshipUuid)                 
+          }`,
+      variables: {
+        friendshipUuid,
+      },
+    })).data
+
+  // console.log({ deleteFriendship })
+
+  if (deleteFriendship !== "OK") {
+    throw Error("Deleting Friendship failed")
+  }
 }
 
 export const getEnhancedListOfFriendships = async ({ uuid }) => {
-  const remoteFriendships = _getRemoteListOfFriendships({ uuid })
+  const remoteFriendships = await _getRemoteListOfFriendships({ uuid })
+  console.log({ remoteFriendships })
 
-  const enhancedFriendships = remoteFriendships.map(async friendship => {
-    const key = `${CONST.FRIENDSHIP_PREFIX}:${friendship.friendshipUuid}`
-    const localFriendship = JSON.parse(await Storage.getItem({ key }))
-    const contact = await Contacts.getContactByIdAsync(localFriendship.contactId)
-    return { ...friendship, contact }
-  })
+  const enhancedFriendships = await Promise.all(
+    remoteFriendships.map(async friendship => {
+      const { friendshipUuid } = friendship
+      const contact = await _getLocalContact({ friendshipUuid })
+      const localContact = { ...friendship, key: friendship.friendshipUuid, contact }
+      console.log({ localContact })
+      return localContact
+    })
+  )
+  console.log({ enhancedFriendships })
+
   return enhancedFriendships
 }
 
+const _getLocalContact = async ({ friendshipUuid }) => {
+  const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
+  const localFriendship = JSON.parse(await Storage.getItem({ key }))
+  if (!localFriendship) {
+    return null
+  }
+  const contact = await Contacts.getContactByIdAsync(localFriendship.contactId)
+  return contact
+}
+
 const _getRemoteListOfFriendships = async ({ uuid }) => {
-  let friendsList = []
   try {
-    friendsList = (await CONST.gqlClient
+    const friendsList = (await CONST.gqlClient
       .query({
         query: gql`
       query getfriendshipsList($uuid: String!) {
