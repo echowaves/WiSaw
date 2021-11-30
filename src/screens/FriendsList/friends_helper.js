@@ -65,11 +65,12 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
 
 const _getLocalContact = async ({ friendshipUuid }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
-  const localFriendship = JSON.parse(await Storage.getItem({ key }))
-  if (!localFriendship) {
+  const localFriendshipId = JSON.parse(await Storage.getItem({ key }))
+  if (!localFriendshipId) {
     return null
   }
-  const contact = await Contacts.getContactByIdAsync(localFriendship.contactId)
+  // console.log({ localFriendshipId })
+  const contact = await Contacts.getContactByIdAsync(localFriendshipId)
   return contact
 }
 

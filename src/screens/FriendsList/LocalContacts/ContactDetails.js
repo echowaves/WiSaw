@@ -109,6 +109,10 @@ const ContactDetails = ({ route }) => {
   )
 
   const _sendFriendshipRequest = async ({ contact, phone }) => {
+    // const friendship = await dispatch(reducer.createFriendship({ uuid }))
+    // await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
+    // dispatch(reducer.reloadListOfFriends({ uuid }))
+    /// /////////////////////////////////////////
     const isSmsAvailable = await SMS.isAvailableAsync()
     if (isSmsAvailable) {
       const friendship = await dispatch(reducer.createFriendship({ uuid }))
