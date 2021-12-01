@@ -48,17 +48,23 @@ const FriendsList = () => {
   const friendsList = useSelector(state => state.friendsList.friendsList)
 
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'friends',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-    _reload()
+    (
+      async () => {
+        navigation.setOptions({
+          headerTitle: 'friends',
+          headerTintColor: CONST.MAIN_COLOR,
+          headerRight: renderHeaderRight,
+          headerLeft: renderHeaderLeft,
+          headerBackTitle: '',
+          headerStyle: {
+            backgroundColor: CONST.NAV_COLOR,
+          },
+        })
+        // a friendship with no locally assigned contact can never show in the list on the screen
+        await friendsHelper.cleanupAbandonedFriendships({ uuid })
+        _reload()
+      }
+    )()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -121,63 +127,37 @@ const FriendsList = () => {
         paddingLeft: 10,
         paddingRight: 10,
         width: '100%',
+      }}
+      onPress={() => {
+        alert(friend?.contact?.name)
       }}>
-      <Grid>
-        <Row>
-          <Col
-            style={{
-
-            }}>
-            <Text>
-              {`${friend.friendshipUuid}`}
-            </Text>
-          </Col>
-          <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-            <AntDesign
-              name="contacts"
-              size={30}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
+      <ListItem.Content>
+        <ListItem.Title>
+          <Grid width={width - 100}>
+            <Col>
+              <Text>
+                {`${friend?.contact?.name}`}
+              </Text>
+            </Col>
+            <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
+              <SimpleLineIcons
+                name="user-unfollow"
+                size={30}
+                style={
+                  {
+                    color: CONST.MAIN_COLOR,
+                  }
                 }
-              }
-              onPress={
-                () => {
-                  _handleAssociateLocalFriend({ friendshipUuid: friend.friendshipUuid })
+                onPress={
+                  () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
                 }
-              }
-            />
-          </Col>
-          <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-            <SimpleLineIcons
-              name="user-unfollow"
-              size={30}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              onPress={
-                () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
-              }
-            />
-          </Col>
-          <Col style={{ width: 40, marginRight: 0, marginLeft: 10 }}>
-            <FontAwesome
-              name="chevron-right"
-              size={30}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-            // onPress={
-            // () => navigation.goBack()
-            // }
-            />
-          </Col>
-        </Row>
-      </Grid>
+              />
+            </Col>
+          </Grid>
+        </ListItem.Title>
+        {friend.uuid2 === null && (<ListItem.Subtitle style={{ color: "red" }}>pending confirmation</ListItem.Subtitle>)}
+      </ListItem.Content>
+      <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
     </ListItem>
   )
 
@@ -186,9 +166,9 @@ const FriendsList = () => {
     navigation.navigate('LocalContacts')
   }
 
-  const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
-    navigation.navigate('LocalContacts', { friendshipUuid })
-  }
+  // const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
+  //   navigation.navigate('LocalContacts', { friendshipUuid })
+  // }
 
   const _handleRemoveFriend = ({ friendshipUuid }) => {
     Alert.alert(

@@ -58,7 +58,7 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
       return localContact
     })
   )
-  console.log({ enhancedFriendships })
+  // console.log({ enhancedFriendships })
 
   return enhancedFriendships
 }
