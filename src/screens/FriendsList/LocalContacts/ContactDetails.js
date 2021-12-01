@@ -151,8 +151,8 @@ ${url}`,
         topOffset,
       })
     }
-    await navigation.pop()
-    await navigation.pop()
+    await navigation.popToTop()
+    await navigation.navigate('FriendsList')
   }
 
   const _createBranchUniversalObject = async ({ friendshipUuid }) => {
@@ -228,15 +228,7 @@ ${url}`,
                 <ListItem.Title>{phone.number}</ListItem.Title>
                 <ListItem.Subtitle>{phone.label}</ListItem.Subtitle>
               </ListItem.Content>
-              <FontAwesome
-                name="chevron-right"
-                size={30}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-              />
+              <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
             </ListItem>
           ))
         }

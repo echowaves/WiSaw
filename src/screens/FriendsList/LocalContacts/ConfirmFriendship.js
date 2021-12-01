@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import { useDimensions } from '@react-native-community/hooks'
-import * as SMS from 'expo-sms'
+import * as Linking from 'expo-linking'
+
 import * as Contacts from 'expo-contacts'
 
 import validator from 'validator'
@@ -51,6 +52,9 @@ const ConfirmFriendship = ({ route }) => {
   const topOffset = useSelector(state => state.photosList.topOffset)
 
   const { width, height } = useDimensions().window
+  const [permissionGranted, setPermissionGranted] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [contacts, setContacts] = useState([])
 
   const { freindshipUuid } = route.params
   const [contact, setContact] = useState(null)
@@ -70,7 +74,7 @@ const ConfirmFriendship = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-    _reloadContact()
+    _checkPermission()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -84,10 +88,6 @@ const ConfirmFriendship = ({ route }) => {
       paddingBottom: 300,
     },
   })
-
-  const _reloadContact = async () => {
-    setContact(await Contacts.getContactByIdAsync(contactId))
-  }
 
   const renderHeaderRight = () => {}
 
@@ -107,85 +107,45 @@ const ConfirmFriendship = ({ route }) => {
       }
     />
   )
-
-  const _openSms = async phoneNumber => {
-    const isAvailable = await SMS.isAvailableAsync()
-    if (isAvailable) {
-      const friendship = await dispatch(reducer.createFriendship({ uuid }))
-
-      const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship.friendshipUuid })
-
-      // alert(JSON.stringify(_branchUniversalObject))
-
-      const { url } = await _branchUniversalObject.generateShortUrl({}, {})
-
-      const { result } = await SMS.sendSMSAsync(
-        [phoneNumber],
-        `To confirm freidnship follow the url: ${url}`,
-        {
-          // attachments: {
-          //   uri: 'path/myfile.png',
-          //   mimeType: 'image/png',
-          //   filename: 'myfile.png',
-          // },
-        }
-      )
-      // console.log({ result })
-      if (result === "sent") {
-        // console.log({ result })
-        // store local contact association for the friendship
-        await friendsHelper.addFriendshipLocally({ freindshipUuid: friendship.friendshipUuid, contactId: contact.id })
-
-        // const { url } = await branchUniversalObject.generateShortUrl(linkProperties, controlParams)
+  const _checkPermission = async () => {
+    if (!permissionGranted) {
+      const { status } = await Contacts.requestPermissionsAsync()
+      if (status !== 'granted') {
+        Alert.alert(
+          "In order to establish p4p identity, WiSaw needs to access contacts in your phone book.",
+          "You need to enable Contacts in Settings and Try Again",
+          [
+            {
+              text: 'Open Settings',
+              onPress: () => {
+                Linking.openSettings()
+              },
+            },
+          ],
+        )
+        return
       }
-    } else {
-      // misfortune... there's no SMS available on this device
-      Toast.show({
-        text1: "SMS is not available on this devise",
-        type: "error",
-        topOffset,
-      })
+      setPermissionGranted(status === 'granted')
     }
   }
 
-  const _createBranchUniversalObject = async ({ friendshipUuid }) => {
-    // eslint-disable-next-line
-    if (!__DEV__) {
-      // import Branch, { BranchEvent } from 'expo-branch'
-      const ExpoBranch = await import('expo-branch')
-      const Branch = ExpoBranch.default
-
-      // console.log({ friendship })
-
-      const _branchUniversalObject = await Branch.createBranchUniversalObject(
-
-        `${friendshipUuid}`,
-        {
-
-          // title: article.title,
-          // contentImageUrl: photo.imgUrl,
-          // contentDescription: article.description,
-          // This metadata can be used to easily navigate back to this screen
-          // when implementing deep linking with `Branch.subscribe`.
-          contentMetadata: {
-            customMetadata: {
-              friendshipUuid, // your userId field would be defined under customMetadata
-            },
-          },
-          // metadata: {
-          //   // screen: 'friendshipScreen',
-          //   params: { friendshipUuid },
-          // },
-        }
-      )
-      return _branchUniversalObject
+  const _submitSearch = async searchString => {
+    if (searchString.length === 0) {
+      return
     }
-    Toast.show({
-      text1: "Branch is not available in DEV mode",
-      type: "error",
-      topOffset,
+    // console.log('--------------------------------------------------')
+    // console.log({ searchString })
+    const { data } = await Contacts.getContactsAsync({
+      name: searchString,
+      fields: [/* Contacts.Fields.Emails, */Contacts.Fields.PhoneNumbers],
     })
-    return null
+    // console.log({ data })
+    // console.log(data.length)
+    setContacts(data.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase()))
+  }
+
+  const _confirmFriendship = async ({ uuid, contact }) => {
+
   }
 
   return (
@@ -196,41 +156,64 @@ const ConfirmFriendship = ({ route }) => {
           false
         }>
         <Text>
-          Pick where you want to send your invitation for:
+          Find your friend in contacts, and click on the name to confirm the friendship.
         </Text>
-        <Text h3>
-          {contact?.name}
-        </Text>
-
+        <View style={{
+          flexDirection: 'row',
+          backgroundColor: CONST.NAV_COLOR,
+        }}>
+          <SearchBar
+            placeholder="Type Contact Name..."
+            placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+            onChangeText={currentTerm => {
+              setSearchTerm(currentTerm)
+              _submitSearch(currentTerm)
+            }}
+            value={searchTerm}
+            // onSubmitEditing={
+            //   () => _submitSearch()
+            // }
+            autoFocus
+            containerStyle={{
+              width,
+            }}
+            style={
+              {
+                color: CONST.MAIN_COLOR,
+                backgroundColor: "white",
+                paddingLeft: 10,
+                paddingRight: 10,
+              }
+            }
+            rightIconContainerStyle={{
+              margin: 10,
+            }}
+            lightTheme
+          />
+        </View>
         {
-          contact?.phoneNumbers?.map((phone, index) => (
+          contacts.map((contact, index) => (
             <ListItem
               bottomDivider
-              key={phone.id}
+              key={contact.id}
               style={{
                 paddingBottom: 5,
                 paddingLeft: 10,
                 paddingRight: 10,
                 width: '100%',
               }}
-              onPress={() => {
-                // console.log({ phone })
-                _openSms(phone.number)
+              onPress={async () => {
+                await _confirmFriendship({ uuid, contact })
+                await navigation.popToTop()
+                await navigation.navigate('FriendsList')
               }}>
               <ListItem.Content>
-                <ListItem.Title>{phone.number}</ListItem.Title>
-                <ListItem.Subtitle>{phone.label}</ListItem.Subtitle>
+                <ListItem.Title>{contact.name}</ListItem.Title>
+                {/* <ListItem.Subtitle>{JSON.stringify(contact.emails)}{JSON.stringify(contact.phoneNumbers)}</ListItem.Subtitle> */}
               </ListItem.Content>
-              <FontAwesome
-                name="chevron-right"
-                size={30}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-              />
+              <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
             </ListItem>
+
           ))
         }
         <TouchableOpacity
@@ -240,8 +223,11 @@ const ConfirmFriendship = ({ route }) => {
           }}
           onPress={
             async () => {
-              const contact = await Contacts.presentFormAsync(contactId)
-              setContact(await Contacts.getContactByIdAsync(contactId))
+              await Contacts.presentFormAsync(null, {}, {
+                isNew: true,
+                allowsActions: false,
+              })
+              _submitSearch(searchTerm)
             }
           }>
           <Col
@@ -255,13 +241,14 @@ const ConfirmFriendship = ({ route }) => {
                 fontSize: 25,
                 color: CONST.MAIN_COLOR,
               }}>
-              Edit contact in Phone book
+              Add new contact to Phone book
             </Text>
           </Col>
           <Col
             size={1}>
-            <MaterialIcons
-              name="update" style={
+            <Ionicons
+              name="add-circle"
+              style={
                 {
                   fontSize: 45,
                   color: CONST.MAIN_COLOR,
@@ -273,6 +260,7 @@ const ConfirmFriendship = ({ route }) => {
 
       </ScrollView>
     </SafeAreaView>
+
   )
 }
 

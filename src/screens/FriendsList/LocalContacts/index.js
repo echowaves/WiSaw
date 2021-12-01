@@ -96,6 +96,7 @@ const LocalContacts = () => {
             },
           ],
         )
+        return
       }
       setPermissionGranted(status === 'granted')
     }
@@ -196,15 +197,7 @@ const LocalContacts = () => {
                 <ListItem.Title>{contact.name}</ListItem.Title>
                 {/* <ListItem.Subtitle>{JSON.stringify(contact.emails)}{JSON.stringify(contact.phoneNumbers)}</ListItem.Subtitle> */}
               </ListItem.Content>
-              <FontAwesome
-                name="chevron-right"
-                size={30}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
-                  }
-                }
-              />
+              <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
             </ListItem>
           ))
         }
