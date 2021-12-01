@@ -38,11 +38,11 @@ import { Col, Row, Grid } from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../../consts.js'
 
-import * as reducer from './reducer'
+import * as reducer from '../reducer'
 
-import * as friendsHelper from './friends_helper'
+import * as friendsHelper from '../friends_helper'
 
 const ConfirmFriendship = ({ route }) => {
   const navigation = useNavigation()
