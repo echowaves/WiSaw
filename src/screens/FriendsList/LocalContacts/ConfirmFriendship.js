@@ -56,7 +56,7 @@ const ConfirmFriendship = ({ route }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [contacts, setContacts] = useState([])
 
-  const { freindshipUuid } = route.params
+  const { friendshipUuid } = route.params
   const [contact, setContact] = useState(null)
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
@@ -145,7 +145,20 @@ const ConfirmFriendship = ({ route }) => {
   }
 
   const _confirmFriendship = async ({ uuid, contact }) => {
+    try {
+      await friendsHelper.addFriendshipLocally({ friendshipUuid, contactId: contact.id })
+      await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
 
+      dispatch(reducer.reloadListOfFriends({ uuid }))
+    } catch (err) {
+      // console.log({ err })
+      Toast.show({
+        text1: 'Unable to confirm Friendship',
+        text2: err.toString(),
+        type: "error",
+        topOffset,
+      })
+    }
   }
 
   return (
