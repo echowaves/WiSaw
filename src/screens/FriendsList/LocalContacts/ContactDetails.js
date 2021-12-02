@@ -109,6 +109,7 @@ const ContactDetails = ({ route }) => {
   )
 
   const _sendFriendshipRequest = async ({ contact, phone }) => {
+    // TODO: delete next 3 lines -- debuggin
     // const friendship = await dispatch(reducer.createFriendship({ uuid }))
     // await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
     // dispatch(reducer.reloadListOfFriends({ uuid }))
