@@ -46,7 +46,7 @@ export const deleteFriendship = async ({ friendshipUuid }) => {
 }
 
 export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
-  console.log({ friendshipUuid, uuid })
+  // console.log({ friendshipUuid, uuid })
   const { friendship, chat, chatUser } = (await CONST.gqlClient
     .mutate({
       mutation: gql`
@@ -80,7 +80,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
       },
     })).data.acceptFriendshipRequest
 
-  console.log({ friendship, chat, chatUser })
+  // console.log({ friendship, chat, chatUser })
 }
 
 export const getEnhancedListOfFriendships = async ({ uuid }) => {

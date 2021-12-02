@@ -151,7 +151,7 @@ const ConfirmFriendship = ({ route }) => {
 
       dispatch(reducer.reloadListOfFriends({ uuid }))
     } catch (err) {
-      // console.log({ err })
+      console.log({ err })
       Toast.show({
         text1: 'Unable to confirm Friendship',
         text2: err.toString(),
