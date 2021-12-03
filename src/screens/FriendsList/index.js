@@ -86,7 +86,7 @@ const FriendsList = () => {
     // },
   })
 
-  const renderHeaderRight = () => (
+  const renderAddFriendButton = () => (
     <SimpleLineIcons
       name="user-follow"
       size={30}
@@ -101,6 +101,10 @@ const FriendsList = () => {
         () => _handleAddFriend()
       }
     />
+  )
+
+  const renderHeaderRight = () => (
+    renderAddFriendButton()
   )
 
   const renderHeaderLeft = () => (
@@ -184,6 +188,27 @@ const FriendsList = () => {
         },
       ],
       { cancelable: true }
+    )
+  }
+
+  if (!friendsList || friendsList?.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Card
+          borderRadius={5}
+          containerStyle={{
+            borderWidth: 0,
+          }}>
+          <Text style={{
+            fontSize: 20,
+            textAlign: 'center',
+            margin: 10,
+          }}>
+            You don't have any friends yet. To start a conversation, send invitation to a friend from your phone book.
+          </Text>
+          {renderAddFriendButton()}
+        </Card>
+      </View>
     )
   }
 
