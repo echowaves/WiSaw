@@ -35,6 +35,7 @@ import IdentityScreen from './src/screens/Secret'
 import ModalInputText from './src/screens/ModalInputText'
 
 import ChatsList from './src/screens/ChatsList'
+import Chat from './src/screens/Chat'
 import FriendsList from './src/screens/FriendsList'
 import LocalContacts from './src/screens/FriendsList/LocalContacts'
 import ContactDetails from './src/screens/FriendsList/LocalContacts/ContactDetails'
@@ -102,8 +103,8 @@ const App = () => (
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                   <Stack.Screen
-                    name="ChatsList"
-                    component={ChatsList}
+                    name="Chat"
+                    component={Chat}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
                   <Stack.Screen
@@ -174,7 +175,7 @@ const App = () => (
               }}
             />
 
-            <Drawer.Screen
+            {/* <Drawer.Screen
               name="ChatsList"
               component={ChatsList}
               options={{
@@ -195,7 +196,7 @@ const App = () => (
                 drawerLabel: 'chats',
                 headerShown: true,
               }}
-            />
+            /> */}
 
             <Drawer.Screen
               name="Feedback"
