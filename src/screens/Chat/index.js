@@ -65,6 +65,8 @@ const Chat = () => {
   }, [])
 
   const onSend = useCallback((messages = []) => {
+    console.log({ messages })
+
     setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
   }, [])
 
@@ -108,8 +110,9 @@ const Chat = () => {
         messages={messages}
         onSend={messages => onSend(messages)}
         user={{
-          _id: 1,
+          _id: uuid,
         }}
+        // alwaysShowSend
       />
     </SafeAreaView>
   )
