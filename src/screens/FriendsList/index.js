@@ -87,8 +87,8 @@ const FriendsList = () => {
   })
 
   const renderAddFriendButton = () => (
-    <SimpleLineIcons
-      name="user-follow"
+    <FontAwesome
+      name="user-plus"
       size={30}
       style={
         {
@@ -146,8 +146,8 @@ const FriendsList = () => {
               </Text>
             </Col>
             <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-              <SimpleLineIcons
-                name="user-unfollow"
+              <FontAwesome
+                name="user-times"
                 size={30}
                 style={
                   {

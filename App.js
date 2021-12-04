@@ -34,7 +34,6 @@ import FeedbackScreen from './src/screens/Feedback'
 import IdentityScreen from './src/screens/Secret'
 import ModalInputText from './src/screens/ModalInputText'
 
-import ChatsList from './src/screens/ChatsList'
 import Chat from './src/screens/Chat'
 import FriendsList from './src/screens/FriendsList'
 import LocalContacts from './src/screens/FriendsList/LocalContacts'
@@ -174,29 +173,6 @@ const App = () => (
                 headerShown: true,
               }}
             />
-
-            {/* <Drawer.Screen
-              name="ChatsList"
-              component={ChatsList}
-              options={{
-                drawerIcon:
-                config => (
-                  <MaterialCommunityIcons
-                    name="chat"
-                    size={30}
-                    style={
-                      {
-                        marginLeft: 10,
-                        color: CONST.MAIN_COLOR,
-                        width: 60,
-                      }
-                    }
-                  />
-                ),
-                drawerLabel: 'chats',
-                headerShown: true,
-              }}
-            /> */}
 
             <Drawer.Screen
               name="Feedback"
