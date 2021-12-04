@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
+import { GiftedChat } from 'react-native-gifted-chat'
 
 import {
   Alert,
@@ -26,8 +27,6 @@ import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts.js'
 
-import * as reducer from './reducer'
-
 const Chat = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
@@ -36,9 +35,11 @@ const Chat = () => {
 
   const uuid = useSelector(state => state.secret.uuid)
 
+  const [messages, setMessages] = useState([])
+
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'chats',
+      headerTitle: 'chat',
       headerTintColor: CONST.MAIN_COLOR,
       headerRight: renderHeaderRight,
       headerLeft: renderHeaderLeft,
@@ -47,7 +48,24 @@ const Chat = () => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
+
+    setMessages([
+      {
+        _id: 1,
+        text: 'Hello developer',
+        createdAt: new Date(),
+        user: {
+          _id: 2,
+          name: 'React Native',
+          avatar: 'https://placeimg.com/140/140/any',
+        },
+      },
+    ])
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const onSend = useCallback((messages = []) => {
+    setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
   }, [])
 
   const styles = StyleSheet.create({
@@ -61,35 +79,7 @@ const Chat = () => {
     },
   })
 
-  const renderHeaderRight = () => (
-    <Ionicons
-      name="add-circle"
-      size={30}
-      style={
-        {
-          marginRight: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => _handleAddChat()
-      }
-    />
-    // <Ionicons
-    //   onPress={
-    //     () => handleSubmit()
-    //   }
-    //   name="send"
-    //   size={30}
-    //   style={
-    //     {
-    //       marginRight: 10,
-    //       color: canSubmit ? CONST.MAIN_COLOR : CONST.SECONDARY_COLOR,
-    //     }
-    //   }
-    // />
-  )
+  const renderHeaderRight = () => {}
 
   const renderHeaderLeft = () => (
     <FontAwesome
@@ -114,20 +104,31 @@ const Chat = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollView}
-        showsVerticalScrollIndicator={
-          false
-        }>
-        <Card containerStyle={{ padding: 0 }}>
-          <ListItem>
-            <Text>
-              chats
-            </Text>
-          </ListItem>
-        </Card>
-      </ScrollView>
+      <GiftedChat
+        messages={messages}
+        onSend={messages => onSend(messages)}
+        user={{
+          _id: 1,
+        }}
+      />
     </SafeAreaView>
   )
+  // return (
+  //   <SafeAreaView style={styles.container}>
+  //     <ScrollView
+  //       contentContainerStyle={styles.scrollView}
+  //       showsVerticalScrollIndicator={
+  //         false
+  //       }>
+  //       <Card containerStyle={{ padding: 0 }}>
+  //         <ListItem>
+  //           <Text>
+  //             chats
+  //           </Text>
+  //         </ListItem>
+  //       </Card>
+  //     </ScrollView>
+  //   </SafeAreaView>
+  // )
 }
 export default Chat

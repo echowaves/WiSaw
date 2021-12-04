@@ -134,6 +134,8 @@ const FriendsList = () => {
       }}
       onPress={() => {
         alert(friend?.contact?.name)
+        console.log({ friend })
+        navigation.navigate('Chat', { chatUuid: friend.chatUuid })
       }}>
       <ListItem.Content>
         <ListItem.Title>
