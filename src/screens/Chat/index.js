@@ -33,7 +33,7 @@ import PropTypes from 'prop-types'
 import * as CONST from '../../consts.js'
 
 const Chat = ({ route }) => {
-  const { chatUuid } = route.params
+  const { chatUuid, contact } = route.params
 
   const navigation = useNavigation()
   const dispatch = useDispatch()
@@ -47,7 +47,7 @@ const Chat = ({ route }) => {
   useEffect(() => {
     (async () => {
       navigation.setOptions({
-        headerTitle: 'chat',
+        headerTitle: `chat with: ${contact?.name}`,
         headerTintColor: CONST.MAIN_COLOR,
         headerRight: renderHeaderRight,
         headerLeft: renderHeaderLeft,
