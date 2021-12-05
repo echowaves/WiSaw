@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
-import { GiftedChat } from 'react-native-gifted-chat'
+import { GiftedChat, Send } from 'react-native-gifted-chat'
 
 import {
   Alert,
   SafeAreaView,
   StyleSheet,
   ScrollView,
+  View,
 } from 'react-native'
 
 import {
@@ -136,6 +137,27 @@ const Chat = ({ route }) => {
       }
     />
   )
+  const renderSend = props => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Send {...props}>
+      <View style={{
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+        <Ionicons
+          name="send"
+          size={35}
+          style={
+            {
+              marginRight: 10,
+              marginBottom: 10,
+              color: CONST.MAIN_COLOR,
+            }
+          }
+        />
+      </View>
+    </Send>
+  )
 
   return (
     <SafeAreaView style={styles.container}>
@@ -146,6 +168,7 @@ const Chat = ({ route }) => {
           _id: uuid,
         }}
         // alwaysShowSend
+        renderSend={renderSend}
       />
     </SafeAreaView>
   )
