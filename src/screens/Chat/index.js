@@ -150,8 +150,8 @@ const Chat = ({ route }) => {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-        <Ionicons
-          name="send"
+        <MaterialCommunityIcons
+          name="send-circle"
           size={35}
           style={
             {
