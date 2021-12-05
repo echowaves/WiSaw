@@ -9,6 +9,7 @@ import {
   StyleSheet,
   ScrollView,
   View,
+  ActivityIndicator,
 } from 'react-native'
 
 import {
@@ -18,6 +19,7 @@ import {
   Card,
   ListItem,
   Button,
+  Icon,
 } from 'react-native-elements'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
@@ -165,6 +167,42 @@ const Chat = ({ route }) => {
     </Send>
   )
 
+  const renderLoading = () => (
+    <View style={{
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <ActivityIndicator size="large" color={CONST.MAIN_COLOR} />
+    </View>
+  )
+
+  const scrollToBottomComponent = () => (
+    <View style={{
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}>
+      {/* <MaterialCommunityIcons
+        name="send-circle"
+        size={35}
+        style={
+          {
+            marginRight: 10,
+            marginBottom: 10,
+            color: CONST.MAIN_COLOR,
+          }
+        }
+      /> */}
+      <Icon
+        reverse
+        name="angle-double-down"
+        type="font-awesome"
+        color={CONST.MAIN_COLOR}
+        size={36}
+      />
+    </View>
+  )
+
   return (
     <SafeAreaView style={styles.container}>
       <GiftedChat
@@ -175,26 +213,11 @@ const Chat = ({ route }) => {
         }}
         // alwaysShowSend
         renderSend={renderSend}
+        renderLoading={renderLoading}
+        scrollToBottomComponent={scrollToBottomComponent}
       />
     </SafeAreaView>
   )
-  // return (
-  //   <SafeAreaView style={styles.container}>
-  //     <ScrollView
-  //       contentContainerStyle={styles.scrollView}
-  //       showsVerticalScrollIndicator={
-  //         false
-  //       }>
-  //       <Card containerStyle={{ padding: 0 }}>
-  //         <ListItem>
-  //           <Text>
-  //             chats
-  //           </Text>
-  //         </ListItem>
-  //       </Card>
-  //     </ScrollView>
-  //   </SafeAreaView>
-  // )
 }
 
 Chat.propTypes = {
