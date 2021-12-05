@@ -120,7 +120,7 @@ const PhotosList = () => {
 
   useEffect(() => {
     // TODO: delete next line -- debuggin
-    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "4a2dd7e7-6ab8-40bb-bfa3-42cad60314b2" })
+    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
 
     dispatch(reducer.settopOffset(height / 3))
 

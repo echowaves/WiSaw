@@ -133,7 +133,7 @@ const FriendsList = () => {
         width: '100%',
       }}
       onPress={() => {
-        alert(friend?.contact?.name)
+        // alert(friend?.contact?.name)
         // console.log({ friend })
         navigation.navigate('Chat', { chatUuid: friend.chatUuid })
       }}>

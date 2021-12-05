@@ -45,6 +45,8 @@ import * as reducer from '../reducer'
 import * as friendsHelper from '../friends_helper'
 
 const ContactDetails = ({ route }) => {
+  const { contactId } = route.params
+
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
@@ -52,7 +54,6 @@ const ContactDetails = ({ route }) => {
 
   const { width, height } = useDimensions().window
 
-  const { contactId } = route.params
   const [contact, setContact] = useState(null)
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
@@ -113,7 +114,7 @@ const ContactDetails = ({ route }) => {
     // const friendship = await dispatch(reducer.createFriendship({ uuid }))
     // await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
     // dispatch(reducer.reloadListOfFriends({ uuid }))
-    /// /////////////////////////////////////////
+    /// //////////////////////////////////////
     const isSmsAvailable = await SMS.isAvailableAsync()
     if (isSmsAvailable) {
       const friendship = await dispatch(reducer.createFriendship({ uuid }))

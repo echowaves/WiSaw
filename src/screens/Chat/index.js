@@ -23,11 +23,15 @@ import Toast from 'react-native-toast-message'
 
 import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
+import { gql } from "@apollo/client"
+
 import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts.js'
 
-const Chat = () => {
+const Chat = ({ route }) => {
+  const { chatUuid } = route.params
+
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
@@ -65,9 +69,40 @@ const Chat = () => {
   }, [])
 
   const onSend = useCallback((messages = []) => {
-    console.log({ messages })
+    messages.forEach(message => {
+      (async () => {
+        try {
+          const { _id, text } = message
+          const messageUuid = _id
 
-    setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+          const { returnedMessage } = (await CONST.gqlClient
+            .mutate({
+              mutation: gql`
+              mutation
+              sendMessage($chatUuid: String!, $uuid: String!, $messageUuid: String!, $text: String!) {
+                sendMessage(chatUuid: $chatUuid, uuid: $uuid, messageUuid: $messageUuid,text: $text) {
+                    messageUuid
+                    createdAt
+                  }
+              }
+              `,
+              variables: {
+                chatUuid,
+                uuid,
+                messageUuid,
+                text,
+              },
+            })).data.sendMessage
+
+          console.log({ message })
+          console.log({ returnedMessage })
+
+          setMessages(previousMessages => GiftedChat.append(previousMessages, [returnedMessage]))
+        } catch (e) {
+          console.log({ e })
+        }
+      })()
+    })
   }, [])
 
   const styles = StyleSheet.create({
@@ -100,10 +135,6 @@ const Chat = () => {
     />
   )
 
-  const _handleAddChat = () => {
-
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <GiftedChat
@@ -134,4 +165,9 @@ const Chat = () => {
   //   </SafeAreaView>
   // )
 }
+
+Chat.propTypes = {
+  route: PropTypes.object.isRequired,
+}
+
 export default Chat

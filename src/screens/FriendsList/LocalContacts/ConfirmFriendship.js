@@ -46,6 +46,8 @@ import * as reducer from '../reducer'
 import * as friendsHelper from '../friends_helper'
 
 const ConfirmFriendship = ({ route }) => {
+  const { friendshipUuid } = route.params
+
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
@@ -56,7 +58,6 @@ const ConfirmFriendship = ({ route }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [contacts, setContacts] = useState([])
 
-  const { friendshipUuid } = route.params
   const [contact, setContact] = useState(null)
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
