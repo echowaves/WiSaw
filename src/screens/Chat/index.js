@@ -102,7 +102,13 @@ const Chat = ({ route }) => {
             setMessages(previousMessages => GiftedChat.append(previousMessages, [message]))
           }
         } catch (e) {
-          console.log({ e })
+          Toast.show({
+            text1: `Failed to send message:`,
+            text2: `${e}`,
+            type: "error",
+            topOffset,
+          })
+          // console.log({ e })
         }
       })()
     })
