@@ -75,7 +75,7 @@ const Chat = ({ route }) => {
           const { _id, text } = message
           const messageUuid = _id
 
-          const { returnedMessage } = (await CONST.gqlClient
+          const returnedMessage = (await CONST.gqlClient
             .mutate({
               mutation: gql`
               mutation
@@ -94,10 +94,12 @@ const Chat = ({ route }) => {
               },
             })).data.sendMessage
 
-          console.log({ message })
-          console.log({ returnedMessage })
+          // console.log({ message })
+          // console.log({ returnedMessage })
 
-          setMessages(previousMessages => GiftedChat.append(previousMessages, [returnedMessage]))
+          if (message._id === returnedMessage.messageUuid) {
+            setMessages(previousMessages => GiftedChat.append(previousMessages, [message]))
+          }
         } catch (e) {
           console.log({ e })
         }
