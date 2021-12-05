@@ -117,8 +117,8 @@ const _getRemoteListOfFriendships = async ({ uuid }) => {
     const friendsList = (await CONST.gqlClient
       .query({
         query: gql`
-      query getfriendshipsList($uuid: String!) {
-        getfriendshipsList(uuid: $uuid){
+      query getFriendshipsList($uuid: String!) {
+        getFriendshipsList(uuid: $uuid){
           chatUuid
           createdAt
           friendshipUuid
@@ -130,7 +130,7 @@ const _getRemoteListOfFriendships = async ({ uuid }) => {
           uuid,
         },
         fetchPolicy: "network-only",
-      })).data.getfriendshipsList
+      })).data.getFriendshipsList
     return friendsList
   } catch (err5) {
     // eslint-disable-next-line no-console

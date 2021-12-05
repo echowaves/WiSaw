@@ -45,17 +45,20 @@ const Chat = ({ route }) => {
   const [messages, setMessages] = useState([])
 
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'chat',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
+    (async () => {
+      navigation.setOptions({
+        headerTitle: 'chat',
+        headerTintColor: CONST.MAIN_COLOR,
+        headerRight: renderHeaderRight,
+        headerLeft: renderHeaderLeft,
+        headerBackTitle: '',
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
+      })
 
+      setMessages(await _loadMessages({ chatUuid }))
+    })()
     setMessages([
       // {
       //   _id: 1,
@@ -70,6 +73,46 @@ const Chat = ({ route }) => {
     ])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const _loadMessages = async ({ chatUuid }) => {
+    try {
+      const messagesList = (await CONST.gqlClient
+        .query({
+          query: gql`
+        query getMessagesList($chatUuid: String!) {
+          getMessagesList(chatUuid: $chatUuid){
+            uuid,
+            messageUuid, 
+            text, 
+            createdAt,
+            updatedAt
+          }
+        }`,
+          variables: {
+            chatUuid,
+          },
+          fetchPolicy: "network-only",
+        })).data.getMessagesList
+      return messagesList.map(message => ({
+        _id: message.messageUuid,
+        text: message.text,
+        createdAt: message.createdAt,
+        user: {
+          _id: message.uuid,
+          // name: 'React Native',
+          // avatar: 'https://placeimg.com/140/140/any',
+        },
+      }))
+    } catch (e) {
+      Toast.show({
+        text1: `Failed to load messages:`,
+        text2: `${e}`,
+        type: "error",
+        topOffset,
+      })
+      // console.log({ e })
+    }
+  }
 
   const onSend = useCallback((messages = []) => {
     messages.forEach(message => {
@@ -203,6 +246,10 @@ const Chat = ({ route }) => {
     </View>
   )
 
+  const onLoadEarlier = () => {
+    console.log('onLoadEarlier')
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <GiftedChat
@@ -215,6 +262,8 @@ const Chat = ({ route }) => {
         renderSend={renderSend}
         renderLoading={renderLoading}
         scrollToBottomComponent={scrollToBottomComponent}
+        infiniteScroll
+        onLoadEarlier={onLoadEarlier}
       />
     </SafeAreaView>
   )
