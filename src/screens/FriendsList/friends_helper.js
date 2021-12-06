@@ -10,6 +10,7 @@ export const addFriendshipLocally = async ({ friendshipUuid, contactId }) => {
   await Storage.setItem({ key, value: JSON.stringify(contactId) })
 }
 
+// TODO: review the logic, should not be deleting the friendship on the server even if the local one is not established yet
 export const cleanupAbandonedFriendships = async ({ uuid }) => {
   const remoteFriendships = await _getRemoteListOfFriendships({ uuid })
   await Promise.all(remoteFriendships.map(async friendship => {
@@ -43,6 +44,19 @@ export const deleteFriendship = async ({ friendshipUuid }) => {
   if (deleteFriendship !== "OK") {
     throw Error("Deleting Friendship failed")
   }
+}
+
+export const getLocalContactName = ({ uuid, friendUuid, friendsList }) => {
+  if (uuid === friendUuid) {
+    return "me"
+  }
+
+  const enhancedFriend = friendsList.find(friendship => friendship.uuid1 === friendUuid || friendship.uuid1.friendUuid)
+  if (!enhancedFriend) {
+    return "anonim"
+  }
+
+  return enhancedFriend?.contact?.name
 }
 
 export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
@@ -81,6 +95,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
     })).data.acceptFriendshipRequest
 
   // console.log({ friendship, chat, chatUser })
+  return { friendship, chat, chatUser }
 }
 
 export const getEnhancedListOfFriendships = async ({ uuid }) => {
@@ -91,7 +106,7 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
     remoteFriendships.map(async friendship => {
       const { friendshipUuid } = friendship
       const contact = await _getLocalContact({ friendshipUuid })
-      const localContact = { ...friendship, key: friendship.friendshipUuid, contact }
+      const localContact = { key: friendship.friendshipUuid, contact, ...friendship }
       // console.log({ localContact })
       return localContact
     })

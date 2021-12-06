@@ -31,6 +31,8 @@ import { gql } from "@apollo/client"
 
 import PropTypes from 'prop-types'
 
+import * as friendsHelper from '../FriendsList/friends_helper'
+
 import * as CONST from '../../consts.js'
 
 const Chat = ({ route }) => {
@@ -42,6 +44,7 @@ const Chat = ({ route }) => {
   const topOffset = useSelector(state => state.photosList.topOffset)
 
   const uuid = useSelector(state => state.secret.uuid)
+  const friendsList = useSelector(state => state.friendsList.friendsList)
 
   const [messages, setMessages] = useState([])
   // .format("YYYY-MM-DD HH:mm:ss.SSS")
@@ -95,18 +98,20 @@ const Chat = ({ route }) => {
             chatUuid,
             lastLoaded,
           },
-          fetchPolicy: "network-only",
+          // fetchPolicy: "network-only",
         })).data.getMessagesList
-      return messagesList.map(message => ({
-        _id: message.messageUuid,
-        text: message.text,
-        createdAt: message.createdAt,
-        user: {
-          _id: message.uuid,
-          // name: 'React Native',
+      return messagesList.map(message => (
+
+        {
+          _id: message.messageUuid,
+          text: message.text,
+          createdAt: message.createdAt,
+          user: {
+            _id: message.uuid,
+            name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
           // avatar: 'https://placeimg.com/140/140/any',
-        },
-      }))
+          },
+        }))
     } catch (e) {
       Toast.show({
         text1: `Failed to load messages:`,

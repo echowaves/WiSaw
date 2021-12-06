@@ -20,6 +20,8 @@ import * as CONST from '../../consts.js'
 import * as ACTION_TYPES from './action_types'
 import { INIT_UUID } from '../Secret/action_types'
 
+import * as friendsReducer from '../FriendsList/reducer'
+
 import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
@@ -258,6 +260,8 @@ export function initState() {
       type: INIT_UUID,
       uuid,
     })
+    // console.log({ uuid })
+    dispatch(friendsReducer.reloadListOfFriends({ uuid }))// the list of enhanced friends list has to be loaded earlier on
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
   }
 }

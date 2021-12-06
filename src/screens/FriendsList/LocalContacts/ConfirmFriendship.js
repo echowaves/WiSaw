@@ -147,8 +147,10 @@ const ConfirmFriendship = ({ route }) => {
 
   const _confirmFriendship = async ({ uuid, contact }) => {
     try {
-      await friendsHelper.addFriendshipLocally({ friendshipUuid, contactId: contact.id })
-      await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
+      // const { friendship, chat, chatUser } =
+      // await
+      friendsHelper.confirmFriendship({ friendshipUuid, uuid })
+      friendsHelper.addFriendshipLocally({ friendshipUuid, contactId: contact.id })
 
       dispatch(reducer.reloadListOfFriends({ uuid }))
     } catch (err) {
