@@ -326,6 +326,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
                   id
                   comment
                   updatedAt
+                  uuid
                 }
                 recognitions{
                   metaData

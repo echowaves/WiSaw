@@ -42,11 +42,14 @@ import CachedImage from 'expo-cached-image'
 import { async } from 'regenerator-runtime'
 import * as reducer from './reducer'
 
+import * as friendsHelper from '../../screens/FriendsList/friends_helper'
+
 import * as CONST from '../../consts.js'
 
 const Photo = ({ photo }) => {
   const componentIsMounted = useRef(true)
   const uuid = useSelector(state => state.secret.uuid)
+  const friendsList = useSelector(state => state.friendsList.friendsList)
 
   // const videoRef = React.useRef(null)
 
@@ -138,12 +141,23 @@ const Photo = ({ photo }) => {
           <View style={{ flex: 1 }}>
             <Text
               style={{
+                marginLeft: 10,
+                color: CONST.MAIN_COLOR,
+              }}>
+              {friendsHelper.getLocalContactName({ uuid, friendUuid: photo.uuid, friendsList })}
+              {"\n"}
+            </Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
                 marginRight: 10,
                 color: CONST.MAIN_COLOR,
                 textAlign: 'right',
               }}>
               {renderDateTime(photo.createdAt)}
             </Text>
+            <Text />
           </View>
         </View>
       )
@@ -157,6 +171,8 @@ const Photo = ({ photo }) => {
               marginLeft: 10,
               color: CONST.MAIN_COLOR,
             }}>
+            {friendsHelper.getLocalContactName({ uuid, friendUuid: photo.uuid, friendsList })}
+            {"\n"}
             {photoDetails?.comments ? photoDetails?.comments.length : 0} Comment{(photoDetails?.comments ? photoDetails?.comments.length : 0) !== 1 ? 's' : ''}
           </Text>
         </View>
@@ -252,6 +268,13 @@ const Photo = ({ photo }) => {
                       color: CONST.TEXT_COLOR,
                       fontSize: 20,
                     }}>{comment.comment}
+                  </Text>
+                  <Text
+                    style={{
+                      color: CONST.MAIN_COLOR,
+                      fontSize: 10,
+                    }}>
+                    {friendsHelper.getLocalContactName({ uuid, friendUuid: comment.uuid, friendsList })}
                   </Text>
                   {renderCommentButtons({ photo, comment })}
                 </Card>
