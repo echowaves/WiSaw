@@ -43,6 +43,7 @@ const Chat = ({ route }) => {
   const uuid = useSelector(state => state.secret.uuid)
 
   const [messages, setMessages] = useState([])
+  const [pageNumber, setPageNumber] = useState(0)
 
   useEffect(() => {
     (async () => {
@@ -57,30 +58,30 @@ const Chat = ({ route }) => {
         },
       })
 
-      setMessages(await _loadMessages({ chatUuid }))
+      setMessages(await _loadMessages({ chatUuid, pageNumber }))
     })()
-    setMessages([
-      // {
-      //   _id: 1,
-      //   text: 'Hello developer',
-      //   createdAt: new Date(),
-      //   user: {
-      //     _id: 2,
-      //     name: 'React Native',
-      //     avatar: 'https://placeimg.com/140/140/any',
-      //   },
-      // },
-    ])
+    // setMessages([
+    //   // {
+    //   //   _id: 1,
+    //   //   text: 'Hello developer',
+    //   //   createdAt: new Date(),
+    //   //   user: {
+    //   //     _id: 2,
+    //   //     name: 'React Native',
+    //   //     avatar: 'https://placeimg.com/140/140/any',
+    //   //   },
+    //   // },
+    // ])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const _loadMessages = async ({ chatUuid }) => {
+  const _loadMessages = async ({ chatUuid, pageNumber }) => {
     try {
       const messagesList = (await CONST.gqlClient
         .query({
           query: gql`
-        query getMessagesList($chatUuid: String!) {
-          getMessagesList(chatUuid: $chatUuid){
+        query getMessagesList($chatUuid: String!, $pageNumber: Int!) {
+          getMessagesList(chatUuid: $chatUuid, pageNumber: $pageNumber){
             uuid,
             messageUuid, 
             text, 
@@ -90,6 +91,7 @@ const Chat = ({ route }) => {
         }`,
           variables: {
             chatUuid,
+            pageNumber,
           },
           fetchPolicy: "network-only",
         })).data.getMessagesList
@@ -246,8 +248,14 @@ const Chat = ({ route }) => {
     </View>
   )
 
-  const onLoadEarlier = () => {
+  const onLoadEarlier = async () => {
     console.log('onLoadEarlier')
+    // setMessages([...messages, await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })])
+    const earlierMessages = await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })
+    setMessages(previousMessages => GiftedChat.prepend(previousMessages, earlierMessages))
+    // setMessages([(await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })), ...messages])
+
+    setPageNumber(pageNumber + 1)
   }
 
   return (
@@ -263,6 +271,7 @@ const Chat = ({ route }) => {
         renderLoading={renderLoading}
         scrollToBottomComponent={scrollToBottomComponent}
         infiniteScroll
+        loadEarlier
         onLoadEarlier={onLoadEarlier}
       />
     </SafeAreaView>
