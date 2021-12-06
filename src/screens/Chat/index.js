@@ -60,7 +60,7 @@ const Chat = ({ route }) => {
         },
       })
 
-      setMessages(await _loadMessages({ chatUuid, lastRead: moment() }))
+      setMessages(await _loadMessages({ chatUuid, lastLoaded: moment() }))
     })()
     // setMessages([
     //   // {
@@ -77,13 +77,13 @@ const Chat = ({ route }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const _loadMessages = async ({ chatUuid, lastRead }) => {
+  const _loadMessages = async ({ chatUuid, lastLoaded }) => {
     try {
       const messagesList = (await CONST.gqlClient
         .query({
           query: gql`
-        query getMessagesList($chatUuid: String!, $lastRead: AWSDateTime!) {
-          getMessagesList(chatUuid: $chatUuid, lastRead: $lastRead){
+        query getMessagesList($chatUuid: String!, $lastLoaded: AWSDateTime!) {
+          getMessagesList(chatUuid: $chatUuid, lastLoaded: $lastLoaded){
             uuid,
             messageUuid, 
             text, 
@@ -93,7 +93,7 @@ const Chat = ({ route }) => {
         }`,
           variables: {
             chatUuid,
-            lastRead,
+            lastLoaded,
           },
           fetchPolicy: "network-only",
         })).data.getMessagesList
@@ -253,7 +253,7 @@ const Chat = ({ route }) => {
   const onLoadEarlier = async () => {
     // console.log('onLoadEarlier')
     // setMessages([...messages, await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })])
-    const earlierMessages = await _loadMessages({ chatUuid, lastRead: messages[messages.length - 1].createdAt })
+    const earlierMessages = await _loadMessages({ chatUuid, lastLoaded: messages[messages.length - 1].createdAt })
     setMessages(previousMessages => GiftedChat.prepend(previousMessages, earlierMessages))
     // setMessages([(await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })), ...messages])
 
