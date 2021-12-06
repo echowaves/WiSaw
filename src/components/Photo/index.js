@@ -269,17 +269,18 @@ const Photo = ({ photo }) => {
                       fontSize: 20,
                     }}>{comment.comment}
                   </Text>
-                  <Text
-                    style={{
-                      color: CONST.MAIN_COLOR,
-                      fontSize: 10,
-                    }}>
-                    {friendsHelper.getLocalContactName({ uuid, friendUuid: comment.uuid, friendsList })}
-                  </Text>
                   {renderCommentButtons({ photo, comment })}
                 </Card>
                 {!comment.hiddenButtons && (
                   <View style={{ flex: 1, flexDirection: 'row' }}>
+                    <Text
+                      style={{
+                        color: CONST.MAIN_COLOR,
+                        // fontSize: 10,
+                        marginLeft: 10,
+                      }}>
+                      {friendsHelper.getLocalContactName({ uuid, friendUuid: comment.uuid, friendsList })}
+                    </Text>
                     <View style={{ flex: 1 }}>
                       <Text
                         style={{
