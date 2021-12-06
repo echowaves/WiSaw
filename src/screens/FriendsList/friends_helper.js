@@ -51,7 +51,7 @@ export const getLocalContactName = ({ uuid, friendUuid, friendsList }) => {
     return "me"
   }
 
-  const enhancedFriend = friendsList.find(friendship => friendship.uuid1 === friendUuid || friendship.uuid1.friendUuid)
+  const enhancedFriend = friendsList.find(friendship => friendship.uuid1 === friendUuid || friendship.uuid2 === friendUuid)
   if (!enhancedFriend) {
     return "anonim"
   }

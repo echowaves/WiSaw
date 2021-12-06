@@ -280,6 +280,7 @@ const Chat = ({ route }) => {
         infiniteScroll
         loadEarlier
         onLoadEarlier={onLoadEarlier}
+        renderUsernameOnMessage
       />
     </SafeAreaView>
   )
