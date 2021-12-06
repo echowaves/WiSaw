@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import { GiftedChat, Send } from 'react-native-gifted-chat'
+import moment from 'moment'
 
 import {
   Alert,
@@ -43,7 +44,8 @@ const Chat = ({ route }) => {
   const uuid = useSelector(state => state.secret.uuid)
 
   const [messages, setMessages] = useState([])
-  const [pageNumber, setPageNumber] = useState(0)
+  // .format("YYYY-MM-DD HH:mm:ss.SSS")
+  // const [lastRead, setLastRead] = useState(moment())
 
   useEffect(() => {
     (async () => {
@@ -58,7 +60,7 @@ const Chat = ({ route }) => {
         },
       })
 
-      setMessages(await _loadMessages({ chatUuid, pageNumber }))
+      setMessages(await _loadMessages({ chatUuid, lastRead: moment() }))
     })()
     // setMessages([
     //   // {
@@ -75,13 +77,13 @@ const Chat = ({ route }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const _loadMessages = async ({ chatUuid, pageNumber }) => {
+  const _loadMessages = async ({ chatUuid, lastRead }) => {
     try {
       const messagesList = (await CONST.gqlClient
         .query({
           query: gql`
-        query getMessagesList($chatUuid: String!, $pageNumber: Int!) {
-          getMessagesList(chatUuid: $chatUuid, pageNumber: $pageNumber){
+        query getMessagesList($chatUuid: String!, $lastRead: AWSDateTime!) {
+          getMessagesList(chatUuid: $chatUuid, lastRead: $lastRead){
             uuid,
             messageUuid, 
             text, 
@@ -91,7 +93,7 @@ const Chat = ({ route }) => {
         }`,
           variables: {
             chatUuid,
-            pageNumber,
+            lastRead,
           },
           fetchPolicy: "network-only",
         })).data.getMessagesList
@@ -249,13 +251,13 @@ const Chat = ({ route }) => {
   )
 
   const onLoadEarlier = async () => {
-    console.log('onLoadEarlier')
+    // console.log('onLoadEarlier')
     // setMessages([...messages, await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })])
-    const earlierMessages = await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })
+    const earlierMessages = await _loadMessages({ chatUuid, lastRead: messages[messages.length - 1].createdAt })
     setMessages(previousMessages => GiftedChat.prepend(previousMessages, earlierMessages))
     // setMessages([(await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })), ...messages])
 
-    setPageNumber(pageNumber + 1)
+    // setLastRead(earlierMessages[0].createdAt)
   }
 
   return (
