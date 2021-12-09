@@ -65,20 +65,46 @@ const Chat = ({ route }) => {
 
       setMessages(await _loadMessages({ chatUuid, lastLoaded: moment() }))
     })()
-    // setMessages([
-    //   // {
-    //   //   _id: 1,
-    //   //   text: 'Hello developer',
-    //   //   createdAt: new Date(),
-    //   //   user: {
-    //   //     _id: 2,
-    //   //     name: 'React Native',
-    //   //     avatar: 'https://placeimg.com/140/140/any',
-    //   //   },
-    //   // },
-    // ])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // useEffect(() => {
+  //   // add subscription listener
+  //   const subscription = CONST.gqlClient
+  //     .subscribe({
+  //       query: gql`
+  //       subscription onSendMessage($chatUuid: String!){
+  //         onSendMessage (chatUuid: $chatUuid){
+  //            messageUuid uuid chatUuid text
+  //         }
+  //       }
+  //       `,
+  //       variables: {
+  //         chatUuid,
+  //       },
+  //     })
+  //     // .subscribe(
+  //     //   next => {
+  //     //     console.log({ next })
+  //     //   },
+  //     //   error => {
+  //     //     console.log({ error })
+  //     //   }
+  //     // )
+
+  //   console.log({ subscription })
+
+  //   subscription.subscribe(
+  //     next => {
+  //       console.log({ next })
+  //     },
+  //     error => {
+  //       console.log({ error })
+  //     }
+  //   )
+
+  //   return () => subscription.unsubscribe()
+  // }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const _loadMessages = async ({ chatUuid, lastLoaded }) => {
     try {

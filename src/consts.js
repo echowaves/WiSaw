@@ -4,10 +4,14 @@ import {
   ApolloClient,
   InMemoryCache,
   HttpLink,
-  from,
+  // from,
+  split,
 } from "@apollo/client"
 
-import { API_URI, API_KEY } from "@env"
+import { WebSocketLink } from '@apollo/client/link/ws'
+import { getMainDefinition } from '@apollo/client/utilities'
+
+import { API_URI, API_KEY, REALTIME_API_URI } from "@env"
 
 const fetch = require('node-fetch')
 
@@ -42,9 +46,35 @@ const httpLink = new HttpLink({
   },
 })
 
+const wsLink = new WebSocketLink({
+  uri: REALTIME_API_URI,
+  options: {
+    reconnect: true,
+    lazy: true,
+    connectionParams: {
+      headers: {
+        'X-Api-Key': API_KEY,
+      },
+      authorization: `Bearer ${API_KEY}`,
+      authToken: API_KEY,
+    },
+  },
+})
+
+const link = split(
+  ({ query }) => {
+    const { kind, operation } = getMainDefinition(query)
+    return (
+      kind === 'OperationDefinition'
+      && operation === 'subscription'
+    )
+  },
+  wsLink,
+  httpLink
+)
+
 export const gqlClient = new ApolloClient({
-  uri: API_URI,
-  link: from([httpLink]),
+  link,
   cache: new InMemoryCache(),
 })
 // console.log({ API_URI }, { API_KEY })
