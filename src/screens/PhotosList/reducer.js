@@ -39,7 +39,7 @@ export const initialState = {
   orientation: 'portrait',
   activeSegment: 0,
   searchTerm: '',
-  batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+  batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   isLastPage: true,
   netAvailable: false,
   uploadingPhoto: false,
@@ -96,7 +96,7 @@ const reducer = (state = initialState, action) => {
         // errorMessage: '',
         // pageNumber: -1,
         // isLastPage: false,
-        // batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+        // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
       }
     case ACTION_TYPES.RESET_STATE:
       return {
@@ -107,7 +107,7 @@ const reducer = (state = initialState, action) => {
         errorMessage: '',
         pageNumber: -1,
         isLastPage: false,
-        batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+        batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
       }
     case ACTION_TYPES.SET_IS_TANDC_ACCEPTED:
       return {
@@ -289,12 +289,13 @@ async function _requestGeoPhotos(getState) {
   const {
     pageNumber, batch, zeroMoment, location: { coords: { latitude, longitude } },
   } = getState().photosList
+  // console.log(1, typeof batch)
   const whenToStop = moment(zeroMoment)
   try {
     const response = (await CONST.gqlClient
       .query({
         query: gql`
-      query feedByDate($daysAgo: Int!, $lat: Float!, $lon: Float!, $batch: Long!, $whenToStop: AWSDateTime!) {
+      query feedByDate($daysAgo: Int!, $lat: Float!, $lon: Float!, $batch: String!, $whenToStop: AWSDateTime!) {
         feedByDate(daysAgo: $daysAgo, lat: $lat, lon: $lon, batch: $batch, whenToStop: $whenToStop){
           photos {
                   row_number
@@ -319,6 +320,7 @@ async function _requestGeoPhotos(getState) {
           whenToStop,
         },
       }))
+    // console.log(2, typeof response.data.feedByDate.batch)
     return {
       photos: response.data.feedByDate.photos,
       batch: response.data.feedByDate.batch,
@@ -342,7 +344,7 @@ async function _requestWatchedPhotos(getState) {
     const response = (await CONST.gqlClient
       .query({
         query: gql`
-      query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: Long!) {
+      query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!) {
         feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch){
           photos {
                   row_number
@@ -384,7 +386,7 @@ async function _requestSearchedPhotos(getState) {
     const response = (await CONST.gqlClient
       .query({
         query: gql`
-      query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: Long!) {
+      query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: String!) {
         feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch){
           photos {
                   row_number
@@ -458,6 +460,7 @@ export function getPhotos() {
         // eslint-disable-next-line no-console
         // console.log({ responseJson })
         noMoreData = responseJson?.noMoreData
+        // console.log(typeof responseJson?.batch, typeof getState()?.photosList?.batch, responseJson?.batch === getState()?.photosList?.batch)
         if (responseJson?.batch === getState()?.photosList?.batch) {
           if (responseJson?.photos?.length > 0) {
             dispatch({

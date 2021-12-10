@@ -16,7 +16,7 @@
     "publish:prod": "expo publish --release-channel prod_$npm_package_version"
   },
   "dependencies": {
-    "@apollo/client": "^3.4.16",
+    "@apollo/client": "3.4.16",
     "@babel/plugin-transform-async-to-generator": "7.14.5",
     "@dudigital/react-native-zoomable-view": "1.0.16",
     "@react-native-community/hooks": "2.8.0",
