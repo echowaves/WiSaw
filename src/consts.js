@@ -52,10 +52,10 @@ const wsLink = new WebSocketLink({
     reconnect: true,
     lazy: true,
     connectionParams: {
-      headers: {
-        'X-Api-Key': API_KEY,
-      },
-      authorization: `Bearer ${API_KEY}`,
+      // headers: {
+      //   'X-Api-Key': API_KEY,
+      // },
+      // authorization: `Bearer ${API_KEY}`,
       authToken: API_KEY,
     },
   },

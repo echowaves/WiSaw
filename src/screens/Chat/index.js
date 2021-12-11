@@ -68,43 +68,48 @@ const Chat = ({ route }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // useEffect(() => {
-  //   // add subscription listener
-  //   const subscription = CONST.gqlClient
-  //     .subscribe({
-  //       query: gql`
-  //       subscription onSendMessage($chatUuid: String!){
-  //         onSendMessage (chatUuid: $chatUuid){
-  //            messageUuid uuid chatUuid text
-  //         }
-  //       }
-  //       `,
-  //       variables: {
-  //         chatUuid,
-  //       },
-  //     })
-  //     // .subscribe(
-  //     //   next => {
-  //     //     console.log({ next })
-  //     //   },
-  //     //   error => {
-  //     //     console.log({ error })
-  //     //   }
-  //     // )
+  useEffect(() => {
+    console.log(`subscribing to ${chatUuid}`)
+    // add subscription listener
+    const subscription = CONST.gqlClient
+      .subscribe({
+        query: gql`
+        subscription onSendMessage($chatUuid: String!) {
+          onSendMessage (chatUuid: $chatUuid) {
+            chatUuid
+            createdAt
+            messageUuid
+            text
+            updatedAt
+            uuid          }
+        }
+        `,
+        variables: {
+          chatUuid,
+        },
+      })
+      // .subscribe(
+      //   next => {
+      //     console.log({ next })
+      //   },
+      //   error => {
+      //     console.log({ error })
+      //   }
+      // )
 
-  //   console.log({ subscription })
+    console.log({ subscription })
 
-  //   subscription.subscribe(
-  //     next => {
-  //       console.log({ next })
-  //     },
-  //     error => {
-  //       console.log({ error })
-  //     }
-  //   )
+    subscription.subscribe(
+      next => {
+        console.log({ next })
+      },
+      error => {
+        console.log({ error })
+      }
+    )
 
-  //   return () => subscription.unsubscribe()
-  // }, [])// eslint-disable-line react-hooks/exhaustive-deps
+    return () => subscription.unsubscribe()
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const _loadMessages = async ({ chatUuid, lastLoaded }) => {
     try {
@@ -160,18 +165,22 @@ const Chat = ({ route }) => {
             .mutate({
               mutation: gql`
               mutation
-              sendMessage($chatUuid: String!, $uuid: String!, $messageUuid: String!, $text: String!) {
-                sendMessage(chatUuid: $chatUuid, uuid: $uuid, messageUuid: $messageUuid,text: $text) {
-                    messageUuid
-                    createdAt
+              sendMessage($chatUuidArg: String!, $uuidArg: String!, $messageUuidArg: String!, $textArg: String!) {
+                sendMessage(chatUuidArg: $chatUuidArg, uuidArg: $uuidArg, messageUuidArg: $messageUuidArg,textArg: $textArg) {
+                  chatUuid
+                  createdAt
+                  messageUuid
+                  text
+                  updatedAt
+                  uuid
                   }
               }
               `,
               variables: {
-                chatUuid,
-                uuid,
-                messageUuid,
-                text,
+                chatUuidArg: chatUuid,
+                uuidArg: uuid,
+                messageUuidArg: messageUuid,
+                textArg: text,
               },
             })).data.sendMessage
 
