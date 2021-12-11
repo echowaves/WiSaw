@@ -1,5 +1,8 @@
 import * as FileSystem from 'expo-file-system'
 
+import { WebSocketLink } from '@apollo/client/link/ws'
+import { setContext } from '@apollo/client/link/context'
+
 import {
   ApolloClient,
   InMemoryCache,
@@ -8,12 +11,11 @@ import {
   split,
 } from "@apollo/client"
 
-import { WebSocketLink } from '@apollo/client/link/ws'
 import { getMainDefinition } from '@apollo/client/utilities'
 
 import { API_URI, API_KEY, REALTIME_API_URI } from "@env"
 
-const fetch = require('node-fetch')
+// const fetch = require('node-fetch')
 
 export const HOST = "https://api.wisaw.com"
 // export const HOST = "https://testapi.wisaw.com"
@@ -38,12 +40,23 @@ export const PENDING_UPLOADS_KEY = "@PENDING_UPLOADS"
 
 export const FRIENDSHIP_PREFIX = "@FRIENDSHIP"
 
+const authLink = setContext((_, { headers }) => {
+  const token = API_KEY
+  return {
+    headers: {
+      ...headers,
+      'X-Api-Key': API_KEY,
+      authorization: token,
+    },
+  }
+})
+
 const httpLink = new HttpLink({
   uri: API_URI,
-  fetch,
-  headers: {
-    'X-Api-Key': API_KEY,
-  },
+  // fetch,
+  // headers: {
+  //   // 'X-Api-Key': API_KEY,
+  // },
 })
 
 const wsLink = new WebSocketLink({
@@ -51,13 +64,6 @@ const wsLink = new WebSocketLink({
   options: {
     reconnect: true,
     lazy: true,
-    connectionParams: {
-      // headers: {
-      //   'X-Api-Key': API_KEY,
-      // },
-      // authorization: `Bearer ${API_KEY}`,
-      authToken: API_KEY,
-    },
   },
 })
 
@@ -69,8 +75,10 @@ const link = split(
       && operation === 'subscription'
     )
   },
-  wsLink,
-  httpLink
+  // wsLink,
+  authLink.concat(wsLink),
+  authLink.concat(httpLink),
+
 )
 
 export const gqlClient = new ApolloClient({

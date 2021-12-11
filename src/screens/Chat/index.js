@@ -88,25 +88,26 @@ const Chat = ({ route }) => {
           chatUuid,
         },
       })
-      // .subscribe(
-      //   next => {
-      //     console.log({ next })
-      //   },
-      //   error => {
-      //     console.log({ error })
-      //   }
-      // )
+      .subscribe({
+        next(data) {
+          console.log({ data })
+        },
+        error({ error }) {
+          console.log({ error })
+        },
+        complete() { console.log("subs. DONE") }, // never printed
+      })
 
     console.log({ subscription })
 
-    subscription.subscribe(
-      next => {
-        console.log({ next })
-      },
-      error => {
-        console.log({ error })
-      }
-    )
+    // subscription.subscribe(
+    //   next => {
+    //     console.log({ next })
+    //   },
+    //   error => {
+    //     console.log({ error })
+    //   }
+    // )
 
     return () => subscription.unsubscribe()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps

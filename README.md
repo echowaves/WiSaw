@@ -13,3 +13,9 @@ If you see something you do not like -- just delete it, which will have an effec
 This works best for events, large and small. Wedding or celebration party, at a beach or a park, student at a campus, or a conference attendee, or a group of fans at a football game -- these all will benefit from WiSaw and will definitely make it a lot more fun.
 
 To see your and others photos visit https://www.wisaw.com
+
+
+
+## ApolloClient config
+https://www.tutorialguruji.com/react-js/appsync-subscriptions-with-apolloclient-in-react/
+https://dev.to/sayanide/beginner-s-guide-to-using-websockets-in-apollo-client-graphql-subscription-11m
