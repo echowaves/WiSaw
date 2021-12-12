@@ -51,45 +51,46 @@ const authLink = setContext((_, { headers }) => {
     },
   }
 })
-const authLinkRealTime = setContext((_, { headers }) => {
-  const token = API_KEY
-  return {
-    headers: {
-      ...headers,
-      host: 'obfhlh63bjhq7mmzi3kkhpbaym.appsync-api.us-east-1.amazonaws.com',
-      'X-Api-Key': API_KEY,
-      // authorization: token,
-    },
-  }
-})
+// const authLinkRealTime = setContext((_, { headers }) => {
+//   const token = API_KEY
+//   return {
+//     headers: {
+//       ...headers,
+//       host: 'obfhlh63bjhq7mmzi3kkhpbaym.appsync-api.us-east-1.amazonaws.com',
+//       'X-Api-Key': API_KEY,
+//       // authorization: token,
+//     },
+//   }
+// })
 
 const httpLink = new HttpLink({
   uri: API_URI,
 })
 
-const wsLink = new WebSocketLink({
-  uri: REALTIME_API_URI,
-  options: {
-    reconnect: true,
-    lazy: true,
-  },
-})
+// const wsLink = new WebSocketLink({
+//   uri: REALTIME_API_URI,
+//   options: {
+//     reconnect: true,
+//     lazy: true,
+//   },
+// })
 
-const link = split(
-  ({ query }) => {
-    const { kind, operation } = getMainDefinition(query)
-    return (
-      kind === 'OperationDefinition'
-      && operation === 'subscription'
-    )
-  },
-  // wsLink,
-  authLinkRealTime.concat(wsLink),
-  authLink.concat(httpLink),
-)
+// const link = split(
+//   ({ query }) => {
+//     const { kind, operation } = getMainDefinition(query)
+//     return (
+//       kind === 'OperationDefinition'
+//       && operation === 'subscription'
+//     )
+//   },
+//   // wsLink,
+//   authLinkRealTime.concat(wsLink),
+//   authLink.concat(httpLink),
+// )
 
 export const gqlClient = new ApolloClient({
-  link,
+  // link,
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 })
 // console.log({ API_URI }, { API_KEY })

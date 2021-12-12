@@ -34,6 +34,7 @@ import PropTypes from 'prop-types'
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as CONST from '../../consts.js'
+import subscriptionClient from '../../subscriptionClient'
 
 const Chat = ({ route }) => {
   const { chatUuid, contact } = route.params
@@ -71,7 +72,7 @@ const Chat = ({ route }) => {
   useEffect(() => {
     console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
-    const subscription = CONST.gqlClient
+    const subscription = subscriptionClient
       .subscribe({
         query: gql`
         subscription onSendMessage($chatUuid: String!) {
@@ -109,7 +110,10 @@ const Chat = ({ route }) => {
     //   }
     // )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.log(`unsubscribing from ${chatUuid}`)
+      subscription.unsubscribe()
+    }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   const _loadMessages = async ({ chatUuid, lastLoaded }) => {
