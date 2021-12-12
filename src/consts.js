@@ -45,18 +45,26 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
+      host: 'obfhlh63bjhq7mmzi3kkhpbaym.appsync-api.us-east-1.amazonaws.com',
       'X-Api-Key': API_KEY,
-      authorization: token,
+      // authorization: token,
+    },
+  }
+})
+const authLinkRealTime = setContext((_, { headers }) => {
+  const token = API_KEY
+  return {
+    headers: {
+      ...headers,
+      host: 'obfhlh63bjhq7mmzi3kkhpbaym.appsync-api.us-east-1.amazonaws.com',
+      'X-Api-Key': API_KEY,
+      // authorization: token,
     },
   }
 })
 
 const httpLink = new HttpLink({
   uri: API_URI,
-  // fetch,
-  // headers: {
-  //   // 'X-Api-Key': API_KEY,
-  // },
 })
 
 const wsLink = new WebSocketLink({
@@ -76,9 +84,8 @@ const link = split(
     )
   },
   // wsLink,
-  authLink.concat(wsLink),
+  authLinkRealTime.concat(wsLink),
   authLink.concat(httpLink),
-
 )
 
 export const gqlClient = new ApolloClient({
