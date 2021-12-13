@@ -136,35 +136,32 @@ const FriendsList = () => {
       }}>
       <ListItem.Content>
         <ListItem.Title>
-          <Grid style={{ width: width - 100 }}>
-            <Row style={{ marginRight: 10, marginLeft: 10 }}>
-              <Col>
-                <Text>
-                  {`${friend?.contact?.name}`}
-                </Text>
-              </Col>
-              <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-                <FontAwesome
-                  name="user-times"
-                  size={30}
-                  style={
-                    {
-                      color: CONST.MAIN_COLOR,
-                    }
-                  }
-                  onPress={
-                    () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
-                  }
-                />
-              </Col>
-            </Row>
-            <Row style={{ marginRight: 10, marginLeft: 10 }}>
-              {friend.uuid2 === null && (<ListItem.Subtitle style={{ color: "red" }}>pending confirmation</ListItem.Subtitle>)}
-            </Row>
-          </Grid>
+          <Text>
+            {`${friend?.contact?.name}`}
+          </Text>
         </ListItem.Title>
-
+        {friend.uuid2 === null && (
+          <ListItem.Subtitle>
+            <Text style={{
+              color: "red",
+            }}>
+              pending confirmation
+            </Text>
+          </ListItem.Subtitle>
+        )}
       </ListItem.Content>
+      <FontAwesome
+        name="user-times"
+        size={30}
+        style={
+          {
+            color: CONST.MAIN_COLOR,
+          }
+        }
+        onPress={
+          () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
+        }
+      />
       <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
     </ListItem>
   )
