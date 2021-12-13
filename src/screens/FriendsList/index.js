@@ -127,10 +127,7 @@ const FriendsList = () => {
   const _renderFriend = ({ friend }) => ( // eslint-disable-line react/no-multi-comp, react/prop-types
     <ListItem
       style={{
-        paddingBottom: 5,
-        paddingLeft: 10,
-        paddingRight: 10,
-        width: '100%',
+        height: 70,
       }}
       onPress={() => {
         // alert(friend?.contact?.name)
@@ -139,29 +136,34 @@ const FriendsList = () => {
       }}>
       <ListItem.Content>
         <ListItem.Title>
-          <Grid width={width - 100}>
-            <Col>
-              <Text>
-                {`${friend?.contact?.name}`}
-              </Text>
-            </Col>
-            <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
-              <FontAwesome
-                name="user-times"
-                size={30}
-                style={
-                  {
-                    color: CONST.MAIN_COLOR,
+          <Grid style={{ width: width - 100 }}>
+            <Row style={{ marginRight: 10, marginLeft: 10 }}>
+              <Col>
+                <Text>
+                  {`${friend?.contact?.name}`}
+                </Text>
+              </Col>
+              <Col style={{ width: 40, marginRight: 10, marginLeft: 10 }}>
+                <FontAwesome
+                  name="user-times"
+                  size={30}
+                  style={
+                    {
+                      color: CONST.MAIN_COLOR,
+                    }
                   }
-                }
-                onPress={
-                  () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
-                }
-              />
-            </Col>
+                  onPress={
+                    () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
+                  }
+                />
+              </Col>
+            </Row>
+            <Row style={{ marginRight: 10, marginLeft: 10 }}>
+              {friend.uuid2 === null && (<ListItem.Subtitle style={{ color: "red" }}>pending confirmation</ListItem.Subtitle>)}
+            </Row>
           </Grid>
         </ListItem.Title>
-        {friend.uuid2 === null && (<ListItem.Subtitle style={{ color: "red" }}>pending confirmation</ListItem.Subtitle>)}
+
       </ListItem.Content>
       <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
     </ListItem>
