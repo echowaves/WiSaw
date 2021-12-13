@@ -45,7 +45,6 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      host: 'obfhlh63bjhq7mmzi3kkhpbaym.appsync-api.us-east-1.amazonaws.com',
       'X-Api-Key': API_KEY,
       // authorization: token,
     },
