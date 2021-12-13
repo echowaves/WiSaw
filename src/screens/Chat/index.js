@@ -91,7 +91,10 @@ const Chat = ({ route }) => {
       })
       .subscribe({
         next(data) {
-          console.log({ data })
+          const { onSendMessage } = data?.data
+          // console.log({ onSendMessage })
+
+          setMessages(previousMessages => GiftedChat.append(previousMessages, [_messageAdapter(onSendMessage)]))
         },
         error({ error }) {
           console.log({ error })
@@ -137,17 +140,8 @@ const Chat = ({ route }) => {
           // fetchPolicy: "network-only",
         })).data.getMessagesList
       return messagesList.map(message => (
-
-        {
-          _id: message.messageUuid,
-          text: message.text,
-          createdAt: message.createdAt,
-          user: {
-            _id: message.uuid,
-            name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
-          // avatar: 'https://placeimg.com/140/140/any',
-          },
-        }))
+        _messageAdapter(message)
+      ))
     } catch (e) {
       Toast.show({
         text1: `Failed to load messages:`,
@@ -158,6 +152,17 @@ const Chat = ({ route }) => {
       // console.log({ e })
     }
   }
+
+  const _messageAdapter = message => ({
+    _id: message.messageUuid,
+    text: message.text,
+    createdAt: message.createdAt,
+    user: {
+      _id: message.uuid,
+      name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
+      // avatar: 'https://placeimg.com/140/140/any',
+    },
+  })
 
   const onSend = useCallback((messages = []) => {
     messages.forEach(message => {
@@ -192,9 +197,9 @@ const Chat = ({ route }) => {
           // console.log({ message })
           // console.log({ returnedMessage })
 
-          if (message._id === returnedMessage.messageUuid) {
-            setMessages(previousMessages => GiftedChat.append(previousMessages, [message]))
-          }
+          // if (message._id === returnedMessage.messageUuid) {
+          //   setMessages(previousMessages => GiftedChat.append(previousMessages, [message]))
+          // }
         } catch (e) {
           Toast.show({
             text1: `Failed to send message:`,
