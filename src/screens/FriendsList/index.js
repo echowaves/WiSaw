@@ -130,8 +130,6 @@ const FriendsList = () => {
         height: 70,
       }}
       onPress={() => {
-        // alert(friend?.contact?.name)
-        // console.log({ friend })
         navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
       }}>
       <ListItem.Content>

@@ -226,7 +226,7 @@ const LocalContacts = () => {
                 fontSize: 25,
                 color: CONST.MAIN_COLOR,
               }}>
-              Add new contact to Phone book
+              Or Add new contact to Phone book
             </Text>
           </Col>
           <Col
