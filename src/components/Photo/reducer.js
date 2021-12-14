@@ -1,5 +1,4 @@
 // import Branch from '../../util/my-branch'
-// import * as SMS from 'expo-sms'
 
 import Toast from 'react-native-toast-message'
 
@@ -19,7 +18,6 @@ export const initialState = {
   photo: {},
   bans: [],
   inputText: '',
-  commentsSubmitting: false,
   error: '',
 }
 
@@ -40,19 +38,6 @@ export default function reducer(state = initialState, action) {
         ...state,
         inputText: action.inputText,
       }
-    case ACTION_TYPES.SUBMIT_COMMENT_STARTED:
-      return {
-        ...state,
-        commentsSubmitting: true,
-        error: '',
-      }
-    case ACTION_TYPES.SUBMIT_COMMENT_FAILED:
-      return {
-        ...state,
-        commentsSubmitting: false,
-        error: action.error,
-      }
-
     default:
       return state
   }
@@ -60,7 +45,7 @@ export default function reducer(state = initialState, action) {
 
 export function watchPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
     const { uuid } = getState().secret
     try {
       const watchersCount = (await CONST.gqlClient
@@ -90,7 +75,7 @@ export function watchPhoto({ photo }) {
         text1: 'Unable to Star photo',
         text2: 'Network Issue?',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -98,7 +83,7 @@ export function watchPhoto({ photo }) {
 
 export function unwatchPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
     const { uuid } = getState().secret
     try {
       const watchersCount = (await CONST.gqlClient
@@ -128,7 +113,7 @@ export function unwatchPhoto({ photo }) {
         text1: "Unable to un-Star photo",
         text2: "Maybe Network Issue?",
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -136,7 +121,7 @@ export function unwatchPhoto({ photo }) {
 
 export function banPhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
     const { uuid } = getState().secret
 
     dispatch({
@@ -171,7 +156,7 @@ export function banPhoto({ photo }) {
       Toast.show({
         text1: `Abusive Photo reported`,
         type: "success",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     } catch (err) {
       // console.error({ err })
@@ -185,7 +170,7 @@ export function banPhoto({ photo }) {
 
 export function deletePhoto({ photo }) {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
     const { uuid } = getState().secret
 
     try {
@@ -207,14 +192,14 @@ export function deletePhoto({ photo }) {
       Toast.show({
         text1: `${photo.video ? 'Video' : 'Photo'} deleted`,
         type: "success",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     } catch (err) {
       Toast.show({
         text1: "Unable to delete",
         text2: "Network Issue?",
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -222,7 +207,7 @@ export function deletePhoto({ photo }) {
 
 export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
 
     try {
       let messageBody = `Check out what I saw today${photo?.video ? " (video)" : ''}:`
@@ -274,7 +259,7 @@ export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
         text1: "Unable to share photo",
         text2: "Wait a bit and try again",
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -282,11 +267,8 @@ export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
 
 export function submitComment({ inputText, uuid, photo }) {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
 
-    dispatch({
-      type: ACTION_TYPES.SUBMIT_COMMENT_STARTED,
-    })
     try {
       const comment = (await CONST.gqlClient
         .mutate({
@@ -314,24 +296,20 @@ export function submitComment({ inputText, uuid, photo }) {
         lastComment: comment.comment,
         commentsCount: photo.commentsCount,
       })
+      dispatch(watchPhoto({ photo }))
 
       Toast.show({
         text1: "Comment added",
         type: "success",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
-      dispatch(watchPhoto({ photo }))
     } catch (err) {
-      console.log({ err })// eslint-disable-line
-      dispatch({
-        type: ACTION_TYPES.SUBMIT_COMMENT_FAILED,
-        error: JSON.stringify(err),
-      })
+      // console.log({ err })// eslint-disable-line
       Toast.show({
         text1: "Unable to add comment",
-        text2: "Network Issue?",
-        type: "error",
-        topOffset: headerHeight + 15,
+        text2: `${err}`,
+        type: 'error',
+        topOffset,
       })
     }
   }
@@ -348,6 +326,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
                   id
                   comment
                   updatedAt
+                  uuid
                 }
                 recognitions{
                   metaData
@@ -403,7 +382,7 @@ export function toggleCommentButtons({ photoDetails, commentId }) {
 
 export function deleteComment({ photo, photoDetails, comment }) {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
     const { uuid } = getState().secret
 
     try {
@@ -430,7 +409,7 @@ export function deleteComment({ photo, photoDetails, comment }) {
       Toast.show({
         text1: "Comment deleted",
         type: "success",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       return {
         ...photoDetails,
@@ -441,7 +420,7 @@ export function deleteComment({ photo, photoDetails, comment }) {
         text1: "Unable to delete comment",
         text2: "Network Issue?",
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }

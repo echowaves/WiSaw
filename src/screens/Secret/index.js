@@ -37,7 +37,7 @@ const SecretScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const uuid = useSelector(state => state.secret.uuid)
 
@@ -79,6 +79,16 @@ const SecretScreen = () => {
 
   useEffect(() => {
     resetFields()
+    navigation.setOptions({
+      headerTitle: 'my secret',
+      headerTintColor: CONST.MAIN_COLOR,
+      headerRight: renderHeaderRight,
+      headerLeft: renderHeaderLeft,
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -176,7 +186,7 @@ const SecretScreen = () => {
     Toast.show({
       text1: 'Secret reset',
       text2: "enter new Secret",
-      topOffset: headerHeight + 15,
+      topOffset,
     })
   }
 

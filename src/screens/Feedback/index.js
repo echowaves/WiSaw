@@ -22,7 +22,7 @@ const maxStringLength = 2000
 const FeedbackScreen = () => {
   const navigation = useNavigation()
 
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
   const uuid = useSelector(state => state.secret.uuid)
 
   // const [diskSpace, setDiskSpace] = useState('')
@@ -122,7 +122,7 @@ const FeedbackScreen = () => {
       navigation.goBack()
       Toast.show({
         text1: 'Feedback submitted.',
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       // console.log({ contactForm })
     } catch (err) {
@@ -130,7 +130,7 @@ const FeedbackScreen = () => {
         text1: 'Error',
         text2: err.toString(),
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }

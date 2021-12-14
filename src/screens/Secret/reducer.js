@@ -46,7 +46,7 @@ export function registerSecret({ nickName, secret, uuid }) {
   // console.log({ nickName })
   return async (dispatch, getState) => {
     const {
-      headerHeight,
+      topOffset,
     } = getState().photosList
 
     // console.log({ nickName, secret, uuid })
@@ -87,7 +87,7 @@ export function registerSecret({ nickName, secret, uuid }) {
 
       Toast.show({
         text1: 'Secret attached to this device.',
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     } catch (err) {
       // console.log({ err })
@@ -95,7 +95,7 @@ export function registerSecret({ nickName, secret, uuid }) {
         text1: 'Unable to store Secret',
         text2: err.toString(),
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -106,7 +106,7 @@ export function updateSecret({
 }) {
   return async (dispatch, getState) => {
     const {
-      headerHeight,
+      topOffset,
     } = getState().photosList
 
     try {
@@ -142,7 +142,7 @@ export function updateSecret({
 
       Toast.show({
         text1: 'Secret updated.',
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     } catch (err) {
       // console.log({ err })
@@ -150,7 +150,7 @@ export function updateSecret({
         text1: 'Unable to update Secret',
         text2: err.toString(),
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -160,7 +160,7 @@ export function resetSecret() {
   // console.log({ nickName })
   return async (dispatch, getState) => {
     const {
-      headerHeight,
+      topOffset,
     } = getState().photosList
     try {
       await Promise.all([
@@ -180,7 +180,7 @@ export function resetSecret() {
         text1: 'Unable to reset Secret',
         text2: err.toString(),
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }

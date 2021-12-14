@@ -39,13 +39,17 @@ import { Video } from 'expo-av'
 
 import CachedImage from 'expo-cached-image'
 
+import { async } from 'regenerator-runtime'
 import * as reducer from './reducer'
+
+import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 
 import * as CONST from '../../consts.js'
 
 const Photo = ({ photo }) => {
   const componentIsMounted = useRef(true)
   const uuid = useSelector(state => state.secret.uuid)
+  const friendsList = useSelector(state => state.friendsList.friendsList)
 
   // const videoRef = React.useRef(null)
 
@@ -53,7 +57,7 @@ const Photo = ({ photo }) => {
 
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const navigation = useNavigation()
 
@@ -62,7 +66,7 @@ const Photo = ({ photo }) => {
   const { width, height } = useDimensions().window
   const imageHeight = height - 250
   const bans = useSelector(state => state.photo.bans)
-  const [branchUniversalObject, setBranchUniversalObject] = useState({})
+  // const [branchUniversalObject, setBranchUniversalObject] = useState({})
 
   // const error = useSelector(state => state.photo.error)
 
@@ -75,7 +79,7 @@ const Photo = ({ photo }) => {
             ...photoDetails,
             watchersCount: photo.watchersCount,
           })
-          createBranchUniversalObject({ photo })
+          // createBranchUniversalObject({ photo })
         }
       })
 
@@ -109,13 +113,19 @@ const Photo = ({ photo }) => {
           // contentDescription: article.description,
           // This metadata can be used to easily navigate back to this screen
           // when implementing deep linking with `Branch.subscribe`.
+          contentMetadata: {
+            customMetadata: {
+              photoId: photo.id, // your userId field would be defined under customMetadata
+            },
+          },
           metadata: {
-            screen: 'photoScreen',
-            params: JSON.stringify({ photoId: photo.id }),
+            // screen: 'photoScreen',
+            params: { photoId: photo.id },
           },
         }
       )
-      setBranchUniversalObject(_branchUniversalObject)
+      // setBranchUniversalObject(_branchUniversalObject)
+      return _branchUniversalObject
     }
   }
 
@@ -131,12 +141,23 @@ const Photo = ({ photo }) => {
           <View style={{ flex: 1 }}>
             <Text
               style={{
+                marginLeft: 10,
+                color: CONST.MAIN_COLOR,
+              }}>
+              {friendsHelper.getLocalContactName({ uuid, friendUuid: photo.uuid, friendsList })}
+              {"\n"}
+            </Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
                 marginRight: 10,
                 color: CONST.MAIN_COLOR,
                 textAlign: 'right',
               }}>
               {renderDateTime(photo.createdAt)}
             </Text>
+            <Text />
           </View>
         </View>
       )
@@ -150,6 +171,8 @@ const Photo = ({ photo }) => {
               marginLeft: 10,
               color: CONST.MAIN_COLOR,
             }}>
+            {friendsHelper.getLocalContactName({ uuid, friendUuid: photo.uuid, friendsList })}
+            {"\n"}
             {photoDetails?.comments ? photoDetails?.comments.length : 0} Comment{(photoDetails?.comments ? photoDetails?.comments.length : 0) !== 1 ? 's' : ''}
           </Text>
         </View>
@@ -250,6 +273,14 @@ const Photo = ({ photo }) => {
                 </Card>
                 {!comment.hiddenButtons && (
                   <View style={{ flex: 1, flexDirection: 'row' }}>
+                    <Text
+                      style={{
+                        color: CONST.MAIN_COLOR,
+                        // fontSize: 10,
+                        marginLeft: 10,
+                      }}>
+                      {friendsHelper.getLocalContactName({ uuid, friendUuid: comment.uuid, friendsList })}
+                    </Text>
                     <View style={{ flex: 1 }}>
                       <Text
                         style={{
@@ -512,7 +543,8 @@ const Photo = ({ photo }) => {
               alignItems: 'center',
             }}
             onPress={
-              () => {
+              async () => {
+                const branchUniversalObject = await createBranchUniversalObject(({ photo }))
                 dispatch(reducer.sharePhoto({ photo, photoDetails, branchUniversalObject }))
               }
             }>
@@ -540,7 +572,7 @@ const Photo = ({ photo }) => {
         text1: 'Unable to ban Starred photo',
         text2: 'Un-Star photo first',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       return
     }
@@ -549,7 +581,7 @@ const Photo = ({ photo }) => {
         text1: 'Looks like you already Banned this Photo',
         text2: 'You can only Ban same Photo once',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     } else {
       Alert.alert(
@@ -570,7 +602,7 @@ const Photo = ({ photo }) => {
         text1: 'Unable to delete Starred photo',
         text2: 'Un-Star photo first',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
       return
     }
@@ -613,7 +645,7 @@ const Photo = ({ photo }) => {
         text1: 'Unable to complete',
         text2: 'Network issue? Try again later',
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }

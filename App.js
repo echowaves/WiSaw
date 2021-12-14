@@ -10,7 +10,9 @@ import 'react-native-gesture-handler'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { FontAwesome, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
+import {
+  FontAwesome, FontAwesome5, MaterialIcons, MaterialCommunityIcons,
+} from '@expo/vector-icons'
 
 import { NavigationContainer } from '@react-navigation/native'
 
@@ -31,6 +33,12 @@ import PhotosDetailsShared from './src/screens/PhotosDetailsShared'
 import FeedbackScreen from './src/screens/Feedback'
 import IdentityScreen from './src/screens/Secret'
 import ModalInputText from './src/screens/ModalInputText'
+
+import Chat from './src/screens/Chat'
+import FriendsList from './src/screens/FriendsList'
+import LocalContacts from './src/screens/FriendsList/LocalContacts'
+import ContactDetails from './src/screens/FriendsList/LocalContacts/ContactDetails'
+import ConfirmFriendship from './src/screens/FriendsList/LocalContacts/ConfirmFriendship'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
 
@@ -93,6 +101,31 @@ const App = () => (
                     component={ModalInputText}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
+                  <Stack.Screen
+                    name="Chat"
+                    component={Chat}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="FriendsList"
+                    component={FriendsList}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="LocalContacts"
+                    component={LocalContacts}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ContactDetails"
+                    component={ContactDetails}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ConfirmFriendship"
+                    component={ConfirmFriendship}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
                 </Stack.Navigator>
               )}
             </Drawer.Screen>
@@ -118,6 +151,29 @@ const App = () => (
                 headerShown: true,
               }}
             />
+            <Drawer.Screen
+              name="FriendsList"
+              component={FriendsList}
+              options={{
+                drawerIcon:
+                config => (
+                  <FontAwesome5
+                    name="user-friends"
+                    size={30}
+                    style={
+                      {
+                        marginLeft: 10,
+                        color: CONST.MAIN_COLOR,
+                        width: 60,
+                      }
+                    }
+                  />
+                ),
+                drawerLabel: 'friends',
+                headerShown: true,
+              }}
+            />
+
             <Drawer.Screen
               name="Feedback"
               component={FeedbackScreen}

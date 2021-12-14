@@ -20,6 +20,8 @@ import * as CONST from '../../consts.js'
 import * as ACTION_TYPES from './action_types'
 import { INIT_UUID } from '../Secret/action_types'
 
+import * as friendsReducer from '../FriendsList/reducer'
+
 import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
@@ -37,12 +39,12 @@ export const initialState = {
   orientation: 'portrait',
   activeSegment: 0,
   searchTerm: '',
-  batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+  batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   isLastPage: true,
   netAvailable: false,
   uploadingPhoto: false,
   zeroMoment: null,
-  headerHeight: 100,
+  toastOffset: 100,
   currentIndex: 0,
 }
 
@@ -94,7 +96,7 @@ const reducer = (state = initialState, action) => {
         // errorMessage: '',
         // pageNumber: -1,
         // isLastPage: false,
-        // batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+        // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
       }
     case ACTION_TYPES.RESET_STATE:
       return {
@@ -105,17 +107,17 @@ const reducer = (state = initialState, action) => {
         errorMessage: '',
         pageNumber: -1,
         isLastPage: false,
-        batch: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+        batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
       }
     case ACTION_TYPES.SET_IS_TANDC_ACCEPTED:
       return {
         ...state,
         isTandcAccepted: action.isTandcAccepted,
       }
-    case ACTION_TYPES.SET_HEADER_HEIGHT:
+    case ACTION_TYPES.SET_TOP_OFFSET:
       return {
         ...state,
-        headerHeight: action.headerHeight,
+        topOffset: action.topOffset,
       }
     case ACTION_TYPES.INIT_STATE:
       return {
@@ -258,6 +260,8 @@ export function initState() {
       type: INIT_UUID,
       uuid,
     })
+    // console.log({ uuid })
+    dispatch(friendsReducer.reloadListOfFriends({ uuid }))// the list of enhanced friends list has to be loaded earlier on
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
   }
 }
@@ -285,12 +289,13 @@ async function _requestGeoPhotos(getState) {
   const {
     pageNumber, batch, zeroMoment, location: { coords: { latitude, longitude } },
   } = getState().photosList
+  // console.log(1, typeof batch)
   const whenToStop = moment(zeroMoment)
   try {
     const response = (await CONST.gqlClient
       .query({
         query: gql`
-      query feedByDate($daysAgo: Int!, $lat: Float!, $lon: Float!, $batch: Long!, $whenToStop: AWSDateTime!) {
+      query feedByDate($daysAgo: Int!, $lat: Float!, $lon: Float!, $batch: String!, $whenToStop: AWSDateTime!) {
         feedByDate(daysAgo: $daysAgo, lat: $lat, lon: $lon, batch: $batch, whenToStop: $whenToStop){
           photos {
                   row_number
@@ -315,6 +320,7 @@ async function _requestGeoPhotos(getState) {
           whenToStop,
         },
       }))
+    // console.log(2, typeof response.data.feedByDate.batch)
     return {
       photos: response.data.feedByDate.photos,
       batch: response.data.feedByDate.batch,
@@ -338,7 +344,7 @@ async function _requestWatchedPhotos(getState) {
     const response = (await CONST.gqlClient
       .query({
         query: gql`
-      query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: Long!) {
+      query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!) {
         feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch){
           photos {
                   row_number
@@ -380,7 +386,7 @@ async function _requestSearchedPhotos(getState) {
     const response = (await CONST.gqlClient
       .query({
         query: gql`
-      query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: Long!) {
+      query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: String!) {
         feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch){
           photos {
                   row_number
@@ -424,7 +430,7 @@ export function getPhotos() {
     // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
     await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
     const {
-      location, netAvailable, searchTerm, headerHeight,
+      location, netAvailable, searchTerm, topOffset,
     } = getState().photosList
 
     let noMoreData = false
@@ -454,6 +460,7 @@ export function getPhotos() {
         // eslint-disable-next-line no-console
         // console.log({ responseJson })
         noMoreData = responseJson?.noMoreData
+        // console.log(typeof responseJson?.batch, typeof getState()?.photosList?.batch, responseJson?.batch === getState()?.photosList?.batch)
         if (responseJson?.batch === getState()?.photosList?.batch) {
           if (responseJson?.photos?.length > 0) {
             dispatch({
@@ -476,7 +483,7 @@ export function getPhotos() {
           text1: 'Error',
           text2: `${err}`,
           type: "error",
-          topOffset: headerHeight + 15,
+          topOffset,
         })
       }
     }
@@ -502,10 +509,10 @@ export function acceptTandC() {
   }
 }
 
-export function setHeaderHeight(headerHeight) {
+export function settopOffset(topOffset) {
   return {
-    type: ACTION_TYPES.SET_HEADER_HEIGHT,
-    headerHeight,
+    type: ACTION_TYPES.SET_TOP_OFFSET,
+    topOffset,
   }
 }
 
@@ -717,7 +724,7 @@ export const queueFileForUpload = ({ cameraImgUrl, type, location }) => async (d
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
-    const { headerHeight } = getState().photosList
+    const { topOffset } = getState().photosList
     const { uuid } = getState().secret
     _updatePendingPhotos(dispatch)
 
@@ -774,7 +781,7 @@ export function uploadPendingPhotos() {
               text1: "Sorry, you've been banned",
               text2: "Try again later",
               type: "error",
-              topOffset: headerHeight + 15,
+              topOffset,
             })
           }
         }
@@ -807,15 +814,16 @@ export function uploadPendingPhotos() {
           })
           Toast.show({
             text1: `${item.photo.video ? 'Video' : 'Photo'} uploaded`,
-            topOffset: headerHeight + 15,
+            topOffset,
             visibilityTime: 500,
           })
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({
-            text1: 'Unable to upload, refresh to try again',
-            text2: 'Network issue...?',
-            topOffset: headerHeight + 15,
+            text1: 'Upload is going slooooow...',
+            text2: 'Still trying to upload.',
+            visibilityTime: 500,
+            topOffset,
           })
         }
       }
@@ -826,9 +834,10 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
       Toast.show({
-        text1: 'Failed to upload, refresh to try again',
-        text2: 'Network issue?...',
-        topOffset: headerHeight + 15,
+        text1: 'Upload is slow...',
+        text2: 'Still trying to upload.',
+        visibilityTime: 500,
+        topOffset,
       })
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())

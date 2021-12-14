@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useHeaderHeight } from '@react-navigation/elements'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
@@ -14,11 +13,13 @@ import Toast from 'react-native-toast-message'
 
 // import Branch, { BranchEvent } from 'expo-branch'
 
+import * as BackgroundFetch from 'expo-background-fetch'
+import * as TaskManager from 'expo-task-manager'
+
 import useKeyboard from '@rnhooks/keyboard'
 
 import {
   StyleSheet,
-  Text,
   View,
   Alert,
   SafeAreaView,
@@ -26,7 +27,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, Ionicons, AntDesign, FontAwesome5,
+  FontAwesome, Ionicons, AntDesign, FontAwesome5, MaterialCommunityIcons,
 } from '@expo/vector-icons'
 
 import { Col, /* Row, */ Grid } from "react-native-easy-grid"
@@ -46,6 +47,7 @@ import {
   ButtonGroup,
   SearchBar,
   Overlay,
+  Text,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
@@ -54,6 +56,36 @@ import * as CONST from '../../consts.js'
 import Thumb from '../../components/Thumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
 import ThumbPending from '../../components/ThumbPending'
+
+const BACKGROUND_FETCH_TASK = 'background-fetch'
+
+// 1. Define the task by providing a name and the function that should be executed
+// Note: This needs to be called in the global scope (e.g outside of your React components)
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const now = Date.now()
+
+  console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`)
+
+  // Be sure to return the successful result type!
+  return BackgroundFetch.BackgroundFetchResult.NewData
+})
+
+// 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background fetch should behave
+// Note: This does NOT need to be in the global scope and CAN be used in your React components!
+async function registerBackgroundFetchAsync() {
+  return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+    minimumInterval: 60 * 15, // 15 minutes
+    stopOnTerminate: false, // android only,
+    startOnBoot: true, // android only
+  })
+}
+
+// 3. (Optional) Unregister tasks by specifying the task name
+// This will cancel any future background fetch calls that match the given name
+// Note: This does NOT need to be in the global scope and CAN be used in your React components!
+async function unregisterBackgroundFetchAsync() {
+  return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK)
+}
 
 const FOOTER_HEIGHT = 90
 
@@ -64,7 +96,7 @@ const PhotosList = () => {
 
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useDimensions().window
-  const headerHeight = useSelector(state => state.photosList.headerHeight)
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
@@ -96,6 +128,17 @@ const PhotosList = () => {
     setLastViewableRow(lastViewableItem.index)
   })
 
+  React.useEffect(() => {
+    checkStatusAsync()
+  }, [])
+
+  const checkStatusAsync = async () => {
+    const status = await BackgroundFetch.getStatusAsync()
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK)
+    // setStatus(status)
+    // setIsRegistered(isRegistered)
+  }
+
   const _initState = async () => {
     // /// //////////////////////////////////////
     // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
@@ -119,10 +162,11 @@ const PhotosList = () => {
     await _reload()
   }
 
-  const heightOfHeader = useHeaderHeight()
-
   useEffect(() => {
-    dispatch(reducer.setHeaderHeight(heightOfHeader))
+    // TODO: delete next line -- debuggin
+    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
+
+    dispatch(reducer.settopOffset(height / 3))
 
     _initBranch({ navigation })
     _getLocation()
@@ -177,7 +221,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'WiSaw updated',
           text2: "Restart to see changes",
-          topOffset: headerHeight + 15,
+          topOffset,
         })
         // setTimeout(() => { Updates.reloadAsync() }, 3000)
       }
@@ -187,7 +231,7 @@ const PhotosList = () => {
       //   text1: `Failed to get over the air update:`,
       //   text2: `${error}`,
       //   type: "error",
-      // topOffset: headerHeight + 15,
+      // topOffset: topOffset,
       // })
     }
   }
@@ -318,7 +362,7 @@ const PhotosList = () => {
             // Toast.show({
             //   text1: 'location udated',
             //   type: "error",
-            // topOffset: headerHeight + 15,
+            // topOffset: topOffset,
             // })
             await dispatch(reducer.setLocation(loc))
           }
@@ -327,7 +371,7 @@ const PhotosList = () => {
         Toast.show({
           text1: 'Unable to get location',
           type: "error",
-          topOffset: headerHeight + 15,
+          topOffset,
         })
       }
     }
@@ -474,7 +518,7 @@ const PhotosList = () => {
         right: 0,
         left: 0,
       }}>
-        {/* feedback button */}
+        {/* drawer button */}
         <Col
           style={{
             justifyContent: 'center',
@@ -488,11 +532,10 @@ const PhotosList = () => {
               name="navicon"
               size={25}
               style={{
-              // marginRight: 20,
                 color: CONST.MAIN_COLOR,
                 position: 'absolute',
                 bottom: 0,
-                left: 10,
+                left: 15,
               }}
             />
           )}
@@ -571,18 +614,29 @@ const PhotosList = () => {
             }
           />
         </Col>
-        {/* empty button */}
+        {/* drawer button */}
         <Col
           style={{
             justifyContent: 'center',
             alignItems: 'center',
-          }}
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking({ cameraType: 'video' })
-            }
-          }
-        />
+          }}>
+          {netAvailable && (
+            <FontAwesome5
+              onPress={
+                () => navigation.navigate('FriendsList')
+              }
+              name="user-friends"
+              size={35}
+              style={{
+                color: CONST.MAIN_COLOR,
+                position: 'absolute',
+                bottom: 0,
+                right: 15,
+              }}
+            />
+          )}
+        </Col>
+
       </Grid>
     </SafeAreaView>
   )
@@ -720,7 +774,7 @@ const PhotosList = () => {
       Toast.show({
         text1: "Search for more than 3 characters",
         type: "error",
-        topOffset: headerHeight + 15,
+        topOffset,
       })
     }
   }
@@ -1020,7 +1074,16 @@ if (!__DEV__) {
 
         // alert(JSON.stringify(bundle))
         navigation.popToTop()
-        navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
+        if (bundle?.params?.photoId) {
+          // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
+          navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.photoId })
+        }
+        if (bundle?.params?.friendshipUuid) {
+          // alert(JSON.stringify({ friendshipUuid: bundle?.params?.friendshipUuid }))
+          navigation.navigate('ConfirmFriendship', { friendshipUuid: bundle?.params?.friendshipUuid })
+        }
+
+        // navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
       }
     })
   }
