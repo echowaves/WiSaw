@@ -300,6 +300,7 @@ async function _requestGeoPhotos(getState) {
           photos {
                   row_number
                   id
+                  uuid
                   imgUrl
                   thumbUrl
                   videoUrl
@@ -349,6 +350,7 @@ async function _requestWatchedPhotos(getState) {
           photos {
                   row_number
                   id
+                  uuid
                   imgUrl
                   thumbUrl
                   videoUrl
@@ -391,6 +393,7 @@ async function _requestSearchedPhotos(getState) {
           photos {
                   row_number
                   id
+                  uuid
                   imgUrl
                   thumbUrl
                   videoUrl
