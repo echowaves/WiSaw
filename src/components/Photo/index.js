@@ -39,7 +39,7 @@ import { Video } from 'expo-av'
 
 import CachedImage from 'expo-cached-image'
 
-import { async } from 'regenerator-runtime'
+// import { async } from 'regenerator-runtime'
 import * as reducer from './reducer'
 
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
