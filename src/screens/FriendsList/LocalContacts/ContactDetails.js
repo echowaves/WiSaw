@@ -16,6 +16,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  Clipboard,
 } from 'react-native'
 
 import {
@@ -116,23 +117,23 @@ const ContactDetails = ({ route }) => {
     // dispatch(reducer.reloadListOfFriends({ uuid }))
     /// //////////////////////////////////////
     const isSmsAvailable = await SMS.isAvailableAsync()
+    const friendship = await dispatch(reducer.createFriendship({ uuid }))
+
+    // alert(JSON.stringify({ friendship }))
+
+    const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship.friendshipUuid })
+
+    // alert(JSON.stringify({ _branchUniversalObject }))
+
+    const { url } = await _branchUniversalObject.generateShortUrl({}, {})
+    const message = `You've got WiSaw friendship request.
+To confirm, follow the url: ${url}`
+
+    // alert(JSON.stringify({ url }))
     if (isSmsAvailable) {
-      const friendship = await dispatch(reducer.createFriendship({ uuid }))
-
-      // alert(JSON.stringify({ friendship }))
-
-      const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship.friendshipUuid })
-
-      // alert(JSON.stringify({ _branchUniversalObject }))
-
-      const { url } = await _branchUniversalObject.generateShortUrl({}, {})
-
-      // alert(JSON.stringify({ url }))
-
       const { result } = await SMS.sendSMSAsync(
         phone.number,
-        `You've got WiSaw friendship request.
-To confirm, follow the url: ${url}`
+        message
         //         {
         //           // attachments: {
         //           //   uri: 'path/myfile.png',
@@ -151,11 +152,33 @@ To confirm, follow the url: ${url}`
       }
     } else {
       // misfortune... there's no SMS available on this device
-      Toast.show({
-        text1: "SMS is not available on this devise",
-        type: "error",
-        topOffset,
-      })
+      Alert.alert(
+        'SMS sending is not awailable on this device, but',
+        'Would you like to copy the sharable message to clipboard, so that you can paste it to email and send it to your friend?',
+        [
+          {
+            text: 'Yes',
+            onPress: () => {
+              Clipboard.setString(message)
+              Toast.show({
+                text1: "The sharable message is copied to clipboard",
+                text2: "Paste it to email for your friend you want to invite.",
+                topOffset,
+              })
+            },
+          },
+          { text: 'No', onPress: () => console.log('No button clicked'), style: 'cancel' },
+        ],
+        {
+          cancelable: true,
+        }
+      )
+
+      // Toast.show({
+      //   text1: "SMS is not available on this devise",
+      //   type: "error",
+      //   topOffset,
+      // })
     }
     await navigation.popToTop()
     await navigation.navigate('FriendsList')

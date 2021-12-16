@@ -19,6 +19,7 @@
     "@apollo/client": "3.4.16",
     "@babel/plugin-transform-async-to-generator": "7.14.5",
     "@dudigital/react-native-zoomable-view": "1.0.16",
+    "@react-native-community/clipboard": "^1.5.1",
     "@react-native-community/hooks": "2.8.0",
     "@react-native-community/masked-view": "0.1.11",
     "@react-native-community/netinfo": "6.0.2",
