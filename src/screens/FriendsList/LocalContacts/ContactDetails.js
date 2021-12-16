@@ -119,25 +119,29 @@ const ContactDetails = ({ route }) => {
     if (isSmsAvailable) {
       const friendship = await dispatch(reducer.createFriendship({ uuid }))
 
+      // alert(JSON.stringify({ friendship }))
+
       const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship.friendshipUuid })
 
-      // alert(JSON.stringify(_branchUniversalObject))
+      // alert(JSON.stringify({ _branchUniversalObject }))
 
       const { url } = await _branchUniversalObject.generateShortUrl({}, {})
 
+      // alert(JSON.stringify({ url }))
+
       const { result } = await SMS.sendSMSAsync(
-        [phone.number],
+        phone.number,
         `You've got WiSaw friendship request.
-To confirm, follow the url: 
-${url}`,
-        {
-          // attachments: {
-          //   uri: 'path/myfile.png',
-          //   mimeType: 'image/png',
-          //   filename: 'myfile.png',
-          // },
-        }
+To confirm, follow the url: ${url}`
+        //         {
+        //           // attachments: {
+        //           //   uri: 'path/myfile.png',
+        //           //   mimeType: 'image/png',
+        //           //   filename: 'myfile.png',
+        //           // },
+        //         }
       )
+      // alert(JSON.stringify({ result }))
       // console.log({ result })
       if (result === "sent") {
         // console.log({ result })
