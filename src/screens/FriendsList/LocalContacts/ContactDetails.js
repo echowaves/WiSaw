@@ -16,8 +16,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
-  Clipboard,
 } from 'react-native'
+
+import Clipboard from '@react-native-community/clipboard'
 
 import {
   Text,
@@ -172,7 +173,9 @@ To confirm, follow the url: ${url}`
         [
           {
             text: 'Yes',
-            onPress: () => {
+            onPress: async () => {
+              await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
+              dispatch(reducer.reloadListOfFriends({ uuid }))
               Clipboard.setString(message)
               Toast.show({
                 text1: "The sharable message is copied to clipboard",
