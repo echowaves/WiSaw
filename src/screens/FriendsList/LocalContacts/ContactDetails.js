@@ -120,12 +120,26 @@ const ContactDetails = ({ route }) => {
     const friendship = await dispatch(reducer.createFriendship({ uuid }))
 
     // alert(JSON.stringify({ friendship }))
+    if (!friendship) {
+      await navigation.popToTop()
+      await navigation.navigate('FriendsList')
+      return // was not able to create friendship
+    }
 
-    const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship.friendshipUuid })
+    const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship?.friendshipUuid })
 
-    // alert(JSON.stringify({ _branchUniversalObject }))
+    // if (Platform.OS === 'android') {
+    //   await new Promise(r => setTimeout(r, 5000))// have to sleep here on Androd
+    //   // alert(JSON.stringify({ _branchUniversalObject }))
+    // }
 
-    const { url } = await _branchUniversalObject.generateShortUrl({}, {})
+    const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
+
+    const { url } = await _branchUniversalObject.generateShortUrl(linkProperties, {})
+    // if (Platform.OS === 'android') {
+    //   alert(JSON.stringify({ url }))
+    // }
+
     const message = `You've got WiSaw friendship request.
 To confirm, follow the url: ${url}`
 
@@ -197,10 +211,10 @@ To confirm, follow the url: ${url}`
 
         `${friendshipUuid}`,
         {
-
-          // title: article.title,
+          locallyIndex: false,
+          title: 'Inviting friend to collaborate on WiSaw',
           // contentImageUrl: photo.imgUrl,
-          // contentDescription: article.description,
+          contentDescription: "Let's talk.",
           // This metadata can be used to easily navigate back to this screen
           // when implementing deep linking with `Branch.subscribe`.
           contentMetadata: {

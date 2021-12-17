@@ -86,10 +86,10 @@ export function createFriendship({ uuid }) {
         type: ACTION_TYPES.ADD_TO_FRIENDSHIP,
         friendship,
       })
-      Toast.show({
-        text1: 'New Friend created.',
-        topOffset,
-      })
+      // Toast.show({
+      //   text1: 'New Friend created.',
+      //   topOffset,
+      // })
       return friendship
     } catch (err) {
       // console.log({ err })
@@ -99,6 +99,7 @@ export function createFriendship({ uuid }) {
         type: "error",
         topOffset,
       })
+      return null
     }
   }
 }
