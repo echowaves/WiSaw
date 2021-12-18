@@ -148,9 +148,27 @@ const FriendsList = () => {
       }}
       onPress={() => {
         if (!friend?.contact?.name) {
-          // console.log({ friend })
-          setFriendshipUuid(friend.friendshipUuid)
-          setShowLocalContacts(true)
+          Alert.alert(
+            'Do you want to associate this friend with contract from address book?',
+            'Pick the right contact.',
+            [
+              {
+                text: 'No',
+                onPress: () => {
+                  navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
+                },
+              },
+              {
+                text: 'Yes',
+                onPress: () => {
+                  // console.log({ friend })
+                  setFriendshipUuid(friend.friendshipUuid)
+                  setShowLocalContacts(true)
+                },
+              },
+            ],
+            { cancelable: false }
+          )
         } else {
           navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
         }
