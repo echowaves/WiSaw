@@ -10,6 +10,7 @@ import * as friendsHelper from './friends_helper'
 
 export const initialState = {
   friendsList: [],
+  unreadCountsList: [],
 }
 
 export default function reducer(state = initialState, action) {
@@ -18,6 +19,11 @@ export default function reducer(state = initialState, action) {
       return {
         ...state,
         friendsList: action.friendsList,
+      }
+    case ACTION_TYPES.LIST_OF_UNREAD_COUNTS:
+      return {
+        ...state,
+        unreadCountsList: action.unreadCountsList,
       }
     case ACTION_TYPES.ADD_TO_FRIENDSHIP:
       return {
@@ -135,13 +141,32 @@ export function deleteFriendship({ friendshipUuid }) {
   }
 }
 
-export function reloadListOfFriends({ uuid }) {
+export function reloadFriendsList({ uuid }) {
   return async (dispatch, getState) => {
     try {
       const friendsList = await friendsHelper.getEnhancedListOfFriendships({ uuid })
+      // console.log({ friendsList })
       dispatch({
         type: ACTION_TYPES.LIST_OF_FRIENDS,
         friendsList,
+      })
+      // console.log(friendsList.length)
+    } catch (err5) {
+      // eslint-disable-next-line no-console
+      console.log({ err5 })// eslint-disable-line      
+    }
+  }
+}
+
+export function reloadUnreadCountsList({ uuid }) {
+  return async (dispatch, getState) => {
+    try {
+      const unreadCountsList = await friendsHelper.getUnreadCountsList({ uuid })
+      console.log({ unreadCountsList }, '--------------------------------------------')
+
+      dispatch({
+        type: ACTION_TYPES.LIST_OF_UNREAD_COUNTS,
+        unreadCountsList,
       })
       // console.log(friendsList.length)
     } catch (err5) {

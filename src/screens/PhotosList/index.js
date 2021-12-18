@@ -48,6 +48,7 @@ import {
   SearchBar,
   Overlay,
   Text,
+  Badge,
 } from 'react-native-elements'
 
 import * as reducer from './reducer'
@@ -119,6 +120,7 @@ const PhotosList = () => {
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const netAvailable = useSelector(state => state.photosList.netAvailable)
   // const batch = useSelector(state => state.photosList.batch)
+  const unreadCountList = useSelector(state => state.friendsList.unreadCountsList)
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
@@ -635,6 +637,13 @@ const PhotosList = () => {
               }}
             />
           )}
+          <Badge
+            value={unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)}
+            badgeStyle={{
+              backgroundColor: CONST.MAIN_COLOR,
+            }}
+            containerStyle={{ position: 'absolute', top: 5, right: 5 }}
+          />
         </Col>
 
       </Grid>

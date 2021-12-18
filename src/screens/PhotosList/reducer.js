@@ -261,7 +261,8 @@ export function initState() {
       uuid,
     })
     // console.log({ uuid })
-    dispatch(friendsReducer.reloadListOfFriends({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+    dispatch(friendsReducer.reloadFriendsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+    dispatch(friendsReducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
   }
 }

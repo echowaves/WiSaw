@@ -139,7 +139,7 @@ const ConfirmFriendship = ({ route }) => {
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactId })
-      await dispatch(reducer.reloadListOfFriends({ uuid }))
+      await dispatch(reducer.reloadFriendsList({ uuid }))
       await navigation.popToTop()
       await navigation.navigate('FriendsList')
     } catch (err) {

@@ -96,20 +96,37 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
 }
 
 export const getEnhancedListOfFriendships = async ({ uuid }) => {
-  const remoteFriendships = await _getRemoteListOfFriendships({ uuid })
+  const [
+    remoteFriendships,
+    unreadCountsList,
+  ] = await Promise.all([
+    _getRemoteListOfFriendships({ uuid }),
+    _getUnreadCountsList({ uuid }),
+  ])
+
   // console.log({ remoteFriendships })
 
   const enhancedFriendships = await Promise.all(// not sure if this is going to scale
     remoteFriendships.map(async friendship => {
       const { friendshipUuid } = friendship
       const contact = await _getLocalContact({ friendshipUuid })
-      const localContact = { key: friendship.friendshipUuid, contact, ...friendship }
+      const unread = unreadCountsList.find(unreadChat => unreadChat.chatUuid === friendship.chatUuid)
+
+      const localContact = {
+        key: friendship.friendshipUuid, contact, ...friendship, unreadCount: unread.unread,
+      }
       // console.log({ localContact })
       return localContact
     })
   )
   // console.log({ enhancedFriendships })
-  return enhancedFriendships
+  return enhancedFriendships.sort((a, b) => a.unreadCount < b.unreadCount)
+}
+
+export const getUnreadCountsList = async ({ uuid }) => {
+  const unreadCountsList = await _getUnreadCountsList({ uuid })
+  // console.log({ unreadCountsList })
+  return unreadCountsList
 }
 
 const _getLocalContact = async ({ friendshipUuid }) => {
@@ -121,6 +138,29 @@ const _getLocalContact = async ({ friendshipUuid }) => {
   // console.log({ localFriendshipId })
   const contact = await Contacts.getContactByIdAsync(localFriendshipId)
   return contact
+}
+
+const _getUnreadCountsList = async ({ uuid }) => {
+  try {
+    const unreadCountsList = (await CONST.gqlClient
+      .query({
+        query: gql`
+      query getUnreadCountsList($uuid: String!) {
+        getUnreadCountsList(uuid: $uuid){
+          chatUuid
+          unread
+        }
+      }`,
+        variables: {
+          uuid,
+        },
+        fetchPolicy: "network-only",
+      })).data.getUnreadCountsList
+    return unreadCountsList
+  } catch (err6) {
+    // eslint-disable-next-line no-console
+    console.log({ err6 })// eslint-disable-line      
+  }
 }
 
 const _getRemoteListOfFriendships = async ({ uuid }) => {

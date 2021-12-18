@@ -17,6 +17,7 @@ import {
   Card,
   ListItem,
   Button,
+  Badge,
 } from 'react-native-elements'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
@@ -74,7 +75,7 @@ const FriendsList = () => {
   }, [])
 
   const _reload = async () => {
-    dispatch(reducer.reloadListOfFriends({ uuid }))
+    dispatch(reducer.reloadFriendsList({ uuid }))
   }
   // useEffect(() => {
   //   console.log(`friends list updated: ${friendsList.length}`)
@@ -94,7 +95,7 @@ const FriendsList = () => {
     if (friendshipUuid) {
       friendsHelper.addFriendshipLocally({ friendshipUuid, contactId })
       setFriendshipUuid(null)
-      dispatch(reducer.reloadListOfFriends({ uuid }))
+      dispatch(reducer.reloadFriendsList({ uuid }))
     } else {
       navigation.navigate('ContactDetails', { contactId })
     }
@@ -173,6 +174,13 @@ const FriendsList = () => {
           navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
         }
       }}>
+      <Badge
+        value={friend.unreadCount}
+        badgeStyle={{
+          backgroundColor: CONST.MAIN_COLOR,
+        }}
+        containerStyle={{ marginTop: -20 }}
+      />
       <ListItem.Content>
         <ListItem.Title>
           <Text>
