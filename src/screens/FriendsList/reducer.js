@@ -162,7 +162,7 @@ export function reloadUnreadCountsList({ uuid }) {
   return async (dispatch, getState) => {
     try {
       const unreadCountsList = await friendsHelper.getUnreadCountsList({ uuid })
-      console.log({ unreadCountsList }, '--------------------------------------------')
+      // console.log({ unreadCountsList }, '--------------------------------------------')
 
       dispatch({
         type: ACTION_TYPES.LIST_OF_UNREAD_COUNTS,

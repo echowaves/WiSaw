@@ -95,6 +95,21 @@ const Chat = ({ route }) => {
           // console.log({ onSendMessage })
 
           setMessages(previousMessages => GiftedChat.append(previousMessages, [_messageAdapter(onSendMessage)]))
+
+          // update read counts
+          CONST.gqlClient
+            .mutate({
+              mutation: gql`
+              mutation
+              resetUnreadCount($chatUuid: String!, $uuid: String!) {
+                resetUnreadCount(chatUuid: $chatUuid, uuid: $uuid)                   
+              }
+              `,
+              variables: {
+                chatUuid,
+                uuid,
+              },
+            })
         },
         error({ error }) {
           console.log({ error })
