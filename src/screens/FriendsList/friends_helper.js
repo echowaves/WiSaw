@@ -129,6 +129,24 @@ export const getUnreadCountsList = async ({ uuid }) => {
   return unreadCountsList
 }
 
+export const resetUnreadCount = async ({ chatUuid, uuid }) => {
+  const lastReadAt = await CONST.gqlClient
+    .mutate({
+      mutation: gql`
+  mutation
+  resetUnreadCount($chatUuid: String!, $uuid: String!) {
+    resetUnreadCount(chatUuid: $chatUuid, uuid: $uuid)                   
+  }
+  `,
+      variables: {
+        chatUuid,
+        uuid,
+      },
+    })
+  // console.log({ lastReadAt })
+  return lastReadAt
+}
+
 const _getLocalContact = async ({ friendshipUuid }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
   const localFriendshipId = JSON.parse(await Storage.getItem({ key }))

@@ -65,6 +65,7 @@ const Chat = ({ route }) => {
       })
 
       setMessages(await _loadMessages({ chatUuid, lastLoaded: moment() }))
+      friendsHelper.resetUnreadCount({ chatUuid, uuid })
     })()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -97,19 +98,7 @@ const Chat = ({ route }) => {
           setMessages(previousMessages => GiftedChat.append(previousMessages, [_messageAdapter(onSendMessage)]))
 
           // update read counts
-          CONST.gqlClient
-            .mutate({
-              mutation: gql`
-              mutation
-              resetUnreadCount($chatUuid: String!, $uuid: String!) {
-                resetUnreadCount(chatUuid: $chatUuid, uuid: $uuid)                   
-              }
-              `,
-              variables: {
-                chatUuid,
-                uuid,
-              },
-            })
+          friendsHelper.resetUnreadCount({ chatUuid, uuid })
         },
         error({ error }) {
           console.log({ error })
