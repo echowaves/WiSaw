@@ -43,7 +43,7 @@ import * as reducer from '../../screens/FriendsList/reducer'
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 
 const LocalContacts = ({
-  show, setShow, setContactId,
+  show, setShow, setContactId, headerText,
 }) => {
   // const navigation = useNavigation()
   const dispatch = useDispatch()
@@ -105,25 +105,6 @@ const LocalContacts = ({
       setPermissionGranted(status === 'granted')
     }
   }
-
-  // const renderHeaderRight = () => {}
-
-  // const renderHeaderLeft = () => (
-  //   <FontAwesome
-  //     name="chevron-left"
-  //     size={30}
-  //     style={
-  //       {
-  //         marginLeft: 10,
-  //         color: CONST.MAIN_COLOR,
-  //         width: 60,
-  //       }
-  //     }
-  //     onPress={
-  //       () => navigation.goBack()
-  //     }
-  //   />
-  // )
 
   const _submitSearch = async searchString => {
     if (searchString.length === 0) {
@@ -205,6 +186,13 @@ const LocalContacts = ({
           }
           rightComponent={renderHeaderRight()}
         />
+        {headerText && (
+          <Text
+            style={{
+              textAlign: 'center',
+            }}>{headerText}
+          </Text>
+        )}
         <ScrollView
           contentContainerStyle={styles.scrollView}
           showsVerticalScrollIndicator={

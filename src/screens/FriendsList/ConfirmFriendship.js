@@ -159,6 +159,7 @@ const ConfirmFriendship = ({ route }) => {
         show={showLocalContacts}
         setShow={setShowLocalContacts}
         setContactId={setContactId}
+        headerText="To store this connection request locally, pick your friend from the address book."
       />
     </SafeAreaView>
   )

@@ -44,6 +44,7 @@ const FriendsList = () => {
   const { width, height } = useDimensions().window
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
+  const headerText = "SMS confirmation message for your friend will be send to the number you pick from the list. Make sure to pick a correct number."
 
   const uuid = useSelector(state => state.secret.uuid)
   const friendsList = useSelector(state => state.friendsList.friendsList)
@@ -221,6 +222,7 @@ const FriendsList = () => {
           show={showLocalContacts}
           setShow={setShowLocalContacts}
           setContactId={setContactId}
+          headerText={headerText}
         />
         <Card
           borderRadius={5}
@@ -246,6 +248,7 @@ const FriendsList = () => {
         show={showLocalContacts}
         setShow={setShowLocalContacts}
         setContactId={setContactId}
+        headerText={headerText}
       />
       <FlatGrid
         itemDimension={
