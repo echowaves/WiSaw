@@ -11,7 +11,7 @@ import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import {
-  FontAwesome, FontAwesome5, MaterialIcons, MaterialCommunityIcons,
+  FontAwesome, FontAwesome5, MaterialIcons,
 } from '@expo/vector-icons'
 
 import { NavigationContainer } from '@react-navigation/native'
@@ -36,9 +36,9 @@ import ModalInputText from './src/screens/ModalInputText'
 
 import Chat from './src/screens/Chat'
 import FriendsList from './src/screens/FriendsList'
-import LocalContacts from './src/screens/FriendsList/LocalContacts'
-import ContactDetails from './src/screens/FriendsList/LocalContacts/ContactDetails'
-import ConfirmFriendship from './src/screens/FriendsList/LocalContacts/ConfirmFriendship'
+// import LocalContacts from './src/screens/FriendsList/LocalContacts'
+import ContactDetails from './src/screens/FriendsList/ContactDetails'
+import ConfirmFriendship from './src/screens/FriendsList/ConfirmFriendship'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
 
@@ -111,16 +111,20 @@ const App = () => (
                     component={FriendsList}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
-                  <Stack.Screen
+                  {/* <Stack.Screen
                     name="LocalContacts"
                     component={LocalContacts}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                  <Stack.Screen
-                    name="ContactDetails"
-                    component={ContactDetails}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
+                    options={{
+                      headerTintColor: CONST.MAIN_COLOR,
+                      presentation: 'modal',
+                    }}
+                  /> */
+                    <Stack.Screen
+                      name="ContactDetails"
+                      component={ContactDetails}
+                      options={{ headerTintColor: CONST.MAIN_COLOR }}
+                    />
+                  }
                   <Stack.Screen
                     name="ConfirmFriendship"
                     component={ConfirmFriendship}

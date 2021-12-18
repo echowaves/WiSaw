@@ -39,11 +39,11 @@ import { Col, Row, Grid } from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
-import * as CONST from '../../../consts.js'
+import * as CONST from '../../consts.js'
 
-import * as reducer from '../reducer'
+import * as reducer from './reducer'
 
-import * as friendsHelper from '../friends_helper'
+import * as friendsHelper from './friends_helper'
 
 const ConfirmFriendship = ({ route }) => {
   const { friendshipUuid } = route.params
@@ -149,8 +149,8 @@ const ConfirmFriendship = ({ route }) => {
     try {
       // const { friendship, chat, chatUser } =
       // await
-      friendsHelper.confirmFriendship({ friendshipUuid, uuid })
-      friendsHelper.addFriendshipLocally({ friendshipUuid, contactId: contact.id })
+      await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
+      await friendsHelper.addFriendshipLocally({ friendshipUuid, contactId: contact.id })
 
       dispatch(reducer.reloadListOfFriends({ uuid }))
     } catch (err) {

@@ -70,7 +70,7 @@ const Chat = ({ route }) => {
   }, [])
 
   useEffect(() => {
-    console.log(`subscribing to ${chatUuid}`)
+    // console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
     const subscription = subscriptionClient
       .subscribe({
@@ -102,7 +102,7 @@ const Chat = ({ route }) => {
         complete() { console.log("subs. DONE") }, // never printed
       })
 
-    console.log({ subscription })
+    // console.log({ subscription })
 
     // subscription.subscribe(
     //   next => {
@@ -114,7 +114,7 @@ const Chat = ({ route }) => {
     // )
 
     return () => {
-      console.log(`unsubscribing from ${chatUuid}`)
+      // console.log(`unsubscribing from ${chatUuid}`)
       subscription.unsubscribe()
     }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps

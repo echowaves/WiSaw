@@ -36,6 +36,7 @@ import * as CONST from '../../consts.js'
 import * as reducer from './reducer'
 
 import * as friendsHelper from './friends_helper'
+import LocalContacts from '../../components/LocalContacts'
 
 const FriendsList = () => {
   const navigation = useNavigation()
@@ -46,6 +47,9 @@ const FriendsList = () => {
 
   const uuid = useSelector(state => state.secret.uuid)
   const friendsList = useSelector(state => state.friendsList.friendsList)
+
+  const [showLocalContacts, setShowLocalContacts] = useState(false)
+  const [friendshipUuid, setFriendshipUuid] = useState(null)
 
   useEffect(() => {
     (
@@ -61,7 +65,7 @@ const FriendsList = () => {
           },
         })
         // a friendship with no locally assigned contact can never show in the list on the screen
-        await friendsHelper.cleanupAbandonedFriendships({ uuid })
+        // await friendsHelper.cleanupAbandonedFriendships({ uuid })
         _reload()
       }
     )()
@@ -85,6 +89,15 @@ const FriendsList = () => {
     //   paddingBottom: 300,
     // },
   })
+  const setContactId = contactId => {
+    if (friendshipUuid) {
+      friendsHelper.addFriendshipLocally({ friendshipUuid, contactId })
+      setFriendshipUuid(null)
+      dispatch(reducer.reloadListOfFriends({ uuid }))
+    } else {
+      navigation.navigate('ContactDetails', { contactId })
+    }
+  }
 
   const renderAddFriendButton = () => (
     <FontAwesome
@@ -98,7 +111,10 @@ const FriendsList = () => {
         }
       }
       onPress={
-        () => _handleAddFriend()
+        () => {
+          _handleAddFriend()
+        }
+
       }
     />
   )
@@ -130,7 +146,13 @@ const FriendsList = () => {
         height: 70,
       }}
       onPress={() => {
-        navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
+        if (!friend?.contact?.name) {
+          // console.log({ friend })
+          setFriendshipUuid(friend.friendshipUuid)
+          setShowLocalContacts(true)
+        } else {
+          navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
+        }
       }}>
       <ListItem.Content>
         <ListItem.Title>
@@ -165,8 +187,10 @@ const FriendsList = () => {
   )
 
   const _handleAddFriend = () => {
+    // console.log('adding friend')
+    setFriendshipUuid(null)// make sure we are adding a new friend
+    setShowLocalContacts(true)
     // const friend = await dispatch(reducer.createFriendship({ uuid }))
-    navigation.navigate('LocalContacts')
   }
 
   // const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
@@ -192,7 +216,12 @@ const FriendsList = () => {
 
   if (!friendsList || friendsList?.length === 0) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
+        <LocalContacts
+          show={showLocalContacts}
+          setShow={setShowLocalContacts}
+          setContactId={setContactId}
+        />
         <Card
           borderRadius={5}
           containerStyle={{
@@ -203,16 +232,21 @@ const FriendsList = () => {
             textAlign: 'center',
             margin: 10,
           }}>
-            You don't have any friends yet. To start a conversation, send invitation to a friend from your phone book.
+            You don&apos;t have any friends yet. To start a conversation, send invitation to a friend from your phone book.
           </Text>
           {renderAddFriendButton()}
         </Card>
-      </View>
+      </SafeAreaView>
     )
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <LocalContacts
+        show={showLocalContacts}
+        setShow={setShowLocalContacts}
+        setContactId={setContactId}
+      />
       <FlatGrid
         itemDimension={
           width
@@ -244,7 +278,7 @@ const FriendsList = () => {
           }
         }
       />
-    </View>
+    </SafeAreaView>
   )
 }
 
