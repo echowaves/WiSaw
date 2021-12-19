@@ -3,6 +3,8 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
+import * as SecureStore from 'expo-secure-store'
+import * as Notifications from 'expo-notifications'
 
 import { useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
@@ -51,6 +53,8 @@ import {
   Badge,
 } from 'react-native-elements'
 
+import { UUID_KEY } from "../Secret/reducer"
+import { getUnreadCountsList } from "../FriendsList/friends_helper"
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
@@ -63,9 +67,12 @@ const BACKGROUND_FETCH_TASK = 'background-fetch'
 // 1. Define the task by providing a name and the function that should be executed
 // Note: This needs to be called in the global scope (e.g outside of your React components)
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
-  const now = Date.now()
+  // const now = Date.now()
 
-  console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`)
+  const uuid = await SecureStore.getItemAsync(UUID_KEY)
+  const unreadCountList = getUnreadCountsList({ uuid })
+  const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
+  Notifications.setBadgeCountAsync(badgeCount)
 
   // Be sure to return the successful result type!
   return BackgroundFetch.BackgroundFetchResult.NewData
@@ -84,9 +91,9 @@ async function registerBackgroundFetchAsync() {
 // 3. (Optional) Unregister tasks by specifying the task name
 // This will cancel any future background fetch calls that match the given name
 // Note: This does NOT need to be in the global scope and CAN be used in your React components!
-async function unregisterBackgroundFetchAsync() {
-  return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK)
-}
+// async function unregisterBackgroundFetchAsync() {
+//   return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK)
+// }
 
 const FOOTER_HEIGHT = 90
 
@@ -132,16 +139,25 @@ const PhotosList = () => {
     setLastViewableRow(lastViewableItem.index)
   })
 
-  React.useEffect(() => {
-    checkStatusAsync()
+  useEffect(() => {
+    // checkStatusAsync()
+    Notifications.requestPermissionsAsync({
+      ios: {
+        allowAlert: true,
+        allowBadge: true,
+        allowSound: true,
+        allowAnnouncements: true,
+      },
+    })
+    registerBackgroundFetchAsync()
   }, [])
 
-  const checkStatusAsync = async () => {
-    const status = await BackgroundFetch.getStatusAsync()
-    const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK)
-    // setStatus(status)
-    // setIsRegistered(isRegistered)
-  }
+  // const checkStatusAsync = async () => {
+  //   const status = await BackgroundFetch.getStatusAsync()
+  //   const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK)
+  //   // setStatus(status)
+  //   // setIsRegistered(isRegistered)
+  // }
 
   const _initState = async () => {
     // /// //////////////////////////////////////

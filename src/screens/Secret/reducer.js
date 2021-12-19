@@ -10,7 +10,7 @@ import * as CONST from '../../consts.js'
 
 import * as ACTION_TYPES from './action_types'
 
-const UUID_KEY = 'wisaw_device_uuid'
+export const UUID_KEY = 'wisaw_device_uuid'
 const NICK_NAME_KEY = 'wisaw_nick_name'
 
 export const initialState = {

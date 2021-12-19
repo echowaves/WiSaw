@@ -113,7 +113,7 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
       const unread = unreadCountsList.find(unreadChat => unreadChat.chatUuid === friendship.chatUuid)
 
       const localContact = {
-        key: friendship.friendshipUuid, contact, ...friendship, unreadCount: unread.unread,
+        key: friendship.friendshipUuid, contact, ...friendship, unreadCount: unread?.unread || 0,
       }
       // console.log({ localContact })
       return localContact
@@ -178,6 +178,7 @@ const _getUnreadCountsList = async ({ uuid }) => {
   } catch (err6) {
     // eslint-disable-next-line no-console
     console.log({ err6 })// eslint-disable-line      
+    return []
   }
 }
 

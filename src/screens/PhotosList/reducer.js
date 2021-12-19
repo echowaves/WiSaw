@@ -244,24 +244,16 @@ const reducer = (state = initialState, action) => {
 
 export function initState() {
   return async (dispatch, getState) => {
-    const [
-      uuid,
-      isTandcAccepted,
-    ] = await Promise.all([
-      getUUID(),
-      _getTancAccepted(),
-    ])
-    // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
-    dispatch({
-      type: ACTION_TYPES.INIT_STATE,
-      isTandcAccepted,
-    })
+    const uuid = await getUUID()
     dispatch({
       type: INIT_UUID,
       uuid,
     })
-    // console.log({ uuid })
-    // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
+    const isTandcAccepted = await _getTancAccepted()
+    dispatch({
+      type: ACTION_TYPES.INIT_STATE,
+      isTandcAccepted,
+    })
   }
 }
 
