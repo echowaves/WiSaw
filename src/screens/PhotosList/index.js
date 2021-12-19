@@ -122,6 +122,8 @@ const PhotosList = () => {
   // const batch = useSelector(state => state.photosList.batch)
   const unreadCountList = useSelector(state => state.friendsList.unreadCountsList)
 
+  const unreadCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
+
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
   const onViewRef = React.useRef(viewableItems => {
@@ -503,7 +505,7 @@ const PhotosList = () => {
     />
   )
 
-  const renderFooter = () => location && (
+  const renderFooter = ({ unreadCount }) => location && (
     <SafeAreaView
       style={{
         backgroundColor: CONST.NAV_COLOR,
@@ -637,13 +639,15 @@ const PhotosList = () => {
               }}
             />
           )}
-          <Badge
-            value={unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)}
-            badgeStyle={{
-              backgroundColor: CONST.MAIN_COLOR,
-            }}
-            containerStyle={{ position: 'absolute', top: 5, right: 5 }}
-          />
+          {unreadCount > 0 && (
+            <Badge
+              value={unreadCount}
+              badgeStyle={{
+                backgroundColor: CONST.MAIN_COLOR,
+              }}
+              containerStyle={{ position: 'absolute', top: 5, right: 5 }}
+            />
+          )}
         </Col>
 
       </Grid>
@@ -853,7 +857,7 @@ const PhotosList = () => {
         {activeSegment === 0 && renderThumbs()}
         {activeSegment === 1 && renderThumbsWithComments()}
         {activeSegment === 2 && renderThumbsWithComments()}
-        {renderFooter()}
+        {renderFooter({ unreadCount })}
       </View>
     )
   }
@@ -932,7 +936,7 @@ const PhotosList = () => {
           </Text>
         </Card>
         {renderPendingPhotos()}
-        {renderFooter()}
+        {renderFooter({ unreadCount })}
       </View>
     )
   }
@@ -954,7 +958,7 @@ const PhotosList = () => {
           </Text>
         </Card>
         {renderPendingPhotos()}
-        {renderFooter()}
+        {renderFooter({ renderFooter })}
       </View>
     )
   }
@@ -968,7 +972,7 @@ const PhotosList = () => {
         }
         />
         {renderPendingPhotos()}
-        {renderFooter()}
+        {renderFooter({ unreadCount })}
       </View>
     )
   }
@@ -1026,7 +1030,7 @@ const PhotosList = () => {
           </Card>
         )}
         {renderPendingPhotos()}
-        {renderFooter()}
+        {renderFooter({ unreadCount })}
       </View>
     )
   }
@@ -1063,7 +1067,7 @@ const PhotosList = () => {
     <View style={styles.container}>
       {activeSegment === 2 && renderSearchBar(false)}
       {renderPendingPhotos()}
-      {renderFooter()}
+      {renderFooter({ unreadCount })}
     </View>
   )
 }

@@ -33,6 +33,8 @@ import PropTypes from 'prop-types'
 
 import * as friendsHelper from '../FriendsList/friends_helper'
 
+import * as friendsListReducer from '../FriendsList/reducer'
+
 import * as CONST from '../../consts.js'
 import subscriptionClient from '../../subscriptionClient'
 
@@ -242,7 +244,11 @@ const Chat = ({ route }) => {
         }
       }
       onPress={
-        () => navigation.goBack()
+        () => {
+          dispatch(friendsListReducer.reloadFriendsList({ uuid }))
+          dispatch(friendsListReducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+          navigation.goBack()
+        }
       }
     />
   )

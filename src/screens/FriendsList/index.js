@@ -174,13 +174,15 @@ const FriendsList = () => {
           navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
         }
       }}>
-      <Badge
-        value={friend.unreadCount}
-        badgeStyle={{
-          backgroundColor: CONST.MAIN_COLOR,
-        }}
-        containerStyle={{ marginTop: -20 }}
-      />
+      {friend.unreadCount > 0 && (
+        <Badge
+          value={friend.unreadCount}
+          badgeStyle={{
+            backgroundColor: CONST.MAIN_COLOR,
+          }}
+          containerStyle={{ marginTop: -20 }}
+        />
+      )}
       <ListItem.Content>
         <ListItem.Title>
           <Text>

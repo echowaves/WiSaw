@@ -261,8 +261,6 @@ export function initState() {
       uuid,
     })
     // console.log({ uuid })
-    dispatch(friendsReducer.reloadFriendsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
-    dispatch(friendsReducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
     // await new Promise(r => setTimeout(r, 500)) // this is really weird, but seems to help with the order of the images
   }
 }
@@ -428,11 +426,16 @@ async function _requestSearchedPhotos(getState) {
 
 export function getPhotos() {
   return async (dispatch, getState) => {
+    const { uuid } = getState().secret
+
+    dispatch(friendsReducer.reloadFriendsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+    dispatch(friendsReducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+
     // const {
     //   batch, loading, isLastPage, pageNumber, searchTerm,
     // } = getState().photosList
     // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
-    await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
+    // await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
     const {
       location, netAvailable, searchTerm, topOffset,
     } = getState().photosList
