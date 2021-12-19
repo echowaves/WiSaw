@@ -164,6 +164,7 @@ To confirm, follow the url: ${url}`
         // enhanse friendship locally
         await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
         dispatch(reducer.reloadFriendsList({ uuid }))
+        dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
       }
     } else {
       // misfortune... there's no SMS available on this device
@@ -176,6 +177,7 @@ To confirm, follow the url: ${url}`
             onPress: async () => {
               await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
               dispatch(reducer.reloadFriendsList({ uuid }))
+              dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
               Clipboard.setString(message)
               Toast.show({
                 text1: "The sharable message is copied to clipboard",

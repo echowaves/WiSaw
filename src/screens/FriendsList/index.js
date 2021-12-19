@@ -76,6 +76,7 @@ const FriendsList = () => {
 
   const _reload = async () => {
     dispatch(reducer.reloadFriendsList({ uuid }))
+    dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
   }
   // useEffect(() => {
   //   console.log(`friends list updated: ${friendsList.length}`)
@@ -96,6 +97,7 @@ const FriendsList = () => {
       friendsHelper.addFriendshipLocally({ friendshipUuid, contactId })
       setFriendshipUuid(null)
       dispatch(reducer.reloadFriendsList({ uuid }))
+      dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
     } else {
       navigation.navigate('ContactDetails', { contactId })
     }
