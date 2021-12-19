@@ -103,7 +103,8 @@ const Chat = ({ route }) => {
           friendsHelper.resetUnreadCount({ chatUuid, uuid })
         },
         error({ error }) {
-          console.log({ error })
+          console.error("subscription error", { error })
+          _return({ uuid })
         },
         complete() { console.log("subs. DONE") }, // never printed
       })
@@ -245,13 +246,16 @@ const Chat = ({ route }) => {
       }
       onPress={
         () => {
-          dispatch(friendsListReducer.reloadFriendsList({ uuid }))
-          dispatch(friendsListReducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
-          navigation.goBack()
+          _return({ uuid })
         }
       }
     />
   )
+  const _return = ({ uuid }) => {
+    dispatch(friendsListReducer.reloadFriendsList({ uuid }))
+    dispatch(friendsListReducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+    navigation.goBack()
+  }
   const renderSend = props => (
     // eslint-disable-next-line react/jsx-props-no-spreading
     <Send {...props}>

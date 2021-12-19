@@ -68,19 +68,25 @@ const BACKGROUND_FETCH_TASK = 'background-fetch'
 // Note: This needs to be called in the global scope (e.g outside of your React components)
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   // const now = Date.now()
+  try {
+    const uuid = await SecureStore.getItemAsync(UUID_KEY)
+    const unreadCountList = getUnreadCountsList({ uuid })
+    const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
+    Notifications.setBadgeCountAsync(badgeCount)
+    console.log("background fetch", { badgeCount })
 
-  const uuid = await SecureStore.getItemAsync(UUID_KEY)
-  const unreadCountList = getUnreadCountsList({ uuid })
-  const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
-  Notifications.setBadgeCountAsync(badgeCount)
-
-  // Be sure to return the successful result type!
-  return BackgroundFetch.BackgroundFetchResult.NewData
+    // Be sure to return the successful result type!
+    return BackgroundFetch.BackgroundFetchResult.NewData
+  } catch (error) {
+    console.log("background fetch", { error })
+    return BackgroundFetch.Result.Failed
+  }
 })
 
 // 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background fetch should behave
 // Note: This does NOT need to be in the global scope and CAN be used in your React components!
 async function registerBackgroundFetchAsync() {
+  console.log('registering background fetch...')
   return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
     minimumInterval: 60 * 15, // 15 minutes
     stopOnTerminate: false, // android only,
