@@ -521,154 +521,158 @@ const PhotosList = () => {
     />
   )
 
-  const renderFooter = ({ unreadCount }) => location && (
-    <SafeAreaView
-      style={{
-        backgroundColor: CONST.NAV_COLOR,
-        width,
-        height: FOOTER_HEIGHT,
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        left: 0,
-      }}>
-      <Grid style={{
-        position: 'absolute',
-        top: 5,
-        right: 0,
-        left: 0,
-      }}>
-        {/* drawer button */}
-        <Col
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          {netAvailable && (
-            <FontAwesome
-              onPress={
-                () => navigation.openDrawer()
-              }
-              name="navicon"
-              size={25}
-              style={{
-                color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                bottom: 0,
-                left: 15,
-              }}
-            />
-          )}
-        </Col>
+  const renderFooter = ({ unreadCount }) => {
+    Notifications.setBadgeCountAsync(unreadCount)
 
-        {/*  video button */}
-        <Col
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: 45,
-            backgroundColor: 'white',
-            height: 50,
-            width: 80,
-
-          }}
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking({ cameraType: 'video' })
-            }
-          }>
-          <FontAwesome5
-            name="video"
-            color={CONST.EMPHASIZED_COLOR}
-            size={30}
+    return location && (
+      <SafeAreaView
+        style={{
+          backgroundColor: CONST.NAV_COLOR,
+          width,
+          height: FOOTER_HEIGHT,
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          left: 0,
+        }}>
+        <Grid style={{
+          position: 'absolute',
+          top: 5,
+          right: 0,
+          left: 0,
+        }}>
+          {/* drawer button */}
+          <Col
             style={{
-              alignSelf: 'center',
-            }}
-            containerStyle={
-              {
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }
-            }
-          />
-        </Col>
-        <Col
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: 50,
-            width: 25,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            {netAvailable && (
+              <FontAwesome
+                onPress={
+                  () => navigation.openDrawer()
+                }
+                name="navicon"
+                size={25}
+                style={{
+                  color: CONST.MAIN_COLOR,
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 15,
+                }}
+              />
+            )}
+          </Col>
 
-          }}
-        />
-        {/* photo button */}
-        <Col
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: 50,
-            width: 80,
-            backgroundColor: 'white',
-            borderRadius: 45,
-
-          }}
-          onPress={
-            () => {
-              checkPermissionsForPhotoTaking({ cameraType: 'camera' })
-            }
-          }>
-          <FontAwesome5
-            name="camera"
-            color={CONST.MAIN_COLOR}
-            size={30}
+          {/*  video button */}
+          <Col
             style={{
-              alignSelf: 'center',
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderRadius: 45,
+              backgroundColor: 'white',
+              height: 50,
+              width: 80,
+
             }}
-            containerStyle={
-              {
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+            onPress={
+              () => {
+                checkPermissionsForPhotoTaking({ cameraType: 'video' })
               }
-            }
-          />
-        </Col>
-        {/* drawer button */}
-        <Col
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          {netAvailable && (
+            }>
             <FontAwesome5
-              onPress={
-                () => navigation.navigate('FriendsList')
-              }
-              name="user-friends"
-              size={35}
+              name="video"
+              color={CONST.EMPHASIZED_COLOR}
+              size={30}
               style={{
-                color: CONST.MAIN_COLOR,
-                position: 'absolute',
-                bottom: 0,
-                right: 15,
+                alignSelf: 'center',
               }}
+              containerStyle={
+                {
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }
+              }
             />
-          )}
-          {unreadCount > 0 && (
-            <Badge
-              value={unreadCount}
-              badgeStyle={{
-                backgroundColor: CONST.MAIN_COLOR,
-              }}
-              containerStyle={{ position: 'absolute', top: 5, right: 5 }}
-            />
-          )}
-        </Col>
+          </Col>
+          <Col
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: 50,
+              width: 25,
 
-      </Grid>
-    </SafeAreaView>
-  )
+            }}
+          />
+          {/* photo button */}
+          <Col
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: 50,
+              width: 80,
+              backgroundColor: 'white',
+              borderRadius: 45,
+
+            }}
+            onPress={
+              () => {
+                checkPermissionsForPhotoTaking({ cameraType: 'camera' })
+              }
+            }>
+            <FontAwesome5
+              name="camera"
+              color={CONST.MAIN_COLOR}
+              size={30}
+              style={{
+                alignSelf: 'center',
+              }}
+              containerStyle={
+                {
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }
+              }
+            />
+          </Col>
+          {/* drawer button */}
+          <Col
+            style={{
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            {netAvailable && (
+              <FontAwesome5
+                onPress={
+                  () => navigation.navigate('FriendsList')
+                }
+                name="user-friends"
+                size={35}
+                style={{
+                  color: CONST.MAIN_COLOR,
+                  position: 'absolute',
+                  bottom: 0,
+                  right: 15,
+                }}
+              />
+            )}
+            {unreadCount > 0 && (
+              <Badge
+                value={unreadCount}
+                badgeStyle={{
+                  backgroundColor: CONST.MAIN_COLOR,
+                }}
+                containerStyle={{ position: 'absolute', top: 5, right: 5 }}
+              />
+            )}
+          </Col>
+
+        </Grid>
+      </SafeAreaView>
+    )
+  }
 
   const segment0 = () => (
     <FontAwesome
