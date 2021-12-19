@@ -20,3 +20,6 @@ To see your and others photos visit https://www.wisaw.com
 https://www.tutorialguruji.com/react-js/appsync-subscriptions-with-apolloclient-in-react/
 https://dev.to/sayanide/beginner-s-guide-to-using-websockets-in-apollo-client-graphql-subscription-11m
 https://github.com/apollographql/apollo-feature-requests/issues/224
+
+## Badge notifications
+https://dev.to/marianapatcosta/basics-and-caveats-of-expo-notifications-23cd
