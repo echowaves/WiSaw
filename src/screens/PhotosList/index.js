@@ -204,7 +204,9 @@ const PhotosList = () => {
         dispatch(reducer.setNetAvailable(state.isInternetReachable))
       }
     })
-    return () => unsubscribeNetInfo()
+    return () => {
+      unsubscribeNetInfo()
+    }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -1098,33 +1100,50 @@ const PhotosList = () => {
   )
 }
 
-export const _initBranch = async ({ navigation }) => {
+const _initBranch = async ({ navigation }) => {
 // eslint-disable-next-line
 if (!__DEV__) {
     const ExpoBranch = await import('expo-branch')
     const Branch = ExpoBranch.default
 
+    // eslint-disable-next-line global-require
+    // const Branch = require("expo-branch").default
+
     // console.log('...................................................................................1')
     // console.log({ Branch })
-    // alert(JSON.stringify(Branch))
-    Branch.subscribe(bundle => {
+    // alert(JSON.stringify({ Branch }))
+    Branch.subscribe(async bundle => {
+      // alert(JSON.stringify({ bundle }))
+
+      // if (bundle?.error) {
+      //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
+      // }
+      // const params = await Branch.getLatestReferringParams()
+      // alert(JSON.stringify({ params }))
+
       if (bundle && bundle.params && bundle?.params?.$canonical_identifier && !bundle.error) {
       // `bundle.params` contains all the info about the link.
-
-        // alert(JSON.stringify(bundle))
-        navigation.popToTop()
-        if (bundle?.params?.photoId) {
-          // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
-          navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.photoId })
-        }
-        if (bundle?.params?.friendshipUuid) {
-          // alert(JSON.stringify({ friendshipUuid: bundle?.params?.friendshipUuid }))
-          navigation.navigate('ConfirmFriendship', { friendshipUuid: bundle?.params?.friendshipUuid })
-        }
-
+        _navigateByParams({ params: bundle.params, navigation })
         // navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
+      } else {
+        const params = await Branch.getLatestReferringParams()
+        // alert(JSON.stringify({ params }))
+        _navigateByParams({ params, navigation })
       }
     })
+  }
+}
+
+const _navigateByParams = ({ params, navigation }) => {
+  // alert(JSON.stringify({ params }))
+  navigation.popToTop()
+  if (params?.photoId) {
+    // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
+    navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
+  }
+  if (params?.friendshipUuid) {
+    // alert(JSON.stringify({ friendshipUuid: bundle?.params?.friendshipUuid }))
+    navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
   }
 }
 
