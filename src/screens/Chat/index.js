@@ -104,7 +104,15 @@ const Chat = ({ route }) => {
         },
         error({ error }) {
           console.error("subscription error", { error })
-          _return({ uuid })
+          Toast.show({
+            text1: 'Error in the application, chat may not function properly.',
+            // text2: 'You may want to leave this screen and come back to it again, to make it work.',
+            text2: JSON.stringify({ error }),
+            type: "error",
+            topOffset,
+          })
+
+          // _return({ uuid })
         },
         complete() { console.log("subs. DONE") }, // never printed
       })
