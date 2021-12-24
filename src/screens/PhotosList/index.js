@@ -1134,16 +1134,16 @@ if (!__DEV__) {
   }
 }
 
-const _navigateByParams = ({ params, navigation }) => {
+const _navigateByParams = async ({ params, navigation }) => {
   // alert(JSON.stringify({ params }))
-  navigation.popToTop()
+  await navigation.popToTop()
   if (params?.photoId) {
     // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
-    navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
+    await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
   }
   if (params?.friendshipUuid) {
     // alert(JSON.stringify({ friendshipUuid: bundle?.params?.friendshipUuid }))
-    navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
+    await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
   }
 }
 
