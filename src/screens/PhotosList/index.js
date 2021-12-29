@@ -29,7 +29,7 @@ import {
 } from 'react-native'
 
 import {
-  FontAwesome, Ionicons, AntDesign, FontAwesome5, MaterialCommunityIcons,
+  FontAwesome, Ionicons, AntDesign, FontAwesome5,
 } from '@expo/vector-icons'
 
 import { Col, /* Row, */ Grid } from "react-native-easy-grid"
@@ -73,12 +73,12 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
     const unreadCountList = getUnreadCountsList({ uuid })
     const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
     Notifications.setBadgeCountAsync(badgeCount)
-    console.log("background fetch", { badgeCount })
+    // console.log("background fetch", { badgeCount })
 
     // Be sure to return the successful result type!
     return BackgroundFetch.BackgroundFetchResult.NewData
   } catch (error) {
-    console.log("background fetch", { error })
+    // console.log("background fetch", { error })
     return BackgroundFetch.Result.Failed
   }
 })
@@ -86,7 +86,7 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
 // 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background fetch should behave
 // Note: This does NOT need to be in the global scope and CAN be used in your React components!
 async function registerBackgroundFetchAsync() {
-  console.log('registering background fetch...')
+  // console.log('registering background fetch...')
   return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
     minimumInterval: 60 * 15, // 15 minutes
     stopOnTerminate: false, // android only,

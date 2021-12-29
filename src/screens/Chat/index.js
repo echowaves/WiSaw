@@ -5,27 +5,31 @@ import { GiftedChat, Send } from 'react-native-gifted-chat'
 import moment from 'moment'
 
 import {
-  Alert,
+  // Alert,
   SafeAreaView,
   StyleSheet,
-  ScrollView,
+  // ScrollView,
   View,
   ActivityIndicator,
 } from 'react-native'
 
 import {
-  Text,
-  Input,
-  LinearProgress,
-  Card,
-  ListItem,
-  Button,
+  // Text,
+  // Input,
+  // LinearProgress,
+  // Card,
+  // ListItem,
+  // Button,
   Icon,
 } from 'react-native-elements'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
-import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import {
+  FontAwesome,
+  // Ionicons,
+  MaterialCommunityIcons,
+} from '@expo/vector-icons'
 
 import { gql } from "@apollo/client"
 
@@ -103,7 +107,7 @@ const Chat = ({ route }) => {
           friendsHelper.resetUnreadCount({ chatUuid, uuid })
         },
         error({ error }) {
-          console.error("subscription error", { error })
+          // console.error("subscription error", { error })
           Toast.show({
             text1: 'Error in the application, chat may not function properly.',
             // text2: 'You may want to leave this screen and come back to it again, to make it work.',
@@ -114,19 +118,10 @@ const Chat = ({ route }) => {
 
           // _return({ uuid })
         },
-        complete() { console.log("subs. DONE") }, // never printed
+        complete() {
+          // console.log("subs. DONE")
+        }, // never printed
       })
-
-    // console.log({ subscription })
-
-    // subscription.subscribe(
-    //   next => {
-    //     console.log({ next })
-    //   },
-    //   error => {
-    //     console.log({ error })
-    //   }
-    // )
 
     return () => {
       // console.log(`unsubscribing from ${chatUuid}`)
@@ -208,13 +203,7 @@ const Chat = ({ route }) => {
                 textArg: text,
               },
             })).data.sendMessage
-
-          // console.log({ message })
-          // console.log({ returnedMessage })
-
-          // if (message._id === returnedMessage.messageUuid) {
-          //   setMessages(previousMessages => GiftedChat.append(previousMessages, [message]))
-          // }
+          return returnedMessage
         } catch (e) {
           Toast.show({
             text1: `Failed to send message:`,
@@ -222,10 +211,10 @@ const Chat = ({ route }) => {
             type: "error",
             topOffset,
           })
-          // console.log({ e })
         }
       })()
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const styles = StyleSheet.create({

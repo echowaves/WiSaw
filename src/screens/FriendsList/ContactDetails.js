@@ -1,42 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
-import { useDimensions } from '@react-native-community/hooks'
 import * as SMS from 'expo-sms'
 import * as Contacts from 'expo-contacts'
 
-import validator from 'validator'
-import { phone } from 'phone'
-
 import {
-  View,
   Alert,
   SafeAreaView,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Platform,
 } from 'react-native'
 
 import Clipboard from '@react-native-community/clipboard'
 
 import {
   Text,
-  Input,
-  LinearProgress,
-  Card,
   ListItem,
-  Button,
-  SearchBar,
 } from 'react-native-elements'
-// import * as FileSystem from 'expo-file-system'
+
 import Toast from 'react-native-toast-message'
 
 import {
-  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign, MaterialIcons,
+  FontAwesome,
+  MaterialIcons,
 } from '@expo/vector-icons'
 
-import { Col, Row, Grid } from "react-native-easy-grid"
+import {
+  Col,
+  // Row,
+  // Grid,
+} from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
@@ -53,8 +47,6 @@ const ContactDetails = ({ route }) => {
   const dispatch = useDispatch()
 
   const topOffset = useSelector(state => state.photosList.topOffset)
-
-  const { width, height } = useDimensions().window
 
   const [contact, setContact] = useState(null)
 
@@ -112,11 +104,6 @@ const ContactDetails = ({ route }) => {
   )
 
   const _sendFriendshipRequest = async ({ contact, phone }) => {
-    // TODO: delete next 3 lines -- debuggin
-    // const friendship = await dispatch(reducer.createFriendship({ uuid }))
-    // await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
-    // dispatch(reducer.reloadListOfFriends({ uuid }))
-    /// //////////////////////////////////////
     const isSmsAvailable = await SMS.isAvailableAsync()
     const friendship = await dispatch(reducer.createFriendship({ uuid }))
 
@@ -128,11 +115,6 @@ const ContactDetails = ({ route }) => {
     }
 
     const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship?.friendshipUuid })
-
-    // if (Platform.OS === 'android') {
-    //   await new Promise(r => setTimeout(r, 5000))// have to sleep here on Androd
-    //   // alert(JSON.stringify({ _branchUniversalObject }))
-    // }
 
     const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
 
@@ -149,19 +131,8 @@ To confirm, follow the url: ${url}`
       const { result } = await SMS.sendSMSAsync(
         phone.number,
         message
-        //         {
-        //           // attachments: {
-        //           //   uri: 'path/myfile.png',
-        //           //   mimeType: 'image/png',
-        //           //   filename: 'myfile.png',
-        //           // },
-        //         }
       )
-      // alert(JSON.stringify({ result }))
-      // console.log({ result })
       if (result === "sent") {
-        // console.log({ result })
-        // enhanse friendship locally
         await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactId: contact.id })
         dispatch(reducer.reloadFriendsList({ uuid }))
         dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
@@ -186,18 +157,12 @@ To confirm, follow the url: ${url}`
               })
             },
           },
-          { text: 'No', onPress: () => console.log('No button clicked'), style: 'cancel' },
+          { text: 'No', onPress: () => {}, style: 'cancel' },
         ],
         {
           cancelable: true,
         }
       )
-
-      // Toast.show({
-      //   text1: "SMS is not available on this devise",
-      //   type: "error",
-      //   topOffset,
-      // })
     }
     await navigation.popToTop()
     await navigation.navigate('FriendsList')
@@ -227,10 +192,6 @@ To confirm, follow the url: ${url}`
               friendshipUuid, // your userId field would be defined under customMetadata
             },
           },
-          // metadata: {
-          //   // screen: 'friendshipScreen',
-          //   params: { friendshipUuid },
-          // },
         }
       )
       return _branchUniversalObject
@@ -287,7 +248,7 @@ To confirm, follow the url: ${url}`
           }}
           onPress={
             async () => {
-              const contact = await Contacts.presentFormAsync(contactId)
+              // const contact = await Contacts.presentFormAsync(contactId)
               setContact(await Contacts.getContactByIdAsync(contactId))
             }
           }>

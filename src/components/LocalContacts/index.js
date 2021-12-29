@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 // import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from "react-redux"
+// import { useDispatch, useSelector } from "react-redux"
 import { useDimensions } from '@react-native-community/hooks'
 import * as Linking from 'expo-linking'
 import * as Contacts from 'expo-contacts'
@@ -17,58 +17,40 @@ import {
 
 import {
   Text,
-  Input,
-  LinearProgress,
-  Card,
   ListItem,
-  Button,
   SearchBar,
   Header,
 } from 'react-native-elements'
-// import * as FileSystem from 'expo-file-system'
-import Toast from 'react-native-toast-message'
 
 import {
-  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign, MaterialIcons,
+  FontAwesome, Ionicons,
 } from '@expo/vector-icons'
 
-import { Col, Row, Grid } from "react-native-easy-grid"
+import {
+  Col,
+  // Row,
+  // Grid,
+} from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts.js'
 
-import * as reducer from '../../screens/FriendsList/reducer'
-
-import * as friendsHelper from '../../screens/FriendsList/friends_helper'
-
 const LocalContacts = ({
   show, setShow, setContactId, headerText,
 }) => {
   // const navigation = useNavigation()
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
   const [searchTerm, setSearchTerm] = useState('')
   const [contacts, setContacts] = useState([])
   const [permissionGranted, setPermissionGranted] = useState(false)
 
-  const { width, height } = useDimensions().window
-
-  // const topOffset = useSelector(state => state.photosList.topOffset)
-
-  const uuid = useSelector(state => state.secret.uuid)
-  const friendsList = useSelector(state => state.friendsList.friendsList)
+  const {
+    width,
+    // height,
+  } = useDimensions().window
 
   useEffect(() => {
-    // navigation.setOptions({
-    //   headerTitle: 'Phone Book',
-    //   headerTintColor: CONST.MAIN_COLOR,
-    //   headerRight: renderHeaderRight,
-    //   headerLeft: renderHeaderLeft,
-    //   headerBackTitle: '',
-    //   headerStyle: {
-    //     backgroundColor: CONST.NAV_COLOR,
-    //   },
-    // })
     _checkPermission()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -310,6 +292,7 @@ LocalContacts.propTypes = {
   show: PropTypes.bool.isRequired,
   setShow: PropTypes.func.isRequired,
   setContactId: PropTypes.func.isRequired,
+  headerText: PropTypes.string.isRequired,
 }
 
 export default LocalContacts

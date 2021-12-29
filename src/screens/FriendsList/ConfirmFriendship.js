@@ -1,41 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
-import { useDimensions } from '@react-native-community/hooks'
 import * as Linking from 'expo-linking'
 
 import * as Contacts from 'expo-contacts'
 
-import validator from 'validator'
-import { phone } from 'phone'
-
 import {
-  View,
   Alert,
   SafeAreaView,
   StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
 } from 'react-native'
 
-import {
-  Text,
-  Input,
-  LinearProgress,
-  Card,
-  ListItem,
-  Button,
-  SearchBar,
-} from 'react-native-elements'
-// import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
 import {
-  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign, MaterialIcons,
+  FontAwesome,
 } from '@expo/vector-icons'
-
-import { Col, Row, Grid } from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
@@ -55,16 +35,8 @@ const ConfirmFriendship = ({ route }) => {
 
   const topOffset = useSelector(state => state.photosList.topOffset)
 
-  const { width, height } = useDimensions().window
   const [permissionGranted, setPermissionGranted] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [contacts, setContacts] = useState([])
-
   const [showLocalContacts, setShowLocalContacts] = useState(true)
-
-  // const [contact, setContact] = useState(null)
-
-  // const topOffset = useSelector(state => state.photosList.topOffset)
 
   const uuid = useSelector(state => state.secret.uuid)
 
@@ -161,7 +133,7 @@ const ConfirmFriendship = ({ route }) => {
         show={showLocalContacts}
         setShow={setShowLocalContacts}
         setContactId={setContactId}
-        headerText="To store this connection request locally, pick your friend from the address book."
+        headerText="You have received a friendship request. Did this message come from friend your know and trust? To confirm, pick your friend from the address book."
       />
     </SafeAreaView>
   )

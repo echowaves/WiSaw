@@ -3,32 +3,29 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 
 import {
-  View,
   Alert,
   SafeAreaView,
   StyleSheet,
-  ScrollView,
 } from 'react-native'
 
 import {
   Text,
-  Input,
-  LinearProgress,
   Card,
   ListItem,
-  Button,
   Badge,
 } from 'react-native-elements'
-// import * as FileSystem from 'expo-file-system'
-import Toast from 'react-native-toast-message'
+
+// import Toast from 'react-native-toast-message'
 import FlatGrid from 'react-native-super-grid'
 import { useDimensions } from '@react-native-community/hooks'
 
 import {
-  FontAwesome, Ionicons, MaterialCommunityIcons, SimpleLineIcons, AntDesign,
+  FontAwesome,
+  // Ionicons,
+  // MaterialCommunityIcons,
+  // SimpleLineIcons,
+  // AntDesign,
 } from '@expo/vector-icons'
-
-import { Col, Row, Grid } from "react-native-easy-grid"
 
 import PropTypes from 'prop-types'
 
@@ -42,7 +39,10 @@ import LocalContacts from '../../components/LocalContacts'
 const FriendsList = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const { width, height } = useDimensions().window
+  const {
+    width,
+    // height,
+  } = useDimensions().window
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
   const headerText = "SMS confirmation message for your friend will be send to the number you pick from the list. Make sure to pick a correct number."
@@ -78,19 +78,11 @@ const FriendsList = () => {
     dispatch(reducer.reloadFriendsList({ uuid }))
     dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
   }
-  // useEffect(() => {
-  //   console.log(`friends list updated: ${friendsList.length}`)
-  // }, [friendsList])
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
     },
-    // scrollView: {
-    //   alignItems: 'center',
-    //   marginHorizontal: 0,
-    //   paddingBottom: 300,
-    // },
   })
   const setContactId = contactId => {
     if (friendshipUuid) {
@@ -150,6 +142,7 @@ const FriendsList = () => {
         height: 70,
       }}
       onPress={() => {
+        // eslint-disable-next-line react/prop-types
         if (!friend?.contact?.name) {
           Alert.alert(
             'Do you want to associate this friend with contract from address book?',
@@ -158,13 +151,14 @@ const FriendsList = () => {
               {
                 text: 'No',
                 onPress: () => {
+                  // eslint-disable-next-line react/prop-types
                   navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
                 },
               },
               {
                 text: 'Yes',
                 onPress: () => {
-                  // console.log({ friend })
+                  // eslint-disable-next-line react/prop-types
                   setFriendshipUuid(friend.friendshipUuid)
                   setShowLocalContacts(true)
                 },
@@ -173,33 +167,46 @@ const FriendsList = () => {
             { cancelable: false }
           )
         } else {
+        // eslint-disable-next-line react/prop-types
           navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
         }
       }}>
-      {friend.unreadCount > 0 && (
-        <Badge
-          value={friend.unreadCount}
-          badgeStyle={{
-            backgroundColor: CONST.MAIN_COLOR,
-          }}
-          containerStyle={{ marginTop: -20 }}
-        />
-      )}
+      {
+        // eslint-disable-next-line react/prop-types
+        friend.unreadCount > 0 && (
+          <Badge
+            value={
+              // eslint-disable-next-line react/prop-types
+              friend.unreadCount
+            }
+            badgeStyle={{
+              backgroundColor: CONST.MAIN_COLOR,
+            }}
+            containerStyle={{ marginTop: -20 }}
+          />
+        )
+      }
       <ListItem.Content>
         <ListItem.Title>
           <Text>
-            {`${friend?.contact?.name}`}
+            {
+            // eslint-disable-next-line react/prop-types
+              `${friend?.contact?.name}`
+            }
           </Text>
         </ListItem.Title>
-        {friend.uuid2 === null && (
-          <ListItem.Subtitle>
-            <Text style={{
-              color: "red",
-            }}>
-              pending confirmation
-            </Text>
-          </ListItem.Subtitle>
-        )}
+        {
+          // eslint-disable-next-line react/prop-types
+          friend.uuid2 === null && (
+            <ListItem.Subtitle>
+              <Text style={{
+                color: "red",
+              }}>
+                pending confirmation
+              </Text>
+            </ListItem.Subtitle>
+          )
+        }
       </ListItem.Content>
       <FontAwesome
         name="user-times"
@@ -210,6 +217,7 @@ const FriendsList = () => {
           }
         }
         onPress={
+          // eslint-disable-next-line react/prop-types
           () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
         }
       />

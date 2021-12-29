@@ -57,7 +57,6 @@
     "expo-video-thumbnails": "~6.0.3",
     "graphql": "^16.0.0",
     "moment": "2.29.1",
-    "phone": "^3.1.10",
     "prop-types": "15.7.2",
     "react": "17.0.1",
     "react-native": "0.64.3",
@@ -81,8 +80,7 @@
     "redux": "^4.1.2",
     "redux-thunk": "^2.4.0",
     "subscriptions-transport-ws": "^0.11.0",
-    "uuid": "8.3.2",
-    "validator": "^13.7.0"
+    "uuid": "8.3.2"    
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
