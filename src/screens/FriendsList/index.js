@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
+import Toast from 'react-native-toast-message'
 
 import {
   Alert,
@@ -34,7 +35,7 @@ import * as CONST from '../../consts.js'
 import * as reducer from './reducer'
 
 import * as friendsHelper from './friends_helper'
-import LocalContacts from '../../components/LocalContacts'
+import NamePicker from '../../components/NamePicker'
 
 const FriendsList = () => {
   const navigation = useNavigation()
@@ -43,14 +44,15 @@ const FriendsList = () => {
     width,
     // height,
   } = useDimensions().window
+  const topOffset = useSelector(state => state.photosList.topOffset)
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
-  const headerText = "SMS confirmation message for your friend will be send to the number you pick from the list. Make sure to pick a correct number."
+  const headerText = "What is the name of your friend to whom you want to connect?"
 
   const uuid = useSelector(state => state.secret.uuid)
   const friendsList = useSelector(state => state.friendsList.friendsList)
 
-  const [showLocalContacts, setShowLocalContacts] = useState(false)
+  const [showNamePicker, setShowNamePicker] = useState(false)
   const [friendshipUuid, setFriendshipUuid] = useState(null)
 
   useEffect(() => {
@@ -84,15 +86,81 @@ const FriendsList = () => {
       flex: 1,
     },
   })
-  const setContactId = contactId => {
-    if (friendshipUuid) {
-      friendsHelper.addFriendshipLocally({ friendshipUuid, contactId })
-      setFriendshipUuid(null)
-      dispatch(reducer.reloadFriendsList({ uuid }))
-      dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
-    } else {
-      navigation.navigate('ContactDetails', { contactId })
+  const setContactName = async contactName => {
+    if (!friendshipUuid) {
+      // this is new friendship, let's create it and then send the invite
+      const friendship = await _sendFriendshipRequest({ contactName })
+      await setFriendshipUuid(friendship.friendshipUuid)
     }
+    // console.log({ contactName })
+    await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
+    await setFriendshipUuid(null)
+    dispatch(reducer.reloadFriendsList({ uuid }))
+    dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+  }
+
+  const _sendFriendshipRequest = async ({ contactName }) => {
+    const friendship = await dispatch(reducer.createFriendship({ uuid }))
+
+    // alert(JSON.stringify({ friendship }))
+    if (!friendship) {
+      // await navigation.popToTop()
+      // await navigation.navigate('FriendsList')
+      return // was not able to create friendship
+    }
+
+    const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship?.friendshipUuid })
+
+    // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
+
+    const messageBody = `${contactName}, You've got WiSaw friendship request.
+To confirm, follow the url:`
+
+    const shareOptions = {
+      messageHeader: "What I Saw today...",
+      messageBody,
+      emailSubject: 'What I Saw today friendship request...',
+    }
+
+    await _branchUniversalObject.showShareSheet(shareOptions)
+
+    // alert(JSON.stringify({ url }))
+    return friendship
+  }
+
+  const _createBranchUniversalObject = async ({ friendshipUuid }) => {
+    // eslint-disable-next-line
+    if (!__DEV__) {
+      // import Branch, { BranchEvent } from 'expo-branch'
+      const ExpoBranch = await import('expo-branch')
+      const Branch = ExpoBranch.default
+
+      // console.log({ friendship })
+
+      const _branchUniversalObject = await Branch.createBranchUniversalObject(
+        `${friendshipUuid}`,
+        {
+          locallyIndex: false,
+          title: 'Inviting friend to collaborate on WiSaw',
+          // contentImageUrl: photo.imgUrl,
+          contentDescription: "Let's talk.",
+          // This metadata can be used to easily navigate back to this screen
+          // when implementing deep linking with `Branch.subscribe`.
+          contentMetadata: {
+            customMetadata: {
+              friendshipUuid, // your userId field would be defined under customMetadata
+            },
+          },
+        }
+      )
+      return _branchUniversalObject
+    }
+    Toast.show({
+      text1: "Branch is not available in DEV mode",
+      type: "error",
+      topOffset,
+    })
+    return null
   }
 
   const renderAddFriendButton = () => (
@@ -143,10 +211,10 @@ const FriendsList = () => {
       }}
       onPress={() => {
         // eslint-disable-next-line react/prop-types
-        if (!friend?.contact?.name) {
+        if (!friend?.contact) {
           Alert.alert(
-            'Do you want to associate this friend with contract from address book?',
-            'Pick the right contact.',
+            'This is unnamed connection.',
+            'Do you want to give your friend a name?',
             [
               {
                 text: 'No',
@@ -160,7 +228,7 @@ const FriendsList = () => {
                 onPress: () => {
                   // eslint-disable-next-line react/prop-types
                   setFriendshipUuid(friend.friendshipUuid)
-                  setShowLocalContacts(true)
+                  setShowNamePicker(true)
                 },
               },
             ],
@@ -191,7 +259,7 @@ const FriendsList = () => {
           <Text>
             {
             // eslint-disable-next-line react/prop-types
-              `${friend?.contact?.name}`
+              `${friend?.contact}`
             }
           </Text>
         </ListItem.Title>
@@ -228,7 +296,7 @@ const FriendsList = () => {
   const _handleAddFriend = () => {
     // console.log('adding friend')
     setFriendshipUuid(null)// make sure we are adding a new friend
-    setShowLocalContacts(true)
+    setShowNamePicker(true)
     // const friend = await dispatch(reducer.createFriendship({ uuid }))
   }
 
@@ -256,10 +324,10 @@ const FriendsList = () => {
   if (!friendsList || friendsList?.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <LocalContacts
-          show={showLocalContacts}
-          setShow={setShowLocalContacts}
-          setContactId={setContactId}
+        <NamePicker
+          show={showNamePicker}
+          setShow={setShowNamePicker}
+          setContactName={setContactName}
           headerText={headerText}
         />
         <Card
@@ -272,7 +340,7 @@ const FriendsList = () => {
             textAlign: 'center',
             margin: 10,
           }}>
-            You don&apos;t have any friends yet. To start a conversation, send invitation to a friend from your phone book.
+            You don&apos;t have any friends yet. To start a conversation, send invitation to a friend.
           </Text>
           {renderAddFriendButton()}
         </Card>
@@ -282,10 +350,10 @@ const FriendsList = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LocalContacts
-        show={showLocalContacts}
-        setShow={setShowLocalContacts}
-        setContactId={setContactId}
+      <NamePicker
+        show={showNamePicker}
+        setShow={setShowNamePicker}
+        setContactName={setContactName}
         headerText={headerText}
       />
       <FlatGrid

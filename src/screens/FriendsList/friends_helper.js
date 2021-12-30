@@ -1,26 +1,13 @@
 import { gql } from "@apollo/client"
-import * as Contacts from 'expo-contacts'
 
 import { Storage } from 'expo-storage'
 import * as CONST from '../../consts.js'
 
-export const addFriendshipLocally = async ({ friendshipUuid, contactId }) => {
+export const addFriendshipLocally = async ({ friendshipUuid, contactName }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
   await Storage.removeItem({ key }) // always cleanup first
-  await Storage.setItem({ key, value: JSON.stringify(contactId) })
+  await Storage.setItem({ key, value: JSON.stringify(contactName) })
 }
-
-// TODO: review the logic, should not be deleting the friendship on the server even if the local one is not established yet
-// export const cleanupAbandonedFriendships = async ({ uuid }) => {
-//   const remoteFriendships = await _getRemoteListOfFriendships({ uuid })
-//   await Promise.all(remoteFriendships.map(async friendship => {
-//     const { friendshipUuid } = friendship
-//     const contact = await _getLocalContact({ friendshipUuid })
-//     if (!contact) {
-//       deleteFriendship({ friendshipUuid })
-//     }
-//   }))
-// }
 
 export const deleteFriendship = async ({ friendshipUuid }) => {
   // cleanup local contact
@@ -54,7 +41,7 @@ export const getLocalContactName = ({ uuid, friendUuid, friendsList }) => {
   if (!enhancedFriend) {
     return "anonym"
   }
-  return enhancedFriend?.contact?.name
+  return enhancedFriend?.contact
 }
 
 export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
@@ -113,7 +100,10 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
       const unread = unreadCountsList.find(unreadChat => unreadChat.chatUuid === friendship.chatUuid)
 
       const localContact = {
-        key: friendship.friendshipUuid, contact, ...friendship, unreadCount: unread?.unread || 0,
+        key: friendship.friendshipUuid,
+        contact,
+        ...friendship,
+        unreadCount: unread?.unread || 0,
       }
       // console.log({ localContact })
       return localContact
@@ -149,13 +139,12 @@ export const resetUnreadCount = async ({ chatUuid, uuid }) => {
 
 const _getLocalContact = async ({ friendshipUuid }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
-  const localFriendshipId = JSON.parse(await Storage.getItem({ key }))
-  if (!localFriendshipId) {
+  const localFriendshipName = JSON.parse(await Storage.getItem({ key }))
+  if (!localFriendshipName) {
     return null
   }
-  // console.log({ localFriendshipId })
-  const contact = await Contacts.getContactByIdAsync(localFriendshipId)
-  return contact
+  // console.log({ friendshipUuid, localFriendshipName })
+  return localFriendshipName
 }
 
 const _getUnreadCountsList = async ({ uuid }) => {

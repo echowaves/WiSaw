@@ -38,7 +38,6 @@
     "expo-background-fetch": "~10.0.3",
     "expo-branch": "5.1.0",
     "expo-cached-image": "43.0.1",
-    "expo-contacts": "~10.0.3",
     "expo-file-system": "~13.0.3",
     "expo-image-manipulator": "~10.1.2",
     "expo-image-picker": "~11.0.3",

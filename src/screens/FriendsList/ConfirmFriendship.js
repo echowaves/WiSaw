@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
-import * as Linking from 'expo-linking'
-
-import * as Contacts from 'expo-contacts'
 
 import {
-  Alert,
   SafeAreaView,
   StyleSheet,
 } from 'react-native'
@@ -19,7 +15,7 @@ import {
 
 import PropTypes from 'prop-types'
 
-import LocalContacts from '../../components/LocalContacts'
+import LocalContacts from '../../components/NamePicker'
 
 import * as CONST from '../../consts.js'
 
@@ -35,8 +31,7 @@ const ConfirmFriendship = ({ route }) => {
 
   const topOffset = useSelector(state => state.photosList.topOffset)
 
-  const [permissionGranted, setPermissionGranted] = useState(false)
-  const [showLocalContacts, setShowLocalContacts] = useState(true)
+  const [showNamePicker, setShowNamePicker] = useState(true)
 
   const uuid = useSelector(state => state.secret.uuid)
 
@@ -51,7 +46,6 @@ const ConfirmFriendship = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-    _checkPermission()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -85,32 +79,10 @@ const ConfirmFriendship = ({ route }) => {
     />
   )
 
-  const _checkPermission = async () => {
-    if (!permissionGranted) {
-      const { status } = await Contacts.requestPermissionsAsync()
-      if (status !== 'granted') {
-        Alert.alert(
-          "In order to establish p4p identity, WiSaw needs to access contacts in your phone book.",
-          "You need to enable Contacts in Settings and Try Again",
-          [
-            {
-              text: 'Open Settings',
-              onPress: () => {
-                Linking.openSettings()
-              },
-            },
-          ],
-        )
-        return
-      }
-      setPermissionGranted(status === 'granted')
-    }
-  }
-
-  const setContactId = async contactId => {
+  const setContactName = async contactName => {
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
-      await friendsHelper.addFriendshipLocally({ friendshipUuid, contactId })
+      await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
       dispatch(reducer.reloadFriendsList({ uuid }))
       dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
 
@@ -130,10 +102,10 @@ const ConfirmFriendship = ({ route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <LocalContacts
-        show={showLocalContacts}
-        setShow={setShowLocalContacts}
-        setContactId={setContactId}
-        headerText="You have received a friendship request. Did this message come from friend your know and trust? To confirm, pick your friend from the address book."
+        show={showNamePicker}
+        setShow={setShowNamePicker}
+        setContactName={setContactName}
+        headerText="You have received a friendship request. Did this message come from friend your know and trust? What is the name of the friend you've got the invitation from?"
       />
     </SafeAreaView>
   )

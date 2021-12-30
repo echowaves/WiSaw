@@ -36,8 +36,6 @@ import ModalInputText from './src/screens/ModalInputText'
 
 import Chat from './src/screens/Chat'
 import FriendsList from './src/screens/FriendsList'
-// import LocalContacts from './src/screens/FriendsList/LocalContacts'
-import ContactDetails from './src/screens/FriendsList/ContactDetails'
 import ConfirmFriendship from './src/screens/FriendsList/ConfirmFriendship'
 
 // import StackNavigator from './src/nav/stackNavigator.js'
@@ -111,20 +109,6 @@ const App = () => (
                     component={FriendsList}
                     options={{ headerTintColor: CONST.MAIN_COLOR }}
                   />
-                  {/* <Stack.Screen
-                    name="LocalContacts"
-                    component={LocalContacts}
-                    options={{
-                      headerTintColor: CONST.MAIN_COLOR,
-                      presentation: 'modal',
-                    }}
-                  /> */
-                    <Stack.Screen
-                      name="ContactDetails"
-                      component={ContactDetails}
-                      options={{ headerTintColor: CONST.MAIN_COLOR }}
-                    />
-                  }
                   <Stack.Screen
                     name="ConfirmFriendship"
                     component={ConfirmFriendship}

@@ -81,21 +81,10 @@ export function createFriendship({ uuid }) {
           },
         })).data.createFriendship
 
-      // console.log({ returned })
-
-      // await Promise.all([
-      //   _storeUUID(returnedSecret.uuid),
-      //   _storeNickName(returnedSecret.nickName),
-      // ])
-      // console.log({ friendship })
       dispatch({
         type: ACTION_TYPES.ADD_TO_FRIENDSHIP,
         friendship,
       })
-      // Toast.show({
-      //   text1: 'New Friend created.',
-      //   topOffset,
-      // })
       return friendship
     } catch (err) {
       // console.log({ err })
