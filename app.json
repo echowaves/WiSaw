@@ -29,10 +29,12 @@
     ],
     "ios": {
       "bundleIdentifier": "com.echowaves",
-      "buildNumber": "201",
+      "buildNumber": "202",
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["fetch"],
+        "UIBackgroundModes": [
+          "fetch"
+        ],
         "NSCameraUsageDescription": "This will allow you to take photos with WiSaw app. When you take a photo with WiSaw, it will be stored in your photo album on your device and will be shared with other near-by users of the app. Any user who finds content objectionable or abusive will be able to remove it permanently, so that no one will be able to see it any more.",
         "NSLocationAlwaysUsageDescription": "We need to know your location so that we can show you posts in your area.",
         "NSLocationWhenInUseUsageDescription": "You need to enable your location, in order to see photos that are closest to you.",
@@ -58,7 +60,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.echowaves.wisaw",
-      "versionCode": 201,
+      "versionCode": 202,
       "permissions": [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",
@@ -67,7 +69,7 @@
         "CAMERA",
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE",
-        "READ_CONTACTS", 
+        "READ_CONTACTS",
         "WRITE_CONTACTS"
       ],
       "config": {
@@ -78,7 +80,7 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "autoVerify": true,          
+          "autoVerify": true,
           "data": [
             {
               "scheme": "https",
