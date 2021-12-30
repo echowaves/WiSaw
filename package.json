@@ -1,6 +1,6 @@
 {
   "name": "wisaw",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "node_modules/expo/AppEntry.js",
@@ -11,7 +11,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "reset:simulator": "xcrun simctl erase all",
-    "build": "eas build --release-channel prod_$npm_package_version",
+    "build": "eas build",
     "build:android": "expo build:android --release-channel prod_$npm_package_version",
     "publish:prod": "expo publish --release-channel prod_$npm_package_version"
   },
