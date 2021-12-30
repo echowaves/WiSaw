@@ -11,9 +11,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "reset:simulator": "xcrun simctl erase all",
-    "build": "eas build",
-    "build:android": "expo build:android --release-channel prod_$npm_package_version",
-    "publish:prod": "expo publish --release-channel prod_$npm_package_version"
+    "build": "eas build"    
   },
   "dependencies": {
     "@apollo/client": "3.4.16",
