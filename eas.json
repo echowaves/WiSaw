@@ -11,7 +11,13 @@
       "distribution": "internal"
     },
     "production": {
-      "releaseChannel": "production"
+      "releaseChannel": "production",
+      "android": {
+        "autoIncrement": true
+      },
+      "ios": {
+        "autoIncrement": true
+      }
     }
   },
   "submit": {
