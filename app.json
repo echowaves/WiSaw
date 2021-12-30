@@ -29,7 +29,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.echowaves",
-      "buildNumber": "202",
+      "buildNumber": "203",
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": [
@@ -59,7 +59,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.echowaves.wisaw",
-      "versionCode": 202,
+      "versionCode": 203,
       "permissions": [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",
