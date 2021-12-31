@@ -15,7 +15,7 @@ import {
 
 import PropTypes from 'prop-types'
 
-import LocalContacts from '../../components/NamePicker'
+import NamePicker from '../../components/NamePicker'
 
 import * as CONST from '../../consts.js'
 
@@ -80,6 +80,7 @@ const ConfirmFriendship = ({ route }) => {
   )
 
   const setContactName = async contactName => {
+    alert(JSON.stringify({ friendshipUuid, contactName }))
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
@@ -101,7 +102,7 @@ const ConfirmFriendship = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <LocalContacts
+      <NamePicker
         show={showNamePicker}
         setShow={setShowNamePicker}
         setContactName={setContactName}

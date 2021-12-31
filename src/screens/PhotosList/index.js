@@ -1112,16 +1112,16 @@ if (!__DEV__) {
     // console.log('...................................................................................1')
     // console.log({ Branch })
     // alert(JSON.stringify({ Branch }))
-    Branch.subscribe(async bundle => {
+    Branch.subscribe( bundle => {
       // alert(JSON.stringify({ bundle }))
 
       // if (bundle?.error) {
       //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
       // }
       // const params = await Branch.getLatestReferringParams()
-      // alert(JSON.stringify({ params }))
+      // alert(JSON.stringify({ params: bundle.params }))
 
-      if (bundle && bundle.params && bundle?.params?.$canonical_identifier && !bundle.error) {
+      if (bundle && bundle?.params  && !bundle.error) {
       // `bundle.params` contains all the info about the link.
         _navigateByParams({ params: bundle.params, navigation })
         // navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
@@ -1142,7 +1142,7 @@ const _navigateByParams = async ({ params, navigation }) => {
     await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
   }
   if (params?.friendshipUuid) {
-    // alert(JSON.stringify({ friendshipUuid: bundle?.params?.friendshipUuid }))
+    // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
     await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
   }
 }
