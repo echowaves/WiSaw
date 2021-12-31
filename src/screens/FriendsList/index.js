@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
-import Toast from 'react-native-toast-message'
+// import Toast from 'react-native-toast-message'
 
 import {
   Alert,
@@ -22,6 +22,7 @@ import { useDimensions } from '@react-native-community/hooks'
 
 import {
   FontAwesome,
+  FontAwesome5,
   // Ionicons,
   // MaterialCommunityIcons,
   // SimpleLineIcons,
@@ -44,10 +45,10 @@ const FriendsList = () => {
     width,
     // height,
   } = useDimensions().window
-  const topOffset = useSelector(state => state.photosList.topOffset)
+  // const topOffset = useSelector(state => state.photosList.topOffset)
 
   // const topOffset = useSelector(state => state.photosList.topOffset)
-  const headerText = "What is the name of your friend to whom you want to connect?"
+  const headerText = "What is your friend name?"
 
   const uuid = useSelector(state => state.secret.uuid)
   const friendsList = useSelector(state => state.friendsList.friendsList)
@@ -86,82 +87,31 @@ const FriendsList = () => {
       flex: 1,
     },
   })
+
   const setContactName = async contactName => {
+    // this is edit existing name
     if (!friendshipUuid) {
-      // this is new friendship, let's create it and then send the invite
+    // this is new friendship, let's create it and then send the invite
       const friendship = await _sendFriendshipRequest({ contactName })
-      alert(JSON.stringify({ friendship }))
-      await setFriendshipUuid(friendship.friendshipUuid)
+      await friendsHelper.addFriendshipLocally({ friendshipUuid: friendship.friendshipUuid, contactName })
+    } else {
+      await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
     }
-    // console.log({ contactName })
-    await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
-    await setFriendshipUuid(null)
+
+    // alert(JSON.stringify({ friendship }))
+    // await setFriendshipUuid(friendship.friendshipUuid)
+
+    // alert(JSON.stringify({ friendshipUuid, contactName }))
+    await setShowNamePicker(false)
+    setFriendshipUuid(null)// reset friendshipUuid for next request
+
     dispatch(reducer.reloadFriendsList({ uuid }))
     dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
   }
 
   const _sendFriendshipRequest = async ({ contactName }) => {
-    const friendship = await dispatch(reducer.createFriendship({ uuid }))
-
-    // alert(JSON.stringify({ friendship }))
-    if (!friendship) {
-      // await navigation.popToTop()
-      // await navigation.navigate('FriendsList')
-      return // was not able to create friendship
-    }
-
-    const _branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship?.friendshipUuid })
-
-    // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
-
-    const messageBody = `${contactName}, You've got WiSaw friendship request.
-To confirm, follow the url:`
-
-    const shareOptions = {
-      messageHeader: "What I Saw today...",
-      messageBody,
-      emailSubject: 'What I Saw today friendship request...',
-    }
-
-    await _branchUniversalObject.showShareSheet(shareOptions)
-
-    // alert(JSON.stringify({ url }))
+    const friendship = await dispatch(reducer.createFriendship({ uuid, contactName }))
     return friendship
-  }
-
-  const _createBranchUniversalObject = async ({ friendshipUuid }) => {
-    // eslint-disable-next-line
-    if (!__DEV__) {
-      // import Branch, { BranchEvent } from 'expo-branch'
-      const ExpoBranch = await import('expo-branch')
-      const Branch = ExpoBranch.default
-
-      // console.log({ friendship })
-
-      const _branchUniversalObject = await Branch.createBranchUniversalObject(
-        `${friendshipUuid}`,
-        {
-          locallyIndex: false,
-          title: 'Inviting friend to collaborate on WiSaw',
-          // contentImageUrl: photo.imgUrl,
-          contentDescription: "Let's talk.",
-          // This metadata can be used to easily navigate back to this screen
-          // when implementing deep linking with `Branch.subscribe`.
-          contentMetadata: {
-            customMetadata: {
-              friendshipUuid, // your userId field would be defined under customMetadata
-            },
-          },
-        }
-      )
-      return _branchUniversalObject
-    }
-    Toast.show({
-      text1: "Branch is not available in DEV mode",
-      type: "error",
-      topOffset,
-    })
-    return null
   }
 
   const renderAddFriendButton = () => (
@@ -212,33 +162,7 @@ To confirm, follow the url:`
       }}
       onPress={() => {
         // eslint-disable-next-line react/prop-types
-        if (!friend?.contact) {
-          Alert.alert(
-            'This is unnamed connection.',
-            'Do you want to give your friend a name?',
-            [
-              {
-                text: 'No',
-                onPress: () => {
-                  // eslint-disable-next-line react/prop-types
-                  navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
-                },
-              },
-              {
-                text: 'Yes',
-                onPress: () => {
-                  // eslint-disable-next-line react/prop-types
-                  setFriendshipUuid(friend.friendshipUuid)
-                  setShowNamePicker(true)
-                },
-              },
-            ],
-            { cancelable: false }
-          )
-        } else {
-        // eslint-disable-next-line react/prop-types
-          navigation.navigate('Chat', { chatUuid: friend.chatUuid, contact: friend?.contact })
-        }
+        navigation.navigate('Chat', { chatUuid: friend?.chatUuid, contact: friend?.contact })
       }}>
       {
         // eslint-disable-next-line react/prop-types
@@ -277,6 +201,22 @@ To confirm, follow the url:`
           )
         }
       </ListItem.Content>
+      <FontAwesome5
+        name="user-edit"
+        size={30}
+        style={
+          {
+            color: CONST.MAIN_COLOR,
+          }
+        }
+        onPress={
+          async () => {
+          // eslint-disable-next-line react/prop-types
+            await setFriendshipUuid(friend?.friendshipUuid)
+            setShowNamePicker(true)
+          }
+        }
+      />
       <FontAwesome
         name="user-times"
         size={30}
@@ -294,11 +234,9 @@ To confirm, follow the url:`
     </ListItem>
   )
 
-  const _handleAddFriend = () => {
-    // console.log('adding friend')
-    setFriendshipUuid(null)// make sure we are adding a new friend
-    setShowNamePicker(true)
-    // const friend = await dispatch(reducer.createFriendship({ uuid }))
+  const _handleAddFriend = async () => {
+    await setFriendshipUuid(null)// make sure we are adding a new friend
+    await setShowNamePicker(true)
   }
 
   // const _handleAssociateLocalFriend = ({ friendshipUuid }) => {

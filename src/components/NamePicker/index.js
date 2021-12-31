@@ -63,7 +63,10 @@ const NamePicker = ({
         }
       }
       onPress={
-        () => setShow(false)
+        () => {
+          setShow(false)
+          setInputText('')// reset for next use
+        }
       }
     />
   )
@@ -79,8 +82,9 @@ const NamePicker = ({
       }
       onPress={
         async () => {
-          setContactName(inputText)
-          setShow(false)
+          await setContactName(inputText)
+          await setShow(false)
+          await setInputText('')
         }
       }
     />

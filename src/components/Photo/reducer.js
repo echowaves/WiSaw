@@ -228,31 +228,9 @@ export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
         messageHeader: "What I Saw today...",
         messageBody,
         emailSubject,
-        // attachments: {
-        //   uri: branchUniversalObject.canonicalUrl,
-        //   mimeType: 'image/jpeg',
-        //   // filename: `${item.id}ii.jpg`,
-        // },
       }
+      // alert(JSON.stringify({ branchUniversalObject }))
       await branchUniversalObject.showShareSheet(shareOptions)
-
-      //
-      // if (!(await SMS.isAvailableAsync())) {
-      //   throw (new Error("SMS is not available."))
-      // }
-      // const uri = await CacheManager.getCachedUri({ key: `${item.id}` })
-      //
-      // await SMS.sendSMSAsync(
-      //   [],
-      //   messageBody,
-      //   {
-      //     attachments: {
-      //       uri,
-      //       mimeType: 'image/jpeg',
-      //       filename: `${item.id}i.jpg`,
-      //     },
-      //   }
-      // )
     } catch (err) {
       // console.log({ err })
       Toast.show({

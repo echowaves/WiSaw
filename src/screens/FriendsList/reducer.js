@@ -41,7 +41,7 @@ export default function reducer(state = initialState, action) {
   }
 }
 
-export function createFriendship({ uuid }) {
+export function createFriendship({ uuid, contactName }) {
   return async (dispatch, getState) => {
     const {
       topOffset,
@@ -85,6 +85,22 @@ export function createFriendship({ uuid }) {
         type: ACTION_TYPES.ADD_TO_FRIENDSHIP,
         friendship,
       })
+
+      const branchUniversalObject = await _createBranchUniversalObject({ friendshipUuid: friendship?.friendshipUuid, topOffset })
+
+      // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
+
+      const messageBody = `${contactName}, you've got WiSaw friendship request.
+  To confirm, follow the url:`
+
+      const shareOptions = {
+        messageHeader: "What I Saw today...",
+        messageBody,
+        emailSubject: 'What I Saw today friendship request...',
+      }
+      // alert(JSON.stringify({ branchUniversalObject }))
+      await branchUniversalObject.showShareSheet(shareOptions)
+
       return friendship
     } catch (err) {
       // console.log({ err })
@@ -163,4 +179,39 @@ export function reloadUnreadCountsList({ uuid }) {
       console.log({ err5 })// eslint-disable-line      
     }
   }
+}
+
+const _createBranchUniversalObject = async ({ friendshipUuid, topOffset }) => {
+  // eslint-disable-next-line
+  if (!__DEV__) {
+    // import Branch, { BranchEvent } from 'expo-branch'
+    const ExpoBranch = await import('expo-branch')
+    const Branch = ExpoBranch.default
+
+    // console.log({ friendship })
+
+    const _branchUniversalObject = await Branch.createBranchUniversalObject(
+      `${friendshipUuid}`,
+      {
+        locallyIndex: false,
+        title: 'Inviting friend to collaborate on WiSaw',
+        // contentImageUrl: photo.imgUrl,
+        contentDescription: "Let's talk.",
+        // This metadata can be used to easily navigate back to this screen
+        // when implementing deep linking with `Branch.subscribe`.
+        contentMetadata: {
+          customMetadata: {
+            friendshipUuid, // your userId field would be defined under customMetadata
+          },
+        },
+      }
+    )
+    return _branchUniversalObject
+  }
+  Toast.show({
+    text1: "Branch is not available in DEV mode",
+    type: "error",
+    topOffset,
+  })
+  return null
 }
