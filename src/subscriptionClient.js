@@ -6,9 +6,9 @@ import { createHttpLink } from "apollo-link-http"
 import ApolloClient from "apollo-client"
 import { InMemoryCache } from "apollo-cache-inmemory"
 
-import {
-  API_URI, API_KEY, REGION,
-} from "@env"
+import Constants from 'expo-constants'
+
+const { API_URI, API_KEY, REGION } = Constants.manifest.extra
 
 const url = API_URI
 const region = REGION
