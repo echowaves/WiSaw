@@ -90,6 +90,7 @@ const FriendsList = () => {
     if (!friendshipUuid) {
       // this is new friendship, let's create it and then send the invite
       const friendship = await _sendFriendshipRequest({ contactName })
+      alert(JSON.stringify({ friendship }))
       await setFriendshipUuid(friendship.friendshipUuid)
     }
     // console.log({ contactName })
