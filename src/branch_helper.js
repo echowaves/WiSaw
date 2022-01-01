@@ -20,6 +20,7 @@ export const initBranch = async ({ navigation }) => {
     // if (bundle?.error) {
     //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
     // }
+
     // const params = await Branch.getLatestReferringParams()
     // alert(JSON.stringify({ params, bundle_params: bundle.params }))
 
