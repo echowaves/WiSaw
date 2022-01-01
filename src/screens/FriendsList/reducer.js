@@ -8,7 +8,12 @@ import * as ACTION_TYPES from './action_types'
 
 import * as friendsHelper from './friends_helper'
 
-import * as branchHelper from '../../branch_helper'
+// import * as branchHelper from '../../branch_helper'
+// let branchHelper
+// // eslint-disable-next-line no-undef
+// if (!__DEV__) {
+//   branchHelper = await import('../../branch_helper')
+// }
 
 export const initialState = {
   friendsList: [],
@@ -90,6 +95,7 @@ export function createFriendship({ uuid, contactName }) {
 
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
+        const branchHelper = await import('../../branch_helper')
         await branchHelper.shareFriend({ friendshipUuid: friendship?.friendshipUuid, contactName })
       }
       // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }

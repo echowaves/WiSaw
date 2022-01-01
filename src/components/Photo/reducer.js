@@ -4,7 +4,8 @@ import Toast from 'react-native-toast-message'
 
 // import { CacheManager } from 'expo-cached-image'
 import { gql } from "@apollo/client"
-import * as branchHelper from "../../branch_helper"
+
+// import * as branchHelper from "../../branch_helper"
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -210,6 +211,7 @@ export function sharePhoto({ photo, photoDetails }) {
     try {
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
+        const branchHelper = await import('../../branch_helper')
         await branchHelper.sharePhoto({ photo, photoDetails })
       }
     } catch (err) {

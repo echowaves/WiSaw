@@ -56,11 +56,12 @@ import { getUnreadCountsList } from "../FriendsList/friends_helper"
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
-import * as branchHelper from '../../branch_helper'
 
 import Thumb from '../../components/Thumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
 import ThumbPending from '../../components/ThumbPending'
+
+// import * as branchHelper from '../../branch_helper'
 
 const BACKGROUND_FETCH_TASK = 'background-fetch'
 
@@ -194,13 +195,15 @@ const PhotosList = () => {
 
     dispatch(reducer.settopOffset(height / 3))
 
-    // eslint-disable-next-line no-undef
-    if (!__DEV__) {
-      branchHelper.initBranch({ navigation })
-    }
-
     _getLocation()
-    _initandreload()
+    _initandreload();
+    (async () => {
+      // eslint-disable-next-line no-undef
+      if (!__DEV__) {
+        const branchHelper = await import('../../branch_helper')
+        branchHelper.initBranch({ navigation })
+      }
+    })()
 
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener(state => {
