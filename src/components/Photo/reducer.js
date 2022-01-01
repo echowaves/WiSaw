@@ -3,10 +3,8 @@
 import Toast from 'react-native-toast-message'
 
 // import { CacheManager } from 'expo-cached-image'
-
 import { gql } from "@apollo/client"
-
-// import Branch, { BranchEvent } from 'expo-branch'
+import * as branchHelper from "../../branch_helper"
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
@@ -205,32 +203,14 @@ export function deletePhoto({ photo }) {
   }
 }
 
-export function sharePhoto({ photo, photoDetails, branchUniversalObject }) {
+export function sharePhoto({ photo, photoDetails }) {
   return async (dispatch, getState) => {
     const { topOffset } = getState().photosList
 
     try {
-      let messageBody = `Check out what I saw today${photo?.video ? " (video)" : ''}:`
-      // const messageHeader = 'Check out what I saw today:'
-      const emailSubject = 'WiSaw: Check out what I saw today'
-
-      if (photoDetails.comments) {
-        // get only the 3 comments
-        messageBody = `${messageBody}\n\n${
-          photoDetails.comments.slice(0, 3).map(
-            comment => (
-              comment.comment
-            )
-          ).join('\n\n')}\n\n`
+      if (!__DEV__) {
+        await branchHelper.sharePhoto({ photo, photoDetails })
       }
-
-      const shareOptions = {
-        messageHeader: "What I Saw today...",
-        messageBody,
-        emailSubject,
-      }
-      // alert(JSON.stringify({ branchUniversalObject }))
-      await branchUniversalObject.showShareSheet(shareOptions)
     } catch (err) {
       // console.log({ err })
       Toast.show({

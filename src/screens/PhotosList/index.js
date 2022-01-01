@@ -13,8 +13,6 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Updates from 'expo-updates'
 import Toast from 'react-native-toast-message'
 
-// import Branch, { BranchEvent } from 'expo-branch'
-
 import * as BackgroundFetch from 'expo-background-fetch'
 import * as TaskManager from 'expo-task-manager'
 
@@ -58,6 +56,8 @@ import { getUnreadCountsList } from "../FriendsList/friends_helper"
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts.js'
+import * as branchHelper from '../../branch_helper'
+
 import Thumb from '../../components/Thumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
 import ThumbPending from '../../components/ThumbPending'
@@ -194,7 +194,7 @@ const PhotosList = () => {
 
     dispatch(reducer.settopOffset(height / 3))
 
-    _initBranch({ navigation })
+    branchHelper.initBranch({ navigation })
     _getLocation()
     _initandreload()
 
@@ -1063,33 +1063,6 @@ const PhotosList = () => {
     )
   }
 
-  // if (photos.length === 0 && !loading && !isLastPage && pageNumber === -1) {
-  //   return (
-  //     <View style={styles.container}>
-  //       {activeSegment === 2 && renderSearchBar(false)}
-  //       <Ionicons
-  //         onPress={
-  //           () => _reload()
-  //         }
-  //         name="reload"
-  //         size={100}
-  //         style={
-  //           {
-  //             margin: 10,
-  //             color: CONST.MAIN_COLOR,
-  //             alignSelf: 'center',
-  //
-  //           }
-  //         }
-  //       />
-  //
-  //       {renderPendingPhotos()}
-  //       {renderPhotoButton()}
-  //     </View>
-  //   )
-  // }
-  //
-
   dispatch(reducer.getPhotos())
   return (
     <View style={styles.container}>
@@ -1098,53 +1071,6 @@ const PhotosList = () => {
       {renderFooter({ unreadCount })}
     </View>
   )
-}
-
-const _initBranch = async ({ navigation }) => {
-// eslint-disable-next-line
-if (!__DEV__) {
-    const ExpoBranch = await import('expo-branch')
-    const Branch = ExpoBranch.default
-
-    // eslint-disable-next-line global-require
-    // const Branch = require("expo-branch").default
-
-    // console.log('...................................................................................1')
-    // console.log({ Branch })
-    // alert(JSON.stringify({ Branch }))
-    Branch.subscribe( bundle => {
-      // alert(JSON.stringify({ bundle }))
-
-      // if (bundle?.error) {
-      //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
-      // }
-      // const params = await Branch.getLatestReferringParams()
-      // alert(JSON.stringify({ params: bundle.params }))
-
-      if (bundle && bundle?.params  && !bundle.error) {
-      // `bundle.params` contains all the info about the link.
-        _navigateByParams({ params: bundle.params, navigation })
-        // navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
-      } else {
-        const params = await Branch.getLatestReferringParams()
-        // alert(JSON.stringify({ params }))
-        _navigateByParams({ params, navigation })
-      }
-    })
-  }
-}
-
-const _navigateByParams = async ({ params, navigation }) => {
-  // alert(JSON.stringify({ params }))
-  await navigation.popToTop()
-  if (params?.photoId) {
-    // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
-    await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
-  }
-  if (params?.friendshipUuid) {
-    // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
-    await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
-  }
 }
 
 export default PhotosList

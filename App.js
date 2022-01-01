@@ -5,7 +5,11 @@
  * @flow strict-local
  */
 
-import 'react-native-gesture-handler'
+// import 'react-native-gesture-handler'
+import {
+  GestureHandlerRootView,
+  // RectButton,
+} from 'react-native-gesture-handler'
 
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -47,13 +51,14 @@ const App = () => (
   <Provider store={store}>
     <View style={styles.container}>
       <ThemeProvider>
-        <NavigationContainer>
-          <Drawer.Navigator
-            screenOptions={{ gestureEnabled: true, headerShown: false }}>
-            <Drawer.Screen
-              name="Home"
-              options={{
-                drawerIcon:
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <NavigationContainer>
+            <Drawer.Navigator
+              screenOptions={{ gestureEnabled: true, headerShown: false }}>
+              <Drawer.Screen
+                name="Home"
+                options={{
+                  drawerIcon:
                   config => (
                     <FontAwesome
                       name="chevron-left"
@@ -67,61 +72,61 @@ const App = () => (
                       }
                     />
                   ),
-                drawerLabel: '',
-              }}>
-              {props => (
-                <Stack.Navigator
+                  drawerLabel: '',
+                }}>
+                {props => (
+                  <Stack.Navigator
                   // headerMode="none"
                   // initialRouteName="PhotosList"
-                  screenOptions={{ gestureEnabled: true, headerShown: true }}>
-                  <Stack.Screen
-                    name="PhotosList"
-                    component={PhotosList}
-                    options={{
-                      headerTintColor: CONST.MAIN_COLOR,
-                      headerTitle: '',
-                      headerLeft: '',
-                      headerRight: '',
-                    }}
-                  />
-                  <Stack.Screen
-                    name="PhotosDetails"
-                    component={PhotosDetails}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                  <Stack.Screen
-                    name="PhotosDetailsShared"
-                    component={PhotosDetailsShared}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                  <Stack.Screen
-                    name="ModalInputTextScreen"
-                    component={ModalInputText}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                  <Stack.Screen
-                    name="Chat"
-                    component={Chat}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                  <Stack.Screen
-                    name="FriendsList"
-                    component={FriendsList}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                  <Stack.Screen
-                    name="ConfirmFriendship"
-                    component={ConfirmFriendship}
-                    options={{ headerTintColor: CONST.MAIN_COLOR }}
-                  />
-                </Stack.Navigator>
-              )}
-            </Drawer.Screen>
-            <Drawer.Screen
-              name="SecretScreen"
-              component={IdentityScreen}
-              options={{
-                drawerIcon:
+                    screenOptions={{ gestureEnabled: true, headerShown: true }}>
+                    <Stack.Screen
+                      name="PhotosList"
+                      component={PhotosList}
+                      options={{
+                        headerTintColor: CONST.MAIN_COLOR,
+                        headerTitle: '',
+                        headerLeft: '',
+                        headerRight: '',
+                      }}
+                    />
+                    <Stack.Screen
+                      name="PhotosDetails"
+                      component={PhotosDetails}
+                      options={{ headerTintColor: CONST.MAIN_COLOR }}
+                    />
+                    <Stack.Screen
+                      name="PhotosDetailsShared"
+                      component={PhotosDetailsShared}
+                      options={{ headerTintColor: CONST.MAIN_COLOR }}
+                    />
+                    <Stack.Screen
+                      name="ModalInputTextScreen"
+                      component={ModalInputText}
+                      options={{ headerTintColor: CONST.MAIN_COLOR }}
+                    />
+                    <Stack.Screen
+                      name="Chat"
+                      component={Chat}
+                      options={{ headerTintColor: CONST.MAIN_COLOR }}
+                    />
+                    <Stack.Screen
+                      name="FriendsList"
+                      component={FriendsList}
+                      options={{ headerTintColor: CONST.MAIN_COLOR }}
+                    />
+                    <Stack.Screen
+                      name="ConfirmFriendship"
+                      component={ConfirmFriendship}
+                      options={{ headerTintColor: CONST.MAIN_COLOR }}
+                    />
+                  </Stack.Navigator>
+                )}
+              </Drawer.Screen>
+              <Drawer.Screen
+                name="SecretScreen"
+                component={IdentityScreen}
+                options={{
+                  drawerIcon:
                 config => (
                   <FontAwesome
                     name="user-secret"
@@ -135,15 +140,15 @@ const App = () => (
                     }
                   />
                 ),
-                drawerLabel: 'secret',
-                headerShown: true,
-              }}
-            />
-            <Drawer.Screen
-              name="FriendsList"
-              component={FriendsList}
-              options={{
-                drawerIcon:
+                  drawerLabel: 'secret',
+                  headerShown: true,
+                }}
+              />
+              <Drawer.Screen
+                name="FriendsList"
+                component={FriendsList}
+                options={{
+                  drawerIcon:
                 config => (
                   <FontAwesome5
                     name="user-friends"
@@ -157,16 +162,16 @@ const App = () => (
                     }
                   />
                 ),
-                drawerLabel: 'friends',
-                headerShown: true,
-              }}
-            />
+                  drawerLabel: 'friends',
+                  headerShown: true,
+                }}
+              />
 
-            <Drawer.Screen
-              name="Feedback"
-              component={FeedbackScreen}
-              options={{
-                drawerIcon:
+              <Drawer.Screen
+                name="Feedback"
+                component={FeedbackScreen}
+                options={{
+                  drawerIcon:
                 config => (
                   <MaterialIcons
                     name="feedback"
@@ -180,12 +185,13 @@ const App = () => (
                     }
                   />
                 ),
-                drawerLabel: 'feedback',
-                headerShown: true,
-              }}
-            />
-          </Drawer.Navigator>
-        </NavigationContainer>
+                  drawerLabel: 'feedback',
+                  headerShown: true,
+                }}
+              />
+            </Drawer.Navigator>
+          </NavigationContainer>
+        </GestureHandlerRootView>
       </ThemeProvider>
       <Toast ref={ref => Toast.setRef(ref)} />
     </View>

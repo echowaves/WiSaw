@@ -8,6 +8,8 @@ import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import moment from 'moment'
 
+// import Branch, { BranchEvent } from 'expo-branch'
+
 import {
   // Dimensions,
   View,
@@ -97,37 +99,6 @@ const Photo = ({ photo }) => {
   //     // videoRef.current.playAsync()
   //   }
   // }, [videoRef])// eslint-disable-line react-hooks/exhaustive-deps
-
-  const createBranchUniversalObject = async ({ photo }) => {
-    // eslint-disable-next-line
-    if (!__DEV__) {
-      // import Branch, { BranchEvent } from 'expo-branch'
-      const ExpoBranch = await import('expo-branch')
-      const Branch = ExpoBranch.default
-
-      const _branchUniversalObject = await Branch.createBranchUniversalObject(
-        `${photo.id}`,
-        {
-        // title: article.title,
-          contentImageUrl: photo.imgUrl,
-          // contentDescription: article.description,
-          // This metadata can be used to easily navigate back to this screen
-          // when implementing deep linking with `Branch.subscribe`.
-          contentMetadata: {
-            customMetadata: {
-              photoId: photo.id, // your userId field would be defined under customMetadata
-            },
-          },
-          metadata: {
-            // screen: 'photoScreen',
-            params: { photoId: photo.id },
-          },
-        }
-      )
-      // setBranchUniversalObject(_branchUniversalObject)
-      return _branchUniversalObject
-    }
-  }
 
   const renderDateTime = dateString => {
     const dateTime = moment(new Date(dateString), "YYYY-MM-DD-HH-mm-ss-SSS").format("LLL")
@@ -544,8 +515,7 @@ const Photo = ({ photo }) => {
             }}
             onPress={
               async () => {
-                const branchUniversalObject = await createBranchUniversalObject(({ photo }))
-                dispatch(reducer.sharePhoto({ photo, photoDetails, branchUniversalObject }))
+                dispatch(reducer.sharePhoto({ photo, photoDetails }))
               }
             }>
             <FontAwesome
