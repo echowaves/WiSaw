@@ -194,7 +194,11 @@ const PhotosList = () => {
 
     dispatch(reducer.settopOffset(height / 3))
 
-    branchHelper.initBranch({ navigation })
+    // eslint-disable-next-line no-undef
+    if (!__DEV__) {
+      branchHelper.initBranch({ navigation })
+    }
+
     _getLocation()
     _initandreload()
 

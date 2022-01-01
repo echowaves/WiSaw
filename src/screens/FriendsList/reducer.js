@@ -88,8 +88,10 @@ export function createFriendship({ uuid, contactName }) {
         friendship,
       })
 
-      await branchHelper.shareFriend({ friendshipUuid: friendship?.friendshipUuid, contactName })
-
+      // eslint-disable-next-line no-undef
+      if (!__DEV__) {
+        await branchHelper.shareFriend({ friendshipUuid: friendship?.friendshipUuid, contactName })
+      }
       // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
 
       return friendship

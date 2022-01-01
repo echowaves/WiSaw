@@ -208,6 +208,7 @@ export function sharePhoto({ photo, photoDetails }) {
     const { topOffset } = getState().photosList
 
     try {
+      // eslint-disable-next-line no-undef
       if (!__DEV__) {
         await branchHelper.sharePhoto({ photo, photoDetails })
       }
