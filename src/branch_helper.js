@@ -14,14 +14,14 @@ export const initBranch = async ({ navigation }) => {
   // console.log('...................................................................................1')
   // console.log({ Branch })
   // alert(JSON.stringify({ Branch }))
-  Branch.subscribe(bundle => {
-    alert(JSON.stringify({ params: bundle.params }))
+  Branch.subscribe(async bundle => {
+    // alert(JSON.stringify({ params: bundle.params }))
 
     // if (bundle?.error) {
     //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
     // }
     // const params = await Branch.getLatestReferringParams()
-    // alert(JSON.stringify({ params: bundle.params }))
+    // alert(JSON.stringify({ params, bundle_params: bundle.params }))
 
     if (bundle && bundle?.params && !bundle.error) {
       // // `bundle.params` contains all the info about the link.
@@ -64,11 +64,11 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
         screen: 'photoScreen',
         params: JSON.stringify({ photoId: photo?.id },),
       },
-      // contentMetadata: JSON.stringify({
-      //   customMetadata: {
-      //     photoId: photo?.id, // your userId field would be defined under customMetadata
-      //   },
-      // }),
+      contentMetadata: {
+        customMetadata: {
+          photoId: photo?.id, // your userId field would be defined under customMetadata
+        },
+      },
     }
   )
 

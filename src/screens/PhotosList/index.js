@@ -73,7 +73,7 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
     const uuid = await SecureStore.getItemAsync(UUID_KEY)
     const unreadCountList = getUnreadCountsList({ uuid })
     const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
-    Notifications.setBadgeCountAsync(badgeCount)
+    Notifications.setBadgeCountAsync(badgeCount || 0)
     // console.log("background fetch", { badgeCount })
 
     // Be sure to return the successful result type!
@@ -537,7 +537,7 @@ const PhotosList = () => {
   )
 
   const renderFooter = ({ unreadCount }) => {
-    Notifications.setBadgeCountAsync(unreadCount)
+    Notifications.setBadgeCountAsync(unreadCount || 0)
 
     return location && (
       <SafeAreaView
