@@ -41,6 +41,7 @@ export default {
       UIBackgroundModes: [
         "fetch",
       ],
+      ITSAppUsesNonExemptEncryption: false,
       NSCameraUsageDescription: "This will allow you to take photos with WiSaw app. When you take a photo with WiSaw, it will be stored in your photo album on your device and will be shared with other near-by users of the app. Any user who finds content objectionable or abusive will be able to remove it permanently, so that no one will be able to see it any more.",
       NSLocationAlwaysUsageDescription: "We need to know your location so that we can show you posts in your area.",
       NSLocationWhenInUseUsageDescription: "You need to enable your location, in order to see photos that are closest to you.",
