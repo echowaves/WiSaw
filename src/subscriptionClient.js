@@ -8,7 +8,8 @@ import { InMemoryCache } from "apollo-cache-inmemory"
 
 import Constants from 'expo-constants'
 
-const { API_URI, API_KEY, REGION } = Constants.manifest.extra
+// const { API_URI, API_KEY, REGION } = Constants.manifest.extra
+const { API_URI, API_KEY, REGION } = process.env
 
 const url = API_URI
 const region = REGION
