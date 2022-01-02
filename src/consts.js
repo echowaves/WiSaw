@@ -17,7 +17,7 @@ import Constants from 'expo-constants'
 
 const { API_URI, API_KEY } = Constants.manifest.extra
 // const { API_URI, API_KEY } = process.env
-console.log({ API_URI, API_KEY })
+// console.log({ API_URI, API_KEY })
 // const fetch = require('node-fetch')
 
 export const HOST = "https://api.wisaw.com"
