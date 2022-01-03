@@ -178,7 +178,7 @@ const PhotosList = () => {
     setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2)
 
     await Promise.all([
-      checkForUpdate(),
+      // checkForUpdate(),
       // check permissions, retrieve UUID, make sure upload folder exists
       dispatch(reducer.initState()),
       dispatch(reducer.zeroMoment()),
@@ -247,29 +247,29 @@ const PhotosList = () => {
     _updateNavBar()
   }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const checkForUpdate = async () => {
-    try {
-      const update = await Updates.checkForUpdateAsync()
-      if (update.isAvailable) {
-        await Updates.fetchUpdateAsync()
+  // const checkForUpdate = async () => {
+  //   try {
+  //     const update = await Updates.checkForUpdateAsync()
+  //     if (update.isAvailable) {
+  //       await Updates.fetchUpdateAsync()
 
-        Toast.show({
-          text1: 'WiSaw updated',
-          text2: "Restart to see changes",
-          topOffset,
-        })
-        // setTimeout(() => { Updates.reloadAsync() }, 3000)
-      }
-    } catch (error) {
-    // handle or log error
-      // Toast.show({
-      //   text1: `Failed to get over the air update:`,
-      //   text2: `${error}`,
-      //   type: "error",
-      // topOffset: topOffset,
-      // })
-    }
-  }
+  //       Toast.show({
+  //         text1: 'WiSaw updated',
+  //         text2: "Restart to see changes",
+  //         topOffset,
+  //       })
+  //       // setTimeout(() => { Updates.reloadAsync() }, 3000)
+  //     }
+  //   } catch (error) {
+  //   // handle or log error
+  //     // Toast.show({
+  //     //   text1: `Failed to get over the air update:`,
+  //     //   text2: `${error}`,
+  //     //   type: "error",
+  //     // topOffset: topOffset,
+  //     // })
+  //   }
+  // }
 
   const wantToLoadMore = () => {
     if (isLastPage) {
