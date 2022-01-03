@@ -15,20 +15,13 @@ export const initBranch = async ({ navigation }) => {
   // console.log({ Branch })
   // alert(JSON.stringify({ Branch }))
   Branch.subscribe(async bundle => {
-    // alert(JSON.stringify({ params: bundle.params }))
-
-    // if (bundle?.error) {
-    //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
-    // }
-
-    // const installParams = await Branch.getFirstReferringParams() // params from original install
-    // const params = await Branch.getLatestReferringParams()
+    const latestParams = await Branch.getLatestReferringParams()
     // alert(JSON.stringify({ params, installParams, bundle_params: bundle.params }))
-    alert(JSON.stringify({ bundle_params: bundle.params }))
+    // alert(JSON.stringify({ bundle_params: bundle.params }))
 
     if (bundle && bundle?.params && !bundle.error) {
       // // `bundle.params` contains all the info about the link.
-      _navigateByParams({ params: bundle.params, navigation })
+      _navigateByParams({ params: bundle.params, latestParams, navigation })
       // navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
       // }
       // else {
@@ -41,16 +34,16 @@ export const initBranch = async ({ navigation }) => {
   // }
 }
 
-const _navigateByParams = async ({ params, navigation }) => {
+const _navigateByParams = async ({ params, latestParams, navigation }) => {
   // alert(JSON.stringify({ params }))
   await navigation.popToTop()
-  if (params?.photoId) {
+  if (params?.photoId || latestParams?.photoId) {
     // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
-    await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
+    await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId || latestParams?.photoId })
   }
-  if (params?.friendshipUuid) {
+  if (params?.friendshipUuid || latestParams?.friendshipUuid) {
     // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
-    await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
+    await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid || latestParams?.friendshipUuid })
   }
 }
 
