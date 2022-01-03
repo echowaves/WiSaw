@@ -21,8 +21,9 @@ export const initBranch = async ({ navigation }) => {
     //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
     // }
 
-    // const params = await Branch.getLatestReferringParams()
-    // alert(JSON.stringify({ params, bundle_params: bundle.params }))
+    const installParams = await Branch.getFirstReferringParams() // params from original install
+    const params = await Branch.getLatestReferringParams()
+    // alert(JSON.stringify({ params, installParams, bundle_params: bundle.params }))
 
     if (bundle && bundle?.params && !bundle.error) {
       // // `bundle.params` contains all the info about the link.
@@ -61,10 +62,11 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
       // contentDescription: photo.id,
       // This metadata can be used to easily navigate back to this screen
       // when implementing deep linking with `Branch.subscribe`.
-      metadata: {
-        screen: 'photoScreen',
-        params: JSON.stringify({ photoId: photo?.id },),
-      },
+      // metadata: {
+      //   // screen: 'photoScreen',
+      //   params: JSON.stringify({ photoId: photo?.id },),
+      //   // params: { photoId: photo?.id },
+      // },
       contentMetadata: {
         customMetadata: {
           photoId: photo?.id, // your userId field would be defined under customMetadata

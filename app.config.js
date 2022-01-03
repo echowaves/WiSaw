@@ -33,7 +33,7 @@ export default {
   ],
   ios: {
     bundleIdentifier: "com.echowaves",
-    buildNumber: "214",
+    buildNumber: "216",
     supportsTablet: true,
     infoPlist: {
       UIBackgroundModes: [
@@ -64,7 +64,7 @@ export default {
       backgroundColor: "#FFFFFF",
     },
     package: "com.echowaves.wisaw",
-    versionCode: 214,
+    versionCode: 216,
     permissions: [
       "INTERNET",
       "SYSTEM_ALERT_WINDOW",

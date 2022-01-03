@@ -16,6 +16,7 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import Constants from 'expo-constants'
 
 const { API_URI, API_KEY } = Constants.manifest.extra
+// alert(JSON.stringify({ API_URI, API_KEY }))
 // const { API_URI, API_KEY } = process.env
 // console.log({ API_URI, API_KEY })
 // const fetch = require('node-fetch')
