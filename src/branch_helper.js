@@ -21,9 +21,10 @@ export const initBranch = async ({ navigation }) => {
     //   alert("branch error:", JSON.stringify({ error: bundle?.error }))
     // }
 
-    const installParams = await Branch.getFirstReferringParams() // params from original install
-    const params = await Branch.getLatestReferringParams()
+    // const installParams = await Branch.getFirstReferringParams() // params from original install
+    // const params = await Branch.getLatestReferringParams()
     // alert(JSON.stringify({ params, installParams, bundle_params: bundle.params }))
+    alert(JSON.stringify({ bundle_params: bundle.params }))
 
     if (bundle && bundle?.params && !bundle.error) {
       // // `bundle.params` contains all the info about the link.

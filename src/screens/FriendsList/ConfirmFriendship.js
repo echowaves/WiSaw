@@ -80,7 +80,7 @@ const ConfirmFriendship = ({ route }) => {
   )
 
   const setContactName = async contactName => {
-    alert(JSON.stringify({ friendshipUuid, contactName }))
+    // alert(JSON.stringify({ friendshipUuid, contactName }))
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })

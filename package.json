@@ -13,6 +13,8 @@
     "reset:simulator": "xcrun simctl erase all",
     "build": "eas build",
     "build:local": "eas build --local",
+    "build:ios": "expo build:ios --release-channel production",
+    "build:android": "expo build:android --release-channel production",
     "publish:prod": "expo publish --release-channel production"
   },
   "dependencies": {
