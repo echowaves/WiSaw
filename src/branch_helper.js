@@ -1,6 +1,7 @@
 import Branch,
 { BranchEvent }
 from 'expo-branch'
+import { Alert } from 'react-native'
 
 export const initBranch = async ({ navigation }) => {
   // eslint-disable-next-line
@@ -15,35 +16,38 @@ export const initBranch = async ({ navigation }) => {
   // console.log({ Branch })
   // alert(JSON.stringify({ Branch }))
   Branch.subscribe(async bundle => {
-    const latestParams = await Branch.getLatestReferringParams()
-    // alert(JSON.stringify({ params, installParams, bundle_params: bundle.params }))
-    // alert(JSON.stringify({ bundle_params: bundle.params }))
+    // alert(JSON.stringify({ bundle: bundle === true, params: bundle?.params === true, notError: !bundle?.error }))
 
-    if (bundle && bundle?.params && !bundle.error) {
+    // alert(JSON.stringify({ bundle }))
+    if (bundle && bundle?.params && !bundle?.error) {
       // // `bundle.params` contains all the info about the link.
-      _navigateByParams({ params: bundle.params, latestParams, navigation })
-      // navigation.navigate('PhotosDetailsShared', { photoId: bundle?.params?.$canonical_identifier })
-      // }
-      // else {
-      // const params = await Branch.getLatestReferringParams()
-      // alert(JSON.stringify({ params }))
-      // _navigateByParams({ params, navigation })
-      // }
+      _navigateByParams({ params: bundle.params, navigation })
+    } else { // this could be android path, because it always contains error "Session initializaion already happened"
+      const latestParams = await Branch.getLatestReferringParams()
+      _navigateByParams({ params: latestParams, navigation })
     }
   })
   // }
 }
 
-const _navigateByParams = async ({ params, latestParams, navigation }) => {
+const _navigateByParams = async ({ params, navigation }) => {
   // alert(JSON.stringify({ params }))
+  // alert(JSON.stringify({ params, hello: "hello" }))
+
   await navigation.popToTop()
-  if (params?.photoId || latestParams?.photoId) {
+  if (params?.photoId) {
     // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
-    await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId || latestParams?.photoId })
+    await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
   }
-  if (params?.friendshipUuid || latestParams?.friendshipUuid) {
+  if (params?.friendshipUuid) {
     // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
-    await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid || latestParams?.friendshipUuid })
+    await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
+  }
+  if (!(params?.photoId || params?.friendshipUuid)) {
+    Alert.alert(
+      "You may want to close WiSaw application and then click on the deep link to make it open correctly.",
+      "This is a known issue which will be eventually fixed in one of the depencencies libararies"
+    )
   }
 }
 
