@@ -1,4 +1,5 @@
 import Toast from 'react-native-toast-message'
+import { Platform } from 'react-native'
 
 import { gql } from "@apollo/client"
 
@@ -94,9 +95,11 @@ export function createFriendship({ uuid, contactName }) {
       })
 
       // eslint-disable-next-line no-undef
-      if (!__DEV__) {
+      if (!__DEV__ && Platform.OS === 'ios') {
         const branchHelper = await import('../../branch_helper')
         await branchHelper.shareFriend({ friendshipUuid: friendship?.friendshipUuid, contactName })
+      } else {
+        alert("The feature is not supported on this device yet, try again later")
       }
       // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
 

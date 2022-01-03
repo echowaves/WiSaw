@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import * as MediaLibrary from 'expo-media-library'
@@ -24,6 +25,7 @@ import {
   Alert,
   SafeAreaView,
   ScrollView,
+  Platform,
 } from 'react-native'
 
 import {
@@ -199,7 +201,7 @@ const PhotosList = () => {
     _initandreload();
     (async () => {
       // eslint-disable-next-line no-undef
-      if (!__DEV__) {
+      if (!__DEV__ && Platform.OS === 'ios') {
         const branchHelper = await import('../../branch_helper')
         branchHelper.initBranch({ navigation })
       }
@@ -605,8 +607,8 @@ const PhotosList = () => {
               containerStyle={
                 {
                   display: 'flex',
-                  justifyContent: "center",
-                  alignItems: "center",
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }
               }
             />

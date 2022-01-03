@@ -12,6 +12,7 @@
     "web": "expo start --web",
     "reset:simulator": "xcrun simctl erase all",
     "build": "eas build",
+    "build:local": "eas build --local",
     "publish:prod": "expo publish --release-channel production"
   },
   "dependencies": {
