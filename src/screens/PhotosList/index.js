@@ -10,7 +10,7 @@ import { useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
 import * as ImagePicker from 'expo-image-picker'
-import * as Updates from 'expo-updates'
+// import * as Updates from 'expo-updates'
 import Toast from 'react-native-toast-message'
 
 import * as BackgroundFetch from 'expo-background-fetch'
@@ -604,7 +604,7 @@ const PhotosList = () => {
               }}
               containerStyle={
                 {
-                  display: "flex",
+                  display: 'flex',
                   justifyContent: "center",
                   alignItems: "center",
                 }

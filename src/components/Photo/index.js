@@ -291,7 +291,7 @@ const Photo = ({ photo }) => {
         />
         <Col
           size={6}
-          style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
+          style={{ flex: 3, justifyContent: 'center', alignItems: 'center' }}>
           <Text
             style={{
               fontSize: 25,
@@ -326,7 +326,7 @@ const Photo = ({ photo }) => {
       .filter(text => text.Type === 'LINE')
     const moderationLabels = JSON.parse(photoDetails?.recognitions[0].metaData).ModerationLabels
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         {labels.length > 0 && (
           <Card
             width={width - 100}
@@ -338,9 +338,9 @@ const Photo = ({ photo }) => {
               shadowOpacity: 0, // default is 1
               shadowRadius: 0, // default is 1
             }}>
-            <Text style={{ fontWeight: 'bold', textAlignVertical: "center", textAlign: "center" }}>AI recognized tags:</Text>
+            <Text style={{ fontWeight: 'bold', textAlignVertical: 'center', textAlign: 'center' }}>AI recognized tags:</Text>
             {labels.map(label => (
-              <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{label.Name}</Text>
+              <Text key={label.Name} style={{ fontSize: label.Confidence / 5, textAlignVertical: 'center', textAlign: 'center' }}>{label.Name}</Text>
             ))}
             <Text />
             <Divider />
@@ -359,11 +359,11 @@ const Photo = ({ photo }) => {
               shadowRadius: 0, // default is 1
             }}>
             <Text style={{
-              fontWeight: 'bold', textAlignVertical: "center", textAlign: "center",
+              fontWeight: 'bold', textAlignVertical: 'center', textAlign: 'center',
             }}>AI recognized text:
             </Text>
             {textDetections.map(text => (
-              <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: "center", textAlign: "center" }}>{text.DetectedText}</Text>
+              <Text key={text.Id} style={{ fontSize: text.Confidence / 5, textAlignVertical: 'center', textAlign: 'center' }}>{text.DetectedText}</Text>
             ))}
             <Text />
             <Divider />
@@ -382,13 +382,13 @@ const Photo = ({ photo }) => {
               shadowRadius: 0, // default is 1
             }}>
             <Text style={{
-              fontWeight: 'bold', color: 'red', textAlignVertical: "center", textAlign: "center",
+              fontWeight: 'bold', color: 'red', textAlignVertical: 'center', textAlign: 'center',
             }}>AI moderation tags:
             </Text>
             {moderationLabels.map(label => (
               <Text
                 key={label.Name} style={{
-                  fontSize: label.Confidence / 5, color: 'red', textAlignVertical: "center", textAlign: "center",
+                  fontSize: label.Confidence / 5, color: 'red', textAlignVertical: 'center', textAlign: 'center',
                 }}>{label.Name}
               </Text>
             ))}
