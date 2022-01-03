@@ -22,7 +22,13 @@ export const initBranch = async ({ navigation }) => {
     if (bundle && bundle?.params && !bundle?.error) {
       // // `bundle.params` contains all the info about the link.
       _navigateByParams({ params: bundle.params, navigation })
-    } else { // this could be android path, because it always contains error "Session initializaion already happened"
+    // } else if (bundle?.error === 'Warning. Session initialization already happened.') {
+    //   // this could be android path, because it always contains error "Session initializaion already happened"
+    //   Alert.alert(
+    //     "You may want to close WiSaw application and then click on the deep link to make it open correctly.",
+    //     "This is a known issue which will be eventually fixed in one of the depencencies libararies"
+    //   )
+    } else {
       const latestParams = await Branch.getLatestReferringParams()
       _navigateByParams({ params: latestParams, navigation })
     }
@@ -42,12 +48,6 @@ const _navigateByParams = async ({ params, navigation }) => {
   if (params?.friendshipUuid) {
     // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
     await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
-  }
-  if (!(params?.photoId || params?.friendshipUuid)) {
-    Alert.alert(
-      "You may want to close WiSaw application and then click on the deep link to make it open correctly.",
-      "This is a known issue which will be eventually fixed in one of the depencencies libararies"
-    )
   }
 }
 
