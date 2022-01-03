@@ -1,5 +1,4 @@
 import Toast from 'react-native-toast-message'
-import { Platform } from 'react-native'
 
 import { gql } from "@apollo/client"
 
@@ -95,7 +94,7 @@ export function createFriendship({ uuid, contactName }) {
       })
 
       // eslint-disable-next-line no-undef
-      if (!__DEV__ && Platform.OS === 'ios') {
+      if (!__DEV__) {
         const branchHelper = await import('../../branch_helper')
         await branchHelper.shareFriend({ friendshipUuid: friendship?.friendshipUuid, contactName })
       } else {

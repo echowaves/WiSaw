@@ -23,7 +23,7 @@ export const initBranch = async ({ navigation }) => {
 
     const installParams = await Branch.getFirstReferringParams() // params from original install
     const params = await Branch.getLatestReferringParams()
-    alert(JSON.stringify({ params, installParams, bundle_params: bundle.params }))
+    // alert(JSON.stringify({ params, installParams, bundle_params: bundle.params }))
 
     if (bundle && bundle?.params && !bundle.error) {
       // // `bundle.params` contains all the info about the link.

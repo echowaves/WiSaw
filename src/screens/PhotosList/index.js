@@ -25,7 +25,6 @@ import {
   Alert,
   SafeAreaView,
   ScrollView,
-  Platform,
 } from 'react-native'
 
 import {
@@ -201,7 +200,7 @@ const PhotosList = () => {
     _initandreload();
     (async () => {
       // eslint-disable-next-line no-undef
-      if (!__DEV__ && Platform.OS === 'ios') {
+      if (!__DEV__) {
         const branchHelper = await import('../../branch_helper')
         branchHelper.initBranch({ navigation })
       }
