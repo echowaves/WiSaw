@@ -60,7 +60,7 @@ const Chat = ({ route }) => {
   useEffect(() => {
     (async () => {
       navigation.setOptions({
-        headerTitle: `chat with: ${contact?.name}`,
+        headerTitle: `chat with: ${contact}`,
         headerTintColor: CONST.MAIN_COLOR,
         headerRight: renderHeaderRight,
         headerLeft: renderHeaderLeft,
