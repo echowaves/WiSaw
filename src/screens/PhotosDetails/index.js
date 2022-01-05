@@ -1,6 +1,7 @@
 import React, { useEffect /* useState */ } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
+import { useDimensions } from '@react-native-community/hooks'
 
 import PropTypes from 'prop-types'
 
@@ -8,7 +9,7 @@ import { FontAwesome, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 
 import {
-
+// View,
 } from 'react-native'
 
 import {
@@ -30,6 +31,7 @@ const PhotosDetails = ({ route }) => {
   const currentIndex = useSelector(state => state.photosList.currentIndex)
 
   const photos = useSelector(state => state.photosList.photos)
+  // const { width, height } = useDimensions().window
 
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
@@ -83,8 +85,12 @@ const PhotosDetails = ({ route }) => {
   }
 
   return (
+    // <GestureHandlerRootView>
     <Swiper
-      // keyboardShouldPersistTaps="always"
+      keyboardShouldPersistTaps="always"
+      removeClippedSubviews={false}
+      // height="100%"
+      // width="100%"
       bounces
       autoplay={false}
       horizontal
@@ -110,6 +116,7 @@ const PhotosDetails = ({ route }) => {
         <Photo photo={photo} key={photo.id} />
       ))}
     </Swiper>
+    // </GestureHandlerRootView>
   )
 }
 

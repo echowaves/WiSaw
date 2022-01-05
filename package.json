@@ -1,6 +1,6 @@
 {
   "name": "wisaw",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "node_modules/expo/AppEntry.js",
@@ -11,11 +11,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "reset:simulator": "xcrun simctl erase all",
-    "build": "eas build",
+    "build": "eas build --release-channel production_7.0.4",
     "build:local": "eas build --local",
-    "build:ios": "expo build:ios --release-channel production",
-    "build:android": "expo build:android --release-channel production",
-    "publish:prod": "expo publish --release-channel production"
+    "build:ios": "expo build:ios --release-channel production_7.0.4",
+    "build:android": "expo build:android --release-channel production_7.0.4",
+    "publish:prod": "expo publish --release-channel production_7.0.4"
   },
   "dependencies": {
     "@apollo/client": "3.4.16",
@@ -36,7 +36,7 @@
     "apollo-link": "^1.2.14",
     "apollo-link-http": "^1.5.17",
     "aws-appsync-auth-link": "^3.0.7",
-    "aws-appsync-subscription-link": "^3.0.9",    
+    "aws-appsync-subscription-link": "^3.0.9",
     "expo": "^44.0.0",
     "expo-av": "~10.2.0",
     "expo-background-fetch": "~10.1.0",
@@ -67,7 +67,7 @@
     "react-native-gesture-handler": "~2.1.0",
     "react-native-get-random-values": "~1.7.0",
     "react-native-gifted-chat": "^0.16.3",
-    "react-native-reanimated": "2.2.0",
+    "react-native-reanimated": "~2.3.1",
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "~3.10.1",
     "react-native-slider": "0.11.0",

@@ -1,6 +1,6 @@
 export default {
   name: "WiSaw",
-  version: "7.0.3",
+  version: "7.0.4",
   extra: {
     API_URI: process.env.API_URI,
     API_KEY: process.env.API_KEY,
@@ -33,7 +33,7 @@ export default {
   ],
   ios: {
     bundleIdentifier: "com.echowaves",
-    buildNumber: "225",
+    buildNumber: "226",
     supportsTablet: true,
     infoPlist: {
       UIBackgroundModes: [
@@ -64,7 +64,7 @@ export default {
       backgroundColor: "#FFFFFF",
     },
     package: "com.echowaves.wisaw",
-    versionCode: 225,
+    versionCode: 226,
     permissions: [
       "INTERNET",
       "SYSTEM_ALERT_WINDOW",
