@@ -1,7 +1,7 @@
 import React, { useEffect /* useState */ } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
-import { useDimensions } from '@react-native-community/hooks'
+// import { useDimensions } from '@react-native-community/hooks'
 
 import PropTypes from 'prop-types'
 
