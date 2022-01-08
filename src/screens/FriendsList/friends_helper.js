@@ -104,13 +104,14 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
         contact,
         ...friendship,
         unreadCount: unread?.unread || 0,
+        updatedAt: unread?.updatedAt || Date.now(),
       }
       // console.log({ localContact })
       return localContact
     })
   )
-  // console.log({ enhancedFriendships })
-  return enhancedFriendships.sort((a, b) => a.unreadCount < b.unreadCount)
+  // console.log({ enhancedFriendships }, "--------------------------------------")
+  return enhancedFriendships.sort((a, b) => new Date(a.updatedAt).getTime() < new Date(b.updatedAt).getTime())
 }
 
 export const getUnreadCountsList = async ({ uuid }) => {
@@ -156,6 +157,7 @@ const _getUnreadCountsList = async ({ uuid }) => {
         getUnreadCountsList(uuid: $uuid){
           chatUuid
           unread
+          updatedAt
         }
       }`,
         variables: {
