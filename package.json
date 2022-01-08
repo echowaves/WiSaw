@@ -1,6 +1,6 @@
 {
   "name": "wisaw",
-  "version": "7.0.4",
+  "version": "7.1.0",
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "node_modules/expo/AppEntry.js",
@@ -11,11 +11,11 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "reset:simulator": "xcrun simctl erase all",
-    "build": "eas build --release-channel production_7.0.4",
+    "build": "eas build --release-channel production_7.1.0",
     "build:local": "eas build --local",
-    "build:ios": "expo build:ios --release-channel production_7.0.4",
-    "build:android": "expo build:android --release-channel production_7.0.4",
-    "publish:prod": "expo publish --release-channel production_7.0.4"
+    "build:ios": "expo build:ios --release-channel production_7.1.0",
+    "build:android": "expo build:android --release-channel production_7.1.0",
+    "publish:prod": "expo publish --release-channel production_7.1.0"
   },
   "dependencies": {
     "@apollo/client": "3.4.16",
