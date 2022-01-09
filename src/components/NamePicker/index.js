@@ -184,7 +184,7 @@ const NamePicker = ({
                     {
                       fontSize: 30,
                       color: CONST.MAIN_COLOR,
-                      mirginRight: 10,
+                      marginRight: 10,
                     }
                   }
                 />
