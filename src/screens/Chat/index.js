@@ -14,7 +14,7 @@ import {
 } from 'react-native'
 
 import {
-  // Text,
+  Text,
   // Input,
   // LinearProgress,
   // Card,
@@ -106,8 +106,8 @@ const Chat = ({ route }) => {
           // update read counts
           friendsHelper.resetUnreadCount({ chatUuid, uuid })
         },
-        error({ error }) {
-          // console.error("subscription error", { error })
+        error(error) {
+          console.error("subscription error", { error })
           Toast.show({
             text1: 'Error in the application, chat may not function properly.',
             // text2: 'You may want to leave this screen and come back to it again, to make it work.',
@@ -285,31 +285,31 @@ const Chat = ({ route }) => {
     </View>
   )
 
-  const scrollToBottomComponent = () => (
-    <View style={{
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}>
-      {/* <MaterialCommunityIcons
-        name="send-circle"
-        size={35}
-        style={
-          {
-            marginRight: 10,
-            marginBottom: 10,
-            color: CONST.MAIN_COLOR,
-          }
-        }
-      /> */}
-      <Icon
-        reverse
-        name="angle-double-down"
-        type="font-awesome"
-        color={CONST.MAIN_COLOR}
-        size={36}
-      />
-    </View>
-  )
+  // const scrollToBottomComponent = () => (
+  //   <View style={{
+  //     justifyContent: 'center',
+  //     alignItems: 'center',
+  //   }}>
+  //     {/* <MaterialCommunityIcons
+  //       name="send-circle"
+  //       size={35}
+  //       style={
+  //         {
+  //           marginRight: 10,
+  //           marginBottom: 10,
+  //           color: CONST.MAIN_COLOR,
+  //         }
+  //       }
+  //     /> */}
+  //     <Icon
+  //       reverse
+  //       name="angle-double-down"
+  //       type="font-awesome"
+  //       color={CONST.MAIN_COLOR}
+  //       size={36}
+  //     />
+  //   </View>
+  // )
 
   const onLoadEarlier = async () => {
     // console.log('onLoadEarlier')
@@ -320,6 +320,40 @@ const Chat = ({ route }) => {
 
     // setLastRead(earlierMessages[0].createdAt)
   }
+
+  const renderAccessory = () => (
+    <View style={{
+      flexDirection: 'row',
+      // alignItems: 'center',
+      justifyContent: 'space-evenly',
+      padding: 10,
+    }}>
+      <View />
+      <FontAwesome
+        name="camera"
+        size={25}
+        style={
+          {
+            // marginRight: 10,
+            // marginBottom: 10,
+            color: CONST.MAIN_COLOR,
+          }
+        }
+      />
+      <FontAwesome
+        name="image"
+        size={25}
+        style={
+          {
+            // marginRight: 10,
+            // marginBottom: 10,
+            color: CONST.MAIN_COLOR,
+          }
+        }
+      />
+      <View />
+    </View>
+  )
 
   return (
     <SafeAreaView style={styles.container}>
@@ -332,11 +366,12 @@ const Chat = ({ route }) => {
         // alwaysShowSend
         renderSend={renderSend}
         renderLoading={renderLoading}
-        scrollToBottomComponent={scrollToBottomComponent}
+        // scrollToBottomComponent={scrollToBottomComponent}
         infiniteScroll
         loadEarlier
         onLoadEarlier={onLoadEarlier}
         renderUsernameOnMessage
+        renderAccessory={renderAccessory}
       />
     </SafeAreaView>
   )
