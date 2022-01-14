@@ -329,7 +329,7 @@ const Chat = ({ route }) => {
       padding: 10,
     }}>
       <View />
-      <FontAwesome
+      {/* <FontAwesome
         name="camera"
         size={25}
         style={
@@ -339,7 +339,7 @@ const Chat = ({ route }) => {
             color: CONST.MAIN_COLOR,
           }
         }
-      />
+      /> */}
       <FontAwesome
         name="image"
         size={25}
