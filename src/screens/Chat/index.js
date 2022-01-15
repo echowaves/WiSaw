@@ -4,8 +4,11 @@ import { useDispatch, useSelector } from "react-redux"
 import { GiftedChat, Send } from 'react-native-gifted-chat'
 import moment from 'moment'
 
+import * as ImagePicker from 'expo-image-picker'
+import * as Linking from 'expo-linking'
+
 import {
-  // Alert,
+  Alert,
   SafeAreaView,
   StyleSheet,
   // ScrollView,
@@ -350,10 +353,34 @@ const Chat = ({ route }) => {
             color: CONST.MAIN_COLOR,
           }
         }
+        onPress={async () => pickAsset()}
       />
       <View />
     </View>
   )
+
+  const pickAsset = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+    if (permissionResult.granted === false) {
+      Alert.alert(
+        "Do you want to use photos from your albom?",
+        "Why don't you enable this permission in settings?",
+        [
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              Linking.openSettings()
+            },
+          },
+        ],
+      )
+      return
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync()
+    console.log(pickerResult)
+  }
 
   return (
     <SafeAreaView style={styles.container}>
