@@ -6,6 +6,8 @@ import moment from 'moment'
 
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
+import * as Crypto from 'expo-crypto'
+import * as FileSystem from 'expo-file-system'
 
 import {
   Alert,
@@ -379,7 +381,12 @@ const Chat = ({ route }) => {
     }
 
     const pickerResult = await ImagePicker.launchImageLibraryAsync()
-    console.log(pickerResult)
+    const fileContents = await FileSystem.readAsStringAsync(pickerResult.uri, { encoding: FileSystem.EncodingType.Base64 })
+    const digest = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      fileContents
+    )
+    console.log('Digest: ', digest)
   }
 
   return (
