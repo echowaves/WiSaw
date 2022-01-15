@@ -93,8 +93,11 @@ const Chat = ({ route }) => {
             createdAt
             messageUuid
             text
+            pending
+            chatPhotoUuid
             updatedAt
-            uuid          }
+            uuid          
+          }
         }
         `,
         variables: {
@@ -105,9 +108,22 @@ const Chat = ({ route }) => {
         next(data) {
           const { onSendMessage } = data?.data
           // console.log({ onSendMessage })
-
-          setMessages(previousMessages => GiftedChat.append(previousMessages, [_messageAdapter(onSendMessage)]))
-
+          setMessages(previousMessages => previousMessages.map(message => {
+            if (message._id === onSendMessage.messageUuid) {
+              return {
+                _id: onSendMessage.messageUuid,
+                text: onSendMessage.text,
+                pending: onSendMessage.pending,
+                createdAt: onSendMessage.createdAt,
+                user: {
+                  _id: onSendMessage.uuid,
+                  name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
+                  // avatar: 'https://placeimg.com/140/140/any',
+                },
+              }
+            }
+            return message
+          }))
           // update read counts
           friendsHelper.resetUnreadCount({ chatUuid, uuid })
         },
@@ -144,6 +160,8 @@ const Chat = ({ route }) => {
             uuid,
             messageUuid, 
             text, 
+            pending, 
+            chatPhotoUuid,
             createdAt,
             updatedAt
           }
@@ -154,8 +172,19 @@ const Chat = ({ route }) => {
           },
           // fetchPolicy: "network-only",
         })).data.getMessagesList
+
       return messagesList.map(message => (
-        _messageAdapter(message)
+        {
+          _id: message.messageUuid,
+          text: message.text,
+          pending: message.pending,
+          createdAt: message.createdAt,
+          user: {
+            _id: message.uuid,
+            name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
+            // avatar: 'https://placeimg.com/140/140/any',
+          },
+        }
       ))
     } catch (e) {
       Toast.show({
@@ -168,16 +197,17 @@ const Chat = ({ route }) => {
     }
   }
 
-  const _messageAdapter = message => ({
-    _id: message.messageUuid,
-    text: message.text,
-    createdAt: message.createdAt,
-    user: {
-      _id: message.uuid,
-      name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
-      // avatar: 'https://placeimg.com/140/140/any',
-    },
-  })
+  // const _messageAdapter = message => ({
+  //   _id: message.messageUuid || message._id,
+  //   text: message.text,
+  //   pending: message.pending === undefined || false,
+  //   createdAt: message.createdAt,
+  //   user: {
+  //     _id: message.uuid,
+  //     name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
+  //     // avatar: 'https://placeimg.com/140/140/any',
+  //   },
+  // })
 
   const onSend = useCallback((messages = []) => {
     messages.forEach(message => {
@@ -185,6 +215,19 @@ const Chat = ({ route }) => {
         try {
           const { _id, text } = message
           const messageUuid = _id
+
+          setMessages(previousMessages => GiftedChat.append(previousMessages,
+            [{
+              _id,
+              text,
+              pending: true,
+              createdAt: moment(),
+              user: {
+                _id: uuid,
+                name: friendsHelper.getLocalContactName({ uuid, friendUuid: uuid, friendsList }),
+                // avatar: 'https://placeimg.com/140/140/any',
+              },
+            }]))
 
           const returnedMessage = (await CONST.gqlClient
             .mutate({
@@ -196,6 +239,8 @@ const Chat = ({ route }) => {
                   createdAt
                   messageUuid
                   text
+                  pending 
+                  chatPhotoUuid
                   updatedAt
                   uuid
                   }
@@ -208,6 +253,7 @@ const Chat = ({ route }) => {
                 textArg: text,
               },
             })).data.sendMessage
+
           return returnedMessage
         } catch (e) {
           Toast.show({
