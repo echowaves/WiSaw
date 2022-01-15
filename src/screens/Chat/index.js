@@ -108,22 +108,44 @@ const Chat = ({ route }) => {
         next(data) {
           const { onSendMessage } = data?.data
           // console.log({ onSendMessage })
-          setMessages(previousMessages => previousMessages.map(message => {
-            if (message._id === onSendMessage.messageUuid) {
-              return {
-                _id: onSendMessage.messageUuid,
-                text: onSendMessage.text,
-                pending: onSendMessage.pending,
-                createdAt: onSendMessage.createdAt,
-                user: {
-                  _id: onSendMessage.uuid,
-                  name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
+          setMessages(previousMessages => {
+            const updatedMessages = previousMessages.map(message => {
+              if (message._id === onSendMessage.messageUuid) { // this is the update of the message which is already in the feed
+                return {
+                  _id: onSendMessage.messageUuid,
+                  text: onSendMessage.text,
+                  pending: onSendMessage.pending,
+                  createdAt: onSendMessage.createdAt,
+                  user: {
+                    _id: onSendMessage.uuid,
+                    name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
                   // avatar: 'https://placeimg.com/140/140/any',
-                },
+                  },
+                }
               }
-            }
-            return message
-          }))
+              return message
+            })
+
+            // this is a new message which was not present in the feed, let's append it to the end
+            if (updatedMessages.find(message => message._id === onSendMessage.messageUuid) === undefined) {
+              return [
+                {
+                  _id: onSendMessage.messageUuid,
+                  text: onSendMessage.text,
+                  pending: onSendMessage.pending,
+                  createdAt: onSendMessage.createdAt,
+                  user: {
+                    _id: onSendMessage.uuid,
+                    name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
+                    // avatar: 'https://placeimg.com/140/140/any',
+                  },
+                },
+                ...updatedMessages,
+              ]
+            } // if this is the new message
+            // console.log({ updatedMessages })
+            return updatedMessages
+          })
           // update read counts
           friendsHelper.resetUnreadCount({ chatUuid, uuid })
         },
