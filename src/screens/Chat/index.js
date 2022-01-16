@@ -152,7 +152,7 @@ const Chat = ({ route }) => {
         error(error) {
           console.error("subscription error", { error })
           Toast.show({
-            text1: 'Error in the application, chat may not function properly.',
+            text1: 'Trying to re-connect, chat may not function properly.',
             // text2: 'You may want to leave this screen and come back to it again, to make it work.',
             text2: JSON.stringify({ error }),
             type: "error",
