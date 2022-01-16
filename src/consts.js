@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system'
 
-import { WebSocketLink } from '@apollo/client/link/ws'
+// import { WebSocketLink } from '@apollo/client/link/ws'
 import { setContext } from '@apollo/client/link/context'
 
 import {
@@ -8,10 +8,10 @@ import {
   InMemoryCache,
   HttpLink,
   // from,
-  split,
+  // split,
 } from "@apollo/client"
 
-import { getMainDefinition } from '@apollo/client/utilities'
+// import { getMainDefinition } from '@apollo/client/utilities'
 
 import Constants from 'expo-constants'
 
@@ -49,7 +49,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      'X-Api-Key': API_KEY,
+      'X-Api-Key': token,
       // authorization: token,
     },
   }
