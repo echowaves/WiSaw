@@ -81,10 +81,12 @@ const Chat = ({ route }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // subscription onSendMessage($chatUuid: String!) {
+
   useEffect(() => {
-    // console.log(`subscribing to ${chatUuid}`)
+    console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
-    const subscription = subscriptionClient
+    const observableObject = subscriptionClient
       .subscribe({
         query: gql`
         subscription onSendMessage($chatUuid: String!) {
@@ -96,79 +98,92 @@ const Chat = ({ route }) => {
             pending
             chatPhotoUuid
             updatedAt
-            uuid          
+            uuid
           }
-        }
-        `,
+        }`,
         variables: {
           chatUuid,
         },
       })
-      .subscribe({
-        next(data) {
-          const { onSendMessage } = data?.data
-          // console.log({ onSendMessage })
-          setMessages(previousMessages => {
-            const updatedMessages = previousMessages.map(message => {
-              if (message._id === onSendMessage.messageUuid) { // this is the update of the message which is already in the feed
-                return {
-                  _id: onSendMessage.messageUuid,
-                  text: onSendMessage.text,
-                  pending: onSendMessage.pending,
-                  createdAt: onSendMessage.createdAt,
-                  user: {
-                    _id: onSendMessage.uuid,
-                    name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
+
+    // console.log({ observableObject })
+    // console.log(Object.entries(observableObject))
+    const subscription = observableObject.subscribe({
+      // onmessage() {
+      //   console.log("onMessage")
+      // },
+      start() {
+        console.log('Start')
+      },
+      next(data) {
+        console.log({ data })
+        const { onSendMessage } = data?.data
+        // console.log({ onSendMessage })
+        setMessages(previousMessages => {
+          const updatedMessages = previousMessages.map(message => {
+            if (message._id === onSendMessage.messageUuid) { // this is the update of the message which is already in the feed
+              return {
+                _id: onSendMessage.messageUuid,
+                text: onSendMessage.text,
+                pending: onSendMessage.pending,
+                createdAt: onSendMessage.createdAt,
+                user: {
+                  _id: onSendMessage.uuid,
+                  name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
                   // avatar: 'https://placeimg.com/140/140/any',
-                  },
-                }
-              }
-              return message
-            })
-
-            // this is a new message which was not present in the feed, let's append it to the end
-            if (updatedMessages.find(message => message._id === onSendMessage.messageUuid) === undefined) {
-              return [
-                {
-                  _id: onSendMessage.messageUuid,
-                  text: onSendMessage.text,
-                  pending: onSendMessage.pending,
-                  createdAt: onSendMessage.createdAt,
-                  user: {
-                    _id: onSendMessage.uuid,
-                    name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
-                    // avatar: 'https://placeimg.com/140/140/any',
-                  },
                 },
-                ...updatedMessages,
-              ]
-            } // if this is the new message
-            // console.log({ updatedMessages })
-            return updatedMessages
-          })
-          // update read counts
-          friendsHelper.resetUnreadCount({ chatUuid, uuid })
-        },
-        error(error) {
-          console.error("subscription error", { error })
-          Toast.show({
-            text1: 'Trying to re-connect, chat may not function properly.',
-            // text2: 'You may want to leave this screen and come back to it again, to make it work.',
-            text2: JSON.stringify({ error }),
-            type: "error",
-            topOffset,
+              }
+            }
+            return message
           })
 
-          // _return({ uuid })
-        },
-        complete() {
-          // console.log("subs. DONE")
-        }, // never printed
-      })
+          // this is a new message which was not present in the feed, let's append it to the end
+          if (updatedMessages.find(message => message._id === onSendMessage.messageUuid) === undefined) {
+            return [
+              {
+                _id: onSendMessage.messageUuid,
+                text: onSendMessage.text,
+                pending: onSendMessage.pending,
+                createdAt: onSendMessage.createdAt,
+                user: {
+                  _id: onSendMessage.uuid,
+                  name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
+                  // avatar: 'https://placeimg.com/140/140/any',
+                },
+              },
+              ...updatedMessages,
+            ]
+          } // if this is the new message
+          // console.log({ updatedMessages })
+          return updatedMessages
+        })
+        // update read counts
+        friendsHelper.resetUnreadCount({ chatUuid, uuid })
+      },
+      error(error) {
+        console.error("subscription error", { error })
+        Toast.show({
+          text1: 'Trying to re-connect, chat may not function properly.',
+          // text2: 'You may want to leave this screen and come back to it again, to make it work.',
+          text2: JSON.stringify({ error }),
+          type: "error",
+          topOffset,
+        })
+
+        // _return({ uuid })
+      },
+      complete() {
+        console.log("subs. DONE")
+      }, // never printed
+    })
+
+    // const subscription = observableObject.subscribe(result => {
+    //   console.log('Subscription data => ', { result })
+    // })
 
     return () => {
-      // console.log(`unsubscribing from ${chatUuid}`)
       subscription.unsubscribe()
+      console.log(`unsubscribing from ${chatUuid}`)
     }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 

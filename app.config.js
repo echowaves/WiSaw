@@ -3,6 +3,7 @@ export default {
   version: "7.1.0",
   extra: {
     API_URI: process.env.API_URI,
+    REALTIME_API_URI: process.env.REALTIME_API_URI,
     API_KEY: process.env.API_KEY,
     REGION: process.env.REGION,
   },

@@ -18,7 +18,7 @@
     "publish:prod": "expo publish --release-channel production_7.1.0"
   },
   "dependencies": {
-    "@apollo/client": "3.4.16",
+    "@apollo/client": "3.5.7",
     "@babel/plugin-transform-async-to-generator": "7.14.5",
     "@dudigital/react-native-zoomable-view": "1.0.16",
     "@react-native-community/clipboard": "^1.5.1",
@@ -59,10 +59,12 @@
     "expo-updates": "~0.11.4",
     "expo-video-thumbnails": "~6.1.0",
     "graphql": "^16.0.0",
+    "graphql-ws": "^5.5.5",
     "moment": "2.29.1",
     "prop-types": "15.7.2",
     "react": "17.0.1",
     "react-native": "0.64.3",
+    "react-native-base64": "^0.2.1",
     "react-native-easy-grid": "^0.2.2",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "~2.1.0",
