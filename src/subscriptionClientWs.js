@@ -2,11 +2,12 @@ import Constants from 'expo-constants'
 // const WebSocket = require('ws')
 
 import base64 from 'react-native-base64'
-import { WebSocketLink } from "@apollo/client/link/ws"
-import { SubscriptionClient } from "subscriptions-transport-ws"
+// import { WebSocketLink } from "@apollo/client/link/ws"
+// import { SubscriptionClient } from "subscriptions-transport-ws"
+import { createClient } from 'graphql-ws'
 
-import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
-import { any } from 'prop-types'
+// import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
+// import { any } from 'prop-types'
 
 const {
   API_URI, REALTIME_API_URI, API_KEY, REGION,
@@ -31,12 +32,28 @@ const connection_url = `${REALTIME_API_URI}?header=${header_encode(api_header)}&
 
 console.log({ connection_url })
 
-const wsLink = new WebSocketLink({
-  uri: connection_url,
+// const wsLink = new WebSocketLink({
+//   uri: connection_url,
+//   options: {
+//     reconnect: true,
+//     // timeout: 30000,
+//     // lazy: true,
+//     connectionCallback: error => {
+//       console.log("connectionCallback", error ? { error } : "OK")
+//     },
+//   // connectionParams: {
+//   // authToken: user.authToken,
+//   // },
+//   },
+//   // webSocketImpl: WebSocket,
+// })
+
+const subscriptionClient = createClient({
+  url: connection_url,
   options: {
     reconnect: true,
-    // timeout: 30000,
-    // lazy: true,
+    timeout: 3000,
+    lazy: true,
     connectionCallback: error => {
       console.log("connectionCallback", error ? { error } : "OK")
     },
@@ -44,14 +61,13 @@ const wsLink = new WebSocketLink({
   // authToken: user.authToken,
   // },
   },
-  // webSocketImpl: WebSocket,
 })
 
-const subscriptionClient = new ApolloClient({
-  link: wsLink,
-  // uri: connection_url,
-  cache: new InMemoryCache(),
+// const subscriptionClient = new ApolloClient({
+//   link: wsLink,
+//   // uri: connection_url,
+//   cache: new InMemoryCache(),
 
-})
+// })
 
 export default subscriptionClient

@@ -106,17 +106,15 @@ const Chat = ({ route }) => {
         },
       })
 
-    // console.log({ observableObject })
-    // console.log(Object.entries(observableObject))
-    const subscription = observableObject.subscribe({
+    const subscriptionParameters = {
       // onmessage() {
       //   console.log("onMessage")
       // },
       start() {
-        console.log('Start')
+        console.log('observableObject:: Start')
       },
       next(data) {
-        console.log({ data })
+        console.log('observableObject:: ', { data })
         const { onSendMessage } = data?.data
         // console.log({ onSendMessage })
         setMessages(previousMessages => {
@@ -161,7 +159,8 @@ const Chat = ({ route }) => {
         friendsHelper.resetUnreadCount({ chatUuid, uuid })
       },
       error(error) {
-        console.error("subscription error", { error })
+        console.error("observableObject:: subscription error", { error })
+
         Toast.show({
           text1: 'Trying to re-connect, chat may not function properly.',
           // text2: 'You may want to leave this screen and come back to it again, to make it work.',
@@ -169,13 +168,18 @@ const Chat = ({ route }) => {
           type: "error",
           topOffset,
         })
-
+        console.log('------------------------- this is the whole new begining --------------------------------------')
+        subscription.unsubscribe()
+        observableObject.subscribe(subscriptionParameters)
         // _return({ uuid })
       },
       complete() {
-        console.log("subs. DONE")
+        console.log("observableObject:: subs. DONE")
       }, // never printed
-    })
+    }
+    // console.log({ observableObject })
+    // console.log(Object.entries(observableObject))
+    const subscription = observableObject.subscribe(subscriptionParameters)
 
     // const subscription = observableObject.subscribe(result => {
     //   console.log('Subscription data => ', { result })
