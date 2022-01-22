@@ -1,3 +1,4 @@
+// https://github.com/apollographql/apollo-feature-requests/issues/224
 import Constants from 'expo-constants'
 
 // const WebSocket = require('ws')
