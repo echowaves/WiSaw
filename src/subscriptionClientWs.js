@@ -1,13 +1,12 @@
 import Constants from 'expo-constants'
+
 // const WebSocket = require('ws')
 
 import base64 from 'react-native-base64'
-// import { WebSocketLink } from "@apollo/client/link/ws"
-// import { SubscriptionClient } from "subscriptions-transport-ws"
-import { createClient } from 'graphql-ws'
 
-// import { ApolloClient, InMemoryCache, gql } from "@apollo/client"
-// import { any } from 'prop-types'
+const { ApolloClient, InMemoryCache, gql } = require("@apollo/client")
+const { WebSocketLink } = require('@apollo/client/link/ws')
+const WebSocket = require('isomorphic-ws')
 
 const {
   API_URI, REALTIME_API_URI, API_KEY, REGION,
@@ -30,44 +29,68 @@ const header_encode = obj => base64.encode(JSON.stringify(obj))
 // eslint-disable-next-line camelcase
 const connection_url = `${REALTIME_API_URI}?header=${header_encode(api_header)}&payload=${header_encode({})}`
 
-console.log({ connection_url })
+//------------------------------------------------------------------------------------------------
+const { SubscriptionClient } = require("subscriptions-transport-ws")
+const uuid4 = require("uuid").v4
 
-// const wsLink = new WebSocketLink({
-//   uri: connection_url,
-//   options: {
-//     reconnect: true,
-//     // timeout: 30000,
-//     // lazy: true,
-//     connectionCallback: error => {
-//       console.log("connectionCallback", error ? { error } : "OK")
-//     },
-//   // connectionParams: {
-//   // authToken: user.authToken,
-//   // },
-//   },
-//   // webSocketImpl: WebSocket,
-// })
+class UUIDOperationIdSubscriptionClient extends SubscriptionClient {
+  generateOperationId() {
+    // AppSync recommends using UUIDs for Subscription IDs but SubscriptionClient uses an incrementing number
+    return uuid4()
+  }
 
-const subscriptionClient = createClient({
-  url: connection_url,
-  options: {
-    reconnect: true,
-    timeout: 3000,
-    lazy: true,
-    connectionCallback: error => {
-      console.log("connectionCallback", error ? { error } : "OK")
-    },
-  // connectionParams: {
-  // authToken: user.authToken,
-  // },
+  processReceivedData(receivedData) {
+    try {
+      const parsedMessage = JSON.parse(receivedData)
+      if (parsedMessage?.type === 'start_ack') return // sent by AppSync but meaningless to us
+    } catch (e) {
+      throw new Error(`Message must be JSON-parsable. Got: ${receivedData}`)
+    }
+    super.processReceivedData(receivedData)
+  }
+}
+
+// appSyncGraphQLOperationAdapter.js
+const graphqlPrinter = require("graphql/language/printer")
+
+const createAppSyncGraphQLOperationAdapter = () => ({
+  applyMiddleware: async (options, next) => {
+    // AppSync expects GraphQL operation to be defined as a JSON-encoded object in a "data" property
+    // eslint-disable-next-line no-param-reassign
+    options.data = JSON.stringify({
+      query: typeof options.query === 'string' ? options.query : graphqlPrinter.print(options.query),
+      variables: options.variables,
+    })
+
+    // AppSync only permits authorized operations
+    // eslint-disable-next-line no-param-reassign
+    options.extensions = { authorization: api_header }
+
+    // AppSync does not care about these properties
+    // eslint-disable-next-line no-param-reassign
+    delete options.operationName
+    // eslint-disable-next-line no-param-reassign
+    delete options.variables
+    // Not deleting "query" property as SubscriptionClient validation requires it
+
+    next()
   },
 })
 
-// const subscriptionClient = new ApolloClient({
-//   link: wsLink,
-//   // uri: connection_url,
-//   cache: new InMemoryCache(),
+// WebSocketLink
+const wsLink = new WebSocketLink(
+  new UUIDOperationIdSubscriptionClient(
+    connection_url,
+    {
+      timeout: 5 * 60 * 1000, reconnect: true, lazy: true, connectionCallback: err => console.log("connectionCallback", err ? "ERR" : "OK", err || ""),
+    },
+    WebSocket
+  ).use([createAppSyncGraphQLOperationAdapter()])
+)
 
-// })
+const subscriptionClient = new ApolloClient({
+  cache: new InMemoryCache(),
+  link: wsLink,
+})
 
 export default subscriptionClient

@@ -45,7 +45,7 @@ import * as friendsHelper from '../FriendsList/friends_helper'
 import * as friendsListReducer from '../FriendsList/reducer'
 
 import * as CONST from '../../consts.js'
-import subscriptionClient from '../../subscriptionClient'
+import subscriptionClient from '../../subscriptionClientWs'
 
 const Chat = ({ route }) => {
   const { chatUuid, contact } = route.params
@@ -105,16 +105,16 @@ const Chat = ({ route }) => {
           chatUuid,
         },
       })
-
+    // console.log({ observableObject })
     const subscriptionParameters = {
       // onmessage() {
       //   console.log("onMessage")
       // },
-      start() {
-        console.log('observableObject:: Start')
-      },
+      // start() {
+      //   console.log('observableObject:: Start')
+      // },
       next(data) {
-        console.log('observableObject:: ', { data })
+        // console.log('observableObject:: ', { data })
         const { onSendMessage } = data?.data
         // console.log({ onSendMessage })
         setMessages(previousMessages => {
@@ -171,7 +171,7 @@ const Chat = ({ route }) => {
         console.log('------------------------- this is the whole new begining --------------------------------------')
         subscription.unsubscribe()
         observableObject.subscribe(subscriptionParameters)
-        // _return({ uuid })
+        // // _return({ uuid })
       },
       complete() {
         console.log("observableObject:: subs. DONE")
@@ -179,6 +179,7 @@ const Chat = ({ route }) => {
     }
     // console.log({ observableObject })
     // console.log(Object.entries(observableObject))
+
     const subscription = observableObject.subscribe(subscriptionParameters)
 
     // const subscription = observableObject.subscribe(result => {
