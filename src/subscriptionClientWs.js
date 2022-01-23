@@ -5,12 +5,12 @@ import Constants from 'expo-constants'
 
 import base64 from 'react-native-base64'
 
-const { ApolloClient, InMemoryCache, gql } = require("@apollo/client")
+const { ApolloClient, InMemoryCache } = require("@apollo/client")
 const { WebSocketLink } = require('@apollo/client/link/ws')
 const WebSocket = require('isomorphic-ws')
 
 const {
-  API_URI, REALTIME_API_URI, API_KEY, REGION,
+  API_URI, REALTIME_API_URI, API_KEY,
 } = Constants.manifest.extra
 
 // const WSS_URL = API_URI.replace('https', 'wss').replace('appsync-api', 'appsync-realtime-api')
@@ -83,6 +83,7 @@ const wsLink = new WebSocketLink(
   new UUIDOperationIdSubscriptionClient(
     connection_url,
     {
+      // eslint-disable-next-line no-console
       timeout: 5 * 60 * 1000, reconnect: true, lazy: true, connectionCallback: err => console.log("connectionCallback", err ? "ERR" : "OK", err || ""),
     },
     WebSocket
