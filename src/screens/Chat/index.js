@@ -81,8 +81,6 @@ const Chat = ({ route }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // subscription onSendMessage($chatUuid: String!) {
-
   useEffect(() => {
     console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
@@ -239,18 +237,6 @@ const Chat = ({ route }) => {
     }
   }
 
-  // const _messageAdapter = message => ({
-  //   _id: message.messageUuid || message._id,
-  //   text: message.text,
-  //   pending: message.pending === undefined || false,
-  //   createdAt: message.createdAt,
-  //   user: {
-  //     _id: message.uuid,
-  //     name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
-  //     // avatar: 'https://placeimg.com/140/140/any',
-  //   },
-  // })
-
   const onSend = useCallback((messages = []) => {
     messages.forEach(message => {
       (async () => {
@@ -377,32 +363,6 @@ const Chat = ({ route }) => {
       <ActivityIndicator size="large" color={CONST.MAIN_COLOR} />
     </View>
   )
-
-  // const scrollToBottomComponent = () => (
-  //   <View style={{
-  //     justifyContent: 'center',
-  //     alignItems: 'center',
-  //   }}>
-  //     {/* <MaterialCommunityIcons
-  //       name="send-circle"
-  //       size={35}
-  //       style={
-  //         {
-  //           marginRight: 10,
-  //           marginBottom: 10,
-  //           color: CONST.MAIN_COLOR,
-  //         }
-  //       }
-  //     /> */}
-  //     <Icon
-  //       reverse
-  //       name="angle-double-down"
-  //       type="font-awesome"
-  //       color={CONST.MAIN_COLOR}
-  //       size={36}
-  //     />
-  //   </View>
-  // )
 
   const onLoadEarlier = async () => {
     // console.log('onLoadEarlier')
