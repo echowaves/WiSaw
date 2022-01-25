@@ -40,6 +40,8 @@ import { gql } from "@apollo/client"
 
 import PropTypes from 'prop-types'
 
+import * as reducer from './reducer'
+
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as friendsListReducer from '../FriendsList/reducer'
@@ -430,11 +432,13 @@ const Chat = ({ route }) => {
 
     const pickerResult = await ImagePicker.launchImageLibraryAsync()
     const fileContents = await FileSystem.readAsStringAsync(pickerResult.uri, { encoding: FileSystem.EncodingType.Base64 })
-    const digest = await Crypto.digestStringAsync(
+    const photoHash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       fileContents
     )
-    console.log('Digest: ', digest)
+    console.log('photoHash: ', photoHash)
+    await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, photoHash }))
+    dispatch(reducer.uploadPendingPhotos())
   }
 
   return (

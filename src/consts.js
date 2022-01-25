@@ -39,8 +39,10 @@ export const TRANSPARENT_BUTTON_COLOR = 'rgba(200, 200, 200, 0.8)'
 export const TRANSPARENT_ICONS_COLOR = 'rgba(10,10,10,.5)'
 
 export const PENDING_UPLOADS_FOLDER = `${FileSystem.documentDirectory}pendingUploads/`
+export const PENDING_UPLOADS_FOLDER_CHAT = `${FileSystem.documentDirectory}pendingUploadsChat/`
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
 export const PENDING_UPLOADS_KEY = "@PENDING_UPLOADS"
+export const PENDING_CHAT_UPLOADS_KEY = "@PENDING_CHAT_UPLOADS"
 
 export const FRIENDSHIP_PREFIX = "@FRIENDSHIP"
 
@@ -97,3 +99,11 @@ export const gqlClient = new ApolloClient({
   cache: new InMemoryCache(),
 })
 // console.log({ API_URI }, { API_KEY })
+
+export const _makeSureDirectoryExists = async ({ directory }) => {
+  const tmpDir = await FileSystem.getInfoAsync(directory)
+  // create cacheDir if does not exist
+  if (!tmpDir.exists) {
+    await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
+  }
+}
