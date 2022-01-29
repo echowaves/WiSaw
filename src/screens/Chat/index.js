@@ -80,6 +80,9 @@ const Chat = ({ route }) => {
       setMessages(await _loadMessages({ chatUuid, lastLoaded: moment() }))
       friendsHelper.resetUnreadCount({ chatUuid, uuid })
     })()
+
+    CONST._makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER_CHAT })
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

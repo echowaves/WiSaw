@@ -56,16 +56,13 @@ const reducer = (state = initialState, action) => {
   }
 }
 
-const _genLocalThumbs = async image => {
+const _genLocalThumb = async localImgUrl => {
   const manipResult = await ImageManipulator.manipulateAsync(
-    image.localImgUrl,
+    localImgUrl,
     [{ resize: { height: 300 } }],
     { compress: 1, format: ImageManipulator.SaveFormat.PNG }
   )
-  return {
-    ...image,
-    localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
-  }
+  return manipResult.uri
 }
 
 const _addToQueue = async image => {
@@ -148,20 +145,28 @@ const _removeFromQueue = async imageToRemove => {
 
 export const queueFileForUpload = ({ assetUrl, photoHash }) => async (dispatch, getState) => {
   const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER_CHAT}${photoHash}`
+
+  // console.log({ assetUrl, photoHash, localImgUrl })
   // console.log({ localImgUrl })
   // copy file to cacheDir
-  await FileSystem.moveAsync({
+
+  await CONST._makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER_CHAT })
+
+  await FileSystem.copyAsync({
     from: assetUrl,
     to: localImgUrl,
   })
 
+  const localThumbUrl = await _genLocalThumb(localImgUrl)
+
+  CacheManager.addToCache({ file: localThumbUrl, key: `${photoHash}-thumb` })
+  CacheManager.addToCache({ file: localImgUrl, key: `${photoHash}` })
+
   const image = {
     localImgUrl, photoHash,
   }
-  const thumbEnhansedImage = await _genLocalThumbs(image)
-  await CacheManager.addToCache({ file: thumbEnhansedImage.localThumbUrl, key: `${photoHash}.thumb` })
 
-  await _addToQueue(thumbEnhansedImage)
+  await _addToQueue(image)
 }
 
 export function uploadPendingPhotos() {
@@ -187,15 +192,14 @@ export function uploadPendingPhotos() {
       // here let's iterate over the items and upload one file at a time
 
       const generatePhotoQueue = await _getQueue()
-
+      // console.log({ generatePhotoQueue })
       // first pass iteration to generate photos ID and the photo record on the backend
       for (i = 0; i < generatePhotoQueue.length; i += 1) {
         const item = generatePhotoQueue[i]
 
         // eslint-disable-next-line no-await-in-loop
-        const { responseData } = await _uploadItem({
-          item,
-        })
+        const { responseData } = await _uploadItem({ item })
+        console.log({ responseData })
 
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
@@ -217,10 +221,6 @@ export function uploadPendingPhotos() {
             topOffset,
           })
         }
-        // eslint-disable-next-line no-await-in-loop
-        CacheManager.addToCache({ file: item.localThumbUrl, key: `${item.photoHash}.thumb` })
-        // eslint-disable-next-line no-await-in-loop
-        CacheManager.addToCache({ file: item.localImgUrl, key: `${item.photoHash}` })
       }
     } catch (err2) {
       // eslint-disable-next-line no-console
@@ -251,51 +251,37 @@ export function uploadPendingPhotos() {
 }
 
 const _uploadItem = async ({ item }) => {
+  const contentType = "image/jpeg"
   try {
-    const response = await _uploadFile({
-      assetKey: `${item.photo.id}.upload`,
-      contentType: "image/jpeg",
-      assetUri: item.localImgUrl,
-    })
-    return { responseData: response.responseData }
+    console.log("uploading", { item })
+    const uploadUrl = (await CONST.gqlClient
+      .query({
+        query: gql`
+        query generateUploadUrlForMessage($photoHash: String!, $contentType: String!) {
+          generateUploadUrlForMessage(photoHash: $photoHash, contentType: $contentType)
+        }`,
+        variables: {
+          assetKey: item.photoHash,
+          contentType,
+        },
+      })).data.generateUploadUrlForMessage
+
+    const responseData = await FileSystem.uploadAsync(
+      uploadUrl,
+      item.localImgUrl,
+      {
+        httpMethod: 'PUT',
+        headers: {
+          "Content-Type": contentType,
+        },
+      }
+    )
+
+    return { responseData }
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.log({ err3 })
     return { responseData: `something bad happened, unable to upload ${JSON.stringify(err3)}` }
-  }
-}
-
-const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
-  // console.log({ assetKey })
-  const uploadUrl = (await CONST.gqlClient
-    .query({
-      query: gql`
-      query generateUploadUrl($assetKey: String!, $contentType: String!) {
-        generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
-      }`,
-      variables: {
-        assetKey,
-        contentType,
-      },
-    })).data.generateUploadUrl
-
-  const responseData = await FileSystem.uploadAsync(
-    uploadUrl,
-    assetUri,
-    {
-      httpMethod: 'PUT',
-      headers: {
-        "Content-Type": contentType,
-      },
-    }
-  )
-  return { responseData }
-}
-
-export function setCurrentIndex(currentIndex) {
-  return {
-    type: ACTION_TYPES.CURRENT_INDEX,
-    currentIndex,
   }
 }
 
