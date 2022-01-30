@@ -198,8 +198,7 @@ export function uploadPendingPhotos() {
         const item = generatePhotoQueue[i]
 
         // eslint-disable-next-line no-await-in-loop
-        const { responseData } = await _uploadItem({ item })
-        console.log({ responseData })
+        const { responseData } = await _uploadItem({ uuid, item })
 
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
@@ -250,34 +249,44 @@ export function uploadPendingPhotos() {
   }
 }
 
-const _uploadItem = async ({ item }) => {
+const _uploadItem = async ({ uuid, item }) => {
   const contentType = "image/jpeg"
   try {
-    console.log("uploading", { item })
+    // console.log("uploading", { item })
     const uploadUrl = (await CONST.gqlClient
       .query({
         query: gql`
-        query generateUploadUrlForMessage($photoHash: String!, $contentType: String!) {
-          generateUploadUrlForMessage(photoHash: $photoHash, contentType: $contentType)
+        query generateUploadUrlForMessage($uuid: String!, $photoHash: String!, $contentType: String!) {
+          generateUploadUrlForMessage(uuid: $uuid, photoHash: $photoHash, contentType: $contentType){
+            newAsset
+            uploadUrl
+          }
         }`,
         variables: {
-          assetKey: item.photoHash,
+          uuid,
+          photoHash: item.photoHash,
           contentType,
         },
       })).data.generateUploadUrlForMessage
 
-    const responseData = await FileSystem.uploadAsync(
-      uploadUrl,
-      item.localImgUrl,
-      {
-        httpMethod: 'PUT',
-        headers: {
-          "Content-Type": contentType,
-        },
-      }
-    )
+    // console.log({ uploadUrl })
+    if (uploadUrl?.newAsset === true) {
+      const responseData = await FileSystem.uploadAsync(
+        uploadUrl.uploadUrl,
+        item.localImgUrl,
+        {
+          httpMethod: 'PUT',
+          headers: {
+            "Content-Type": contentType,
+          },
+        }
+      )
+      console.log({ responseData })
 
-    return { responseData }
+      return { responseData }
+    }
+    todo
+    // TODO: this is not new asset
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.log({ err3 })
