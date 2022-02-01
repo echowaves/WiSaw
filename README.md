@@ -51,7 +51,7 @@ https://dev.to/marianapatcosta/basics-and-caveats-of-expo-notifications-23cd
 <br><br><br>
 
 
-### Sandwidge menu has some additional options
+### Sandwich menu has some additional options
 <img alt="You can do extra in wisaw" src="https://static.wixstatic.com/media/c90e7e_7f845f0d82c84276a3006698d9c5df00~mv2.png" height="865" width="400" >
 <br><br><br>
 
