@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import { GiftedChat, Send } from 'react-native-gifted-chat'
 import moment from 'moment'
+import { v4 as uuidv4 } from 'uuid'
 
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
@@ -99,7 +100,7 @@ const Chat = ({ route }) => {
             messageUuid
             text
             pending
-            chatPhotoUuid
+            chatPhotoHash
             updatedAt
             uuid
           }
@@ -206,7 +207,7 @@ const Chat = ({ route }) => {
             messageUuid, 
             text, 
             pending, 
-            chatPhotoUuid,
+            chatPhotoHash,
             createdAt,
             updatedAt
           }
@@ -232,6 +233,7 @@ const Chat = ({ route }) => {
         }
       ))
     } catch (e) {
+      console.log("failed to load messages: ", { e })
       Toast.show({
         text1: `Failed to load messages:`,
         text2: `${e}`,
@@ -262,33 +264,11 @@ const Chat = ({ route }) => {
               },
             }]))
 
-          const returnedMessage = (await CONST.gqlClient
-            .mutate({
-              mutation: gql`
-              mutation
-              sendMessage($chatUuidArg: String!, $uuidArg: String!, $messageUuidArg: String!, $textArg: String!) {
-                sendMessage(chatUuidArg: $chatUuidArg, uuidArg: $uuidArg, messageUuidArg: $messageUuidArg,textArg: $textArg) {
-                  chatUuid
-                  createdAt
-                  messageUuid
-                  text
-                  pending 
-                  chatPhotoUuid
-                  updatedAt
-                  uuid
-                  }
-              }
-              `,
-              variables: {
-                chatUuidArg: chatUuid,
-                uuidArg: uuid,
-                messageUuidArg: messageUuid,
-                textArg: text,
-              },
-            })).data.sendMessage
-
-          return returnedMessage
+          const returnedMessage = await reducer.sendMessage({
+            chatUuid, uuid, messageUuid, text, pending: false, chatPhotoHash: '',
+          })
         } catch (e) {
+          console.log("failed to send message: ", { e })
           Toast.show({
             text1: `Failed to send message:`,
             text2: `${e}`,
@@ -435,13 +415,31 @@ const Chat = ({ route }) => {
 
     const pickerResult = await ImagePicker.launchImageLibraryAsync()
     const fileContents = await FileSystem.readAsStringAsync(pickerResult.uri, { encoding: FileSystem.EncodingType.Base64 })
-    const photoHash = await Crypto.digestStringAsync(
+    const chatPhotoHash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       fileContents
     )
-    console.log('photoHash: ', photoHash)
-    await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, photoHash }))
-    dispatch(reducer.uploadPendingPhotos())
+    console.log('photoHash: ', chatPhotoHash)
+    const messageUuid = uuidv4()
+
+    setMessages(previousMessages => GiftedChat.append(previousMessages,
+      [{
+        _id: messageUuid,
+        text: '',
+        pending: true,
+        createdAt: moment(),
+        user: {
+          _id: uuid,
+          name: friendsHelper.getLocalContactName({ uuid, friendUuid: uuid, friendsList }),
+          // avatar: 'https://placeimg.com/140/140/any',
+        },
+      }]))
+
+    const returnedMessage = await reducer.sendMessage({
+      chatUuid, uuid, messageUuid, text: "", pending: false, chatPhotoHash,
+    })
+    await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, chatPhotoHash, messageUuid }))
+    dispatch(reducer.uploadPendingPhotos({ chatUuid }))
   }
 
   return (

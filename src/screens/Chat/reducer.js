@@ -66,7 +66,7 @@ const _genLocalThumb = async localImgUrl => {
 }
 
 const _addToQueue = async image => {
-  // localImgUrl, photoHash, localThumbUrl
+  // localImgUrl, chatPhotoHash, localThumbUrl
 
   let pendingImages = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY })
@@ -100,7 +100,7 @@ const _getQueue = async () => {
   }
   // remove images from the queue if corresponding file does not exist
   imagesInQueue.forEach(image => {
-    if (!filesInStorage.some(f => f === image.photoHash)) {
+    if (!filesInStorage.some(f => f === image.chatPhotoHash)) {
       _removeFromQueue(image)
     }
   })
@@ -115,7 +115,7 @@ const _getQueue = async () => {
 
   // remove image from storage if corresponding recorsd does not exist in the queue
   filesInStorage.forEach(file => {
-    if (!imagesInQueue.some(i => i.photoHash === file)) {
+    if (!imagesInQueue.some(i => i.chatPhotoHash === file)) {
       FileSystem.deleteAsync(
         `${CONST.PENDING_UPLOADS_FOLDER_CHAT}${file}`,
         { idempotent: true }
@@ -143,10 +143,10 @@ const _removeFromQueue = async imageToRemove => {
   })
 }
 
-export const queueFileForUpload = ({ assetUrl, photoHash }) => async (dispatch, getState) => {
-  const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER_CHAT}${photoHash}`
+export const queueFileForUpload = ({ assetUrl, chatPhotoHash, messageUuid }) => async (dispatch, getState) => {
+  const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER_CHAT}${chatPhotoHash}`
 
-  // console.log({ assetUrl, photoHash, localImgUrl })
+  // console.log({ assetUrl, chatPhotoHash, localImgUrl })
   // console.log({ localImgUrl })
   // copy file to cacheDir
 
@@ -159,17 +159,17 @@ export const queueFileForUpload = ({ assetUrl, photoHash }) => async (dispatch, 
 
   const localThumbUrl = await _genLocalThumb(localImgUrl)
 
-  CacheManager.addToCache({ file: localThumbUrl, key: `${photoHash}-thumb` })
-  CacheManager.addToCache({ file: localImgUrl, key: `${photoHash}` })
+  CacheManager.addToCache({ file: localThumbUrl, key: `${chatPhotoHash}-thumb` })
+  CacheManager.addToCache({ file: localImgUrl, key: `${chatPhotoHash}` })
 
   const image = {
-    localImgUrl, photoHash,
+    localImgUrl, chatPhotoHash, messageUuid,
   }
 
   await _addToQueue(image)
 }
 
-export function uploadPendingPhotos() {
+export function uploadPendingPhotos({ chatUuid }) {
   return async (dispatch, getState) => {
     const { topOffset } = getState().chat
     const { uuid } = getState().secret
@@ -205,11 +205,37 @@ export function uploadPendingPhotos() {
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
           // show the photo in the photo list immidiately
+          // eslint-disable-next-line no-await-in-loop
+          dispatch({
+            type: ACTION_TYPES.CHAT_UPDATE_PHOTO_UPLOADED,
+            photo: item.photo,
+          })
+
+          // eslint-disable-next-line no-await-in-loop
+          const returnedMessage = await sendMessage({
+            chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: item.chatPhotoHash,
+          })
+        } else if (responseData.status === 100) {
+          // alert(JSON.stringify({ responseData }))
+          Toast.show({
+            text1: 'This image already uploaded',
+            // text2: '',
+            visibilityTime: 500,
+            topOffset,
+          })
+          // eslint-disable-next-line no-await-in-loop
+          await _removeFromQueue(item)
+          // eslint-disable-next-line no-await-in-loop
+          // show the photo in the photo list immidiately
 
           // eslint-disable-next-line no-await-in-loop
           dispatch({
             type: ACTION_TYPES.CHAT_UPDATE_PHOTO_UPLOADED,
             photo: item.photo,
+          })
+          // eslint-disable-next-line no-await-in-loop
+          const returnedMessage = await sendMessage({
+            chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: item.chatPhotoHash,
           })
         } else {
           // alert(JSON.stringify({ responseData }))
@@ -220,13 +246,10 @@ export function uploadPendingPhotos() {
             topOffset,
           })
         }
-      }
+      } // for
     } catch (err2) {
       // eslint-disable-next-line no-console
-      // console.log({ err2 })
-      dispatch({
-        type: ACTION_TYPES.CHAT_FINISH_PHOTO_UPLOADING,
-      })
+      console.log({ err2 })
       Toast.show({
         text1: 'Upload is slow...',
         text2: 'Still trying to upload.',
@@ -236,6 +259,7 @@ export function uploadPendingPhotos() {
       // console.log({ error }) // eslint-disable-line no-console
       // dispatch(uploadPendingPhotos())
     }
+
     dispatch({
       type: ACTION_TYPES.CHAT_FINISH_PHOTO_UPLOADING,
     })
@@ -244,9 +268,61 @@ export function uploadPendingPhotos() {
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     if ((await _getQueue()).length > 0) {
-      dispatch(uploadPendingPhotos())
+      dispatch(uploadPendingPhotos({ chatUuid }))
     }
   }
+}
+
+export const sendMessage = async ({
+  chatUuid,
+  uuid,
+  messageUuid,
+  text,
+  pending,
+  chatPhotoHash,
+}) => {
+  const returnedMessage = (await CONST.gqlClient
+    .mutate({
+      mutation: gql`
+      mutation
+      sendMessage(
+        $chatUuidArg: String!, 
+        $uuidArg: String!, 
+        $messageUuidArg: String!, 
+        $textArg: String!, 
+        $pendingArg: Boolean!, 
+        $chatPhotoHashArg: String!
+      ) {
+        sendMessage(
+          chatUuidArg: $chatUuidArg, 
+          uuidArg: $uuidArg, 
+          messageUuidArg: $messageUuidArg,
+          textArg: $textArg,
+          pendingArg: $pendingArg,
+          chatPhotoHashArg: $chatPhotoHashArg
+        ) {
+          chatUuid
+          createdAt
+          messageUuid
+          text
+          pending 
+          chatPhotoHash
+          updatedAt
+          uuid
+          }
+      }
+      `,
+      variables: {
+        chatUuidArg: chatUuid,
+        uuidArg: uuid,
+        messageUuidArg: messageUuid,
+        textArg: text,
+        pendingArg: pending,
+        chatPhotoHashArg: chatPhotoHash,
+      },
+    })).data.sendMessage
+
+  return returnedMessage
 }
 
 const _uploadItem = async ({ uuid, item }) => {
@@ -264,7 +340,7 @@ const _uploadItem = async ({ uuid, item }) => {
         }`,
         variables: {
           uuid,
-          photoHash: item.photoHash,
+          photoHash: item.chatPhotoHash,
           contentType,
         },
       })).data.generateUploadUrlForMessage
@@ -281,12 +357,13 @@ const _uploadItem = async ({ uuid, item }) => {
           },
         }
       )
-      console.log({ responseData })
-
+      // console.log({ responseData })
       return { responseData }
     }
-    todo
-    // TODO: this is not new asset
+    const responseData = {
+      status: 100,
+    }
+    return { responseData }
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.log({ err3 })
