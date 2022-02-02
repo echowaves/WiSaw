@@ -15,7 +15,7 @@ import {
 
 import Constants from 'expo-constants'
 
-const { API_URI, API_KEY } = Constants.manifest.extra
+export const { API_URI, API_KEY, PRIVATE_IMG_HOST } = Constants.manifest.extra
 // alert(JSON.stringify({ API_URI, API_KEY }))
 // const { API_URI, API_KEY } = process.env
 // console.log({ API_URI, API_KEY })

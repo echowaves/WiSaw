@@ -196,47 +196,39 @@ export function uploadPendingPhotos({ chatUuid }) {
       // first pass iteration to generate photos ID and the photo record on the backend
       for (i = 0; i < generatePhotoQueue.length; i += 1) {
         const item = generatePhotoQueue[i]
-
+        // console.log({ item })
         // eslint-disable-next-line no-await-in-loop
         const { responseData } = await _uploadItem({ uuid, item })
-
+        // console.log({ responseData })
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
           // show the photo in the photo list immidiately
-          // eslint-disable-next-line no-await-in-loop
-          dispatch({
-            type: ACTION_TYPES.CHAT_UPDATE_PHOTO_UPLOADED,
-            photo: item.photo,
-          })
 
           // eslint-disable-next-line no-await-in-loop
           const returnedMessage = await sendMessage({
             chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: item.chatPhotoHash,
           })
+          // console.log("1", { returnedMessage })
         } else if (responseData.status === 100) {
           // alert(JSON.stringify({ responseData }))
-          Toast.show({
-            text1: 'This image already uploaded',
-            // text2: '',
-            visibilityTime: 500,
-            topOffset,
-          })
+          // Toast.show({
+          //   text1: 'This image already uploaded',
+          //   text2: '',
+          //   visibilityTime: 500,
+          //   topOffset,
+          // })
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
           // show the photo in the photo list immidiately
 
           // eslint-disable-next-line no-await-in-loop
-          dispatch({
-            type: ACTION_TYPES.CHAT_UPDATE_PHOTO_UPLOADED,
-            photo: item.photo,
-          })
-          // eslint-disable-next-line no-await-in-loop
           const returnedMessage = await sendMessage({
             chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: item.chatPhotoHash,
           })
+          // console.log("2", { returnedMessage })
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({
@@ -343,9 +335,9 @@ const _uploadItem = async ({ uuid, item }) => {
           photoHash: item.chatPhotoHash,
           contentType,
         },
+        fetchPolicy: "network-only",
       })).data.generateUploadUrlForMessage
 
-    // console.log({ uploadUrl })
     if (uploadUrl?.newAsset === true) {
       const responseData = await FileSystem.uploadAsync(
         uploadUrl.uploadUrl,

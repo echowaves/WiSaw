@@ -5,7 +5,7 @@ export default {
     API_URI: process.env.API_URI,
     REALTIME_API_URI: process.env.REALTIME_API_URI,
     API_KEY: process.env.API_KEY,
-    REGION: process.env.REGION,
+    PRIVATE_IMG_HOST: process.env.PRIVATE_IMG_HOST,
   },
   slug: "WiSaw",
   scheme: "wisaw",

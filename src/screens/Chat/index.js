@@ -134,6 +134,7 @@ const Chat = ({ route }) => {
                   name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
+                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
               }
             }
             return message
@@ -152,6 +153,7 @@ const Chat = ({ route }) => {
                   name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
+                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
               },
               ...updatedMessages,
             ]
@@ -218,7 +220,6 @@ const Chat = ({ route }) => {
           },
           // fetchPolicy: "network-only",
         })).data.getMessagesList
-
       return messagesList.map(message => (
         {
           _id: message.messageUuid,
@@ -230,6 +231,7 @@ const Chat = ({ route }) => {
             name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
             // avatar: 'https://placeimg.com/140/140/any',
           },
+          image: message?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb` : null,
         }
       ))
     } catch (e) {
@@ -262,6 +264,7 @@ const Chat = ({ route }) => {
                 name: friendsHelper.getLocalContactName({ uuid, friendUuid: uuid, friendsList }),
                 // avatar: 'https://placeimg.com/140/140/any',
               },
+              image: message?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb` : null,
             }]))
 
           const returnedMessage = await reducer.sendMessage({
@@ -419,7 +422,7 @@ const Chat = ({ route }) => {
       Crypto.CryptoDigestAlgorithm.SHA256,
       fileContents
     )
-    console.log('photoHash: ', chatPhotoHash)
+    // console.log('photoHash: ', chatPhotoHash)
     const messageUuid = uuidv4()
 
     setMessages(previousMessages => GiftedChat.append(previousMessages,
@@ -436,7 +439,7 @@ const Chat = ({ route }) => {
       }]))
 
     const returnedMessage = await reducer.sendMessage({
-      chatUuid, uuid, messageUuid, text: "", pending: false, chatPhotoHash,
+      chatUuid, uuid, messageUuid, text: "", pending: true, chatPhotoHash,
     })
     await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, chatPhotoHash, messageUuid }))
     dispatch(reducer.uploadPendingPhotos({ chatUuid }))
