@@ -196,25 +196,36 @@ export function uploadPendingPhotos({ chatUuid }) {
       // first pass iteration to generate photos ID and the photo record on the backend
       for (i = 0; i < generatePhotoQueue.length; i += 1) {
         const item = generatePhotoQueue[i]
-        // console.log({ item })
         // eslint-disable-next-line no-await-in-loop
         const { responseData } = await _uploadItem({ uuid, item })
         // sleep for 1 second before re-trying
 
-        // const now = new Date().getTime()
-        // while (new Date().getTime() < now + 10000) { /* Do nothing */ }
-
         // console.log({ responseData })
+        if (responseData.status === 200) {
+          // console.log("sleeping:: started")
+          // // const now = new Date().getTime()
+          // // while (new Date().getTime() < now + 10000) { /* Do nothing */ }
+          // console.log("sleeping:: done")
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          // eslint-disable-next-line no-await-in-loop
+          sendMessage({
+            chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: '',
+          })
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        }
         if (responseData.status === 200 || responseData.status === 100) {
-          // eslint-disable-next-line no-await-in-loop
-          await _removeFromQueue(item)
-          // eslint-disable-next-line no-await-in-loop
           // show the photo in the photo list immidiately
+
+          // console.log({ item })
 
           // eslint-disable-next-line no-await-in-loop
           const returnedMessage = await sendMessage({
             chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: item.chatPhotoHash,
           })
+          // eslint-disable-next-line no-await-in-loop
+          await _removeFromQueue(item)
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({

@@ -136,8 +136,8 @@ const Chat = ({ route }) => {
                   name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
-                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
-                chatPhotoHash: onSendMessage?.chatPhotoHash,
+                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : '',
+                chatPhotoHash: onSendMessage?.chatPhotoHash || '',
               }
             }
             return message
@@ -145,6 +145,7 @@ const Chat = ({ route }) => {
 
           // this is a new message which was not present in the feed, let's append it to the end
           if (updatedMessages.find(message => message._id === onSendMessage.messageUuid) === undefined) {
+            // console.log({ onSendMessage })
             return [
               {
                 _id: onSendMessage.messageUuid,
@@ -156,8 +157,8 @@ const Chat = ({ route }) => {
                   name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
-                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
-                chatPhotoHash: onSendMessage?.chatPhotoHash,
+                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : '',
+                chatPhotoHash: onSendMessage?.chatPhotoHash || '',
               },
               ...updatedMessages,
             ]
