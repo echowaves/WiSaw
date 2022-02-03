@@ -3,9 +3,15 @@ import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from "react-redux"
 import { GiftedChat, Send } from 'react-native-gifted-chat'
 import moment from 'moment'
+import { v4 as uuidv4 } from 'uuid'
+
+import * as ImagePicker from 'expo-image-picker'
+import * as Linking from 'expo-linking'
+import * as Crypto from 'expo-crypto'
+import * as FileSystem from 'expo-file-system'
 
 import {
-  // Alert,
+  Alert,
   SafeAreaView,
   StyleSheet,
   // ScrollView,
@@ -14,7 +20,7 @@ import {
 } from 'react-native'
 
 import {
-  // Text,
+  Text,
   // Input,
   // LinearProgress,
   // Card,
@@ -35,12 +41,14 @@ import { gql } from "@apollo/client"
 
 import PropTypes from 'prop-types'
 
+import * as reducer from './reducer'
+
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as friendsListReducer from '../FriendsList/reducer'
 
 import * as CONST from '../../consts.js'
-import subscriptionClient from '../../subscriptionClient'
+import subscriptionClient from '../../subscriptionClientWs'
 
 const Chat = ({ route }) => {
   const { chatUuid, contact } = route.params
@@ -73,13 +81,16 @@ const Chat = ({ route }) => {
       setMessages(await _loadMessages({ chatUuid, lastLoaded: moment() }))
       friendsHelper.resetUnreadCount({ chatUuid, uuid })
     })()
+
+    CONST._makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER_CHAT })
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    // console.log(`subscribing to ${chatUuid}`)
+    console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
-    const subscription = subscriptionClient
+    const observableObject = subscriptionClient
       .subscribe({
         query: gql`
         subscription onSendMessage($chatUuid: String!) {
@@ -88,44 +99,102 @@ const Chat = ({ route }) => {
             createdAt
             messageUuid
             text
+            pending
+            chatPhotoHash
             updatedAt
-            uuid          }
-        }
-        `,
+            uuid
+          }
+        }`,
         variables: {
           chatUuid,
         },
       })
-      .subscribe({
-        next(data) {
-          const { onSendMessage } = data?.data
-          // console.log({ onSendMessage })
-
-          setMessages(previousMessages => GiftedChat.append(previousMessages, [_messageAdapter(onSendMessage)]))
-
-          // update read counts
-          friendsHelper.resetUnreadCount({ chatUuid, uuid })
-        },
-        error({ error }) {
-          // console.error("subscription error", { error })
-          Toast.show({
-            text1: 'Error in the application, chat may not function properly.',
-            // text2: 'You may want to leave this screen and come back to it again, to make it work.',
-            text2: JSON.stringify({ error }),
-            type: "error",
-            topOffset,
+    // console.log({ observableObject })
+    const subscriptionParameters = {
+      // onmessage() {
+      //   console.log("onMessage")
+      // },
+      // start() {
+      //   console.log('observableObject:: Start')
+      // },
+      next(data) {
+        // console.log('observableObject:: ', { data })
+        const { onSendMessage } = data?.data
+        // console.log({ onSendMessage })
+        setMessages(previousMessages => {
+          const updatedMessages = previousMessages.map(message => {
+            if (message._id === onSendMessage.messageUuid) { // this is the update of the message which is already in the feed
+              return {
+                _id: onSendMessage.messageUuid,
+                text: onSendMessage.text,
+                pending: onSendMessage.pending,
+                createdAt: onSendMessage.createdAt,
+                user: {
+                  _id: onSendMessage.uuid,
+                  name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
+                  // avatar: 'https://placeimg.com/140/140/any',
+                },
+                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
+              }
+            }
+            return message
           })
 
-          // _return({ uuid })
-        },
-        complete() {
-          // console.log("subs. DONE")
-        }, // never printed
-      })
+          // this is a new message which was not present in the feed, let's append it to the end
+          if (updatedMessages.find(message => message._id === onSendMessage.messageUuid) === undefined) {
+            return [
+              {
+                _id: onSendMessage.messageUuid,
+                text: onSendMessage.text,
+                pending: onSendMessage.pending,
+                createdAt: onSendMessage.createdAt,
+                user: {
+                  _id: onSendMessage.uuid,
+                  name: friendsHelper.getLocalContactName({ uuid, friendUuid: onSendMessage.uuid, friendsList }),
+                  // avatar: 'https://placeimg.com/140/140/any',
+                },
+                image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
+              },
+              ...updatedMessages,
+            ]
+          } // if this is the new message
+          // console.log({ updatedMessages })
+          return updatedMessages
+        })
+        // update read counts
+        friendsHelper.resetUnreadCount({ chatUuid, uuid })
+      },
+      error(error) {
+        console.error("observableObject:: subscription error", { error })
+
+        Toast.show({
+          text1: 'Trying to re-connect, chat may not function properly.',
+          // text2: 'You may want to leave this screen and come back to it again, to make it work.',
+          text2: JSON.stringify({ error }),
+          type: "error",
+          topOffset,
+        })
+        console.log('------------------------- this is the whole new begining --------------------------------------')
+        subscription.unsubscribe()
+        observableObject.subscribe(subscriptionParameters)
+        // // _return({ uuid })
+      },
+      complete() {
+        console.log("observableObject:: subs. DONE")
+      }, // never printed
+    }
+    // console.log({ observableObject })
+    // console.log(Object.entries(observableObject))
+
+    const subscription = observableObject.subscribe(subscriptionParameters)
+
+    // const subscription = observableObject.subscribe(result => {
+    //   console.log('Subscription data => ', { result })
+    // })
 
     return () => {
-      // console.log(`unsubscribing from ${chatUuid}`)
       subscription.unsubscribe()
+      console.log(`unsubscribing from ${chatUuid}`)
     }
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -139,6 +208,8 @@ const Chat = ({ route }) => {
             uuid,
             messageUuid, 
             text, 
+            pending, 
+            chatPhotoHash,
             createdAt,
             updatedAt
           }
@@ -150,9 +221,21 @@ const Chat = ({ route }) => {
           // fetchPolicy: "network-only",
         })).data.getMessagesList
       return messagesList.map(message => (
-        _messageAdapter(message)
+        {
+          _id: message.messageUuid,
+          text: message.text,
+          pending: message.pending,
+          createdAt: message.createdAt,
+          user: {
+            _id: message.uuid,
+            name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
+            // avatar: 'https://placeimg.com/140/140/any',
+          },
+          image: message?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb` : null,
+        }
       ))
     } catch (e) {
+      console.log("failed to load messages: ", { e })
       Toast.show({
         text1: `Failed to load messages:`,
         text2: `${e}`,
@@ -163,17 +246,6 @@ const Chat = ({ route }) => {
     }
   }
 
-  const _messageAdapter = message => ({
-    _id: message.messageUuid,
-    text: message.text,
-    createdAt: message.createdAt,
-    user: {
-      _id: message.uuid,
-      name: friendsHelper.getLocalContactName({ uuid, friendUuid: message.uuid, friendsList }),
-      // avatar: 'https://placeimg.com/140/140/any',
-    },
-  })
-
   const onSend = useCallback((messages = []) => {
     messages.forEach(message => {
       (async () => {
@@ -181,30 +253,25 @@ const Chat = ({ route }) => {
           const { _id, text } = message
           const messageUuid = _id
 
-          const returnedMessage = (await CONST.gqlClient
-            .mutate({
-              mutation: gql`
-              mutation
-              sendMessage($chatUuidArg: String!, $uuidArg: String!, $messageUuidArg: String!, $textArg: String!) {
-                sendMessage(chatUuidArg: $chatUuidArg, uuidArg: $uuidArg, messageUuidArg: $messageUuidArg,textArg: $textArg) {
-                  chatUuid
-                  createdAt
-                  messageUuid
-                  text
-                  updatedAt
-                  uuid
-                  }
-              }
-              `,
-              variables: {
-                chatUuidArg: chatUuid,
-                uuidArg: uuid,
-                messageUuidArg: messageUuid,
-                textArg: text,
+          setMessages(previousMessages => GiftedChat.append(previousMessages,
+            [{
+              _id,
+              text,
+              pending: true,
+              createdAt: moment(),
+              user: {
+                _id: uuid,
+                name: friendsHelper.getLocalContactName({ uuid, friendUuid: uuid, friendsList }),
+                // avatar: 'https://placeimg.com/140/140/any',
               },
-            })).data.sendMessage
-          return returnedMessage
+              image: message?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb` : null,
+            }]))
+
+          const returnedMessage = await reducer.sendMessage({
+            chatUuid, uuid, messageUuid, text, pending: false, chatPhotoHash: '',
+          })
         } catch (e) {
+          console.log("failed to send message: ", { e })
           Toast.show({
             text1: `Failed to send message:`,
             text2: `${e}`,
@@ -285,32 +352,6 @@ const Chat = ({ route }) => {
     </View>
   )
 
-  const scrollToBottomComponent = () => (
-    <View style={{
-      justifyContent: 'center',
-      alignItems: 'center',
-    }}>
-      {/* <MaterialCommunityIcons
-        name="send-circle"
-        size={35}
-        style={
-          {
-            marginRight: 10,
-            marginBottom: 10,
-            color: CONST.MAIN_COLOR,
-          }
-        }
-      /> */}
-      <Icon
-        reverse
-        name="angle-double-down"
-        type="font-awesome"
-        color={CONST.MAIN_COLOR}
-        size={36}
-      />
-    </View>
-  )
-
   const onLoadEarlier = async () => {
     // console.log('onLoadEarlier')
     // setMessages([...messages, await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })])
@@ -319,6 +360,89 @@ const Chat = ({ route }) => {
     // setMessages([(await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })), ...messages])
 
     // setLastRead(earlierMessages[0].createdAt)
+  }
+
+  const renderAccessory = () => (
+    <View style={{
+      flexDirection: 'row',
+      // alignItems: 'center',
+      justifyContent: 'space-evenly',
+      padding: 10,
+    }}>
+      <View />
+      {/* <FontAwesome
+        name="camera"
+        size={25}
+        style={
+          {
+            // marginRight: 10,
+            // marginBottom: 10,
+            color: CONST.MAIN_COLOR,
+          }
+        }
+      /> */}
+      <FontAwesome
+        name="image"
+        size={25}
+        style={
+          {
+            // marginRight: 10,
+            // marginBottom: 10,
+            color: CONST.MAIN_COLOR,
+          }
+        }
+        onPress={async () => pickAsset()}
+      />
+      <View />
+    </View>
+  )
+
+  const pickAsset = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+    if (permissionResult.granted === false) {
+      Alert.alert(
+        "Do you want to use photos from your albom?",
+        "Why don't you enable this permission in settings?",
+        [
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              Linking.openSettings()
+            },
+          },
+        ],
+      )
+      return
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync()
+    const fileContents = await FileSystem.readAsStringAsync(pickerResult.uri, { encoding: FileSystem.EncodingType.Base64 })
+    const chatPhotoHash = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      fileContents
+    )
+    // console.log('photoHash: ', chatPhotoHash)
+    const messageUuid = uuidv4()
+
+    setMessages(previousMessages => GiftedChat.append(previousMessages,
+      [{
+        _id: messageUuid,
+        text: '',
+        pending: true,
+        createdAt: moment(),
+        user: {
+          _id: uuid,
+          name: friendsHelper.getLocalContactName({ uuid, friendUuid: uuid, friendsList }),
+          // avatar: 'https://placeimg.com/140/140/any',
+        },
+      }]))
+
+    const returnedMessage = await reducer.sendMessage({
+      chatUuid, uuid, messageUuid, text: "", pending: true, chatPhotoHash,
+    })
+    await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, chatPhotoHash, messageUuid }))
+    dispatch(reducer.uploadPendingPhotos({ chatUuid }))
   }
 
   return (
@@ -332,11 +456,12 @@ const Chat = ({ route }) => {
         // alwaysShowSend
         renderSend={renderSend}
         renderLoading={renderLoading}
-        scrollToBottomComponent={scrollToBottomComponent}
+        // scrollToBottomComponent={scrollToBottomComponent}
         infiniteScroll
         loadEarlier
         onLoadEarlier={onLoadEarlier}
         renderUsernameOnMessage
+        renderAccessory={renderAccessory}
       />
     </SafeAreaView>
   )

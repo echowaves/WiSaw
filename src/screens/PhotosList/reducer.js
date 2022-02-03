@@ -580,14 +580,6 @@ const _updatePendingPhotos = async dispatch => {
   })
 }
 
-const _makeSureDirectoryExists = async ({ directory }) => {
-  const tmpDir = await FileSystem.getInfoAsync(directory)
-  // create cacheDir if does not exist
-  if (!tmpDir.exists) {
-    await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
-  }
-}
-
 const _genLocalThumbs = async image => {
   if (image.type === 'image') {
     const manipResult = await ImageManipulator.manipulateAsync(
@@ -640,7 +632,7 @@ const _addToQueue = async image => {
 // returns an array that has everything needed for rendering
 const _getQueue = async () => {
   // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
-  await _makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
+  await CONST._makeSureDirectoryExists({ directory: CONST.PENDING_UPLOADS_FOLDER })
 
   const filesInStorage = await FileSystem.readDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER)
   let imagesInQueue = JSON.parse(

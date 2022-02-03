@@ -1,6 +1,6 @@
 import * as FileSystem from 'expo-file-system'
 
-import { WebSocketLink } from '@apollo/client/link/ws'
+// import { WebSocketLink } from '@apollo/client/link/ws'
 import { setContext } from '@apollo/client/link/context'
 
 import {
@@ -8,14 +8,14 @@ import {
   InMemoryCache,
   HttpLink,
   // from,
-  split,
+  // split,
 } from "@apollo/client"
 
-import { getMainDefinition } from '@apollo/client/utilities'
+// import { getMainDefinition } from '@apollo/client/utilities'
 
 import Constants from 'expo-constants'
 
-const { API_URI, API_KEY } = Constants.manifest.extra
+export const { API_URI, API_KEY, PRIVATE_IMG_HOST } = Constants.manifest.extra
 // alert(JSON.stringify({ API_URI, API_KEY }))
 // const { API_URI, API_KEY } = process.env
 // console.log({ API_URI, API_KEY })
@@ -39,8 +39,10 @@ export const TRANSPARENT_BUTTON_COLOR = 'rgba(200, 200, 200, 0.8)'
 export const TRANSPARENT_ICONS_COLOR = 'rgba(10,10,10,.5)'
 
 export const PENDING_UPLOADS_FOLDER = `${FileSystem.documentDirectory}pendingUploads/`
+export const PENDING_UPLOADS_FOLDER_CHAT = `${FileSystem.documentDirectory}pendingUploadsChat/`
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
 export const PENDING_UPLOADS_KEY = "@PENDING_UPLOADS"
+export const PENDING_CHAT_UPLOADS_KEY = "@PENDING_CHAT_UPLOADS"
 
 export const FRIENDSHIP_PREFIX = "@FRIENDSHIP"
 
@@ -49,7 +51,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      'X-Api-Key': API_KEY,
+      'X-Api-Key': token,
       // authorization: token,
     },
   }
@@ -97,3 +99,11 @@ export const gqlClient = new ApolloClient({
   cache: new InMemoryCache(),
 })
 // console.log({ API_URI }, { API_KEY })
+
+export const _makeSureDirectoryExists = async ({ directory }) => {
+  const tmpDir = await FileSystem.getInfoAsync(directory)
+  // create cacheDir if does not exist
+  if (!tmpDir.exists) {
+    await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
+  }
+}

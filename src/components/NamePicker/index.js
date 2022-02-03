@@ -15,10 +15,11 @@ import {
   Text,
   Header,
   Input,
+  Button,
 } from 'react-native-elements'
 
 import {
-  FontAwesome, Ionicons,
+  FontAwesome,
 } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
@@ -71,25 +72,25 @@ const NamePicker = ({
     />
   )
 
-  const renderHeaderRight = () => (
-    <Ionicons
-      name="send"
-      style={
-        {
-          fontSize: 30,
-          color: CONST.MAIN_COLOR,
-        }
-      }
-      onPress={
-        async () => {
-          await setContactName(inputText)
-          await setShow(false)
-          await setInputText('')
-        }
-      }
-    />
+  // const renderHeaderRight = () => (
+  //   <Ionicons
+  //     name="send"
+  //     style={
+  //       {
+  //         fontSize: 30,
+  //         color: CONST.MAIN_COLOR,
+  //       }
+  //     }
+  //     onPress={
+  //       async () => {
+  //         await setContactName(inputText)
+  //         await setShow(false)
+  //         await setInputText('')
+  //       }
+  //     }
+  //   />
 
-  )
+  // )
 
   return (
     <Modal
@@ -115,7 +116,7 @@ const NamePicker = ({
               },
             }
           }
-          rightComponent={renderHeaderRight()}
+          // rightComponent={renderHeaderRight()}
         />
         {headerText && (
           <Text
@@ -131,7 +132,7 @@ const NamePicker = ({
           }>
 
           <View style={{
-            flexDirection: 'row',
+            flexDirection: 'column',
             backgroundColor: CONST.NAV_COLOR,
           }}>
             <Input
@@ -154,14 +155,48 @@ const NamePicker = ({
                   margin: 10,
                 }
               }
-              rightIconContainerStyle={{
-                margin: 10,
-              }}
+              // rightIconContainerStyle={{
+              //   margin: 10,
+              // }}
               lightTheme
               onChangeText={inputValue => {
                 setInputText(inputValue.slice(0, 140))
               }}
               value={inputText}
+            />
+
+            <Button
+              type="outline"
+              titleStyle={
+                {
+                  color: CONST.MAIN_COLOR,
+                }
+              }
+              containerStyle={
+                {
+                  margin: 10,
+                }
+              }
+              icon={(
+                <FontAwesome
+                  name="save"
+                  style={
+                    {
+                      fontSize: 30,
+                      color: CONST.MAIN_COLOR,
+                      marginRight: 10,
+                    }
+                  }
+                />
+              )}
+              title="Save on Device"
+              onPress={
+                async () => {
+                  await setContactName(inputText)
+                  await setShow(false)
+                  await setInputText('')
+                }
+              }
             />
           </View>
         </ScrollView>
