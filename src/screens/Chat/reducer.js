@@ -199,8 +199,13 @@ export function uploadPendingPhotos({ chatUuid }) {
         // console.log({ item })
         // eslint-disable-next-line no-await-in-loop
         const { responseData } = await _uploadItem({ uuid, item })
+        // sleep for 1 second before re-trying
+
+        // const now = new Date().getTime()
+        // while (new Date().getTime() < now + 10000) { /* Do nothing */ }
+
         // console.log({ responseData })
-        if (responseData.status === 200) {
+        if (responseData.status === 200 || responseData.status === 100) {
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
@@ -210,25 +215,6 @@ export function uploadPendingPhotos({ chatUuid }) {
           const returnedMessage = await sendMessage({
             chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: item.chatPhotoHash,
           })
-          // console.log("1", { returnedMessage })
-        } else if (responseData.status === 100) {
-          // alert(JSON.stringify({ responseData }))
-          // Toast.show({
-          //   text1: 'This image already uploaded',
-          //   text2: '',
-          //   visibilityTime: 500,
-          //   topOffset,
-          // })
-          // eslint-disable-next-line no-await-in-loop
-          await _removeFromQueue(item)
-          // eslint-disable-next-line no-await-in-loop
-          // show the photo in the photo list immidiately
-
-          // eslint-disable-next-line no-await-in-loop
-          const returnedMessage = await sendMessage({
-            chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: item.chatPhotoHash,
-          })
-          // console.log("2", { returnedMessage })
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({
@@ -338,8 +324,9 @@ const _uploadItem = async ({ uuid, item }) => {
         fetchPolicy: "network-only",
       })).data.generateUploadUrlForMessage
 
+    let responseData
     if (uploadUrl?.newAsset === true) {
-      const responseData = await FileSystem.uploadAsync(
+      responseData = await FileSystem.uploadAsync(
         uploadUrl.uploadUrl,
         item.localImgUrl,
         {
@@ -349,11 +336,11 @@ const _uploadItem = async ({ uuid, item }) => {
           },
         }
       )
-      // console.log({ responseData })
-      return { responseData }
-    }
-    const responseData = {
-      status: 100,
+      // await new Promise(resolve => setTimeout(resolve, 2000))
+    } else {
+      responseData = {
+        status: 100,
+      }
     }
     return { responseData }
   } catch (err3) {

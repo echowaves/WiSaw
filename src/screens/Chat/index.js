@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
 import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
+import CachedImage from 'expo-cached-image'
 
 import {
   Alert,
@@ -17,6 +18,7 @@ import {
   // ScrollView,
   View,
   ActivityIndicator,
+  TouchableHighlight,
 } from 'react-native'
 
 import {
@@ -135,6 +137,7 @@ const Chat = ({ route }) => {
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
                 image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
+                chatPhotoHash: onSendMessage?.chatPhotoHash,
               }
             }
             return message
@@ -154,6 +157,7 @@ const Chat = ({ route }) => {
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
                 image: onSendMessage?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb` : null,
+                chatPhotoHash: onSendMessage?.chatPhotoHash,
               },
               ...updatedMessages,
             ]
@@ -232,6 +236,7 @@ const Chat = ({ route }) => {
             // avatar: 'https://placeimg.com/140/140/any',
           },
           image: message?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb` : null,
+          chatPhotoHash: message?.chatPhotoHash,
         }
       ))
     } catch (e) {
@@ -265,6 +270,7 @@ const Chat = ({ route }) => {
                 // avatar: 'https://placeimg.com/140/140/any',
               },
               image: message?.chatPhotoHash ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb` : null,
+              chatPhotoHash: message?.chatPhotoHash,
             }]))
 
           const returnedMessage = await reducer.sendMessage({
@@ -288,11 +294,18 @@ const Chat = ({ route }) => {
     container: {
       flex: 1,
     },
-    scrollView: {
-      alignItems: 'center',
-      marginHorizontal: 0,
-      paddingBottom: 300,
-    },
+    // scrollView: {
+  //     alignItems: 'center',
+  //     marginHorizontal: 0,
+  //     paddingBottom: 300,
+  //   },
+  //   thumbnail: {
+  //     // flex: 1,
+  //     // alignSelf: 'stretch',
+  //     width: '100%',
+  //     height: '100%',
+  //     borderRadius: 10,
+  //   },
   })
 
   const renderHeaderRight = () => {}
@@ -439,10 +452,44 @@ const Chat = ({ route }) => {
       }]))
 
     const returnedMessage = await reducer.sendMessage({
-      chatUuid, uuid, messageUuid, text: "", pending: true, chatPhotoHash,
+      chatUuid, uuid, messageUuid, text: "", pending: true, chatPhotoHash: '',
     })
     await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, chatPhotoHash, messageUuid }))
     dispatch(reducer.uploadPendingPhotos({ chatUuid }))
+  }
+
+  const renderMessageImage = props => {
+    console.log()
+    const { currentMessage: { image, chatPhotoHash } } = props
+    // console.log({ image, chatPhotoHash })
+
+    return (
+      <TouchableHighlight
+        // onPress={() => onThumbPress(item)}
+        style={
+          {
+            width: 200,
+            height: 200,
+            // borderRadius: 10,
+            // flex: 1,
+            alignSelf: 'stretch',
+          }
+
+        }>
+
+        <CachedImage
+          source={{ uri: `${image}` }}
+          cacheKey={`${chatPhotoHash}-thumb`}
+          resizeMode="contain"
+          style={{
+            width: '100%',
+            height: '100%',
+            // borderRadius: 10,
+          }}
+        />
+      </TouchableHighlight>
+
+    )
   }
 
   return (
@@ -456,6 +503,7 @@ const Chat = ({ route }) => {
         // alwaysShowSend
         renderSend={renderSend}
         renderLoading={renderLoading}
+        renderMessageImage={renderMessageImage}
         // scrollToBottomComponent={scrollToBottomComponent}
         infiniteScroll
         loadEarlier
