@@ -439,6 +439,8 @@ const Chat = ({ route }) => {
     // console.log('photoHash: ', chatPhotoHash)
     const messageUuid = uuidv4()
 
+    await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, chatPhotoHash, messageUuid }))
+
     setMessages(previousMessages => GiftedChat.append(previousMessages,
       [{
         _id: messageUuid,
@@ -450,12 +452,14 @@ const Chat = ({ route }) => {
           name: friendsHelper.getLocalContactName({ uuid, friendUuid: uuid, friendsList }),
           // avatar: 'https://placeimg.com/140/140/any',
         },
+        image: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb`,
+        chatPhotoHash,
       }]))
 
     const returnedMessage = await reducer.sendMessage({
-      chatUuid, uuid, messageUuid, text: "", pending: true, chatPhotoHash: '',
+      chatUuid, uuid, messageUuid, text: "", pending: true, chatPhotoHash,
     })
-    await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, chatPhotoHash, messageUuid }))
+
     dispatch(reducer.uploadPendingPhotos({ chatUuid }))
   }
 

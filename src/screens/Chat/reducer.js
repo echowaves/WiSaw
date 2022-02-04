@@ -207,13 +207,13 @@ export function uploadPendingPhotos({ chatUuid }) {
           // // while (new Date().getTime() < now + 10000) { /* Do nothing */ }
           // console.log("sleeping:: done")
           // eslint-disable-next-line no-await-in-loop
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          await new Promise(resolve => setTimeout(resolve, 4000))
           // eslint-disable-next-line no-await-in-loop
-          sendMessage({
-            chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: '',
-          })
-          // eslint-disable-next-line no-await-in-loop
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          // sendMessage({
+          //   chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: '',
+          // })
+          // // eslint-disable-next-line no-await-in-loop
+          // await new Promise(resolve => setTimeout(resolve, 1000))
         }
         if (responseData.status === 200 || responseData.status === 100) {
           // show the photo in the photo list immidiately
