@@ -4,12 +4,12 @@ import { useDispatch, useSelector } from "react-redux"
 import { GiftedChat, Send } from 'react-native-gifted-chat'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
+import * as MediaLibrary from 'expo-media-library'
 
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
 import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
-import CachedImage from 'expo-cached-image'
 
 import {
   Alert,
@@ -387,7 +387,7 @@ const Chat = ({ route }) => {
       padding: 10,
     }}>
       <View />
-      {/* <FontAwesome
+      <FontAwesome
         name="camera"
         size={25}
         style={
@@ -397,7 +397,8 @@ const Chat = ({ route }) => {
             color: CONST.MAIN_COLOR,
           }
         }
-      /> */}
+        onPress={async () => takePhoto()}
+      />
       <FontAwesome
         name="image"
         size={25}
@@ -434,15 +435,58 @@ const Chat = ({ route }) => {
     }
 
     const pickerResult = await ImagePicker.launchImageLibraryAsync()
-    const fileContents = await FileSystem.readAsStringAsync(pickerResult.uri, { encoding: FileSystem.EncodingType.Base64 })
+
+    const { uri } = pickerResult
+    uploadAsset({ uri })
+  }
+
+  const takePhoto = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync()
+
+    if (permissionResult.granted === false) {
+      Alert.alert(
+        "Do you want to take photo with wisaw?",
+        "Why don't you enable this permission in settings?",
+        [
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              Linking.openSettings()
+            },
+          },
+        ],
+      )
+      return
+    }
+
+    const cameraReturn = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      // allowsEditing: true,
+      quality: 1.0,
+      // exif: false,
+    })
+
+    if (cameraReturn.cancelled === true) {
+      return
+    }
+
+    await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
+
+    const { uri } = cameraReturn
+    uploadAsset({ uri })
+  }
+
+  const uploadAsset = async ({ uri }) => {
+    const fileContents = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 })
     const chatPhotoHash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       fileContents
     )
-    // console.log('photoHash: ', chatPhotoHash)
+    console.log('photoHash: ', chatPhotoHash)
+
     const messageUuid = uuidv4()
 
-    await dispatch(reducer.queueFileForUpload({ assetUrl: pickerResult.uri, chatPhotoHash, messageUuid }))
+    await dispatch(reducer.queueFileForUpload({ assetUrl: uri, chatPhotoHash, messageUuid }))
 
     setMessages(previousMessages => GiftedChat.append(previousMessages,
       [{
