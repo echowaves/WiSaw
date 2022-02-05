@@ -19,6 +19,7 @@ import {
   View,
   ActivityIndicator,
   TouchableHighlight,
+  Pressable,
 } from 'react-native'
 
 import {
@@ -51,6 +52,8 @@ import * as friendsListReducer from '../FriendsList/reducer'
 
 import * as CONST from '../../consts.js'
 import subscriptionClient from '../../subscriptionClientWs'
+
+import ChatPhoto from './ChatPhoto'
 
 const Chat = ({ route }) => {
   const { chatUuid, contact } = route.params
@@ -463,40 +466,6 @@ const Chat = ({ route }) => {
     dispatch(reducer.uploadPendingPhotos({ chatUuid }))
   }
 
-  const renderMessageImage = props => {
-    console.log()
-    const { currentMessage: { image, chatPhotoHash } } = props
-    // console.log({ image, chatPhotoHash })
-
-    return (
-      <TouchableHighlight
-        // onPress={() => onThumbPress(item)}
-        style={
-          {
-            width: 200,
-            height: 200,
-            // borderRadius: 10,
-            // flex: 1,
-            alignSelf: 'stretch',
-          }
-
-        }>
-
-        <CachedImage
-          source={{ uri: `${image}` }}
-          cacheKey={`${chatPhotoHash}-thumb`}
-          resizeMode="contain"
-          style={{
-            width: '100%',
-            height: '100%',
-            // borderRadius: 10,
-          }}
-        />
-      </TouchableHighlight>
-
-    )
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <GiftedChat
@@ -508,7 +477,8 @@ const Chat = ({ route }) => {
         // alwaysShowSend
         renderSend={renderSend}
         renderLoading={renderLoading}
-        renderMessageImage={renderMessageImage}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        renderMessageImage={props => <ChatPhoto {...props} />}
         // scrollToBottomComponent={scrollToBottomComponent}
         infiniteScroll
         loadEarlier
