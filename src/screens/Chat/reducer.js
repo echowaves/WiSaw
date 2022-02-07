@@ -208,6 +208,7 @@ export function uploadPendingPhotos({ chatUuid }) {
           // console.log("sleeping:: done")
           // eslint-disable-next-line no-await-in-loop
           await new Promise(resolve => setTimeout(resolve, 4000))
+
           // eslint-disable-next-line no-await-in-loop
           // sendMessage({
           //   chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: '',
