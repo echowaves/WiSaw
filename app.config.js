@@ -1,6 +1,6 @@
 export default {
   name: "WiSaw",
-  version: "7.1.0",
+  version: "7.1.1",
   extra: {
     API_URI: process.env.API_URI,
     REALTIME_API_URI: process.env.REALTIME_API_URI,
@@ -34,7 +34,7 @@ export default {
   ],
   ios: {
     bundleIdentifier: "com.echowaves",
-    buildNumber: "227",
+    buildNumber: "228",
     supportsTablet: true,
     infoPlist: {
       UIBackgroundModes: [
@@ -65,7 +65,7 @@ export default {
       backgroundColor: "#FFFFFF",
     },
     package: "com.echowaves.wisaw",
-    versionCode: 227,
+    versionCode: 228,
     permissions: [
       "INTERNET",
       "SYSTEM_ALERT_WINDOW",
