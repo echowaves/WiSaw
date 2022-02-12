@@ -311,9 +311,7 @@ const FriendsList = () => {
           ...styles.container,
           marginBottom: 95,
         }}
-        showsVerticalScrollIndicator={
-          false
-        }
+        showsVerticalScrollIndicator
         horizontal={
           false
         }
