@@ -39,14 +39,14 @@ export const initBranch = async ({ navigation }) => {
 const _navigateByParams = async ({ params, navigation }) => {
   // alert(JSON.stringify({ params }))
   // alert(JSON.stringify({ params, hello: "hello" }))
-
-  await navigation.popToTop()
   if (params?.photoId) {
     // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
+    await navigation.popToTop()
     await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
   }
   if (params?.friendshipUuid) {
     // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
+    await navigation.popToTop()
     await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
   }
 }
