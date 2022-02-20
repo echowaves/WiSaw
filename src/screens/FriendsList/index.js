@@ -178,29 +178,8 @@ const FriendsList = () => {
             containerStyle={{ marginTop: -20 }}
           />
         )
+
       }
-      <ListItem.Content>
-        <ListItem.Title>
-          <Text>
-            {
-            // eslint-disable-next-line react/prop-types
-              `${friend?.contact}`
-            }
-          </Text>
-        </ListItem.Title>
-        {
-          // eslint-disable-next-line react/prop-types
-          friend.uuid2 === null && (
-            <ListItem.Subtitle>
-              <Text style={{
-                color: "red",
-              }}>
-                pending confirmation
-              </Text>
-            </ListItem.Subtitle>
-          )
-        }
-      </ListItem.Content>
       <FontAwesome5
         name="user-edit"
         size={30}
@@ -230,6 +209,29 @@ const FriendsList = () => {
           () => _handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
         }
       />
+      <ListItem.Content>
+        <ListItem.Title>
+          <Text>
+            {
+            // eslint-disable-next-line react/prop-types
+              `${friend?.contact}`
+            }
+          </Text>
+        </ListItem.Title>
+        {
+          // eslint-disable-next-line react/prop-types
+          friend.uuid2 === null && (
+            <ListItem.Subtitle>
+              <Text style={{
+                color: "red",
+              }}>
+                pending confirmation
+              </Text>
+            </ListItem.Subtitle>
+          )
+        }
+      </ListItem.Content>
+
       <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
     </ListItem>
   )
