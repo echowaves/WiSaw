@@ -46,6 +46,7 @@ const App = () => (
     <ThemeProvider>
       <NavigationContainer>
         <Drawer.Navigator
+          useLegacyImplementation
           screenOptions={{ gestureEnabled: true, headerShown: false }}>
           <Drawer.Screen
             name="Home"
