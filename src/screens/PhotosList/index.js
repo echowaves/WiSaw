@@ -132,7 +132,9 @@ const PhotosList = () => {
   // const pageNumber = useSelector(state => state.photosList.pageNumber)
 
   const activeSegment = useSelector(state => state.photosList.activeSegment)
-  const searchTerm = useSelector(state => state.photosList.searchTerm)
+  // const searchTerm = useSelector(state => state.photosList.searchTerm)
+  const [currentSearchTerm, setCurrentSearchTerm] = useState('')
+
   const netAvailable = useSelector(state => state.photosList.netAvailable)
   // const batch = useSelector(state => state.photosList.batch)
   const unreadCountList = useSelector(state => state.friendsList.unreadCountsList)
@@ -773,9 +775,9 @@ const PhotosList = () => {
         placeholder="Type Text Here..."
         placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
         onChangeText={currentTerm => {
-          dispatch(reducer.setSearchTerm(currentTerm))
+          setCurrentSearchTerm(currentTerm)
         }}
-        value={searchTerm}
+        value={currentSearchTerm}
         onSubmitEditing={
           () => submitSearch()
         }
@@ -814,8 +816,10 @@ const PhotosList = () => {
   )
 
   const submitSearch = async () => {
+    dispatch(reducer.setSearchTerm(currentSearchTerm))
+
     _reload()
-    if (searchTerm && searchTerm.length >= 3) {
+    if (currentSearchTerm && currentSearchTerm.length >= 3) {
       if (keyboardVisible) {
         dismissKeyboard()
       }

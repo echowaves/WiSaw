@@ -202,7 +202,7 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos: [],
-        searchTerm: '',
+        // searchTerm: '',
         activeSegment: action.activeSegment,
       }
     case ACTION_TYPES.SET_SEARCH_TERM:
