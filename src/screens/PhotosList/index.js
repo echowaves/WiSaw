@@ -1032,8 +1032,7 @@ const PhotosList = () => {
               textAlign: 'center',
               margin: 10,
             }}>
-              Nothing found.
-              Search string should be more than 3 characters.
+              Nothing found. Try to search for something else.
             </Text>
           </Card>
         )}
