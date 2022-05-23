@@ -1,6 +1,6 @@
 import Branch,
 { BranchEvent }
-from 'expo-branch'
+from 'react-native-branch'
 import { Alert } from 'react-native'
 
 export const initBranch = async ({ navigation }) => {

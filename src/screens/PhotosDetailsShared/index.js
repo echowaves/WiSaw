@@ -16,8 +16,6 @@ import Photo from '../../components/Photo'
 
 import * as CONST from '../../consts.js'
 
-// import { _initBranch } from '../PhotosList'
-
 const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
@@ -25,7 +23,6 @@ const PhotosDetailsShared = ({ route }) => {
   const { photoId } = route.params
 
   useEffect(() => {
-    // _initBranch({ navigation })
     navigation.setOptions({
       headerTitle: renderHeaderTitle,
       headerLeft: renderHeaderLeft,

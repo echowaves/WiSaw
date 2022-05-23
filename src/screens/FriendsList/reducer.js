@@ -8,13 +8,6 @@ import * as ACTION_TYPES from './action_types'
 
 import * as friendsHelper from './friends_helper'
 
-// import * as branchHelper from '../../branch_helper'
-// let branchHelper
-// // eslint-disable-next-line no-undef
-// if (!__DEV__) {
-//   branchHelper = await import('../../branch_helper')
-// }
-
 export const initialState = {
   friendsList: [],
   unreadCountsList: [],

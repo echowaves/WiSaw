@@ -8,8 +8,6 @@ import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import moment from 'moment'
 
-// import Branch, { BranchEvent } from 'expo-branch'
-
 import {
   // Dimensions,
   View,
@@ -36,8 +34,6 @@ import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/R
 import PropTypes from 'prop-types'
 
 import { Video } from 'expo-av'
-
-// import Branch, { /* BranchEvent */ } from 'expo-branch'
 
 import CachedImage from 'expo-cached-image'
 
@@ -68,8 +64,6 @@ const Photo = ({ photo }) => {
   const { width, height } = useDimensions().window
   const imageHeight = height - 250
   const bans = useSelector(state => state.photo.bans)
-  // const [branchUniversalObject, setBranchUniversalObject] = useState({})
-
   // const error = useSelector(state => state.photo.error)
 
   useFocusEffect( // use this to make the navigastion to a detailed screen faster
@@ -81,7 +75,6 @@ const Photo = ({ photo }) => {
             ...photoDetails,
             watchersCount: photo.watchersCount,
           })
-          // createBranchUniversalObject({ photo })
         }
       })
 

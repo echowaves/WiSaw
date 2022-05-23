@@ -62,8 +62,6 @@ import Thumb from '../../components/Thumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
 import ThumbPending from '../../components/ThumbPending'
 
-// import * as branchHelper from '../../branch_helper'
-
 const BACKGROUND_FETCH_TASK = 'background-fetch'
 
 // 1. Define the task by providing a name and the function that should be executed

@@ -1,11 +1,7 @@
-// import Branch from '../../util/my-branch'
-
 import Toast from 'react-native-toast-message'
 
 // import { CacheManager } from 'expo-cached-image'
 import { gql } from "@apollo/client"
-
-// import * as branchHelper from "../../branch_helper"
 
 import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
 
