@@ -13,9 +13,7 @@
     "prebuild-native-code": "expo run:android && expo run:ios",
     "build": "eas build",
     "build:local": "eas build --local",
-    "build:ios": "expo build:ios --release-channel production_7.1.2",
-    "build:android": "expo build:android --release-channel production_7.1.2",
-    "publish:prod": "expo publish --release-channel production_7.1.2"
+    "publish:prod": "expo publish --release-channel production"
   },
   "dependencies": {
     "@apollo/client": "3.5.7",

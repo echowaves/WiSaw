@@ -2,7 +2,6 @@ export default {
   expo: {
     name: "WiSaw",
     version: "7.1.2",
-
     plugins: [
       "@config-plugins/react-native-branch",
       // {
@@ -118,7 +117,7 @@ export default {
     updates: {
       enabled: true,
       checkAutomatically: "ON_LOAD",
-      fallbackToCacheTimeout: 30000,
+      fallbackToCacheTimeout: 300000,
     },
     assetBundlePatterns: [
       "**/*",

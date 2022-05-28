@@ -651,7 +651,7 @@ const Photo = ({ photo }) => {
               styles.photoContainer
             }
           />
-          <LinearProgress
+          {/* <LinearProgress
             color={
               CONST.MAIN_COLOR
             }
@@ -661,7 +661,7 @@ const Photo = ({ photo }) => {
               position: 'absolute',
               top: imageHeight / 2,
             }}
-          />
+          /> */}
           <CachedImage
             source={{ uri: `${photo.imgUrl}` }}
             cacheKey={`${photo.id}`}
