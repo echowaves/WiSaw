@@ -711,8 +711,9 @@ const Photo = ({ photo }) => {
         showsVerticalScrollIndicator={false}
         style={{ margin: 1, backgroundColor: 'white' }}>
         <Grid>
-          <Row />
-          {renderPhotoRow({ photo })}
+          <Row>
+            {renderPhotoRow({ photo })}
+          </Row>
           <Row>
             {renderCommentsStats({ photo, photoDetails }) }
           </Row>
