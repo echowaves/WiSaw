@@ -631,49 +631,49 @@ const Photo = ({ photo }) => {
       return (
         <ReactNativeZoomableView
           style={{
-            flex: 1,
+            width,
             height: imageHeight,
+            // top: 0,
+            // bottom: 0,
+            // right: 0,
+            // left: 0,
+            // backgroundColor: 'transparent',
           }}
           zoomEnabled
           initialZoom={1.0}
-          maxZoom={5.0}
-          minZoom={1.0}
-          zoomStep={1.0}
+          maxZoom={12.0}
+          minZoom={1}
+          zoomStep={3}
           bindToBorders
           doubleTapZoomToCenter={false}
           captureEvent>
-          <View
+          {/* <LinearProgress
+              color={
+                CONST.MAIN_COLOR
+              }
+              style={{
+                alignSelf: 'center',
+                width: width / 4,
+                position: 'absolute',
+                top: imageHeight / 2,
+              }}
+            /> */}
+          <CachedImage
+            source={{ uri: `${photo.thumbUrl}` }}
+            cacheKey={`${photo.id}-thumb`}
+            resizeMode="contain"
             style={
               styles.photoContainer
-            }>
-            <CachedImage
-              source={{ uri: `${photo.thumbUrl}` }}
-              cacheKey={`${photo.id}-thumb`}
-              resizeMode="contain"
-              style={
-                styles.photoContainer
-              }
-            />
-            {/* <LinearProgress
-            color={
-              CONST.MAIN_COLOR
             }
-            style={{
-              alignSelf: 'center',
-              width: width / 4,
-              position: 'absolute',
-              top: imageHeight / 2,
-            }}
-          /> */}
-            <CachedImage
-              source={{ uri: `${photo.imgUrl}` }}
-              cacheKey={`${photo.id}`}
-              resizeMode="contain"
-              style={
-                styles.photoContainer
-              }
-            />
-          </View>
+          />
+          <CachedImage
+            source={{ uri: `${photo.imgUrl}` }}
+            cacheKey={`${photo.id}`}
+            resizeMode="contain"
+            style={
+              styles.photoContainer
+            }
+          />
         </ReactNativeZoomableView>
       )
     }
@@ -711,9 +711,8 @@ const Photo = ({ photo }) => {
         showsVerticalScrollIndicator={false}
         style={{ margin: 1, backgroundColor: 'white' }}>
         <Grid>
-          <Row>
-            {renderPhotoRow({ photo })}
-          </Row>
+          <Row />
+          {renderPhotoRow({ photo })}
           <Row>
             {renderCommentsStats({ photo, photoDetails }) }
           </Row>
