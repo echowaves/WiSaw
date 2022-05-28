@@ -261,6 +261,7 @@ export function submitComment({ inputText, uuid, photo }) {
         text1: "Comment added",
         type: "success",
         topOffset,
+        visibilityTime: 500,
       })
     } catch (err) {
       // console.log({ err })// eslint-disable-line
