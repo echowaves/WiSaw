@@ -29,7 +29,7 @@ import {
 
 import { Col, Row, Grid } from "react-native-easy-grid"
 
-import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
+import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
 
 import PropTypes from 'prop-types'
 
@@ -635,23 +635,26 @@ const Photo = ({ photo }) => {
             height: imageHeight,
           }}
           zoomEnabled
-          maxZoom={10.0}
+          initialZoom={1.0}
+          maxZoom={5.0}
           minZoom={1.0}
           zoomStep={1.0}
-          initialZoom={1.0}
           bindToBorders
           doubleTapZoomToCenter={false}
-          captureEvent={false}>
-
-          <CachedImage
-            source={{ uri: `${photo.thumbUrl}` }}
-            cacheKey={`${photo.id}-thumb`}
-            resizeMode="contain"
+          captureEvent>
+          <View
             style={
               styles.photoContainer
-            }
-          />
-          {/* <LinearProgress
+            }>
+            <CachedImage
+              source={{ uri: `${photo.thumbUrl}` }}
+              cacheKey={`${photo.id}-thumb`}
+              resizeMode="contain"
+              style={
+                styles.photoContainer
+              }
+            />
+            {/* <LinearProgress
             color={
               CONST.MAIN_COLOR
             }
@@ -662,14 +665,15 @@ const Photo = ({ photo }) => {
               top: imageHeight / 2,
             }}
           /> */}
-          <CachedImage
-            source={{ uri: `${photo.imgUrl}` }}
-            cacheKey={`${photo.id}`}
-            resizeMode="contain"
-            style={
-              styles.photoContainer
-            }
-          />
+            <CachedImage
+              source={{ uri: `${photo.imgUrl}` }}
+              cacheKey={`${photo.id}`}
+              resizeMode="contain"
+              style={
+                styles.photoContainer
+              }
+            />
+          </View>
         </ReactNativeZoomableView>
       )
     }

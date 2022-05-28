@@ -1168,13 +1168,6 @@
     "@expo/config-plugins" "~4.1.4"
     "@expo/config-types" "^45.0.0"
 
-"@dudigital/react-native-zoomable-view@1.0.16":
-  version "1.0.16"
-  resolved "https://registry.yarnpkg.com/@dudigital/react-native-zoomable-view/-/react-native-zoomable-view-1.0.16.tgz#c6b5a930e699a7bc5b579323f510481735f94827"
-  integrity sha512-20H1FEwX+JKTf9zJAub+3cOCU98YpmRqgn73FwslHNOXJZbavnTAV3Qpbt90vinRo4CkWaobH28sJG1asPw2qg==
-  dependencies:
-    prop-types "^15.5.10"
-
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/@egjs/hammerjs/-/hammerjs-2.0.17.tgz#5dc02af75a6a06e4c2db0202cae38c9263895124"
@@ -1938,6 +1931,13 @@
   dependencies:
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
+
+"@openspacelabs/react-native-zoomable-view@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@openspacelabs/react-native-zoomable-view/-/react-native-zoomable-view-2.0.4.tgz#e907a9d68e9b48bd2934ed0354bd5b3eb958f575"
+  integrity sha512-/mtLvqpP99NdYsskD+e+mNivBY+y/JzufxS2GWHeJE6H4NF63jDAfuBFV2gVmr1YIF3clZGlXqdvuqLIOk/H4g==
+  dependencies:
+    prop-types "^15.7.2"
 
 "@react-native-community/cli-debugger-ui@^7.0.3":
   version "7.0.3"

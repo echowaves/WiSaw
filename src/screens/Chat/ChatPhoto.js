@@ -9,7 +9,7 @@ import {
 import {
   LinearProgress,
 } from 'react-native-elements'
-import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
+// import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
 
 import PropTypes from 'prop-types'
 
