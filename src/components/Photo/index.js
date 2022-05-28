@@ -29,7 +29,7 @@ import {
 
 import { Col, Row, Grid } from "react-native-easy-grid"
 
-import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
+import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
 
 import PropTypes from 'prop-types'
 
@@ -640,24 +640,12 @@ const Photo = ({ photo }) => {
             // backgroundColor: 'transparent',
           }}
           zoomEnabled
-          initialZoom={1.0}
-          maxZoom={12.0}
+          maxZoom={9}
           minZoom={1}
           zoomStep={3}
+          initialZoom={1}
           bindToBorders
-          doubleTapZoomToCenter={false}
           captureEvent>
-          {/* <LinearProgress
-              color={
-                CONST.MAIN_COLOR
-              }
-              style={{
-                alignSelf: 'center',
-                width: width / 4,
-                position: 'absolute',
-                top: imageHeight / 2,
-              }}
-            /> */}
           <CachedImage
             source={{ uri: `${photo.thumbUrl}` }}
             cacheKey={`${photo.id}-thumb`}
@@ -710,10 +698,9 @@ const Photo = ({ photo }) => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ margin: 1, backgroundColor: 'white' }}>
+        {renderPhotoRow({ photo })}
         <Grid>
-          <Row>
-            {renderPhotoRow({ photo })}
-          </Row>
+          <Row />
           <Row>
             {renderCommentsStats({ photo, photoDetails }) }
           </Row>
