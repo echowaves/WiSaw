@@ -640,10 +640,10 @@ const Photo = ({ photo }) => {
             // backgroundColor: 'transparent',
           }}
           zoomEnabled
-          maxZoom={9}
+          maxZoom={3.0}
           minZoom={1}
           zoomStep={3}
-          initialZoom={1}
+          initialZoom={1.0}
           bindToBorders
           captureEvent>
           <CachedImage
