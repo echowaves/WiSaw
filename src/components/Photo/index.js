@@ -631,20 +631,17 @@ const Photo = ({ photo }) => {
       return (
         <ReactNativeZoomableView
           style={{
-            width,
+            flex: 1,
+            // width,
             height: imageHeight,
-            // top: 0,
-            // bottom: 0,
-            // right: 0,
-            // left: 0,
-            // backgroundColor: 'transparent',
           }}
           zoomEnabled
           maxZoom={3.0}
           minZoom={1}
-          zoomStep={3}
+          zoomStep={1}
           initialZoom={1.0}
           bindToBorders
+          doubleTapZoomToCenter={false}
           captureEvent>
           <CachedImage
             source={{ uri: `${photo.thumbUrl}` }}
@@ -698,9 +695,10 @@ const Photo = ({ photo }) => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ margin: 1, backgroundColor: 'white' }}>
-        {renderPhotoRow({ photo })}
         <Grid>
-          <Row />
+          <Row>
+            {renderPhotoRow({ photo })}
+          </Row>
           <Row>
             {renderCommentsStats({ photo, photoDetails }) }
           </Row>
