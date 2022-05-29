@@ -693,6 +693,7 @@ const Photo = ({ photo }) => {
   return (
     <View>
       <ScrollView
+        nestedScrollEnabled
         showsVerticalScrollIndicator={false}
         style={{ margin: 1, backgroundColor: 'white' }}>
         <Grid>
