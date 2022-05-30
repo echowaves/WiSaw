@@ -664,8 +664,8 @@ const Photo = ({ photo }) => {
   return (
     <View>
       <ScrollView
-        disableScrollViewPanResponder={false}
-        nestedScrollEnabled
+        // disableScrollViewPanResponder
+        // nestedScrollEnabled
         // overScrollMode="always"
         showsVerticalScrollIndicator
         style={{ margin: 1, backgroundColor: 'white' }}>
