@@ -1,4 +1,4 @@
-import React, { useEffect /* useState */ } from 'react'
+import React, { useEffect, useRef /* useState */ } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
 // import { useDimensions } from '@react-native-community/hooks'
@@ -32,6 +32,8 @@ const PhotosDetails = ({ route }) => {
 
   const photos = useSelector(state => state.photosList.photos)
   // const { width, height } = useDimensions().window
+
+  const swiper = useRef(null)
 
   const searchTerm = useSelector(state => state.photosList.searchTerm)
   const activeSegment = useSelector(state => state.photosList.activeSegment)
@@ -87,6 +89,7 @@ const PhotosDetails = ({ route }) => {
   return (
     // <GestureHandlerRootView>
     <Swiper
+      ref={swiper}
       keyboardShouldPersistTaps="always"
       removeClippedSubviews={false}
       // height="100%"
@@ -109,11 +112,12 @@ const PhotosDetails = ({ route }) => {
         }
       }} // otherwise will jump to wrong photo onLayout
       loadMinimal
+      scrollEnabled
       loadMinimalSize={1}
       showsPagination={false}
       pagingEnabled>
       {photos.map(photo => (
-        <Photo photo={photo} key={photo.id} />
+        <Photo photo={photo} key={photo.id} swiper={swiper} />
       ))}
     </Swiper>
     // </GestureHandlerRootView>

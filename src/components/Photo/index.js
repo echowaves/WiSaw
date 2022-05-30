@@ -7,16 +7,14 @@ import { useDimensions } from '@react-native-community/hooks'
 import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import moment from 'moment'
-
 import {
-  // Dimensions,
   View,
   TouchableOpacity,
   Alert,
   InteractionManager,
-  StyleSheet,
   ScrollView,
   SafeAreaView,
+  StyleSheet,
 } from 'react-native'
 
 import {
@@ -29,7 +27,9 @@ import {
 
 import { Col, Row, Grid } from "react-native-easy-grid"
 
-import ReactNativeZoomableView from '@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView'
+// import ReactNativeZoomableView from '@openspacelabs/react-native-zoomable-view/src/ReactNativeZoomableView'
+
+// import ImageZoom from 'react-native-image-pan-zoom'
 
 import PropTypes from 'prop-types'
 
@@ -38,18 +38,19 @@ import { Video } from 'expo-av'
 import CachedImage from 'expo-cached-image'
 
 // import { async } from 'regenerator-runtime'
+
 import * as reducer from './reducer'
 
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 
 import * as CONST from '../../consts.js'
 
-const Photo = ({ photo }) => {
+import PinchableView from './PinchableView'
+
+const Photo = ({ photo, swiper }) => {
   const componentIsMounted = useRef(true)
   const uuid = useSelector(state => state.secret.uuid)
   const friendsList = useSelector(state => state.friendsList.friendsList)
-
-  // const videoRef = React.useRef(null)
 
   const videoRef = useRef(null)
 
@@ -616,7 +617,7 @@ const Photo = ({ photo }) => {
   const styles = StyleSheet.create({
     photoContainer: {
       width,
-      height: imageHeight,
+      height,
       position: 'absolute',
       top: 0,
       bottom: 0,
@@ -629,63 +630,83 @@ const Photo = ({ photo }) => {
   const renderPhotoRow = ({ photo }) => {
     if (!photo.video) {
       return (
-        <ReactNativeZoomableView
-          style={{
-            flex: 1,
-            // width,
-            height: imageHeight,
-          }}
-          zoomEnabled
-          maxZoom={3.0}
-          minZoom={1}
-          zoomStep={1}
-          initialZoom={1.0}
-          bindToBorders
-          doubleTapZoomToCenter={false}
-          captureEvent>
-          <CachedImage
-            source={{ uri: `${photo.thumbUrl}` }}
-            cacheKey={`${photo.id}-thumb`}
-            resizeMode="contain"
-            style={
-              styles.photoContainer
-            }
-          />
-          <CachedImage
-            source={{ uri: `${photo.imgUrl}` }}
-            cacheKey={`${photo.id}`}
-            resizeMode="contain"
-            style={
-              styles.photoContainer
-            }
-          />
-        </ReactNativeZoomableView>
+        // // <ReactNativeZoomableView
+        // // style={{
+        // //   flex: 1,
+        // //   width,
+        // //   height: imageHeight,
+        // // }}
+        // // zoomEnabled
+        // // maxZoom={3.0}
+        // // minZoom={1}
+        // // zoomStep={1}
+        // // initialZoom={1.0}
+        // // bindToBorders
+        // // doubleTapZoomToCenter={false}>
+        // <ImageZoom
+        //   // useNativeDriver
+        //   // disableScrollViewPanResponder
+        //   panToMove={false}
+        //   pinchToZoom
+        //   cropWidth={width}
+        //   cropHeight={imageHeight}
+        //   imageWidth={width}
+        //   imageHeight={imageHeight}
+        //   enableSwipeDown
+        //   // onStartShouldSetPanResponder={() => true}
+        //   // onMoveShouldSetPanResponder={() => false}
+        //   // panToMove
+        //   // onPanResponderTerminationRequest={() => true}
+        //   horizontalOuterRangeOffset={offsetX => {
+        //   // console.log(offsetX)
+        //     if (swiperSwiped.current === false) {
+        //       if (offsetX <= -100.0) {
+        //         swiperSwiped.current = true
+        //         swiper.current.scrollBy(1, true)
+        //       }
+        //       if (offsetX >= 100.0) {
+        //         swiperSwiped.current = true
+        //         swiper.current.scrollBy(-1, true)
+        //       }
+        //     }
+        //   }}
+        //   responderRelease={() => {
+        //     swiperSwiped.current = false
+        //   }}
+        //   onMove={position => {
+        //     // console.log({ position })
+        //   }}>
+        <PinchableView
+          width={width}
+          height={imageHeight}
+          photo={photo}
+        />
       )
     }
     return (
-      <View
-        style={{
-          flex: 1,
-          height: imageHeight,
-        }}>
 
-        <Video
-          ref={videoRef}
-          style={
-            styles.photoContainer
+      <Video
+        ref={videoRef}
+        style={
+          {
+            flex: 1,
+            height: imageHeight,
           }
-          source={{
-            uri: `${photo.videoUrl}`,
-          }}
-          useNativeControls
-          // overrideFileExtensionAndroid
-          resizeMode="contain"
-          // onPlaybackStatusUpdate={status => setStatus(() => status)}
-          usePoster={false}
-          posterSource={{ uri: `${photo.thumbUrl}` }}
-          isLooping
-        />
-      </View>
+        }
+        // style={
+        //   styles.photoContainer
+        // }
+        source={{
+          uri: `${photo.videoUrl}`,
+        }}
+        useNativeControls
+        // overrideFileExtensionAndroid
+        resizeMode="contain"
+        // onPlaybackStatusUpdate={status => setStatus(() => status)}
+        usePoster={false}
+        posterSource={{ uri: `${photo.thumbUrl}` }}
+        isLooping
+      />
 
     )
   }
@@ -693,13 +714,13 @@ const Photo = ({ photo }) => {
   return (
     <View>
       <ScrollView
+        disableScrollViewPanResponder={false}
         nestedScrollEnabled
-        showsVerticalScrollIndicator={false}
+        // overScrollMode="always"
+        showsVerticalScrollIndicator
         style={{ margin: 1, backgroundColor: 'white' }}>
+        {renderPhotoRow({ photo })}
         <Grid>
-          <Row>
-            {renderPhotoRow({ photo })}
-          </Row>
           <Row>
             {renderCommentsStats({ photo, photoDetails }) }
           </Row>
@@ -723,6 +744,7 @@ const Photo = ({ photo }) => {
 
 Photo.propTypes = {
   photo: PropTypes.object.isRequired,
+  swiper: PropTypes.object.isRequired,
 }
 
 export default (Photo)
