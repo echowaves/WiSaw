@@ -49,8 +49,8 @@ const PinchableView = ({ width, height, photo }) => {
       //   if (height / 2 > event.nativeEvent.absoluteY) _setTouchY(_touchY + 50)
       //   else _setTouchY(_touchY - 50)
 
-      _setTouchX(((event.nativeEvent.absoluteX - event.nativeEvent.x) / -5))
-      _setTouchY(((event.nativeEvent.absoluteY - event.nativeEvent.y) / -5))
+      _setTouchX(((event.nativeEvent.absoluteX - event.nativeEvent.x) / -2))
+      _setTouchY(((event.nativeEvent.absoluteY - event.nativeEvent.y) / -2))
     }
   }
 
