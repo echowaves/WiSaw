@@ -35,10 +35,6 @@ import PropTypes from 'prop-types'
 
 import { Video } from 'expo-av'
 
-import CachedImage from 'expo-cached-image'
-
-// import { async } from 'regenerator-runtime'
-
 import * as reducer from './reducer'
 
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
@@ -47,7 +43,7 @@ import * as CONST from '../../consts.js'
 
 import PinchableView from './PinchableView'
 
-const Photo = ({ photo, swiper }) => {
+const Photo = ({ photo }) => {
   const componentIsMounted = useRef(true)
   const uuid = useSelector(state => state.secret.uuid)
   const friendsList = useSelector(state => state.friendsList.friendsList)
@@ -630,52 +626,6 @@ const Photo = ({ photo, swiper }) => {
   const renderPhotoRow = ({ photo }) => {
     if (!photo.video) {
       return (
-        // // <ReactNativeZoomableView
-        // // style={{
-        // //   flex: 1,
-        // //   width,
-        // //   height: imageHeight,
-        // // }}
-        // // zoomEnabled
-        // // maxZoom={3.0}
-        // // minZoom={1}
-        // // zoomStep={1}
-        // // initialZoom={1.0}
-        // // bindToBorders
-        // // doubleTapZoomToCenter={false}>
-        // <ImageZoom
-        //   // useNativeDriver
-        //   // disableScrollViewPanResponder
-        //   panToMove={false}
-        //   pinchToZoom
-        //   cropWidth={width}
-        //   cropHeight={imageHeight}
-        //   imageWidth={width}
-        //   imageHeight={imageHeight}
-        //   enableSwipeDown
-        //   // onStartShouldSetPanResponder={() => true}
-        //   // onMoveShouldSetPanResponder={() => false}
-        //   // panToMove
-        //   // onPanResponderTerminationRequest={() => true}
-        //   horizontalOuterRangeOffset={offsetX => {
-        //   // console.log(offsetX)
-        //     if (swiperSwiped.current === false) {
-        //       if (offsetX <= -100.0) {
-        //         swiperSwiped.current = true
-        //         swiper.current.scrollBy(1, true)
-        //       }
-        //       if (offsetX >= 100.0) {
-        //         swiperSwiped.current = true
-        //         swiper.current.scrollBy(-1, true)
-        //       }
-        //     }
-        //   }}
-        //   responderRelease={() => {
-        //     swiperSwiped.current = false
-        //   }}
-        //   onMove={position => {
-        //     // console.log({ position })
-        //   }}>
         <PinchableView
           width={width}
           height={imageHeight}
@@ -744,7 +694,6 @@ const Photo = ({ photo, swiper }) => {
 
 Photo.propTypes = {
   photo: PropTypes.object.isRequired,
-  swiper: PropTypes.object.isRequired,
 }
 
 export default (Photo)
