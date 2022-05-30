@@ -40,11 +40,17 @@ const PinchableView = ({ width, height, photo }) => {
   const onDoubleTapEvent = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
     //   { console.log({ event }) }
-      if (width / 2 > event.nativeEvent.absoluteX) _setTouchX(_touchX + 50)
-      else _setTouchX(_touchX - 50)
 
-      if (height / 2 > event.nativeEvent.absoluteY) _setTouchY(_touchY + 50)
-      else _setTouchY(_touchY - 50)
+      //   console.log(event.nativeEvent.absoluteX - event.nativeEvent.x)
+
+      //   if (width / 2 > event.nativeEvent.absoluteX) _setTouchX(_touchX + 50)
+      //   else _setTouchX(_touchX - 50)
+
+      //   if (height / 2 > event.nativeEvent.absoluteY) _setTouchY(_touchY + 50)
+      //   else _setTouchY(_touchY - 50)
+
+      _setTouchX(((event.nativeEvent.absoluteX - event.nativeEvent.x) / -5))
+      _setTouchY(((event.nativeEvent.absoluteY - event.nativeEvent.y) / -5))
     }
   }
 
