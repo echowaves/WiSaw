@@ -31,7 +31,7 @@ const PinchableView = ({ width, height, photo }) => {
       //   console.log({ event })
       Animated.spring(scale, {
         toValue: newScale,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start()
       setScale(newScale)
     }
