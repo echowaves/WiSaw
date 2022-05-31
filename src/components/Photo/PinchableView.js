@@ -37,7 +37,7 @@ const PinchableView = ({ width, height, photo }) => {
     }
   }
 
-  const onDoubleTapEvent = event => {
+  const onSingleTapEvent = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
       _setTouchX(width / 2 - event.nativeEvent.x)
       _setTouchY(height / 2 - event.nativeEvent.y)
@@ -59,8 +59,8 @@ const PinchableView = ({ width, height, photo }) => {
 
   return (
     <TapGestureHandler
-      onHandlerStateChange={onDoubleTapEvent}
-      numberOfTaps={2}>
+      onHandlerStateChange={onSingleTapEvent}
+      numberOfTaps={1}>
       <PinchGestureHandler
         //   waitFor={100}
         onGestureEvent={onPinchEvent}
