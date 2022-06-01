@@ -11,8 +11,8 @@ import CachedImage from 'expo-cached-image'
 
 const PinchableView = ({ width, height, photo }) => {
   const scale = new Animated.Value(1)
-  const [_touchX, _setTouchX] = useState(0)
-  const [_touchY, _setTouchY] = useState(0)
+  const [translateX, setTranslateX] = useState(new Animated.Value(0))
+  const [translateY, setTranslateY] = useState(new Animated.Value(0))
 
   const onPinchEvent = Animated.event(
     [
@@ -26,20 +26,33 @@ const PinchableView = ({ width, height, photo }) => {
   )
 
   const onPinchStateChange = event => {
-    if (event.nativeEvent.oldState === State.ACTIVE) {
-      const newScale = event.nativeEvent.scale < 1 ? new Animated.Value(1) : new Animated.Value(event.nativeEvent.scale)// new Animated.Value(event.nativeEvent.scale)
-      //   console.log({ event })
-      Animated.spring(scale, { // new Animated.Value(event.nativeEvent.scale), {
-        toValue: newScale,
-        useNativeDriver: false,
-      }).start()
+    // if (event.nativeEvent.oldState === State.ACTIVE) {
+    //   const newScale = event.nativeEvent.scale// new Animated.Value(event.nativeEvent.scale)
+    //   //   console.log({ event })
+    //   Animated.spring(scale, { // new Animated.Value(event.nativeEvent.scale), {
+    //     toValue: newScale,
+    //     useNativeDriver: false,
+    //   }).start()
+    // }
+
+    // if (event.nativeEvent.state === State.START) {
+    //   scale.setValue(event.nativeEvent.scale)
+    // }
+
+    if (event.nativeEvent.state === State.END) {
+      if (event.nativeEvent.scale < 1) {
+        Animated.spring(scale, { // new Animated.Value(event.nativeEvent.scale), {
+          toValue: 1,
+          useNativeDriver: false,
+        }).start()
+      }
     }
   }
 
   const onSingleTapEvent = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
-      _setTouchX(width / 2 - event.nativeEvent.x)
-      _setTouchY(height / 2 - event.nativeEvent.y)
+      setTranslateX(width / 2 - event.nativeEvent.x)
+      setTranslateY(height / 2 - event.nativeEvent.y)
     }
   }
 
@@ -71,10 +84,10 @@ const PinchableView = ({ width, height, photo }) => {
             transform: [
               { scale },
               {
-                translateX: _touchX,
+                translateX,
               },
               {
-                translateY: _touchY,
+                translateY,
               },
             ],
           }}
