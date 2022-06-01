@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   // Dimensions,
   StyleSheet,
@@ -10,7 +10,7 @@ import { PinchGestureHandler, TapGestureHandler, State } from 'react-native-gest
 import CachedImage from 'expo-cached-image'
 
 const PinchableView = ({ width, height, photo }) => {
-  const [scale, setScale] = useState(new Animated.Value(1))
+  const scale = new Animated.Value(1)
   const [_touchX, _setTouchX] = useState(0)
   const [_touchY, _setTouchY] = useState(0)
 
@@ -27,13 +27,12 @@ const PinchableView = ({ width, height, photo }) => {
 
   const onPinchStateChange = event => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
-      const newScale = event.nativeEvent.scale < 1 ? new Animated.Value(1) : new Animated.Value(event.nativeEvent.scale)
+      const newScale = event.nativeEvent.scale < 1 ? new Animated.Value(1) : new Animated.Value(event.nativeEvent.scale)// new Animated.Value(event.nativeEvent.scale)
       //   console.log({ event })
-      Animated.spring(scale, {
+      Animated.spring(scale, { // new Animated.Value(event.nativeEvent.scale), {
         toValue: newScale,
         useNativeDriver: false,
       }).start()
-      setScale(newScale)
     }
   }
 
