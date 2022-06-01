@@ -26,19 +26,6 @@ const PinchableView = ({ width, height, photo }) => {
   )
 
   const onPinchStateChange = event => {
-    // if (event.nativeEvent.oldState === State.ACTIVE) {
-    //   const newScale = event.nativeEvent.scale// new Animated.Value(event.nativeEvent.scale)
-    //   //   console.log({ event })
-    //   Animated.spring(scale, { // new Animated.Value(event.nativeEvent.scale), {
-    //     toValue: newScale,
-    //     useNativeDriver: false,
-    //   }).start()
-    // }
-
-    // if (event.nativeEvent.state === State.START) {
-    //   scale.setValue(event.nativeEvent.scale)
-    // }
-
     if (event.nativeEvent.state === State.END) {
       if (event.nativeEvent.scale < 1) {
         Animated.spring(scale, { // new Animated.Value(event.nativeEvent.scale), {
@@ -52,7 +39,18 @@ const PinchableView = ({ width, height, photo }) => {
   }
 
   const onSingleTapEvent = event => {
-    if (event.nativeEvent.oldState === State.ACTIVE) {
+    // if (event.nativeEvent.oldState === State.ACTIVE) {
+
+    // }
+    if (event.nativeEvent.state === State.END) {
+    //   Animated.spring(translateX, {
+    //     toValue: width / 2 - event.nativeEvent.x,
+    //     useNativeDriver: false,
+    //   }).start()
+    //   Animated.spring(translateY, {
+    //     toValue: height / 2 - event.nativeEvent.y,
+    //     useNativeDriver: false,
+    //   }).start()
       setTranslateX(width / 2 - event.nativeEvent.x)
       setTranslateY(height / 2 - event.nativeEvent.y)
     }
