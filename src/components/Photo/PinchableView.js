@@ -72,16 +72,10 @@ const PinchableView = ({ width, height, photo }) => {
             transform: [
               { scale },
               {
-                translateX: Animated.add(
-                  _touchX,
-                  new Animated.Value(0),
-                ),
+                translateX: _touchX,
               },
               {
-                translateY: Animated.add(
-                  _touchY,
-                  new Animated.Value(0),
-                ),
+                translateY: _touchY,
               },
             ],
           }}
