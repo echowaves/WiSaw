@@ -10,7 +10,7 @@ import { PinchGestureHandler, TapGestureHandler, State } from 'react-native-gest
 import CachedImage from 'expo-cached-image'
 
 const PinchableView = ({ width, height, photo }) => {
-  const scale = new Animated.Value(1)
+  const scale = useRef(new Animated.Value(1)).current
   const [translateX, setTranslateX] = useState(new Animated.Value(0))
   const [translateY, setTranslateY] = useState(new Animated.Value(0))
 
@@ -45,6 +45,8 @@ const PinchableView = ({ width, height, photo }) => {
           toValue: 1,
           useNativeDriver: false,
         }).start()
+      } else {
+        scale.setValue(event.nativeEvent.scale)
       }
     }
   }
