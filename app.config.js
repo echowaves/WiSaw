@@ -1,7 +1,7 @@
 export default {
   expo: {
     name: "WiSaw",
-    version: "7.1.3",
+    version: "7.1.4",
     plugins: [
       "@config-plugins/react-native-branch",
       // {
@@ -19,7 +19,7 @@ export default {
     },
     ios: {
       bundleIdentifier: "com.echowaves",
-      buildNumber: "241",
+      buildNumber: "242",
       supportsTablet: true,
       infoPlist: {
         UIBackgroundModes: [
@@ -50,7 +50,7 @@ export default {
         backgroundColor: "#FFFFFF",
       },
       package: "com.echowaves.wisaw",
-      versionCode: 241,
+      versionCode: 242,
       permissions: [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",

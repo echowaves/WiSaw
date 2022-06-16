@@ -36,6 +36,8 @@ import Chat from './src/screens/Chat'
 import FriendsList from './src/screens/FriendsList'
 import ConfirmFriendship from './src/screens/FriendsList/ConfirmFriendship'
 
+import 'react-native-gesture-handler'
+
 // import StackNavigator from './src/nav/stackNavigator.js'
 
 const Drawer = createDrawerNavigator()

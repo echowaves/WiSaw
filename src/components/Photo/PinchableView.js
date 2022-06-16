@@ -3,11 +3,14 @@ import {
   // Dimensions,
   StyleSheet,
   Animated,
+  ActivityIndicator,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
 import { PinchGestureHandler, TapGestureHandler, State } from 'react-native-gesture-handler'
 import CachedImage from 'expo-cached-image'
+
+import * as CONST from '../../consts.js'
 
 const PinchableView = ({ width, height, photo }) => {
   const scale = useRef(new Animated.Value(1)).current
@@ -93,7 +96,10 @@ const PinchableView = ({ width, height, photo }) => {
           }}
           resizeMode="contain">
           <CachedImage
-            source={{ uri: `${photo.thumbUrl}` }}
+            source={{
+              uri: `${photo.thumbUrl}`,
+              // expiresIn: 5, // seconds. This field is optional
+            }}
             cacheKey={`${photo.id}-thumb`}
             resizeMode="contain"
             style={
@@ -101,8 +107,24 @@ const PinchableView = ({ width, height, photo }) => {
             }
           />
           <CachedImage
-            source={{ uri: `${photo.imgUrl}` }}
+            source={{
+              uri: `${photo.imgUrl}`,
+              // next field is optional, if not set -- will never expire and will be managed by the OS
+              // expiresIn: 2_628_288, // 1 month in seconds
+            }}
             cacheKey={`${photo.id}`}
+            placeholderContent={( // optional
+              <ActivityIndicator
+                color={
+                  CONST.MAIN_COLOR
+                }
+                size="small"
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                }}
+              />
+            )}
             resizeMode="contain"
             style={
               styles.photoContainer

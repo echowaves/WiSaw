@@ -46,9 +46,12 @@ const Thumb = props => {
           styles.container,
           thumbWidthStyles,
         ]}>
-
         <CachedImage
-          source={{ uri: `${item.thumbUrl}` }}
+          source={{
+            uri: `${item.thumbUrl}`,
+            // 1 month in seconds
+            // expiresIn: 2_628_288, // This field is optional
+          }}
           cacheKey={`${item.id}-thumb`}
           style={styles.thumbnail}
         />
