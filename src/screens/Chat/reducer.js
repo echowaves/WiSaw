@@ -1,12 +1,8 @@
 // import { Platform } from 'react-native'
 
-import * as SecureStore from 'expo-secure-store'
 import * as FileSystem from 'expo-file-system'
-import * as VideoThumbnails from 'expo-video-thumbnails'
 
 import * as ImageManipulator from 'expo-image-manipulator'
-
-import moment from 'moment'
 
 import { CacheManager } from 'expo-cached-image'
 import { Storage } from 'expo-storage'
