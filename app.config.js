@@ -19,7 +19,7 @@ export default {
     },
     ios: {
       bundleIdentifier: "com.echowaves",
-      buildNumber: "245",
+      buildNumber: "246",
       supportsTablet: true,
       infoPlist: {
         UIBackgroundModes: [
@@ -50,7 +50,7 @@ export default {
         backgroundColor: "#FFFFFF",
       },
       package: "com.echowaves.wisaw",
-      versionCode: 245,
+      versionCode: 246,
       permissions: [
         "INTERNET",
         "SYSTEM_ALERT_WINDOW",
@@ -59,6 +59,7 @@ export default {
         "CAMERA",
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE",
+        "com.google.android.gms.permission.AD_ID",
       ],
       config: {
         branch: {
