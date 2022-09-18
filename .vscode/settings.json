@@ -5,6 +5,11 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     },
-    "eslint.validate": ["javascript"]
+    "eslint.validate": [
+      "javascript"
+    ],
+    "javascript.format.semicolons": "remove",
+    "typescript.format.semicolons": "remove",
+    "prettier.semi": false
    }
    
