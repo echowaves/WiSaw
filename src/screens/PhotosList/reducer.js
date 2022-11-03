@@ -61,7 +61,7 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         photos: [...state.photos, ...action.photos].sort(
-          (a, b) => a.row_number - b.row_number
+          (a, b) => a.row_number - b.row_number,
         ),
         // this really stinks, need to figure out why there are duplicates in the first place
         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
@@ -157,7 +157,7 @@ const reducer = (state = initialState, action) => {
         photos: state.photos.map((item) =>
           item.id === action.photoId
             ? { ...item, watchersCount: action.watchersCount }
-            : item
+            : item,
         ),
       }
     case ACTION_TYPES.PHOTO_UNWATCHED:
@@ -166,7 +166,7 @@ const reducer = (state = initialState, action) => {
         photos: state.photos.map((item) =>
           item.id === action.photoId
             ? { ...item, watchersCount: action.watchersCount }
-            : item
+            : item,
         ),
       }
 
@@ -185,7 +185,7 @@ const reducer = (state = initialState, action) => {
                 commentsCount: action.commentsCount - 1,
                 lastComment: action.lastComment,
               }
-            : item
+            : item,
         ),
       }
 
@@ -199,7 +199,7 @@ const reducer = (state = initialState, action) => {
                 commentsCount: action.commentsCount + 1,
                 lastComment: action.lastComment,
               }
-            : item
+            : item,
         ),
       }
     case ACTION_TYPES.SET_ACTIVE_SEGMENT:
@@ -619,7 +619,7 @@ const _genLocalThumbs = async (image) => {
     const manipResult = await ImageManipulator.manipulateAsync(
       image.localImgUrl,
       [{ resize: { height: 300 } }],
-      { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+      { compress: 1, format: ImageManipulator.SaveFormat.PNG },
     )
     return {
       ...image,
@@ -633,7 +633,7 @@ const _genLocalThumbs = async (image) => {
   const manipResult = await ImageManipulator.manipulateAsync(
     uri,
     [{ resize: { height: 300 } }],
-    { compress: 1, format: ImageManipulator.SaveFormat.PNG }
+    { compress: 1, format: ImageManipulator.SaveFormat.PNG },
   )
 
   return {
@@ -649,7 +649,7 @@ const _addToQueue = async (image) => {
   // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
 
   let pendingImages = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
   )
   if (!pendingImages) {
     pendingImages = []
@@ -669,10 +669,10 @@ const _getQueue = async () => {
   })
 
   const filesInStorage = await FileSystem.readDirectoryAsync(
-    CONST.PENDING_UPLOADS_FOLDER
+    CONST.PENDING_UPLOADS_FOLDER,
   )
   let imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
   )
 
   if (!imagesInQueue) {
@@ -691,7 +691,7 @@ const _getQueue = async () => {
 
   // get images in queue again after filtering
   imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
   )
   if (!imagesInQueue) {
     imagesInQueue = []
@@ -711,7 +711,7 @@ const _getQueue = async () => {
 
 const _removeFromQueue = async (imageToRemove) => {
   let pendingImagesBefore = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY })
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
   )
 
   if (!pendingImagesBefore) {
@@ -720,7 +720,7 @@ const _removeFromQueue = async (imageToRemove) => {
 
   const pendingImagesAfter = pendingImagesBefore.filter(
     (imageInTheQueue) =>
-      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove)
+      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
   )
 
   await Storage.setItem({
@@ -733,7 +733,7 @@ export const queueFileForUpload =
   ({ cameraImgUrl, type, location }) =>
   async (dispatch, getState) => {
     const localImageName = cameraImgUrl.substr(
-      cameraImgUrl.lastIndexOf("/") + 1
+      cameraImgUrl.lastIndexOf("/") + 1,
     )
     const localCacheKey = localImageName.split(".")[0]
 
@@ -787,7 +787,7 @@ export function uploadPendingPhotos() {
 
       // generatePhotoQueue will only contain item with undefined photo
       const generatePhotoQueue = (await _getQueue()).filter(
-        (image) => !image.photo
+        (image) => !image.photo,
       )
 
       // first pass iteration to generate photos ID and the photo record on the backend
@@ -932,7 +932,7 @@ const _uploadItem = async ({ item }) => {
     console.log({ err3 })
     return {
       responseData: `something bad happened, unable to upload ${JSON.stringify(
-        err3
+        err3,
       )}`,
     }
   }

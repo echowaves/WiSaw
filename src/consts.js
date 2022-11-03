@@ -1,7 +1,7 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from "expo-file-system"
 
 // import { WebSocketLink } from '@apollo/client/link/ws'
-import { setContext } from '@apollo/client/link/context'
+import { setContext } from "@apollo/client/link/context"
 
 import {
   ApolloClient,
@@ -13,9 +13,9 @@ import {
 
 // import { getMainDefinition } from '@apollo/client/utilities'
 
-import Constants from 'expo-constants'
+import Constants from "expo-constants"
 
-export const { API_URI, API_KEY, PRIVATE_IMG_HOST } = Constants.manifest.extra
+export const { API_URI, API_KEY, PRIVATE_IMG_HOST } = Constants.expoConfig.extra
 // alert(JSON.stringify({ API_URI, API_KEY }))
 // const { API_URI, API_KEY } = process.env
 // console.log({ API_URI, API_KEY })
@@ -30,13 +30,13 @@ export const SECONDARY_COLOR = "#C0C0C0"
 export const NAV_COLOR = "#f0f0f0"
 export const BG_COLOR = "#ffffff"
 
-export const FOOTER_COLOR = 'rgba(240,240,240,.9)'
+export const FOOTER_COLOR = "rgba(240,240,240,.9)"
 
 export const TEXT_COLOR = "#555f61"
 export const PLACEHOLDER_TEXT_COLOR = "#ececec"
-export const UNFILLED_COLOR = 'rgba(200, 200, 200, 0.2)'
-export const TRANSPARENT_BUTTON_COLOR = 'rgba(200, 200, 200, 0.8)'
-export const TRANSPARENT_ICONS_COLOR = 'rgba(10,10,10,.5)'
+export const UNFILLED_COLOR = "rgba(200, 200, 200, 0.2)"
+export const TRANSPARENT_BUTTON_COLOR = "rgba(200, 200, 200, 0.8)"
+export const TRANSPARENT_ICONS_COLOR = "rgba(10,10,10,.5)"
 
 export const PENDING_UPLOADS_FOLDER = `${FileSystem.documentDirectory}pendingUploads/`
 export const PENDING_UPLOADS_FOLDER_CHAT = `${FileSystem.documentDirectory}pendingUploadsChat/`
@@ -51,7 +51,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      'X-Api-Key': token,
+      "X-Api-Key": token,
       // authorization: token,
     },
   }
