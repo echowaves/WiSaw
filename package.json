@@ -1,21 +1,16 @@
 {
   "name": "wisaw",
-  "version": "7.1.5",
+  "version": "7.1.6",
   "author": "Echowaves Corp.",
   "license": "MIT",
   "scripts": {
-    "start": "expo start --dev-client",
-    "startc": "expo r -c",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
+    "start": "npx expo start",
+    "clear": "npm cache clean --force",
     "reset:simulator": "xcrun simctl erase all",
-    "prebuild-native-code": "expo run:android && expo run:ios",
+    "android": "npx expo start --android",
+    "ios": "npx expo start --ios",
     "build": "eas build",
-    "build-ios": "eas build -p ios --clear-cache",
-    "build-android": "eas build -p android",
-    "build:local": "eas build --local",
-    "publish:prod": "expo publish --release-channel production"
+    "publish:prod": "eas update --branch production"
   },
   "dependencies": {
     "@apollo/client": "3.5.7",
