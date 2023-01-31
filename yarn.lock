@@ -1144,13 +1144,10 @@
   resolved "https://registry.yarnpkg.com/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@config-plugins/react-native-branch@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@config-plugins/react-native-branch/-/react-native-branch-2.0.0.tgz#681212bc98c7935bd54ffc681ec9ec7cd5edd102"
-  integrity sha512-IhIZ1AA6rj4UL/0rS84UaUFdlnrh7dsoKR7YYdiJdZeLHKq/bf6F6wdXXEwSPEGne6JZliCJI8tbmPbpf/IUoQ==
-  dependencies:
-    "@expo/config-plugins" "~4.1.4"
-    "@expo/config-types" "^45.0.0"
+"@config-plugins/react-native-branch@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@config-plugins/react-native-branch/-/react-native-branch-4.0.0.tgz#5206cd9af8389e0c16820c1f9762abb16bed3363"
+  integrity sha512-QbRW5t6TWJyU+jLHZIYQYyVLkqJadKR/eKhYgHvS5lqi6sa1PXvNXhh2/dy+v2NarYGWMn0IDiu82dax2Rv/Pg==
 
 "@egjs/hammerjs@^2.0.17":
   version "2.0.17"
@@ -1285,7 +1282,7 @@
     xcode "^3.0.1"
     xml2js "0.4.23"
 
-"@expo/config-plugins@4.1.5", "@expo/config-plugins@~4.1.4":
+"@expo/config-plugins@4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-4.1.5.tgz#9d357d2cda9c095e511b51583ede8a3b76174068"
   integrity sha512-RVvU40RtZt12HavuDAe+LDIq9lHj7sheOfMEHdmpJ/uTA8pgvkbc56XF6JHQD+yRr6+uhhb+JnAasGq49dsQbw==
@@ -10867,7 +10864,7 @@ react-native-base64@^0.2.1:
   resolved "https://registry.yarnpkg.com/react-native-base64/-/react-native-base64-0.2.1.tgz#3d0e73a649c4c0129f7b7695d3912456aebae847"
   integrity sha512-eHgt/MA8y5ZF0aHfZ1aTPcIkDWxza9AaEk4GcpIX+ZYfZ04RcaNahO+527KR7J44/mD3efYfM23O2C1N44ByWA==
 
-react-native-branch@^5.4.0:
+react-native-branch@^5.7.0:
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-5.7.0.tgz#a517478b01abbe676a897b1a9db1b177638ce985"
   integrity sha512-f1NsH3HibkAl8Ar3fybNAd/2j6pS5V57x3DexJ6T5utsiU1ezaZyp6hXBAv9yhdCVYBxtXZqiK9mWQVnU6tKiw==

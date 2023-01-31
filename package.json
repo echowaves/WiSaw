@@ -15,7 +15,7 @@
   "dependencies": {
     "@apollo/client": "3.5.7",
     "@babel/plugin-transform-async-to-generator": "7.14.5",
-    "@config-plugins/react-native-branch": "^2.0.0",
+    "@config-plugins/react-native-branch": "4.0.0",
     "@expo/config-plugins": "^5.0.2",
     "@expo/metro-config": "0.3.17",
     "@react-native-community/clipboard": "^1.5.1",
@@ -60,7 +60,7 @@
     "react-dom": "18.1.0",
     "react-native": "0.70.5",
     "react-native-base64": "^0.2.1",
-    "react-native-branch": "^5.4.0",
+    "react-native-branch": "^5.7.0",
     "react-native-easy-grid": "^0.2.2",
     "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "~2.8.0",
