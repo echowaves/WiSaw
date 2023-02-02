@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, useSelector } from 'react-redux'
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
 import * as SecureStore from 'expo-secure-store'
 import * as Notifications from 'expo-notifications'
 
-import { useDimensions } from '@react-native-community/hooks'
 import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
 import * as ImagePicker from 'expo-image-picker'
@@ -25,15 +24,19 @@ import {
   Alert,
   SafeAreaView,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native'
 
 import {
-  FontAwesome, Ionicons, AntDesign, FontAwesome5,
+  FontAwesome,
+  Ionicons,
+  AntDesign,
+  FontAwesome5,
 } from '@expo/vector-icons'
 
-import { Col, /* Row, */ Grid } from "react-native-easy-grid"
+import { Col, /* Row, */ Grid } from 'react-native-easy-grid'
 
-import NetInfo from "@react-native-community/netinfo"
+import NetInfo from '@react-native-community/netinfo'
 
 import FlatGrid from 'react-native-super-grid'
 
@@ -52,11 +55,11 @@ import {
   Badge,
 } from 'react-native-elements'
 
-import { UUID_KEY } from "../Secret/reducer"
-import { getUnreadCountsList } from "../FriendsList/friends_helper"
+import { UUID_KEY } from '../Secret/reducer'
+import { getUnreadCountsList } from '../FriendsList/friends_helper'
 import * as reducer from './reducer'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 import Thumb from '../../components/Thumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
@@ -109,40 +112,45 @@ const PhotosList = () => {
   const dispatch = useDispatch()
 
   // const deviceOrientation = useDeviceOrientation()
-  const { width, height } = useDimensions().window
-  const topOffset = useSelector(state => state.photosList.topOffset)
+  const { width, height } = useWindowDimensions()
+  const topOffset = useSelector((state) => state.photosList.topOffset)
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
   // const [loadMore, setLoadMore] = useState(false)
 
-  const photos = useSelector(state => state.photosList.photos)
-  const pendingPhotos = useSelector(state => state.photosList.pendingPhotos)
-  const location = useSelector(state => state.photosList.location)
+  const photos = useSelector((state) => state.photosList.photos)
+  const pendingPhotos = useSelector((state) => state.photosList.pendingPhotos)
+  const location = useSelector((state) => state.photosList.location)
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
-  const isLastPage = useSelector(state => state.photosList.isLastPage)
+  const isLastPage = useSelector((state) => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
-  const isTandcAccepted = useSelector(state => state.photosList.isTandcAccepted)
-  const uuid = useSelector(state => state.secret.uuid)
-  const zeroMoment = useSelector(state => state.photosList.zeroMoment)
+  const isTandcAccepted = useSelector(
+    (state) => state.photosList.isTandcAccepted,
+  )
+  const uuid = useSelector((state) => state.secret.uuid)
+  const zeroMoment = useSelector((state) => state.photosList.zeroMoment)
 
-  const loading = useSelector(state => state.photosList.loading)
+  const loading = useSelector((state) => state.photosList.loading)
   // const pageNumber = useSelector(state => state.photosList.pageNumber)
 
-  const activeSegment = useSelector(state => state.photosList.activeSegment)
+  const activeSegment = useSelector((state) => state.photosList.activeSegment)
   // const searchTerm = useSelector(state => state.photosList.searchTerm)
   const [currentSearchTerm, setCurrentSearchTerm] = useState('')
 
-  const netAvailable = useSelector(state => state.photosList.netAvailable)
+  const netAvailable = useSelector((state) => state.photosList.netAvailable)
   // const batch = useSelector(state => state.photosList.batch)
-  const unreadCountList = useSelector(state => state.friendsList.unreadCountsList)
+  const unreadCountList = useSelector(
+    (state) => state.friendsList.unreadCountsList,
+  )
 
   const unreadCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
-  const onViewRef = React.useRef(viewableItems => {
-    const lastViewableItem = viewableItems.changed[viewableItems.changed.length - 1]
+  const onViewRef = React.useRef((viewableItems) => {
+    const lastViewableItem =
+      viewableItems.changed[viewableItems.changed.length - 1]
     // const lastViewableItem = viewableItems.changed[0]
     setLastViewableRow(lastViewableItem.index)
   })
@@ -176,7 +184,9 @@ const PhotosList = () => {
     // // cleanup cache folder
     // /// //////////////////////////////////////
     const thumbsCount = Math.floor(width / 90)
-    setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2)
+    setThumbDimension(
+      Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
+    )
 
     await Promise.all([
       // checkForUpdate(),
@@ -197,8 +207,8 @@ const PhotosList = () => {
     dispatch(reducer.settopOffset(height / 3))
 
     _getLocation()
-    _initandreload();
-    (async () => {
+    _initandreload()
+    ;(async () => {
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
         const branchHelper = await import('../../branch_helper')
@@ -207,7 +217,7 @@ const PhotosList = () => {
     })()
 
     // add network availability listener
-    const unsubscribeNetInfo = NetInfo.addEventListener(state => {
+    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (state) {
         dispatch(reducer.setNetAvailable(state.isInternetReachable))
       }
@@ -215,13 +225,13 @@ const PhotosList = () => {
     return () => {
       unsubscribeNetInfo()
     }
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (uuid && zeroMoment) {
       _reload() // initially load only when zero moment is loaded and uuid is assigned
     }
-  }, [uuid, zeroMoment])// eslint-disable-line react-hooks/exhaustive-deps
+  }, [uuid, zeroMoment]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // re-render title on  state chage
   useEffect(() => {
@@ -278,11 +288,11 @@ const PhotosList = () => {
       return false
     }
 
-    const screenColumns = /* Math.floor */(width / thumbDimension)
-    const screenRows = /* Math.floor */(height / thumbDimension)
-    const totalNumRows = /* Math.floor */(photos.length / screenColumns)
+    const screenColumns = /* Math.floor */ width / thumbDimension
+    const screenRows = /* Math.floor */ height / thumbDimension
+    const totalNumRows = /* Math.floor */ photos.length / screenColumns
 
-    if ((screenRows * 1 + lastViewableRow) > totalNumRows) {
+    if (screenRows * 1 + lastViewableRow > totalNumRows) {
       // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
       return true
     }
@@ -300,7 +310,6 @@ const PhotosList = () => {
       // paddingBottom: 10,
       // marginBottom: 10,
     },
-
   })
 
   const _updateNavBar = async () => {
@@ -333,22 +342,21 @@ const PhotosList = () => {
   }
 
   async function _checkPermission({
-    permissionFunction, alertHeader, alertBody, permissionFunctionArgument,
+    permissionFunction,
+    alertHeader,
+    alertBody,
+    permissionFunctionArgument,
   }) {
     const { status } = await permissionFunction(permissionFunctionArgument)
     if (status !== 'granted') {
-      Alert.alert(
-        alertHeader,
-        alertBody,
-        [
-          {
-            text: 'Open Settings',
-            onPress: () => {
-              Linking.openSettings()
-            },
+      Alert.alert(alertHeader, alertBody, [
+        {
+          text: 'Open Settings',
+          onPress: () => {
+            Linking.openSettings()
           },
-        ],
-      )
+        },
+      ])
     }
     return status
   }
@@ -357,14 +365,14 @@ const PhotosList = () => {
     const cameraPermission = await _checkPermission({
       permissionFunction: ImagePicker.requestCameraPermissionsAsync,
       alertHeader: 'Do you want to take photo with wisaw?',
-      alertBody: 'Why don\'t you enable photo permission?',
+      alertBody: "Why don't you enable photo permission?",
     })
 
     if (cameraPermission === 'granted') {
       const photoAlbomPermission = await _checkPermission({
         permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
         alertHeader: 'Do you want to save photo on your device?',
-        alertBody: 'Why don\'t you enable the permission?',
+        alertBody: "Why don't you enable the permission?",
         permissionFunctionArgument: true,
       })
 
@@ -377,36 +385,42 @@ const PhotosList = () => {
   async function _getLocation() {
     const locationPermission = await _checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
-      alertHeader: 'WiSaw shows you near-by photos based on your current location.',
+      alertHeader:
+        'WiSaw shows you near-by photos based on your current location.',
       alertBody: 'You need to enable Location in Settings and Try Again.',
     })
 
     if (locationPermission === 'granted') {
       try {
         // initially set the location that is last known -- works much faster this way
-        await dispatch(reducer.setLocation(await Location.getLastKnownPositionAsync({
-          maxAge: 86400000,
-          requiredAccuracy: 5000,
-        })))
+        await dispatch(
+          reducer.setLocation(
+            await Location.getLastKnownPositionAsync({
+              maxAge: 86400000,
+              requiredAccuracy: 5000,
+            }),
+          ),
+        )
 
         Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.Lowest,
             timeInterval: 10000,
             distanceInterval: 3000,
-          }, async loc => {
+          },
+          async (loc) => {
             // Toast.show({
             //   text1: 'location udated',
             //   type: "error",
             // topOffset: topOffset,
             // })
             await dispatch(reducer.setLocation(loc))
-          }
+          },
         )
       } catch (err) {
         Toast.show({
           text1: 'Unable to get location',
-          type: "error",
+          type: 'error',
           topOffset,
         })
       }
@@ -415,7 +429,7 @@ const PhotosList = () => {
 
   const takePhoto = async ({ cameraType }) => {
     let cameraReturn
-    if (cameraType === "camera") {
+    if (cameraType === 'camera') {
       // launch photo capturing
       cameraReturn = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -438,7 +452,13 @@ const PhotosList = () => {
     if (cameraReturn.cancelled === false) {
       await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
       // have to wait, otherwise the upload will not start
-      await dispatch(reducer.queueFileForUpload({ cameraImgUrl: cameraReturn.uri, type: cameraReturn.type, location }))
+      await dispatch(
+        reducer.queueFileForUpload({
+          cameraImgUrl: cameraReturn.uri,
+          type: cameraReturn.type,
+          location,
+        }),
+      )
 
       dispatch(reducer.uploadPendingPhotos())
     }
@@ -446,45 +466,23 @@ const PhotosList = () => {
 
   const renderThumbs = () => (
     <FlatGrid
-      itemDimension={
-        thumbDimension
-      }
+      itemDimension={thumbDimension}
       spacing={3}
-      data={
-        photos
-      }
-      renderItem={
-        ({ item, index }) => (
-          <Thumb
-            item={
-              item
-            }
-            index={
-              index
-            }
-            thumbDimension={thumbDimension}
-          />
-        )
-      }
-      keyExtractor={item => item.id}
+      data={photos}
+      renderItem={({ item, index }) => (
+        <Thumb item={item} index={index} thumbDimension={thumbDimension} />
+      )}
+      keyExtractor={(item) => item.id}
       style={{
         ...styles.container,
         marginBottom: FOOTER_HEIGHT,
       }}
-      showsVerticalScrollIndicator={
-        false
-      }
-      horizontal={
-        false
-      }
-      refreshing={
-        false
-      }
-      onRefresh={
-        () => {
-          _reload()
-        }
-      }
+      showsVerticalScrollIndicator={false}
+      horizontal={false}
+      refreshing={false}
+      onRefresh={() => {
+        _reload()
+      }}
       onViewableItemsChanged={onViewRef.current}
       // viewabilityConfig={viewConfigRef.current}
     />
@@ -492,46 +490,28 @@ const PhotosList = () => {
 
   const renderThumbsWithComments = () => (
     <FlatGrid
-      itemDimension={
-        width
-      }
+      itemDimension={width}
       spacing={3}
-      data={
-        photos
-      }
-      renderItem={
-        ({ item, index }) => (
-          <ThumbWithComments
-            item={
-              item
-            }
-            index={
-              index
-            }
-            thumbDimension={thumbDimension}
-            screenWidth={width}
-          />
-        )
-      }
-      keyExtractor={item => item.id}
+      data={photos}
+      renderItem={({ item, index }) => (
+        <ThumbWithComments
+          item={item}
+          index={index}
+          thumbDimension={thumbDimension}
+          screenWidth={width}
+        />
+      )}
+      keyExtractor={(item) => item.id}
       style={{
         ...styles.container,
         marginBottom: 95,
       }}
-      showsVerticalScrollIndicator={
-        false
-      }
-      horizontal={
-        false
-      }
-      refreshing={
-        false
-      }
-      onRefresh={
-        () => {
-          _reload()
-        }
-      }
+      showsVerticalScrollIndicator={false}
+      horizontal={false}
+      refreshing={false}
+      onRefresh={() => {
+        _reload()
+      }}
       onViewableItemsChanged={onViewRef.current}
       // viewabilityConfig={viewConfigRef.current}
     />
@@ -540,153 +520,146 @@ const PhotosList = () => {
   const renderFooter = ({ unreadCount }) => {
     Notifications.setBadgeCountAsync(unreadCount || 0)
 
-    return location && (
-      <SafeAreaView
-        style={{
-          backgroundColor: CONST.NAV_COLOR,
-          width,
-          height: FOOTER_HEIGHT,
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          left: 0,
-        }}>
-        <Grid style={{
-          position: 'absolute',
-          top: 5,
-          right: 0,
-          left: 0,
-        }}>
-          {/* drawer button */}
-          <Col
+    return (
+      location && (
+        <SafeAreaView
+          style={{
+            backgroundColor: CONST.NAV_COLOR,
+            width,
+            height: FOOTER_HEIGHT,
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            left: 0,
+          }}
+        >
+          <Grid
             style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            {netAvailable && (
-              <FontAwesome
-                onPress={
-                  () => navigation.openDrawer()
-                }
-                name="navicon"
-                size={25}
-                style={{
-                  color: CONST.MAIN_COLOR,
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 15,
-                }}
-              />
-            )}
-          </Col>
-
-          {/*  video button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderRadius: 45,
-              backgroundColor: 'white',
-              height: 50,
-              width: 80,
-
+              position: 'absolute',
+              top: 5,
+              right: 0,
+              left: 0,
             }}
-            onPress={
-              () => {
-                checkPermissionsForPhotoTaking({ cameraType: 'video' })
-              }
-            }>
-            <FontAwesome5
-              name="video"
-              color={CONST.EMPHASIZED_COLOR}
-              size={30}
+          >
+            {/* drawer button */}
+            <Col
               style={{
-                alignSelf: 'center',
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              containerStyle={
-                {
+            >
+              {netAvailable && (
+                <FontAwesome
+                  onPress={() => navigation.openDrawer()}
+                  name="navicon"
+                  size={25}
+                  style={{
+                    color: CONST.MAIN_COLOR,
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 15,
+                  }}
+                />
+              )}
+            </Col>
+
+            {/*  video button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: 45,
+                backgroundColor: 'white',
+                height: 50,
+                width: 80,
+              }}
+              onPress={() => {
+                checkPermissionsForPhotoTaking({ cameraType: 'video' })
+              }}
+            >
+              <FontAwesome5
+                name="video"
+                color={CONST.EMPHASIZED_COLOR}
+                size={30}
+                style={{
+                  alignSelf: 'center',
+                }}
+                containerStyle={{
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                }
-              }
-            />
-          </Col>
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: 50,
-              width: 25,
-
-            }}
-          />
-          {/* photo button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: 50,
-              width: 80,
-              backgroundColor: 'white',
-              borderRadius: 45,
-
-            }}
-            onPress={
-              () => {
-                checkPermissionsForPhotoTaking({ cameraType: 'camera' })
-              }
-            }>
-            <FontAwesome5
-              name="camera"
-              color={CONST.MAIN_COLOR}
-              size={30}
+                }}
+              />
+            </Col>
+            <Col
               style={{
-                alignSelf: 'center',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 50,
+                width: 25,
               }}
-              containerStyle={
-                {
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }
-              }
             />
-          </Col>
-          {/* drawer button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            {netAvailable && (
+            {/* photo button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: 50,
+                width: 80,
+                backgroundColor: 'white',
+                borderRadius: 45,
+              }}
+              onPress={() => {
+                checkPermissionsForPhotoTaking({ cameraType: 'camera' })
+              }}
+            >
               <FontAwesome5
-                onPress={
-                  () => navigation.navigate('FriendsList')
-                }
-                name="user-friends"
-                size={35}
+                name="camera"
+                color={CONST.MAIN_COLOR}
+                size={30}
                 style={{
-                  color: CONST.MAIN_COLOR,
-                  position: 'absolute',
-                  bottom: 0,
-                  right: 15,
+                  alignSelf: 'center',
+                }}
+                containerStyle={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}
               />
-            )}
-            {unreadCount > 0 && (
-              <Badge
-                value={unreadCount}
-                badgeStyle={{
-                  backgroundColor: CONST.MAIN_COLOR,
-                }}
-                containerStyle={{ position: 'absolute', top: 5, right: 5 }}
-              />
-            )}
-          </Col>
-
-        </Grid>
-      </SafeAreaView>
+            </Col>
+            {/* drawer button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {netAvailable && (
+                <FontAwesome5
+                  onPress={() => navigation.navigate('FriendsList')}
+                  name="user-friends"
+                  size={35}
+                  style={{
+                    color: CONST.MAIN_COLOR,
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 15,
+                  }}
+                />
+              )}
+              {unreadCount > 0 && (
+                <Badge
+                  value={unreadCount}
+                  badgeStyle={{
+                    backgroundColor: CONST.MAIN_COLOR,
+                  }}
+                  containerStyle={{ position: 'absolute', top: 5, right: 5 }}
+                />
+              )}
+            </Col>
+          </Grid>
+        </SafeAreaView>
+      )
     )
   }
 
@@ -694,7 +667,9 @@ const PhotosList = () => {
     <FontAwesome
       name="globe"
       size={23}
-      color={activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
+      color={
+        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
     />
   )
 
@@ -702,7 +677,9 @@ const PhotosList = () => {
     <AntDesign
       name="star"
       size={23}
-      color={activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
+      color={
+        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
     />
   )
 
@@ -710,11 +687,13 @@ const PhotosList = () => {
     <FontAwesome
       name="search"
       size={23}
-      color={activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR}
+      color={
+        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
     />
   )
 
-  const updateIndex = async index => {
+  const updateIndex = async (index) => {
     await dispatch(reducer.setActiveSegment(index))
     _reload()
   }
@@ -727,7 +706,11 @@ const PhotosList = () => {
         height: 35,
       }}
       buttonStyle={{ alignSelf: 'center' }}
-      buttons={[{ element: segment0 }, { element: segment1 }, { element: segment2 }]}
+      buttons={[
+        { element: segment0 },
+        { element: segment1 },
+        { element: segment2 },
+      ]}
     />
   )
 
@@ -764,51 +747,45 @@ const PhotosList = () => {
   //   />
   // )
 
-  const renderSearchBar = autoFocus => (
-    <View style={{
-      flexDirection: 'row',
-      backgroundColor: CONST.NAV_COLOR,
-    }}>
+  const renderSearchBar = (autoFocus) => (
+    <View
+      style={{
+        flexDirection: 'row',
+        backgroundColor: CONST.NAV_COLOR,
+      }}
+    >
       <SearchBar
         placeholder="Type Text Here..."
         placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-        onChangeText={currentTerm => {
+        onChangeText={(currentTerm) => {
           setCurrentSearchTerm(currentTerm)
         }}
         value={currentSearchTerm}
-        onSubmitEditing={
-          () => submitSearch()
-        }
+        onSubmitEditing={() => submitSearch()}
         autoFocus={autoFocus}
         containerStyle={{
           width: width - 60,
         }}
-        style={
-          {
-            color: CONST.MAIN_COLOR,
-            backgroundColor: "white",
-            paddingLeft: 10,
-            paddingRight: 10,
-          }
-        }
+        style={{
+          color: CONST.MAIN_COLOR,
+          backgroundColor: 'white',
+          paddingLeft: 10,
+          paddingRight: 10,
+        }}
         rightIconContainerStyle={{
           margin: 10,
         }}
         lightTheme
       />
       <Ionicons
-        onPress={
-          () => submitSearch()
-        }
+        onPress={() => submitSearch()}
         name="send"
         size={30}
-        style={
-          {
-            margin: 10,
-            color: CONST.MAIN_COLOR,
-            alignSelf: 'center',
-          }
-        }
+        style={{
+          margin: 10,
+          color: CONST.MAIN_COLOR,
+          alignSelf: 'center',
+        }}
       />
     </View>
   )
@@ -823,8 +800,8 @@ const PhotosList = () => {
       }
     } else {
       Toast.show({
-        text1: "Search for more than 3 characters",
-        type: "error",
+        text1: 'Search for more than 3 characters',
+        type: 'error',
         topOffset,
       })
     }
@@ -835,36 +812,19 @@ const PhotosList = () => {
       return (
         <View>
           <FlatGrid
-            itemDimension={
-              thumbDimension
-            }
+            itemDimension={thumbDimension}
             spacing={3}
-            data={
-              pendingPhotos
-            }
-            renderItem={
-              ({ item }) => (
-                <ThumbPending
-                  item={
-                    item
-                  }
-                  thumbDimension={thumbDimension}
-                />
-              )
-            }
-            keyExtractor={item => item.localImageName}
-            showsVerticalScrollIndicator={
-              false
-            }
-            horizontal={
-              false
-            }
+            data={pendingPhotos}
+            renderItem={({ item }) => (
+              <ThumbPending item={item} thumbDimension={thumbDimension} />
+            )}
+            keyExtractor={(item) => item.localImageName}
+            showsVerticalScrollIndicator={false}
+            horizontal={false}
             fixed
           />
           <LinearProgress
-            color={
-              CONST.MAIN_COLOR
-            }
+            color={CONST.MAIN_COLOR}
             style={{
               position: 'absolute',
               bottom: 0,
@@ -881,12 +841,7 @@ const PhotosList = () => {
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
 
-  if (
-    isTandcAccepted
-  && netAvailable
-  && location
-  && photos.length > 0
-  ) {
+  if (isTandcAccepted && netAvailable && location && photos.length > 0) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
@@ -907,9 +862,10 @@ const PhotosList = () => {
           <ScrollView>
             <Card containerStyle={{ padding: 0 }}>
               <ListItem style={{ borderRadius: 10 }}>
-                <Text>When you take a photo with WiSaw app,
-                  it will be added to a Photo Album on your phone,
-                  as well as posted to global feed in the cloud.
+                <Text>
+                  When you take a photo with WiSaw app, it will be added to a
+                  Photo Album on your phone, as well as posted to global feed in
+                  the cloud.
                 </Text>
               </ListItem>
               <Divider />
@@ -918,20 +874,27 @@ const PhotosList = () => {
               </ListItem>
               <Divider />
               <ListItem>
-                <Text>You can see other&#39;s photos too.
+                <Text>You can see other&#39;s photos too.</Text>
+              </ListItem>
+              <Divider />
+              <ListItem>
+                <Text>
+                  If you find any photo abusive or inappropriate, you can delete
+                  it -- it will be deleted from the cloud so that no one will
+                  ever see it again.
                 </Text>
               </ListItem>
               <Divider />
               <ListItem>
-                <Text>If you find any photo abusive or inappropriate, you can delete it -- it will be deleted from the cloud so that no one will ever see it again.</Text>
+                <Text>
+                  No one will tolerate objectionable content or abusive users.
+                </Text>
               </ListItem>
               <Divider />
               <ListItem>
-                <Text>No one will tolerate objectionable content or abusive users.</Text>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <Text>The abusive users will be banned from WiSaw by other users.</Text>
+                <Text>
+                  The abusive users will be banned from WiSaw by other users.
+                </Text>
               </ListItem>
               <Divider />
               <ListItem>
@@ -943,11 +906,9 @@ const PhotosList = () => {
                 <Button
                   title="I Agree"
                   type="outline"
-                  onPress={
-                    () => {
-                      dispatch(reducer.acceptTandC())
-                    }
-                  }
+                  onPress={() => {
+                    dispatch(reducer.acceptTandC())
+                  }}
                 />
               </ListItem>
             </Card>
@@ -964,13 +925,17 @@ const PhotosList = () => {
           borderRadius={5}
           containerStyle={{
             borderWidth: 0,
-          }}>
-          <Text style={{
-            fontSize: 20,
-            textAlign: 'center',
-            margin: 10,
-          }}>
-            No network available, you can still snap photos -- they will be uploaded later.
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: 'center',
+              margin: 10,
+            }}
+          >
+            No network available, you can still snap photos -- they will be
+            uploaded later.
           </Text>
         </Card>
         {renderPendingPhotos()}
@@ -986,12 +951,15 @@ const PhotosList = () => {
           borderRadius={5}
           containerStyle={{
             borderWidth: 0,
-          }}>
-          <Text style={{
-            fontSize: 20,
-            textAlign: 'center',
-            margin: 10,
-          }}>
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: 'center',
+              margin: 10,
+            }}
+          >
             Acquiring location, make sure to enable Location Service.
           </Text>
         </Card>
@@ -1005,10 +973,7 @@ const PhotosList = () => {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
-        <LinearProgress color={
-          CONST.MAIN_COLOR
-        }
-        />
+        <LinearProgress color={CONST.MAIN_COLOR} />
         {renderPendingPhotos()}
         {renderFooter({ unreadCount })}
       </View>
@@ -1024,29 +989,34 @@ const PhotosList = () => {
             borderRadius={5}
             containerStyle={{
               borderWidth: 0,
-            }}>
-            <Text style={{
-              fontSize: 20,
-              textAlign: 'center',
-              margin: 10,
-            }}>
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                textAlign: 'center',
+                margin: 10,
+              }}
+            >
               Nothing found. Try to search for something else.
             </Text>
           </Card>
         )}
-        { activeSegment === 0 && (
+        {activeSegment === 0 && (
           <Card
             borderRadius={5}
             containerStyle={{
               borderWidth: 0,
-            }}>
-            <Text style={{
-              fontSize: 20,
-              textAlign: 'center',
-              margin: 10,
-            }}>
-              No Photos found in your location.
-              Try to take some photos.
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                textAlign: 'center',
+                margin: 10,
+              }}
+            >
+              No Photos found in your location. Try to take some photos.
             </Text>
           </Card>
         )}
@@ -1055,14 +1025,18 @@ const PhotosList = () => {
             borderRadius={5}
             containerStyle={{
               borderWidth: 0,
-            }}>
-            <Text style={{
-              fontSize: 20,
-              textAlign: 'center',
-              margin: 10,
-            }}>
-              Don&apos;t have anything Starred?
-              Try to take a photo, comment on other&apos;s photos, or Star somebody else&apos;s photo -- they will all appear here.
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                textAlign: 'center',
+                margin: 10,
+              }}
+            >
+              Don&apos;t have anything Starred? Try to take a photo, comment on
+              other&apos;s photos, or Star somebody else&apos;s photo -- they
+              will all appear here.
             </Text>
           </Card>
         )}

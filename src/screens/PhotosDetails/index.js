@@ -1,7 +1,6 @@
 import React, { useEffect, useRef /* useState */ } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
-// import { useDimensions } from '@react-native-community/hooks'
 
 import PropTypes from 'prop-types'
 
@@ -21,14 +20,13 @@ import Photo from '../../components/Photo'
 
 import { getPhotos } from '../PhotosList/reducer'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 const PhotosDetails = ({ route }) => {
   const navigation = useNavigation()
   const currentIndex = useSelector((state) => state.photosList.currentIndex)
 
   const photos = useSelector((state) => state.photosList.photos)
-  // const { width, height } = useDimensions().window
 
   const swiper = useRef(null)
 

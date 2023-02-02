@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 // import { useNavigation } from '@react-navigation/native'
 // import { useDispatch, useSelector } from "react-redux"
-import { useDimensions } from '@react-native-community/hooks'
 
 import {
   View,
@@ -9,34 +8,26 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
+  useWindowDimensions,
 } from 'react-native'
 
-import {
-  Text,
-  Header,
-  Input,
-  Button,
-} from 'react-native-elements'
+import { Text, Header, Input, Button } from 'react-native-elements'
 
-import {
-  FontAwesome,
-} from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
-const NamePicker = ({
-  show, setShow, setContactName, headerText,
-}) => {
+const NamePicker = ({ show, setShow, setContactName, headerText }) => {
   const {
     width,
     // height,
-  } = useDimensions().window
+  } = useWindowDimensions()
 
   const [inputText, _setInputText] = useState('')
   const inputTextRef = React.useRef(inputText)
-  const setInputText = data => {
+  const setInputText = (data) => {
     inputTextRef.current = data
     _setInputText(data)
   }
@@ -56,19 +47,15 @@ const NamePicker = ({
     <FontAwesome
       name="close"
       size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => {
-          setShow(false)
-          setInputText('')// reset for next use
-        }
-      }
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => {
+        setShow(false)
+        setInputText('') // reset for next use
+      }}
     />
   )
 
@@ -98,7 +85,8 @@ const NamePicker = ({
       transparent={false}
       // style={styles.container}
       visible={show}
-      backgroundColor="white">
+      backgroundColor="white"
+    >
       <SafeAreaView>
         <Header
           containerStyle={{
@@ -108,33 +96,33 @@ const NamePicker = ({
             justifyContent: 'center',
           }}
           leftComponent={renderHeaderLeft()}
-          centerComponent={
-            {
-              text: 'Friend Name.',
-              style: {
-                color: CONST.MAIN_COLOR,
-              },
-            }
-          }
+          centerComponent={{
+            text: 'Friend Name.',
+            style: {
+              color: CONST.MAIN_COLOR,
+            },
+          }}
           // rightComponent={renderHeaderRight()}
         />
         {headerText && (
           <Text
             style={{
               textAlign: 'center',
-            }}>{headerText}
+            }}
+          >
+            {headerText}
           </Text>
         )}
         <ScrollView
           contentContainerStyle={styles.scrollView}
-          showsVerticalScrollIndicator={
-            false
-          }>
-
-          <View style={{
-            flexDirection: 'column',
-            backgroundColor: CONST.NAV_COLOR,
-          }}>
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={{
+              flexDirection: 'column',
+              backgroundColor: CONST.NAV_COLOR,
+            }}
+          >
             <Input
               placeholder="Type Friend Name..."
               placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
@@ -145,21 +133,19 @@ const NamePicker = ({
               containerStyle={{
                 width,
               }}
-              style={
-                {
-                  color: CONST.MAIN_COLOR,
-                  backgroundColor: "white",
-                  // paddingTop: 10,
-                  // paddingLeft: 10,
-                  // paddingRight: 10,
-                  margin: 10,
-                }
-              }
+              style={{
+                color: CONST.MAIN_COLOR,
+                backgroundColor: 'white',
+                // paddingTop: 10,
+                // paddingLeft: 10,
+                // paddingRight: 10,
+                margin: 10,
+              }}
               // rightIconContainerStyle={{
               //   margin: 10,
               // }}
               lightTheme
-              onChangeText={inputValue => {
+              onChangeText={(inputValue) => {
                 setInputText(inputValue.slice(0, 140))
               }}
               value={inputText}
@@ -167,36 +153,28 @@ const NamePicker = ({
 
             <Button
               type="outline"
-              titleStyle={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              containerStyle={
-                {
-                  margin: 10,
-                }
-              }
-              icon={(
+              titleStyle={{
+                color: CONST.MAIN_COLOR,
+              }}
+              containerStyle={{
+                margin: 10,
+              }}
+              icon={
                 <FontAwesome
                   name="save"
-                  style={
-                    {
-                      fontSize: 30,
-                      color: CONST.MAIN_COLOR,
-                      marginRight: 10,
-                    }
-                  }
+                  style={{
+                    fontSize: 30,
+                    color: CONST.MAIN_COLOR,
+                    marginRight: 10,
+                  }}
                 />
-              )}
-              title="Save on Device"
-              onPress={
-                async () => {
-                  await setContactName(inputText)
-                  await setShow(false)
-                  await setInputText('')
-                }
               }
+              title="Save on Device"
+              onPress={async () => {
+                await setContactName(inputText)
+                await setShow(false)
+                await setInputText('')
+              }}
             />
           </View>
         </ScrollView>

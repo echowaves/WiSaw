@@ -2,8 +2,6 @@ import React, { useRef, useState /* useEffect */ } from 'react'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { useDimensions } from '@react-native-community/hooks'
-
 import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import moment from 'moment'
@@ -15,6 +13,7 @@ import {
   ScrollView,
   SafeAreaView,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native'
 
 import {
@@ -58,7 +57,7 @@ const Photo = ({ photo }) => {
 
   const dispatch = useDispatch()
   // const deviceOrientation = useDeviceOrientation()
-  const { width, height } = useDimensions().window
+  const { width, height } = useWindowDimensions()
   const imageHeight = height - 250
   const bans = useSelector((state) => state.photo.bans)
   // const error = useSelector(state => state.photo.error)

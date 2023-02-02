@@ -1,29 +1,25 @@
 import React, { useState } from 'react'
-import { useDimensions } from '@react-native-community/hooks'
 
-import {
-  TouchableHighlight,
-  View,
-} from 'react-native'
+import { TouchableHighlight, View, useWindowDimensions } from 'react-native'
 
-import {
-  LinearProgress,
-} from 'react-native-elements'
+import { LinearProgress } from 'react-native-elements'
 // import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
 
 import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
-const ChatPhoto = props => {
-  const { width, height } = useDimensions().window
+const ChatPhoto = (props) => {
+  const { width, height } = useWindowDimensions()
 
   const [expanded, setExpanded] = useState(false)
 
   //   console.log({ props })
-  const { currentMessage: { image, chatPhotoHash } } = props
+  const {
+    currentMessage: { image, chatPhotoHash },
+  } = props
   // console.log({ image, chatPhotoHash })
   //   console.log({ image })
 
@@ -34,15 +30,14 @@ const ChatPhoto = props => {
           setExpanded(!expanded)
           // console.log(expanded)
         }}
-        style={
-          {
-            width: 200,
-            height: 200,
-            // borderRadius: 10,
-            // flex: 1,
-            alignSelf: 'stretch',
-          }
-        }>
+        style={{
+          width: 200,
+          height: 200,
+          // borderRadius: 10,
+          // flex: 1,
+          alignSelf: 'stretch',
+        }}
+      >
         <CachedImage
           source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
           cacheKey={`${chatPhotoHash}-thumb`}
@@ -62,20 +57,20 @@ const ChatPhoto = props => {
         setExpanded(!expanded)
         // console.log(expanded)
       }}
-      style={
-        {
-          width: width - 10,
-          height,
-          // borderRadius: 10,
-          // flex: 1,
-          alignSelf: 'stretch',
-        }
-      }>
+      style={{
+        width: width - 10,
+        height,
+        // borderRadius: 10,
+        // flex: 1,
+        alignSelf: 'stretch',
+      }}
+    >
       <View
         style={{
           flex: 1,
           height,
-        }}>
+        }}
+      >
         <CachedImage
           source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
           cacheKey={`${chatPhotoHash}-thumb`}
@@ -89,7 +84,7 @@ const ChatPhoto = props => {
             right: 0,
             left: 0,
             backgroundColor: 'transparent',
-          //   borderRadius: 10,
+            //   borderRadius: 10,
           }}
         />
         <CachedImage
@@ -106,7 +101,7 @@ const ChatPhoto = props => {
             left: 0,
             backgroundColor: 'transparent',
 
-          //   borderRadius: 10,
+            //   borderRadius: 10,
           }}
         />
       </View>
@@ -114,4 +109,4 @@ const ChatPhoto = props => {
   )
 }
 
-export default (ChatPhoto)
+export default ChatPhoto

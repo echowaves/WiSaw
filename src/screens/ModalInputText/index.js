@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from "react-redux"
-import { useDimensions } from '@react-native-community/hooks'
+import { useDispatch, useSelector } from 'react-redux'
 
 import {
   Text,
   TextInput,
   SafeAreaView,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
@@ -16,7 +16,7 @@ import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 import * as reducer from '../../components/Photo/reducer'
 
@@ -26,14 +26,14 @@ const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const { photo } = route.params
-  const { height } = useDimensions().window
+  const { height } = useWindowDimensions()
 
-  const uuid = useSelector(state => state.secret.uuid)
+  const uuid = useSelector((state) => state.secret.uuid)
 
   const [inputText, _setInputText] = useState('')
 
   const inputTextRef = React.useRef(inputText)
-  const setInputText = data => {
+  const setInputText = (data) => {
     inputTextRef.current = data
     _setInputText(data)
   }
@@ -49,7 +49,7 @@ const ModalInputText = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const styles = StyleSheet.create({
     container: {
@@ -61,39 +61,37 @@ const ModalInputText = ({ route }) => {
     <FontAwesome
       name="chevron-left"
       size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => navigation.goBack()
-      }
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
     />
   )
 
   const renderHeaderRight = () => (
     <Ionicons
-      onPress={
-        () => {
-          handleSubmit()
-        }
-      }
+      onPress={() => {
+        handleSubmit()
+      }}
       name="send"
       size={30}
-      style={
-        {
-          marginRight: 10,
-          color: CONST.MAIN_COLOR,
-        }
-      }
+      style={{
+        marginRight: 10,
+        color: CONST.MAIN_COLOR,
+      }}
     />
   )
 
   const handleSubmit = () => {
-    dispatch(reducer.submitComment({ inputText: inputTextRef.current.trim(), uuid, photo }))
+    dispatch(
+      reducer.submitComment({
+        inputText: inputTextRef.current.trim(),
+        uuid,
+        photo,
+      }),
+    )
     navigation.pop()
   }
 
@@ -119,36 +117,34 @@ const ModalInputText = ({ route }) => {
         placeholder="Wanna share any thoughts?"
         placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
         maxLength={maxStringLength}
-        style={
-          {
-            color: CONST.MAIN_COLOR,
-            height: height < 700 ? 150 : 200,
-            margin: 12,
-            padding: 10,
-            borderWidth: 1,
-            borderColor: CONST.MAIN_COLOR,
-            fontSize: 20,
-            textAlignVertical: 'top',
-          }
-        }
-        onChangeText={inputValue => {
+        style={{
+          color: CONST.MAIN_COLOR,
+          height: height < 700 ? 150 : 200,
+          margin: 12,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: CONST.MAIN_COLOR,
+          fontSize: 20,
+          textAlignVertical: 'top',
+        }}
+        onChangeText={(inputValue) => {
           setInputText(inputValue.slice(0, maxStringLength))
         }}
         value={inputText}
       />
-      <Text style={{
-        flex: 1,
-        flexDirection: 'row',
-        position: 'absolute',
-        top: 12,
-        right: 12,
-        color: CONST.MAIN_COLOR,
-
-      }}>
+      <Text
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          color: CONST.MAIN_COLOR,
+        }}
+      >
         {maxStringLength - inputText.length}
       </Text>
     </SafeAreaView>
-
   )
 }
 ModalInputText.defaultProps = {
