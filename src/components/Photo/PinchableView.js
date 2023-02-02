@@ -1,63 +1,55 @@
-import React, { useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
+
 import {
   // Dimensions,
   StyleSheet,
   Animated,
   ActivityIndicator,
+  View,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
-import { PinchGestureHandler, TapGestureHandler, State } from 'react-native-gesture-handler'
+import {
+  PinchGestureHandler,
+  TapGestureHandler,
+  State,
+} from 'react-native-gesture-handler'
+import { useDimensions } from '@react-native-community/hooks'
+import { FontAwesome, AntDesign } from '@expo/vector-icons'
+import ReactNativeZoomableView from '@openspacelabs/react-native-zoomable-view/src/ReactNativeZoomableView'
+
 import CachedImage from 'expo-cached-image'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
-const PinchableView = ({ width, height, photo }) => {
-  const scale = useRef(new Animated.Value(1)).current
-  const [translateX, setTranslateX] = useState(new Animated.Value(0))
-  const [translateY, setTranslateY] = useState(new Animated.Value(0))
+const PinchableView = ({ route, navigation }) => {
+  const { photo } = route.params
+  const { width, height } = useDimensions().window
 
-  const onPinchEvent = Animated.event(
-    [
-      {
-        nativeEvent: { scale },
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: renderHeaderTitle,
+      headerLeft: renderHeaderLeft,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
       },
-    ],
-    {
-      useNativeDriver: false,
-    }
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
+    />
   )
 
-  const onPinchStateChange = event => {
-    if (event.nativeEvent.state === State.END) {
-      if (event.nativeEvent.scale < 1) {
-        Animated.spring(scale, { // new Animated.Value(event.nativeEvent.scale), {
-          toValue: 1,
-          useNativeDriver: false,
-        }).start()
-      } else {
-        scale.setValue(event.nativeEvent.scale)
-      }
-    }
-  }
-
-  const onSingleTapEvent = event => {
-    // if (event.nativeEvent.oldState === State.ACTIVE) {
-
-    // }
-    if (event.nativeEvent.state === State.END) {
-    //   Animated.spring(translateX, {
-    //     toValue: width / 2 - event.nativeEvent.x,
-    //     useNativeDriver: false,
-    //   }).start()
-    //   Animated.spring(translateY, {
-    //     toValue: height / 2 - event.nativeEvent.y,
-    //     useNativeDriver: false,
-    //   }).start()
-      setTranslateX(width / 2 - event.nativeEvent.x)
-      setTranslateY(height / 2 - event.nativeEvent.y)
-    }
-  }
+  const renderHeaderTitle = () => {}
 
   const styles = StyleSheet.create({
     photoContainer: {
@@ -73,73 +65,56 @@ const PinchableView = ({ width, height, photo }) => {
   })
 
   return (
-    <TapGestureHandler
-      onHandlerStateChange={onSingleTapEvent}
-      numberOfTaps={1}>
-      <PinchGestureHandler
-        //   waitFor={100}
-        onGestureEvent={onPinchEvent}
-        onHandlerStateChange={onPinchStateChange}>
-        <Animated.View
-          style={{
-            width,
-            height,
-            transform: [
-              { scale },
-              {
-                translateX,
-              },
-              {
-                translateY,
-              },
-            ],
-          }}
-          resizeMode="contain">
-          <CachedImage
-            source={{
-              uri: `${photo.thumbUrl}`,
-              // expiresIn: 5, // seconds. This field is optional
+    <ReactNativeZoomableView
+      maxZoom={10}
+      minZoom={0.8}
+      zoomStep={0.5}
+      initialZoom={2}
+      bindToBorders={true}
+      style={{
+        width,
+        height,
+      }}
+      resizeMode="contain"
+    >
+      <CachedImage
+        source={{
+          uri: `${photo.thumbUrl}`,
+          // expiresIn: 5, // seconds. This field is optional
+        }}
+        cacheKey={`${photo.id}-thumb`}
+        resizeMode="contain"
+        style={styles.photoContainer}
+      />
+      <CachedImage
+        source={{
+          uri: `${photo.imgUrl}`,
+          // next field is optional, if not set -- will never expire and will be managed by the OS
+          // expiresIn: 2_628_288, // 1 month in seconds
+        }}
+        cacheKey={`${photo.id}`}
+        placeholderContent={
+          // optional
+          <ActivityIndicator
+            color={CONST.MAIN_COLOR}
+            size="small"
+            style={{
+              flex: 1,
+              justifyContent: 'center',
             }}
-            cacheKey={`${photo.id}-thumb`}
-            resizeMode="contain"
-            style={
-              styles.photoContainer
-            }
           />
-          <CachedImage
-            source={{
-              uri: `${photo.imgUrl}`,
-              // next field is optional, if not set -- will never expire and will be managed by the OS
-              // expiresIn: 2_628_288, // 1 month in seconds
-            }}
-            cacheKey={`${photo.id}`}
-            placeholderContent={( // optional
-              <ActivityIndicator
-                color={
-                  CONST.MAIN_COLOR
-                }
-                size="small"
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                }}
-              />
-            )}
-            resizeMode="contain"
-            style={
-              styles.photoContainer
-            }
-          />
-        </Animated.View>
-      </PinchGestureHandler>
-    </TapGestureHandler>
+        }
+        resizeMode="contain"
+        style={styles.photoContainer}
+      />
+    </ReactNativeZoomableView>
   )
 }
 
 PinchableView.propTypes = {
-  photo: PropTypes.object.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
+  // photo: PropTypes.object.isRequired,
+  // width: PropTypes.number.isRequired,
+  // height: PropTypes.number.isRequired,
 }
 
 export default PinchableView
