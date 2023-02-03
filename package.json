@@ -47,8 +47,6 @@
     "expo-updates": "~0.15.6",
     "expo-video-thumbnails": "~7.0.0",
     "graphql": "^16.6.0",
-    "graphql-ws": "^5.11.3",
-    "isomorphic-ws": "^4.0.1",
     "moment": "2.29.4",
     "prop-types": "15.8.1",
     "react": "18.1.0",

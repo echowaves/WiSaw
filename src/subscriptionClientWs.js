@@ -7,7 +7,7 @@ import base64 from 'react-native-base64'
 
 const { ApolloClient, InMemoryCache } = require('@apollo/client')
 const { WebSocketLink } = require('@apollo/client/link/ws')
-const WebSocket = require('isomorphic-ws')
+// const WebSocket = require('isomorphic-ws')
 
 const { API_URI, REALTIME_API_URI, API_KEY } = Constants.expoConfig.extra
 
@@ -81,6 +81,8 @@ const createAppSyncGraphQLOperationAdapter = () => ({
   },
 })
 
+// const ws = new WebSocket(connection_url)
+
 // WebSocketLink
 const wsLink = new WebSocketLink(
   new UUIDOperationIdSubscriptionClient(
@@ -93,7 +95,7 @@ const wsLink = new WebSocketLink(
       connectionCallback: (err) =>
         console.log('connectionCallback', err ? 'ERR' : 'OK', err || ''),
     },
-    WebSocket,
+    // WebSocket,
   ).use([createAppSyncGraphQLOperationAdapter()]),
 )
 
