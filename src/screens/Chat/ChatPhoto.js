@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 
 import { TouchableHighlight, View, useWindowDimensions } from 'react-native'
 
-import { LinearProgress } from 'react-native-elements'
 // import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
 
 import PropTypes from 'prop-types'

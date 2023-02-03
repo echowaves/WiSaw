@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  Alert,
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-} from 'react-native'
+import { Alert, SafeAreaView, StyleSheet, ScrollView } from 'react-native'
 
 import {
   Text,
@@ -16,17 +11,21 @@ import {
   Card,
   ListItem,
   Button,
-} from 'react-native-elements'
+} from '@rneui/themed'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
-import { FontAwesome, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import {
+  FontAwesome,
+  Ionicons,
+  MaterialCommunityIcons,
+} from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
 import zxcvbn from '../../zxcvbn'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 import * as reducer from './reducer'
 
@@ -37,9 +36,9 @@ const SecretScreen = () => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const topOffset = useSelector(state => state.photosList.topOffset)
+  const topOffset = useSelector((state) => state.photosList.topOffset)
 
-  const uuid = useSelector(state => state.secret.uuid)
+  const uuid = useSelector((state) => state.secret.uuid)
 
   const [nickName, setNickName] = useState('')
   const [nickNameEntered, setNickNameEntered] = useState(false)
@@ -53,13 +52,7 @@ const SecretScreen = () => {
 
   const [errorsMap, setErrorsMap] = useState(new Map())
 
-  const strengthColors = [
-    'red',
-    'orangered',
-    'orange',
-    'yellowgreen',
-    'green',
-  ]
+  const strengthColors = ['red', 'orangered', 'orange', 'yellowgreen', 'green']
   const strengthLabel = [
     'This Secret is too obvious -- keep typing.',
     'This Secret is still too weak -- easy to guess.',
@@ -89,7 +82,7 @@ const SecretScreen = () => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     resetFields()
@@ -101,7 +94,7 @@ const SecretScreen = () => {
 
   useEffect(() => {
     validate()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nickName, secret, secretConfirm, strength])
 
   useEffect(() => {
@@ -110,7 +103,7 @@ const SecretScreen = () => {
     } else {
       setCanSubmit(false)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errorsMap])
 
   useEffect(() => {
@@ -124,7 +117,7 @@ const SecretScreen = () => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canSubmit])
 
   const styles = StyleSheet.create({
@@ -140,41 +133,38 @@ const SecretScreen = () => {
 
   const renderHeaderRight = () => (
     <Ionicons
-      onPress={
-        canSubmit ? () => handleSubmit() : null
-      }
+      onPress={canSubmit ? () => handleSubmit() : null}
       name="send"
       size={30}
-      style={
-        {
-          marginRight: 10,
-          color: canSubmit ? CONST.MAIN_COLOR : CONST.SECONDARY_COLOR,
-        }
-      }
+      style={{
+        marginRight: 10,
+        color: canSubmit ? CONST.MAIN_COLOR : CONST.SECONDARY_COLOR,
+      }}
     />
   )
   const renderHeaderLeft = () => (
     <FontAwesome
       name="chevron-left"
       size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => navigation.goBack()
-      }
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
     />
   )
 
   const handleSubmit = async () => {
     if (nickNameEntered) {
-      await dispatch(reducer.updateSecret({
-        nickName, oldSecret, secret, uuid,
-      }))
+      await dispatch(
+        reducer.updateSecret({
+          nickName,
+          oldSecret,
+          secret,
+          uuid,
+        }),
+      )
     } else {
       await dispatch(reducer.registerSecret({ nickName, secret, uuid }))
     }
@@ -185,7 +175,7 @@ const SecretScreen = () => {
     await resetFields()
     Toast.show({
       text1: 'Secret reset',
-      text2: "enter new Secret",
+      text2: 'enter new Secret',
       topOffset,
     })
   }
@@ -193,16 +183,24 @@ const SecretScreen = () => {
   const validate = () => {
     const errors = new Map()
 
-    if (!/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickName.toLowerCase())) errors.set('nickName', 'Nickname wrong format.')
-    if (nickName?.length < minNickNameLength) errors.set('nickName', 'Nickname too short.')
-    if (nickName?.length > maxNickNameLength) errors.set('nickName', 'Nickname too long.')
+    if (
+      !/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickName.toLowerCase())
+    )
+      errors.set('nickName', 'Nickname wrong format.')
+    if (nickName?.length < minNickNameLength)
+      errors.set('nickName', 'Nickname too short.')
+    if (nickName?.length > maxNickNameLength)
+      errors.set('nickName', 'Nickname too long.')
     if (secret.length === 0) {
       setErrorsMap(errors)
       return
     }
-    if (secret?.length < minNickNameLength) errors.set('secret', `Secret too short.`)
-    if (secret?.length > maxNickNameLength) errors.set('secret', `Secret too long.`)
-    if (secret !== secretConfirm) errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
+    if (secret?.length < minNickNameLength)
+      errors.set('secret', `Secret too short.`)
+    if (secret?.length > maxNickNameLength)
+      errors.set('secret', `Secret too long.`)
+    if (secret !== secretConfirm)
+      errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
     if (strength < 3) errors.set('strength', 'Secret is not secure.')
 
     setErrorsMap(errors)
@@ -212,17 +210,18 @@ const SecretScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollView}
-        showsVerticalScrollIndicator={
-          false
-        }>
+        showsVerticalScrollIndicator={false}
+      >
         <Card containerStyle={{ padding: 0 }}>
           <ListItem>
-            <Text style={
-              {
+            <Text
+              style={{
                 color: CONST.MAIN_COLOR,
                 fontSize: 20,
-              }
-            }>The secret allows you to carry incognito identity to a different device, or restore it from another phone.
+              }}
+            >
+              The secret allows you to carry incognito identity to a different
+              device, or restore it from another phone.
             </Text>
           </ListItem>
         </Card>
@@ -232,15 +231,9 @@ const SecretScreen = () => {
           autoCapitalize="none"
           autoComplete="off"
           disabled={nickNameEntered}
-          leftIcon={(
-            <FontAwesome
-              name="user"
-              size={24}
-              color="black"
-            />
-          )}
+          leftIcon={<FontAwesome name="user" size={24} color="black" />}
           value={nickName}
-          onChangeText={text => setNickName(text.toLowerCase())}
+          onChangeText={(text) => setNickName(text.toLowerCase())}
           errorStyle={{ color: 'red' }}
           errorMessage={errorsMap.get('nickName')}
         />
@@ -252,15 +245,11 @@ const SecretScreen = () => {
             autoCapitalize="none"
             autoComplete="off"
             secureTextEntry
-            leftIcon={(
-              <FontAwesome
-                name="user-secret"
-                size={24}
-                color="black"
-              />
-            )}
+            leftIcon={
+              <FontAwesome name="user-secret" size={24} color="black" />
+            }
             value={oldSecret}
-            onChangeText={text => setOldSecret(text)}
+            onChangeText={(text) => setOldSecret(text)}
           />
         )}
 
@@ -278,17 +267,15 @@ const SecretScreen = () => {
           autoCapitalize="none"
           autoComplete="off"
           secureTextEntry
-          leftIcon={(
-            <FontAwesome
-              name="user-secret"
-              size={24}
-              color="black"
-            />
-          )}
+          leftIcon={<FontAwesome name="user-secret" size={24} color="black" />}
           value={secret}
-          onChangeText={text => setSecret(text)}
+          onChangeText={(text) => setSecret(text)}
           errorStyle={{ color: strengthColors[strength] }}
-          errorMessage={secret.length === 0 ? '' : `${strengthLabel[strength]} ${errorsMap.get('secret') || ''}`}
+          errorMessage={
+            secret.length === 0
+              ? ''
+              : `${strengthLabel[strength]} ${errorsMap.get('secret') || ''}`
+          }
         />
         <Input
           placeholder="Confirm Secret"
@@ -296,63 +283,57 @@ const SecretScreen = () => {
           autoCapitalize="none"
           autoComplete="off"
           secureTextEntry
-          leftIcon={(
-            <FontAwesome
-              name="user-secret"
-              size={24}
-              color="black"
-            />
-          )}
+          leftIcon={<FontAwesome name="user-secret" size={24} color="black" />}
           value={secretConfirm}
-          onChangeText={text => setSecretConfirm(text)}
+          onChangeText={(text) => setSecretConfirm(text)}
           errorStyle={{ color: 'red' }}
           errorMessage={errorsMap.get('secretConfirm')}
         />
 
         <Card containerStyle={{ padding: 0 }}>
           <ListItem>
-            <Text style={{
-              color: "red",
-              fontSize: 12,
-            }}>Make sure to use only strong secrets.
-              Write it down and store in secure place.
-              If you loose it -- we will not be able to help you to re-cover it,
-              because we never collect your explicit identity in any form (like your email or mobile phone number).
+            <Text
+              style={{
+                color: 'red',
+                fontSize: 12,
+              }}
+            >
+              Make sure to use only strong secrets. Write it down and store in
+              secure place. If you loose it -- we will not be able to help you
+              to re-cover it, because we never collect your explicit identity in
+              any form (like your email or mobile phone number).
             </Text>
           </ListItem>
         </Card>
 
         {nickNameEntered && (
           <Card containerStyle={{ padding: 10 }}>
-            <Text style={{
-              color: "red",
-              fontSize: 12,
-              paddingBottom: 10,
-            }}>
-              You secret is attached to this device.
-              Wiping the Secret will disconnect your current incognito identity from this phone.
-              Before clicking the button below, write down your current Secret.
+            <Text
+              style={{
+                color: 'red',
+                fontSize: 12,
+                paddingBottom: 10,
+              }}
+            >
+              You secret is attached to this device. Wiping the Secret will
+              disconnect your current incognito identity from this phone. Before
+              clicking the button below, write down your current Secret.
             </Text>
 
             <Button
               type="outline"
-              titleStyle={
-                {
-                  color: CONST.MAIN_COLOR,
-                }
-              }
-              icon={(
+              titleStyle={{
+                color: CONST.MAIN_COLOR,
+              }}
+              icon={
                 <MaterialCommunityIcons
                   name="wiper"
                   size={30}
-                  style={
-                    {
-                      color: CONST.MAIN_COLOR,
-                    }
-                  }
+                  style={{
+                    color: CONST.MAIN_COLOR,
+                  }}
                 />
-
-              )}
+              }
               title="Wipe Secret"
               onPress={() => {
                 Alert.alert(
@@ -363,7 +344,7 @@ Remember to store old NickName and Secret in secure place if you ever intend to 
                     { text: 'No', onPress: () => null, style: 'cancel' },
                     { text: 'Yes', onPress: () => handleReset() },
                   ],
-                  { cancelable: true }
+                  { cancelable: true },
                 )
               }}
             />

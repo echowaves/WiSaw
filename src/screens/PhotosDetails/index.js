@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message'
 import // View,
 'react-native'
 
-import { Text } from 'react-native-elements'
+import { Text } from '@rneui/themed'
 
 import { useDispatch, useSelector } from 'react-redux'
 

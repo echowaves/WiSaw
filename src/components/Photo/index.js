@@ -16,13 +16,7 @@ import {
   useWindowDimensions,
 } from 'react-native'
 
-import {
-  Text,
-  Card,
-  LinearProgress,
-  Divider,
-  Badge,
-} from 'react-native-elements'
+import { Text, Card, LinearProgress, Divider, Badge } from '@rneui/themed'
 
 import { Col, Row, Grid } from 'react-native-easy-grid'
 

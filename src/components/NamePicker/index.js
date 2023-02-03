@@ -11,7 +11,7 @@ import {
   useWindowDimensions,
 } from 'react-native'
 
-import { Text, Header, Input, Button } from 'react-native-elements'
+import { Text, Header, Input, Button } from '@rneui/themed'
 
 import { FontAwesome } from '@expo/vector-icons'
 

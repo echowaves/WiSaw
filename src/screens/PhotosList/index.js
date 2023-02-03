@@ -53,7 +53,7 @@ import {
   Overlay,
   Text,
   Badge,
-} from 'react-native-elements'
+} from '@rneui/themed'
 
 import { UUID_KEY } from '../Secret/reducer'
 import { getUnreadCountsList } from '../FriendsList/friends_helper'

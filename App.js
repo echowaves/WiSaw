@@ -16,7 +16,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer'
 
 import { Provider } from 'react-redux'
 
-import { ThemeProvider } from 'react-native-elements'
+import { ThemeProvider } from '@rneui/themed'
 import Toast from 'react-native-toast-message'
 
 import { createStackNavigator } from '@react-navigation/stack'

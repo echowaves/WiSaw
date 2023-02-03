@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
 } from 'react-native'
 
-import { Text, Card, ListItem, Badge } from 'react-native-elements'
+import { Text, Card, ListItem, Badge } from '@rneui/themed'
 
 // import Toast from 'react-native-toast-message'
 import FlatGrid from 'react-native-super-grid'

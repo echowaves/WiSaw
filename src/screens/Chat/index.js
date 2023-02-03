@@ -22,15 +22,6 @@ import {
   Pressable,
 } from 'react-native'
 
-import {
-  Text,
-  // Input,
-  // LinearProgress,
-  // Card,
-  // ListItem,
-  // Button,
-  Icon,
-} from 'react-native-elements'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
