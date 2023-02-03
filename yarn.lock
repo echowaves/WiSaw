@@ -4774,7 +4774,7 @@ expo-video-thumbnails@~7.0.0:
   resolved "https://registry.yarnpkg.com/expo-video-thumbnails/-/expo-video-thumbnails-7.0.0.tgz#a98c726d529372153161735794ccf6bd9ba925f2"
   integrity sha512-QTifwHjz1VL+nXX39lSZHJtbHKI8a/DVCVk6iT/WQZG1JmZdeUHObrcWlIKeDsTCB5fQWIfOmin+N9hbe4n0qw==
 
-expo@^47.0.13:
+expo@^47.0.0:
   version "47.0.13"
   resolved "https://registry.yarnpkg.com/expo/-/expo-47.0.13.tgz#f53f82e7f9e209f8a8b25f2493f58439958368cb"
   integrity sha512-9VjjGdViCJ9NfWbUE7brkwFBDvKuA35V345vMtHFYNKoGJjXib36yitmawreMDQFv0kMTqTnzc7T2191Pod7Ng==
@@ -6670,7 +6670,7 @@ json5@^1.0.1:
   dependencies:
     minimist "^1.2.0"
 
-json5@^2.2.2:
+json5@^2.2.2, json5@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
   integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==
