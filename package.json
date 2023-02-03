@@ -49,7 +49,7 @@
     "graphql": "^16.6.0",
     "graphql-ws": "^5.11.3",
     "isomorphic-ws": "^4.0.1",
-    "moment": "2.29.1",
+    "moment": "2.29.4",
     "prop-types": "15.7.2",
     "react": "18.1.0",
     "react-dom": "18.1.0",
