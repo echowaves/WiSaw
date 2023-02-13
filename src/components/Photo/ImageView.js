@@ -26,9 +26,9 @@ const ImageView = ({ width, height, photo }) => {
   }
 
   const onSingleTapEvent = (event) => {
-    // if (event.nativeEvent.oldState === State.ACTIVE) {
-    //   navigation.navigate('PinchableView', { photo })
-    // }
+    if (event.nativeEvent.state === State.ACTIVE) {
+      navigation.navigate('PinchableView', { photo })
+    }
   }
 
   const styles = StyleSheet.create({
