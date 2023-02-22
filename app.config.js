@@ -1,5 +1,6 @@
 export default {
   expo: {
+    owner: 'echowaves',
     runtimeVersion: {
       policy: 'sdkVersion',
     },
