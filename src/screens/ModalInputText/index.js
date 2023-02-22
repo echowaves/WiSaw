@@ -2,13 +2,19 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { TextInput, StyleSheet, useWindowDimensions } from 'react-native'
+
 import {
   Text,
-  TextInput,
-  SafeAreaView,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native'
+  Input,
+  LinearProgress,
+  Card,
+  ListItem,
+  Button,
+  Icon,
+} from '@rneui/themed'
+
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
@@ -96,7 +102,7 @@ const ModalInputText = ({ route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <KeyboardAwareScrollView style={styles.container}>
       <CachedImage
         source={{ uri: `${photo.thumbUrl}` }}
         cacheKey={`${photo.id}t`}
@@ -144,7 +150,17 @@ const ModalInputText = ({ route }) => {
       >
         {maxStringLength - inputText.length}
       </Text>
-    </SafeAreaView>
+      <Button
+        onPress={() => handleSubmit()}
+        name="send"
+        size="lg"
+        iconRight
+        color={CONST.MAIN_COLOR}
+      >
+        {`   Submit`}
+        <Icon name="send" color="white" />
+      </Button>
+    </KeyboardAwareScrollView>
   )
 }
 ModalInputText.defaultProps = {
