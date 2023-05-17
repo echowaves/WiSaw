@@ -4,6 +4,7 @@ export default {
     runtimeVersion: {
       policy: 'sdkVersion',
     },
+    jsEngine: 'hermes',
     updates: {
       url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee',
     },
@@ -34,6 +35,7 @@ export default {
       },
     },
     ios: {
+      jsEngine: 'jsc',
       bundleIdentifier: 'com.echowaves',
       buildNumber: '253',
       supportsTablet: true,
