@@ -35,7 +35,8 @@ export default {
       },
     },
     ios: {
-      jsEngine: 'jsc',
+      // jsEngine: 'jsc',
+      jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
       buildNumber: '254',
       supportsTablet: true,

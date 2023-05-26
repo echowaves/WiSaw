@@ -2,7 +2,7 @@ import Toast from 'react-native-toast-message'
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client'
 
 import * as SecureStore from 'expo-secure-store'
 
@@ -45,30 +45,36 @@ export default function reducer(state = initialState, action) {
 export function registerSecret({ nickName, secret, uuid }) {
   // console.log({ nickName })
   return async (dispatch, getState) => {
-    const {
-      topOffset,
-    } = getState().photosList
+    const { topOffset } = getState().photosList
 
     // console.log({ nickName, secret, uuid })
 
     try {
-      const returnedSecret = (await CONST.gqlClient
-        .mutate({
+      const returnedSecret = (
+        await CONST.gqlClient.mutate({
           mutation: gql`
-            mutation 
-            registerSecret($nickName: String!, $secret: String!, $uuid: String!) {
-              registerSecret(nickName: $nickName, secret: $secret, uuid: $uuid)
-                     {
-                        uuid
-                        nickName
-                      }
-            }`,
+            mutation registerSecret(
+              $nickName: String!
+              $secret: String!
+              $uuid: String!
+            ) {
+              registerSecret(
+                nickName: $nickName
+                secret: $secret
+                uuid: $uuid
+              ) {
+                uuid
+                nickName
+              }
+            }
+          `,
           variables: {
             nickName,
             secret,
             uuid,
           },
-        })).data.registerSecret
+        })
+      ).data.registerSecret
 
       // console.log({ returnedSecret })
       // console.log(returnedSecret.uuid)
@@ -94,40 +100,46 @@ export function registerSecret({ nickName, secret, uuid }) {
       Toast.show({
         text1: 'Unable to store Secret',
         text2: err.toString(),
-        type: "error",
+        type: 'error',
         topOffset,
       })
     }
   }
 }
 
-export function updateSecret({
-  nickName, oldSecret, secret, uuid,
-}) {
+export function updateSecret({ nickName, oldSecret, secret, uuid }) {
   return async (dispatch, getState) => {
-    const {
-      topOffset,
-    } = getState().photosList
+    const { topOffset } = getState().photosList
 
     try {
-      const updatedSecret = (await CONST.gqlClient
-        .mutate({
+      const updatedSecret = (
+        await CONST.gqlClient.mutate({
           mutation: gql`
-            mutation 
-            updateSecret($nickName: String!, $secret: String!, $newSecret: String!, $uuid: String!) {
-              updateSecret(nickName: $nickName, secret: $secret, newSecret: $newSecret, uuid: $uuid)
-                     {
-                        uuid
-                        nickName
-                      }
-            }`,
+            mutation updateSecret(
+              $nickName: String!
+              $secret: String!
+              $newSecret: String!
+              $uuid: String!
+            ) {
+              updateSecret(
+                nickName: $nickName
+                secret: $secret
+                newSecret: $newSecret
+                uuid: $uuid
+              ) {
+                uuid
+                nickName
+              }
+            }
+          `,
           variables: {
             nickName,
             secret: oldSecret,
             newSecret: secret,
             uuid,
           },
-        })).data.updateSecret
+        })
+      ).data.updateSecret
 
       await Promise.all([
         _storeUUID(updatedSecret.uuid),
@@ -149,7 +161,7 @@ export function updateSecret({
       Toast.show({
         text1: 'Unable to update Secret',
         text2: err.toString(),
-        type: "error",
+        type: 'error',
         topOffset,
       })
     }
@@ -159,9 +171,7 @@ export function updateSecret({
 export function resetSecret() {
   // console.log({ nickName })
   return async (dispatch, getState) => {
-    const {
-      topOffset,
-    } = getState().photosList
+    const { topOffset } = getState().photosList
     try {
       await Promise.all([
         SecureStore.deleteItemAsync(UUID_KEY),
@@ -179,7 +189,7 @@ export function resetSecret() {
       Toast.show({
         text1: 'Unable to reset Secret',
         text2: err.toString(),
-        type: "error",
+        type: 'error',
         topOffset,
       })
     }
@@ -204,26 +214,26 @@ export async function getUUID() {
   return uuid
 }
 
-const _storeUUID = async uuid => {
+const _storeUUID = async (uuid) => {
   try {
     await SecureStore.setItemAsync(UUID_KEY, uuid)
   } catch (err) {
     Toast.show({
       text1: 'Unable to store UUID',
       text2: err.toString(),
-      type: "error",
+      type: 'error',
     })
   }
 }
 
-const _storeNickName = async nickName => {
+const _storeNickName = async (nickName) => {
   try {
     await SecureStore.setItemAsync(NICK_NAME_KEY, nickName)
   } catch (err) {
     Toast.show({
       text1: 'Unable to store NickName',
       text2: err.toString(),
-      type: "error",
+      type: 'error',
     })
   }
 }

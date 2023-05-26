@@ -43,6 +43,8 @@ const Photo = ({ photo }) => {
 
   const videoRef = useRef(null)
 
+  const [bans, setBans] = useState([])
+
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
   const topOffset = useSelector((state) => state.photosList.topOffset)
@@ -53,7 +55,6 @@ const Photo = ({ photo }) => {
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useWindowDimensions()
   const imageHeight = height - 250
-  const bans = useSelector((state) => state.photo.bans)
   // const error = useSelector(state => state.photo.error)
 
   useFocusEffect(
@@ -62,7 +63,7 @@ const Photo = ({ photo }) => {
       const task = InteractionManager.runAfterInteractions(async () => {
         if (componentIsMounted) {
           const photoDetails = await reducer.getPhotoDetails({
-            photoId: photo.id,
+            photoId: photo?.id,
             uuid,
           })
           setPhotoDetails({
@@ -76,7 +77,7 @@ const Photo = ({ photo }) => {
         componentIsMounted.current = false
         task.cancel()
       }
-    }, []), // eslint-disable-line react-hooks/exhaustive-deps
+    }, []),
   )
 
   // useEffect(() => {
@@ -95,7 +96,7 @@ const Photo = ({ photo }) => {
     return dateTime
   }
 
-  const renderCommentsStats = ({ photo, photoDetails }) => {
+  const renderCommentsStats = () => {
     if (!photoDetails?.comments || photoDetails?.comments?.length === 0) {
       return (
         <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -166,7 +167,7 @@ const Photo = ({ photo }) => {
     )
   }
 
-  const renderCommentButtons = ({ photo, comment }) => {
+  const renderCommentButtons = ({ comment }) => {
     if (!comment?.hiddenButtons) {
       return (
         <View
@@ -214,7 +215,7 @@ const Photo = ({ photo }) => {
     return <View />
   }
 
-  const renderCommentsRows = ({ photo, photoDetails }) => {
+  const renderCommentsRows = () => {
     if (photoDetails?.comments) {
       return (
         <View>
@@ -253,7 +254,7 @@ const Photo = ({ photo }) => {
                   >
                     {comment.comment}
                   </Text>
-                  {renderCommentButtons({ photo, comment })}
+                  {renderCommentButtons({ comment })}
                 </Card>
                 {!comment.hiddenButtons && (
                   <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -290,9 +291,10 @@ const Photo = ({ photo }) => {
         </View>
       )
     }
+    return <View />
   }
 
-  const renderAddCommentsRow = ({ photo, photoDetails }) => {
+  const renderAddCommentsRow = () => {
     if (!photoDetails?.comments) {
       return <Text />
     }
@@ -331,7 +333,7 @@ const Photo = ({ photo }) => {
     )
   }
 
-  const renderRecognitions = ({ photoDetails }) => {
+  const renderRecognitions = () => {
     if (
       !photoDetails ||
       !photoDetails?.recognitions ||
@@ -466,7 +468,91 @@ const Photo = ({ photo }) => {
     )
   }
 
-  const renderFooter = ({ photo, photoDetails }) => (
+  const isPhotoBannedByMe = () => bans.includes(photo?.id)
+
+  const handleDelete = () => {
+    if (photoDetails?.isPhotoWatched) {
+      Toast.show({
+        text1: 'Unable to delete Starred photo',
+        text2: 'Un-Star photo first',
+        type: 'error',
+        topOffset,
+      })
+      return
+    }
+    Alert.alert(
+      'Will delete photo for everyone!',
+      "This can't be undone. Are you sure? ",
+      [
+        { text: 'No', onPress: () => null, style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: () => {
+            dispatch(reducer.deletePhoto({ photo }))
+            navigation.goBack()
+          },
+        },
+      ],
+      { cancelable: true },
+    )
+  }
+
+  const handleBan = () => {
+    if (photoDetails?.isPhotoWatched) {
+      Toast.show({
+        text1: 'Unable to Report Starred photo',
+        text2: 'Un-Star photo first',
+        type: 'error',
+        topOffset,
+      })
+      return
+    }
+    if (isPhotoBannedByMe()) {
+      Toast.show({
+        text1: 'Looks like you already Reported this Photo',
+        text2: 'You can only Report same Photo once',
+        type: 'error',
+        topOffset,
+      })
+    } else {
+      Alert.alert(
+        'Report abusive Photo?',
+        'The user who posted this photo will be banned. Are you sure?',
+        [
+          { text: 'No', onPress: () => null, style: 'cancel' },
+          { text: 'Yes', onPress: () => dispatch(reducer.banPhoto({ photo })) },
+        ],
+        { cancelable: true },
+      )
+    }
+  }
+
+  const handleFlipWatch = async () => {
+    try {
+      if (photoDetails?.isPhotoWatched) {
+        setPhotoDetails({
+          ...photoDetails,
+          watchersCount: await dispatch(reducer.unwatchPhoto({ photo })),
+          isPhotoWatched: !photoDetails?.isPhotoWatched,
+        })
+      } else {
+        setPhotoDetails({
+          ...photoDetails,
+          watchersCount: await dispatch(reducer.watchPhoto({ photo })),
+          isPhotoWatched: !photoDetails?.isPhotoWatched,
+        })
+      }
+    } catch (err) {
+      Toast.show({
+        text1: 'Unable to complete',
+        text2: 'Network issue? Try again later',
+        type: 'error',
+        topOffset,
+      })
+    }
+  }
+
+  const renderFooter = () => (
     <SafeAreaView
       style={{
         backgroundColor: CONST.NAV_COLOR,
@@ -506,7 +592,7 @@ const Photo = ({ photo }) => {
               justifyContent: 'center',
               alignItems: 'center',
             }}
-            onPress={() => handleDelete({ photo, photoDetails })}
+            onPress={() => handleDelete()}
           >
             <FontAwesome
               name="trash"
@@ -525,14 +611,13 @@ const Photo = ({ photo }) => {
               justifyContent: 'center',
               alignItems: 'center',
             }}
-            onPress={() => handleBan({ photo, photoDetails })}
+            onPress={() => handleBan()}
           >
             <FontAwesome
               name="ban"
               style={{
                 color:
-                  photoDetails?.isPhotoWatched ||
-                  isPhotoBannedByMe({ photoId: photo?.id })
+                  photoDetails?.isPhotoWatched || isPhotoBannedByMe()
                     ? CONST.SECONDARY_COLOR
                     : CONST.MAIN_COLOR,
               }}
@@ -547,7 +632,7 @@ const Photo = ({ photo }) => {
               alignItems: 'center',
             }}
             onPress={async () => {
-              handleFlipWatch({ photoDetails, photo })
+              handleFlipWatch()
             }}
           >
             {photoDetails.watchersCount > 0 && (
@@ -594,90 +679,6 @@ const Photo = ({ photo }) => {
     </SafeAreaView>
   )
 
-  const handleBan = ({ photo, photoDetails }) => {
-    if (photoDetails?.isPhotoWatched) {
-      Toast.show({
-        text1: 'Unable to Report Starred photo',
-        text2: 'Un-Star photo first',
-        type: 'error',
-        topOffset,
-      })
-      return
-    }
-    if (isPhotoBannedByMe({ photoId: photo?.id })) {
-      Toast.show({
-        text1: 'Looks like you already Reported this Photo',
-        text2: 'You can only Report same Photo once',
-        type: 'error',
-        topOffset,
-      })
-    } else {
-      Alert.alert(
-        'Report abusive Photo?',
-        'The user who posted this photo will be banned. Are you sure?',
-        [
-          { text: 'No', onPress: () => null, style: 'cancel' },
-          { text: 'Yes', onPress: () => dispatch(reducer.banPhoto({ photo })) },
-        ],
-        { cancelable: true },
-      )
-    }
-  }
-
-  const handleDelete = ({ photo, photoDetails }) => {
-    if (photoDetails?.isPhotoWatched) {
-      Toast.show({
-        text1: 'Unable to delete Starred photo',
-        text2: 'Un-Star photo first',
-        type: 'error',
-        topOffset,
-      })
-      return
-    }
-    Alert.alert(
-      'Will delete photo for everyone!',
-      "This can't be undone. Are you sure? ",
-      [
-        { text: 'No', onPress: () => null, style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: () => {
-            dispatch(reducer.deletePhoto({ photo }))
-            navigation.goBack()
-          },
-        },
-      ],
-      { cancelable: true },
-    )
-  }
-
-  const isPhotoBannedByMe = ({ photoId }) => bans.includes(photoId)
-
-  const handleFlipWatch = async ({ photoDetails, photo }) => {
-    try {
-      if (photoDetails?.isPhotoWatched) {
-        setPhotoDetails({
-          ...photoDetails,
-          watchersCount: await dispatch(reducer.unwatchPhoto({ photo })),
-          isPhotoWatched: !photoDetails?.isPhotoWatched,
-        })
-      } else {
-        setPhotoDetails({
-          ...photoDetails,
-          watchersCount: await dispatch(reducer.watchPhoto({ photo })),
-          isPhotoWatched: !photoDetails?.isPhotoWatched,
-        })
-      }
-    } catch (err) {
-      Toast.show({
-        text1: 'Unable to complete',
-        text2: 'Network issue? Try again later',
-        type: 'error',
-        topOffset,
-      })
-    }
-  }
-
   const styles = StyleSheet.create({
     photoContainer: {
       width,
@@ -691,7 +692,7 @@ const Photo = ({ photo }) => {
     },
   })
 
-  const renderPhotoRow = ({ photo }) => {
+  const renderPhotoRow = () => {
     if (!photo.video) {
       return <ImageView width={width} height={imageHeight} photo={photo} />
     }
@@ -728,17 +729,17 @@ const Photo = ({ photo }) => {
         showsVerticalScrollIndicator
         style={{ margin: 1, backgroundColor: 'white' }}
       >
-        {renderPhotoRow({ photo })}
+        {renderPhotoRow()}
         <Grid>
-          <Row>{renderCommentsStats({ photo, photoDetails })}</Row>
-          <Row>{renderCommentsRows({ photo, photoDetails })}</Row>
-          <Row>{renderAddCommentsRow({ photo, photoDetails })}</Row>
+          <Row>{renderCommentsStats()}</Row>
+          <Row>{renderCommentsRows()}</Row>
+          <Row>{renderAddCommentsRow()}</Row>
           <Divider />
-          <Row>{renderRecognitions({ photoDetails })}</Row>
+          <Row>{renderRecognitions()}</Row>
           <Row style={{ height: 110 }} />
         </Grid>
       </ScrollView>
-      {renderFooter({ photo, photoDetails })}
+      {renderFooter()}
     </View>
   )
 }
