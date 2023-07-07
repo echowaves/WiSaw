@@ -57,7 +57,7 @@ import {
 
 import { UUID_KEY } from '../Secret/reducer'
 import { getUnreadCountsList } from '../FriendsList/friends_helper'
-import * as reducer from './reducer'
+// import * as reducer from './reducer'
 
 import * as CONST from '../../consts'
 
@@ -175,7 +175,7 @@ const PhotosList = () => {
   //   // setIsRegistered(isRegistered)
   // }
 
-  const _initState = async () => {
+  const initState = async () => {
     // /// //////////////////////////////////////
     // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
     // files.forEach(file => {
@@ -195,153 +195,18 @@ const PhotosList = () => {
       dispatch(reducer.zeroMoment()),
     ])
   }
-  const _initandreload = async () => {
-    await _initState()
-    await _reload()
-  }
 
-  useEffect(() => {
-    // TODO: delete next line -- debuggin
-    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
-
-    dispatch(reducer.settopOffset(height / 3))
-
-    _getLocation()
-    _initandreload()
-    ;(async () => {
-      // eslint-disable-next-line no-undef
-      if (!__DEV__) {
-        const branchHelper = await import('../../branch_helper')
-        branchHelper.initBranch({ navigation })
-      }
-    })()
-
-    // add network availability listener
-    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-      if (state) {
-        dispatch(reducer.setNetAvailable(state.isInternetReachable))
-      }
-    })
-    return () => {
-      unsubscribeNetInfo()
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (uuid && zeroMoment) {
-      _reload() // initially load only when zero moment is loaded and uuid is assigned
-    }
-  }, [uuid, zeroMoment]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // re-render title on  state chage
-  useEffect(() => {
-    // defining this function for special case, when network becomes available after the app has started
-    _updateNavBar()
-    if (netAvailable) {
-      _initandreload()
-    }
-    // else {
-    //   (async () => {
-    //     await navigation.popToTop()
-    //     await _updateNavBar()
-    //   })()
-    // }
-  }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (wantToLoadMore()) {
-      dispatch(reducer.getPhotos())
-    }
-  }, [lastViewableRow, loading]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    _updateNavBar()
-  }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // const checkForUpdate = async () => {
-  //   try {
-  //     const update = await Updates.checkForUpdateAsync()
-  //     if (update.isAvailable) {
-  //       await Updates.fetchUpdateAsync()
-
-  //       Toast.show({
-  //         text1: 'WiSaw updated',
-  //         text2: "Restart to see changes",
-  //         topOffset,
-  //       })
-  //       // setTimeout(() => { Updates.reloadAsync() }, 3000)
-  //     }
-  //   } catch (error) {
-  //   // handle or log error
-  //     // Toast.show({
-  //     //   text1: `Failed to get over the air update:`,
-  //     //   text2: `${error}`,
-  //     //   type: "error",
-  //     // topOffset: topOffset,
-  //     // })
-  //   }
-  // }
-
-  const wantToLoadMore = () => {
-    if (isLastPage) {
-      // console.log(`isLastPage:${isLastPage}`)
-      return false
-    }
-
-    const screenColumns = /* Math.floor */ width / thumbDimension
-    const screenRows = /* Math.floor */ height / thumbDimension
-    const totalNumRows = /* Math.floor */ photos.length / screenColumns
-
-    if (screenRows * 1 + lastViewableRow > totalNumRows) {
-      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
-      return true
-    }
-
-    return false
-  }
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: CONST.BG_COLOR,
-    },
-    thumbContainer: {
-      // height: thumbDimension,
-      // paddingBottom: 10,
-      // marginBottom: 10,
-    },
-  })
-
-  const _updateNavBar = async () => {
-    if (netAvailable) {
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle,
-        // headerLeft: renderHeaderLeft,
-        // headerRight: renderHeaderRight,
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    } else {
-      navigation.setOptions({
-        headerTitle: '',
-        headerLeft: '',
-        headerRight: '',
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    }
-  }
-
-  // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
-
-  const _reload = async () => {
+  const reload = async () => {
     dispatch(reducer.resetState())
     dispatch(reducer.uploadPendingPhotos())
   }
 
-  async function _checkPermission({
+  const initandreload = async () => {
+    await initState()
+    await reload()
+  }
+
+  async function checkPermission({
     permissionFunction,
     alertHeader,
     alertBody,
@@ -361,15 +226,52 @@ const PhotosList = () => {
     return status
   }
 
+  const takePhoto = async ({ cameraType }) => {
+    let cameraReturn
+    if (cameraType === 'camera') {
+      // launch photo capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // allowsEditing: true,
+        quality: 1.0,
+        exif: false,
+      })
+    } else {
+      // launch video capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        // allowsEditing: true,
+        videoMaxDuration: 5,
+        quality: 1.0,
+        exif: false,
+      })
+    }
+
+    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
+    if (cameraReturn.cancelled === false) {
+      await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
+      // have to wait, otherwise the upload will not start
+      await dispatch(
+        reducer.queueFileForUpload({
+          cameraImgUrl: cameraReturn.uri,
+          type: cameraReturn.type,
+          location,
+        }),
+      )
+
+      dispatch(reducer.uploadPendingPhotos())
+    }
+  }
+
   const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
-    const cameraPermission = await _checkPermission({
+    const cameraPermission = await checkPermission({
       permissionFunction: ImagePicker.requestCameraPermissionsAsync,
       alertHeader: 'Do you want to take photo with wisaw?',
       alertBody: "Why don't you enable photo permission?",
     })
 
     if (cameraPermission === 'granted') {
-      const photoAlbomPermission = await _checkPermission({
+      const photoAlbomPermission = await checkPermission({
         permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
         alertHeader: 'Do you want to save photo on your device?',
         alertBody: "Why don't you enable the permission?",
@@ -382,8 +284,8 @@ const PhotosList = () => {
     }
   }
 
-  async function _getLocation() {
-    const locationPermission = await _checkPermission({
+  async function getLocation() {
+    const locationPermission = await checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
       alertHeader:
         'WiSaw shows you near-by photos based on your current location.',
@@ -426,43 +328,191 @@ const PhotosList = () => {
       }
     }
   }
+  const updateIndex = async (index) => {
+    await dispatch(reducer.setActiveSegment(index))
+    reload()
+  }
+  const segment0 = () => (
+    <FontAwesome
+      name="globe"
+      size={23}
+      color={
+        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
 
-  const takePhoto = async ({ cameraType }) => {
-    let cameraReturn
-    if (cameraType === 'camera') {
-      // launch photo capturing
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        // allowsEditing: true,
-        quality: 1.0,
-        exif: false,
+  const segment1 = () => (
+    <AntDesign
+      name="star"
+      size={23}
+      color={
+        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+
+  const segment2 = () => (
+    <FontAwesome
+      name="search"
+      size={23}
+      color={
+        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+
+  const renderHeaderTitle = () => (
+    <ButtonGroup
+      onPress={updateIndex}
+      containerStyle={{
+        width: 200,
+        height: 35,
+      }}
+      buttonStyle={{ alignSelf: 'center' }}
+      buttons={[
+        { element: segment0 },
+        { element: segment1 },
+        { element: segment2 },
+      ]}
+    />
+  )
+
+  const updateNavBar = async () => {
+    if (netAvailable) {
+      navigation.setOptions({
+        headerTitle: renderHeaderTitle,
+        // headerLeft: renderHeaderLeft,
+        // headerRight: renderHeaderRight,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
       })
     } else {
-      // launch video capturing
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-        // allowsEditing: true,
-        videoMaxDuration: 5,
-        quality: 1.0,
-        exif: false,
+      navigation.setOptions({
+        headerTitle: '',
+        headerLeft: '',
+        headerRight: '',
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
       })
     }
-
-    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
-    if (cameraReturn.cancelled === false) {
-      await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
-      // have to wait, otherwise the upload will not start
-      await dispatch(
-        reducer.queueFileForUpload({
-          cameraImgUrl: cameraReturn.uri,
-          type: cameraReturn.type,
-          location,
-        }),
-      )
-
-      dispatch(reducer.uploadPendingPhotos())
-    }
   }
+
+  useEffect(() => {
+    // TODO: delete next line -- debuggin
+    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
+
+    dispatch(reducer.settopOffset(height / 3))
+
+    getLocation()
+    initandreload()
+    ;(async () => {
+      // eslint-disable-next-line no-undef
+      if (!__DEV__) {
+        const branchHelper = await import('../../branch_helper')
+        branchHelper.initBranch({ navigation })
+      }
+    })()
+
+    // add network availability listener
+    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+      if (state) {
+        dispatch(reducer.setNetAvailable(state.isInternetReachable))
+      }
+    })
+    return () => {
+      unsubscribeNetInfo()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (uuid && zeroMoment) {
+      reload() // initially load only when zero moment is loaded and uuid is assigned
+    }
+  }, [uuid, zeroMoment])
+
+  // re-render title on  state chage
+  useEffect(() => {
+    // defining this function for special case, when network becomes available after the app has started
+    updateNavBar()
+    if (netAvailable) {
+      initandreload()
+    }
+    // else {
+    //   (async () => {
+    //     await navigation.popToTop()
+    //     await _updateNavBar()
+    //   })()
+    // }
+  }, [netAvailable])
+
+  const wantToLoadMore = () => {
+    if (isLastPage) {
+      // console.log(`isLastPage:${isLastPage}`)
+      return false
+    }
+
+    const screenColumns = /* Math.floor */ width / thumbDimension
+    const screenRows = /* Math.floor */ height / thumbDimension
+    const totalNumRows = /* Math.floor */ photos.length / screenColumns
+
+    if (screenRows * 1 + lastViewableRow > totalNumRows) {
+      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
+      return true
+    }
+
+    return false
+  }
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: CONST.BG_COLOR,
+    },
+    thumbContainer: {
+      // height: thumbDimension,
+      // paddingBottom: 10,
+      // marginBottom: 10,
+    },
+  })
+
+  useEffect(() => {
+    if (wantToLoadMore()) {
+      dispatch(reducer.getPhotos())
+    }
+  }, [lastViewableRow, loading])
+
+  useEffect(() => {
+    updateNavBar()
+  }, [activeSegment])
+
+  // const checkForUpdate = async () => {
+  //   try {
+  //     const update = await Updates.checkForUpdateAsync()
+  //     if (update.isAvailable) {
+  //       await Updates.fetchUpdateAsync()
+
+  //       Toast.show({
+  //         text1: 'WiSaw updated',
+  //         text2: "Restart to see changes",
+  //         topOffset,
+  //       })
+  //       // setTimeout(() => { Updates.reloadAsync() }, 3000)
+  //     }
+  //   } catch (error) {
+  //   // handle or log error
+  //     // Toast.show({
+  //     //   text1: `Failed to get over the air update:`,
+  //     //   text2: `${error}`,
+  //     //   type: "error",
+  //     // topOffset: topOffset,
+  //     // })
+  //   }
+  // }
+
+  // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
   const renderThumbs = () => (
     <FlatGrid
@@ -481,7 +531,7 @@ const PhotosList = () => {
       horizontal={false}
       refreshing={false}
       onRefresh={() => {
-        _reload()
+        reload()
       }}
       onViewableItemsChanged={onViewRef.current}
       // viewabilityConfig={viewConfigRef.current}
@@ -510,14 +560,14 @@ const PhotosList = () => {
       horizontal={false}
       refreshing={false}
       onRefresh={() => {
-        _reload()
+        reload()
       }}
       onViewableItemsChanged={onViewRef.current}
       // viewabilityConfig={viewConfigRef.current}
     />
   )
 
-  const renderFooter = ({ unreadCount }) => {
+  const renderFooter = () => {
     Notifications.setBadgeCountAsync(unreadCount || 0)
 
     return (
@@ -663,57 +713,6 @@ const PhotosList = () => {
     )
   }
 
-  const segment0 = () => (
-    <FontAwesome
-      name="globe"
-      size={23}
-      color={
-        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment1 = () => (
-    <AntDesign
-      name="star"
-      size={23}
-      color={
-        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment2 = () => (
-    <FontAwesome
-      name="search"
-      size={23}
-      color={
-        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const updateIndex = async (index) => {
-    await dispatch(reducer.setActiveSegment(index))
-    _reload()
-  }
-
-  const renderHeaderTitle = () => (
-    <ButtonGroup
-      onPress={updateIndex}
-      containerStyle={{
-        width: 200,
-        height: 35,
-      }}
-      buttonStyle={{ alignSelf: 'center' }}
-      buttons={[
-        { element: segment0 },
-        { element: segment1 },
-        { element: segment2 },
-      ]}
-    />
-  )
-
   // const renderHeaderLeft = () => (
   //   <FontAwesome5
   //     onPress={
@@ -793,7 +792,7 @@ const PhotosList = () => {
   const submitSearch = async () => {
     dispatch(reducer.setSearchTerm(currentSearchTerm))
 
-    _reload()
+    reload()
     if (currentSearchTerm && currentSearchTerm.length >= 3) {
       if (keyboardVisible) {
         dismissKeyboard()

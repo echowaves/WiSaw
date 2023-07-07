@@ -3,40 +3,40 @@ import Toast from 'react-native-toast-message'
 // import { CacheManager } from 'expo-cached-image'
 import { gql } from '@apollo/client'
 
-import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types'
+// import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types.js'
 
 import * as CONST from '../../consts'
 
 import * as ACTION_TYPES from './action_types'
 
-// export const initialState = {
-//   photo: {},
-//   uuids: [],
-//   inputText: '',
-//   error: '',
-// }
+export const initialState = {
+  photo: {},
+  uuids: [],
+  inputText: '',
+  error: '',
+}
 
-// export default function reducer(state = initialState, action) {
-//   switch (action.type) {
-//     case ACTION_TYPES.BAN_PHOTO:
-//       return {
-//         ...state,
-//         bans: state.bans.concat(action.photoId),
-//       }
-//     case ACTION_TYPES.UNBAN_PHOTO:
-//       return {
-//         ...state,
-//         bans: state.bans.filter((item) => item !== action.photoId),
-//       }
-//     case ACTION_TYPES.SET_INPUT_TEXT:
-//       return {
-//         ...state,
-//         inputText: action.inputText,
-//       }
-//     default:
-//       return state
-//   }
-// }
+export default function reducer(state = initialState, action) {
+  switch (action.type) {
+    case ACTION_TYPES.BAN_PHOTO:
+      return {
+        ...state,
+        bans: state.bans.concat(action.photoId),
+      }
+    case ACTION_TYPES.UNBAN_PHOTO:
+      return {
+        ...state,
+        bans: state.bans.filter((item) => item !== action.photoId),
+      }
+    case ACTION_TYPES.SET_INPUT_TEXT:
+      return {
+        ...state,
+        inputText: action.inputText,
+      }
+    default:
+      return state
+  }
+}
 
 export function watchPhoto({ photo }) {
   return async (dispatch, getState) => {

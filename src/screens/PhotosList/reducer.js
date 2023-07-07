@@ -1,32 +1,32 @@
 // import { Platform } from 'react-native'
 
-import * as SecureStore from "expo-secure-store"
-import * as FileSystem from "expo-file-system"
-import * as VideoThumbnails from "expo-video-thumbnails"
+import * as SecureStore from 'expo-secure-store'
+import * as FileSystem from 'expo-file-system'
+import * as VideoThumbnails from 'expo-video-thumbnails'
 
-import * as ImageManipulator from "expo-image-manipulator"
+import * as ImageManipulator from 'expo-image-manipulator'
 
-import moment from "moment"
+import moment from 'moment'
 
-import { CacheManager } from "expo-cached-image"
-import { Storage } from "expo-storage"
+import { CacheManager } from 'expo-cached-image'
+import { Storage } from 'expo-storage'
 
-import Toast from "react-native-toast-message"
+import Toast from 'react-native-toast-message'
 
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client'
 
-import * as CONST from "../../consts.js"
+import * as CONST from '../../consts'
 
-import * as ACTION_TYPES from "./action_types"
-import { INIT_UUID } from "../Secret/action_types"
+// import * as ACTION_TYPES from './action_types'
+import { INIT_UUID } from '../Secret/action_types'
 
-import * as friendsReducer from "../FriendsList/reducer"
+import * as friendsReducer from '../FriendsList/reducer'
 
-import { getUUID } from "../Secret/reducer"
+import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
-const IS_TANDC_ACCEPTED_KEY = "wisaw_is_tandc_accepted_on_this_device"
+const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
-const ZERO_PHOTOS_LOADED_MESSAGE = "0 photos loaded"
+const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
   isTandcAccepted: true,
@@ -34,11 +34,11 @@ export const initialState = {
   photos: [],
   pendingPhotos: [],
   loading: false,
-  errorMessage: "",
+  errorMessage: '',
   pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
-  orientation: "portrait",
+  orientation: 'portrait',
   activeSegment: 0,
-  searchTerm: "",
+  searchTerm: '',
   batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   isLastPage: true,
   netAvailable: false,
@@ -48,203 +48,203 @@ export const initialState = {
   currentIndex: 0,
 }
 
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case ACTION_TYPES.GET_PHOTOS_STARTED:
-      return {
-        ...state,
-        loading: true,
-        pageNumber: state.pageNumber + 1,
-        errorMessage: "",
-      }
-    case ACTION_TYPES.GET_PHOTOS_SUCCESS:
-      return {
-        ...state,
-        photos: [...state.photos, ...action.photos].sort(
-          (a, b) => a.row_number - b.row_number,
-        ),
-        // this really stinks, need to figure out why there are duplicates in the first place
-        // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
-        // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
-        // pageNumber: state.pageNumber + 1,
-        errorMessage: "",
-      }
-    case ACTION_TYPES.GET_PHOTOS_FAIL:
-      return {
-        ...state,
-        // pageNumber: state.pageNumber + 1,
-        errorMessage: action.errorMessage,
-      }
-    case ACTION_TYPES.GET_PHOTOS_FINISHED:
-      return {
-        ...state,
-        loading: false,
-        isLastPage: action.noMoreData,
+// const reducer = (state = initialState, action) => {
+//   switch (action.type) {
+//     case ACTION_TYPES.GET_PHOTOS_STARTED:
+//       return {
+//         ...state,
+//         loading: true,
+//         pageNumber: state.pageNumber + 1,
+//         errorMessage: '',
+//       }
+//     case ACTION_TYPES.GET_PHOTOS_SUCCESS:
+//       return {
+//         ...state,
+//         photos: [...state.photos, ...action.photos].sort(
+//           (a, b) => a.row_number - b.row_number,
+//         ),
+//         // this really stinks, need to figure out why there are duplicates in the first place
+//         // .filter((obj, pos, arr) => arr.map(mapObj => mapObj.id).indexOf(obj.id) === pos), // fancy way to remove duplicate photos
+//         // .sort((a, b) => b.id - a.id), // the sort should always happen on the server
+//         // pageNumber: state.pageNumber + 1,
+//         errorMessage: '',
+//       }
+//     case ACTION_TYPES.GET_PHOTOS_FAIL:
+//       return {
+//         ...state,
+//         // pageNumber: state.pageNumber + 1,
+//         errorMessage: action.errorMessage,
+//       }
+//     case ACTION_TYPES.GET_PHOTOS_FINISHED:
+//       return {
+//         ...state,
+//         loading: false,
+//         isLastPage: action.noMoreData,
 
-        //  (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
-        // || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
-        // || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
-      }
-    case ACTION_TYPES.SET_LOCATION:
-      return {
-        ...state,
-        location: action.location,
-        // photos: [],
-        // loading: true,
-        // loadMore: true,
-        // errorMessage: '',
-        // pageNumber: -1,
-        // isLastPage: false,
-        // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-      }
-    case ACTION_TYPES.RESET_STATE:
-      return {
-        ...state,
-        photos: [],
-        loading: true,
-        loadMore: true,
-        errorMessage: "",
-        pageNumber: -1,
-        isLastPage: false,
-        batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-      }
-    case ACTION_TYPES.SET_IS_TANDC_ACCEPTED:
-      return {
-        ...state,
-        isTandcAccepted: action.isTandcAccepted,
-      }
-    case ACTION_TYPES.SET_TOP_OFFSET:
-      return {
-        ...state,
-        topOffset: action.topOffset,
-      }
-    case ACTION_TYPES.INIT_STATE:
-      return {
-        ...state,
-        isTandcAccepted: action.isTandcAccepted,
-      }
-    case ACTION_TYPES.SET_ERROR:
-      return {
-        ...state,
-        error: action.error,
-      }
-    case ACTION_TYPES.SET_ORIENTATION:
-      return {
-        ...state,
-        orientation: action.orientation,
-      }
-    case ACTION_TYPES.PHOTO_BANNED:
-      return {
-        ...state,
-        // photos: state.photos.filter(item => (item.id !== action.photoId)),
-      }
-    case ACTION_TYPES.PHOTO_DELETED:
-      return {
-        ...state,
-        photos: state.photos.filter((item) => item.id !== action.photoId),
-      }
+//         //  (state.activeSegment === 0 && state.pageNumber > 1095) // 1095 days === 3 years
+//         // || (state.activeSegment === 1 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+//         // || (state.activeSegment === 2 && state.errorMessage === ZERO_PHOTOS_LOADED_MESSAGE)
+//       }
+//     case ACTION_TYPES.SET_LOCATION:
+//       return {
+//         ...state,
+//         location: action.location,
+//         // photos: [],
+//         // loading: true,
+//         // loadMore: true,
+//         // errorMessage: '',
+//         // pageNumber: -1,
+//         // isLastPage: false,
+//         // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+//       }
+//     case ACTION_TYPES.RESET_STATE:
+//       return {
+//         ...state,
+//         photos: [],
+//         loading: true,
+//         loadMore: true,
+//         errorMessage: '',
+//         pageNumber: -1,
+//         isLastPage: false,
+//         batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+//       }
+//     case ACTION_TYPES.SET_IS_TANDC_ACCEPTED:
+//       return {
+//         ...state,
+//         isTandcAccepted: action.isTandcAccepted,
+//       }
+//     case ACTION_TYPES.SET_TOP_OFFSET:
+//       return {
+//         ...state,
+//         topOffset: action.topOffset,
+//       }
+//     case ACTION_TYPES.INIT_STATE:
+//       return {
+//         ...state,
+//         isTandcAccepted: action.isTandcAccepted,
+//       }
+//     case ACTION_TYPES.SET_ERROR:
+//       return {
+//         ...state,
+//         error: action.error,
+//       }
+//     case ACTION_TYPES.SET_ORIENTATION:
+//       return {
+//         ...state,
+//         orientation: action.orientation,
+//       }
+//     case ACTION_TYPES.PHOTO_BANNED:
+//       return {
+//         ...state,
+//         // photos: state.photos.filter(item => (item.id !== action.photoId)),
+//       }
+//     case ACTION_TYPES.PHOTO_DELETED:
+//       return {
+//         ...state,
+//         photos: state.photos.filter((item) => item.id !== action.photoId),
+//       }
 
-    case ACTION_TYPES.PHOTO_UPLOADED_PREPEND:
-      return {
-        ...state,
-        photos: [action.photo, ...state.photos],
-        currentIndex: state.currentIndex + 1,
-      }
+//     case ACTION_TYPES.PHOTO_UPLOADED_PREPEND:
+//       return {
+//         ...state,
+//         photos: [action.photo, ...state.photos],
+//         currentIndex: state.currentIndex + 1,
+//       }
 
-    case ACTION_TYPES.PHOTO_WATCHED:
-      return {
-        ...state,
-        photos: state.photos.map((item) =>
-          item.id === action.photoId
-            ? { ...item, watchersCount: action.watchersCount }
-            : item,
-        ),
-      }
-    case ACTION_TYPES.PHOTO_UNWATCHED:
-      return {
-        ...state,
-        photos: state.photos.map((item) =>
-          item.id === action.photoId
-            ? { ...item, watchersCount: action.watchersCount }
-            : item,
-        ),
-      }
+//     case ACTION_TYPES.PHOTO_WATCHED:
+//       return {
+//         ...state,
+//         photos: state.photos.map((item) =>
+//           item.id === action.photoId
+//             ? { ...item, watchersCount: action.watchersCount }
+//             : item,
+//         ),
+//       }
+//     case ACTION_TYPES.PHOTO_UNWATCHED:
+//       return {
+//         ...state,
+//         photos: state.photos.map((item) =>
+//           item.id === action.photoId
+//             ? { ...item, watchersCount: action.watchersCount }
+//             : item,
+//         ),
+//       }
 
-    case ACTION_TYPES.ZERO_MOMEMT:
-      return {
-        ...state,
-        zeroMoment: action.zeroMoment,
-      }
-    case ACTION_TYPES.COMMENT_DELETED:
-      return {
-        ...state,
-        photos: state.photos.map((item) =>
-          item.id === action.photoId
-            ? {
-                ...item,
-                commentsCount: action.commentsCount - 1,
-                lastComment: action.lastComment,
-              }
-            : item,
-        ),
-      }
+//     case ACTION_TYPES.ZERO_MOMEMT:
+//       return {
+//         ...state,
+//         zeroMoment: action.zeroMoment,
+//       }
+//     case ACTION_TYPES.COMMENT_DELETED:
+//       return {
+//         ...state,
+//         photos: state.photos.map((item) =>
+//           item.id === action.photoId
+//             ? {
+//                 ...item,
+//                 commentsCount: action.commentsCount - 1,
+//                 lastComment: action.lastComment,
+//               }
+//             : item,
+//         ),
+//       }
 
-    case ACTION_TYPES.COMMENT_ADDED:
-      return {
-        ...state,
-        photos: state.photos.map((item) =>
-          item.id === action.photoId
-            ? {
-                ...item,
-                commentsCount: action.commentsCount + 1,
-                lastComment: action.lastComment,
-              }
-            : item,
-        ),
-      }
-    case ACTION_TYPES.SET_ACTIVE_SEGMENT:
-      return {
-        ...state,
-        photos: [],
-        // searchTerm: '',
-        activeSegment: action.activeSegment,
-      }
-    case ACTION_TYPES.SET_SEARCH_TERM:
-      return {
-        ...state,
-        // photos: [],
-        searchTerm: action.searchTerm,
-      }
-    case ACTION_TYPES.SET_NET_AVAILABLE:
-      return {
-        ...state,
-        netAvailable: action.netAvailable,
-      }
+//     case ACTION_TYPES.COMMENT_ADDED:
+//       return {
+//         ...state,
+//         photos: state.photos.map((item) =>
+//           item.id === action.photoId
+//             ? {
+//                 ...item,
+//                 commentsCount: action.commentsCount + 1,
+//                 lastComment: action.lastComment,
+//               }
+//             : item,
+//         ),
+//       }
+//     case ACTION_TYPES.SET_ACTIVE_SEGMENT:
+//       return {
+//         ...state,
+//         photos: [],
+//         // searchTerm: '',
+//         activeSegment: action.activeSegment,
+//       }
+//     case ACTION_TYPES.SET_SEARCH_TERM:
+//       return {
+//         ...state,
+//         // photos: [],
+//         searchTerm: action.searchTerm,
+//       }
+//     case ACTION_TYPES.SET_NET_AVAILABLE:
+//       return {
+//         ...state,
+//         netAvailable: action.netAvailable,
+//       }
 
-    case ACTION_TYPES.START_PHOTO_UPLOADING:
-      return {
-        ...state,
-        uploadingPhoto: true,
-      }
-    case ACTION_TYPES.FINISH_PHOTO_UPLOADING:
-      return {
-        ...state,
-        uploadingPhoto: false,
-      }
-    case ACTION_TYPES.UPDATE_PENDING_PHOTOS:
-      return {
-        ...state,
-        pendingPhotos: action.pendingPhotos,
-      }
-    case ACTION_TYPES.CURRENT_INDEX:
-      return {
-        ...state,
-        currentIndex: action.currentIndex,
-      }
-    default:
-      return state
-  }
-}
+//     case ACTION_TYPES.START_PHOTO_UPLOADING:
+//       return {
+//         ...state,
+//         uploadingPhoto: true,
+//       }
+//     case ACTION_TYPES.FINISH_PHOTO_UPLOADING:
+//       return {
+//         ...state,
+//         uploadingPhoto: false,
+//       }
+//     case ACTION_TYPES.UPDATE_PENDING_PHOTOS:
+//       return {
+//         ...state,
+//         pendingPhotos: action.pendingPhotos,
+//       }
+//     case ACTION_TYPES.CURRENT_INDEX:
+//       return {
+//         ...state,
+//         currentIndex: action.currentIndex,
+//       }
+//     default:
+//       return state
+//   }
+// }
 
 export function initState() {
   return async (dispatch, getState) => {
@@ -253,7 +253,7 @@ export function initState() {
       type: INIT_UUID,
       uuid,
     })
-    const isTandcAccepted = await _getTancAccepted()
+    const isTandcAccepted = await getTancAccepted()
     dispatch({
       type: ACTION_TYPES.INIT_STATE,
       isTandcAccepted,
@@ -513,9 +513,9 @@ export function getPhotos() {
           errorMessage: `${err}`,
         })
         Toast.show({
-          text1: "Error",
+          text1: 'Error',
           text2: `${err}`,
-          type: "error",
+          type: 'error',
           topOffset,
         })
       }
@@ -529,7 +529,7 @@ export function getPhotos() {
 
 export function acceptTandC() {
   try {
-    SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, "true")
+    SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, 'true')
     return {
       type: ACTION_TYPES.SET_IS_TANDC_ACCEPTED,
       isTandcAccepted: true,
@@ -553,7 +553,7 @@ export function cancelPendingUpload(item) {
   return async (dispatch) => {
     await _removeFromQueue(item)
 
-    _updatePendingPhotos(dispatch)
+    updatePendingPhotos(dispatch)
   }
 }
 
@@ -598,15 +598,15 @@ export function setNetAvailable(netAvailable) {
   }
 }
 
-async function _getTancAccepted() {
+async function getTancAccepted() {
   try {
-    return (await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY)) === "true"
+    return (await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY)) === 'true'
   } catch (err) {
     return false
   }
 }
 
-const _updatePendingPhotos = async (dispatch) => {
+const updatePendingPhotos = async (dispatch) => {
   const pendingPhotos = await _getQueue()
   dispatch({
     type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
@@ -614,8 +614,8 @@ const _updatePendingPhotos = async (dispatch) => {
   })
 }
 
-const _genLocalThumbs = async (image) => {
-  if (image.type === "image") {
+const genLocalThumbs = async (image) => {
+  if (image.type === 'image') {
     const manipResult = await ImageManipulator.manipulateAsync(
       image.localImgUrl,
       [{ resize: { height: 300 } }],
@@ -733,9 +733,9 @@ export const queueFileForUpload =
   ({ cameraImgUrl, type, location }) =>
   async (dispatch, getState) => {
     const localImageName = cameraImgUrl.substr(
-      cameraImgUrl.lastIndexOf("/") + 1,
+      cameraImgUrl.lastIndexOf('/') + 1,
     )
-    const localCacheKey = localImageName.split(".")[0]
+    const localCacheKey = localImageName.split('.')[0]
 
     const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
     // copy file to cacheDir
@@ -751,7 +751,7 @@ export const queueFileForUpload =
       location,
       localCacheKey,
     }
-    const thumbEnhansedImage = await _genLocalThumbs(image)
+    const thumbEnhansedImage = await genLocalThumbs(image)
     await CacheManager.addToCache({
       file: thumbEnhansedImage.localThumbUrl,
       key: thumbEnhansedImage.localCacheKey,
@@ -759,14 +759,14 @@ export const queueFileForUpload =
 
     await _addToQueue(thumbEnhansedImage)
 
-    _updatePendingPhotos(dispatch)
+    updatePendingPhotos(dispatch)
   }
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
     const { topOffset } = getState().photosList
     const { uuid } = getState().secret
-    _updatePendingPhotos(dispatch)
+    updatePendingPhotos(dispatch)
 
     if (getState().photosList.netAvailable === false) {
       return Promise.resolve()
@@ -799,7 +799,7 @@ export function uploadPendingPhotos() {
             uuid,
             lat: item.location.coords.latitude,
             lon: item.location.coords.longitude,
-            video: item?.type === "video",
+            video: item?.type === 'video',
           })
           // eslint-disable-next-line no-await-in-loop
           CacheManager.addToCache({
@@ -821,13 +821,13 @@ export function uploadPendingPhotos() {
         } catch (err1) {
           // eslint-disable-next-line no-console
           console.log({ err1 })
-          if (`${err1}`.includes("banned")) {
+          if (`${err1}`.includes('banned')) {
             // eslint-disable-next-line no-await-in-loop
             await _removeFromQueue(item)
             Toast.show({
               text1: "Sorry, you've been banned",
-              text2: "Try again later",
-              type: "error",
+              text2: 'Try again later',
+              type: 'error',
               topOffset,
             })
           }
@@ -849,7 +849,7 @@ export function uploadPendingPhotos() {
           // eslint-disable-next-line no-await-in-loop
           await _removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
-          await _updatePendingPhotos(dispatch)
+          await updatePendingPhotos(dispatch)
 
           // show the photo in the photo list immidiately
 
@@ -859,15 +859,15 @@ export function uploadPendingPhotos() {
             photo: item.photo,
           })
           Toast.show({
-            text1: `${item.photo.video ? "Video" : "Photo"} uploaded`,
+            text1: `${item.photo.video ? 'Video' : 'Photo'} uploaded`,
             topOffset,
             visibilityTime: 500,
           })
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({
-            text1: "Upload is going slooooow...",
-            text2: "Still trying to upload.",
+            text1: 'Upload is going slooooow...',
+            text2: 'Still trying to upload.',
             visibilityTime: 500,
             topOffset,
           })
@@ -880,8 +880,8 @@ export function uploadPendingPhotos() {
         type: ACTION_TYPES.FINISH_PHOTO_UPLOADING,
       })
       Toast.show({
-        text1: "Upload is slow...",
-        text2: "Still trying to upload.",
+        text1: 'Upload is slow...',
+        text2: 'Still trying to upload.',
         visibilityTime: 500,
         topOffset,
       })
@@ -904,18 +904,18 @@ export function uploadPendingPhotos() {
 const _uploadItem = async ({ item }) => {
   try {
     // if video -- upload video file in addition to the image
-    if (item.type === "video") {
+    if (item.type === 'video') {
       // eslint-disable-next-line
       const videoResponse = await _uploadFile({
         assetKey: `${item.photo.id}.mov`,
-        contentType: "video/mov",
+        contentType: 'video/mov',
         assetUri: item.localVideoUrl,
       })
 
       if (videoResponse?.responseData?.status !== 200) {
         return {
           responseData:
-            "something bad happened during video upload, unable to upload.",
+            'something bad happened during video upload, unable to upload.',
           status: videoResponse.responseData.status,
         }
       }
@@ -923,7 +923,7 @@ const _uploadItem = async ({ item }) => {
 
     const response = await _uploadFile({
       assetKey: `${item.photo.id}.upload`,
-      contentType: "image/jpeg",
+      contentType: 'image/jpeg',
       assetUri: item.localImgUrl,
     })
     return { responseData: response.responseData }
@@ -993,9 +993,9 @@ const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
   ).data.generateUploadUrl
 
   const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
-    httpMethod: "PUT",
+    httpMethod: 'PUT',
     headers: {
-      "Content-Type": contentType,
+      'Content-Type': contentType,
     },
   })
   return { responseData }

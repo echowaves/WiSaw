@@ -47,7 +47,6 @@ const App = () => (
     <ThemeProvider>
       <NavigationContainer>
         <Drawer.Navigator
-          useLegacyImplementation
           screenOptions={{ gestureEnabled: true, headerShown: false }}
         >
           <Drawer.Screen
@@ -191,7 +190,7 @@ const App = () => (
         </Drawer.Navigator>
       </NavigationContainer>
     </ThemeProvider>
-    <Toast ref={(ref) => Toast.setRef(ref)} />
+    {/* <Toast ref={(ref) => Toast.setRef(ref)} /> */}
   </Provider>
 )
 export default App
