@@ -6,7 +6,7 @@ import { gql } from '@apollo/client'
 
 import * as SecureStore from 'expo-secure-store'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 import * as ACTION_TYPES from './action_types'
 
@@ -81,8 +81,8 @@ export function registerSecret({ nickName, secret, uuid }) {
       // console.log(returnedSecret.nickName)
 
       await Promise.all([
-        _storeUUID(returnedSecret.uuid),
-        _storeNickName(returnedSecret.nickName),
+        storeUUID(returnedSecret.uuid),
+        storeNickName(returnedSecret.nickName),
       ])
 
       dispatch({
@@ -142,8 +142,8 @@ export function updateSecret({ nickName, oldSecret, secret, uuid }) {
       ).data.updateSecret
 
       await Promise.all([
-        _storeUUID(updatedSecret.uuid),
-        _storeNickName(updatedSecret.nickName),
+        storeUUID(updatedSecret.uuid),
+        storeNickName(updatedSecret.nickName),
       ])
 
       dispatch({
@@ -178,7 +178,7 @@ export function resetSecret() {
         SecureStore.deleteItemAsync(NICK_NAME_KEY),
       ])
       const uuid = await getUUID()
-      await _storeUUID(uuid)
+      await storeUUID(uuid)
 
       dispatch({
         type: ACTION_TYPES.RESET_STATE,
@@ -195,6 +195,17 @@ export function resetSecret() {
     }
   }
 }
+const storeUUID = async (uuid) => {
+  try {
+    await SecureStore.setItemAsync(UUID_KEY, uuid)
+  } catch (err) {
+    Toast.show({
+      text1: 'Unable to store UUID',
+      text2: err.toString(),
+      type: 'error',
+    })
+  }
+}
 
 export async function getUUID() {
   let uuid
@@ -208,25 +219,13 @@ export async function getUUID() {
 
     if (uuid === '' || uuid === null) {
       uuid = uuidv4()
-      await _storeUUID(uuid)
+      await storeUUID(uuid)
     }
   }
   return uuid
 }
 
-const _storeUUID = async (uuid) => {
-  try {
-    await SecureStore.setItemAsync(UUID_KEY, uuid)
-  } catch (err) {
-    Toast.show({
-      text1: 'Unable to store UUID',
-      text2: err.toString(),
-      type: 'error',
-    })
-  }
-}
-
-const _storeNickName = async (nickName) => {
+const storeNickName = async (nickName) => {
   try {
     await SecureStore.setItemAsync(NICK_NAME_KEY, nickName)
   } catch (err) {

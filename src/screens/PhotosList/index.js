@@ -57,7 +57,7 @@ import {
 
 import { UUID_KEY } from '../Secret/reducer'
 import { getUnreadCountsList } from '../FriendsList/friends_helper'
-// import * as reducer from './reducer'
+import * as reducer from './reducer'
 
 import * as CONST from '../../consts'
 
@@ -119,17 +119,16 @@ const PhotosList = () => {
   const [lastViewableRow, setLastViewableRow] = useState(1)
   // const [loadMore, setLoadMore] = useState(false)
 
+  const [isTandcAccepted, setIsTandcAccepted] = useState(true)
+  const [uuid, setUuid] = useState(null)
+  const [zeroMoment, setZeroMoment] = useState(null)
+
   const photos = useSelector((state) => state.photosList.photos)
   const pendingPhotos = useSelector((state) => state.photosList.pendingPhotos)
   const location = useSelector((state) => state.photosList.location)
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
   const isLastPage = useSelector((state) => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
-  const isTandcAccepted = useSelector(
-    (state) => state.photosList.isTandcAccepted,
-  )
-  const uuid = useSelector((state) => state.secret.uuid)
-  const zeroMoment = useSelector((state) => state.photosList.zeroMoment)
 
   const loading = useSelector((state) => state.photosList.loading)
   // const pageNumber = useSelector(state => state.photosList.pageNumber)
@@ -191,8 +190,8 @@ const PhotosList = () => {
     await Promise.all([
       // checkForUpdate(),
       // check permissions, retrieve UUID, make sure upload folder exists
-      dispatch(reducer.initState()),
-      dispatch(reducer.zeroMoment()),
+      reducer.initState(setUuid, setIsTandcAccepted),
+      reducer.getZeroMoment(setZeroMoment),
     ])
   }
 
