@@ -100,7 +100,7 @@ export const gqlClient = new ApolloClient({
 })
 // console.log({ API_URI }, { API_KEY })
 
-export const _makeSureDirectoryExists = async ({ directory }) => {
+export const makeSureDirectoryExists = async ({ directory }) => {
   const tmpDir = await FileSystem.getInfoAsync(directory)
   // create cacheDir if does not exist
   if (!tmpDir.exists) {

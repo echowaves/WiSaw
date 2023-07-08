@@ -20,8 +20,6 @@ import * as CONST from '../../consts'
 import * as ACTION_TYPES from './action_types'
 import { INIT_UUID } from '../Secret/action_types'
 
-import * as friendsReducer from '../FriendsList/reducer'
-
 import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
@@ -29,10 +27,11 @@ const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
-  isTandcAccepted: true, //
-  zeroMoment: null, //
+  // isTandcAccepted: true, //
+  // zeroMoment: null, //
+  // photos: [], //
+
   location: null,
-  photos: [],
   pendingPhotos: [],
   loading: false,
   errorMessage: '',
@@ -279,16 +278,13 @@ export async function getZeroMoment(setZeroMoment) {
   return zeroMoment
 }
 
-async function requestGeoPhotos(getState, { zeroMoment }) {
-  const {
-    pageNumber,
-    batch,
-
-    location: {
-      coords: { latitude, longitude },
-    },
-  } = getState().photosList
-  // console.log(1, typeof batch)
+async function requestGeoPhotos({
+  pageNumber,
+  batch,
+  latitude,
+  longitude,
+  zeroMoment,
+}) {
   const whenToStop = moment(zeroMoment)
   try {
     const response = await CONST.gqlClient.query({
@@ -349,9 +345,9 @@ async function requestGeoPhotos(getState, { zeroMoment }) {
   }
 }
 
-async function requestWatchedPhotos(getState, { uuid }) {
+async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
   // const { uuid } = getState().secret
-  const { pageNumber, batch } = getState().photosList
+
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
@@ -402,8 +398,7 @@ async function requestWatchedPhotos(getState, { uuid }) {
   }
 }
 
-async function requestSearchedPhotos(getState) {
-  const { pageNumber, searchTerm, batch } = getState().photosList
+async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
@@ -458,81 +453,76 @@ async function requestSearchedPhotos(getState) {
   }
 }
 
-export function getPhotos(uuid, zeroMoment) {
-  return async (dispatch, getState) => {
-    // const { uuid } = getState().secret
+export async function getPhotos({
+  uuid,
+  zeroMoment,
+  location,
+  netAvailable,
+  searchTerm,
+  topOffset,
+  activeSegment,
+  batch,
+  pageNumber,
+  latitude,
+  longitude,
+}) {
+  // const { uuid } = getState().secret
 
-    dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
-    dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+  // dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+  // dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
 
-    // const {
-    //   batch, loading, isLastPage, pageNumber, searchTerm,
-    // } = getState().photosList
-    // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
-    // await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
-    const { location, netAvailable, searchTerm, topOffset } =
-      getState().photosList
+  // const {
+  //   batch, loading, isLastPage, pageNumber, searchTerm,
+  // } = getState().photosList
+  // console.log(`getPhotos() batch:${batch} pageNumber:${pageNumber} loading:${loading} isLastPage:${isLastPage} searchTerm:${searchTerm}`)
+  // await new Promise(r => setTimeout(r, 200)) // this is really weird, but seems to help with the order of the images
 
-    let noMoreData = false
+  const noMoreData = false
 
-    if (
-      !location ||
-      netAvailable === false ||
-      (getState().photosList.activeSegment === 2 && searchTerm.length < 3)
-    ) {
-      dispatch({
-        type: ACTION_TYPES.GET_PHOTOS_FAIL,
-        errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-      })
-    } else {
-      dispatch({
-        type: ACTION_TYPES.GET_PHOTOS_STARTED,
-      })
-      try {
-        let responseJson
-        const { activeSegment } = getState().photosList
-        console.log({ activeSegment })
-        if (activeSegment === 0) {
-          responseJson = await requestGeoPhotos(getState, { zeroMoment })
-        } else if (activeSegment === 1) {
-          responseJson = await requestWatchedPhotos(getState, { uuid })
-        } else if (activeSegment === 2) {
-          responseJson = await requestSearchedPhotos(getState)
-        }
-        // eslint-disable-next-line no-console
-        // console.log({ responseJson })
-        noMoreData = responseJson?.noMoreData
-        // console.log(typeof responseJson?.batch, typeof getState()?.photosList?.batch, responseJson?.batch === getState()?.photosList?.batch)
-        if (responseJson?.batch === getState()?.photosList?.batch) {
-          if (responseJson?.photos?.length > 0) {
-            dispatch({
-              type: ACTION_TYPES.GET_PHOTOS_SUCCESS,
-              photos: responseJson.photos,
-            })
-          } else {
-            dispatch({
-              type: ACTION_TYPES.GET_PHOTOS_FAIL,
-              errorMessage: ZERO_PHOTOS_LOADED_MESSAGE,
-            })
-          }
-        } // else { console.log('wrong batch') }
-      } catch (err) {
-        dispatch({
-          type: ACTION_TYPES.GET_PHOTOS_FAIL,
-          errorMessage: `${err}`,
-        })
-        Toast.show({
-          text1: 'Error',
-          text2: `${err}`,
-          type: 'error',
-          topOffset,
-        })
-      }
+  if (
+    !location ||
+    netAvailable === false ||
+    (activeSegment === 2 && searchTerm.length < 3)
+  ) {
+    return {
+      photos: [],
+      batch,
+      noMoreData: true,
     }
-    dispatch({
-      type: ACTION_TYPES.GET_PHOTOS_FINISHED,
-      noMoreData,
+  }
+  try {
+    let responseJson
+    console.log({ activeSegment })
+    if (activeSegment === 0) {
+      responseJson = await requestGeoPhotos({
+        pageNumber,
+        batch,
+        latitude,
+        longitude,
+        zeroMoment,
+      })
+    } else if (activeSegment === 1) {
+      responseJson = await requestWatchedPhotos({ uuid, pageNumber, batch })
+    } else if (activeSegment === 2) {
+      responseJson = await requestSearchedPhotos({
+        pageNumber,
+        searchTerm,
+        batch,
+      })
+    }
+    return responseJson
+  } catch (err) {
+    Toast.show({
+      text1: 'Error',
+      text2: `${err}`,
+      type: 'error',
+      topOffset,
     })
+  }
+  return {
+    photos: [],
+    batch,
+    noMoreData: true,
   }
 }
 
@@ -557,10 +547,85 @@ export function settopOffset(topOffset) {
     topOffset,
   }
 }
+const removeFromQueue = async (imageToRemove) => {
+  let pendingImagesBefore = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+  )
+
+  if (!pendingImagesBefore) {
+    pendingImagesBefore = []
+  }
+
+  const pendingImagesAfter = pendingImagesBefore.filter(
+    (imageInTheQueue) =>
+      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
+  )
+
+  await Storage.setItem({
+    key: CONST.PENDING_UPLOADS_KEY,
+    value: JSON.stringify(pendingImagesAfter),
+  })
+}
+
+// returns an array that has everything needed for rendering
+const getQueue = async () => {
+  // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
+  await CONST.makeSureDirectoryExists({
+    directory: CONST.PENDING_UPLOADS_FOLDER,
+  })
+
+  const filesInStorage = await FileSystem.readDirectoryAsync(
+    CONST.PENDING_UPLOADS_FOLDER,
+  )
+  let imagesInQueue = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+  )
+
+  if (!imagesInQueue) {
+    imagesInQueue = []
+    await Storage.setItem({
+      key: CONST.PENDING_UPLOADS_KEY,
+      value: JSON.stringify([]),
+    })
+  }
+  // remove images from the queue if corresponding file does not exist
+  imagesInQueue.forEach((image) => {
+    if (!filesInStorage.some((f) => f === image.localImageName)) {
+      removeFromQueue(image)
+    }
+  })
+
+  // get images in queue again after filtering
+  imagesInQueue = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+  )
+  if (!imagesInQueue) {
+    imagesInQueue = []
+  }
+
+  // remove image from storage if corresponding recorsd does not exist in the queue
+  filesInStorage.forEach((file) => {
+    if (!imagesInQueue.some((i) => i.localImageName === file)) {
+      FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${file}`, {
+        idempotent: true,
+      })
+    }
+  })
+
+  return imagesInQueue
+}
+
+const updatePendingPhotos = async (dispatch) => {
+  const pendingPhotos = await getQueue()
+  dispatch({
+    type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
+    pendingPhotos,
+  })
+}
 
 export function cancelPendingUpload(item) {
   return async (dispatch) => {
-    await _removeFromQueue(item)
+    await removeFromQueue(item)
 
     updatePendingPhotos(dispatch)
   }
@@ -607,14 +672,6 @@ export function setNetAvailable(netAvailable) {
   }
 }
 
-const updatePendingPhotos = async (dispatch) => {
-  const pendingPhotos = await getQueue()
-  dispatch({
-    type: ACTION_TYPES.UPDATE_PENDING_PHOTOS,
-    pendingPhotos,
-  })
-}
-
 const genLocalThumbs = async (image) => {
   if (image.type === 'image') {
     const manipResult = await ImageManipulator.manipulateAsync(
@@ -646,7 +703,7 @@ const genLocalThumbs = async (image) => {
   }
 }
 
-const _addToQueue = async (image) => {
+const addToQueue = async (image) => {
   // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
 
   let pendingImages = JSON.parse(
@@ -659,74 +716,6 @@ const _addToQueue = async (image) => {
   await Storage.setItem({
     key: CONST.PENDING_UPLOADS_KEY,
     value: JSON.stringify([...pendingImages, image]),
-  })
-}
-
-// returns an array that has everything needed for rendering
-const getQueue = async () => {
-  // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
-  await CONST._makeSureDirectoryExists({
-    directory: CONST.PENDING_UPLOADS_FOLDER,
-  })
-
-  const filesInStorage = await FileSystem.readDirectoryAsync(
-    CONST.PENDING_UPLOADS_FOLDER,
-  )
-  let imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
-
-  if (!imagesInQueue) {
-    imagesInQueue = []
-    await Storage.setItem({
-      key: CONST.PENDING_UPLOADS_KEY,
-      value: JSON.stringify([]),
-    })
-  }
-  // remove images from the queue if corresponding file does not exist
-  imagesInQueue.forEach((image) => {
-    if (!filesInStorage.some((f) => f === image.localImageName)) {
-      _removeFromQueue(image)
-    }
-  })
-
-  // get images in queue again after filtering
-  imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
-  if (!imagesInQueue) {
-    imagesInQueue = []
-  }
-
-  // remove image from storage if corresponding recorsd does not exist in the queue
-  filesInStorage.forEach((file) => {
-    if (!imagesInQueue.some((i) => i.localImageName === file)) {
-      FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${file}`, {
-        idempotent: true,
-      })
-    }
-  })
-
-  return imagesInQueue
-}
-
-const _removeFromQueue = async (imageToRemove) => {
-  let pendingImagesBefore = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
-
-  if (!pendingImagesBefore) {
-    pendingImagesBefore = []
-  }
-
-  const pendingImagesAfter = pendingImagesBefore.filter(
-    (imageInTheQueue) =>
-      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
-  )
-
-  await Storage.setItem({
-    key: CONST.PENDING_UPLOADS_KEY,
-    value: JSON.stringify(pendingImagesAfter),
   })
 }
 
@@ -758,10 +747,110 @@ export const queueFileForUpload =
       key: thumbEnhansedImage.localCacheKey,
     })
 
-    await _addToQueue(thumbEnhansedImage)
+    await addToQueue(thumbEnhansedImage)
 
     updatePendingPhotos(dispatch)
   }
+
+const generatePhoto = async ({ uuid, lat, lon, video }) => {
+  const photo = (
+    await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation createPhoto(
+          $lat: Float!
+          $lon: Float!
+          $uuid: String!
+          $video: Boolean
+        ) {
+          createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
+            active
+            commentsCount
+            watchersCount
+            createdAt
+            id
+            imgUrl
+            imgUrl
+            thumbUrl
+            location
+            updatedAt
+            uuid
+            video
+          }
+        }
+      `,
+      variables: {
+        uuid,
+        lat,
+        lon,
+        video,
+      },
+    })
+  ).data.createPhoto
+
+  return photo
+}
+
+const uploadFile = async ({ assetKey, contentType, assetUri }) => {
+  // console.log({ assetKey })
+  const uploadUrl = (
+    await CONST.gqlClient.query({
+      query: gql`
+        query generateUploadUrl($assetKey: String!, $contentType: String!) {
+          generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
+        }
+      `,
+      variables: {
+        assetKey,
+        contentType,
+      },
+    })
+  ).data.generateUploadUrl
+
+  const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
+    httpMethod: 'PUT',
+    headers: {
+      'Content-Type': contentType,
+    },
+  })
+  return { responseData }
+}
+
+const uploadItem = async ({ item }) => {
+  try {
+    // if video -- upload video file in addition to the image
+    if (item.type === 'video') {
+      // eslint-disable-next-line
+      const videoResponse = await uploadFile({
+        assetKey: `${item.photo.id}.mov`,
+        contentType: 'video/mov',
+        assetUri: item.localVideoUrl,
+      })
+
+      if (videoResponse?.responseData?.status !== 200) {
+        return {
+          responseData:
+            'something bad happened during video upload, unable to upload.',
+          status: videoResponse.responseData.status,
+        }
+      }
+    }
+
+    const response = await uploadFile({
+      assetKey: `${item.photo.id}.upload`,
+      contentType: 'image/jpeg',
+      assetUri: item.localImgUrl,
+    })
+    return { responseData: response.responseData }
+  } catch (err3) {
+    // eslint-disable-next-line no-console
+    console.log({ err3 })
+    return {
+      responseData: `something bad happened, unable to upload ${JSON.stringify(
+        err3,
+      )}`,
+    }
+  }
+}
 
 export function uploadPendingPhotos() {
   return async (dispatch, getState) => {
@@ -796,7 +885,7 @@ export function uploadPendingPhotos() {
         const item = generatePhotoQueue[i]
         try {
           // eslint-disable-next-line no-await-in-loop
-          const photo = await _generatePhoto({
+          const photo = await generatePhoto({
             uuid,
             lat: item.location.coords.latitude,
             lon: item.location.coords.longitude,
@@ -813,9 +902,9 @@ export function uploadPendingPhotos() {
             key: `${photo.id}`,
           })
           // eslint-disable-next-line no-await-in-loop
-          await _removeFromQueue(item)
+          await removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
-          await _addToQueue({
+          await addToQueue({
             ...item,
             photo,
           })
@@ -824,7 +913,7 @@ export function uploadPendingPhotos() {
           console.log({ err1 })
           if (`${err1}`.includes('banned')) {
             // eslint-disable-next-line no-await-in-loop
-            await _removeFromQueue(item)
+            await removeFromQueue(item)
             Toast.show({
               text1: "Sorry, you've been banned",
               text2: 'Try again later',
@@ -842,13 +931,13 @@ export function uploadPendingPhotos() {
         const item = uploadQueue[i]
 
         // eslint-disable-next-line no-await-in-loop
-        const { responseData } = await _uploadItem({
+        const { responseData } = await uploadItem({
           item,
         })
 
         if (responseData.status === 200) {
           // eslint-disable-next-line no-await-in-loop
-          await _removeFromQueue(item)
+          await removeFromQueue(item)
           // eslint-disable-next-line no-await-in-loop
           await updatePendingPhotos(dispatch)
 
@@ -899,107 +988,8 @@ export function uploadPendingPhotos() {
     if ((await getQueue()).length > 0) {
       dispatch(uploadPendingPhotos())
     }
+    return Promise.resolve()
   }
-}
-
-const _uploadItem = async ({ item }) => {
-  try {
-    // if video -- upload video file in addition to the image
-    if (item.type === 'video') {
-      // eslint-disable-next-line
-      const videoResponse = await _uploadFile({
-        assetKey: `${item.photo.id}.mov`,
-        contentType: 'video/mov',
-        assetUri: item.localVideoUrl,
-      })
-
-      if (videoResponse?.responseData?.status !== 200) {
-        return {
-          responseData:
-            'something bad happened during video upload, unable to upload.',
-          status: videoResponse.responseData.status,
-        }
-      }
-    }
-
-    const response = await _uploadFile({
-      assetKey: `${item.photo.id}.upload`,
-      contentType: 'image/jpeg',
-      assetUri: item.localImgUrl,
-    })
-    return { responseData: response.responseData }
-  } catch (err3) {
-    // eslint-disable-next-line no-console
-    console.log({ err3 })
-    return {
-      responseData: `something bad happened, unable to upload ${JSON.stringify(
-        err3,
-      )}`,
-    }
-  }
-}
-
-const _generatePhoto = async ({ uuid, lat, lon, video }) => {
-  const photo = (
-    await CONST.gqlClient.mutate({
-      mutation: gql`
-        mutation createPhoto(
-          $lat: Float!
-          $lon: Float!
-          $uuid: String!
-          $video: Boolean
-        ) {
-          createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
-            active
-            commentsCount
-            watchersCount
-            createdAt
-            id
-            imgUrl
-            imgUrl
-            thumbUrl
-            location
-            updatedAt
-            uuid
-            video
-          }
-        }
-      `,
-      variables: {
-        uuid,
-        lat,
-        lon,
-        video,
-      },
-    })
-  ).data.createPhoto
-
-  return photo
-}
-
-const _uploadFile = async ({ assetKey, contentType, assetUri }) => {
-  // console.log({ assetKey })
-  const uploadUrl = (
-    await CONST.gqlClient.query({
-      query: gql`
-        query generateUploadUrl($assetKey: String!, $contentType: String!) {
-          generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
-        }
-      `,
-      variables: {
-        assetKey,
-        contentType,
-      },
-    })
-  ).data.generateUploadUrl
-
-  const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
-    httpMethod: 'PUT',
-    headers: {
-      'Content-Type': contentType,
-    },
-  })
-  return { responseData }
 }
 
 export function setCurrentIndex(currentIndex) {

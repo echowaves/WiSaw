@@ -1,19 +1,19 @@
 // import { Platform } from 'react-native'
 
-import * as FileSystem from "expo-file-system"
+import * as FileSystem from 'expo-file-system'
 
-import * as ImageManipulator from "expo-image-manipulator"
+import * as ImageManipulator from 'expo-image-manipulator'
 
-import { CacheManager } from "expo-cached-image"
-import { Storage } from "expo-storage"
+import { CacheManager } from 'expo-cached-image'
+import { Storage } from 'expo-storage'
 
-import Toast from "react-native-toast-message"
+import Toast from 'react-native-toast-message'
 
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client'
 
-import * as CONST from "../../consts.js"
+import * as CONST from '../../consts.js'
 
-import * as ACTION_TYPES from "./action_types"
+import * as ACTION_TYPES from './action_types'
 
 //  date '+%Y%m%d%H%M%S'
 
@@ -80,7 +80,7 @@ const _addToQueue = async (image) => {
 // returns an array that has everything needed for rendering
 const _getQueue = async () => {
   // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
-  await CONST._makeSureDirectoryExists({
+  await CONST.makeSureDirectoryExists({
     directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
   })
 
@@ -154,7 +154,7 @@ export const queueFileForUpload =
     // console.log({ localImgUrl })
     // copy file to cacheDir
 
-    await CONST._makeSureDirectoryExists({
+    await CONST.makeSureDirectoryExists({
       directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
     })
 
@@ -237,7 +237,7 @@ export function uploadPendingPhotos({ chatUuid }) {
             chatUuid,
             uuid,
             messageUuid: item.messageUuid,
-            text: "",
+            text: '',
             pending: false,
             chatPhotoHash: item.chatPhotoHash,
           })
@@ -246,8 +246,8 @@ export function uploadPendingPhotos({ chatUuid }) {
         } else {
           // alert(JSON.stringify({ responseData }))
           Toast.show({
-            text1: "Upload is going slooooow...",
-            text2: "Still trying to upload.",
+            text1: 'Upload is going slooooow...',
+            text2: 'Still trying to upload.',
             visibilityTime: 500,
             topOffset,
           })
@@ -257,8 +257,8 @@ export function uploadPendingPhotos({ chatUuid }) {
       // eslint-disable-next-line no-console
       console.log({ err2 })
       Toast.show({
-        text1: "Upload is slow...",
-        text2: "Still trying to upload.",
+        text1: 'Upload is slow...',
+        text2: 'Still trying to upload.',
         visibilityTime: 500,
         topOffset,
       })
@@ -332,7 +332,7 @@ export const sendMessage = async ({
 }
 
 const _uploadItem = async ({ uuid, item }) => {
-  const contentType = "image/jpeg"
+  const contentType = 'image/jpeg'
   try {
     // console.log("uploading", { item })
     const uploadUrl = (
@@ -358,7 +358,7 @@ const _uploadItem = async ({ uuid, item }) => {
           photoHash: item.chatPhotoHash,
           contentType,
         },
-        fetchPolicy: "network-only",
+        fetchPolicy: 'network-only',
       })
     ).data.generateUploadUrlForMessage
 
@@ -368,9 +368,9 @@ const _uploadItem = async ({ uuid, item }) => {
         uploadUrl.uploadUrl,
         item.localImgUrl,
         {
-          httpMethod: "PUT",
+          httpMethod: 'PUT',
           headers: {
-            "Content-Type": contentType,
+            'Content-Type': contentType,
           },
         },
       )

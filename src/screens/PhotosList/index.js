@@ -56,6 +56,8 @@ import {
 } from '@rneui/themed'
 
 import { UUID_KEY } from '../Secret/reducer'
+import * as friendsReducer from '../FriendsList/reducer'
+
 import { getUnreadCountsList } from '../FriendsList/friends_helper'
 import * as reducer from './reducer'
 
@@ -123,7 +125,8 @@ const PhotosList = () => {
   const [uuid, setUuid] = useState(null)
   const [zeroMoment, setZeroMoment] = useState(null)
 
-  const photos = useSelector((state) => state.photosList.photos)
+  const [photos, setPhotos] = useState([])
+
   const pendingPhotos = useSelector((state) => state.photosList.pendingPhotos)
   const location = useSelector((state) => state.photosList.location)
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
@@ -479,7 +482,22 @@ const PhotosList = () => {
 
   useEffect(() => {
     if (wantToLoadMore()) {
-      dispatch(reducer.getPhotos(uuid, zeroMoment))
+      dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+      dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+
+      reducer.getPhotos({
+        uuid,
+        zeroMoment,
+        location,
+        netAvailable,
+        searchTerm,
+        topOffset,
+        activeSegment,
+        batch,
+        pageNumber,
+        latitude,
+        longitude,
+      })
     }
   }, [lastViewableRow, loading])
 
@@ -744,6 +762,22 @@ const PhotosList = () => {
   //     }}
   //   />
   // )
+  const submitSearch = async () => {
+    dispatch(reducer.setSearchTerm(currentSearchTerm))
+
+    reload()
+    if (currentSearchTerm && currentSearchTerm.length >= 3) {
+      if (keyboardVisible) {
+        dismissKeyboard()
+      }
+    } else {
+      Toast.show({
+        text1: 'Search for more than 3 characters',
+        type: 'error',
+        topOffset,
+      })
+    }
+  }
 
   const renderSearchBar = (autoFocus) => (
     <View
@@ -788,23 +822,6 @@ const PhotosList = () => {
     </View>
   )
 
-  const submitSearch = async () => {
-    dispatch(reducer.setSearchTerm(currentSearchTerm))
-
-    reload()
-    if (currentSearchTerm && currentSearchTerm.length >= 3) {
-      if (keyboardVisible) {
-        dismissKeyboard()
-      }
-    } else {
-      Toast.show({
-        text1: 'Search for more than 3 characters',
-        type: 'error',
-        topOffset,
-      })
-    }
-  }
-
   const renderPendingPhotos = () => {
     if (pendingPhotos.length > 0) {
       return (
@@ -833,6 +850,7 @@ const PhotosList = () => {
         </View>
       )
     }
+    return null
   }
 
   /// //////////////////////////////////////////////////////////////////////////
