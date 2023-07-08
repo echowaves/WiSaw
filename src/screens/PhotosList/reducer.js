@@ -30,18 +30,19 @@ export const initialState = {
   // isTandcAccepted: true, //
   // zeroMoment: null, //
   // photos: [], //
-
-  location: null,
+  // netAvailable: false,
+  // searchTerm: '',
+  // location: null,
   pendingPhotos: [],
   loading: false,
   errorMessage: '',
-  pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
+  // pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
   orientation: 'portrait',
   activeSegment: 0,
-  searchTerm: '',
-  batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+
+  // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   isLastPage: true,
-  netAvailable: false,
+
   uploadingPhoto: false,
   toastOffset: 100,
   currentIndex: 0,
@@ -463,8 +464,6 @@ export async function getPhotos({
   activeSegment,
   batch,
   pageNumber,
-  latitude,
-  longitude,
 }) {
   // const { uuid } = getState().secret
 
@@ -484,12 +483,15 @@ export async function getPhotos({
     netAvailable === false ||
     (activeSegment === 2 && searchTerm.length < 3)
   ) {
+    console.log('returning1')
     return {
       photos: [],
       batch,
       noMoreData: true,
     }
   }
+  const { latitude, longitude } = location.coords
+
   try {
     let responseJson
     console.log({ activeSegment })

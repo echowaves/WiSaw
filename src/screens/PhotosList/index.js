@@ -125,22 +125,30 @@ const PhotosList = () => {
   const [uuid, setUuid] = useState(null)
   const [zeroMoment, setZeroMoment] = useState(null)
 
-  const [photos, setPhotos] = useState([])
+  const [photosList, setPhotosList] = useState([])
+
+  const [netAvailable, setNetAvailable] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [location, setLocation] = useState(null)
+
+  const [isLastPage, setIsLastPage] = useState(false)
+
+  const [pageNumber, setPageNumber] = useState(0)
+
+  const [batch, setBatch] = useState(
+    `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+  )
 
   const pendingPhotos = useSelector((state) => state.photosList.pendingPhotos)
-  const location = useSelector((state) => state.photosList.location)
+
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
-  const isLastPage = useSelector((state) => state.photosList.isLastPage)
   // const paging = useSelector(state => state.photosList.paging)
 
   const loading = useSelector((state) => state.photosList.loading)
   // const pageNumber = useSelector(state => state.photosList.pageNumber)
 
   const activeSegment = useSelector((state) => state.photosList.activeSegment)
-  // const searchTerm = useSelector(state => state.photosList.searchTerm)
-  const [currentSearchTerm, setCurrentSearchTerm] = useState('')
 
-  const netAvailable = useSelector((state) => state.photosList.netAvailable)
   // const batch = useSelector(state => state.photosList.batch)
   const unreadCountList = useSelector(
     (state) => state.friendsList.unreadCountsList,
@@ -200,7 +208,12 @@ const PhotosList = () => {
 
   const reload = async () => {
     dispatch(reducer.resetState())
+    setPageNumber(0)
+    setBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+
     dispatch(reducer.uploadPendingPhotos())
+    dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+    dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
   }
 
   const initandreload = async () => {
@@ -297,13 +310,12 @@ const PhotosList = () => {
     if (locationPermission === 'granted') {
       try {
         // initially set the location that is last known -- works much faster this way
-        await dispatch(
-          reducer.setLocation(
-            await Location.getLastKnownPositionAsync({
-              maxAge: 86400000,
-              requiredAccuracy: 5000,
-            }),
-          ),
+
+        setLocation(
+          await Location.getLastKnownPositionAsync({
+            maxAge: 86400000,
+            requiredAccuracy: 5000,
+          }),
         )
 
         Location.watchPositionAsync(
@@ -318,7 +330,7 @@ const PhotosList = () => {
             //   type: "error",
             // topOffset: topOffset,
             // })
-            await dispatch(reducer.setLocation(loc))
+            setLocation(loc)
           },
         )
       } catch (err) {
@@ -421,7 +433,7 @@ const PhotosList = () => {
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (state) {
-        dispatch(reducer.setNetAvailable(state.isInternetReachable))
+        setNetAvailable(state.isInternetReachable)
       }
     })
     return () => {
@@ -458,7 +470,7 @@ const PhotosList = () => {
 
     const screenColumns = /* Math.floor */ width / thumbDimension
     const screenRows = /* Math.floor */ height / thumbDimension
-    const totalNumRows = /* Math.floor */ photos.length / screenColumns
+    const totalNumRows = /* Math.floor */ photosList.length / screenColumns
 
     if (screenRows * 1 + lastViewableRow > totalNumRows) {
       // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
@@ -481,24 +493,31 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
-    if (wantToLoadMore()) {
-      dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
-      dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+    ;(async () => {
+      if (wantToLoadMore()) {
+        const { photos, noMoreData } = await reducer.getPhotos({
+          uuid,
+          zeroMoment,
+          location,
+          netAvailable,
+          searchTerm,
+          topOffset,
+          activeSegment,
+          batch,
+          pageNumber,
+        })
 
-      reducer.getPhotos({
-        uuid,
-        zeroMoment,
-        location,
-        netAvailable,
-        searchTerm,
-        topOffset,
-        activeSegment,
-        batch,
-        pageNumber,
-        latitude,
-        longitude,
-      })
-    }
+        console.log({ photos, noMoreData })
+
+        setPhotosList(
+          [...photosList, ...photos].sort(
+            (a, b) => a.row_number - b.row_number,
+          ),
+        )
+        setIsLastPage(noMoreData)
+        setPageNumber(pageNumber + 1)
+      }
+    })()
   }, [lastViewableRow, loading])
 
   useEffect(() => {
@@ -535,7 +554,7 @@ const PhotosList = () => {
     <FlatGrid
       itemDimension={thumbDimension}
       spacing={3}
-      data={photos}
+      data={photosList}
       renderItem={({ item, index }) => (
         <Thumb item={item} index={index} thumbDimension={thumbDimension} />
       )}
@@ -559,7 +578,7 @@ const PhotosList = () => {
     <FlatGrid
       itemDimension={width}
       spacing={3}
-      data={photos}
+      data={photosList}
       renderItem={({ item, index }) => (
         <ThumbWithComments
           item={item}
@@ -763,10 +782,8 @@ const PhotosList = () => {
   //   />
   // )
   const submitSearch = async () => {
-    dispatch(reducer.setSearchTerm(currentSearchTerm))
-
     reload()
-    if (currentSearchTerm && currentSearchTerm.length >= 3) {
+    if (searchTerm && searchTerm.length >= 3) {
       if (keyboardVisible) {
         dismissKeyboard()
       }
@@ -790,9 +807,9 @@ const PhotosList = () => {
         placeholder="Type Text Here..."
         placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
         onChangeText={(currentTerm) => {
-          setCurrentSearchTerm(currentTerm)
+          setSearchTerm(currentTerm)
         }}
-        value={currentSearchTerm}
+        value={searchTerm}
         onSubmitEditing={() => submitSearch()}
         autoFocus={autoFocus}
         containerStyle={{
@@ -857,7 +874,7 @@ const PhotosList = () => {
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
 
-  if (isTandcAccepted && netAvailable && location && photos.length > 0) {
+  if (isTandcAccepted && netAvailable && location && photosList.length > 0) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
@@ -985,7 +1002,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photos.length === 0 && loading) {
+  if (photosList.length === 0 && loading) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
@@ -996,7 +1013,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photos.length === 0 && !loading && isLastPage) {
+  if (photosList.length === 0 && !loading && isLastPage) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
