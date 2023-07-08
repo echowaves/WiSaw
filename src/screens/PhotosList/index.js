@@ -479,7 +479,7 @@ const PhotosList = () => {
 
   useEffect(() => {
     if (wantToLoadMore()) {
-      dispatch(reducer.getPhotos())
+      dispatch(reducer.getPhotos(uuid, zeroMoment))
     }
   }, [lastViewableRow, loading])
 
@@ -1044,7 +1044,7 @@ const PhotosList = () => {
     )
   }
 
-  dispatch(reducer.getPhotos())
+  // dispatch(reducer.getPhotos())
   return (
     <View style={styles.container}>
       {activeSegment === 2 && renderSearchBar(false)}

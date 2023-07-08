@@ -1,6 +1,6 @@
 import Toast from 'react-native-toast-message'
 
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client'
 
 import * as CONST from '../../consts.js'
 
@@ -33,7 +33,11 @@ export default function reducer(state = initialState, action) {
     case ACTION_TYPES.DELETE_FRIENDSHIP:
       return {
         ...state,
-        friendsList: [...state.friendsList.filter(friendship => friendship.friendshipUuid !== action.friendshipUuid)],
+        friendsList: [
+          ...state.friendsList.filter(
+            (friendship) => friendship.friendshipUuid !== action.friendshipUuid,
+          ),
+        ],
       }
 
     default:
@@ -43,18 +47,15 @@ export default function reducer(state = initialState, action) {
 
 export function createFriendship({ uuid, contactName }) {
   return async (dispatch, getState) => {
-    const {
-      topOffset,
-    } = getState().photosList
+    const { topOffset } = getState().photosList
     // console.log({ uuid })
     // console.log({ nickName, secret, uuid })
 
     try {
-      const { friendship } = (await CONST.gqlClient
-        .mutate({
+      const { friendship } = (
+        await CONST.gqlClient.mutate({
           mutation: gql`
-            mutation 
-            createFriendship($uuid: String!) {
+            mutation createFriendship($uuid: String!) {
               createFriendship(uuid: $uuid) {
                 chat {
                   chatUuid
@@ -66,7 +67,7 @@ export function createFriendship({ uuid, contactName }) {
                   invitedByUuid
                   lastReadAt
                   uuid
-                }                
+                }
                 friendship {
                   chatUuid
                   createdAt
@@ -75,11 +76,13 @@ export function createFriendship({ uuid, contactName }) {
                   uuid2
                 }
               }
-            }`,
+            }
+          `,
           variables: {
             uuid,
           },
-        })).data.createFriendship
+        })
+      ).data.createFriendship
 
       dispatch({
         type: ACTION_TYPES.ADD_TO_FRIENDSHIP,
@@ -89,9 +92,14 @@ export function createFriendship({ uuid, contactName }) {
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
         const branchHelper = await import('../../branch_helper')
-        await branchHelper.shareFriend({ friendshipUuid: friendship?.friendshipUuid, contactName })
+        await branchHelper.shareFriend({
+          friendshipUuid: friendship?.friendshipUuid,
+          contactName,
+        })
       } else {
-        alert("The feature is not supported on this device yet, try again later")
+        alert(
+          'The feature is not supported on this device yet, try again later',
+        )
       }
       // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
 
@@ -101,7 +109,7 @@ export function createFriendship({ uuid, contactName }) {
       Toast.show({
         text1: 'Unable to create Friend',
         text2: err.toString(),
-        type: "error",
+        type: 'error',
         topOffset,
       })
       return null
@@ -111,9 +119,7 @@ export function createFriendship({ uuid, contactName }) {
 
 export function deleteFriendship({ friendshipUuid }) {
   return async (dispatch, getState) => {
-    const {
-      topOffset,
-    } = getState().photosList
+    const { topOffset } = getState().photosList
     // console.log({ uuid })
     // console.log({ nickName, secret, uuid })
 
@@ -129,11 +135,11 @@ export function deleteFriendship({ friendshipUuid }) {
         topOffset,
       })
     } catch (err) {
-    // console.log({ err })
+      // console.log({ err })
       Toast.show({
         text1: 'Unable to delete Friendship',
         text2: err.toString(),
-        type: "error",
+        type: 'error',
         topOffset,
       })
     }
@@ -143,16 +149,18 @@ export function deleteFriendship({ friendshipUuid }) {
 export function reloadFriendsList({ uuid }) {
   return async (dispatch, getState) => {
     try {
-      const friendsList = await friendsHelper.getEnhancedListOfFriendships({ uuid })
+      const friendsList = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
       // console.log({ friendsList })
       dispatch({
         type: ACTION_TYPES.LIST_OF_FRIENDS,
         friendsList,
       })
       // console.log(friendsList.length)
-    } catch (err5) {
+    } catch (err55) {
       // eslint-disable-next-line no-console
-      console.log({ err5 })// eslint-disable-line      
+      console.log({ err55 }) // eslint-disable-line
     }
   }
 }
@@ -168,9 +176,9 @@ export function reloadUnreadCountsList({ uuid }) {
         unreadCountsList,
       })
       // console.log(friendsList.length)
-    } catch (err5) {
+    } catch (err15) {
       // eslint-disable-next-line no-console
-      console.log({ err5 })// eslint-disable-line      
+      console.log({ err15 }) // eslint-disable-line
     }
   }
 }

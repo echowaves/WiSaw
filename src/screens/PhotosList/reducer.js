@@ -256,6 +256,7 @@ async function getTancAccepted() {
 
 export async function initState(setUuid, setIsTandcAccepted) {
   const uuid = await getUUID()
+  // console.log({ uuid })
   const isTandcAccepted = await getTancAccepted()
   setUuid(uuid)
   setIsTandcAccepted(isTandcAccepted)
@@ -278,11 +279,11 @@ export async function getZeroMoment(setZeroMoment) {
   return zeroMoment
 }
 
-async function _requestGeoPhotos(getState) {
+async function requestGeoPhotos(getState, { zeroMoment }) {
   const {
     pageNumber,
     batch,
-    zeroMoment,
+
     location: {
       coords: { latitude, longitude },
     },
@@ -348,8 +349,8 @@ async function _requestGeoPhotos(getState) {
   }
 }
 
-async function _requestWatchedPhotos(getState) {
-  const { uuid } = getState().secret
+async function requestWatchedPhotos(getState, { uuid }) {
+  // const { uuid } = getState().secret
   const { pageNumber, batch } = getState().photosList
   try {
     const response = await CONST.gqlClient.query({
@@ -394,9 +395,14 @@ async function _requestWatchedPhotos(getState) {
     // eslint-disable-next-line no-console
     console.log({ err5 }) // eslint-disable-line
   }
+  return {
+    photos: [],
+    batch,
+    noMoreData: true,
+  }
 }
 
-async function _requestSearchedPhotos(getState) {
+async function requestSearchedPhotos(getState) {
   const { pageNumber, searchTerm, batch } = getState().photosList
   try {
     const response = await CONST.gqlClient.query({
@@ -445,11 +451,16 @@ async function _requestSearchedPhotos(getState) {
     // eslint-disable-next-line no-console
     console.log({ err6 }) // eslint-disable-line
   }
+  return {
+    photos: [],
+    batch,
+    noMoreData: true,
+  }
 }
 
-export function getPhotos() {
+export function getPhotos(uuid, zeroMoment) {
   return async (dispatch, getState) => {
-    const { uuid } = getState().secret
+    // const { uuid } = getState().secret
 
     dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
@@ -479,12 +490,14 @@ export function getPhotos() {
       })
       try {
         let responseJson
-        if (getState().photosList.activeSegment === 0) {
-          responseJson = await _requestGeoPhotos(getState)
-        } else if (getState().photosList.activeSegment === 1) {
-          responseJson = await _requestWatchedPhotos(getState)
-        } else if (getState().photosList.activeSegment === 2) {
-          responseJson = await _requestSearchedPhotos(getState)
+        const { activeSegment } = getState().photosList
+        console.log({ activeSegment })
+        if (activeSegment === 0) {
+          responseJson = await requestGeoPhotos(getState, { zeroMoment })
+        } else if (activeSegment === 1) {
+          responseJson = await requestWatchedPhotos(getState, { uuid })
+        } else if (activeSegment === 2) {
+          responseJson = await requestSearchedPhotos(getState)
         }
         // eslint-disable-next-line no-console
         // console.log({ responseJson })
