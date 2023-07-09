@@ -132,9 +132,9 @@ const PhotosList = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [location, setLocation] = useState(null)
 
-  const [isLastPage, setIsLastPage] = useState(false)
+  // const [isLastPage, setIsLastPage] = useState(false)
 
-  const [pageNumber, setPageNumber] = useState(-1)
+  const [pageNumber, setPageNumber] = useState(null)
 
   const [batch, setBatch] = useState(
     `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
@@ -205,6 +205,20 @@ const PhotosList = () => {
     setIsTandcAccepted(await reducer.getTancAccepted())
     setUuid(await getUUID())
     setZeroMoment(await reducer.getZeroMoment())
+    setPageNumber(0) // this should trigger initial load
+  }
+
+  const wantToLoadMore = () => {
+    const screenColumns = /* Math.floor */ width / thumbDimension
+    const screenRows = /* Math.floor */ height / thumbDimension
+    const totalNumRows = /* Math.floor */ photosList.length / screenColumns
+
+    if (screenRows * 1 + lastViewableRow > totalNumRows) {
+      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
+      return true
+    }
+
+    return false
   }
 
   const load = async () => {
@@ -220,22 +234,23 @@ const PhotosList = () => {
       pageNumber,
     })
 
-    console.log({ photos, noMoreData })
+    console.log({ noMoreData })
 
     setPhotosList(
       [...photosList, ...photos].sort((a, b) => a.row_number - b.row_number),
     )
-    setIsLastPage(noMoreData)
-    setPageNumber(pageNumber + 1)
+    if (noMoreData === false && wantToLoadMore()) {
+      setPageNumber(pageNumber + 1)
+    }
   }
 
   const reload = async () => {
     // dispatch(reducer.resetState())
 
     setPhotosList([])
-    setPageNumber(0)
-    setBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
 
+    setBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+    setPageNumber(0)
     reducer.uploadPendingPhotos({
       uuid,
       topOffset,
@@ -246,7 +261,6 @@ const PhotosList = () => {
     dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
 
     setPendingPhotos(await reducer.getQueue())
-    await load()
   }
 
   const initandreload = async () => {
@@ -479,44 +493,26 @@ const PhotosList = () => {
     }
   }, [])
 
-  useEffect(() => {
-    if (uuid && zeroMoment && location) {
-      reload() // initially load only when zero moment is loaded and uuid is assigned
-    }
-  }, [uuid, zeroMoment, location])
+  // useEffect(() => {
+  //   if (uuid && zeroMoment && location) {
+  //     reload() // initially load only when zero moment is loaded and uuid is assigned
+  //   }
+  // }, [uuid, zeroMoment, location])
 
   // re-render title on  state chage
-  useEffect(() => {
-    // defining this function for special case, when network becomes available after the app has started
-    updateNavBar()
-    if (netAvailable) {
-      initandreload()
-    }
-    // else {
-    //   (async () => {
-    //     await navigation.popToTop()
-    //     await _updateNavBar()
-    //   })()
-    // }
-  }, [netAvailable])
-
-  const wantToLoadMore = () => {
-    if (isLastPage) {
-      // console.log(`isLastPage:${isLastPage}`)
-      return false
-    }
-
-    const screenColumns = /* Math.floor */ width / thumbDimension
-    const screenRows = /* Math.floor */ height / thumbDimension
-    const totalNumRows = /* Math.floor */ photosList.length / screenColumns
-
-    if (screenRows * 1 + lastViewableRow > totalNumRows) {
-      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
-      return true
-    }
-
-    return false
-  }
+  // useEffect(() => {
+  //   // defining this function for special case, when network becomes available after the app has started
+  //   updateNavBar()
+  //   if (netAvailable) {
+  //     initandreload()
+  //   }
+  //   // else {
+  //   //   (async () => {
+  //   //     await navigation.popToTop()
+  //   //     await _updateNavBar()
+  //   //   })()
+  //   // }
+  // }, [netAvailable])
 
   const styles = StyleSheet.create({
     container: {
@@ -531,8 +527,12 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
+    load()
+  }, [pageNumber])
+
+  useEffect(() => {
     if (wantToLoadMore()) {
-      load()
+      setPageNumber(pageNumber + 1)
     }
   }, [lastViewableRow])
 
@@ -1029,7 +1029,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList.length === 0 && isLastPage) {
+  if (photosList.length === 0) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
