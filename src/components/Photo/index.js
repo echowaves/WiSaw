@@ -62,13 +62,12 @@ const Photo = ({ photo, topOffset, uuid }) => {
     React.useCallback(() => {
       const task = InteractionManager.runAfterInteractions(async () => {
         if (componentIsMounted) {
-          const photoDetails = await reducer.getPhotoDetails({
+          const loadedPhotoDetails = await reducer.getPhotoDetails({
             photoId: photo?.id,
             uuid,
           })
-          console.log({ photoDetails })
           setPhotoDetails({
-            ...photoDetails,
+            ...loadedPhotoDetails,
             watchersCount: photo.watchersCount,
           })
         }
