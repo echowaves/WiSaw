@@ -328,6 +328,8 @@ const PhotosList = () => {
   const reload = async () => {
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
     updateNavBar()
+    setPhotosList([])
+
     await new Promise((resolve) => setTimeout(resolve, 500))
 
     setPhotosList([])
