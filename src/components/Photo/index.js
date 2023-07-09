@@ -36,9 +36,9 @@ import * as CONST from '../../consts'
 
 import ImageView from './ImageView'
 
-const Photo = ({ photo, topOffset }) => {
+const Photo = ({ photo, topOffset, uuid }) => {
   const componentIsMounted = useRef(true)
-  const uuid = useSelector((state) => state.secret.uuid)
+
   const friendsList = useSelector((state) => state.friendsList.friendsList)
 
   const videoRef = useRef(null)
@@ -66,6 +66,7 @@ const Photo = ({ photo, topOffset }) => {
             photoId: photo?.id,
             uuid,
           })
+          console.log({ photoDetails })
           setPhotoDetails({
             ...photoDetails,
             watchersCount: photo.watchersCount,

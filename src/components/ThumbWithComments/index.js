@@ -32,6 +32,7 @@ const ThumbWithComments = (props) => {
     searchTerm,
     activeSegment,
     topOffset,
+    uuid,
   } = props
 
   const onThumbPress = (item) => {
@@ -41,6 +42,7 @@ const ThumbWithComments = (props) => {
       searchTerm,
       activeSegment,
       topOffset,
+      uuid,
     })
     // dispatch(reducer.setCurrentIndex(index)) // this order makes it a little faster, maybe
   }
@@ -75,6 +77,7 @@ const ThumbWithComments = (props) => {
           index={index}
           thumbDimension={thumbDimension}
           photosList={photosList}
+          uuid={uuid}
         />
 
         {item.commentsCount > 0 && (

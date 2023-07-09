@@ -18,7 +18,7 @@ const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
 
-  const { photoId, topOffset } = route.params
+  const { photoId, topOffset, uuid } = route.params
 
   useEffect(() => {
     navigation.setOptions({
@@ -29,7 +29,7 @@ const PhotosDetailsShared = ({ route }) => {
       },
     })
     loadPhoto(photoId)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const loadPhoto = async (photoId) => {
     try {
@@ -86,7 +86,9 @@ const PhotosDetailsShared = ({ route }) => {
   )
 
   if (item) {
-    return <Photo photo={item} key={item.id} topOffset={topOffset} />
+    return (
+      <Photo photo={item} key={item.id} topOffset={topOffset} uuid={uuid} />
+    )
   }
   return <Text />
 }

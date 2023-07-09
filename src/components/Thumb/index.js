@@ -32,6 +32,7 @@ const Thumb = (props) => {
     searchTerm,
     activeSegment,
     topOffset,
+    uuid,
   } = props
 
   const onThumbPress = (item) => {
@@ -42,6 +43,7 @@ const Thumb = (props) => {
       searchTerm,
       activeSegment,
       topOffset,
+      uuid,
     })
     // dispatch(reducer.setCurrentIndex(index))
   }

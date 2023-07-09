@@ -8,7 +8,7 @@ import 'react-native-get-random-values'
 import chat from './screens/Chat/reducer'
 import friendsList from './screens/FriendsList/reducer'
 import secret from './screens/Secret/reducer'
-import photo from './components/Photo/reducer'
+// import photo from './components/Photo/reducer'
 
 const composeEnhancers = compose
 /* eslint no-undef: */
@@ -20,7 +20,7 @@ export const reducers = combineReducers({
   // photosList,
   chat,
   friendsList,
-  photo,
+  // photo,
   secret,
 })
 

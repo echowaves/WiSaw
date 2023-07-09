@@ -606,6 +606,7 @@ const PhotosList = () => {
           searchTerm={searchTerm}
           activeSegment={activeSegment}
           topOffset={topOffset}
+          uuid={uuid}
         />
       )}
       keyExtractor={(item) => item.id}
@@ -639,6 +640,7 @@ const PhotosList = () => {
           searchTerm={searchTerm}
           activeSegment={activeSegment}
           topOffset={topOffset}
+          uuid={uuid}
         />
       )}
       keyExtractor={(item) => item.id}
@@ -902,7 +904,11 @@ const PhotosList = () => {
             spacing={3}
             data={pendingPhotos}
             renderItem={({ item }) => (
-              <ThumbPending item={item} thumbDimension={thumbDimension} />
+              <ThumbPending
+                item={item}
+                thumbDimension={thumbDimension}
+                uuid={uuid}
+              />
             )}
             keyExtractor={(item) => item.localImageName}
             showsVerticalScrollIndicator={false}

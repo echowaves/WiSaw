@@ -172,9 +172,9 @@ export const getUnreadCountsList = async ({ uuid }) => {
       })
     ).data.getUnreadCountsList
     return unreadCountsList
-  } catch (err6) {
+  } catch (err61) {
     // eslint-disable-next-line no-console
-    console.log({ err6 }) // eslint-disable-line
+    console.log({ err61 }) // eslint-disable-line
     return []
   }
 }

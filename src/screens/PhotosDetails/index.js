@@ -23,7 +23,7 @@ import { getPhotos } from '../PhotosList/reducer'
 import * as CONST from '../../consts'
 
 const PhotosDetails = ({ route }) => {
-  const { index, photosList, searchTerm, activeSegment, topOffset } =
+  const { index, photosList, searchTerm, activeSegment, topOffset, uuid } =
     route.params
 
   const navigation = useNavigation()
@@ -38,7 +38,7 @@ const PhotosDetails = ({ route }) => {
 
   // const topOffset = useSelector((state) => state.photosList.topOffset)
 
-  const dispatch = useDispatch()
+  // const dispatch = useDispatch()
 
   const renderHeaderTitle = () => {
     switch (activeSegment) {
@@ -111,7 +111,7 @@ const PhotosDetails = ({ route }) => {
       index={index}
       onIndexChanged={(newIndex) => {
         if (newIndex > photosList.length - 5) {
-          dispatch(getPhotos()) // pre-load more photos when nearing the end
+          getPhotos() // pre-load more photos when nearing the end
         }
         if (newIndex === 0 || newIndex === photosList.length - 1) {
           Toast.show({
@@ -133,6 +133,7 @@ const PhotosDetails = ({ route }) => {
           key={photo.id}
           swiper={swiper}
           topOffset={topOffset}
+          uuid={uuid}
         />
       ))}
     </Swiper>

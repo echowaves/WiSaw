@@ -291,6 +291,7 @@ export function submitComment({ inputText, uuid, photo }) {
 }
 
 export const getPhotoDetails = async ({ photoId, uuid }) => {
+  console.log({ uuid })
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
@@ -330,6 +331,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
   } catch (err) {
     console.log({ err }) // eslint-disable-line
   }
+  return null
 }
 
 export function toggleCommentButtons({ photoDetails, commentId }) {
