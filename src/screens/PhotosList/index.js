@@ -185,28 +185,8 @@ const PhotosList = () => {
   //   // setIsRegistered(isRegistered)
   // }
 
-  const initState = async () => {
-    // /// //////////////////////////////////////
-    // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
-    // files.forEach(file => {
-    //   FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
-    // })
-    // // cleanup cache folder
-    // /// //////////////////////////////////////
-    const thumbsCount = Math.floor(width / 90)
-    setThumbDimension(
-      Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
-    )
-
-    // checkForUpdate(),
-    // check permissions, retrieve UUID, make sure upload folder exists
-    setIsTandcAccepted(await reducer.getTancAccepted())
-    setUuid(await getUUID())
-    setZeroMoment(await reducer.getZeroMoment())
-    setPageNumber(0) // this should trigger initial load
-  }
-
   const wantToLoadMore = () => {
+    if (photosList.length === 0) return true
     const screenColumns = /* Math.floor */ width / thumbDimension
     const screenRows = /* Math.floor */ height / thumbDimension
     const totalNumRows = /* Math.floor */ photosList.length / screenColumns
@@ -232,6 +212,12 @@ const PhotosList = () => {
       pageNumber,
     })
 
+    console.log({
+      activeSegment,
+      pageNumber,
+      photos: photos.length,
+      noMoreData,
+    })
     // const newPhotosList = [...photosList, ...photos].sort(
     //   (a, b) => a.row_number - b.row_number,
     // )
@@ -251,15 +237,99 @@ const PhotosList = () => {
       setLoading(false)
     }
   }
+  const segment0 = () => (
+    <FontAwesome
+      name="globe"
+      size={23}
+      color={
+        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+
+  const segment1 = () => (
+    <AntDesign
+      name="star"
+      size={23}
+      color={
+        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+
+  const segment2 = () => (
+    <FontAwesome
+      name="search"
+      size={23}
+      color={
+        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+
+  const updateIndex = async (index) => {
+    setActiveSegment(index)
+  }
+
+  const renderHeaderTitle = () => (
+    <>
+      <ButtonGroup
+        onPress={updateIndex}
+        containerStyle={{
+          width: 200,
+          height: 35,
+        }}
+        buttonStyle={{ alignSelf: 'center' }}
+        buttons={[
+          { element: segment0 },
+          { element: segment1 },
+          { element: segment2 },
+        ]}
+      />
+      {loading && (
+        <LinearProgress
+          color={CONST.MAIN_COLOR}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            left: 0,
+          }}
+        />
+      )}
+    </>
+  )
+
+  const updateNavBar = async () => {
+    if (netAvailable) {
+      navigation.setOptions({
+        headerTitle: renderHeaderTitle,
+        // headerLeft: renderHeaderLeft,
+        // headerRight: renderHeaderRight,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
+      })
+    } else {
+      navigation.setOptions({
+        headerTitle: '',
+        headerLeft: '',
+        headerRight: '',
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
+      })
+    }
+  }
 
   const reload = async () => {
     // dispatch(reducer.resetState())
-
+    // setPhotosList({})
     setPhotosList([])
 
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
-    setPageNumber(null)
     setPageNumber(0)
+    updateNavBar()
 
     reducer.uploadPendingPhotos({
       uuid,
@@ -271,11 +341,28 @@ const PhotosList = () => {
     dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
 
     setPendingPhotos(await reducer.getQueue())
+    load()
   }
 
-  const initandreload = async () => {
-    await initState()
-    await reload()
+  const initState = async () => {
+    // /// //////////////////////////////////////
+    // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
+    // files.forEach(file => {
+    //   FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
+    // })
+    // // cleanup cache folder
+    // /// //////////////////////////////////////
+    const thumbsCount = Math.floor(width / 90)
+    setThumbDimension(
+      Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
+    )
+
+    // checkForUpdate(),
+    // check permissions, retrieve UUID, make sure upload folder exists
+    setIsTandcAccepted(await reducer.getTancAccepted())
+    setUuid(await getUUID())
+    setZeroMoment(await reducer.getZeroMoment())
+    // reload()
   }
 
   async function checkPermission({
@@ -378,21 +465,21 @@ const PhotosList = () => {
         })
         setLocation(loc)
 
-        Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.Lowest,
-            timeInterval: 10000,
-            distanceInterval: 3000,
-          },
-          async (loc1) => {
-            // Toast.show({
-            //   text1: 'location udated',
-            //   type: "error",
-            // topOffset: topOffset,
-            // })
-            setLocation(loc1)
-          },
-        )
+        // Location.watchPositionAsync(
+        //   {
+        //     accuracy: Location.Accuracy.Lowest,
+        //     timeInterval: 10000,
+        //     distanceInterval: 3000,
+        //   },
+        //   async (loc1) => {
+        //     // Toast.show({
+        //     //   text1: 'location udated',
+        //     //   type: "error",
+        //     // topOffset: topOffset,
+        //     // })
+        //     setLocation(loc1)
+        //   },
+        // )
         return loc
       } catch (err) {
         Toast.show({
@@ -405,101 +492,16 @@ const PhotosList = () => {
     return null
   }
 
-  const updateIndex = async (index) => {
-    setActiveSegment(index)
-    reload()
-  }
-
-  const segment0 = () => (
-    <FontAwesome
-      name="globe"
-      size={23}
-      color={
-        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment1 = () => (
-    <AntDesign
-      name="star"
-      size={23}
-      color={
-        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment2 = () => (
-    <FontAwesome
-      name="search"
-      size={23}
-      color={
-        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const renderHeaderTitle = () => (
-    <>
-      <ButtonGroup
-        onPress={updateIndex}
-        containerStyle={{
-          width: 200,
-          height: 35,
-        }}
-        buttonStyle={{ alignSelf: 'center' }}
-        buttons={[
-          { element: segment0 },
-          { element: segment1 },
-          { element: segment2 },
-        ]}
-      />
-      {loading && (
-        <LinearProgress
-          color={CONST.MAIN_COLOR}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            left: 0,
-          }}
-        />
-      )}
-    </>
-  )
-
-  const updateNavBar = async () => {
-    if (netAvailable) {
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle,
-        // headerLeft: renderHeaderLeft,
-        // headerRight: renderHeaderRight,
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    } else {
-      navigation.setOptions({
-        headerTitle: '',
-        headerLeft: '',
-        headerRight: '',
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    }
-  }
-
   useEffect(() => {
     // TODO: delete next line -- debuggin
     // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
 
     setTopOffset(height / 3)
     ;(async () => {
+      await initState()
       const loc = await getLocation()
       console.log({ loc })
-      await initandreload()
+
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
         const branchHelper = await import('../../branch_helper')
@@ -518,26 +520,11 @@ const PhotosList = () => {
     }
   }, [])
 
-  // useEffect(() => {
-  //   if (uuid && zeroMoment && location) {
-  //     reload() // initially load only when zero moment is loaded and uuid is assigned
-  //   }
-  // }, [uuid, zeroMoment, location])
+  useEffect(() => {
+    reload()
+  }, [location])
 
-  // re-render title on  state chage
-  // useEffect(() => {
-  //   // defining this function for special case, when network becomes available after the app has started
-  //   updateNavBar()
-  //   if (netAvailable) {
-  //     initandreload()
-  //   }
-  //   // else {
-  //   //   (async () => {
-  //   //     await navigation.popToTop()
-  //   //     await _updateNavBar()
-  //   //   })()
-  //   // }
-  // }, [netAvailable])
+  useEffect(() => {}, [currentBatch])
 
   const styles = StyleSheet.create({
     container: {
@@ -556,22 +543,21 @@ const PhotosList = () => {
   }, [loading])
 
   useEffect(() => {
-    if (pageNumber !== null) {
-      setLoading(true)
-      load()
-    }
+    console.log({ pageNumber })
+    setLoading(true)
+    load()
   }, [pageNumber])
+
+  useEffect(() => {
+    // console.log({ activeSegment })
+    reload()
+  }, [activeSegment])
 
   useEffect(() => {
     if (wantToLoadMore() && !loading) {
       setPageNumber((currentPage) => currentPage + 1)
     }
   }, [lastViewableRow])
-
-  useEffect(() => {
-    setPageNumber(null)
-    setPageNumber(0)
-  }, [activeSegment])
 
   // const checkForUpdate = async () => {
   //   try {
@@ -1050,17 +1036,6 @@ const PhotosList = () => {
       </View>
     )
   }
-
-  // if (photosList.length === 0) {
-  //   return (
-  //     <View style={styles.container}>
-  //       {activeSegment === 2 && renderSearchBar(false)}
-  //       <LinearProgress color={CONST.MAIN_COLOR} />
-  //       {renderPendingPhotos()}
-  //       {renderFooter({ unreadCount })}
-  //     </View>
-  //   )
-  // }
 
   if (photosList.length === 0) {
     return (
