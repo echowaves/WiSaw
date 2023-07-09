@@ -1,11 +1,9 @@
-import Branch,
-{ BranchEvent }
-from 'react-native-branch'
+import Branch, { BranchEvent } from 'react-native-branch'
 import { Alert } from 'react-native'
 
 export const initBranch = async ({ navigation }) => {
   // eslint-disable-next-line
-    // if (!__DEV__) {
+  // if (!__DEV__) {
   // const ExpoBranch = await import('expo-branch')
   // const Branch = ExpoBranch.default
 
@@ -15,19 +13,19 @@ export const initBranch = async ({ navigation }) => {
   // console.log('...................................................................................1')
   // console.log({ Branch })
   // alert(JSON.stringify({ Branch }))
-  Branch.subscribe(async bundle => {
+  Branch.subscribe(async (bundle) => {
     // alert(JSON.stringify({ bundle: bundle === true, params: bundle?.params === true, notError: !bundle?.error }))
 
     // alert(JSON.stringify({ bundle }))
     if (bundle && bundle?.params && !bundle?.error) {
       // // `bundle.params` contains all the info about the link.
       _navigateByParams({ params: bundle.params, navigation })
-    // } else if (bundle?.error === 'Warning. Session initialization already happened.') {
-    //   // this could be android path, because it always contains error "Session initializaion already happened"
-    //   Alert.alert(
-    //     "You may want to close WiSaw application and then click on the deep link to make it open correctly.",
-    //     "This is a known issue which will be eventually fixed in one of the depencencies libararies"
-    //   )
+      // } else if (bundle?.error === 'Warning. Session initialization already happened.') {
+      //   // this could be android path, because it always contains error "Session initializaion already happened"
+      //   Alert.alert(
+      //     "You may want to close WiSaw application and then click on the deep link to make it open correctly.",
+      //     "This is a known issue which will be eventually fixed in one of the depencencies libararies"
+      //   )
     } else {
       const latestParams = await Branch.getLatestReferringParams()
       _navigateByParams({ params: latestParams, navigation })
@@ -42,12 +40,17 @@ const _navigateByParams = async ({ params, navigation }) => {
   if (params?.photoId) {
     // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
     await navigation.popToTop()
-    await navigation.navigate('PhotosDetailsShared', { photoId: params?.photoId })
+    await navigation.navigate('PhotosDetailsShared', {
+      photoId: params?.photoId,
+      topOffset,
+    })
   }
   if (params?.friendshipUuid) {
     // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
     await navigation.popToTop()
-    await navigation.navigate('ConfirmFriendship', { friendshipUuid: params?.friendshipUuid })
+    await navigation.navigate('ConfirmFriendship', {
+      friendshipUuid: params?.friendshipUuid,
+    })
   }
 }
 
@@ -62,7 +65,7 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
       // when implementing deep linking with `Branch.subscribe`.
       metadata: {
         // screen: 'photoScreen',
-        params: JSON.stringify({ photoId: photo?.id },),
+        params: JSON.stringify({ photoId: photo?.id }),
         // params: { photoId: photo?.id },
       },
       contentMetadata: {
@@ -70,25 +73,25 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
           photoId: photo?.id, // your userId field would be defined under customMetadata
         },
       },
-    }
+    },
   )
 
-  let messageBody = `Check out what I saw today${photo?.video ? " (video)" : ''}:`
+  let messageBody = `Check out what I saw today${
+    photo?.video ? ' (video)' : ''
+  }:`
   // const messageHeader = 'Check out what I saw today:'
   const emailSubject = 'WiSaw: Check out what I saw today'
 
   if (photoDetails.comments) {
     // get only the 3 comments
-    messageBody = `${messageBody}\n\n${
-      photoDetails.comments.slice(0, 3).map(
-        comment => (
-          comment.comment
-        )
-      ).join('\n\n')}\n\n`
+    messageBody = `${messageBody}\n\n${photoDetails.comments
+      .slice(0, 3)
+      .map((comment) => comment.comment)
+      .join('\n\n')}\n\n`
   }
 
   const shareOptions = {
-    messageHeader: "What I Saw today...",
+    messageHeader: 'What I Saw today...',
     messageBody,
     emailSubject,
   }
@@ -111,13 +114,13 @@ export const shareFriend = async ({ friendshipUuid, contactName }) => {
           friendshipUuid, // your userId field would be defined under customMetadata
         },
       },
-    }
+    },
   )
   const messageBody = `${contactName}, you've got WiSaw friendship request.
   To confirm, follow the url:`
 
   const shareOptions = {
-    messageHeader: "What I Saw today...",
+    messageHeader: 'What I Saw today...',
     messageBody,
     emailSubject: 'What I Saw today friendship request...',
   }

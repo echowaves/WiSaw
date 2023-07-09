@@ -212,12 +212,12 @@ const PhotosList = () => {
       pageNumber,
     })
 
-    console.log({
-      activeSegment,
-      pageNumber,
-      photos: photos.length,
-      noMoreData,
-    })
+    // console.log({
+    //   activeSegment,
+    //   pageNumber,
+    //   photos: photos.length,
+    //   noMoreData,
+    // })
     // const newPhotosList = [...photosList, ...photos].sort(
     //   (a, b) => a.row_number - b.row_number,
     // )
@@ -507,7 +507,7 @@ const PhotosList = () => {
     ;(async () => {
       await initState()
       const loc = await getLocation()
-      console.log({ loc })
+      // console.log({ loc })
 
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
@@ -550,7 +550,7 @@ const PhotosList = () => {
   }, [loading])
 
   useEffect(() => {
-    console.log({ pageNumber })
+    // console.log({ pageNumber })
     setLoading(true)
     load()
   }, [pageNumber])
@@ -598,7 +598,15 @@ const PhotosList = () => {
       spacing={3}
       data={photosList}
       renderItem={({ item, index }) => (
-        <Thumb item={item} index={index} thumbDimension={thumbDimension} />
+        <Thumb
+          item={item}
+          index={index}
+          thumbDimension={thumbDimension}
+          photosList={photosList}
+          searchTerm={searchTerm}
+          activeSegment={activeSegment}
+          topOffset={topOffset}
+        />
       )}
       keyExtractor={(item) => item.id}
       style={{
@@ -627,6 +635,10 @@ const PhotosList = () => {
           index={index}
           thumbDimension={thumbDimension}
           screenWidth={width}
+          photosList={photosList}
+          searchTerm={searchTerm}
+          activeSegment={activeSegment}
+          topOffset={topOffset}
         />
       )}
       keyExtractor={(item) => item.id}

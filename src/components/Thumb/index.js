@@ -24,11 +24,26 @@ const Thumb = (props) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const { index, item, thumbDimension } = props
+  const {
+    index,
+    item,
+    thumbDimension,
+    photosList,
+    searchTerm,
+    activeSegment,
+    topOffset,
+  } = props
 
   const onThumbPress = (item) => {
-    navigation.navigate('PhotosDetails')
-    dispatch(reducer.setCurrentIndex(index))
+    // console.log({ index })
+    navigation.navigate('PhotosDetails', {
+      index,
+      photosList,
+      searchTerm,
+      activeSegment,
+      topOffset,
+    })
+    // dispatch(reducer.setCurrentIndex(index))
   }
 
   const thumbWidthStyles = {

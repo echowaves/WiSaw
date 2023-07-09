@@ -263,12 +263,12 @@ export async function getPhotos({
     netAvailable === false ||
     (activeSegment === 2 && searchTerm.length < 3)
   ) {
-    console.log('returning1', {
-      location,
-      netAvailable,
-      activeSegment,
-      searchTerm,
-    })
+    // console.log('returning1', {
+    //   location,
+    //   netAvailable,
+    //   activeSegment,
+    //   searchTerm,
+    // })
     return {
       photos: [],
       batch,
@@ -279,7 +279,7 @@ export async function getPhotos({
 
   try {
     let responseJson
-    console.log({ activeSegment, pageNumber })
+    // console.log({ activeSegment, pageNumber })
     if (activeSegment === 0) {
       responseJson = await requestGeoPhotos({
         pageNumber,

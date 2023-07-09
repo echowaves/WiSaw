@@ -36,7 +36,7 @@ import * as CONST from '../../consts'
 
 import ImageView from './ImageView'
 
-const Photo = ({ photo }) => {
+const Photo = ({ photo, topOffset }) => {
   const componentIsMounted = useRef(true)
   const uuid = useSelector((state) => state.secret.uuid)
   const friendsList = useSelector((state) => state.friendsList.friendsList)
@@ -47,7 +47,7 @@ const Photo = ({ photo }) => {
 
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
-  const topOffset = useSelector((state) => state.photosList.topOffset)
+  // const topOffset = useSelector((state) => state.photosList.topOffset)
 
   const navigation = useNavigation()
 

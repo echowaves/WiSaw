@@ -11,25 +11,38 @@ import {
 import { FontAwesome, AntDesign } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
-import { useDispatch } from "react-redux"
+import { useDispatch } from 'react-redux'
 
 // import CachedImage from 'expo-cached-image'
 import * as reducer from '../../screens/PhotosList/reducer'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 import Thumb from '../Thumb'
 
-const ThumbWithComments = props => {
+const ThumbWithComments = (props) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
   const {
-    index, item, thumbDimension, screenWidth,
+    index,
+    item,
+    thumbDimension,
+    screenWidth,
+    photosList,
+    searchTerm,
+    activeSegment,
+    topOffset,
   } = props
 
-  const onThumbPress = item => {
-    navigation.navigate('PhotosDetails')
-    dispatch(reducer.setCurrentIndex(index)) // this order makes it a little faster, maybe
+  const onThumbPress = (item) => {
+    navigation.navigate('PhotosDetails', {
+      index,
+      photosList,
+      searchTerm,
+      activeSegment,
+      topOffset,
+    })
+    // dispatch(reducer.setCurrentIndex(index)) // this order makes it a little faster, maybe
   }
 
   return (
@@ -37,7 +50,8 @@ const ThumbWithComments = props => {
       onPress={() => onThumbPress(item)}
       style={{
         borderRadius: 10,
-      }}>
+      }}
+    >
       <View>
         <View
           style={{
@@ -47,88 +61,75 @@ const ThumbWithComments = props => {
             height: thumbDimension,
             position: 'absolute',
             left: thumbDimension - 15,
-            backgroundColor: "white",
+            backgroundColor: 'white',
             borderRadius: 10,
             borderWidth: 1,
             borderColor: 'rgba(100,100,100,0.1)',
-          }}>
-          <Text
-            style={{ paddingLeft: 20 }}>
-            {item.lastComment}
-          </Text>
+          }}
+        >
+          <Text style={{ paddingLeft: 20 }}>{item.lastComment}</Text>
         </View>
 
         <Thumb
-          item={
-            item
-          }
-          index={
-            index
-          }
+          item={item}
+          index={index}
           thumbDimension={thumbDimension}
+          photosList={photosList}
         />
 
-        { item.commentsCount > 0 && (
+        {item.commentsCount > 0 && (
           <View
-            style={
-              {
-                fontSize: 30,
-                position: 'absolute',
-                bottom: -10,
-                left: thumbDimension + 15,
-              }
-            }>
+            style={{
+              fontSize: 30,
+              position: 'absolute',
+              bottom: -10,
+              left: thumbDimension + 15,
+            }}
+          >
             <FontAwesome
               name="comment"
-              style={
-                {
-                  fontSize: 30,
-                  color: CONST.PLACEHOLDER_TEXT_COLOR,
-                }
-              }
+              style={{
+                fontSize: 30,
+                color: CONST.PLACEHOLDER_TEXT_COLOR,
+              }}
             />
             <Text
-              style={
-                {
-                  fontSize: 10,
-                  color: CONST.MAIN_COLOR,
-                  textAlign: 'center',
-                  bottom: 20,
-                }
-              }>
+              style={{
+                fontSize: 10,
+                color: CONST.MAIN_COLOR,
+                textAlign: 'center',
+                bottom: 20,
+              }}
+            >
               {item.commentsCount > 99 ? '+99' : item.commentsCount}
             </Text>
           </View>
         )}
 
-        { item.watchersCount > 0 && (
+        {item.watchersCount > 0 && (
           <View
-            style={
-              {
-                fontSize: 30,
-                position: 'absolute',
-                bottom: -10,
-                right: 10,
-              }
-            }>
+            style={{
+              fontSize: 30,
+              position: 'absolute',
+              bottom: -10,
+              right: 10,
+            }}
+          >
             <AntDesign
               name="star"
-              style={
-                {
-                  fontSize: 30,
-                  color: CONST.PLACEHOLDER_TEXT_COLOR,
-                }
-              }
+              style={{
+                fontSize: 30,
+                color: CONST.PLACEHOLDER_TEXT_COLOR,
+              }}
             />
             <Text
-              style={
-                {
-                  fontSize: 10,
-                  color: CONST.MAIN_COLOR,
-                  textAlign: 'center',
-                  bottom: 20,
-                }
-              }>
+              style={{
+                fontSize: 10,
+                color: CONST.MAIN_COLOR,
+                textAlign: 'center',
+                bottom: 20,
+              }}
+            >
               {item.watchersCount > 99 ? '+ 99' : item.watchersCount}
             </Text>
           </View>
