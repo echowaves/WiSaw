@@ -327,14 +327,13 @@ const PhotosList = () => {
 
   const reload = async () => {
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
-    setPhotosList([])
+    updateNavBar()
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
-    // setPhotosList([])
+    setPhotosList([])
     setPageNumber(0)
     // dispatch(reducer.resetState())
     // setPhotosList({})
-
-    updateNavBar()
 
     reducer.uploadPendingPhotos({
       uuid,
@@ -347,10 +346,7 @@ const PhotosList = () => {
 
     setPendingPhotos(await reducer.getQueue())
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setPhotosList([])
-
-    await load()
+    load()
   }
 
   const initState = async () => {
