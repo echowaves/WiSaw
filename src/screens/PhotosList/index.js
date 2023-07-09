@@ -136,7 +136,7 @@ const PhotosList = () => {
 
   const [pageNumber, setPageNumber] = useState(null)
 
-  const [batch, setBatch] = useState(
+  const [currentBatch, setCurrentBatch] = useState(
     `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   )
 
@@ -220,7 +220,7 @@ const PhotosList = () => {
   }
 
   const load = async () => {
-    const { photos, noMoreData } = await reducer.getPhotos({
+    const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
       zeroMoment,
       location,
@@ -228,7 +228,7 @@ const PhotosList = () => {
       searchTerm,
       topOffset,
       activeSegment,
-      batch,
+      batch: currentBatch,
       pageNumber,
     })
 
@@ -236,11 +236,14 @@ const PhotosList = () => {
     //   (a, b) => a.row_number - b.row_number,
     // )
 
-    setPhotosList((prevPhotosList) =>
-      [...prevPhotosList, ...photos].sort(
-        (a, b) => a.row_number - b.row_number,
-      ),
-    )
+    if (batch === currentBatch) {
+      // avoid duplicates
+      setPhotosList((prevPhotosList) =>
+        [...prevPhotosList, ...photos].sort(
+          (a, b) => a.row_number - b.row_number,
+        ),
+      )
+    }
 
     if (noMoreData === false && wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
@@ -254,7 +257,8 @@ const PhotosList = () => {
 
     setPhotosList([])
 
-    setBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+    setPageNumber(null)
     setPageNumber(0)
 
     reducer.uploadPendingPhotos({
@@ -552,8 +556,10 @@ const PhotosList = () => {
   }, [loading])
 
   useEffect(() => {
-    setLoading(true)
-    load()
+    if (pageNumber !== null) {
+      setLoading(true)
+      load()
+    }
   }, [pageNumber])
 
   useEffect(() => {
@@ -563,7 +569,8 @@ const PhotosList = () => {
   }, [lastViewableRow])
 
   useEffect(() => {
-    updateNavBar()
+    setPageNumber(null)
+    setPageNumber(0)
   }, [activeSegment])
 
   // const checkForUpdate = async () => {
