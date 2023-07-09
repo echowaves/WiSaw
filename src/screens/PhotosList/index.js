@@ -55,7 +55,7 @@ import {
   Badge,
 } from '@rneui/themed'
 
-import { UUID_KEY } from '../Secret/reducer'
+import { UUID_KEY, getUUID } from '../Secret/reducer'
 import * as friendsReducer from '../FriendsList/reducer'
 
 import { getUnreadCountsList } from '../FriendsList/friends_helper'
@@ -115,7 +115,8 @@ const PhotosList = () => {
 
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useWindowDimensions()
-  const topOffset = useSelector((state) => state.photosList.topOffset)
+
+  const [topOffset, setTopOffset] = useState(100)
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
@@ -133,21 +134,22 @@ const PhotosList = () => {
 
   const [isLastPage, setIsLastPage] = useState(false)
 
-  const [pageNumber, setPageNumber] = useState(0)
+  const [pageNumber, setPageNumber] = useState(-1)
 
   const [batch, setBatch] = useState(
     `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   )
 
-  const pendingPhotos = useSelector((state) => state.photosList.pendingPhotos)
+  const [pendingPhotos, setPendingPhotos] = useState([])
+
+  const [activeSegment, setActiveSegment] = useState(0)
 
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
   // const paging = useSelector(state => state.photosList.paging)
 
-  const loading = useSelector((state) => state.photosList.loading)
-  // const pageNumber = useSelector(state => state.photosList.pageNumber)
+  // const [loading, setLoading] = useState(false)
 
-  const activeSegment = useSelector((state) => state.photosList.activeSegment)
+  // const pageNumber = useSelector(state => state.photosList.pageNumber)
 
   // const batch = useSelector(state => state.photosList.batch)
   const unreadCountList = useSelector(
@@ -198,22 +200,53 @@ const PhotosList = () => {
       Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
     )
 
-    await Promise.all([
-      // checkForUpdate(),
-      // check permissions, retrieve UUID, make sure upload folder exists
-      reducer.initState(setUuid, setIsTandcAccepted),
-      reducer.getZeroMoment(setZeroMoment),
-    ])
+    // checkForUpdate(),
+    // check permissions, retrieve UUID, make sure upload folder exists
+    setIsTandcAccepted(await reducer.getTancAccepted())
+    setUuid(await getUUID())
+    setZeroMoment(await reducer.getZeroMoment())
+  }
+
+  const load = async () => {
+    const { photos, noMoreData } = await reducer.getPhotos({
+      uuid,
+      zeroMoment,
+      location,
+      netAvailable,
+      searchTerm,
+      topOffset,
+      activeSegment,
+      batch,
+      pageNumber,
+    })
+
+    console.log({ photos, noMoreData })
+
+    setPhotosList(
+      [...photosList, ...photos].sort((a, b) => a.row_number - b.row_number),
+    )
+    setIsLastPage(noMoreData)
+    setPageNumber(pageNumber + 1)
   }
 
   const reload = async () => {
-    dispatch(reducer.resetState())
+    // dispatch(reducer.resetState())
+
+    setPhotosList([])
     setPageNumber(0)
     setBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
 
-    dispatch(reducer.uploadPendingPhotos())
+    reducer.uploadPendingPhotos({
+      uuid,
+      topOffset,
+      netAvailable,
+      uploadingPhoto: true,
+    })
     dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+
+    setPendingPhotos(await reducer.getQueue())
+    await load()
   }
 
   const initandreload = async () => {
@@ -274,7 +307,12 @@ const PhotosList = () => {
         }),
       )
 
-      dispatch(reducer.uploadPendingPhotos())
+      reducer.uploadPendingPhotos({
+        uuid,
+        topOffset,
+        netAvailable,
+        uploadingPhoto: true,
+      })
     }
   }
 
@@ -310,13 +348,11 @@ const PhotosList = () => {
     if (locationPermission === 'granted') {
       try {
         // initially set the location that is last known -- works much faster this way
-
-        setLocation(
-          await Location.getLastKnownPositionAsync({
-            maxAge: 86400000,
-            requiredAccuracy: 5000,
-          }),
-        )
+        const loc = await Location.getLastKnownPositionAsync({
+          maxAge: 86400000,
+          requiredAccuracy: 5000,
+        })
+        setLocation(loc)
 
         Location.watchPositionAsync(
           {
@@ -324,15 +360,16 @@ const PhotosList = () => {
             timeInterval: 10000,
             distanceInterval: 3000,
           },
-          async (loc) => {
+          async (loc1) => {
             // Toast.show({
             //   text1: 'location udated',
             //   type: "error",
             // topOffset: topOffset,
             // })
-            setLocation(loc)
+            setLocation(loc1)
           },
         )
+        return loc
       } catch (err) {
         Toast.show({
           text1: 'Unable to get location',
@@ -341,9 +378,10 @@ const PhotosList = () => {
         })
       }
     }
+    return null
   }
   const updateIndex = async (index) => {
-    await dispatch(reducer.setActiveSegment(index))
+    setActiveSegment(index)
     reload()
   }
   const segment0 = () => (
@@ -418,11 +456,11 @@ const PhotosList = () => {
     // TODO: delete next line -- debuggin
     // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
 
-    dispatch(reducer.settopOffset(height / 3))
-
-    getLocation()
-    initandreload()
+    setTopOffset(height / 3)
     ;(async () => {
+      const loc = await getLocation()
+      console.log({ loc })
+      await initandreload()
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
         const branchHelper = await import('../../branch_helper')
@@ -442,10 +480,10 @@ const PhotosList = () => {
   }, [])
 
   useEffect(() => {
-    if (uuid && zeroMoment) {
+    if (uuid && zeroMoment && location) {
       reload() // initially load only when zero moment is loaded and uuid is assigned
     }
-  }, [uuid, zeroMoment])
+  }, [uuid, zeroMoment, location])
 
   // re-render title on  state chage
   useEffect(() => {
@@ -493,32 +531,10 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
-    ;(async () => {
-      if (wantToLoadMore()) {
-        const { photos, noMoreData } = await reducer.getPhotos({
-          uuid,
-          zeroMoment,
-          location,
-          netAvailable,
-          searchTerm,
-          topOffset,
-          activeSegment,
-          batch,
-          pageNumber,
-        })
-
-        console.log({ photos, noMoreData })
-
-        setPhotosList(
-          [...photosList, ...photos].sort(
-            (a, b) => a.row_number - b.row_number,
-          ),
-        )
-        setIsLastPage(noMoreData)
-        setPageNumber(pageNumber + 1)
-      }
-    })()
-  }, [lastViewableRow, loading])
+    if (wantToLoadMore()) {
+      load()
+    }
+  }, [lastViewableRow])
 
   useEffect(() => {
     updateNavBar()
@@ -940,7 +956,7 @@ const PhotosList = () => {
                   title="I Agree"
                   type="outline"
                   onPress={() => {
-                    dispatch(reducer.acceptTandC())
+                    setIsTandcAccepted(reducer.acceptTandC())
                   }}
                 />
               </ListItem>
@@ -1002,7 +1018,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList.length === 0 && loading) {
+  if (photosList.length === 0) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
@@ -1013,7 +1029,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList.length === 0 && !loading && isLastPage) {
+  if (photosList.length === 0 && isLastPage) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}

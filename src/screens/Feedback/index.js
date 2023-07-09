@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useSelector } from "react-redux"
+import { useSelector } from 'react-redux'
 
-import {
-  SafeAreaView,
-  TextInput,
-  StyleSheet,
-} from 'react-native'
+import { SafeAreaView, TextInput, StyleSheet } from 'react-native'
 
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
@@ -22,8 +18,8 @@ const maxStringLength = 2000
 const FeedbackScreen = () => {
   const navigation = useNavigation()
 
-  const topOffset = useSelector(state => state.photosList.topOffset)
-  const uuid = useSelector(state => state.secret.uuid)
+  const topOffset = useSelector((state) => state.photosList.topOffset)
+  const uuid = useSelector((state) => state.secret.uuid)
 
   // const [diskSpace, setDiskSpace] = useState('')
   // const [diskCapacity, setDiskCapacity] = useState('')
@@ -31,7 +27,7 @@ const FeedbackScreen = () => {
   const [inputText, _setInputText] = useState('')
 
   const inputTextRef = React.useRef(inputText)
-  const setInputText = data => {
+  const setInputText = (data) => {
     inputTextRef.current = data
     _setInputText(data)
   }
@@ -53,7 +49,7 @@ const FeedbackScreen = () => {
     //   // setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
     // }
     // initState()
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -62,33 +58,25 @@ const FeedbackScreen = () => {
 
   const renderHeaderRight = () => (
     <Ionicons
-      onPress={
-        () => handleSubmit()
-      }
+      onPress={() => handleSubmit()}
       name="send"
       size={30}
-      style={
-        {
-          marginRight: 10,
-          color: CONST.MAIN_COLOR,
-        }
-      }
+      style={{
+        marginRight: 10,
+        color: CONST.MAIN_COLOR,
+      }}
     />
   )
   const renderHeaderLeft = () => (
     <FontAwesome
       name="chevron-left"
       size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => navigation.goBack()
-      }
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
     />
   )
 
@@ -98,26 +86,25 @@ const FeedbackScreen = () => {
   const _submitFeedback = async ({ feedbackText }) => {
     try {
       if (feedbackText.trim().length < 5) {
-        throw Error("unable to submit empty feedback")
+        throw Error('unable to submit empty feedback')
       }
       // const contactForm =
-      await CONST.gqlClient
-        .mutate({
-          mutation: gql`
-              mutation createContactForm($uuid: String!, $description: String!) {
-                createContactForm(uuid: $uuid, description: $description)
-                       {
-                          createdAt
-                          id
-                          updatedAt
-                          uuid
-                        }
-              }`,
-          variables: {
-            uuid,
-            description: feedbackText,
-          },
-        })
+      await CONST.gqlClient.mutate({
+        mutation: gql`
+          mutation createContactForm($uuid: String!, $description: String!) {
+            createContactForm(uuid: $uuid, description: $description) {
+              createdAt
+              id
+              updatedAt
+              uuid
+            }
+          }
+        `,
+        variables: {
+          uuid,
+          description: feedbackText,
+        },
+      })
 
       navigation.goBack()
       Toast.show({
@@ -129,7 +116,7 @@ const FeedbackScreen = () => {
       Toast.show({
         text1: 'Error',
         text2: err.toString(),
-        type: "error",
+        type: 'error',
         topOffset,
       })
     }
@@ -143,7 +130,7 @@ const FeedbackScreen = () => {
 
       <TextInput
         rowSpan={5}
-        onChangeText={inputValue => {
+        onChangeText={(inputValue) => {
           setInputText(inputValue.slice(0, maxStringLength))
         }}
         placeholder="Type your feedback here and click send."
@@ -151,18 +138,16 @@ const FeedbackScreen = () => {
         multiline
         numberOfLines={10}
         maxLength={maxStringLength}
-        style={
-          {
-            color: CONST.MAIN_COLOR,
-            height: 200,
-            margin: 12,
-            padding: 10,
-            borderWidth: 1,
-            borderColor: CONST.MAIN_COLOR,
-            fontSize: 20,
-            textAlignVertical: 'top',
-          }
-        }
+        style={{
+          color: CONST.MAIN_COLOR,
+          height: 200,
+          margin: 12,
+          padding: 10,
+          borderWidth: 1,
+          borderColor: CONST.MAIN_COLOR,
+          fontSize: 20,
+          textAlignVertical: 'top',
+        }}
       />
     </SafeAreaView>
   )

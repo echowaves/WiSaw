@@ -18,7 +18,7 @@ import CachedImage from 'expo-cached-image'
 
 import * as reducer from '../../screens/PhotosList/reducer'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 const Thumb = (props) => {
   const navigation = useNavigation()
