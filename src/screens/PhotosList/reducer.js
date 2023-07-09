@@ -35,15 +35,15 @@ export const initialState = {
   // location: null,
   // pendingPhotos: [],
 
-  errorMessage: '',
+  // errorMessage: '',
   // pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
-  orientation: 'portrait',
+  // orientation: 'portrait',
 
   // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-  isLastPage: true,
+  // isLastPage: true,
 
   uploadingPhoto: false,
-  toastOffset: 100,
+  // toastOffset: 100,
   currentIndex: 0,
 }
 
