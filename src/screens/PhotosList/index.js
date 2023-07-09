@@ -225,9 +225,12 @@ const PhotosList = () => {
     if (batch === currentBatch) {
       // avoid duplicates
       setPhotosList((prevPhotosList) =>
-        [...prevPhotosList, ...photos].sort(
-          (a, b) => a.row_number - b.row_number,
-        ),
+        [...prevPhotosList, ...photos]
+          .filter(
+            (obj, pos, arr) =>
+              arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+          ) // fancy way to remove duplicate photos
+          .sort((a, b) => a.row_number - b.row_number),
       )
     }
 
@@ -323,12 +326,14 @@ const PhotosList = () => {
   }
 
   const reload = async () => {
-    // dispatch(reducer.resetState())
-    // setPhotosList({})
+    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
     setPhotosList([])
 
-    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+    // setPhotosList([])
     setPageNumber(0)
+    // dispatch(reducer.resetState())
+    // setPhotosList({})
+
     updateNavBar()
 
     reducer.uploadPendingPhotos({
@@ -341,7 +346,11 @@ const PhotosList = () => {
     dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
 
     setPendingPhotos(await reducer.getQueue())
-    load()
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setPhotosList([])
+
+    await load()
   }
 
   const initState = async () => {
@@ -524,7 +533,7 @@ const PhotosList = () => {
     reload()
   }, [location])
 
-  useEffect(() => {}, [currentBatch])
+  // useEffect(() => {}, [currentBatch])
 
   const styles = StyleSheet.create({
     container: {
