@@ -44,7 +44,7 @@ export const initialState = {
 
   uploadingPhoto: false,
   // toastOffset: 100,
-  currentIndex: 0,
+  // currentIndex: 0,
 }
 
 export async function getTancAccepted() {
