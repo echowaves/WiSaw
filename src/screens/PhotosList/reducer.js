@@ -279,7 +279,7 @@ export async function getPhotos({
 
   try {
     let responseJson
-    console.log({ activeSegment })
+    console.log({ activeSegment, pageNumber })
     if (activeSegment === 0) {
       responseJson = await requestGeoPhotos({
         pageNumber,

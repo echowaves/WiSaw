@@ -147,9 +147,7 @@ const PhotosList = () => {
   // const errorMessage = useSelector(state => state.photosList.errorMessage)
   // const paging = useSelector(state => state.photosList.paging)
 
-  // const [loading, setLoading] = useState(false)
-
-  // const pageNumber = useSelector(state => state.photosList.pageNumber)
+  const [loading, setLoading] = useState(true)
 
   // const batch = useSelector(state => state.photosList.batch)
   const unreadCountList = useSelector(
@@ -234,13 +232,20 @@ const PhotosList = () => {
       pageNumber,
     })
 
-    console.log({ noMoreData })
+    // const newPhotosList = [...photosList, ...photos].sort(
+    //   (a, b) => a.row_number - b.row_number,
+    // )
 
-    setPhotosList(
-      [...photosList, ...photos].sort((a, b) => a.row_number - b.row_number),
+    setPhotosList((prevPhotosList) =>
+      [...prevPhotosList, ...photos].sort(
+        (a, b) => a.row_number - b.row_number,
+      ),
     )
+
     if (noMoreData === false && wantToLoadMore()) {
-      setPageNumber(pageNumber + 1)
+      setPageNumber((currentPage) => currentPage + 1)
+    } else {
+      setLoading(false)
     }
   }
 
@@ -251,6 +256,7 @@ const PhotosList = () => {
 
     setBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
     setPageNumber(0)
+
     reducer.uploadPendingPhotos({
       uuid,
       topOffset,
@@ -394,10 +400,12 @@ const PhotosList = () => {
     }
     return null
   }
+
   const updateIndex = async (index) => {
     setActiveSegment(index)
     reload()
   }
+
   const segment0 = () => (
     <FontAwesome
       name="globe"
@@ -429,19 +437,32 @@ const PhotosList = () => {
   )
 
   const renderHeaderTitle = () => (
-    <ButtonGroup
-      onPress={updateIndex}
-      containerStyle={{
-        width: 200,
-        height: 35,
-      }}
-      buttonStyle={{ alignSelf: 'center' }}
-      buttons={[
-        { element: segment0 },
-        { element: segment1 },
-        { element: segment2 },
-      ]}
-    />
+    <>
+      <ButtonGroup
+        onPress={updateIndex}
+        containerStyle={{
+          width: 200,
+          height: 35,
+        }}
+        buttonStyle={{ alignSelf: 'center' }}
+        buttons={[
+          { element: segment0 },
+          { element: segment1 },
+          { element: segment2 },
+        ]}
+      />
+      {loading && (
+        <LinearProgress
+          color={CONST.MAIN_COLOR}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            left: 0,
+          }}
+        />
+      )}
+    </>
   )
 
   const updateNavBar = async () => {
@@ -527,12 +548,17 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
+    updateNavBar()
+  }, [loading])
+
+  useEffect(() => {
+    setLoading(true)
     load()
   }, [pageNumber])
 
   useEffect(() => {
-    if (wantToLoadMore()) {
-      setPageNumber(pageNumber + 1)
+    if (wantToLoadMore() && !loading) {
+      setPageNumber((currentPage) => currentPage + 1)
     }
   }, [lastViewableRow])
 
@@ -1018,16 +1044,16 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList.length === 0) {
-    return (
-      <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
-        <LinearProgress color={CONST.MAIN_COLOR} />
-        {renderPendingPhotos()}
-        {renderFooter({ unreadCount })}
-      </View>
-    )
-  }
+  // if (photosList.length === 0) {
+  //   return (
+  //     <View style={styles.container}>
+  //       {activeSegment === 2 && renderSearchBar(false)}
+  //       <LinearProgress color={CONST.MAIN_COLOR} />
+  //       {renderPendingPhotos()}
+  //       {renderFooter({ unreadCount })}
+  //     </View>
+  //   )
+  // }
 
   if (photosList.length === 0) {
     return (
