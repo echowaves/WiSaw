@@ -134,6 +134,7 @@ const PhotosDetails = ({ route }) => {
           swiper={swiper}
           topOffset={topOffset}
           uuid={uuid}
+          photosList={photosList}
         />
       ))}
     </Swiper>

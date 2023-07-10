@@ -18,13 +18,10 @@ import { gql } from '@apollo/client'
 import * as CONST from '../../consts'
 
 // import * as ACTION_TYPES from './action_types'
-import { INIT_UUID } from '../Secret/action_types'
 
 // import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
-
-const ZERO_PHOTOS_LOADED_MESSAGE = '0 photos loaded'
 
 export const initialState = {
   // isTandcAccepted: true, //
@@ -34,15 +31,12 @@ export const initialState = {
   // searchTerm: '',
   // location: null,
   // pendingPhotos: [],
-
   // errorMessage: '',
   // pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
   // orientation: 'portrait',
-
   // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   // isLastPage: true,
-
-  uploadingPhoto: false,
+  // uploadingPhoto: false,
   // toastOffset: 100,
   // currentIndex: 0,
 }
