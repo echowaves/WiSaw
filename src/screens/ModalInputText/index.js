@@ -31,10 +31,8 @@ const maxStringLength = 140
 const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const { photo } = route.params
+  const { photo, topOffset, uuid } = route.params
   const { height } = useWindowDimensions()
-
-  const uuid = useSelector((state) => state.secret.uuid)
 
   const [inputText, _setInputText] = useState('')
 
@@ -55,7 +53,7 @@ const ModalInputText = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const styles = StyleSheet.create({
     container: {
@@ -91,13 +89,11 @@ const ModalInputText = ({ route }) => {
   )
 
   const handleSubmit = () => {
-    dispatch(
-      reducer.submitComment({
-        inputText: inputTextRef.current.trim(),
-        uuid,
-        photo,
-      }),
-    )
+    reducer.submitComment({
+      inputText: inputTextRef.current.trim(),
+      uuid,
+      photo,
+    })
     navigation.pop()
   }
 

@@ -150,7 +150,7 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
   return null
 }
 
-export async function sharePhoto({ photo, photoDetails, uuid, topOffset }) {
+export async function sharePhoto({ photo, photoDetails, topOffset }) {
   try {
     // eslint-disable-next-line no-undef
     if (!__DEV__) {
@@ -223,7 +223,7 @@ export async function submitComment({ inputText, photo, uuid, topOffset }) {
   return null
 }
 
-export const getPhotoDetails = async ({ photoId, uuid, topOffset }) => {
+export const getPhotoDetails = async ({ photoId, uuid }) => {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`

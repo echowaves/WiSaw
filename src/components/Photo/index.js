@@ -188,7 +188,12 @@ const Photo = ({ photo, topOffset, uuid }) => {
                     text: 'Yes',
                     onPress: async () => {
                       // update commentsCount in global reduce store
-                      await dispatch(reducer.deleteComment({ photo, comment }))
+                      await reducer.deleteComment({
+                        photo,
+                        comment,
+                        uuid,
+                        topOffset,
+                      })
                       // bruit force reload comments to re-render in the photo details screen
                       const updatedPhotoDetails = await reducer.getPhotoDetails(
                         { photoId: photo.id, uuid },
@@ -304,7 +309,13 @@ const Photo = ({ photo, topOffset, uuid }) => {
           flex: 1,
           flexDirection: 'row',
         }}
-        onPress={() => navigation.navigate('ModalInputTextScreen', { photo })}
+        onPress={() =>
+          navigation.navigate('ModalInputTextScreen', {
+            photo,
+            uuid,
+            topOffset,
+          })
+        }
       >
         <Col size={2} />
         <Col
@@ -487,8 +498,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
         { text: 'No', onPress: () => null, style: 'cancel' },
         {
           text: 'Yes',
-          onPress: () => {
-            dispatch(reducer.deletePhoto({ photo }))
+          onPress: async () => {
+            await reducer.deletePhoto({ photo, uuid, topOffset })
             navigation.goBack()
           },
         },
@@ -520,7 +531,10 @@ const Photo = ({ photo, topOffset, uuid }) => {
         'The user who posted this photo will be banned. Are you sure?',
         [
           { text: 'No', onPress: () => null, style: 'cancel' },
-          { text: 'Yes', onPress: () => dispatch(reducer.banPhoto({ photo })) },
+          {
+            text: 'Yes',
+            onPress: () => reducer.banPhoto({ photo, uuid, topOffset }),
+          },
         ],
         { cancelable: true },
       )
@@ -532,13 +546,13 @@ const Photo = ({ photo, topOffset, uuid }) => {
       if (photoDetails?.isPhotoWatched) {
         setPhotoDetails({
           ...photoDetails,
-          watchersCount: await dispatch(reducer.unwatchPhoto({ photo })),
+          watchersCount: await reducer.unwatchPhoto({ photo, uuid, topOffset }),
           isPhotoWatched: !photoDetails?.isPhotoWatched,
         })
       } else {
         setPhotoDetails({
           ...photoDetails,
-          watchersCount: await dispatch(reducer.watchPhoto({ photo })),
+          watchersCount: await reducer.watchPhoto({ photo, uuid, topOffset }),
           isPhotoWatched: !photoDetails?.isPhotoWatched,
         })
       }
@@ -662,7 +676,7 @@ const Photo = ({ photo, topOffset, uuid }) => {
               alignItems: 'center',
             }}
             onPress={async () => {
-              dispatch(reducer.sharePhoto({ photo, photoDetails }))
+              await reducer.sharePhoto({ photo, photoDetails, topOffset })
             }}
           >
             <FontAwesome
