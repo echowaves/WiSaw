@@ -329,7 +329,7 @@ const PhotosList = () => {
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
     updateNavBar()
     setPhotosList([])
-
+    setLoading(true)
     await new Promise((resolve) => setTimeout(resolve, 500))
 
     setPhotosList([])
@@ -1062,7 +1062,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList.length === 0) {
+  if (photosList.length === 0 && !loading) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
