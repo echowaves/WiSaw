@@ -518,10 +518,16 @@ const Photo = ({ photo }) => {
               uuid,
               topOffset,
             })
+
             if (deleted) {
+              // console.log('deleted:', { photo })
               setAuthContext((prevAuthContext) => ({
                 ...prevAuthContext,
-                photosList: [...prevAuthContext.photosList],
+                photosList: [
+                  ...prevAuthContext.photosList.filter(
+                    (item) => item.id !== photo.id,
+                  ),
+                ],
               }))
             }
             navigation.goBack()
