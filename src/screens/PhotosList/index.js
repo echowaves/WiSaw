@@ -326,6 +326,13 @@ const PhotosList = () => {
 
   const reload = async () => {
     const { uuid, topOffset } = authContext
+
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      photosList: [],
+      currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+    }))
+    await new Promise((resolve) => setTimeout(resolve, 500))
     setPageNumber(0)
     setAuthContext((prevAuthContext) => ({
       ...prevAuthContext,
@@ -333,7 +340,6 @@ const PhotosList = () => {
       currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
     }))
 
-    // await new Promise((resolve) => setTimeout(resolve, 500))
     // setPageNumber(0)
     // setLoading(true)
     // updateNavBar()
