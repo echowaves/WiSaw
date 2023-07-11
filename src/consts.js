@@ -12,6 +12,7 @@ import {
 } from '@apollo/client'
 
 // import { getMainDefinition } from '@apollo/client/utilities'
+import { createContext } from 'react'
 
 import Constants from 'expo-constants'
 
@@ -20,6 +21,10 @@ export const { API_URI, API_KEY, PRIVATE_IMG_HOST } = Constants.expoConfig.extra
 // const { API_URI, API_KEY } = process.env
 // console.log({ API_URI, API_KEY })
 // const fetch = require('node-fetch')
+export const AuthContext = createContext(null) // {auth}
+
+export const UUID_KEY = 'wisaw_device_uuid'
+export const NICK_NAME_KEY = 'wisaw_nick_name'
 
 export const HOST = 'https://api.wisaw.com'
 // export const HOST = "https://testapi.wisaw.com"

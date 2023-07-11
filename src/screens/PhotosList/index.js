@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -55,7 +55,6 @@ import {
   Badge,
 } from '@rneui/themed'
 
-import { UUID_KEY, getUUID } from '../Secret/reducer'
 import * as friendsReducer from '../FriendsList/reducer'
 
 import { getUnreadCountsList } from '../FriendsList/friends_helper'
@@ -74,7 +73,7 @@ const BACKGROUND_FETCH_TASK = 'background-fetch'
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   // const now = Date.now()
   try {
-    const uuid = await SecureStore.getItemAsync(UUID_KEY)
+    const uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
     const unreadCountList = getUnreadCountsList({ uuid })
     const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
     Notifications.setBadgeCountAsync(badgeCount || 0)
@@ -109,24 +108,21 @@ async function registerBackgroundFetchAsync() {
 const FOOTER_HEIGHT = 90
 
 const PhotosList = () => {
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+
   const navigation = useNavigation()
 
   const dispatch = useDispatch()
-
-  // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useWindowDimensions()
 
-  const [topOffset, setTopOffset] = useState(100)
+  // const deviceOrientation = useDeviceOrientation()
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
   // const [loadMore, setLoadMore] = useState(false)
 
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
-  const [uuid, setUuid] = useState(null)
   const [zeroMoment, setZeroMoment] = useState(null)
-
-  const [photosList, setPhotosList] = useState([])
 
   const [netAvailable, setNetAvailable] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -186,6 +182,8 @@ const PhotosList = () => {
   // }
 
   const wantToLoadMore = () => {
+    const { photosList } = authContext
+
     if (photosList.length === 0) return true
     const screenColumns = /* Math.floor */ width / thumbDimension
     const screenRows = /* Math.floor */ height / thumbDimension
@@ -200,6 +198,8 @@ const PhotosList = () => {
   }
 
   const load = async () => {
+    const { uuid, topOffset } = authContext
+
     const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
       zeroMoment,
@@ -224,14 +224,15 @@ const PhotosList = () => {
 
     if (batch === currentBatch) {
       // avoid duplicates
-      setPhotosList((prevPhotosList) =>
-        [...prevPhotosList, ...photos]
+      setAuthContext((prevAuthContext) => ({
+        ...prevAuthContext,
+        photosList: [...prevAuthContext.photosList, ...photos]
           .filter(
             (obj, pos, arr) =>
               arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
           ) // fancy way to remove duplicate photos
           .sort((a, b) => a.row_number - b.row_number),
-      )
+      }))
     }
 
     if (noMoreData === false && wantToLoadMore()) {
@@ -271,7 +272,8 @@ const PhotosList = () => {
   )
 
   const updateIndex = async (index) => {
-    setActiveSegment(index)
+    await setActiveSegment(index)
+    await reload()
   }
 
   const renderHeaderTitle = () => (
@@ -326,16 +328,20 @@ const PhotosList = () => {
   }
 
   const reload = async () => {
-    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
-    updateNavBar()
-    setPhotosList([])
-    setLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    const { uuid, topOffset } = authContext
 
-    setPhotosList([])
+    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+    // await new Promise((resolve) => setTimeout(resolve, 500))
+    setLoading(true)
+    updateNavBar()
     setPageNumber(0)
-    // dispatch(reducer.resetState())
-    // setPhotosList({})
+
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      photosList: [],
+    }))
+
+    load()
 
     reducer.uploadPendingPhotos({
       uuid,
@@ -343,12 +349,11 @@ const PhotosList = () => {
       netAvailable,
       uploadingPhoto: true,
     })
-    dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
-    dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
-
+    if (uuid.length > 0) {
+      dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+      dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+    }
     setPendingPhotos(await reducer.getQueue())
-
-    load()
   }
 
   const initState = async () => {
@@ -367,7 +372,7 @@ const PhotosList = () => {
     // checkForUpdate(),
     // check permissions, retrieve UUID, make sure upload folder exists
     setIsTandcAccepted(await reducer.getTancAccepted())
-    setUuid(await getUUID())
+
     setZeroMoment(await reducer.getZeroMoment())
     // reload()
   }
@@ -393,6 +398,8 @@ const PhotosList = () => {
   }
 
   const takePhoto = async ({ cameraType }) => {
+    const { uuid, topOffset } = authContext
+
     let cameraReturn
     if (cameraType === 'camera') {
       // launch photo capturing
@@ -456,6 +463,8 @@ const PhotosList = () => {
   }
 
   async function getLocation() {
+    const { topOffset } = authContext
+
     const locationPermission = await checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
       alertHeader:
@@ -503,7 +512,6 @@ const PhotosList = () => {
     // TODO: delete next line -- debuggin
     // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
 
-    setTopOffset(height / 3)
     ;(async () => {
       await initState()
       const loc = await getLocation()
@@ -555,10 +563,10 @@ const PhotosList = () => {
     load()
   }, [pageNumber])
 
-  useEffect(() => {
-    // console.log({ activeSegment })
-    reload()
-  }, [activeSegment])
+  // useEffect(() => {
+  //   // console.log({ activeSegment })
+  //   reload()
+  // }, [activeSegment])
 
   useEffect(() => {
     if (wantToLoadMore() && !loading) {
@@ -592,74 +600,84 @@ const PhotosList = () => {
 
   // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
-  const renderThumbs = () => (
-    <FlatGrid
-      itemDimension={thumbDimension}
-      spacing={3}
-      data={photosList}
-      renderItem={({ item, index }) => (
-        <Thumb
-          item={item}
-          index={index}
-          thumbDimension={thumbDimension}
-          photosList={photosList}
-          searchTerm={searchTerm}
-          activeSegment={activeSegment}
-          topOffset={topOffset}
-          uuid={uuid}
-        />
-      )}
-      keyExtractor={(item) => item.id}
-      style={{
-        ...styles.container,
-        marginBottom: FOOTER_HEIGHT,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
+  const renderThumbs = () => {
+    const { uuid, topOffset, photosList } = authContext
 
-  const renderThumbsWithComments = () => (
-    <FlatGrid
-      itemDimension={width}
-      spacing={3}
-      data={photosList}
-      renderItem={({ item, index }) => (
-        <ThumbWithComments
-          item={item}
-          index={index}
-          thumbDimension={thumbDimension}
-          screenWidth={width}
-          photosList={photosList}
-          searchTerm={searchTerm}
-          activeSegment={activeSegment}
-          topOffset={topOffset}
-          uuid={uuid}
-        />
-      )}
-      keyExtractor={(item) => item.id}
-      style={{
-        ...styles.container,
-        marginBottom: 95,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
+    return (
+      <FlatGrid
+        itemDimension={thumbDimension}
+        spacing={3}
+        data={photosList}
+        renderItem={({ item, index }) => (
+          <Thumb
+            item={item}
+            index={index}
+            thumbDimension={thumbDimension}
+            photosList={photosList}
+            searchTerm={searchTerm}
+            activeSegment={activeSegment}
+            topOffset={topOffset}
+            uuid={uuid}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        style={{
+          ...styles.container,
+          marginBottom: FOOTER_HEIGHT,
+        }}
+        showsVerticalScrollIndicator={false}
+        horizontal={false}
+        refreshing={false}
+        onRefresh={() => {
+          reload()
+        }}
+        onViewableItemsChanged={onViewRef.current}
+        // viewabilityConfig={viewConfigRef.current}
+      />
+    )
+  }
+
+  const renderThumbsWithComments = () => {
+    const { uuid, topOffset, photosList } = authContext
+
+    return (
+      <FlatGrid
+        itemDimension={width}
+        spacing={3}
+        data={photosList}
+        renderItem={({ item, index }) => (
+          <ThumbWithComments
+            item={item}
+            index={index}
+            thumbDimension={thumbDimension}
+            screenWidth={width}
+            photosList={photosList}
+            searchTerm={searchTerm}
+            activeSegment={activeSegment}
+            topOffset={topOffset}
+            uuid={uuid}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        style={{
+          ...styles.container,
+          marginBottom: 95,
+        }}
+        showsVerticalScrollIndicator={false}
+        horizontal={false}
+        refreshing={false}
+        onRefresh={() => {
+          reload()
+        }}
+        onViewableItemsChanged={onViewRef.current}
+        // viewabilityConfig={viewConfigRef.current}
+      />
+    )
+  }
 
   const renderFooter = () => {
+    const { uuid, nickName, topOffset, photosList } = authContext
+
     Notifications.setBadgeCountAsync(unreadCount || 0)
 
     return (
@@ -838,6 +856,8 @@ const PhotosList = () => {
   //   />
   // )
   const submitSearch = async () => {
+    const { uuid, nickName, topOffset, photosList } = authContext
+
     reload()
     if (searchTerm && searchTerm.length >= 3) {
       if (keyboardVisible) {
@@ -852,50 +872,56 @@ const PhotosList = () => {
     }
   }
 
-  const renderSearchBar = (autoFocus) => (
-    <View
-      style={{
-        flexDirection: 'row',
-        backgroundColor: CONST.NAV_COLOR,
-      }}
-    >
-      <SearchBar
-        placeholder="Type Text Here..."
-        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-        onChangeText={(currentTerm) => {
-          setSearchTerm(currentTerm)
-        }}
-        value={searchTerm}
-        onSubmitEditing={() => submitSearch()}
-        autoFocus={autoFocus}
-        containerStyle={{
-          width: width - 60,
-        }}
+  const renderSearchBar = (autoFocus) => {
+    const { uuid, nickName, topOffset, photosList } = authContext
+
+    return (
+      <View
         style={{
-          color: CONST.MAIN_COLOR,
-          backgroundColor: 'white',
-          paddingLeft: 10,
-          paddingRight: 10,
+          flexDirection: 'row',
+          backgroundColor: CONST.NAV_COLOR,
         }}
-        rightIconContainerStyle={{
-          margin: 10,
-        }}
-        lightTheme
-      />
-      <Ionicons
-        onPress={() => submitSearch()}
-        name="send"
-        size={30}
-        style={{
-          margin: 10,
-          color: CONST.MAIN_COLOR,
-          alignSelf: 'center',
-        }}
-      />
-    </View>
-  )
+      >
+        <SearchBar
+          placeholder="Type Text Here..."
+          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+          onChangeText={(currentTerm) => {
+            setSearchTerm(currentTerm)
+          }}
+          value={searchTerm}
+          onSubmitEditing={() => submitSearch()}
+          autoFocus={autoFocus}
+          containerStyle={{
+            width: width - 60,
+          }}
+          style={{
+            color: CONST.MAIN_COLOR,
+            backgroundColor: 'white',
+            paddingLeft: 10,
+            paddingRight: 10,
+          }}
+          rightIconContainerStyle={{
+            margin: 10,
+          }}
+          lightTheme
+        />
+        <Ionicons
+          onPress={() => submitSearch()}
+          name="send"
+          size={30}
+          style={{
+            margin: 10,
+            color: CONST.MAIN_COLOR,
+            alignSelf: 'center',
+          }}
+        />
+      </View>
+    )
+  }
 
   const renderPendingPhotos = () => {
+    const { uuid, nickName, topOffset, photosList } = authContext
+
     if (pendingPhotos.length > 0) {
       return (
         <View>
@@ -934,7 +960,12 @@ const PhotosList = () => {
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
 
-  if (isTandcAccepted && netAvailable && location && photosList.length > 0) {
+  if (
+    isTandcAccepted &&
+    netAvailable &&
+    location &&
+    authContext?.photosList.length > 0
+  ) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
@@ -1062,7 +1093,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList.length === 0 && !loading) {
+  if (authContext?.photosList.length === 0 && !loading) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}

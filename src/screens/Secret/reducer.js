@@ -10,9 +10,6 @@ import * as CONST from '../../consts'
 
 import * as ACTION_TYPES from './action_types'
 
-export const UUID_KEY = 'wisaw_device_uuid'
-const NICK_NAME_KEY = 'wisaw_nick_name'
-
 export const initialState = {
   uuid: null,
   nickName: '',
@@ -174,8 +171,8 @@ export function resetSecret() {
     const { topOffset } = getState().photosList
     try {
       await Promise.all([
-        SecureStore.deleteItemAsync(UUID_KEY),
-        SecureStore.deleteItemAsync(NICK_NAME_KEY),
+        SecureStore.deleteItemAsync(CONST.UUID_KEY),
+        SecureStore.deleteItemAsync(CONST.NICK_NAME_KEY),
       ])
       const uuid = await getUUID()
       await storeUUID(uuid)
@@ -197,7 +194,7 @@ export function resetSecret() {
 }
 const storeUUID = async (uuid) => {
   try {
-    await SecureStore.setItemAsync(UUID_KEY, uuid)
+    await SecureStore.setItemAsync(CONST.UUID_KEY, uuid)
   } catch (err) {
     Toast.show({
       text1: 'Unable to store UUID',
@@ -210,7 +207,7 @@ const storeUUID = async (uuid) => {
 export async function getUUID() {
   let uuid
   try {
-    uuid = await SecureStore.getItemAsync(UUID_KEY)
+    uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
   } catch (err) {
     uuid = null
   }
@@ -227,7 +224,7 @@ export async function getUUID() {
 
 const storeNickName = async (nickName) => {
   try {
-    await SecureStore.setItemAsync(NICK_NAME_KEY, nickName)
+    await SecureStore.setItemAsync(CONST.NICK_NAME_KEY, nickName)
   } catch (err) {
     Toast.show({
       text1: 'Unable to store NickName',
@@ -238,6 +235,6 @@ const storeNickName = async (nickName) => {
 }
 
 export async function getStoredNickName() {
-  const nickName = await SecureStore.getItemAsync(NICK_NAME_KEY)
+  const nickName = await SecureStore.getItemAsync(CONST.NICK_NAME_KEY)
   return nickName || ''
 }
