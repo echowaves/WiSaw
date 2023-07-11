@@ -132,10 +132,6 @@ const PhotosList = () => {
 
   const [pageNumber, setPageNumber] = useState(null)
 
-  const [currentBatch, setCurrentBatch] = useState(
-    `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-  )
-
   const [pendingPhotos, setPendingPhotos] = useState([])
 
   const [activeSegment, setActiveSegment] = useState(0)
@@ -198,7 +194,9 @@ const PhotosList = () => {
   }
 
   const load = async () => {
-    const { uuid, topOffset } = authContext
+    const { uuid, topOffset, currentBatch } = authContext
+
+    setLoading(true)
 
     const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
@@ -272,8 +270,7 @@ const PhotosList = () => {
   )
 
   const updateIndex = async (index) => {
-    await setActiveSegment(index)
-    await reload()
+    setActiveSegment(index)
   }
 
   const renderHeaderTitle = () => (
@@ -329,17 +326,23 @@ const PhotosList = () => {
 
   const reload = async () => {
     const { uuid, topOffset } = authContext
-
-    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
-    // await new Promise((resolve) => setTimeout(resolve, 500))
-    setLoading(true)
-    updateNavBar()
     setPageNumber(0)
-
     setAuthContext((prevAuthContext) => ({
       ...prevAuthContext,
       photosList: [],
+      currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
     }))
+
+    // await new Promise((resolve) => setTimeout(resolve, 500))
+    // setPageNumber(0)
+    // setLoading(true)
+    // updateNavBar()
+
+    // setAuthContext((prevAuthContext) => ({
+    //   ...prevAuthContext,
+    //   photosList: [],
+    //   currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+    // }))
 
     load()
 
@@ -559,14 +562,14 @@ const PhotosList = () => {
 
   useEffect(() => {
     // console.log({ pageNumber })
-    setLoading(true)
     load()
   }, [pageNumber])
 
-  // useEffect(() => {
-  //   // console.log({ activeSegment })
-  //   reload()
-  // }, [activeSegment])
+  useEffect(() => {
+    // console.log({ activeSegment })
+    updateNavBar()
+    reload()
+  }, [activeSegment])
 
   useEffect(() => {
     if (wantToLoadMore() && !loading) {
