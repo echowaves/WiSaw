@@ -1,4 +1,4 @@
-import React, { useRef, useState /* useEffect */ } from 'react'
+import React, { useRef, useState, useContext /* useEffect */ } from 'react'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -36,7 +36,9 @@ import * as CONST from '../../consts'
 
 import ImageView from './ImageView'
 
-const Photo = ({ photo, topOffset, uuid }) => {
+const Photo = ({ photo }) => {
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+
   const componentIsMounted = useRef(true)
 
   const friendsList = useSelector((state) => state.friendsList.friendsList)
@@ -60,6 +62,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   useFocusEffect(
     // use this to make the navigastion to a detailed screen faster
     React.useCallback(() => {
+      const { uuid, topOffset } = authContext
+
       const task = InteractionManager.runAfterInteractions(async () => {
         if (componentIsMounted) {
           const loadedPhotoDetails = await reducer.getPhotoDetails({
@@ -97,6 +101,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   }
 
   const renderCommentsStats = () => {
+    const { uuid, topOffset } = authContext
+
     if (!photoDetails?.comments || photoDetails?.comments?.length === 0) {
       return (
         <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -168,6 +174,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   }
 
   const renderCommentButtons = ({ comment }) => {
+    const { uuid, topOffset } = authContext
+
     if (!comment?.hiddenButtons) {
       return (
         <View
@@ -221,6 +229,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   }
 
   const renderCommentsRows = () => {
+    const { uuid, topOffset } = authContext
+
     if (photoDetails?.comments) {
       return (
         <View>
@@ -300,6 +310,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   }
 
   const renderAddCommentsRow = () => {
+    const { uuid, topOffset } = authContext
+
     if (!photoDetails?.comments) {
       return <Text />
     }
@@ -482,6 +494,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   const isPhotoBannedByMe = () => bans.includes(photo?.id)
 
   const handleDelete = () => {
+    const { uuid, topOffset } = authContext
+
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: 'Unable to delete Starred photo',
@@ -499,7 +513,17 @@ const Photo = ({ photo, topOffset, uuid }) => {
         {
           text: 'Yes',
           onPress: async () => {
-            await reducer.deletePhoto({ photo, uuid, topOffset })
+            const deleted = await reducer.deletePhoto({
+              photo,
+              uuid,
+              topOffset,
+            })
+            if (deleted) {
+              setAuthContext((prevAuthContext) => ({
+                ...prevAuthContext,
+                photosList: [...prevAuthContext.photosList],
+              }))
+            }
             navigation.goBack()
           },
         },
@@ -509,6 +533,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   }
 
   const handleBan = () => {
+    const { uuid, topOffset } = authContext
+
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: 'Unable to Report Starred photo',
@@ -542,6 +568,8 @@ const Photo = ({ photo, topOffset, uuid }) => {
   }
 
   const handleFlipWatch = async () => {
+    const { uuid, topOffset } = authContext
+
     try {
       if (photoDetails?.isPhotoWatched) {
         setPhotoDetails({
@@ -566,132 +594,135 @@ const Photo = ({ photo, topOffset, uuid }) => {
     }
   }
 
-  const renderFooter = () => (
-    <SafeAreaView
-      style={{
-        backgroundColor: CONST.NAV_COLOR,
-        width,
-        borderWidth: 0.5,
-        borderColor: 'rgba(100,100,100,0.1)',
-        height: 85,
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        left: 0,
-      }}
-    >
-      {photoDetails?.isPhotoWatched === undefined && (
-        <LinearProgress
-          color={CONST.MAIN_COLOR}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            left: 0,
-          }}
-        />
-      )}
-      {photoDetails?.isPhotoWatched !== undefined && (
-        <Grid
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 0,
-            left: 0,
-          }}
-        >
-          {/* delete button */}
-          <Col
+  const renderFooter = () => {
+    const { uuid, topOffset } = authContext
+    return (
+      <SafeAreaView
+        style={{
+          backgroundColor: CONST.NAV_COLOR,
+          width,
+          borderWidth: 0.5,
+          borderColor: 'rgba(100,100,100,0.1)',
+          height: 85,
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          left: 0,
+        }}
+      >
+        {photoDetails?.isPhotoWatched === undefined && (
+          <LinearProgress
+            color={CONST.MAIN_COLOR}
             style={{
-              justifyContent: 'center',
-              alignItems: 'center',
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              left: 0,
             }}
-            onPress={() => handleDelete()}
+          />
+        )}
+        {photoDetails?.isPhotoWatched !== undefined && (
+          <Grid
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 0,
+              left: 0,
+            }}
           >
-            <FontAwesome
-              name="trash"
+            {/* delete button */}
+            <Col
               style={{
-                color: photoDetails?.isPhotoWatched
-                  ? CONST.SECONDARY_COLOR
-                  : CONST.MAIN_COLOR,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Delete</Text>
-          </Col>
-          {/* ban button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={() => handleBan()}
-          >
-            <FontAwesome
-              name="ban"
-              style={{
-                color:
-                  photoDetails?.isPhotoWatched || isPhotoBannedByMe()
+              onPress={() => handleDelete()}
+            >
+              <FontAwesome
+                name="trash"
+                style={{
+                  color: photoDetails?.isPhotoWatched
                     ? CONST.SECONDARY_COLOR
                     : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Report Abuse</Text>
-          </Col>
-          {/* watch button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={async () => {
-              handleFlipWatch()
-            }}
-          >
-            {photoDetails.watchersCount > 0 && (
-              <Badge
-                badgeStyle={{
-                  backgroundColor: CONST.MAIN_COLOR,
                 }}
-                containerStyle={{ position: 'absolute', top: -9, right: -9 }}
-                value={photoDetails.watchersCount}
+                size={30}
               />
-            )}
-            <AntDesign
-              name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
+              <Text style={{ fontSize: 10 }}>Delete</Text>
+            </Col>
+            {/* ban button */}
+            <Col
               style={{
-                color: CONST.MAIN_COLOR,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              {`${photoDetails?.isPhotoWatched ? 'un-Star' : 'Star'}`}
-            </Text>
-          </Col>
-          {/* share button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={async () => {
-              await reducer.sharePhoto({ photo, photoDetails, topOffset })
-            }}
-          >
-            <FontAwesome
-              name="share"
+              onPress={() => handleBan()}
+            >
+              <FontAwesome
+                name="ban"
+                style={{
+                  color:
+                    photoDetails?.isPhotoWatched || isPhotoBannedByMe()
+                      ? CONST.SECONDARY_COLOR
+                      : CONST.MAIN_COLOR,
+                }}
+                size={30}
+              />
+              <Text style={{ fontSize: 10 }}>Report Abuse</Text>
+            </Col>
+            {/* watch button */}
+            <Col
               style={{
-                color: CONST.MAIN_COLOR,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Share</Text>
-          </Col>
-        </Grid>
-      )}
-    </SafeAreaView>
-  )
+              onPress={async () => {
+                handleFlipWatch()
+              }}
+            >
+              {photoDetails.watchersCount > 0 && (
+                <Badge
+                  badgeStyle={{
+                    backgroundColor: CONST.MAIN_COLOR,
+                  }}
+                  containerStyle={{ position: 'absolute', top: -9, right: -9 }}
+                  value={photoDetails.watchersCount}
+                />
+              )}
+              <AntDesign
+                name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
+                style={{
+                  color: CONST.MAIN_COLOR,
+                }}
+                size={30}
+              />
+              <Text style={{ fontSize: 10 }}>
+                {`${photoDetails?.isPhotoWatched ? 'un-Star' : 'Star'}`}
+              </Text>
+            </Col>
+            {/* share button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={async () => {
+                await reducer.sharePhoto({ photo, photoDetails, topOffset })
+              }}
+            >
+              <FontAwesome
+                name="share"
+                style={{
+                  color: CONST.MAIN_COLOR,
+                }}
+                size={30}
+              />
+              <Text style={{ fontSize: 10 }}>Share</Text>
+            </Col>
+          </Grid>
+        )}
+      </SafeAreaView>
+    )
+  }
 
   const styles = StyleSheet.create({
     photoContainer: {

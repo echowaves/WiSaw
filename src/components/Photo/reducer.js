@@ -139,6 +139,7 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
       type: 'success',
       topOffset,
     })
+    return true
   } catch (err) {
     Toast.show({
       text1: 'Unable to delete',
@@ -147,7 +148,7 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
       topOffset,
     })
   }
-  return null
+  return false
 }
 
 export async function sharePhoto({ photo, photoDetails, topOffset }) {
