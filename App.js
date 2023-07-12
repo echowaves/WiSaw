@@ -220,7 +220,7 @@ const App = () => {
             </Drawer.Navigator>
           </NavigationContainer>
         </ThemeProvider>
-        {/* <Toast ref={(ref) => Toast.setRef(ref)} /> */}
+        <Toast ref={(ref) => Toast.setRef(ref)} />
       </AuthContext.Provider>
     </Provider>
   )

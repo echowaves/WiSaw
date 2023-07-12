@@ -36,7 +36,7 @@ export const initialState = {
   // orientation: 'portrait',
   // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
   // isLastPage: true,
-  // uploadingPhoto: false,
+  // uploadPendingPhotosloadingPhoto: false,
   // toastOffset: 100,
   // currentIndex: 0,
 }
@@ -436,7 +436,7 @@ const genLocalThumbs = async (image) => {
   }
 }
 
-const addToQueue = async (image) => {
+export const addToQueue = async (image) => {
   // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
 
   let pendingImages = JSON.parse(
@@ -481,7 +481,7 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
   // updatePendingPhotos()
 }
 
-const generatePhoto = async ({ uuid, lat, lon, video }) => {
+export const generatePhoto = async ({ uuid, lat, lon, video }) => {
   const photo = (
     await CONST.gqlClient.mutate({
       mutation: gql`
@@ -544,7 +544,7 @@ const uploadFile = async ({ assetKey, contentType, assetUri }) => {
   return { responseData }
 }
 
-const uploadItem = async ({ item }) => {
+export const uploadItem = async ({ item }) => {
   try {
     // if video -- upload video file in addition to the image
     if (item.type === 'video') {
@@ -580,143 +580,4 @@ const uploadItem = async ({ item }) => {
     }
   }
 }
-
-export async function uploadPendingPhotos({
-  uuid,
-  topOffset,
-  netAvailable,
-  uploadingPhoto,
-}) {
-  // return Promise.resolve()
-  console.log(1)
-  if (netAvailable === false) {
-    return Promise.resolve()
-  }
-
-  if (uploadingPhoto) {
-    console.log({ uploadingPhoto })
-    // already uploading photos, just exit here
-    return Promise.resolve()
-  }
-
-  try {
-    let i
-    // here let's iterate over the items and upload one file at a time
-
-    // generatePhotoQueue will only contain item with undefined photo
-    const generatePhotoQueue = (await getQueue()).filter(
-      (image) => !image.photo,
-    )
-    console.log(2, generatePhotoQueue.length)
-
-    // first pass iteration to generate photos ID and the photo record on the backend
-    for (i = 0; i < generatePhotoQueue.length; i += 1) {
-      const item = generatePhotoQueue[i]
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        const photo = await generatePhoto({
-          uuid,
-          lat: item.location.coords.latitude,
-          lon: item.location.coords.longitude,
-          video: item?.type === 'video',
-        })
-        // eslint-disable-next-line no-await-in-loop
-        CacheManager.addToCache({
-          file: item.localThumbUrl,
-          key: `${photo.id}-thumb`,
-        })
-        // eslint-disable-next-line no-await-in-loop
-        CacheManager.addToCache({
-          file: item.localImgUrl,
-          key: `${photo.id}`,
-        })
-        // eslint-disable-next-line no-await-in-loop
-        await removeFromQueue(item)
-        // eslint-disable-next-line no-await-in-loop
-        await addToQueue({
-          ...item,
-          photo,
-        })
-      } catch (err1) {
-        // eslint-disable-next-line no-console
-        console.log({ err1 })
-        if (`${err1}`.includes('banned')) {
-          // eslint-disable-next-line no-await-in-loop
-          await removeFromQueue(item)
-          Toast.show({
-            text1: "Sorry, you've been banned",
-            text2: 'Try again later',
-            type: 'error',
-            topOffset,
-          })
-        }
-      }
-    }
-
-    // uploadQueue will only contain item with photo generated on the backend
-    const uploadQueue = (await getQueue()).filter((image) => image.photo)
-    // second pass -- upload files
-    for (i = 0; i < uploadQueue.length; i += 1) {
-      const item = uploadQueue[i]
-
-      // eslint-disable-next-line no-await-in-loop
-      const { responseData } = await uploadItem({
-        item,
-      })
-
-      if (responseData.status === 200) {
-        // eslint-disable-next-line no-await-in-loop
-        await removeFromQueue(item)
-        // eslint-disable-next-line no-await-in-loop
-        // await updatePendingPhotos()
-
-        // show the photo in the photo list immidiately
-
-        // eslint-disable-next-line no-await-in-loop
-        // dispatch({
-        //   type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
-        //   photo: item.photo,
-        // })
-        Toast.show({
-          text1: `${item.photo.video ? 'Video' : 'Photo'} uploaded`,
-          topOffset,
-          visibilityTime: 500,
-        })
-      } else {
-        // alert(JSON.stringify({ responseData }))
-        Toast.show({
-          text1: 'Upload is going slooooow...',
-          text2: 'Still trying to upload.',
-          visibilityTime: 500,
-          topOffset,
-        })
-      }
-    }
-  } catch (err2) {
-    // eslint-disable-next-line no-console
-    // console.log({ err2 })
-    Toast.show({
-      text1: 'Upload is slow...',
-      text2: 'Still trying to upload.',
-      visibilityTime: 500,
-      topOffset,
-    })
-    // console.log({ error }) // eslint-disable-line no-console
-    // dispatch(uploadPendingPhotos())
-  }
-
-  // sleep for 1 second before re-trying
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  if ((await getQueue()).length > 0) {
-    uploadPendingPhotos({
-      uuid,
-      topOffset,
-      netAvailable,
-      uploadingPhoto,
-    })
-  }
-  return Promise.resolve()
-}
-
 // export default reducer
