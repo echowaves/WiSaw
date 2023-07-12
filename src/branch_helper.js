@@ -1,6 +1,25 @@
 import Branch, { BranchEvent } from 'react-native-branch'
 import { Alert } from 'react-native'
 
+const navigateByParams = async ({ params, navigation }) => {
+  // alert(JSON.stringify({ params }))
+  // alert(JSON.stringify({ params, hello: "hello" }))
+  if (params?.photoId) {
+    // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
+    await navigation.popToTop()
+    await navigation.navigate('PhotosDetailsShared', {
+      photoId: params?.photoId,
+    })
+  }
+  if (params?.friendshipUuid) {
+    // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
+    await navigation.popToTop()
+    await navigation.navigate('ConfirmFriendship', {
+      friendshipUuid: params?.friendshipUuid,
+    })
+  }
+}
+
 export const initBranch = async ({ navigation }) => {
   // eslint-disable-next-line
   // if (!__DEV__) {
@@ -19,7 +38,7 @@ export const initBranch = async ({ navigation }) => {
     // alert(JSON.stringify({ bundle }))
     if (bundle && bundle?.params && !bundle?.error) {
       // // `bundle.params` contains all the info about the link.
-      _navigateByParams({ params: bundle.params, navigation })
+      navigateByParams({ params: bundle.params, navigation })
       // } else if (bundle?.error === 'Warning. Session initialization already happened.') {
       //   // this could be android path, because it always contains error "Session initializaion already happened"
       //   Alert.alert(
@@ -28,34 +47,14 @@ export const initBranch = async ({ navigation }) => {
       //   )
     } else {
       const latestParams = await Branch.getLatestReferringParams()
-      _navigateByParams({ params: latestParams, navigation })
+      navigateByParams({ params: latestParams, navigation })
     }
   })
   // }
 }
 
-const _navigateByParams = async ({ params, navigation }) => {
-  // alert(JSON.stringify({ params }))
-  // alert(JSON.stringify({ params, hello: "hello" }))
-  if (params?.photoId) {
-    // alert(JSON.stringify({ photoId: bundle?.params?.photoId }))
-    await navigation.popToTop()
-    await navigation.navigate('PhotosDetailsShared', {
-      photoId: params?.photoId,
-      topOffset,
-    })
-  }
-  if (params?.friendshipUuid) {
-    // alert(JSON.stringify({ friendshipUuid: params?.friendshipUuid }))
-    await navigation.popToTop()
-    await navigation.navigate('ConfirmFriendship', {
-      friendshipUuid: params?.friendshipUuid,
-    })
-  }
-}
-
 export const sharePhoto = async ({ photo, photoDetails }) => {
-  const _branchUniversalObject = await Branch.createBranchUniversalObject(
+  const branchUniversalObject = await Branch.createBranchUniversalObject(
     `${photo?.id}`,
     {
       // title: photo.id,
@@ -96,11 +95,11 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
     emailSubject,
   }
   //   alert(JSON.stringify({ _branchUniversalObject }))
-  await _branchUniversalObject.showShareSheet(shareOptions)
+  await branchUniversalObject.showShareSheet(shareOptions)
 }
 
 export const shareFriend = async ({ friendshipUuid, contactName }) => {
-  const _branchUniversalObject = await Branch.createBranchUniversalObject(
+  const branchUniversalObject = await Branch.createBranchUniversalObject(
     `${friendshipUuid}`,
     {
       locallyIndex: false,
@@ -125,5 +124,5 @@ export const shareFriend = async ({ friendshipUuid, contactName }) => {
     emailSubject: 'What I Saw today friendship request...',
   }
   // alert(JSON.stringify({ branchUniversalObject }))
-  await _branchUniversalObject.showShareSheet(shareOptions)
+  await branchUniversalObject.showShareSheet(shareOptions)
 }

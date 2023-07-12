@@ -18,20 +18,9 @@ const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
 
-  const { photoId, topOffset, uuid } = route.params
+  const { photoId } = route.params
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerLeft: renderHeaderLeft,
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-    loadPhoto(photoId)
-  }, [])
-
-  const loadPhoto = async (photoId) => {
+  const loadPhoto = async (photoid) => {
     try {
       const response = (
         await CONST.gqlClient.query({
@@ -52,7 +41,7 @@ const PhotosDetailsShared = ({ route }) => {
             }
           `,
           variables: {
-            photoId,
+            photoId: photoid,
           },
         })
       ).data.getPhotoAllCurr
@@ -85,14 +74,22 @@ const PhotosDetailsShared = ({ route }) => {
     />
   )
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: renderHeaderTitle,
+      headerLeft: renderHeaderLeft,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
+    loadPhoto(photoId)
+  }, [])
+
   if (item) {
-    return (
-      <Photo photo={item} key={item.id} topOffset={topOffset} uuid={uuid} />
-    )
+    return <Photo photo={item} key={item.id} />
   }
   return <Text />
 }
-
 PhotosDetailsShared.propTypes = {
   // photoId: PropTypes.number.isRequired,
   route: PropTypes.object.isRequired,
