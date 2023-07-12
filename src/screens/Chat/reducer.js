@@ -52,7 +52,7 @@ const reducer = (state = initialState, action) => {
   }
 }
 
-const _genLocalThumb = async (localImgUrl) => {
+const genLocalThumb = async (localImgUrl) => {
   const manipResult = await ImageManipulator.manipulateAsync(
     localImgUrl,
     [{ resize: { height: 300 } }],
@@ -61,7 +61,7 @@ const _genLocalThumb = async (localImgUrl) => {
   return manipResult.uri
 }
 
-const _addToQueue = async (image) => {
+const addToQueue = async (image) => {
   // localImgUrl, chatPhotoHash, localThumbUrl
 
   let pendingImages = JSON.parse(
@@ -78,7 +78,7 @@ const _addToQueue = async (image) => {
 }
 
 // returns an array that has everything needed for rendering
-const _getQueue = async () => {
+const getQueue = async () => {
   // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
   await CONST.makeSureDirectoryExists({
     directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
@@ -163,7 +163,7 @@ export const queueFileForUpload =
       to: localImgUrl,
     })
 
-    const localThumbUrl = await _genLocalThumb(localImgUrl)
+    const localThumbUrl = await genLocalThumb(localImgUrl)
 
     CacheManager.addToCache({
       file: localThumbUrl,
@@ -177,7 +177,7 @@ export const queueFileForUpload =
       messageUuid,
     }
 
-    await _addToQueue(image)
+    await addToQueue(image)
   }
 
 export function uploadPendingPhotos({ chatUuid }) {
@@ -202,7 +202,7 @@ export function uploadPendingPhotos({ chatUuid }) {
       let i
       // here let's iterate over the items and upload one file at a time
 
-      const generatePhotoQueue = await _getQueue()
+      const generatePhotoQueue = await getQueue()
       // console.log({ generatePhotoQueue })
       // first pass iteration to generate photos ID and the photo record on the backend
       for (i = 0; i < generatePhotoQueue.length; i += 1) {
@@ -273,7 +273,7 @@ export function uploadPendingPhotos({ chatUuid }) {
     // sleep for 1 second before re-trying
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    if ((await _getQueue()).length > 0) {
+    if ((await getQueue()).length > 0) {
       dispatch(uploadPendingPhotos({ chatUuid }))
     }
   }

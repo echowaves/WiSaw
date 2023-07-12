@@ -1,26 +1,19 @@
 import React from 'react'
 
-import { useDispatch } from "react-redux"
+import { useDispatch } from 'react-redux'
 
-import {
-  Alert,
-  View,
-  StyleSheet,
-  TouchableHighlight,
-} from 'react-native'
+import { Alert, View, StyleSheet, TouchableHighlight } from 'react-native'
 
 import CachedImage from 'expo-cached-image'
 
 import PropTypes from 'prop-types'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
-import { cancelPendingUpload } from '../../screens/PhotosList/reducer'
+import { removeFromQueue } from '../../screens/PhotosList/reducer'
 
-const ThumbPending = props => {
-  const {
-    item, thumbDimension,
-  } = props
+const ThumbPending = (props) => {
+  const { item, thumbDimension } = props
 
   const dispatch = useDispatch()
 
@@ -28,7 +21,8 @@ const ThumbPending = props => {
     container: {
       borderRadius: 5,
       borderWidth: 2,
-      borderColor: item.type === 'image' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR,
+      borderColor:
+        item.type === 'image' ? CONST.MAIN_COLOR : CONST.EMPHASIZED_COLOR,
     },
     thumbnail: {
       flex: 1,
@@ -39,7 +33,7 @@ const ThumbPending = props => {
     },
   })
 
-  const onThumbPress = item => {
+  const onThumbPress = (thumbItem) => {
     Alert.alert(
       'This photo is uploading',
       'Do you want to try to delete it?',
@@ -48,11 +42,11 @@ const ThumbPending = props => {
         {
           text: 'Yes',
           onPress: () => {
-            dispatch(cancelPendingUpload(item))
+            removeFromQueue(thumbItem)
           },
         },
       ],
-      { cancelable: true }
+      { cancelable: true },
     )
   }
 
@@ -64,10 +58,8 @@ const ThumbPending = props => {
     <View>
       <TouchableHighlight
         onPress={() => onThumbPress(item)}
-        style={[
-          styles.container,
-          thumbWidthStyles,
-        ]}>
+        style={[styles.container, thumbWidthStyles]}
+      >
         <CachedImage
           source={{ uri: item.localThumbUrl }}
           cacheKey={item.localCacheKey}
@@ -87,4 +79,4 @@ ThumbPending.defaultProps = {
   thumbDimension: 100,
 }
 
-export default (ThumbPending)
+export default ThumbPending

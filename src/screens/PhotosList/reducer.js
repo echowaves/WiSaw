@@ -316,7 +316,7 @@ export function acceptTandC() {
   }
 }
 
-const removeFromQueue = async (imageToRemove) => {
+export const removeFromQueue = async (imageToRemove) => {
   let pendingImagesBefore = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
   )
@@ -382,14 +382,6 @@ export const getQueue = async () => {
   })
 
   return imagesInQueue
-}
-
-export function cancelPendingUpload(item) {
-  return async (dispatch) => {
-    await removeFromQueue(item)
-
-    // updatePendingPhotos()
-  }
 }
 
 // export function setActiveSegment(activeSegment) {
@@ -460,38 +452,34 @@ const addToQueue = async (image) => {
   })
 }
 
-export const queueFileForUpload =
-  async ({ cameraImgUrl, type, location }) =>
-  async (dispatch, getState) => {
-    const localImageName = cameraImgUrl.substr(
-      cameraImgUrl.lastIndexOf('/') + 1,
-    )
-    const localCacheKey = localImageName.split('.')[0]
+export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
+  const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
+  const localCacheKey = localImageName.split('.')[0]
 
-    const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
-    // copy file to cacheDir
-    await FileSystem.moveAsync({
-      from: cameraImgUrl,
-      to: localImgUrl,
-    })
+  const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
+  // copy file to cacheDir
+  await FileSystem.moveAsync({
+    from: cameraImgUrl,
+    to: localImgUrl,
+  })
 
-    const image = {
-      localImgUrl,
-      localImageName,
-      type,
-      location,
-      localCacheKey,
-    }
-    const thumbEnhansedImage = await genLocalThumbs(image)
-    await CacheManager.addToCache({
-      file: thumbEnhansedImage.localThumbUrl,
-      key: thumbEnhansedImage.localCacheKey,
-    })
-
-    await addToQueue(thumbEnhansedImage)
-
-    // updatePendingPhotos()
+  const image = {
+    localImgUrl,
+    localImageName,
+    type,
+    location,
+    localCacheKey,
   }
+  const thumbEnhansedImage = await genLocalThumbs(image)
+  await CacheManager.addToCache({
+    file: thumbEnhansedImage.localThumbUrl,
+    key: thumbEnhansedImage.localCacheKey,
+  })
+
+  await addToQueue(thumbEnhansedImage)
+
+  // updatePendingPhotos()
+}
 
 const generatePhoto = async ({ uuid, lat, lon, video }) => {
   const photo = (
@@ -599,13 +587,14 @@ export async function uploadPendingPhotos({
   netAvailable,
   uploadingPhoto,
 }) {
-  return Promise.resolve()
-
+  // return Promise.resolve()
+  console.log(1)
   if (netAvailable === false) {
     return Promise.resolve()
   }
 
   if (uploadingPhoto) {
+    console.log({ uploadingPhoto })
     // already uploading photos, just exit here
     return Promise.resolve()
   }
@@ -618,6 +607,7 @@ export async function uploadPendingPhotos({
     const generatePhotoQueue = (await getQueue()).filter(
       (image) => !image.photo,
     )
+    console.log(2, generatePhotoQueue.length)
 
     // first pass iteration to generate photos ID and the photo record on the backend
     for (i = 0; i < generatePhotoQueue.length; i += 1) {

@@ -503,13 +503,13 @@ const Chat = ({ route }) => {
       // exif: false,
     })
 
-    if (cameraReturn.cancelled === true) {
+    if (cameraReturn.canceled === true) {
       return
     }
 
-    await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
+    await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
 
-    const { uri } = cameraReturn
+    const { uri } = cameraReturn.assets[0]
     uploadAsset({ uri })
   }
 

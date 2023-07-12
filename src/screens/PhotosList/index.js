@@ -113,6 +113,7 @@ const PhotosList = () => {
   const navigation = useNavigation()
 
   const dispatch = useDispatch()
+
   const { width, height } = useWindowDimensions()
 
   // const deviceOrientation = useDeviceOrientation()
@@ -429,17 +430,15 @@ const PhotosList = () => {
       })
     }
 
-    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
-    if (cameraReturn.cancelled === false) {
-      await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
+    // alert(`cameraReturn.canceled ${cameraReturn.canceled}`)
+    if (cameraReturn.canceled === false) {
+      await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
       // have to wait, otherwise the upload will not start
-      await dispatch(
-        reducer.queueFileForUpload({
-          cameraImgUrl: cameraReturn.uri,
-          type: cameraReturn.type,
-          location,
-        }),
-      )
+      await reducer.queueFileForUpload({
+        cameraImgUrl: cameraReturn.assets[0].uri,
+        type: cameraReturn.assets[0].type,
+        location,
+      })
 
       reducer.uploadPendingPhotos({
         uuid,
