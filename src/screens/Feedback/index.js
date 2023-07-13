@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 
@@ -11,15 +11,13 @@ import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 const maxStringLength = 2000
 
 const FeedbackScreen = () => {
   const navigation = useNavigation()
-
-  const topOffset = useSelector((state) => state.photosList.topOffset)
-  const uuid = useSelector((state) => state.secret.uuid)
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
 
   // const [diskSpace, setDiskSpace] = useState('')
   // const [diskCapacity, setDiskCapacity] = useState('')
@@ -32,58 +30,9 @@ const FeedbackScreen = () => {
     _setInputText(data)
   }
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'feedback',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
+  const submitFeedback = async ({ feedbackText }) => {
+    const { uuid, topOffset, currentBatch } = authContext
 
-    // const initState = async () => {
-    //   // setDiskSpace(await FileSystem.getFreeDiskStorageAsync())
-    //   // setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
-    // }
-    // initState()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-  })
-
-  const renderHeaderRight = () => (
-    <Ionicons
-      onPress={() => handleSubmit()}
-      name="send"
-      size={30}
-      style={{
-        marginRight: 10,
-        color: CONST.MAIN_COLOR,
-      }}
-    />
-  )
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => navigation.goBack()}
-    />
-  )
-
-  const handleSubmit = () => {
-    _submitFeedback({ feedbackText: inputTextRef.current.trim() })
-  }
-  const _submitFeedback = async ({ feedbackText }) => {
     try {
       if (feedbackText.trim().length < 5) {
         throw Error('unable to submit empty feedback')
@@ -121,6 +70,57 @@ const FeedbackScreen = () => {
       })
     }
   }
+  const handleSubmit = () => {
+    submitFeedback({ feedbackText: inputTextRef.current.trim() })
+  }
+
+  const renderHeaderRight = () => (
+    <Ionicons
+      onPress={() => handleSubmit()}
+      name="send"
+      size={30}
+      style={{
+        marginRight: 10,
+        color: CONST.MAIN_COLOR,
+      }}
+    />
+  )
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
+    />
+  )
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'feedback',
+      headerTintColor: CONST.MAIN_COLOR,
+      headerRight: renderHeaderRight,
+      headerLeft: renderHeaderLeft,
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
+
+    // const initState = async () => {
+    //   // setDiskSpace(await FileSystem.getFreeDiskStorageAsync())
+    //   // setDiskCapacity(await FileSystem.getTotalDiskCapacityAsync())
+    // }
+    // initState()
+  }, [])
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+  })
 
   return (
     <SafeAreaView style={styles.container}>
