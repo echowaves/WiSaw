@@ -8,190 +8,162 @@ import * as SecureStore from 'expo-secure-store'
 
 import * as CONST from '../../consts'
 
-import * as ACTION_TYPES from './action_types'
+// export const initialState = {
+//   uuid: null,
+//   nickName: '',
+// }
 
-export const initialState = {
-  uuid: null,
-  nickName: '',
-}
+// export default function reducer(state = initialState, action) {
+//   switch (action.type) {
+//     case ACTION_TYPES.INIT_UUID:
+//       return {
+//         ...state,
+//         uuid: action.uuid,
+//       }
+//     case ACTION_TYPES.REGISTER_SECRET:
+//       return {
+//         ...state,
+//         nickName: action.nickName,
+//         uuid: action.uuid,
+//       }
+//     case ACTION_TYPES.RESET_STATE:
+//       return {
+//         ...state,
+//         nickName: null,
+//         uuid: action.uuid,
+//       }
+//     default:
+//       return state
+//   }
+// }
 
-export default function reducer(state = initialState, action) {
-  switch (action.type) {
-    case ACTION_TYPES.INIT_UUID:
-      return {
-        ...state,
-        uuid: action.uuid,
-      }
-    case ACTION_TYPES.REGISTER_SECRET:
-      return {
-        ...state,
-        nickName: action.nickName,
-        uuid: action.uuid,
-      }
-    case ACTION_TYPES.RESET_STATE:
-      return {
-        ...state,
-        nickName: null,
-        uuid: action.uuid,
-      }
-    default:
-      return state
-  }
-}
-
-export function registerSecret({ nickName, secret, uuid }) {
+export async function registerSecret({ secret, topOffset, nickName, uuid }) {
   // console.log({ nickName })
-  return async (dispatch, getState) => {
-    const { topOffset } = getState().photosList
 
-    // console.log({ nickName, secret, uuid })
-
-    try {
-      const returnedSecret = (
-        await CONST.gqlClient.mutate({
-          mutation: gql`
-            mutation registerSecret(
-              $nickName: String!
-              $secret: String!
-              $uuid: String!
-            ) {
-              registerSecret(
-                nickName: $nickName
-                secret: $secret
-                uuid: $uuid
-              ) {
-                uuid
-                nickName
-              }
+  try {
+    const returnedSecret = (
+      await CONST.gqlClient.mutate({
+        mutation: gql`
+          mutation registerSecret(
+            $nickName: String!
+            $secret: String!
+            $uuid: String!
+          ) {
+            registerSecret(nickName: $nickName, secret: $secret, uuid: $uuid) {
+              uuid
+              nickName
             }
-          `,
-          variables: {
-            nickName,
-            secret,
-            uuid,
-          },
-        })
-      ).data.registerSecret
-
-      // console.log({ returnedSecret })
-      // console.log(returnedSecret.uuid)
-      // console.log(returnedSecret.nickName)
-
-      await Promise.all([
-        storeUUID(returnedSecret.uuid),
-        storeNickName(returnedSecret.nickName),
-      ])
-
-      dispatch({
-        type: ACTION_TYPES.REGISTER_SECRET,
-        uuid: returnedSecret.uuid,
-        nickName: returnedSecret.nickName,
+          }
+        `,
+        variables: {
+          nickName,
+          secret,
+          uuid,
+        },
       })
+    ).data.registerSecret
 
-      Toast.show({
-        text1: 'Secret attached to this device.',
-        topOffset,
-      })
-    } catch (err) {
-      // console.log({ err })
-      Toast.show({
-        text1: 'Unable to store Secret',
-        text2: err.toString(),
-        type: 'error',
-        topOffset,
-      })
-    }
+    // console.log({ returnedSecret })
+    // console.log(returnedSecret.uuid)
+    // console.log(returnedSecret.nickName)
+
+    await Promise.all([
+      storeUUID(returnedSecret.uuid),
+      storeNickName(returnedSecret.nickName),
+    ])
+
+    Toast.show({
+      text1: 'Secret attached to this device.',
+      topOffset,
+    })
+  } catch (err) {
+    // console.log({ err })
+    Toast.show({
+      text1: 'Unable to store Secret',
+      text2: err.toString(),
+      type: 'error',
+      topOffset,
+    })
   }
 }
 
-export function updateSecret({ nickName, oldSecret, secret, uuid }) {
-  return async (dispatch, getState) => {
-    const { topOffset } = getState().photosList
-
-    try {
-      const updatedSecret = (
-        await CONST.gqlClient.mutate({
-          mutation: gql`
-            mutation updateSecret(
-              $nickName: String!
-              $secret: String!
-              $newSecret: String!
-              $uuid: String!
+export async function updateSecret({
+  nickName,
+  oldSecret,
+  secret,
+  uuid,
+  topOffset,
+}) {
+  try {
+    const updatedSecret = (
+      await CONST.gqlClient.mutate({
+        mutation: gql`
+          mutation updateSecret(
+            $nickName: String!
+            $secret: String!
+            $newSecret: String!
+            $uuid: String!
+          ) {
+            updateSecret(
+              nickName: $nickName
+              secret: $secret
+              newSecret: $newSecret
+              uuid: $uuid
             ) {
-              updateSecret(
-                nickName: $nickName
-                secret: $secret
-                newSecret: $newSecret
-                uuid: $uuid
-              ) {
-                uuid
-                nickName
-              }
+              uuid
+              nickName
             }
-          `,
-          variables: {
-            nickName,
-            secret: oldSecret,
-            newSecret: secret,
-            uuid,
-          },
-        })
-      ).data.updateSecret
-
-      await Promise.all([
-        storeUUID(updatedSecret.uuid),
-        storeNickName(updatedSecret.nickName),
-      ])
-
-      dispatch({
-        type: ACTION_TYPES.REGISTER_SECRET,
-        uuid: updatedSecret.uuid,
-        nickName: updatedSecret.nickName,
+          }
+        `,
+        variables: {
+          nickName,
+          secret: oldSecret,
+          newSecret: secret,
+          uuid,
+        },
       })
+    ).data.updateSecret
 
-      Toast.show({
-        text1: 'Secret updated.',
-        topOffset,
-      })
-    } catch (err) {
-      // console.log({ err })
-      Toast.show({
-        text1: 'Unable to update Secret',
-        text2: err.toString(),
-        type: 'error',
-        topOffset,
-      })
-    }
+    await Promise.all([
+      storeUUID(updatedSecret.uuid),
+      storeNickName(updatedSecret.nickName),
+    ])
+
+    Toast.show({
+      text1: 'Secret updated.',
+      topOffset,
+    })
+  } catch (err) {
+    console.log({ err })
+    Toast.show({
+      text1: 'Unable to update Secret',
+      text2: err.toString(),
+      type: 'error',
+      topOffset,
+    })
   }
 }
 
-export function resetSecret() {
+export async function resetSecret({ topOffset }) {
   // console.log({ nickName })
-  return async (dispatch, getState) => {
-    const { topOffset } = getState().photosList
-    try {
-      await Promise.all([
-        SecureStore.deleteItemAsync(CONST.UUID_KEY),
-        SecureStore.deleteItemAsync(CONST.NICK_NAME_KEY),
-      ])
-      const uuid = await getUUID()
-      await storeUUID(uuid)
-
-      dispatch({
-        type: ACTION_TYPES.RESET_STATE,
-        uuid,
-      })
-    } catch (err) {
-      // console.log({ err })
-      Toast.show({
-        text1: 'Unable to reset Secret',
-        text2: err.toString(),
-        type: 'error',
-        topOffset,
-      })
-    }
+  try {
+    await Promise.all([
+      SecureStore.deleteItemAsync(CONST.UUID_KEY),
+      SecureStore.deleteItemAsync(CONST.NICK_NAME_KEY),
+    ])
+    const uuid = await getUUID()
+    await storeUUID(uuid)
+  } catch (err) {
+    // console.log({ err })
+    Toast.show({
+      text1: 'Unable to reset Secret',
+      text2: err.toString(),
+      type: 'error',
+      topOffset,
+    })
   }
 }
+
 const storeUUID = async (uuid) => {
   try {
     await SecureStore.setItemAsync(CONST.UUID_KEY, uuid)

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -34,14 +34,11 @@ const minNickNameLength = 5 // will also use this parameter for the secret lengt
 
 const SecretScreen = () => {
   const navigation = useNavigation()
-  const dispatch = useDispatch()
 
-  const topOffset = useSelector((state) => state.photosList.topOffset)
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
 
-  const uuid = useSelector((state) => state.secret.uuid)
-
-  const [nickName, setNickName] = useState('')
   const [nickNameEntered, setNickNameEntered] = useState(false)
+  const [nickNameText, setNickNameText] = useState('')
 
   const [oldSecret, setOldSecret] = useState('')
 
@@ -63,74 +60,38 @@ const SecretScreen = () => {
 
   const resetFields = async () => {
     const nnn = await reducer.getStoredNickName()
-    setNickName(nnn)
+    setNickNameText(nnn)
     setNickNameEntered(nnn.length > 0)
     setOldSecret('')
     setSecret('')
     setSecretConfirm('')
   }
+  const handleSubmit = async () => {
+    const { uuid, topOffset, nickName } = authContext
 
-  useEffect(() => {
-    resetFields()
-    navigation.setOptions({
-      headerTitle: 'my secret',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    resetFields()
-  }, [navigation])
-
-  useEffect(() => {
-    setStrength(zxcvbn(secret).score) // from 0 to 4
-  }, [secret])
-
-  useEffect(() => {
-    validate()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nickName, secret, secretConfirm, strength])
-
-  useEffect(() => {
-    if (errorsMap.size === 0 && secret.length > 0) {
-      setCanSubmit(true)
+    if (nickNameEntered) {
+      reducer.updateSecret({
+        nickName: nickNameText,
+        oldSecret,
+        secret,
+        uuid,
+        topOffset,
+      })
     } else {
-      setCanSubmit(false)
+      await reducer.registerSecret({
+        secret,
+        topOffset,
+        nickName: nickNameText,
+        uuid,
+      })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [errorsMap])
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      nickName: nickNameText,
+    }))
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'my secret',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSubmit])
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    scrollView: {
-      alignItems: 'center',
-      marginHorizontal: 0,
-      paddingBottom: 300,
-    },
-  })
-
+    await resetFields()
+  }
   const renderHeaderRight = () => (
     <Ionicons
       onPress={canSubmit ? () => handleSubmit() : null}
@@ -155,41 +116,40 @@ const SecretScreen = () => {
     />
   )
 
-  const handleSubmit = async () => {
-    if (nickNameEntered) {
-      await dispatch(
-        reducer.updateSecret({
-          nickName,
-          oldSecret,
-          secret,
-          uuid,
-        }),
-      )
-    } else {
-      await dispatch(reducer.registerSecret({ nickName, secret, uuid }))
-    }
-    await resetFields()
-  }
-  const handleReset = async () => {
-    await dispatch(reducer.resetSecret())
-    await resetFields()
-    Toast.show({
-      text1: 'Secret reset',
-      text2: 'enter new Secret',
-      topOffset,
+  useEffect(() => {
+    resetFields()
+    navigation.setOptions({
+      headerTitle: 'my secret',
+      headerTintColor: CONST.MAIN_COLOR,
+      headerRight: renderHeaderRight,
+      headerLeft: renderHeaderLeft,
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
     })
-  }
+  }, [])
+
+  useEffect(() => {
+    resetFields()
+  }, [navigation])
+
+  useEffect(() => {
+    setStrength(zxcvbn(secret).score) // from 0 to 4
+  }, [secret])
 
   const validate = () => {
     const errors = new Map()
 
     if (
-      !/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickName.toLowerCase())
+      !/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(
+        nickNameText.toLowerCase(),
+      )
     )
       errors.set('nickName', 'Nickname wrong format.')
-    if (nickName?.length < minNickNameLength)
+    if (nickNameText?.length < minNickNameLength)
       errors.set('nickName', 'Nickname too short.')
-    if (nickName?.length > maxNickNameLength)
+    if (nickNameText?.length > maxNickNameLength)
       errors.set('nickName', 'Nickname too long.')
     if (secret.length === 0) {
       setErrorsMap(errors)
@@ -204,6 +164,53 @@ const SecretScreen = () => {
     if (strength < 3) errors.set('strength', 'Secret is not secure.')
 
     setErrorsMap(errors)
+  }
+  useEffect(() => {
+    validate()
+  }, [nickNameText, secret, secretConfirm, strength])
+
+  useEffect(() => {
+    if (errorsMap.size === 0 && secret.length > 0) {
+      setCanSubmit(true)
+    } else {
+      setCanSubmit(false)
+    }
+  }, [errorsMap])
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'my secret',
+      headerTintColor: CONST.MAIN_COLOR,
+      headerRight: renderHeaderRight,
+      headerLeft: renderHeaderLeft,
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
+  }, [canSubmit])
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      alignItems: 'center',
+      marginHorizontal: 0,
+      paddingBottom: 300,
+    },
+  })
+
+  const handleReset = async () => {
+    const { uuid, topOffset, nickName } = authContext
+
+    await reducer.resetSecret({ topOffset })
+    await resetFields()
+    Toast.show({
+      text1: 'Secret reset',
+      text2: 'enter new Secret',
+      topOffset,
+    })
   }
 
   return (
@@ -232,8 +239,8 @@ const SecretScreen = () => {
           autoComplete="off"
           disabled={nickNameEntered}
           leftIcon={<FontAwesome name="user" size={24} color="black" />}
-          value={nickName}
-          onChangeText={(text) => setNickName(text.toLowerCase())}
+          value={nickNameText}
+          onChangeText={(text) => setNickNameText(text.toLowerCase())}
           errorStyle={{ color: 'red' }}
           errorMessage={errorsMap.get('nickName')}
         />
