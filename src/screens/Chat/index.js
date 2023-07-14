@@ -359,17 +359,16 @@ const Chat = ({ route }) => {
         width: 60,
       }}
       onPress={() => {
-        _return({ uuid })
+        goBack({ uuid })
       }}
     />
   )
-  const _return = ({ uuid }) => {
+  const goBack = ({ uuid }) => {
     dispatch(friendsListReducer.reloadFriendsList({ uuid }))
     dispatch(friendsListReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     navigation.goBack()
   }
   const renderSend = (props) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
     <Send {...props}>
       <View
         style={{

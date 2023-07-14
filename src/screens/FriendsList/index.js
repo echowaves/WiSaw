@@ -86,14 +86,14 @@ const FriendsList = () => {
   )
   const reload = async () => {
     const { uuid, topOffset, currentBatch } = authContext
-    const friendsList = reducer.reloadFriendsList({ uuid })
 
+    const friendsList = await friendsHelper.getEnhancedListOfFriendships({
+      uuid,
+    })
     setAuthContext((prevAuthContext) => ({
       ...prevAuthContext,
-      friendsList,
+      friendsList, // the list of enhanced friends list has to be loaded earlier on
     }))
-
-    reducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier o
   }
 
   useEffect(() => {
@@ -150,8 +150,15 @@ const FriendsList = () => {
     await setShowNamePicker(false)
     setFriendshipUuid(null) // reset friendshipUuid for next request
 
-    reducer.reloadFriendsList({ uuid })
-    reducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier on
+    const friendsList = await friendsHelper.getEnhancedListOfFriendships({
+      uuid,
+    })
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      friendsList, // the list of enhanced friends list has to be loaded earlier on
+    }))
+
+    // const unreadCounts = await friendsHelper.getUnreadCountsList({ uuid })
   }
 
   const handleRemoveFriend = ({ friendshipUuid }) => {

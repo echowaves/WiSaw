@@ -1,39 +1,36 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch, useSelector } from 'react-redux'
 
-import {
-  SafeAreaView,
-  StyleSheet,
-} from 'react-native'
+import { SafeAreaView, StyleSheet } from 'react-native'
 
 import Toast from 'react-native-toast-message'
 
-import {
-  FontAwesome,
-} from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
 import NamePicker from '../../components/NamePicker'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 import * as reducer from './reducer'
 
 import * as friendsHelper from './friends_helper'
 
 const ConfirmFriendship = ({ route }) => {
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+
   const { friendshipUuid } = route.params
 
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
-  const topOffset = useSelector(state => state.photosList.topOffset)
+  const topOffset = useSelector((state) => state.photosList.topOffset)
 
   const [showNamePicker, setShowNamePicker] = useState(true)
 
-  const uuid = useSelector(state => state.secret.uuid)
+  const uuid = useSelector((state) => state.secret.uuid)
 
   useEffect(() => {
     navigation.setOptions({
@@ -46,7 +43,6 @@ const ConfirmFriendship = ({ route }) => {
         backgroundColor: CONST.NAV_COLOR,
       },
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const styles = StyleSheet.create({
@@ -66,35 +62,38 @@ const ConfirmFriendship = ({ route }) => {
     <FontAwesome
       name="chevron-left"
       size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => navigation.goBack()
-      }
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
     />
   )
 
-  const setContactName = async contactName => {
+  const setContactName = async (contactName) => {
     // alert(JSON.stringify({ friendshipUuid, contactName }))
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
-      dispatch(reducer.reloadFriendsList({ uuid }))
-      dispatch(reducer.reloadUnreadCountsList({ uuid }))// the list of enhanced friends list has to be loaded earlier on
+      const friendsList = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
+      setAuthContext((prevAuthContext) => ({
+        ...prevAuthContext,
+        friendsList, // the list of enhanced friends list has to be loaded earlier on
+      }))
+
+      reducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier o
 
       await navigation.popToTop()
       await navigation.navigate('FriendsList')
     } catch (err) {
-    // console.log({ err })
+      // console.log({ err })
       Toast.show({
         text1: 'Unable to confirm Friendship',
         text2: err.toString(),
-        type: "error",
+        type: 'error',
         topOffset,
       })
     }
