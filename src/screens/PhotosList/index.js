@@ -112,8 +112,6 @@ const PhotosList = () => {
 
   const navigation = useNavigation()
 
-  const dispatch = useDispatch()
-
   const { width, height } = useWindowDimensions()
 
   // const deviceOrientation = useDeviceOrientation()
@@ -145,11 +143,10 @@ const PhotosList = () => {
   const [loading, setLoading] = useState(true)
 
   // const batch = useSelector(state => state.photosList.batch)
-  const unreadCountList = useSelector(
-    (state) => state.friendsList.unreadCountsList,
-  )
 
-  const unreadCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
+  const [unreadCountList, setUnreadCountList] = useState([])
+
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
@@ -159,6 +156,10 @@ const PhotosList = () => {
     // const lastViewableItem = viewableItems.changed[0]
     setLastViewableRow(lastViewableItem.index)
   })
+
+  useEffect(() => {
+    setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
+  }, [unreadCountList])
 
   useEffect(() => {
     // checkStatusAsync()
@@ -274,6 +275,7 @@ const PhotosList = () => {
 
   const updateIndex = async (index) => {
     setActiveSegment(index)
+    reload()
   }
 
   const renderHeaderTitle = () => (
@@ -514,8 +516,8 @@ const PhotosList = () => {
 
     uploadPendingPhotos()
     if (uuid.length > 0) {
-      dispatch(friendsReducer.reloadFriendsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
-      dispatch(friendsReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+      friendsReducer.reloadFriendsList({ uuid }) // the list of enhanced friends list has to be loaded earlier on
+      friendsReducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier on
     }
     // setPendingPhotos(await reducer.getQueue())
   }
@@ -729,7 +731,7 @@ const PhotosList = () => {
   useEffect(() => {
     // console.log({ activeSegment })
     updateNavBar()
-    reload()
+    // reload()
   }, [activeSegment])
 
   useEffect(() => {

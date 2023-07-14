@@ -132,8 +132,6 @@ async function requestGeoPhotos({
 }
 
 async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
-  // const { uuid } = getState().secret
-
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
