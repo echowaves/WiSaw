@@ -46,14 +46,12 @@ const Photo = ({ photo }) => {
 
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
-  // const topOffset = useSelector((state) => state.photosList.topOffset)
 
   const navigation = useNavigation()
 
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useWindowDimensions()
   const imageHeight = height - 250
-  // const error = useSelector(state => state.photo.error)
 
   useFocusEffect(
     // use this to make the navigastion to a detailed screen faster

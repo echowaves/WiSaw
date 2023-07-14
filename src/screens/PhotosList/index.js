@@ -136,12 +136,7 @@ const PhotosList = () => {
 
   const [activeSegment, setActiveSegment] = useState(0)
 
-  // const errorMessage = useSelector(state => state.photosList.errorMessage)
-  // const paging = useSelector(state => state.photosList.paging)
-
   const [loading, setLoading] = useState(true)
-
-  // const batch = useSelector(state => state.photosList.batch)
 
   const [unreadCountList, setUnreadCountList] = useState([])
 
@@ -157,7 +152,6 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
-    console.log({ unreadCountList })
     setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
   }, [unreadCountList])
 

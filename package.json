@@ -29,7 +29,7 @@
     "expo": "^49.0.0",
     "expo-av": "~13.4.1",
     "expo-background-fetch": "~11.3.0",
-    "expo-cached-image": "48.0.0",
+    "expo-cached-image": "48.1.0",
     "expo-constants": "~14.4.2",
     "expo-crypto": "~12.4.1",
     "expo-file-system": "~15.4.2",

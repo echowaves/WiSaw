@@ -11,46 +11,44 @@ import Toast from 'react-native-toast-message'
 
 import { gql } from '@apollo/client'
 
-import * as CONST from '../../consts.js'
-
-import * as ACTION_TYPES from './action_types'
+import * as CONST from '../../consts'
 
 //  date '+%Y%m%d%H%M%S'
 
-export const initialState = {
-  // photos: [],
-  // pendingPhotos: [],
-  // loading: false,
-  // errorMessage: '',
-  // pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
-  // orientation: 'portrait',
-  // activeSegment: 0,
-  // searchTerm: '',
-  // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-  // isLastPage: true,
-  // netAvailable: false,
-  uploadingPhoto: false,
-  // zeroMoment: null,
-  toastOffset: 100,
-  // currentIndex: 0,
-}
+// export const initialState = {
+//   // photos: [],
+//   // pendingPhotos: [],
+//   // loading: false,
+//   // errorMessage: '',
+//   // pageNumber: -1, // have to start with -1, because will increment only in one place, when starting to get the next page
+//   // orientation: 'portrait',
+//   // activeSegment: 0,
+//   // searchTerm: '',
+//   // batch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+//   // isLastPage: true,
+//   // netAvailable: false,
+//   uploadingPhoto: false,
+//   // zeroMoment: null,
+//   toastOffset: 100,
+//   // currentIndex: 0,
+// }
 
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case ACTION_TYPES.CHAT_START_PHOTO_UPLOADING:
-      return {
-        ...state,
-        uploadingPhoto: true,
-      }
-    case ACTION_TYPES.CHAT_FINISH_PHOTO_UPLOADING:
-      return {
-        ...state,
-        uploadingPhoto: false,
-      }
-    default:
-      return state
-  }
-}
+// const reducer = (state = initialState, action) => {
+//   switch (action.type) {
+//     case ACTION_TYPES.CHAT_START_PHOTO_UPLOADING:
+//       return {
+//         ...state,
+//         uploadingPhoto: true,
+//       }
+//     case ACTION_TYPES.CHAT_FINISH_PHOTO_UPLOADING:
+//       return {
+//         ...state,
+//         uploadingPhoto: false,
+//       }
+//     default:
+//       return state
+//   }
+// }
 
 const genLocalThumb = async (localImgUrl) => {
   const manipResult = await ImageManipulator.manipulateAsync(
@@ -74,6 +72,26 @@ const addToQueue = async (image) => {
   await Storage.setItem({
     key: CONST.PENDING_CHAT_UPLOADS_KEY,
     value: JSON.stringify([...pendingImages, image]),
+  })
+}
+
+const removeFromQueue = async (imageToRemove) => {
+  let pendingImagesBefore = JSON.parse(
+    await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }),
+  )
+
+  if (!pendingImagesBefore) {
+    pendingImagesBefore = []
+  }
+
+  const pendingImagesAfter = pendingImagesBefore.filter(
+    (imageInTheQueue) =>
+      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
+  )
+
+  await Storage.setItem({
+    key: CONST.PENDING_CHAT_UPLOADS_KEY,
+    value: JSON.stringify(pendingImagesAfter),
   })
 }
 
@@ -101,7 +119,7 @@ const getQueue = async () => {
   // remove images from the queue if corresponding file does not exist
   imagesInQueue.forEach((image) => {
     if (!filesInStorage.some((f) => f === image.chatPhotoHash)) {
-      _removeFromQueue(image)
+      removeFromQueue(image)
     }
   })
 
@@ -123,26 +141,6 @@ const getQueue = async () => {
   })
 
   return imagesInQueue
-}
-
-const _removeFromQueue = async (imageToRemove) => {
-  let pendingImagesBefore = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }),
-  )
-
-  if (!pendingImagesBefore) {
-    pendingImagesBefore = []
-  }
-
-  const pendingImagesAfter = pendingImagesBefore.filter(
-    (imageInTheQueue) =>
-      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
-  )
-
-  await Storage.setItem({
-    key: CONST.PENDING_CHAT_UPLOADS_KEY,
-    value: JSON.stringify(pendingImagesAfter),
-  })
 }
 
 export const queueFileForUpload =
@@ -180,158 +178,7 @@ export const queueFileForUpload =
     await addToQueue(image)
   }
 
-export function uploadPendingPhotos({ chatUuid }) {
-  return async (dispatch, getState) => {
-    const { topOffset } = getState().chat
-    const { uuid } = getState().secret
-
-    if (getState().photosList.netAvailable === false) {
-      return Promise.resolve()
-    }
-
-    if (getState().chat.uploadingPhoto) {
-      // already uploading photos, just exit here
-      return Promise.resolve()
-    }
-
-    try {
-      dispatch({
-        type: ACTION_TYPES.CHAT_START_PHOTO_UPLOADING,
-      })
-
-      let i
-      // here let's iterate over the items and upload one file at a time
-
-      const generatePhotoQueue = await getQueue()
-      // console.log({ generatePhotoQueue })
-      // first pass iteration to generate photos ID and the photo record on the backend
-      for (i = 0; i < generatePhotoQueue.length; i += 1) {
-        const item = generatePhotoQueue[i]
-        // eslint-disable-next-line no-await-in-loop
-        const { responseData } = await _uploadItem({ uuid, item })
-        // sleep for 1 second before re-trying
-
-        // console.log({ responseData })
-        if (responseData.status === 200) {
-          // console.log("sleeping:: started")
-          // // const now = new Date().getTime()
-          // // while (new Date().getTime() < now + 10000) { /* Do nothing */ }
-          // console.log("sleeping:: done")
-          // eslint-disable-next-line no-await-in-loop
-          await new Promise((resolve) => setTimeout(resolve, 4000))
-
-          // eslint-disable-next-line no-await-in-loop
-          // sendMessage({
-          //   chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: '',
-          // })
-          // // eslint-disable-next-line no-await-in-loop
-          // await new Promise(resolve => setTimeout(resolve, 1000))
-        }
-        if (responseData.status === 200 || responseData.status === 100) {
-          // show the photo in the photo list immidiately
-
-          // console.log({ item })
-
-          // eslint-disable-next-line no-await-in-loop
-          const returnedMessage = await sendMessage({
-            chatUuid,
-            uuid,
-            messageUuid: item.messageUuid,
-            text: '',
-            pending: false,
-            chatPhotoHash: item.chatPhotoHash,
-          })
-          // eslint-disable-next-line no-await-in-loop
-          await _removeFromQueue(item)
-        } else {
-          // alert(JSON.stringify({ responseData }))
-          Toast.show({
-            text1: 'Upload is going slooooow...',
-            text2: 'Still trying to upload.',
-            visibilityTime: 500,
-            topOffset,
-          })
-        }
-      } // for
-    } catch (err2) {
-      // eslint-disable-next-line no-console
-      console.log({ err2 })
-      Toast.show({
-        text1: 'Upload is slow...',
-        text2: 'Still trying to upload.',
-        visibilityTime: 500,
-        topOffset,
-      })
-      // console.log({ error }) // eslint-disable-line no-console
-      // dispatch(uploadPendingPhotos())
-    }
-
-    dispatch({
-      type: ACTION_TYPES.CHAT_FINISH_PHOTO_UPLOADING,
-    })
-
-    // sleep for 1 second before re-trying
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    if ((await getQueue()).length > 0) {
-      dispatch(uploadPendingPhotos({ chatUuid }))
-    }
-  }
-}
-
-export const sendMessage = async ({
-  chatUuid,
-  uuid,
-  messageUuid,
-  text,
-  pending,
-  chatPhotoHash,
-}) => {
-  const returnedMessage = (
-    await CONST.gqlClient.mutate({
-      mutation: gql`
-        mutation sendMessage(
-          $chatUuidArg: String!
-          $uuidArg: String!
-          $messageUuidArg: String!
-          $textArg: String!
-          $pendingArg: Boolean!
-          $chatPhotoHashArg: String!
-        ) {
-          sendMessage(
-            chatUuidArg: $chatUuidArg
-            uuidArg: $uuidArg
-            messageUuidArg: $messageUuidArg
-            textArg: $textArg
-            pendingArg: $pendingArg
-            chatPhotoHashArg: $chatPhotoHashArg
-          ) {
-            chatUuid
-            createdAt
-            messageUuid
-            text
-            pending
-            chatPhotoHash
-            updatedAt
-            uuid
-          }
-        }
-      `,
-      variables: {
-        chatUuidArg: chatUuid,
-        uuidArg: uuid,
-        messageUuidArg: messageUuid,
-        textArg: text,
-        pendingArg: pending,
-        chatPhotoHashArg: chatPhotoHash,
-      },
-    })
-  ).data.sendMessage
-
-  return returnedMessage
-}
-
-const _uploadItem = async ({ uuid, item }) => {
+const uploadItem = async ({ uuid, item }) => {
   const contentType = 'image/jpeg'
   try {
     // console.log("uploading", { item })
@@ -392,4 +239,131 @@ const _uploadItem = async ({ uuid, item }) => {
   }
 }
 
-export default reducer
+export const sendMessage = async ({
+  chatUuid,
+  uuid,
+  messageUuid,
+  text,
+  pending,
+  chatPhotoHash,
+}) => {
+  const returnedMessage = (
+    await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation sendMessage(
+          $chatUuidArg: String!
+          $uuidArg: String!
+          $messageUuidArg: String!
+          $textArg: String!
+          $pendingArg: Boolean!
+          $chatPhotoHashArg: String!
+        ) {
+          sendMessage(
+            chatUuidArg: $chatUuidArg
+            uuidArg: $uuidArg
+            messageUuidArg: $messageUuidArg
+            textArg: $textArg
+            pendingArg: $pendingArg
+            chatPhotoHashArg: $chatPhotoHashArg
+          ) {
+            chatUuid
+            createdAt
+            messageUuid
+            text
+            pending
+            chatPhotoHash
+            updatedAt
+            uuid
+          }
+        }
+      `,
+      variables: {
+        chatUuidArg: chatUuid,
+        uuidArg: uuid,
+        messageUuidArg: messageUuid,
+        textArg: text,
+        pendingArg: pending,
+        chatPhotoHashArg: chatPhotoHash,
+      },
+    })
+  ).data.sendMessage
+
+  return returnedMessage
+}
+
+export async function uploadPendingPhotos({ chatUuid, uuid, topOffset }) {
+  try {
+    let i
+    // here let's iterate over the items and upload one file at a time
+
+    const generatePhotoQueue = await getQueue()
+    // console.log({ generatePhotoQueue })
+    // first pass iteration to generate photos ID and the photo record on the backend
+    for (i = 0; i < generatePhotoQueue.length; i += 1) {
+      const item = generatePhotoQueue[i]
+      // eslint-disable-next-line no-await-in-loop
+      const { responseData } = await uploadItem({ uuid, item })
+      // sleep for 1 second before re-trying
+
+      // console.log({ responseData })
+      if (responseData.status === 200) {
+        // console.log("sleeping:: started")
+        // // const now = new Date().getTime()
+        // // while (new Date().getTime() < now + 10000) { /* Do nothing */ }
+        // console.log("sleeping:: done")
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => setTimeout(resolve, 4000))
+
+        // eslint-disable-next-line no-await-in-loop
+        // sendMessage({
+        //   chatUuid, uuid, messageUuid: item.messageUuid, text: '', pending: false, chatPhotoHash: '',
+        // })
+        // // eslint-disable-next-line no-await-in-loop
+        // await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+      if (responseData.status === 200 || responseData.status === 100) {
+        // show the photo in the photo list immidiately
+
+        // console.log({ item })
+
+        // eslint-disable-next-line no-await-in-loop
+        const returnedMessage = await sendMessage({
+          chatUuid,
+          uuid,
+          messageUuid: item.messageUuid,
+          text: '',
+          pending: false,
+          chatPhotoHash: item.chatPhotoHash,
+        })
+        // eslint-disable-next-line no-await-in-loop
+        await removeFromQueue(item)
+      } else {
+        // alert(JSON.stringify({ responseData }))
+        Toast.show({
+          text1: 'Upload is going slooooow...',
+          text2: 'Still trying to upload.',
+          visibilityTime: 500,
+          topOffset,
+        })
+      }
+    } // for
+  } catch (err2) {
+    // eslint-disable-next-line no-console
+    console.log({ err2 })
+    Toast.show({
+      text1: 'Upload is slow...',
+      text2: 'Still trying to upload.',
+      visibilityTime: 500,
+      topOffset,
+    })
+    // console.log({ error }) // eslint-disable-line no-console
+    // dispatch(uploadPendingPhotos())
+  }
+
+  // sleep for 1 second before re-trying
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  if ((await getQueue()).length > 0) {
+    uploadPendingPhotos({ chatUuid, uuid, topOffset })
+  }
+}

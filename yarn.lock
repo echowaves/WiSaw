@@ -4683,10 +4683,10 @@ expo-background-fetch@~11.3.0:
   dependencies:
     expo-task-manager "~11.3.0"
 
-expo-cached-image@48.0.0:
-  version "48.0.0"
-  resolved "https://registry.yarnpkg.com/expo-cached-image/-/expo-cached-image-48.0.0.tgz#5605e9f92d843432953a0432db93b3ceead69664"
-  integrity sha512-pdhr0DnwI7PB4fHdxOt3shBVTujp44YMrw7OGNNcJ6AsXezz2SeY6ii6YzCEU/xuTfQl3AcbI41gmXCq9+MGdQ==
+expo-cached-image@48.1.0:
+  version "48.1.0"
+  resolved "https://registry.yarnpkg.com/expo-cached-image/-/expo-cached-image-48.1.0.tgz#891b3557623fc4e4edd83bc7242108f93a1bb353"
+  integrity sha512-hLSByQdztQfj8DKgHvAxBZKpAcXCt1RkrAvZMcDFMxdx+WAqCk0o63MoBoPxuKegN5o1sntCSfW5Ysrgt7DNow==
   dependencies:
     expo "^48.0.0"
 

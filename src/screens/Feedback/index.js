@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useSelector } from 'react-redux'
 
 import { SafeAreaView, TextInput, StyleSheet } from 'react-native'
 

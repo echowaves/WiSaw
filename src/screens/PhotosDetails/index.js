@@ -25,18 +25,8 @@ const PhotosDetails = ({ route }) => {
     route.params
 
   const navigation = useNavigation()
-  // const currentIndex = useSelector((state) => state.photosList.currentIndex)
-
-  // const photos = useSelector((state) => state.photosList.photos)
 
   const swiper = useRef(null)
-
-  // const searchTerm = useSelector((state) => state.photosList.searchTerm)
-  // const activeSegment = useSelector((state) => state.photosList.activeSegment)
-
-  // const topOffset = useSelector((state) => state.photosList.topOffset)
-
-  // const dispatch = useDispatch()
 
   const renderHeaderTitle = () => {
     switch (activeSegment) {

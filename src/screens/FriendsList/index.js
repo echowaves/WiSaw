@@ -40,9 +40,7 @@ const FriendsList = () => {
     width,
     // height,
   } = useWindowDimensions()
-  // const topOffset = useSelector(state => state.photosList.topOffset)
 
-  // const topOffset = useSelector(state => state.photosList.topOffset)
   const headerText = 'What is your friend name?'
 
   const [showNamePicker, setShowNamePicker] = useState(false)
