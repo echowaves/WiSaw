@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
 import * as SecureStore from 'expo-secure-store'
@@ -273,63 +272,6 @@ const PhotosList = () => {
       }
     />
   )
-
-  const updateIndex = async (index) => {
-    setActiveSegment(index)
-    reload()
-  }
-
-  const renderHeaderTitle = () => (
-    <>
-      <ButtonGroup
-        onPress={updateIndex}
-        containerStyle={{
-          width: 200,
-          height: 35,
-        }}
-        buttonStyle={{ alignSelf: 'center' }}
-        buttons={[
-          { element: segment0 },
-          { element: segment1 },
-          { element: segment2 },
-        ]}
-      />
-      {loading && (
-        <LinearProgress
-          color={CONST.MAIN_COLOR}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            left: 0,
-          }}
-        />
-      )}
-    </>
-  )
-
-  const updateNavBar = async () => {
-    if (netAvailable) {
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle,
-        // headerLeft: renderHeaderLeft,
-        // headerRight: renderHeaderRight,
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    } else {
-      navigation.setOptions({
-        headerTitle: '',
-        headerLeft: '',
-        headerRight: '',
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    }
-  }
-
   async function uploadPendingPhotos() {
     const { uuid, topOffset } = authContext
 
@@ -531,6 +473,62 @@ const PhotosList = () => {
       setUnreadCountList(unreadCounts) // the list of enhanced friends list has to be loaded earlier on
     }
     // setPendingPhotos(await reducer.getQueue())
+  }
+
+  const updateIndex = async (index) => {
+    setActiveSegment(index)
+    reload()
+  }
+
+  const renderHeaderTitle = () => (
+    <>
+      <ButtonGroup
+        onPress={updateIndex}
+        containerStyle={{
+          width: 200,
+          height: 35,
+        }}
+        buttonStyle={{ alignSelf: 'center' }}
+        buttons={[
+          { element: segment0 },
+          { element: segment1 },
+          { element: segment2 },
+        ]}
+      />
+      {loading && (
+        <LinearProgress
+          color={CONST.MAIN_COLOR}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            left: 0,
+          }}
+        />
+      )}
+    </>
+  )
+
+  const updateNavBar = async () => {
+    if (netAvailable) {
+      navigation.setOptions({
+        headerTitle: renderHeaderTitle,
+        // headerLeft: renderHeaderLeft,
+        // headerRight: renderHeaderRight,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
+      })
+    } else {
+      navigation.setOptions({
+        headerTitle: '',
+        headerLeft: '',
+        headerRight: '',
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
+      })
+    }
   }
 
   const initState = async () => {

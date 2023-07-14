@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 // import { useNavigation } from '@react-navigation/native'
-// import { useDispatch, useSelector } from "react-redux"
 
 import {
   View,

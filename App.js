@@ -16,8 +16,6 @@ import { NavigationContainer } from '@react-navigation/native'
 
 import { createDrawerNavigator } from '@react-navigation/drawer'
 
-import { Provider } from 'react-redux'
-
 import { ThemeProvider } from '@rneui/themed'
 import Toast from 'react-native-toast-message'
 
@@ -74,7 +72,6 @@ const App = () => {
   }, [])
 
   return (
-    <Provider store={store}>
       <AuthContext.Provider value={{ authContext, setAuthContext }}>
         <ThemeProvider>
           <NavigationContainer>
@@ -224,7 +221,7 @@ const App = () => {
         </ThemeProvider>
         <Toast ref={(ref) => Toast.setRef(ref)} />
       </AuthContext.Provider>
-    </Provider>
+    
   )
 }
 export default App

@@ -12,8 +12,6 @@ import // View,
 
 import { Text } from '@rneui/themed'
 
-import { useDispatch, useSelector } from 'react-redux'
-
 import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'

@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
-// import Toast from 'react-native-toast-message'
 
 import {
   Alert,

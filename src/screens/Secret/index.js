@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { Alert, SafeAreaView, StyleSheet, ScrollView } from 'react-native'
 

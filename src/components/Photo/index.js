@@ -1,6 +1,5 @@
 import React, { useRef, useState, useContext /* useEffect */ } from 'react'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
@@ -51,7 +50,6 @@ const Photo = ({ photo }) => {
 
   const navigation = useNavigation()
 
-  const dispatch = useDispatch()
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useWindowDimensions()
   const imageHeight = height - 250

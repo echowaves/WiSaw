@@ -11,7 +11,6 @@ import {
 import { FontAwesome, AntDesign } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
-import { useDispatch } from 'react-redux'
 
 // import CachedImage from 'expo-cached-image'
 import * as reducer from '../../screens/PhotosList/reducer'
@@ -21,7 +20,6 @@ import Thumb from '../Thumb'
 
 const ThumbWithComments = (props) => {
   const navigation = useNavigation()
-  const dispatch = useDispatch()
 
   const {
     index,
@@ -35,7 +33,7 @@ const ThumbWithComments = (props) => {
     uuid,
   } = props
 
-  const onThumbPress = (item) => {
+  const onThumbPress = (thumb) => {
     navigation.navigate('PhotosDetails', {
       index,
       photosList,

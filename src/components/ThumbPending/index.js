@@ -1,7 +1,5 @@
 import React from 'react'
 
-import { useDispatch } from 'react-redux'
-
 import { Alert, View, StyleSheet, TouchableHighlight } from 'react-native'
 
 import CachedImage from 'expo-cached-image'
@@ -14,8 +12,6 @@ import { removeFromQueue } from '../../screens/PhotosList/reducer'
 
 const ThumbPending = (props) => {
   const { item, thumbDimension } = props
-
-  const dispatch = useDispatch()
 
   const styles = StyleSheet.create({
     container: {

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { SafeAreaView, StyleSheet } from 'react-native'
 
@@ -24,13 +23,23 @@ const ConfirmFriendship = ({ route }) => {
   const { friendshipUuid } = route.params
 
   const navigation = useNavigation()
-  const dispatch = useDispatch()
-
-  const topOffset = useSelector((state) => state.photosList.topOffset)
 
   const [showNamePicker, setShowNamePicker] = useState(true)
 
-  const uuid = useSelector((state) => state.secret.uuid)
+  const renderHeaderRight = () => {}
+
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
+    />
+  )
 
   useEffect(() => {
     navigation.setOptions({
@@ -56,22 +65,9 @@ const ConfirmFriendship = ({ route }) => {
     },
   })
 
-  const renderHeaderRight = () => {}
-
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => navigation.goBack()}
-    />
-  )
-
   const setContactName = async (contactName) => {
+    const { uuid, topOffset } = authContext
+
     // alert(JSON.stringify({ friendshipUuid, contactName }))
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })

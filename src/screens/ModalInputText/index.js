@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { TextInput, StyleSheet, useWindowDimensions } from 'react-native'
 
@@ -30,7 +29,6 @@ const maxStringLength = 140
 
 const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
-  const dispatch = useDispatch()
   const { photo, topOffset, uuid } = route.params
   const { height } = useWindowDimensions()
 
@@ -41,6 +39,41 @@ const ModalInputText = ({ route }) => {
     inputTextRef.current = data
     _setInputText(data)
   }
+
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
+    />
+  )
+  const handleSubmit = () => {
+    reducer.submitComment({
+      inputText: inputTextRef.current.trim(),
+      uuid,
+      photo,
+    })
+    navigation.pop()
+  }
+
+  const renderHeaderRight = () => (
+    <Ionicons
+      onPress={() => {
+        handleSubmit()
+      }}
+      name="send"
+      size={30}
+      style={{
+        marginRight: 10,
+        color: CONST.MAIN_COLOR,
+      }}
+    />
+  )
 
   useEffect(() => {
     navigation.setOptions({
@@ -60,42 +93,6 @@ const ModalInputText = ({ route }) => {
       flex: 1,
     },
   })
-
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => navigation.goBack()}
-    />
-  )
-
-  const renderHeaderRight = () => (
-    <Ionicons
-      onPress={() => {
-        handleSubmit()
-      }}
-      name="send"
-      size={30}
-      style={{
-        marginRight: 10,
-        color: CONST.MAIN_COLOR,
-      }}
-    />
-  )
-
-  const handleSubmit = () => {
-    reducer.submitComment({
-      inputText: inputTextRef.current.trim(),
-      uuid,
-      photo,
-    })
-    navigation.pop()
-  }
 
   return (
     <KeyboardAwareScrollView style={styles.container}>
