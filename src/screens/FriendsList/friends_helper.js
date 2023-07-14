@@ -175,8 +175,8 @@ export const getUnreadCountsList = async ({ uuid }) => {
   } catch (err61) {
     // eslint-disable-next-line no-console
     console.log({ err61 }) // eslint-disable-line
-    return []
   }
+  return []
 }
 
 const getRemoteListOfFriendships = async ({ uuid }) => {

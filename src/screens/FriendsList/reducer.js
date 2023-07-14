@@ -126,32 +126,3 @@ export function deleteFriendship({ friendshipUuid, topOffset }) {
     })
   }
 }
-
-export async function reloadFriendsList({ uuid }) {
-  try {
-    const friendsList = await friendsHelper.getEnhancedListOfFriendships({
-      uuid,
-    })
-    return friendsList
-    // console.log({ friendsList })
-    // console.log(friendsList.length)
-  } catch (err55) {
-    // eslint-disable-next-line no-console
-    console.log({ err55 }) // eslint-disable-line
-  }
-  return []
-}
-
-export async function reloadUnreadCountsList({ uuid }) {
-  try {
-    const unreadCountsList = await friendsHelper.getUnreadCountsList({ uuid })
-    // console.log({ unreadCountsList }, '--------------------------------------------')
-
-    // console.log(friendsList.length)
-    return unreadCountsList
-  } catch (err15) {
-    // eslint-disable-next-line no-console
-    console.log({ err15 }) // eslint-disable-line
-  }
-  return []
-}

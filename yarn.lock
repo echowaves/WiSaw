@@ -4811,10 +4811,10 @@ expo-linking@~5.0.2:
     qs "^6.11.0"
     url-parse "^1.5.9"
 
-expo-location@~16.0.0:
-  version "16.0.0"
-  resolved "https://registry.yarnpkg.com/expo-location/-/expo-location-16.0.0.tgz#47922f4937192868fa799464c5654dbc9c67d7d6"
-  integrity sha512-v76QOjaYi4wfvqW1yKzMwKnWUcahJPq0dcg9W3Tm6x/HdCUHZJ6fNZw8wLmTZT8JNNCnqqRVZC67kbHG20odAg==
+expo-location@~16.1.0:
+  version "16.1.0"
+  resolved "https://registry.yarnpkg.com/expo-location/-/expo-location-16.1.0.tgz#251a465790d6622f828fd18f0edb2a73b9664b72"
+  integrity sha512-/jfRyYrXb9vjr8HoYmVHnzEqnw+0jaoRbHsxj6ePPAbevXmvXZqYHFRtfZtQ+q32SB4X6kUAXu28eBcLS+tqaA==
 
 expo-manifests@~0.7.0:
   version "0.7.1"

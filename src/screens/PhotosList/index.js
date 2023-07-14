@@ -55,9 +55,8 @@ import {
   Badge,
 } from '@rneui/themed'
 
-import * as friendsReducer from '../FriendsList/reducer'
+import * as friendsHelper from '../FriendsList/friends_helper'
 
-import { getUnreadCountsList } from '../FriendsList/friends_helper'
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts'
@@ -74,7 +73,8 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   // const now = Date.now()
   try {
     const uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
-    const unreadCountList = getUnreadCountsList({ uuid })
+    const unreadCountList = await friendsHelper.getUnreadCountsList({ uuid })
+
     const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
     Notifications.setBadgeCountAsync(badgeCount || 0)
     // console.log("background fetch", { badgeCount })
@@ -158,6 +158,7 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
+    console.log({ unreadCountList })
     setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
   }, [unreadCountList])
 
@@ -516,8 +517,18 @@ const PhotosList = () => {
 
     uploadPendingPhotos()
     if (uuid.length > 0) {
-      friendsReducer.reloadFriendsList({ uuid }) // the list of enhanced friends list has to be loaded earlier on
-      friendsReducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier on
+      const friendsList = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
+      console.log({ friendsList })
+      setAuthContext((prevAuthContext) => ({
+        ...prevAuthContext,
+        friendsList, // the list of enhanced friends list has to be loaded earlier on
+      }))
+
+      const unreadCounts = await friendsHelper.getUnreadCountsList({ uuid })
+      console.log({ friendsList: unreadCounts })
+      setUnreadCountList(unreadCounts) // the list of enhanced friends list has to be loaded earlier on
     }
     // setPendingPhotos(await reducer.getQueue())
   }
