@@ -54,6 +54,7 @@ const App = () => {
     topOffset: 10,
     photosList: [],
     currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+    friendsList: [],
   })
   const { width, height } = useWindowDimensions()
 
@@ -64,6 +65,7 @@ const App = () => {
       topOffset: height / 3,
       photosList: [],
       currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+      friendsList: [],
     })
   }
 

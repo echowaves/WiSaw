@@ -47,8 +47,6 @@ const FriendsList = () => {
   // const topOffset = useSelector(state => state.photosList.topOffset)
   const headerText = 'What is your friend name?'
 
-  const [friendsList, setFriendsList] = useState([])
-
   const [showNamePicker, setShowNamePicker] = useState(false)
   const [friendshipUuid, setFriendshipUuid] = useState(null)
 
@@ -88,8 +86,13 @@ const FriendsList = () => {
   )
   const reload = async () => {
     const { uuid, topOffset, currentBatch } = authContext
+    const friendsList = reducer.reloadFriendsList({ uuid })
 
-    reducer.reloadFriendsList({ uuid })
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      friendsList,
+    }))
+
     reducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier o
   }
 
@@ -237,7 +240,7 @@ const FriendsList = () => {
   //   navigation.navigate('LocalContacts', { friendshipUuid })
   // }
 
-  if (!friendsList || friendsList?.length === 0) {
+  if (authContext.friendsList.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <NamePicker
@@ -279,7 +282,7 @@ const FriendsList = () => {
       <FlatGrid
         itemDimension={width}
         // spacing={3}
-        data={friendsList}
+        data={authContext.friendsList}
         renderItem={({ item }) => renderFriend({ friend: item })}
         keyExtractor={(item) => item.friendshipUuid}
         style={{

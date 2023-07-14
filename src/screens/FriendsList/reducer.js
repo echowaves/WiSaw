@@ -132,12 +132,14 @@ export async function reloadFriendsList({ uuid }) {
     const friendsList = await friendsHelper.getEnhancedListOfFriendships({
       uuid,
     })
+    return friendsList
     // console.log({ friendsList })
     // console.log(friendsList.length)
   } catch (err55) {
     // eslint-disable-next-line no-console
     console.log({ err55 }) // eslint-disable-line
   }
+  return []
 }
 
 export async function reloadUnreadCountsList({ uuid }) {

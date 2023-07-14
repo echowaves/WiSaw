@@ -41,8 +41,6 @@ const Photo = ({ photo }) => {
 
   const componentIsMounted = useRef(true)
 
-  const friendsList = useSelector((state) => state.friendsList.friendsList)
-
   const videoRef = useRef(null)
 
   const [bans, setBans] = useState([])
@@ -101,7 +99,8 @@ const Photo = ({ photo }) => {
   }
 
   const renderCommentsStats = () => {
-    const { uuid, topOffset } = authContext
+    const { uuid, topOffset, friendsList } = authContext
+    // console.log({ friendsList })
 
     if (!photoDetails?.comments || photoDetails?.comments?.length === 0) {
       return (
@@ -229,7 +228,7 @@ const Photo = ({ photo }) => {
   }
 
   const renderCommentsRows = () => {
-    const { uuid, topOffset } = authContext
+    const { uuid, topOffset, friendsList } = authContext
 
     if (photoDetails?.comments) {
       return (
