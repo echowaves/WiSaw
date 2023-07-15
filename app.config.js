@@ -38,7 +38,7 @@ export default {
       // jsEngine: 'jsc',
       jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '262',
+      buildNumber: '263',
       supportsTablet: true,
       infoPlist: {
         UIBackgroundModes: ['fetch'],
@@ -73,7 +73,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 262,
+      versionCode: 263,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
