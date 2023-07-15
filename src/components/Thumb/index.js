@@ -10,7 +10,6 @@ import {
 } from 'react-native'
 
 import { FontAwesome, AntDesign, FontAwesome5 } from '@expo/vector-icons'
-import { useDispatch } from 'react-redux'
 
 import PropTypes from 'prop-types'
 
@@ -18,17 +17,48 @@ import CachedImage from 'expo-cached-image'
 
 import * as reducer from '../../screens/PhotosList/reducer'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(100,100,100,0.1)',
+  },
+  thumbnail: {
+    flex: 1,
+    alignSelf: 'stretch',
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+})
 
 const Thumb = (props) => {
   const navigation = useNavigation()
-  const dispatch = useDispatch()
 
-  const { index, item, thumbDimension } = props
+  const {
+    index,
+    item,
+    thumbDimension,
+    photosList,
+    searchTerm,
+    activeSegment,
+    topOffset,
+    uuid,
+  } = props
 
-  const onThumbPress = (item) => {
-    navigation.navigate('PhotosDetails')
-    dispatch(reducer.setCurrentIndex(index))
+  const onThumbPress = (thumb) => {
+    // console.log({ index })
+    navigation.navigate('PhotosDetails', {
+      index,
+      photosList,
+      searchTerm,
+      activeSegment,
+      topOffset,
+      uuid,
+    })
+    // dispatch(reducer.setCurrentIndex(index))
   }
 
   const thumbWidthStyles = {
@@ -132,21 +162,6 @@ const Thumb = (props) => {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(100,100,100,0.1)',
-  },
-  thumbnail: {
-    flex: 1,
-    alignSelf: 'stretch',
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-  },
-})
 
 Thumb.propTypes = {
   item: PropTypes.object.isRequired,

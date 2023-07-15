@@ -1,6 +1,5 @@
-import React, { useRef, useState /* useEffect */ } from 'react'
+import React, { useRef, useState, useContext /* useEffect */ } from 'react'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { FontAwesome, Ionicons, AntDesign } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
@@ -37,9 +36,9 @@ import * as CONST from '../../consts'
 import ImageView from './ImageView'
 
 const Photo = ({ photo }) => {
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+
   const componentIsMounted = useRef(true)
-  const uuid = useSelector((state) => state.secret.uuid)
-  const friendsList = useSelector((state) => state.friendsList.friendsList)
 
   const videoRef = useRef(null)
 
@@ -47,27 +46,26 @@ const Photo = ({ photo }) => {
 
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
-  const topOffset = useSelector((state) => state.photosList.topOffset)
 
   const navigation = useNavigation()
 
-  const dispatch = useDispatch()
   // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useWindowDimensions()
   const imageHeight = height - 250
-  // const error = useSelector(state => state.photo.error)
 
   useFocusEffect(
     // use this to make the navigastion to a detailed screen faster
     React.useCallback(() => {
+      const { uuid, topOffset } = authContext
+
       const task = InteractionManager.runAfterInteractions(async () => {
         if (componentIsMounted) {
-          const photoDetails = await reducer.getPhotoDetails({
+          const loadedPhotoDetails = await reducer.getPhotoDetails({
             photoId: photo?.id,
             uuid,
           })
           setPhotoDetails({
-            ...photoDetails,
+            ...loadedPhotoDetails,
             watchersCount: photo.watchersCount,
           })
         }
@@ -97,6 +95,9 @@ const Photo = ({ photo }) => {
   }
 
   const renderCommentsStats = () => {
+    const { uuid, topOffset, friendsList } = authContext
+    // console.log({ friendsList })
+
     if (!photoDetails?.comments || photoDetails?.comments?.length === 0) {
       return (
         <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -168,6 +169,8 @@ const Photo = ({ photo }) => {
   }
 
   const renderCommentButtons = ({ comment }) => {
+    const { uuid, topOffset } = authContext
+
     if (!comment?.hiddenButtons) {
       return (
         <View
@@ -188,7 +191,12 @@ const Photo = ({ photo }) => {
                     text: 'Yes',
                     onPress: async () => {
                       // update commentsCount in global reduce store
-                      await dispatch(reducer.deleteComment({ photo, comment }))
+                      await reducer.deleteComment({
+                        photo,
+                        comment,
+                        uuid,
+                        topOffset,
+                      })
                       // bruit force reload comments to re-render in the photo details screen
                       const updatedPhotoDetails = await reducer.getPhotoDetails(
                         { photoId: photo.id, uuid },
@@ -216,6 +224,8 @@ const Photo = ({ photo }) => {
   }
 
   const renderCommentsRows = () => {
+    const { uuid, topOffset, friendsList } = authContext
+
     if (photoDetails?.comments) {
       return (
         <View>
@@ -295,6 +305,8 @@ const Photo = ({ photo }) => {
   }
 
   const renderAddCommentsRow = () => {
+    const { uuid, topOffset } = authContext
+
     if (!photoDetails?.comments) {
       return <Text />
     }
@@ -304,7 +316,13 @@ const Photo = ({ photo }) => {
           flex: 1,
           flexDirection: 'row',
         }}
-        onPress={() => navigation.navigate('ModalInputTextScreen', { photo })}
+        onPress={() =>
+          navigation.navigate('ModalInputTextScreen', {
+            photo,
+            uuid,
+            topOffset,
+          })
+        }
       >
         <Col size={2} />
         <Col
@@ -471,6 +489,8 @@ const Photo = ({ photo }) => {
   const isPhotoBannedByMe = () => bans.includes(photo?.id)
 
   const handleDelete = () => {
+    const { uuid, topOffset } = authContext
+
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: 'Unable to delete Starred photo',
@@ -487,8 +507,24 @@ const Photo = ({ photo }) => {
         { text: 'No', onPress: () => null, style: 'cancel' },
         {
           text: 'Yes',
-          onPress: () => {
-            dispatch(reducer.deletePhoto({ photo }))
+          onPress: async () => {
+            const deleted = await reducer.deletePhoto({
+              photo,
+              uuid,
+              topOffset,
+            })
+
+            if (deleted) {
+              // console.log('deleted:', { photo })
+              setAuthContext((prevAuthContext) => ({
+                ...prevAuthContext,
+                photosList: [
+                  ...prevAuthContext.photosList.filter(
+                    (item) => item.id !== photo.id,
+                  ),
+                ],
+              }))
+            }
             navigation.goBack()
           },
         },
@@ -498,6 +534,8 @@ const Photo = ({ photo }) => {
   }
 
   const handleBan = () => {
+    const { uuid, topOffset } = authContext
+
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: 'Unable to Report Starred photo',
@@ -520,7 +558,10 @@ const Photo = ({ photo }) => {
         'The user who posted this photo will be banned. Are you sure?',
         [
           { text: 'No', onPress: () => null, style: 'cancel' },
-          { text: 'Yes', onPress: () => dispatch(reducer.banPhoto({ photo })) },
+          {
+            text: 'Yes',
+            onPress: () => reducer.banPhoto({ photo, uuid, topOffset }),
+          },
         ],
         { cancelable: true },
       )
@@ -528,17 +569,19 @@ const Photo = ({ photo }) => {
   }
 
   const handleFlipWatch = async () => {
+    const { uuid, topOffset } = authContext
+
     try {
       if (photoDetails?.isPhotoWatched) {
         setPhotoDetails({
           ...photoDetails,
-          watchersCount: await dispatch(reducer.unwatchPhoto({ photo })),
+          watchersCount: await reducer.unwatchPhoto({ photo, uuid, topOffset }),
           isPhotoWatched: !photoDetails?.isPhotoWatched,
         })
       } else {
         setPhotoDetails({
           ...photoDetails,
-          watchersCount: await dispatch(reducer.watchPhoto({ photo })),
+          watchersCount: await reducer.watchPhoto({ photo, uuid, topOffset }),
           isPhotoWatched: !photoDetails?.isPhotoWatched,
         })
       }
@@ -552,132 +595,135 @@ const Photo = ({ photo }) => {
     }
   }
 
-  const renderFooter = () => (
-    <SafeAreaView
-      style={{
-        backgroundColor: CONST.NAV_COLOR,
-        width,
-        borderWidth: 0.5,
-        borderColor: 'rgba(100,100,100,0.1)',
-        height: 85,
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        left: 0,
-      }}
-    >
-      {photoDetails?.isPhotoWatched === undefined && (
-        <LinearProgress
-          color={CONST.MAIN_COLOR}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            left: 0,
-          }}
-        />
-      )}
-      {photoDetails?.isPhotoWatched !== undefined && (
-        <Grid
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 0,
-            left: 0,
-          }}
-        >
-          {/* delete button */}
-          <Col
+  const renderFooter = () => {
+    const { uuid, topOffset } = authContext
+    return (
+      <SafeAreaView
+        style={{
+          backgroundColor: CONST.NAV_COLOR,
+          width,
+          borderWidth: 0.5,
+          borderColor: 'rgba(100,100,100,0.1)',
+          height: 85,
+          position: 'absolute',
+          bottom: 0,
+          right: 0,
+          left: 0,
+        }}
+      >
+        {photoDetails?.isPhotoWatched === undefined && (
+          <LinearProgress
+            color={CONST.MAIN_COLOR}
             style={{
-              justifyContent: 'center',
-              alignItems: 'center',
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              left: 0,
             }}
-            onPress={() => handleDelete()}
+          />
+        )}
+        {photoDetails?.isPhotoWatched !== undefined && (
+          <Grid
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 0,
+              left: 0,
+            }}
           >
-            <FontAwesome
-              name="trash"
+            {/* delete button */}
+            <Col
               style={{
-                color: photoDetails?.isPhotoWatched
-                  ? CONST.SECONDARY_COLOR
-                  : CONST.MAIN_COLOR,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Delete</Text>
-          </Col>
-          {/* ban button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={() => handleBan()}
-          >
-            <FontAwesome
-              name="ban"
-              style={{
-                color:
-                  photoDetails?.isPhotoWatched || isPhotoBannedByMe()
+              onPress={() => handleDelete()}
+            >
+              <FontAwesome
+                name="trash"
+                style={{
+                  color: photoDetails?.isPhotoWatched
                     ? CONST.SECONDARY_COLOR
                     : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Report Abuse</Text>
-          </Col>
-          {/* watch button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={async () => {
-              handleFlipWatch()
-            }}
-          >
-            {photoDetails.watchersCount > 0 && (
-              <Badge
-                badgeStyle={{
-                  backgroundColor: CONST.MAIN_COLOR,
                 }}
-                containerStyle={{ position: 'absolute', top: -9, right: -9 }}
-                value={photoDetails.watchersCount}
+                size={30}
               />
-            )}
-            <AntDesign
-              name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
+              <Text style={{ fontSize: 10 }}>Delete</Text>
+            </Col>
+            {/* ban button */}
+            <Col
               style={{
-                color: CONST.MAIN_COLOR,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              {`${photoDetails?.isPhotoWatched ? 'un-Star' : 'Star'}`}
-            </Text>
-          </Col>
-          {/* share button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={async () => {
-              dispatch(reducer.sharePhoto({ photo, photoDetails }))
-            }}
-          >
-            <FontAwesome
-              name="share"
+              onPress={() => handleBan()}
+            >
+              <FontAwesome
+                name="ban"
+                style={{
+                  color:
+                    photoDetails?.isPhotoWatched || isPhotoBannedByMe()
+                      ? CONST.SECONDARY_COLOR
+                      : CONST.MAIN_COLOR,
+                }}
+                size={30}
+              />
+              <Text style={{ fontSize: 10 }}>Report Abuse</Text>
+            </Col>
+            {/* watch button */}
+            <Col
               style={{
-                color: CONST.MAIN_COLOR,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Share</Text>
-          </Col>
-        </Grid>
-      )}
-    </SafeAreaView>
-  )
+              onPress={async () => {
+                handleFlipWatch()
+              }}
+            >
+              {photoDetails.watchersCount > 0 && (
+                <Badge
+                  badgeStyle={{
+                    backgroundColor: CONST.MAIN_COLOR,
+                  }}
+                  containerStyle={{ position: 'absolute', top: -9, right: -9 }}
+                  value={photoDetails.watchersCount}
+                />
+              )}
+              <AntDesign
+                name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
+                style={{
+                  color: CONST.MAIN_COLOR,
+                }}
+                size={30}
+              />
+              <Text style={{ fontSize: 10 }}>
+                {`${photoDetails?.isPhotoWatched ? 'un-Star' : 'Star'}`}
+              </Text>
+            </Col>
+            {/* share button */}
+            <Col
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              onPress={async () => {
+                await reducer.sharePhoto({ photo, photoDetails, topOffset })
+              }}
+            >
+              <FontAwesome
+                name="share"
+                style={{
+                  color: CONST.MAIN_COLOR,
+                }}
+                size={30}
+              />
+              <Text style={{ fontSize: 10 }}>Share</Text>
+            </Col>
+          </Grid>
+        )}
+      </SafeAreaView>
+    )
+  }
 
   const styles = StyleSheet.create({
     photoContainer: {

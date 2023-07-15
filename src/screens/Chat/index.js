@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
+
 import { GiftedChat, Send } from 'react-native-gifted-chat'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
@@ -39,29 +39,118 @@ import * as reducer from './reducer'
 
 import * as friendsHelper from '../FriendsList/friends_helper'
 
-import * as friendsListReducer from '../FriendsList/reducer'
-
 import * as CONST from '../../consts'
 import subscriptionClient from '../../subscriptionClientWs'
 
 import ChatPhoto from './ChatPhoto'
 
 const Chat = ({ route }) => {
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+
   const { chatUuid, contact } = route.params
 
   const navigation = useNavigation()
-  const dispatch = useDispatch()
-
-  const topOffset = useSelector((state) => state.photosList.topOffset)
-
-  const uuid = useSelector((state) => state.secret.uuid)
-  const friendsList = useSelector((state) => state.friendsList.friendsList)
 
   const [messages, setMessages] = useState([])
   // .format("YYYY-MM-DD HH:mm:ss.SSS")
   // const [lastRead, setLastRead] = useState(moment())
 
+  const goBack = async ({ uuid }) => {
+    const friendsList = await friendsHelper.getEnhancedListOfFriendships({
+      uuid,
+    })
+    console.log({ friendsList })
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      friendsList, // the list of enhanced friends list has to be loaded earlier on
+    }))
+  }
+
+  const renderHeaderRight = () => {}
+
+  const renderHeaderLeft = () => {
+    const { uuid, topOffset, currentBatch } = authContext
+
+    return (
+      <FontAwesome
+        name="chevron-left"
+        size={30}
+        style={{
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+          width: 60,
+        }}
+        onPress={() => {
+          goBack({ uuid })
+        }}
+      />
+    )
+  }
+
+  const loadMessages = async ({ chatUuid, lastLoaded }) => {
+    const { uuid, topOffset, currentBatch, friendsList } = authContext
+
+    try {
+      const messagesList = (
+        await CONST.gqlClient.query({
+          query: gql`
+            query getMessagesList(
+              $chatUuid: String!
+              $lastLoaded: AWSDateTime!
+            ) {
+              getMessagesList(chatUuid: $chatUuid, lastLoaded: $lastLoaded) {
+                uuid
+                messageUuid
+                text
+                pending
+                chatPhotoHash
+                createdAt
+                updatedAt
+              }
+            }
+          `,
+          variables: {
+            chatUuid,
+            lastLoaded,
+          },
+          // fetchPolicy: "network-only",
+        })
+      ).data.getMessagesList
+      return messagesList.map((message) => ({
+        _id: message.messageUuid,
+        text: message.text,
+        pending: message.pending,
+        createdAt: message.createdAt,
+        user: {
+          _id: message.uuid,
+          name: friendsHelper.getLocalContactName({
+            uuid,
+            friendUuid: message.uuid,
+            friendsList,
+          }),
+          // avatar: 'https://placeimg.com/140/140/any',
+        },
+        image: message?.chatPhotoHash
+          ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
+          : null,
+        chatPhotoHash: message?.chatPhotoHash,
+      }))
+    } catch (e) {
+      console.log('failed to load messages: ', { e })
+      Toast.show({
+        text1: `Failed to load messages:`,
+        text2: `${e}`,
+        type: 'error',
+        topOffset,
+      })
+      // console.log({ e })
+      return []
+    }
+  }
+
   useEffect(() => {
+    const { uuid, topOffset, currentBatch } = authContext
+
     ;(async () => {
       navigation.setOptions({
         headerTitle: `chat with: ${contact}`,
@@ -74,18 +163,18 @@ const Chat = ({ route }) => {
         },
       })
 
-      setMessages(await _loadMessages({ chatUuid, lastLoaded: moment() }))
+      setMessages(await loadMessages({ chatUuid, lastLoaded: moment() }))
       friendsHelper.resetUnreadCount({ chatUuid, uuid })
     })()
 
-    CONST._makeSureDirectoryExists({
+    CONST.makeSureDirectoryExists({
       directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
     })
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
+    const { uuid, topOffset, currentBatch, friendsList } = authContext
+
     console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
     const observableObject = subscriptionClient.subscribe({
@@ -216,67 +305,11 @@ const Chat = ({ route }) => {
       subscription.unsubscribe()
       console.log(`unsubscribing from ${chatUuid}`)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const _loadMessages = async ({ chatUuid, lastLoaded }) => {
-    try {
-      const messagesList = (
-        await CONST.gqlClient.query({
-          query: gql`
-            query getMessagesList(
-              $chatUuid: String!
-              $lastLoaded: AWSDateTime!
-            ) {
-              getMessagesList(chatUuid: $chatUuid, lastLoaded: $lastLoaded) {
-                uuid
-                messageUuid
-                text
-                pending
-                chatPhotoHash
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            chatUuid,
-            lastLoaded,
-          },
-          // fetchPolicy: "network-only",
-        })
-      ).data.getMessagesList
-      return messagesList.map((message) => ({
-        _id: message.messageUuid,
-        text: message.text,
-        pending: message.pending,
-        createdAt: message.createdAt,
-        user: {
-          _id: message.uuid,
-          name: friendsHelper.getLocalContactName({
-            uuid,
-            friendUuid: message.uuid,
-            friendsList,
-          }),
-          // avatar: 'https://placeimg.com/140/140/any',
-        },
-        image: message?.chatPhotoHash
-          ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
-          : null,
-        chatPhotoHash: message?.chatPhotoHash,
-      }))
-    } catch (e) {
-      console.log('failed to load messages: ', { e })
-      Toast.show({
-        text1: `Failed to load messages:`,
-        text2: `${e}`,
-        type: 'error',
-        topOffset,
-      })
-      // console.log({ e })
-    }
-  }
+  }, [])
 
   const onSend = useCallback((messages = []) => {
+    const { uuid, topOffset, currentBatch, friendsList } = authContext
+
     messages.forEach((message) => {
       ;(async () => {
         try {
@@ -326,50 +359,15 @@ const Chat = ({ route }) => {
         }
       })()
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
     },
-    // scrollView: {
-    //     alignItems: 'center',
-    //     marginHorizontal: 0,
-    //     paddingBottom: 300,
-    //   },
-    //   thumbnail: {
-    //     // flex: 1,
-    //     // alignSelf: 'stretch',
-    //     width: '100%',
-    //     height: '100%',
-    //     borderRadius: 10,
-    //   },
   })
 
-  const renderHeaderRight = () => {}
-
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => {
-        _return({ uuid })
-      }}
-    />
-  )
-  const _return = ({ uuid }) => {
-    dispatch(friendsListReducer.reloadFriendsList({ uuid }))
-    dispatch(friendsListReducer.reloadUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
-    navigation.goBack()
-  }
   const renderSend = (props) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
     <Send {...props}>
       <View
         style={{
@@ -405,7 +403,7 @@ const Chat = ({ route }) => {
   const onLoadEarlier = async () => {
     // console.log('onLoadEarlier')
     // setMessages([...messages, await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })])
-    const earlierMessages = await _loadMessages({
+    const earlierMessages = await loadMessages({
       chatUuid,
       lastLoaded: messages[messages.length - 1].createdAt,
     })
@@ -450,6 +448,56 @@ const Chat = ({ route }) => {
       <View />
     </View>
   )
+
+  const uploadAsset = async ({ uri }) => {
+    const { uuid, topOffset, currentBatch, friendsList } = authContext
+
+    const fileContents = await FileSystem.readAsStringAsync(uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    })
+    const chatPhotoHash = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      fileContents,
+    )
+    console.log('photoHash: ', chatPhotoHash)
+
+    const messageUuid = uuidv4()
+
+    reducer.queueFileForUpload({ assetUrl: uri, chatPhotoHash, messageUuid })
+
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, [
+        {
+          _id: messageUuid,
+          text: '',
+          pending: true,
+          createdAt: moment(),
+          user: {
+            _id: uuid,
+            name: friendsHelper.getLocalContactName({
+              uuid,
+              friendUuid: uuid,
+              friendsList,
+            }),
+            // avatar: 'https://placeimg.com/140/140/any',
+          },
+          image: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb`,
+          chatPhotoHash,
+        },
+      ]),
+    )
+
+    const returnedMessage = await reducer.sendMessage({
+      chatUuid,
+      uuid,
+      messageUuid,
+      text: '',
+      pending: true,
+      chatPhotoHash,
+    })
+
+    reducer.uploadPendingPhotos({ chatUuid, uuid, topOffset })
+  }
 
   const pickAsset = async () => {
     const permissionResult =
@@ -503,64 +551,14 @@ const Chat = ({ route }) => {
       // exif: false,
     })
 
-    if (cameraReturn.cancelled === true) {
+    if (cameraReturn.canceled === true) {
       return
     }
 
-    await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
+    await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
 
-    const { uri } = cameraReturn
+    const { uri } = cameraReturn.assets[0]
     uploadAsset({ uri })
-  }
-
-  const uploadAsset = async ({ uri }) => {
-    const fileContents = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    })
-    const chatPhotoHash = await Crypto.digestStringAsync(
-      Crypto.CryptoDigestAlgorithm.SHA256,
-      fileContents,
-    )
-    console.log('photoHash: ', chatPhotoHash)
-
-    const messageUuid = uuidv4()
-
-    await dispatch(
-      reducer.queueFileForUpload({ assetUrl: uri, chatPhotoHash, messageUuid }),
-    )
-
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, [
-        {
-          _id: messageUuid,
-          text: '',
-          pending: true,
-          createdAt: moment(),
-          user: {
-            _id: uuid,
-            name: friendsHelper.getLocalContactName({
-              uuid,
-              friendUuid: uuid,
-              friendsList,
-            }),
-            // avatar: 'https://placeimg.com/140/140/any',
-          },
-          image: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb`,
-          chatPhotoHash,
-        },
-      ]),
-    )
-
-    const returnedMessage = await reducer.sendMessage({
-      chatUuid,
-      uuid,
-      messageUuid,
-      text: '',
-      pending: true,
-      chatPhotoHash,
-    })
-
-    dispatch(reducer.uploadPendingPhotos({ chatUuid }))
   }
 
   return (
@@ -569,19 +567,18 @@ const Chat = ({ route }) => {
         messages={messages}
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: uuid,
+          _id: authContext.uuid,
         }}
         // alwaysShowSend
         renderSend={renderSend}
         renderLoading={renderLoading}
-        // eslint-disable-next-line react/jsx-props-no-spreading
         renderMessageImage={(props) => <ChatPhoto {...props} />}
         // scrollToBottomComponent={scrollToBottomComponent}
         infiniteScroll
         loadEarlier
         onLoadEarlier={onLoadEarlier}
         renderUsernameOnMessage
-        renderAccessory={renderAccessory}
+        // renderAccessory={renderAccessory} // disabled photo taking for now
       />
     </SafeAreaView>
   )

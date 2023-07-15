@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 
 import { TextInput, StyleSheet, useWindowDimensions } from 'react-native'
 
@@ -30,11 +29,8 @@ const maxStringLength = 140
 
 const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
-  const dispatch = useDispatch()
-  const { photo } = route.params
+  const { photo, topOffset, uuid } = route.params
   const { height } = useWindowDimensions()
-
-  const uuid = useSelector((state) => state.secret.uuid)
 
   const [inputText, _setInputText] = useState('')
 
@@ -43,25 +39,6 @@ const ModalInputText = ({ route }) => {
     inputTextRef.current = data
     _setInputText(data)
   }
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerLeft: renderHeaderLeft,
-      headerTitle: 'Enter comment',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-  })
 
   const renderHeaderLeft = () => (
     <FontAwesome
@@ -75,6 +52,14 @@ const ModalInputText = ({ route }) => {
       onPress={() => navigation.goBack()}
     />
   )
+  const handleSubmit = () => {
+    reducer.submitComment({
+      inputText: inputTextRef.current.trim(),
+      uuid,
+      photo,
+    })
+    navigation.pop()
+  }
 
   const renderHeaderRight = () => (
     <Ionicons
@@ -90,16 +75,24 @@ const ModalInputText = ({ route }) => {
     />
   )
 
-  const handleSubmit = () => {
-    dispatch(
-      reducer.submitComment({
-        inputText: inputTextRef.current.trim(),
-        uuid,
-        photo,
-      }),
-    )
-    navigation.pop()
-  }
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: renderHeaderLeft,
+      headerTitle: 'Enter comment',
+      headerTintColor: CONST.MAIN_COLOR,
+      headerRight: renderHeaderRight,
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
+  }, [])
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+  })
 
   return (
     <KeyboardAwareScrollView style={styles.container}>

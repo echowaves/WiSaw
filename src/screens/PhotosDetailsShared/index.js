@@ -6,21 +6,73 @@ import PropTypes from 'prop-types'
 
 import { FontAwesome } from '@expo/vector-icons'
 
-import {
-  Text,
-} from 'react-native'
+import { Text } from 'react-native'
 
-import { gql } from "@apollo/client"
+import { gql } from '@apollo/client'
 
 import Photo from '../../components/Photo'
 
-import * as CONST from '../../consts.js'
+import * as CONST from '../../consts'
 
 const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
 
   const { photoId } = route.params
+
+  const loadPhoto = async (photoid) => {
+    try {
+      const response = (
+        await CONST.gqlClient.query({
+          query: gql`
+            query getPhotoAllCurr($photoId: ID!) {
+              getPhotoAllCurr(photoId: $photoId) {
+                photo {
+                  id
+                  imgUrl
+                  thumbUrl
+                  videoUrl
+                  video
+                  commentsCount
+                  watchersCount
+                  createdAt
+                }
+              }
+            }
+          `,
+          variables: {
+            photoId: photoid,
+          },
+        })
+      ).data.getPhotoAllCurr
+      const { photo } = response
+      setItem(photo)
+    } catch (err4) {
+      // eslint-disable-next-line no-console
+      console.log({ err4 }) // eslint-disable-line
+    }
+  }
+
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
+    />
+  )
+
+  const renderHeaderTitle = () => (
+    <FontAwesome
+      name="share"
+      size={30}
+      style={{ color: CONST.SECONDARY_COLOR }}
+    />
+  )
 
   useEffect(() => {
     navigation.setOptions({
@@ -31,67 +83,13 @@ const PhotosDetailsShared = ({ route }) => {
       },
     })
     loadPhoto(photoId)
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  const loadPhoto = async photoId => {
-    try {
-      const response = (await CONST.gqlClient
-        .query({
-          query: gql`
-          query getPhotoAllCurr($photoId: ID!) {
-                                getPhotoAllCurr(photoId: $photoId) {
-                                  photo {
-                                    id
-                                    imgUrl
-                                    thumbUrl
-                                    videoUrl
-                                    video
-                                    commentsCount
-                                    watchersCount
-                                    createdAt
-                                  }
-                                }
-                              }
-        `,
-          variables: {
-            photoId,
-          },
-        })).data.getPhotoAllCurr
-      const { photo } = response
-      setItem(photo)
-    } catch (err4) {
-      // eslint-disable-next-line no-console
-      console.log({ err4 })// eslint-disable-line
-    }
-  }
-
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={
-        {
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }
-      }
-      onPress={
-        () => navigation.goBack()
-      }
-    />
-  )
-
-  const renderHeaderTitle = () => (<FontAwesome name="share" size={30} style={{ color: CONST.SECONDARY_COLOR }} />)
+  }, [])
 
   if (item) {
-    return (
-      <Photo photo={item} key={item.id} />
-    )
+    return <Photo photo={item} key={item.id} />
   }
   return <Text />
 }
-
 PhotosDetailsShared.propTypes = {
   // photoId: PropTypes.number.isRequired,
   route: PropTypes.object.isRequired,

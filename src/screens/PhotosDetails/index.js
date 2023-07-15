@@ -12,8 +12,6 @@ import // View,
 
 import { Text } from '@rneui/themed'
 
-import { useDispatch, useSelector } from 'react-redux'
-
 import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'
@@ -23,42 +21,12 @@ import { getPhotos } from '../PhotosList/reducer'
 import * as CONST from '../../consts'
 
 const PhotosDetails = ({ route }) => {
-  const navigation = useNavigation()
-  const currentIndex = useSelector((state) => state.photosList.currentIndex)
+  const { index, photosList, searchTerm, activeSegment, topOffset, uuid } =
+    route.params
 
-  const photos = useSelector((state) => state.photosList.photos)
+  const navigation = useNavigation()
 
   const swiper = useRef(null)
-
-  const searchTerm = useSelector((state) => state.photosList.searchTerm)
-  const activeSegment = useSelector((state) => state.photosList.activeSegment)
-
-  const topOffset = useSelector((state) => state.photosList.topOffset)
-
-  const dispatch = useDispatch()
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerLeft: renderHeaderLeft,
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => navigation.goBack()}
-    />
-  )
 
   const renderHeaderTitle = () => {
     switch (activeSegment) {
@@ -93,6 +61,29 @@ const PhotosDetails = ({ route }) => {
     }
   }
 
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => navigation.goBack()}
+    />
+  )
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: renderHeaderTitle,
+      headerLeft: renderHeaderLeft,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
+  }, [])
+
   return (
     // <GestureHandlerRootView>
     <Swiper
@@ -105,12 +96,12 @@ const PhotosDetails = ({ route }) => {
       autoplay={false}
       horizontal
       loop={false}
-      index={currentIndex}
+      index={index}
       onIndexChanged={(newIndex) => {
-        if (newIndex > photos.length - 5) {
-          dispatch(getPhotos()) // pre-load more photos when nearing the end
+        if (newIndex > photosList.length - 5) {
+          getPhotos() // pre-load more photos when nearing the end
         }
-        if (newIndex === 0 || newIndex === photos.length - 1) {
+        if (newIndex === 0 || newIndex === photosList.length - 1) {
           Toast.show({
             text1: 'No scrolling beyond this point',
             topOffset,
@@ -124,8 +115,13 @@ const PhotosDetails = ({ route }) => {
       showsPagination={false}
       pagingEnabled
     >
-      {photos.map((photo) => (
-        <Photo photo={photo} key={photo.id} swiper={swiper} />
+      {photosList.map((photo) => (
+        <Photo
+          photo={photo}
+          key={photo.id}
+          swiper={swiper}
+          photosList={photosList}
+        />
       ))}
     </Swiper>
     // </GestureHandlerRootView>

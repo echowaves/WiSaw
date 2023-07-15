@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
-import { useDispatch, useSelector } from 'react-redux'
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
 import * as SecureStore from 'expo-secure-store'
@@ -17,7 +16,7 @@ import * as BackgroundFetch from 'expo-background-fetch'
 import * as TaskManager from 'expo-task-manager'
 
 import useKeyboard from '@rnhooks/keyboard'
-
+import { CacheManager } from 'expo-cached-image'
 import {
   StyleSheet,
   View,
@@ -55,8 +54,8 @@ import {
   Badge,
 } from '@rneui/themed'
 
-import { UUID_KEY } from '../Secret/reducer'
-import { getUnreadCountsList } from '../FriendsList/friends_helper'
+import * as friendsHelper from '../FriendsList/friends_helper'
+
 import * as reducer from './reducer'
 
 import * as CONST from '../../consts'
@@ -72,8 +71,9 @@ const BACKGROUND_FETCH_TASK = 'background-fetch'
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
   // const now = Date.now()
   try {
-    const uuid = await SecureStore.getItemAsync(UUID_KEY)
-    const unreadCountList = getUnreadCountsList({ uuid })
+    const uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
+    const unreadCountList = await friendsHelper.getUnreadCountsList({ uuid })
+
     const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
     Notifications.setBadgeCountAsync(badgeCount || 0)
     // console.log("background fetch", { badgeCount })
@@ -107,44 +107,40 @@ async function registerBackgroundFetchAsync() {
 const FOOTER_HEIGHT = 90
 
 const PhotosList = () => {
+  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+
   const navigation = useNavigation()
 
-  const dispatch = useDispatch()
+  const { width, height } = useWindowDimensions()
 
   // const deviceOrientation = useDeviceOrientation()
-  const { width, height } = useWindowDimensions()
-  const topOffset = useSelector((state) => state.photosList.topOffset)
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
   // const [loadMore, setLoadMore] = useState(false)
 
-  const photos = useSelector((state) => state.photosList.photos)
-  const pendingPhotos = useSelector((state) => state.photosList.pendingPhotos)
-  const location = useSelector((state) => state.photosList.location)
-  // const errorMessage = useSelector(state => state.photosList.errorMessage)
-  const isLastPage = useSelector((state) => state.photosList.isLastPage)
-  // const paging = useSelector(state => state.photosList.paging)
-  const isTandcAccepted = useSelector(
-    (state) => state.photosList.isTandcAccepted,
-  )
-  const uuid = useSelector((state) => state.secret.uuid)
-  const zeroMoment = useSelector((state) => state.photosList.zeroMoment)
+  const [isTandcAccepted, setIsTandcAccepted] = useState(true)
+  const [zeroMoment, setZeroMoment] = useState(null)
 
-  const loading = useSelector((state) => state.photosList.loading)
-  // const pageNumber = useSelector(state => state.photosList.pageNumber)
+  const [netAvailable, setNetAvailable] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [location, setLocation] = useState(null)
 
-  const activeSegment = useSelector((state) => state.photosList.activeSegment)
-  // const searchTerm = useSelector(state => state.photosList.searchTerm)
-  const [currentSearchTerm, setCurrentSearchTerm] = useState('')
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
-  const netAvailable = useSelector((state) => state.photosList.netAvailable)
-  // const batch = useSelector(state => state.photosList.batch)
-  const unreadCountList = useSelector(
-    (state) => state.friendsList.unreadCountsList,
-  )
+  // const [isLastPage, setIsLastPage] = useState(false)
 
-  const unreadCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
+  const [pageNumber, setPageNumber] = useState(null)
+
+  const [pendingPhotos, setPendingPhotos] = useState([])
+
+  const [activeSegment, setActiveSegment] = useState(0)
+
+  const [loading, setLoading] = useState(true)
+
+  const [unreadCountList, setUnreadCountList] = useState([])
+
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
@@ -154,6 +150,10 @@ const PhotosList = () => {
     // const lastViewableItem = viewableItems.changed[0]
     setLastViewableRow(lastViewableItem.index)
   })
+
+  useEffect(() => {
+    setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
+  }, [unreadCountList])
 
   useEffect(() => {
     // checkStatusAsync()
@@ -175,7 +175,357 @@ const PhotosList = () => {
   //   // setIsRegistered(isRegistered)
   // }
 
-  const _initState = async () => {
+  const wantToLoadMore = () => {
+    const { photosList } = authContext
+
+    if (photosList.length === 0) return true
+    const screenColumns = /* Math.floor */ width / thumbDimension
+    const screenRows = /* Math.floor */ height / thumbDimension
+    const totalNumRows = /* Math.floor */ photosList.length / screenColumns
+
+    if (screenRows * 1 + lastViewableRow > totalNumRows) {
+      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
+      return true
+    }
+
+    return false
+  }
+
+  const load = async () => {
+    const { uuid, topOffset, currentBatch } = authContext
+
+    setLoading(true)
+
+    const { photos, noMoreData, batch } = await reducer.getPhotos({
+      uuid,
+      zeroMoment,
+      location,
+      netAvailable,
+      searchTerm,
+      topOffset,
+      activeSegment,
+      batch: currentBatch,
+      pageNumber,
+    })
+
+    // console.log({
+    //   activeSegment,
+    //   pageNumber,
+    //   photos: photos.length,
+    //   noMoreData,
+    // })
+    // const newPhotosList = [...photosList, ...photos].sort(
+    //   (a, b) => a.row_number - b.row_number,
+    // )
+
+    if (batch === currentBatch) {
+      // avoid duplicates
+      setAuthContext((prevAuthContext) => ({
+        ...prevAuthContext,
+        photosList: [...prevAuthContext.photosList, ...photos]
+          .filter(
+            (obj, pos, arr) =>
+              arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+          ) // fancy way to remove duplicate photos
+          .sort((a, b) => a.row_number - b.row_number),
+      }))
+    }
+
+    if (noMoreData === false && wantToLoadMore()) {
+      setPageNumber((currentPage) => currentPage + 1)
+    } else {
+      setLoading(false)
+    }
+  }
+  const segment0 = () => (
+    <FontAwesome
+      name="globe"
+      size={23}
+      color={
+        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+
+  const segment1 = () => (
+    <AntDesign
+      name="star"
+      size={23}
+      color={
+        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+
+  const segment2 = () => (
+    <FontAwesome
+      name="search"
+      size={23}
+      color={
+        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
+      }
+    />
+  )
+  async function uploadPendingPhotos() {
+    const { uuid, topOffset } = authContext
+
+    // return Promise.resolve()
+    // console.log(1)
+    if (netAvailable === false) {
+      return Promise.resolve()
+    }
+
+    if (uploadingPhoto) {
+      // console.log({ uploadingPhoto })
+      // already uploading photos, just exit here
+      return Promise.resolve()
+    }
+    setUploadingPhoto(true)
+    try {
+      let i
+      // here let's iterate over the items and upload one file at a time
+
+      // generatePhotoQueue will only contain item with undefined photo
+      const generatePhotoQueue = (await reducer.getQueue()).filter(
+        (image) => !image.photo,
+      )
+
+      // first pass iteration to generate photos ID and the photo record on the backend
+      for (i = 0; i < generatePhotoQueue.length; i += 1) {
+        const item = generatePhotoQueue[i]
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const photo = await reducer.generatePhoto({
+            uuid,
+            lat: item.location.coords.latitude,
+            lon: item.location.coords.longitude,
+            video: item?.type === 'video',
+          })
+          // eslint-disable-next-line no-await-in-loop
+          CacheManager.addToCache({
+            file: item.localThumbUrl,
+            key: `${photo.id}-thumb`,
+          })
+          // eslint-disable-next-line no-await-in-loop
+          CacheManager.addToCache({
+            file: item.localImgUrl,
+            key: `${photo.id}`,
+          })
+          // eslint-disable-next-line no-await-in-loop
+          await reducer.removeFromQueue(item)
+          // eslint-disable-next-line no-await-in-loop
+          await reducer.addToQueue({
+            ...item,
+            photo,
+          })
+          // eslint-disable-next-line no-await-in-loop
+          // setPendingPhotos(await reducer.getQueue())
+        } catch (err123) {
+          // eslint-disable-next-line no-console
+          console.log({ err123 })
+          if (`${err123}`.includes('banned')) {
+            // eslint-disable-next-line no-await-in-loop
+            await reducer.removeFromQueue(item)
+            // eslint-disable-next-line no-await-in-loop
+            setPendingPhotos(await reducer.getQueue())
+
+            Toast.show({
+              text1: "Sorry, you've been banned",
+              text2: 'Try again later',
+              type: 'error',
+              topOffset,
+            })
+          }
+        }
+      }
+
+      // uploadQueue will only contain item with photo generated on the backend
+      const uploadQueue = (await reducer.getQueue()).filter(
+        (image) => image.photo,
+      )
+      // second pass -- upload files
+      for (i = 0; i < uploadQueue.length; i += 1) {
+        const item = uploadQueue[i]
+
+        // eslint-disable-next-line no-await-in-loop
+        const { responseData } = await reducer.uploadItem({
+          item,
+        })
+
+        if (responseData.status === 200) {
+          // console.log('uploaded', { item: item?.id })
+          // eslint-disable-next-line no-await-in-loop
+          await reducer.removeFromQueue(item)
+
+          // eslint-disable-next-line no-await-in-loop
+          // await updatePendingPhotos()
+
+          // show the photo in the photo list immidiately
+
+          // eslint-disable-next-line no-await-in-loop
+          // dispatch({
+          //   type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
+          //   photo: item.photo,
+          // })
+
+          // eslint-disable-next-line no-await-in-loop
+          // setPendingPhotos((prevQueue) => [
+          //   ...prevQueue.filter((photo) => item.id !== photo.id),
+          // ])
+
+          setAuthContext((prevAuthContext) => ({
+            ...prevAuthContext,
+            photosList: [item.photo, ...prevAuthContext.photosList].filter(
+              (obj, pos, arr) =>
+                arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+            ), // fancy way to remove duplicate photos
+          }))
+
+          // Toast.show({
+          //   text1: `${item.photo.video ? 'Video' : 'Photo'} uploaded`,
+          //   topOffset,
+          //   visibilityTime: 500,
+          // })
+          // eslint-disable-next-line no-await-in-loop
+          setPendingPhotos(await reducer.getQueue())
+        } else {
+          // alert(JSON.stringify({ responseData }))
+          Toast.show({
+            text1: 'Upload is going slooooow...',
+            text2: 'Still trying to upload.',
+            visibilityTime: 500,
+            topOffset,
+          })
+        }
+      }
+    } catch (err2) {
+      // eslint-disable-next-line no-console
+      // console.log({ err2 })
+      Toast.show({
+        text1: 'Upload is slow...',
+        text2: 'Still trying to upload.',
+        visibilityTime: 500,
+        topOffset,
+      })
+      // console.log({ error }) // eslint-disable-line no-console
+      // dispatch(uploadPendingPhotos())
+    }
+
+    setUploadingPhoto(false)
+    // sleep for 1 second before re-trying
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    if ((await reducer.getQueue()).length > 0) {
+      uploadPendingPhotos()
+    }
+    return Promise.resolve()
+  }
+
+  const reload = async () => {
+    const { uuid, topOffset } = authContext
+
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      photosList: [],
+      currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+    }))
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    setPageNumber(0)
+    setAuthContext((prevAuthContext) => ({
+      ...prevAuthContext,
+      photosList: [],
+      currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+    }))
+
+    // setPageNumber(0)
+    // setLoading(true)
+    // updateNavBar()
+
+    // setAuthContext((prevAuthContext) => ({
+    //   ...prevAuthContext,
+    //   photosList: [],
+    //   currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+    // }))
+
+    load()
+
+    setPendingPhotos(await reducer.getQueue())
+
+    uploadPendingPhotos()
+    if (uuid.length > 0) {
+      const friendsList = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
+      console.log({ friendsList })
+      setAuthContext((prevAuthContext) => ({
+        ...prevAuthContext,
+        friendsList, // the list of enhanced friends list has to be loaded earlier on
+      }))
+
+      const unreadCounts = await friendsHelper.getUnreadCountsList({ uuid })
+      console.log({ friendsList: unreadCounts })
+      setUnreadCountList(unreadCounts) // the list of enhanced friends list has to be loaded earlier on
+    }
+    // setPendingPhotos(await reducer.getQueue())
+  }
+
+  const updateIndex = async (index) => {
+    setActiveSegment(index)
+    reload()
+  }
+
+  const renderHeaderTitle = () => (
+    <>
+      <ButtonGroup
+        onPress={updateIndex}
+        containerStyle={{
+          width: 200,
+          height: 35,
+        }}
+        buttonStyle={{ alignSelf: 'center' }}
+        buttons={[
+          { element: segment0 },
+          { element: segment1 },
+          { element: segment2 },
+        ]}
+      />
+      {loading && (
+        <LinearProgress
+          color={CONST.MAIN_COLOR}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            left: 0,
+          }}
+        />
+      )}
+    </>
+  )
+
+  const updateNavBar = async () => {
+    if (netAvailable) {
+      navigation.setOptions({
+        headerTitle: renderHeaderTitle,
+        // headerLeft: renderHeaderLeft,
+        // headerRight: renderHeaderRight,
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
+      })
+    } else {
+      navigation.setOptions({
+        headerTitle: '',
+        headerLeft: '',
+        headerRight: '',
+        headerStyle: {
+          backgroundColor: CONST.NAV_COLOR,
+        },
+      })
+    }
+  }
+
+  const initState = async () => {
     // /// //////////////////////////////////////
     // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
     // files.forEach(file => {
@@ -188,27 +538,154 @@ const PhotosList = () => {
       Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
     )
 
-    await Promise.all([
-      // checkForUpdate(),
-      // check permissions, retrieve UUID, make sure upload folder exists
-      dispatch(reducer.initState()),
-      dispatch(reducer.zeroMoment()),
-    ])
+    // checkForUpdate(),
+    // check permissions, retrieve UUID, make sure upload folder exists
+    setIsTandcAccepted(await reducer.getTancAccepted())
+
+    setZeroMoment(await reducer.getZeroMoment())
+    // reload()
   }
-  const _initandreload = async () => {
-    await _initState()
-    await _reload()
+
+  async function checkPermission({
+    permissionFunction,
+    alertHeader,
+    alertBody,
+    permissionFunctionArgument,
+  }) {
+    const { status } = await permissionFunction(permissionFunctionArgument)
+    if (status !== 'granted') {
+      Alert.alert(alertHeader, alertBody, [
+        {
+          text: 'Open Settings',
+          onPress: () => {
+            Linking.openSettings()
+          },
+        },
+      ])
+    }
+    return status
+  }
+
+  const takePhoto = async ({ cameraType }) => {
+    const { uuid, topOffset } = authContext
+
+    let cameraReturn
+    if (cameraType === 'camera') {
+      // launch photo capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        // allowsEditing: true,
+        quality: 1.0,
+        exif: false,
+      })
+    } else {
+      // launch video capturing
+      cameraReturn = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        // allowsEditing: true,
+        videoMaxDuration: 5,
+        quality: 1.0,
+        exif: false,
+      })
+    }
+
+    // alert(`cameraReturn.canceled ${cameraReturn.canceled}`)
+    if (cameraReturn.canceled === false) {
+      await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
+      // have to wait, otherwise the upload will not start
+      await reducer.queueFileForUpload({
+        cameraImgUrl: cameraReturn.assets[0].uri,
+        type: cameraReturn.assets[0].type,
+        location,
+      })
+
+      setPendingPhotos(await reducer.getQueue())
+
+      uploadPendingPhotos({
+        uuid,
+        topOffset,
+        netAvailable,
+        uploadingPhoto: true,
+      })
+    }
+  }
+
+  const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
+    const cameraPermission = await checkPermission({
+      permissionFunction: ImagePicker.requestCameraPermissionsAsync,
+      alertHeader: 'Do you want to take photo with wisaw?',
+      alertBody: "Why don't you enable photo permission?",
+    })
+
+    if (cameraPermission === 'granted') {
+      const photoAlbomPermission = await checkPermission({
+        permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
+        alertHeader: 'Do you want to save photo on your device?',
+        alertBody: "Why don't you enable the permission?",
+        permissionFunctionArgument: true,
+      })
+
+      if (photoAlbomPermission === 'granted') {
+        await takePhoto({ cameraType })
+      }
+    }
+  }
+
+  async function getLocation() {
+    const { topOffset } = authContext
+
+    const locationPermission = await checkPermission({
+      permissionFunction: Location.requestForegroundPermissionsAsync,
+      alertHeader:
+        'WiSaw shows you near-by photos based on your current location.',
+      alertBody: 'You need to enable Location in Settings and Try Again.',
+    })
+
+    if (locationPermission === 'granted') {
+      try {
+        // initially set the location that is last known -- works much faster this way
+        const loc = await Location.getLastKnownPositionAsync({
+          maxAge: 86400000,
+          requiredAccuracy: 5000,
+        })
+        setLocation(loc)
+
+        // Location.watchPositionAsync(
+        //   {
+        //     accuracy: Location.Accuracy.Lowest,
+        //     timeInterval: 10000,
+        //     distanceInterval: 3000,
+        //   },
+        //   async (loc1) => {
+        //     // Toast.show({
+        //     //   text1: 'location udated',
+        //     //   type: "error",
+        //     // topOffset: topOffset,
+        //     // })
+        //     setLocation(loc1)
+        //   },
+        // )
+        return loc
+      } catch (err) {
+        Toast.show({
+          text1: 'Unable to get location',
+          type: 'error',
+          topOffset,
+        })
+      }
+    }
+    return null
   }
 
   useEffect(() => {
     // TODO: delete next line -- debuggin
     // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
 
-    dispatch(reducer.settopOffset(height / 3))
-
-    _getLocation()
-    _initandreload()
     ;(async () => {
+      await initState()
+      const loc = await getLocation()
+      // console.log({ loc })
+
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
         const branchHelper = await import('../../branch_helper')
@@ -219,44 +696,52 @@ const PhotosList = () => {
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (state) {
-        dispatch(reducer.setNetAvailable(state.isInternetReachable))
+        setNetAvailable(state.isInternetReachable)
       }
     })
     return () => {
       unsubscribeNetInfo()
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
-    if (uuid && zeroMoment) {
-      _reload() // initially load only when zero moment is loaded and uuid is assigned
+    reload()
+  }, [location])
+
+  // useEffect(() => {}, [currentBatch])
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: CONST.BG_COLOR,
+    },
+    thumbContainer: {
+      // height: thumbDimension,
+      // paddingBottom: 10,
+      // marginBottom: 10,
+    },
+  })
+
+  useEffect(() => {
+    updateNavBar()
+  }, [loading])
+
+  useEffect(() => {
+    // console.log({ pageNumber })
+    load()
+  }, [pageNumber])
+
+  useEffect(() => {
+    // console.log({ activeSegment })
+    updateNavBar()
+    // reload()
+  }, [activeSegment])
+
+  useEffect(() => {
+    if (wantToLoadMore() && !loading) {
+      setPageNumber((currentPage) => currentPage + 1)
     }
-  }, [uuid, zeroMoment]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // re-render title on  state chage
-  useEffect(() => {
-    // defining this function for special case, when network becomes available after the app has started
-    _updateNavBar()
-    if (netAvailable) {
-      _initandreload()
-    }
-    // else {
-    //   (async () => {
-    //     await navigation.popToTop()
-    //     await _updateNavBar()
-    //   })()
-    // }
-  }, [netAvailable]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (wantToLoadMore()) {
-      dispatch(reducer.getPhotos())
-    }
-  }, [lastViewableRow, loading]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    _updateNavBar()
-  }, [activeSegment]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastViewableRow])
 
   // const checkForUpdate = async () => {
   //   try {
@@ -282,242 +767,86 @@ const PhotosList = () => {
   //   }
   // }
 
-  const wantToLoadMore = () => {
-    if (isLastPage) {
-      // console.log(`isLastPage:${isLastPage}`)
-      return false
-    }
-
-    const screenColumns = /* Math.floor */ width / thumbDimension
-    const screenRows = /* Math.floor */ height / thumbDimension
-    const totalNumRows = /* Math.floor */ photos.length / screenColumns
-
-    if (screenRows * 1 + lastViewableRow > totalNumRows) {
-      // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
-      return true
-    }
-
-    return false
-  }
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: CONST.BG_COLOR,
-    },
-    thumbContainer: {
-      // height: thumbDimension,
-      // paddingBottom: 10,
-      // marginBottom: 10,
-    },
-  })
-
-  const _updateNavBar = async () => {
-    if (netAvailable) {
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle,
-        // headerLeft: renderHeaderLeft,
-        // headerRight: renderHeaderRight,
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    } else {
-      navigation.setOptions({
-        headerTitle: '',
-        headerLeft: '',
-        headerRight: '',
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    }
-  }
-
   // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
-  const _reload = async () => {
-    dispatch(reducer.resetState())
-    dispatch(reducer.uploadPendingPhotos())
+  const renderThumbs = () => {
+    const { uuid, topOffset, photosList } = authContext
+
+    return (
+      <FlatGrid
+        itemDimension={thumbDimension}
+        spacing={3}
+        data={photosList}
+        renderItem={({ item, index }) => (
+          <Thumb
+            item={item}
+            index={index}
+            thumbDimension={thumbDimension}
+            photosList={photosList}
+            searchTerm={searchTerm}
+            activeSegment={activeSegment}
+            topOffset={topOffset}
+            uuid={uuid}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        style={{
+          ...styles.container,
+          marginBottom: FOOTER_HEIGHT,
+        }}
+        showsVerticalScrollIndicator={false}
+        horizontal={false}
+        refreshing={false}
+        onRefresh={() => {
+          reload()
+        }}
+        onViewableItemsChanged={onViewRef.current}
+        // viewabilityConfig={viewConfigRef.current}
+      />
+    )
   }
 
-  async function _checkPermission({
-    permissionFunction,
-    alertHeader,
-    alertBody,
-    permissionFunctionArgument,
-  }) {
-    const { status } = await permissionFunction(permissionFunctionArgument)
-    if (status !== 'granted') {
-      Alert.alert(alertHeader, alertBody, [
-        {
-          text: 'Open Settings',
-          onPress: () => {
-            Linking.openSettings()
-          },
-        },
-      ])
-    }
-    return status
+  const renderThumbsWithComments = () => {
+    const { uuid, topOffset, photosList } = authContext
+
+    return (
+      <FlatGrid
+        itemDimension={width}
+        spacing={3}
+        data={photosList}
+        renderItem={({ item, index }) => (
+          <ThumbWithComments
+            item={item}
+            index={index}
+            thumbDimension={thumbDimension}
+            screenWidth={width}
+            photosList={photosList}
+            searchTerm={searchTerm}
+            activeSegment={activeSegment}
+            topOffset={topOffset}
+            uuid={uuid}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        style={{
+          ...styles.container,
+          marginBottom: 95,
+        }}
+        showsVerticalScrollIndicator={false}
+        horizontal={false}
+        refreshing={false}
+        onRefresh={() => {
+          reload()
+        }}
+        onViewableItemsChanged={onViewRef.current}
+        // viewabilityConfig={viewConfigRef.current}
+      />
+    )
   }
 
-  const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
-    const cameraPermission = await _checkPermission({
-      permissionFunction: ImagePicker.requestCameraPermissionsAsync,
-      alertHeader: 'Do you want to take photo with wisaw?',
-      alertBody: "Why don't you enable photo permission?",
-    })
+  const renderFooter = () => {
+    const { uuid, nickName, topOffset, photosList } = authContext
 
-    if (cameraPermission === 'granted') {
-      const photoAlbomPermission = await _checkPermission({
-        permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
-        alertHeader: 'Do you want to save photo on your device?',
-        alertBody: "Why don't you enable the permission?",
-        permissionFunctionArgument: true,
-      })
-
-      if (photoAlbomPermission === 'granted') {
-        await takePhoto({ cameraType })
-      }
-    }
-  }
-
-  async function _getLocation() {
-    const locationPermission = await _checkPermission({
-      permissionFunction: Location.requestForegroundPermissionsAsync,
-      alertHeader:
-        'WiSaw shows you near-by photos based on your current location.',
-      alertBody: 'You need to enable Location in Settings and Try Again.',
-    })
-
-    if (locationPermission === 'granted') {
-      try {
-        // initially set the location that is last known -- works much faster this way
-        await dispatch(
-          reducer.setLocation(
-            await Location.getLastKnownPositionAsync({
-              maxAge: 86400000,
-              requiredAccuracy: 5000,
-            }),
-          ),
-        )
-
-        Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.Lowest,
-            timeInterval: 10000,
-            distanceInterval: 3000,
-          },
-          async (loc) => {
-            // Toast.show({
-            //   text1: 'location udated',
-            //   type: "error",
-            // topOffset: topOffset,
-            // })
-            await dispatch(reducer.setLocation(loc))
-          },
-        )
-      } catch (err) {
-        Toast.show({
-          text1: 'Unable to get location',
-          type: 'error',
-          topOffset,
-        })
-      }
-    }
-  }
-
-  const takePhoto = async ({ cameraType }) => {
-    let cameraReturn
-    if (cameraType === 'camera') {
-      // launch photo capturing
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        // allowsEditing: true,
-        quality: 1.0,
-        exif: false,
-      })
-    } else {
-      // launch video capturing
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-        // allowsEditing: true,
-        videoMaxDuration: 5,
-        quality: 1.0,
-        exif: false,
-      })
-    }
-
-    // alert(`cameraReturn.cancelled ${cameraReturn.cancelled}`)
-    if (cameraReturn.cancelled === false) {
-      await MediaLibrary.saveToLibraryAsync(cameraReturn.uri)
-      // have to wait, otherwise the upload will not start
-      await dispatch(
-        reducer.queueFileForUpload({
-          cameraImgUrl: cameraReturn.uri,
-          type: cameraReturn.type,
-          location,
-        }),
-      )
-
-      dispatch(reducer.uploadPendingPhotos())
-    }
-  }
-
-  const renderThumbs = () => (
-    <FlatGrid
-      itemDimension={thumbDimension}
-      spacing={3}
-      data={photos}
-      renderItem={({ item, index }) => (
-        <Thumb item={item} index={index} thumbDimension={thumbDimension} />
-      )}
-      keyExtractor={(item) => item.id}
-      style={{
-        ...styles.container,
-        marginBottom: FOOTER_HEIGHT,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        _reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
-
-  const renderThumbsWithComments = () => (
-    <FlatGrid
-      itemDimension={width}
-      spacing={3}
-      data={photos}
-      renderItem={({ item, index }) => (
-        <ThumbWithComments
-          item={item}
-          index={index}
-          thumbDimension={thumbDimension}
-          screenWidth={width}
-        />
-      )}
-      keyExtractor={(item) => item.id}
-      style={{
-        ...styles.container,
-        marginBottom: 95,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        _reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
-
-  const renderFooter = ({ unreadCount }) => {
     Notifications.setBadgeCountAsync(unreadCount || 0)
 
     return (
@@ -663,57 +992,6 @@ const PhotosList = () => {
     )
   }
 
-  const segment0 = () => (
-    <FontAwesome
-      name="globe"
-      size={23}
-      color={
-        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment1 = () => (
-    <AntDesign
-      name="star"
-      size={23}
-      color={
-        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment2 = () => (
-    <FontAwesome
-      name="search"
-      size={23}
-      color={
-        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const updateIndex = async (index) => {
-    await dispatch(reducer.setActiveSegment(index))
-    _reload()
-  }
-
-  const renderHeaderTitle = () => (
-    <ButtonGroup
-      onPress={updateIndex}
-      containerStyle={{
-        width: 200,
-        height: 35,
-      }}
-      buttonStyle={{ alignSelf: 'center' }}
-      buttons={[
-        { element: segment0 },
-        { element: segment1 },
-        { element: segment2 },
-      ]}
-    />
-  )
-
   // const renderHeaderLeft = () => (
   //   <FontAwesome5
   //     onPress={
@@ -746,55 +1024,11 @@ const PhotosList = () => {
   //     }}
   //   />
   // )
-
-  const renderSearchBar = (autoFocus) => (
-    <View
-      style={{
-        flexDirection: 'row',
-        backgroundColor: CONST.NAV_COLOR,
-      }}
-    >
-      <SearchBar
-        placeholder="Type Text Here..."
-        placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-        onChangeText={(currentTerm) => {
-          setCurrentSearchTerm(currentTerm)
-        }}
-        value={currentSearchTerm}
-        onSubmitEditing={() => submitSearch()}
-        autoFocus={autoFocus}
-        containerStyle={{
-          width: width - 60,
-        }}
-        style={{
-          color: CONST.MAIN_COLOR,
-          backgroundColor: 'white',
-          paddingLeft: 10,
-          paddingRight: 10,
-        }}
-        rightIconContainerStyle={{
-          margin: 10,
-        }}
-        lightTheme
-      />
-      <Ionicons
-        onPress={() => submitSearch()}
-        name="send"
-        size={30}
-        style={{
-          margin: 10,
-          color: CONST.MAIN_COLOR,
-          alignSelf: 'center',
-        }}
-      />
-    </View>
-  )
-
   const submitSearch = async () => {
-    dispatch(reducer.setSearchTerm(currentSearchTerm))
+    const { uuid, nickName, topOffset, photosList } = authContext
 
-    _reload()
-    if (currentSearchTerm && currentSearchTerm.length >= 3) {
+    reload()
+    if (searchTerm && searchTerm.length >= 3) {
       if (keyboardVisible) {
         dismissKeyboard()
       }
@@ -807,7 +1041,56 @@ const PhotosList = () => {
     }
   }
 
+  const renderSearchBar = (autoFocus) => {
+    const { uuid, nickName, topOffset, photosList } = authContext
+
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          backgroundColor: CONST.NAV_COLOR,
+        }}
+      >
+        <SearchBar
+          placeholder="Type Text Here..."
+          placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+          onChangeText={(currentTerm) => {
+            setSearchTerm(currentTerm)
+          }}
+          value={searchTerm}
+          onSubmitEditing={() => submitSearch()}
+          autoFocus={autoFocus}
+          containerStyle={{
+            width: width - 60,
+          }}
+          style={{
+            color: CONST.MAIN_COLOR,
+            backgroundColor: 'white',
+            paddingLeft: 10,
+            paddingRight: 10,
+          }}
+          rightIconContainerStyle={{
+            margin: 10,
+          }}
+          lightTheme
+        />
+        <Ionicons
+          onPress={() => submitSearch()}
+          name="send"
+          size={30}
+          style={{
+            margin: 10,
+            color: CONST.MAIN_COLOR,
+            alignSelf: 'center',
+          }}
+        />
+      </View>
+    )
+  }
+
   const renderPendingPhotos = () => {
+    const { uuid, nickName, topOffset, photosList } = authContext
+
     if (pendingPhotos.length > 0) {
       return (
         <View>
@@ -816,7 +1099,11 @@ const PhotosList = () => {
             spacing={3}
             data={pendingPhotos}
             renderItem={({ item }) => (
-              <ThumbPending item={item} thumbDimension={thumbDimension} />
+              <ThumbPending
+                item={item}
+                thumbDimension={thumbDimension}
+                uuid={uuid}
+              />
             )}
             keyExtractor={(item) => item.localImageName}
             showsVerticalScrollIndicator={false}
@@ -835,13 +1122,19 @@ const PhotosList = () => {
         </View>
       )
     }
+    return null
   }
 
   /// //////////////////////////////////////////////////////////////////////////
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
 
-  if (isTandcAccepted && netAvailable && location && photos.length > 0) {
+  if (
+    isTandcAccepted &&
+    netAvailable &&
+    location &&
+    authContext?.photosList.length > 0
+  ) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
@@ -907,7 +1200,7 @@ const PhotosList = () => {
                   title="I Agree"
                   type="outline"
                   onPress={() => {
-                    dispatch(reducer.acceptTandC())
+                    setIsTandcAccepted(reducer.acceptTandC())
                   }}
                 />
               </ListItem>
@@ -969,18 +1262,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photos.length === 0 && loading) {
-    return (
-      <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
-        <LinearProgress color={CONST.MAIN_COLOR} />
-        {renderPendingPhotos()}
-        {renderFooter({ unreadCount })}
-      </View>
-    )
-  }
-
-  if (photos.length === 0 && !loading && isLastPage) {
+  if (authContext?.photosList.length === 0 && !loading) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
@@ -1046,7 +1328,7 @@ const PhotosList = () => {
     )
   }
 
-  dispatch(reducer.getPhotos())
+  // dispatch(reducer.getPhotos())
   return (
     <View style={styles.container}>
       {activeSegment === 2 && renderSearchBar(false)}
