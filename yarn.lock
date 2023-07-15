@@ -4877,6 +4877,11 @@ expo-notifications@~0.20.1:
     fs-extra "^9.1.0"
     uuid "^3.4.0"
 
+expo-screen-orientation@~6.0.3:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/expo-screen-orientation/-/expo-screen-orientation-6.0.3.tgz#d9222df3e7f126f156afb94a3a62f7ddc3422eed"
+  integrity sha512-j/xYS4ZI3dA/ZZDPfEyIRWonByqG88d8ijAYIsh52s+xNpPGshd7GwBnQVTjKBBq62DW6Uv0PTZ9VeCRTOe2yw==
+
 expo-secure-store@~12.3.1:
   version "12.3.1"
   resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-12.3.1.tgz#7e5ba94f6e7374f132108c9feb5cc811568f3db6"

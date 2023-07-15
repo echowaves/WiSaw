@@ -49,7 +49,6 @@ const Photo = ({ photo }) => {
 
   const navigation = useNavigation()
 
-  // const deviceOrientation = useDeviceOrientation()
   const { width, height } = useWindowDimensions()
   const imageHeight = height - 250
 

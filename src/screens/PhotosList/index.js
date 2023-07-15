@@ -113,8 +113,6 @@ const PhotosList = () => {
 
   const { width, height } = useWindowDimensions()
 
-  // const deviceOrientation = useDeviceOrientation()
-
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
   // const [loadMore, setLoadMore] = useState(false)

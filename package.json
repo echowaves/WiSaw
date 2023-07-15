@@ -39,6 +39,7 @@
     "expo-location": "~16.1.0",
     "expo-media-library": "~15.4.0",
     "expo-notifications": "~0.20.1",
+    "expo-screen-orientation": "~6.0.3",
     "expo-secure-store": "~12.3.1",
     "expo-sms": "~11.4.0",
     "expo-splash-screen": "~0.20.4",

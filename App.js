@@ -20,6 +20,7 @@ import { ThemeProvider } from '@rneui/themed'
 import Toast from 'react-native-toast-message'
 
 import { createStackNavigator } from '@react-navigation/stack'
+import * as ScreenOrientation from 'expo-screen-orientation'
 import * as CONST from './src/consts'
 import { store } from './src'
 
@@ -65,6 +66,7 @@ const App = () => {
       currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
       friendsList: [],
     })
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT)
   }
 
   useEffect(() => {
@@ -72,156 +74,155 @@ const App = () => {
   }, [])
 
   return (
-      <AuthContext.Provider value={{ authContext, setAuthContext }}>
-        <ThemeProvider>
-          <NavigationContainer>
-            <Drawer.Navigator
-              screenOptions={{ gestureEnabled: true, headerShown: false }}
+    <AuthContext.Provider value={{ authContext, setAuthContext }}>
+      <ThemeProvider>
+        <NavigationContainer>
+          <Drawer.Navigator
+            screenOptions={{ gestureEnabled: true, headerShown: false }}
+          >
+            <Drawer.Screen
+              name="Home"
+              options={{
+                drawerIcon: (config) => (
+                  <FontAwesome
+                    name="chevron-left"
+                    size={30}
+                    style={{
+                      marginLeft: 10,
+                      color: CONST.MAIN_COLOR,
+                      width: 60,
+                    }}
+                  />
+                ),
+                drawerLabel: '',
+              }}
             >
-              <Drawer.Screen
-                name="Home"
-                options={{
-                  drawerIcon: (config) => (
-                    <FontAwesome
-                      name="chevron-left"
-                      size={30}
-                      style={{
-                        marginLeft: 10,
-                        color: CONST.MAIN_COLOR,
-                        width: 60,
-                      }}
-                    />
-                  ),
-                  drawerLabel: '',
-                }}
-              >
-                {(props) => (
-                  <Stack.Navigator
-                    // headerMode="none"
-                    // initialRouteName="PhotosList"
-                    screenOptions={{ gestureEnabled: true, headerShown: true }}
-                  >
-                    <Stack.Screen
-                      name="PhotosList"
-                      component={PhotosList}
-                      options={{
-                        headerTintColor: CONST.MAIN_COLOR,
-                        headerTitle: '',
-                        headerLeft: '',
-                        headerRight: '',
-                      }}
-                    />
-                    <Stack.Screen
-                      name="PhotosDetails"
-                      component={PhotosDetails}
-                      options={{
-                        headerTintColor: CONST.MAIN_COLOR,
-                        gestureEnabled: false,
-                      }}
-                      screenOptions={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                      name="PinchableView"
-                      component={PinchableView}
-                      options={{
-                        headerTintColor: CONST.MAIN_COLOR,
-                        gestureEnabled: false,
-                      }}
-                      screenOptions={{ headerShown: false }}
-                    />
+              {(props) => (
+                <Stack.Navigator
+                  // headerMode="none"
+                  // initialRouteName="PhotosList"
+                  screenOptions={{ gestureEnabled: true, headerShown: true }}
+                >
+                  <Stack.Screen
+                    name="PhotosList"
+                    component={PhotosList}
+                    options={{
+                      headerTintColor: CONST.MAIN_COLOR,
+                      headerTitle: '',
+                      headerLeft: '',
+                      headerRight: '',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="PhotosDetails"
+                    component={PhotosDetails}
+                    options={{
+                      headerTintColor: CONST.MAIN_COLOR,
+                      gestureEnabled: false,
+                    }}
+                    screenOptions={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="PinchableView"
+                    component={PinchableView}
+                    options={{
+                      headerTintColor: CONST.MAIN_COLOR,
+                      gestureEnabled: false,
+                    }}
+                    screenOptions={{ headerShown: false }}
+                  />
 
-                    <Stack.Screen
-                      name="PhotosDetailsShared"
-                      component={PhotosDetailsShared}
-                      options={{ headerTintColor: CONST.MAIN_COLOR }}
-                    />
-                    <Stack.Screen
-                      name="ModalInputTextScreen"
-                      component={ModalInputText}
-                      options={{ headerTintColor: CONST.MAIN_COLOR }}
-                    />
-                    <Stack.Screen
-                      name="Chat"
-                      component={Chat}
-                      options={{ headerTintColor: CONST.MAIN_COLOR }}
-                    />
-                    <Stack.Screen
-                      name="FriendsList"
-                      component={FriendsList}
-                      options={{ headerTintColor: CONST.MAIN_COLOR }}
-                    />
-                    <Stack.Screen
-                      name="ConfirmFriendship"
-                      component={ConfirmFriendship}
-                      options={{ headerTintColor: CONST.MAIN_COLOR }}
-                    />
-                  </Stack.Navigator>
-                )}
-              </Drawer.Screen>
-              <Drawer.Screen
-                name="SecretScreen"
-                component={IdentityScreen}
-                options={{
-                  drawerIcon: (config) => (
-                    <FontAwesome
-                      name="user-secret"
-                      size={30}
-                      style={{
-                        marginLeft: 10,
-                        color: CONST.MAIN_COLOR,
-                        width: 60,
-                      }}
-                    />
-                  ),
-                  drawerLabel: 'secret',
-                  headerShown: true,
-                }}
-              />
-              <Drawer.Screen
-                name="FriendsList"
-                component={FriendsList}
-                options={{
-                  drawerIcon: (config) => (
-                    <FontAwesome5
-                      name="user-friends"
-                      size={30}
-                      style={{
-                        marginLeft: 10,
-                        color: CONST.MAIN_COLOR,
-                        width: 60,
-                      }}
-                    />
-                  ),
-                  drawerLabel: 'friends',
-                  headerShown: true,
-                }}
-              />
+                  <Stack.Screen
+                    name="PhotosDetailsShared"
+                    component={PhotosDetailsShared}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ModalInputTextScreen"
+                    component={ModalInputText}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="Chat"
+                    component={Chat}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="FriendsList"
+                    component={FriendsList}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                  <Stack.Screen
+                    name="ConfirmFriendship"
+                    component={ConfirmFriendship}
+                    options={{ headerTintColor: CONST.MAIN_COLOR }}
+                  />
+                </Stack.Navigator>
+              )}
+            </Drawer.Screen>
+            <Drawer.Screen
+              name="SecretScreen"
+              component={IdentityScreen}
+              options={{
+                drawerIcon: (config) => (
+                  <FontAwesome
+                    name="user-secret"
+                    size={30}
+                    style={{
+                      marginLeft: 10,
+                      color: CONST.MAIN_COLOR,
+                      width: 60,
+                    }}
+                  />
+                ),
+                drawerLabel: 'secret',
+                headerShown: true,
+              }}
+            />
+            <Drawer.Screen
+              name="FriendsList"
+              component={FriendsList}
+              options={{
+                drawerIcon: (config) => (
+                  <FontAwesome5
+                    name="user-friends"
+                    size={30}
+                    style={{
+                      marginLeft: 10,
+                      color: CONST.MAIN_COLOR,
+                      width: 60,
+                    }}
+                  />
+                ),
+                drawerLabel: 'friends',
+                headerShown: true,
+              }}
+            />
 
-              <Drawer.Screen
-                name="Feedback"
-                component={FeedbackScreen}
-                options={{
-                  drawerIcon: (config) => (
-                    <MaterialIcons
-                      name="feedback"
-                      size={30}
-                      style={{
-                        marginLeft: 10,
-                        color: CONST.MAIN_COLOR,
-                        width: 60,
-                      }}
-                    />
-                  ),
-                  drawerLabel: 'feedback',
-                  headerShown: true,
-                }}
-              />
-            </Drawer.Navigator>
-          </NavigationContainer>
-        </ThemeProvider>
-        <Toast ref={(ref) => Toast.setRef(ref)} />
-      </AuthContext.Provider>
-    
+            <Drawer.Screen
+              name="Feedback"
+              component={FeedbackScreen}
+              options={{
+                drawerIcon: (config) => (
+                  <MaterialIcons
+                    name="feedback"
+                    size={30}
+                    style={{
+                      marginLeft: 10,
+                      color: CONST.MAIN_COLOR,
+                      width: 60,
+                    }}
+                  />
+                ),
+                drawerLabel: 'feedback',
+                headerShown: true,
+              }}
+            />
+          </Drawer.Navigator>
+        </NavigationContainer>
+      </ThemeProvider>
+      <Toast ref={(ref) => Toast.setRef(ref)} />
+    </AuthContext.Provider>
   )
 }
 export default App
