@@ -104,25 +104,3 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
     return null
   }
 }
-
-export function deleteFriendship({ friendshipUuid, topOffset }) {
-  // console.log({ uuid })
-  // console.log({ nickName, secret, uuid })
-
-  try {
-    friendsHelper.deleteFriendship({ friendshipUuid })
-
-    Toast.show({
-      text1: 'Friendship deleted.',
-      topOffset,
-    })
-  } catch (err) {
-    // console.log({ err })
-    Toast.show({
-      text1: 'Unable to delete Friendship',
-      text2: err.toString(),
-      type: 'error',
-      topOffset,
-    })
-  }
-}

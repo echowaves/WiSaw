@@ -167,8 +167,9 @@ const FriendsList = () => {
         { text: 'No', onPress: () => null, style: 'cancel' },
         {
           text: 'Yes',
-          onPress: () => {
-            reducer.deleteFriendship({ friendshipUuid, topOffset })
+          onPress: async () => {
+            await friendsHelper.deleteFriendship({ friendshipUuid, topOffset })
+            reload()
           },
         },
       ],
