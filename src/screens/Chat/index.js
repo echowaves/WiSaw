@@ -64,6 +64,7 @@ const Chat = ({ route }) => {
       ...prevAuthContext,
       friendsList, // the list of enhanced friends list has to be loaded earlier on
     }))
+    navigation.pop()
   }
 
   const renderHeaderRight = () => {}
