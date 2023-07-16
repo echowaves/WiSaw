@@ -642,10 +642,17 @@ const PhotosList = () => {
     if (locationPermission === 'granted') {
       try {
         // initially set the location that is last known -- works much faster this way
-        const loc = await Location.getLastKnownPositionAsync({
+        let loc = await Location.getLastKnownPositionAsync({
           maxAge: 86400000,
           requiredAccuracy: 5000,
+          accuracy: Location.Accuracy.BestForNavigation,
         })
+        if (!loc) {
+          loc = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.BestForNavigation,
+          })
+        }
+
         setLocation(loc)
 
         // Location.watchPositionAsync(
