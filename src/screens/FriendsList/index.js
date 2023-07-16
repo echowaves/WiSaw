@@ -81,7 +81,7 @@ const FriendsList = () => {
     />
   )
   const reload = async () => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     const friendsList = await friendsHelper.getEnhancedListOfFriendships({
       uuid,
@@ -117,7 +117,7 @@ const FriendsList = () => {
   })
 
   const sendFriendshipRequest = async ({ contactName }) => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     const friendship = await reducer.createFriendship({ uuid, contactName })
 
@@ -125,7 +125,7 @@ const FriendsList = () => {
   }
 
   const setContactName = async (contactName) => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     // this is edit existing name
     if (!friendshipUuid) {
@@ -158,7 +158,7 @@ const FriendsList = () => {
   }
 
   const handleRemoveFriend = ({ friendshipUuid }) => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     Alert.alert(
       'Delete Friendship?',

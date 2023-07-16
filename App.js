@@ -52,7 +52,6 @@ const App = () => {
     nickName: '',
     topOffset: 10,
     photosList: [],
-    currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
     friendsList: [],
   })
   const { width, height } = useWindowDimensions()
@@ -63,7 +62,6 @@ const App = () => {
       nickName: await SecretReducer.getStoredNickName(),
       topOffset: height / 3,
       photosList: [],
-      currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
       friendsList: [],
     })
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT)

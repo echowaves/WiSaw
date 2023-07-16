@@ -106,6 +106,8 @@ async function registerBackgroundFetchAsync() {
 
 const FOOTER_HEIGHT = 90
 
+let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
+
 const PhotosList = () => {
   const { authContext, setAuthContext } = useContext(CONST.AuthContext)
 
@@ -115,7 +117,6 @@ const PhotosList = () => {
 
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
-  // const [loadMore, setLoadMore] = useState(false)
 
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
   const [zeroMoment, setZeroMoment] = useState(null)
@@ -190,7 +191,7 @@ const PhotosList = () => {
   }
 
   const load = async () => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     setLoading(true)
 
@@ -215,7 +216,6 @@ const PhotosList = () => {
     // const newPhotosList = [...photosList, ...photos].sort(
     //   (a, b) => a.row_number - b.row_number,
     // )
-
     if (batch === currentBatch) {
       // avoid duplicates
       setAuthContext((prevAuthContext) => ({
@@ -228,12 +228,14 @@ const PhotosList = () => {
           .sort((a, b) => a.row_number - b.row_number),
       }))
     }
+    //  else {
+    //   console.log('batch missmatch')
+    // }
 
     if (noMoreData === false && wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
-    } else {
-      setLoading(false)
     }
+    setLoading(false)
   }
   const segment0 = () => (
     <FontAwesome
@@ -425,27 +427,11 @@ const PhotosList = () => {
     setAuthContext((prevAuthContext) => ({
       ...prevAuthContext,
       photosList: [],
-      currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
     }))
-    await new Promise((resolve) => setTimeout(resolve, 500))
+
     setPageNumber(0)
-    setAuthContext((prevAuthContext) => ({
-      ...prevAuthContext,
-      photosList: [],
-      currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-    }))
 
-    // setPageNumber(0)
-    // setLoading(true)
-    // updateNavBar()
-
-    // setAuthContext((prevAuthContext) => ({
-    //   ...prevAuthContext,
-    //   photosList: [],
-    //   currentBatch: `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-    // }))
-
-    load()
+    currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
     setPendingPhotos(await reducer.getQueue())
 
@@ -454,14 +440,14 @@ const PhotosList = () => {
       const friendsList = await friendsHelper.getEnhancedListOfFriendships({
         uuid,
       })
-      console.log({ friendsList })
+
       setAuthContext((prevAuthContext) => ({
         ...prevAuthContext,
         friendsList, // the list of enhanced friends list has to be loaded earlier on
       }))
 
       const unreadCounts = await friendsHelper.getUnreadCountsList({ uuid })
-      console.log({ friendsList: unreadCounts })
+
       setUnreadCountList(unreadCounts) // the list of enhanced friends list has to be loaded earlier on
     }
     // setPendingPhotos(await reducer.getQueue())
@@ -732,7 +718,7 @@ const PhotosList = () => {
   useEffect(() => {
     // console.log({ pageNumber })
     load()
-  }, [pageNumber])
+  }, [pageNumber, activeSegment, currentBatch])
 
   useEffect(() => {
     // console.log({ activeSegment })
@@ -741,7 +727,7 @@ const PhotosList = () => {
   }, [activeSegment])
 
   useEffect(() => {
-    if (wantToLoadMore() && !loading) {
+    if (wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
     }
   }, [lastViewableRow])

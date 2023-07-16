@@ -30,7 +30,7 @@ const FeedbackScreen = () => {
   }
 
   const submitFeedback = async ({ feedbackText }) => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     try {
       if (feedbackText.trim().length < 5) {

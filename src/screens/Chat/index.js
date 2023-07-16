@@ -70,7 +70,7 @@ const Chat = ({ route }) => {
   const renderHeaderRight = () => {}
 
   const renderHeaderLeft = () => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     return (
       <FontAwesome
@@ -89,7 +89,7 @@ const Chat = ({ route }) => {
   }
 
   const loadMessages = async ({ chatUuid, lastLoaded }) => {
-    const { uuid, topOffset, currentBatch, friendsList } = authContext
+    const { uuid, topOffset, friendsList } = authContext
 
     try {
       const messagesList = (
@@ -150,7 +150,7 @@ const Chat = ({ route }) => {
   }
 
   useEffect(() => {
-    const { uuid, topOffset, currentBatch } = authContext
+    const { uuid, topOffset } = authContext
 
     ;(async () => {
       navigation.setOptions({
@@ -174,7 +174,7 @@ const Chat = ({ route }) => {
   }, [])
 
   useEffect(() => {
-    const { uuid, topOffset, currentBatch, friendsList } = authContext
+    const { uuid, topOffset, friendsList } = authContext
 
     console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
@@ -309,7 +309,7 @@ const Chat = ({ route }) => {
   }, [])
 
   const onSend = useCallback((messages = []) => {
-    const { uuid, topOffset, currentBatch, friendsList } = authContext
+    const { uuid, topOffset, friendsList } = authContext
 
     messages.forEach((message) => {
       ;(async () => {
@@ -451,7 +451,7 @@ const Chat = ({ route }) => {
   )
 
   const uploadAsset = async ({ uri }) => {
-    const { uuid, topOffset, currentBatch, friendsList } = authContext
+    const { uuid, topOffset, friendsList } = authContext
 
     const fileContents = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
