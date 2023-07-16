@@ -643,8 +643,6 @@ const PhotosList = () => {
       try {
         // initially set the location that is last known -- works much faster this way
         let loc = await Location.getLastKnownPositionAsync({
-          maxAge: 86400000,
-          requiredAccuracy: 5000,
           accuracy: Location.Accuracy.BestForNavigation,
         })
         if (!loc) {
