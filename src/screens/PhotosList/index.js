@@ -107,6 +107,7 @@ async function registerBackgroundFetchAsync() {
 const FOOTER_HEIGHT = 90
 
 let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
+let activeSegment = 0
 
 const PhotosList = () => {
   const { authContext, setAuthContext } = useContext(CONST.AuthContext)
@@ -133,7 +134,7 @@ const PhotosList = () => {
 
   const [pendingPhotos, setPendingPhotos] = useState([])
 
-  const [activeSegment, setActiveSegment] = useState(0)
+  // const [activeSegment, setActiveSegment] = useState(0)
 
   const [loading, setLoading] = useState(true)
 
@@ -207,12 +208,12 @@ const PhotosList = () => {
       pageNumber,
     })
 
-    // console.log({
-    //   activeSegment,
-    //   pageNumber,
-    //   photos: photos.length,
-    //   noMoreData,
-    // })
+    console.log({
+      activeSegment,
+      pageNumber,
+      photos: photos.length,
+      noMoreData,
+    })
     // const newPhotosList = [...photosList, ...photos].sort(
     //   (a, b) => a.row_number - b.row_number,
     // )
@@ -227,16 +228,16 @@ const PhotosList = () => {
           ) // fancy way to remove duplicate photos
           .sort((a, b) => a.row_number - b.row_number),
       }))
+    } else {
+      console.log('batch missmatch')
     }
-    //  else {
-    //   console.log('batch missmatch')
-    // }
 
     if (noMoreData === false && wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
     }
     setLoading(false)
   }
+
   const segment0 = () => (
     <FontAwesome
       name="globe"
@@ -454,7 +455,9 @@ const PhotosList = () => {
   }
 
   const updateIndex = async (index) => {
-    setActiveSegment(index)
+    activeSegment = index
+    // setActiveSegment(index)
+    // updateNavBar()
     reload()
   }
 
@@ -718,17 +721,18 @@ const PhotosList = () => {
   useEffect(() => {
     // console.log({ pageNumber })
     load()
-  }, [pageNumber, activeSegment, currentBatch])
+  }, [pageNumber])
 
-  useEffect(() => {
-    // console.log({ activeSegment })
-    updateNavBar()
-    // reload()
-  }, [activeSegment])
+  // useEffect(() => {
+  //   // console.log({ activeSegment })
+  //   updateNavBar()
+  //   // reload()
+  // }, [activeSegment])
 
   useEffect(() => {
     if (wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
+      // load()
     }
   }, [lastViewableRow])
 
