@@ -208,12 +208,12 @@ const PhotosList = () => {
       pageNumber,
     })
 
-    console.log({
-      activeSegment,
-      pageNumber,
-      photos: photos.length,
-      noMoreData,
-    })
+    // console.log({
+    //   activeSegment,
+    //   pageNumber,
+    //   photos: photos.length,
+    //   noMoreData,
+    // })
     // const newPhotosList = [...photosList, ...photos].sort(
     //   (a, b) => a.row_number - b.row_number,
     // )
@@ -228,9 +228,10 @@ const PhotosList = () => {
           ) // fancy way to remove duplicate photos
           .sort((a, b) => a.row_number - b.row_number),
       }))
-    } else {
-      console.log('batch missmatch')
     }
+    // else {
+    //   console.log('batch missmatch')
+    // }
 
     if (noMoreData === false && wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
