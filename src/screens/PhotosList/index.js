@@ -136,7 +136,7 @@ const PhotosList = () => {
 
   // const [activeSegment, setActiveSegment] = useState(0)
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const [unreadCountList, setUnreadCountList] = useState([])
 
@@ -183,7 +183,7 @@ const PhotosList = () => {
     const screenRows = /* Math.floor */ height / thumbDimension
     const totalNumRows = /* Math.floor */ photosList.length / screenColumns
 
-    if (screenRows * 1 + lastViewableRow > totalNumRows) {
+    if (screenRows * 2 + lastViewableRow > totalNumRows) {
       // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
       return true
     }
@@ -721,7 +721,7 @@ const PhotosList = () => {
   useEffect(() => {
     // console.log({ pageNumber })
     load()
-  }, [pageNumber])
+  }, [pageNumber, activeSegment])
 
   // useEffect(() => {
   //   // console.log({ activeSegment })
@@ -730,7 +730,7 @@ const PhotosList = () => {
   // }, [activeSegment])
 
   useEffect(() => {
-    if (wantToLoadMore()) {
+    if (wantToLoadMore() && loading === false) {
       setPageNumber((currentPage) => currentPage + 1)
       // load()
     }
