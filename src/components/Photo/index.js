@@ -146,8 +146,9 @@ const Photo = ({ photo }) => {
               friendsList,
             })}
             {'\n'}
-            {photoDetails?.comments ? photoDetails?.comments.length : 0} Comment
-            {(photoDetails?.comments ? photoDetails?.comments.length : 0) !== 1
+            {photoDetails?.comments ? photoDetails?.comments?.length : 0}{' '}
+            Comment
+            {(photoDetails?.comments ? photoDetails?.comments?.length : 0) !== 1
               ? 's'
               : ''}
           </Text>
@@ -362,13 +363,13 @@ const Photo = ({ photo }) => {
     const labels = JSON.parse(photoDetails?.recognitions[0].metaData).Labels
     const textDetections = JSON.parse(
       photoDetails?.recognitions[0].metaData,
-    ).TextDetections.filter((text) => text.Type === 'LINE')
+    ).TextDetections?.filter((text) => text.Type === 'LINE')
     const moderationLabels = JSON.parse(
       photoDetails?.recognitions[0].metaData,
     ).ModerationLabels
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        {labels.length > 0 && (
+        {labels?.length > 0 && (
           <Card
             width={width - 100}
             containerStyle={{
@@ -406,7 +407,7 @@ const Photo = ({ photo }) => {
           </Card>
         )}
 
-        {textDetections.length > 0 && (
+        {textDetections?.length > 0 && (
           <Card
             width={width - 100}
             containerStyle={{
@@ -444,7 +445,7 @@ const Photo = ({ photo }) => {
           </Card>
         )}
 
-        {moderationLabels.length > 0 && (
+        {moderationLabels?.length > 0 && (
           <Card
             width={width - 100}
             containerStyle={{
