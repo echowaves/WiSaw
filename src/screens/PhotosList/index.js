@@ -194,8 +194,6 @@ const PhotosList = () => {
   const load = async () => {
     const { uuid, topOffset } = authContext
 
-    setLoading(true)
-
     const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
       zeroMoment,
@@ -222,11 +220,11 @@ const PhotosList = () => {
       setAuthContext((prevAuthContext) => ({
         ...prevAuthContext,
         photosList: [...prevAuthContext.photosList, ...photos]
+          .sort((a, b) => a.row_number - b.row_number)
           .filter(
             (obj, pos, arr) =>
               arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
-          ) // fancy way to remove duplicate photos
-          .sort((a, b) => a.row_number - b.row_number),
+          ), // fancy way to remove duplicate photos
       }))
     }
     // else {
@@ -236,7 +234,6 @@ const PhotosList = () => {
     if (noMoreData === false && wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
     }
-    setLoading(false)
   }
 
   const segment0 = () => (
@@ -477,17 +474,6 @@ const PhotosList = () => {
           { element: segment2 },
         ]}
       />
-      {loading && (
-        <LinearProgress
-          color={CONST.MAIN_COLOR}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            left: 0,
-          }}
-        />
-      )}
     </>
   )
 
@@ -721,7 +707,12 @@ const PhotosList = () => {
 
   useEffect(() => {
     // console.log({ pageNumber })
-    load()
+
+    ;(async () => {
+      if (!loading) setLoading(true)
+      await load()
+      if (loading) setLoading(false)
+    })()
   }, [pageNumber, activeSegment])
 
   // useEffect(() => {
@@ -981,6 +972,17 @@ const PhotosList = () => {
               )}
             </Col>
           </Grid>
+          {loading && (
+            <LinearProgress
+              color={CONST.MAIN_COLOR}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                left: 0,
+              }}
+            />
+          )}
         </SafeAreaView>
       )
     )

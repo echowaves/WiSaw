@@ -64,7 +64,7 @@ const App = () => {
       photosList: [],
       friendsList: [],
     })
-    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT)
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
   }
 
   useEffect(() => {
