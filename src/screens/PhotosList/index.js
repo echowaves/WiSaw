@@ -124,7 +124,9 @@ const PhotosList = () => {
 
   const [netAvailable, setNetAvailable] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [location, setLocation] = useState(null)
+  const [location, setLocation] = useState({
+    coords: { latitude: 0, longitude: 0 },
+  })
 
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
