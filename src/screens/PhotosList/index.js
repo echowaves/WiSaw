@@ -1129,7 +1129,7 @@ const PhotosList = () => {
 
   if (
     isTandcAccepted &&
-    netAvailable &&
+    // netAvailable &&
     location &&
     authContext?.photosList.length > 0
   ) {
