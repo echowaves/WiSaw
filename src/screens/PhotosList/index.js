@@ -1135,12 +1135,12 @@ const PhotosList = () => {
   ) {
     return (
       <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
+        {netAvailable && activeSegment === 2 && renderSearchBar(false)}
         {renderPendingPhotos()}
         {/* photos */}
-        {activeSegment === 0 && renderThumbs()}
-        {activeSegment === 1 && renderThumbsWithComments()}
-        {activeSegment === 2 && renderThumbsWithComments()}
+        {netAvailable && activeSegment === 0 && renderThumbs()}
+        {netAvailable && activeSegment === 1 && renderThumbsWithComments()}
+        {netAvailable && activeSegment === 2 && renderThumbsWithComments()}
         {renderFooter({ unreadCount })}
       </View>
     )
