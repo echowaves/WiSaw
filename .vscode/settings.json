@@ -1,15 +1,12 @@
 {
   "editor.bracketPairColorization.enabled": true,
-  "editor.guides.bracketPairs":"active",
-  
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
-    },
-    "eslint.validate": [
-      "javascript"
-    ],
-    "javascript.format.semicolons": "remove",
-    "typescript.format.semicolons": "remove",
-    "prettier.semi": false
-   }
-   
+  "editor.guides.bracketPairs": "active",
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript"],
+  "javascript.format.semicolons": "remove",
+  "typescript.format.semicolons": "remove",
+  "prettier.semi": false
+}
