@@ -1,7 +1,7 @@
 // import { Platform } from 'react-native'
 
-import * as SecureStore from 'expo-secure-store'
 import * as FileSystem from 'expo-file-system'
+import * as SecureStore from 'expo-secure-store'
 import * as VideoThumbnails from 'expo-video-thumbnails'
 
 import * as ImageManipulator from 'expo-image-manipulator'
@@ -45,6 +45,8 @@ export async function getTancAccepted() {
   try {
     return (await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY)) === 'true'
   } catch (err) {
+    console.error('T&C', { err })
+
     return false
   }
 }
@@ -52,16 +54,21 @@ export async function getTancAccepted() {
 // this function return the time of the very first photo stored in the backend,
 // so that we can tell when to stop requesting new photos while paging through the results
 export async function getZeroMoment() {
-  const { zeroMoment } = (
-    await CONST.gqlClient.query({
-      query: gql`
-        query zeroMoment {
-          zeroMoment
-        }
-      `,
-    })
-  ).data
-  return zeroMoment
+  try {
+    const { zeroMoment } = (
+      await CONST.gqlClient.query({
+        query: gql`
+          query zeroMoment {
+            zeroMoment
+          }
+        `,
+      })
+    ).data
+    return zeroMoment
+  } catch (qwenlcsd) {
+    console.error({ qwenlcsd })
+  }
+  return 0
 }
 
 async function requestGeoPhotos({
@@ -71,7 +78,7 @@ async function requestGeoPhotos({
   longitude,
   zeroMoment,
 }) {
-  const whenToStop = moment(zeroMoment)
+  const whenToStop = moment(zeroMoment || 0)
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
@@ -122,7 +129,7 @@ async function requestGeoPhotos({
     }
   } catch (err4) {
     // eslint-disable-next-line no-console
-    console.log({ err4 }) // eslint-disable-line
+    console.error({ err4 }) // eslint-disable-line
     return {
       photos: [],
       batch,
@@ -173,7 +180,7 @@ async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
     }
   } catch (err5) {
     // eslint-disable-next-line no-console
-    console.log({ err5 }) // eslint-disable-line
+    console.error({ err5 }) // eslint-disable-line
   }
   return {
     photos: [],
@@ -228,7 +235,7 @@ async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
     }
   } catch (err6) {
     // eslint-disable-next-line no-console
-    console.log({ err6 }) // eslint-disable-line
+    console.error({ err6 }) // eslint-disable-line
   }
   return {
     photos: [],
@@ -290,10 +297,11 @@ export async function getPhotos({
       })
     }
     return responseJson
-  } catch (err) {
+  } catch (err7) {
+    console.error({ err7 })
     Toast.show({
       text1: 'Error',
-      text2: `${err}`,
+      text2: `${err7}`,
       type: 'error',
       topOffset,
     })
@@ -309,77 +317,87 @@ export function acceptTandC() {
   try {
     SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, 'true')
     return true
-  } catch (err) {
+  } catch (err8) {
+    console.error({ err8 })
     return false
   }
 }
 
 export const removeFromQueue = async (imageToRemove) => {
-  let pendingImagesBefore = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
+  try {
+    let pendingImagesBefore = JSON.parse(
+      await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+    )
 
-  if (!pendingImagesBefore) {
-    pendingImagesBefore = []
+    if (!pendingImagesBefore) {
+      pendingImagesBefore = []
+    }
+
+    const pendingImagesAfter = pendingImagesBefore.filter(
+      (imageInTheQueue) =>
+        JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
+    )
+
+    await Storage.setItem({
+      key: CONST.PENDING_UPLOADS_KEY,
+      value: JSON.stringify(pendingImagesAfter),
+    })
+  } catch (sdjfhjhbdf) {
+    console.error({ sdjfhjhbdf })
   }
-
-  const pendingImagesAfter = pendingImagesBefore.filter(
-    (imageInTheQueue) =>
-      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
-  )
-
-  await Storage.setItem({
-    key: CONST.PENDING_UPLOADS_KEY,
-    value: JSON.stringify(pendingImagesAfter),
-  })
 }
 
 // returns an array that has everything needed for rendering
 export const getQueue = async () => {
-  // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
-  await CONST.makeSureDirectoryExists({
-    directory: CONST.PENDING_UPLOADS_FOLDER,
-  })
-
-  const filesInStorage = await FileSystem.readDirectoryAsync(
-    CONST.PENDING_UPLOADS_FOLDER,
-  )
-  let imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
-
-  if (!imagesInQueue) {
-    imagesInQueue = []
-    await Storage.setItem({
-      key: CONST.PENDING_UPLOADS_KEY,
-      value: JSON.stringify([]),
+  try {
+    // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
+    await CONST.makeSureDirectoryExists({
+      directory: CONST.PENDING_UPLOADS_FOLDER,
     })
-  }
-  // remove images from the queue if corresponding file does not exist
-  imagesInQueue.forEach((image) => {
-    if (!filesInStorage.some((f) => f === image.localImageName)) {
-      removeFromQueue(image)
-    }
-  })
 
-  // get images in queue again after filtering
-  imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
-  if (!imagesInQueue) {
-    imagesInQueue = []
-  }
+    const filesInStorage = await FileSystem.readDirectoryAsync(
+      CONST.PENDING_UPLOADS_FOLDER,
+    )
+    let imagesInQueue = JSON.parse(
+      await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+    )
 
-  // remove image from storage if corresponding recorsd does not exist in the queue
-  filesInStorage.forEach((file) => {
-    if (!imagesInQueue.some((i) => i.localImageName === file)) {
-      FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${file}`, {
-        idempotent: true,
+    if (!imagesInQueue) {
+      imagesInQueue = []
+      await Storage.setItem({
+        key: CONST.PENDING_UPLOADS_KEY,
+        value: JSON.stringify([]),
       })
     }
-  })
+    // remove images from the queue if corresponding file does not exist
+    imagesInQueue.forEach((image) => {
+      if (!filesInStorage.some((f) => f === image.localImageName)) {
+        removeFromQueue(image)
+      }
+    })
 
-  return imagesInQueue
+    // get images in queue again after filtering
+    imagesInQueue = JSON.parse(
+      await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+    )
+    if (!imagesInQueue) {
+      imagesInQueue = []
+    }
+
+    // remove image from storage if corresponding recorsd does not exist in the queue
+    filesInStorage.forEach((file) => {
+      if (!imagesInQueue.some((i) => i.localImageName === file)) {
+        FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${file}`, {
+          idempotent: true,
+        })
+      }
+    })
+
+    return imagesInQueue
+  } catch (cbushdugw) {
+    console.error({ cbushdugw })
+  }
+  return []
 }
 
 // export function setActiveSegment(activeSegment) {
@@ -404,142 +422,173 @@ export const getQueue = async () => {
 // }
 
 const genLocalThumbs = async (image) => {
-  if (image.type === 'image') {
+  try {
+    if (image.type === 'image') {
+      const manipResult = await ImageManipulator.manipulateAsync(
+        image.localImgUrl,
+        [{ resize: { height: 300 } }],
+        { compress: 1, format: ImageManipulator.SaveFormat.PNG },
+      )
+      return {
+        ...image,
+        localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
+      }
+    }
+
+    // if video
+    const { uri } = await VideoThumbnails.getThumbnailAsync(image.localImgUrl)
+
     const manipResult = await ImageManipulator.manipulateAsync(
-      image.localImgUrl,
+      uri,
       [{ resize: { height: 300 } }],
       { compress: 1, format: ImageManipulator.SaveFormat.PNG },
     )
+
     return {
       ...image,
+      localVideoUrl: image.localImgUrl,
       localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
+      localImgUrl: uri,
+      // localImageName: manipResult.uri.substr(manipResult.uri.lastIndexOf('/') + 1),
     }
+  } catch (cuhduhgquwe) {
+    // eslint-disable-next-line no-console
+    console.error({ cuhduhgquwe })
   }
-
-  // if video
-  const { uri } = await VideoThumbnails.getThumbnailAsync(image.localImgUrl)
-
-  const manipResult = await ImageManipulator.manipulateAsync(
-    uri,
-    [{ resize: { height: 300 } }],
-    { compress: 1, format: ImageManipulator.SaveFormat.PNG },
-  )
-
   return {
-    ...image,
-    localVideoUrl: image.localImgUrl,
-    localThumbUrl: manipResult.uri, // add localThumbUrl to the qued objects
-    localImgUrl: uri,
+    image: null,
+    localVideoUrl: '',
+    localThumbUrl: '', // add localThumbUrl to the qued objects
+    localImgUrl: '',
     // localImageName: manipResult.uri.substr(manipResult.uri.lastIndexOf('/') + 1),
   }
 }
 
 export const addToQueue = async (image) => {
-  // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
+  try {
+    // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
 
-  let pendingImages = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
-  if (!pendingImages) {
-    pendingImages = []
+    let pendingImages = JSON.parse(
+      await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+    )
+    if (!pendingImages) {
+      pendingImages = []
+    }
+
+    await Storage.setItem({
+      key: CONST.PENDING_UPLOADS_KEY,
+      value: JSON.stringify([...pendingImages, image]),
+    })
+  } catch (cbwdjkfnkjsd) {
+    console.error({ cbwdjkfnkjsd })
   }
-
-  await Storage.setItem({
-    key: CONST.PENDING_UPLOADS_KEY,
-    value: JSON.stringify([...pendingImages, image]),
-  })
 }
 
 export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
-  const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
-  const localCacheKey = localImageName.split('.')[0]
+  try {
+    const localImageName = cameraImgUrl.substr(
+      cameraImgUrl.lastIndexOf('/') + 1,
+    )
+    const localCacheKey = localImageName.split('.')[0]
 
-  const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
-  // copy file to cacheDir
-  await FileSystem.moveAsync({
-    from: cameraImgUrl,
-    to: localImgUrl,
-  })
+    const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
+    // copy file to cacheDir
+    await FileSystem.moveAsync({
+      from: cameraImgUrl,
+      to: localImgUrl,
+    })
 
-  const image = {
-    localImgUrl,
-    localImageName,
-    type,
-    location,
-    localCacheKey,
+    const image = {
+      localImgUrl,
+      localImageName,
+      type,
+      location,
+      localCacheKey,
+    }
+    const thumbEnhansedImage = await genLocalThumbs(image)
+    await CacheManager.addToCache({
+      file: thumbEnhansedImage.localThumbUrl,
+      key: thumbEnhansedImage.localCacheKey,
+    })
+
+    await addToQueue(thumbEnhansedImage)
+  } catch (cqwyefyttyf) {
+    console.error({ cqwyefyttyf })
   }
-  const thumbEnhansedImage = await genLocalThumbs(image)
-  await CacheManager.addToCache({
-    file: thumbEnhansedImage.localThumbUrl,
-    key: thumbEnhansedImage.localCacheKey,
-  })
-
-  await addToQueue(thumbEnhansedImage)
-
   // updatePendingPhotos()
 }
 
 export const generatePhoto = async ({ uuid, lat, lon, video }) => {
-  const photo = (
-    await CONST.gqlClient.mutate({
-      mutation: gql`
-        mutation createPhoto(
-          $lat: Float!
-          $lon: Float!
-          $uuid: String!
-          $video: Boolean
-        ) {
-          createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
-            active
-            commentsCount
-            watchersCount
-            createdAt
-            id
-            imgUrl
-            imgUrl
-            thumbUrl
-            location
-            updatedAt
-            uuid
-            video
+  try {
+    const photo = (
+      await CONST.gqlClient.mutate({
+        mutation: gql`
+          mutation createPhoto(
+            $lat: Float!
+            $lon: Float!
+            $uuid: String!
+            $video: Boolean
+          ) {
+            createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
+              active
+              commentsCount
+              watchersCount
+              createdAt
+              id
+              imgUrl
+              imgUrl
+              thumbUrl
+              location
+              updatedAt
+              uuid
+              video
+            }
           }
-        }
-      `,
-      variables: {
-        uuid,
-        lat,
-        lon,
-        video,
-      },
-    })
-  ).data.createPhoto
+        `,
+        variables: {
+          uuid,
+          lat,
+          lon,
+          video,
+        },
+      })
+    ).data.createPhoto
 
-  return photo
+    return photo
+  } catch (xscwdjhb) {
+    // eslint-disable-next-line no-console
+    console.error(xscwdjhb)
+  }
 }
 
 const uploadFile = async ({ assetKey, contentType, assetUri }) => {
-  // console.log({ assetKey })
-  const uploadUrl = (
-    await CONST.gqlClient.query({
-      query: gql`
-        query generateUploadUrl($assetKey: String!, $contentType: String!) {
-          generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
-        }
-      `,
-      variables: {
-        assetKey,
-        contentType,
+  try {
+    // console.log({ assetKey })
+    const uploadUrl = (
+      await CONST.gqlClient.query({
+        query: gql`
+          query generateUploadUrl($assetKey: String!, $contentType: String!) {
+            generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
+          }
+        `,
+        variables: {
+          assetKey,
+          contentType,
+        },
+      })
+    ).data.generateUploadUrl
+
+    const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
+      httpMethod: 'PUT',
+      headers: {
+        'Content-Type': contentType,
       },
     })
-  ).data.generateUploadUrl
-
-  const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
-    httpMethod: 'PUT',
-    headers: {
-      'Content-Type': contentType,
-    },
-  })
-  return { responseData }
+    return { responseData }
+  } catch (cnijedfjknwkejn) {
+    // eslint-disable-next-line no-console
+    console.error({ cnijedfjknwkejn })
+  }
 }
 
 export const uploadItem = async ({ item }) => {
@@ -570,7 +619,7 @@ export const uploadItem = async ({ item }) => {
     return { responseData: response.responseData }
   } catch (err3) {
     // eslint-disable-next-line no-console
-    console.log({ err3 })
+    console.error({ err3 })
     return {
       responseData: `something bad happened, unable to upload ${JSON.stringify(
         err3,

@@ -76,11 +76,11 @@ export async function registerSecret({ secret, topOffset, nickName, uuid }) {
       text1: 'Secret attached to this device.',
       topOffset,
     })
-  } catch (err) {
-    // console.log({ err })
+  } catch (err9) {
+    console.log({ err9 })
     Toast.show({
       text1: 'Unable to store Secret',
-      text2: err.toString(),
+      text2: err9.toString(),
       type: 'error',
       topOffset,
     })
@@ -133,11 +133,11 @@ export async function updateSecret({
       text1: 'Secret updated.',
       topOffset,
     })
-  } catch (err) {
-    console.log({ err })
+  } catch (err10) {
+    console.error({ err10 })
     Toast.show({
       text1: 'Unable to update Secret',
-      text2: err.toString(),
+      text2: err10.toString(),
       type: 'error',
       topOffset,
     })
@@ -153,11 +153,13 @@ export async function resetSecret({ topOffset }) {
     ])
     const uuid = await getUUID()
     await storeUUID(uuid)
-  } catch (err) {
+  } catch (err11) {
+    console.error({ err11 })
+
     // console.log({ err })
     Toast.show({
       text1: 'Unable to reset Secret',
-      text2: err.toString(),
+      text2: err11.toString(),
       type: 'error',
       topOffset,
     })
@@ -167,10 +169,12 @@ export async function resetSecret({ topOffset }) {
 const storeUUID = async (uuid) => {
   try {
     await SecureStore.setItemAsync(CONST.UUID_KEY, uuid)
-  } catch (err) {
+  } catch (err12) {
+    console.error({ err12 })
+
     Toast.show({
       text1: 'Unable to store UUID',
-      text2: err.toString(),
+      text2: err12.toString(),
       type: 'error',
     })
   }
@@ -180,7 +184,9 @@ export async function getUUID() {
   let uuid
   try {
     uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
-  } catch (err) {
+  } catch (err13) {
+    console.error('uuid', { err13 })
+
     uuid = null
   }
   if (uuid === null) {
@@ -197,16 +203,23 @@ export async function getUUID() {
 const storeNickName = async (nickName) => {
   try {
     await SecureStore.setItemAsync(CONST.NICK_NAME_KEY, nickName)
-  } catch (err) {
+  } catch (err14) {
+    console.error('nick name', { err14 })
+
     Toast.show({
       text1: 'Unable to store NickName',
-      text2: err.toString(),
+      text2: err14.toString(),
       type: 'error',
     })
   }
 }
 
 export async function getStoredNickName() {
-  const nickName = await SecureStore.getItemAsync(CONST.NICK_NAME_KEY)
-  return nickName || ''
+  try {
+    const nickName = await SecureStore.getItemAsync(CONST.NICK_NAME_KEY)
+    return nickName || ''
+  } catch (err15) {
+    console.error('nick bname', { err15 })
+  }
+  return ''
 }

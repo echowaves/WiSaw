@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library'
 // import * as FileSystem from 'expo-file-system'
-import * as SecureStore from 'expo-secure-store'
 import * as Notifications from 'expo-notifications'
+import * as SecureStore from 'expo-secure-store'
 
-import * as Location from 'expo-location'
-import * as Linking from 'expo-linking'
 import * as ImagePicker from 'expo-image-picker'
+import * as Linking from 'expo-linking'
+import * as Location from 'expo-location'
 // import * as Updates from 'expo-updates'
 import Toast from 'react-native-toast-message'
 
@@ -18,19 +18,19 @@ import * as TaskManager from 'expo-task-manager'
 import useKeyboard from '@rnhooks/keyboard'
 import { CacheManager } from 'expo-cached-image'
 import {
-  StyleSheet,
-  View,
   Alert,
   SafeAreaView,
   ScrollView,
+  StyleSheet,
+  View,
   useWindowDimensions,
 } from 'react-native'
 
 import {
-  FontAwesome,
-  Ionicons,
   AntDesign,
+  FontAwesome,
   FontAwesome5,
+  Ionicons,
 } from '@expo/vector-icons'
 
 import { Col, /* Row, */ Grid } from 'react-native-easy-grid'
@@ -39,19 +39,17 @@ import NetInfo from '@react-native-community/netinfo'
 
 import FlatGrid from 'react-native-super-grid'
 
-import PropTypes from 'prop-types'
-
 import {
-  Card,
-  ListItem,
-  Divider,
-  Button,
-  LinearProgress,
-  ButtonGroup,
-  SearchBar,
-  Overlay,
-  Text,
   Badge,
+  Button,
+  ButtonGroup,
+  Card,
+  Divider,
+  LinearProgress,
+  ListItem,
+  Overlay,
+  SearchBar,
+  Text,
 } from '@rneui/themed'
 
 import * as friendsHelper from '../FriendsList/friends_helper'
@@ -61,10 +59,22 @@ import * as reducer from './reducer'
 import * as CONST from '../../consts'
 
 import Thumb from '../../components/Thumb'
-import ThumbWithComments from '../../components/ThumbWithComments'
 import ThumbPending from '../../components/ThumbPending'
+import ThumbWithComments from '../../components/ThumbWithComments'
 
 const BACKGROUND_FETCH_TASK = 'background-fetch'
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: CONST.BG_COLOR,
+  },
+  thumbContainer: {
+    // height: thumbDimension,
+    // paddingBottom: 10,
+    // marginBottom: 10,
+  },
+})
 
 // 1. Define the task by providing a name and the function that should be executed
 // Note: This needs to be called in the global scope (e.g outside of your React components)
@@ -81,7 +91,8 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
     // Be sure to return the successful result type!
     return BackgroundFetch.BackgroundFetchResult.NewData
   } catch (error) {
-    // console.log("background fetch", { error })
+    // eslint-disable-next-line no-console
+    console.error('background fetch', { error })
     return BackgroundFetch.Result.Failed
   }
 })
@@ -120,7 +131,7 @@ const PhotosList = () => {
   const [lastViewableRow, setLastViewableRow] = useState(1)
 
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
-  const [zeroMoment, setZeroMoment] = useState(null)
+  const [zeroMoment, setZeroMoment] = useState(0)
 
   const [netAvailable, setNetAvailable] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -132,7 +143,7 @@ const PhotosList = () => {
 
   // const [isLastPage, setIsLastPage] = useState(false)
 
-  const [pageNumber, setPageNumber] = useState(null)
+  const [pageNumber, setPageNumber] = useState(0)
 
   const [pendingPhotos, setPendingPhotos] = useState([])
 
@@ -154,28 +165,9 @@ const PhotosList = () => {
   })
 
   useEffect(() => {
+    console.log(11)
     setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
   }, [unreadCountList])
-
-  useEffect(() => {
-    // checkStatusAsync()
-    Notifications.requestPermissionsAsync({
-      ios: {
-        allowAlert: true,
-        allowBadge: true,
-        allowSound: true,
-        allowAnnouncements: true,
-      },
-    })
-    registerBackgroundFetchAsync()
-  }, [])
-
-  // const checkStatusAsync = async () => {
-  //   const status = await BackgroundFetch.getStatusAsync()
-  //   const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_FETCH_TASK)
-  //   // setStatus(status)
-  //   // setIsRegistered(isRegistered)
-  // }
 
   const wantToLoadMore = () => {
     const { photosList } = authContext
@@ -208,15 +200,6 @@ const PhotosList = () => {
       pageNumber,
     })
 
-    // console.log({
-    //   activeSegment,
-    //   pageNumber,
-    //   photos: photos.length,
-    //   noMoreData,
-    // })
-    // const newPhotosList = [...photosList, ...photos].sort(
-    //   (a, b) => a.row_number - b.row_number,
-    // )
     if (batch === currentBatch) {
       // avoid duplicates
       setAuthContext((prevAuthContext) => ({
@@ -229,12 +212,10 @@ const PhotosList = () => {
           ), // fancy way to remove duplicate photos
       }))
     }
-    // else {
-    //   console.log('batch missmatch')
-    // }
 
     if (noMoreData === false && wantToLoadMore()) {
       setPageNumber((currentPage) => currentPage + 1)
+      // await load()
     }
   }
 
@@ -267,6 +248,7 @@ const PhotosList = () => {
       }
     />
   )
+
   async function uploadPendingPhotos() {
     const { uuid, topOffset } = authContext
 
@@ -323,7 +305,7 @@ const PhotosList = () => {
           // setPendingPhotos(await reducer.getQueue())
         } catch (err123) {
           // eslint-disable-next-line no-console
-          console.log({ err123 })
+          console.error({ err123 })
           if (`${err123}`.includes('banned')) {
             // eslint-disable-next-line no-await-in-loop
             await reducer.removeFromQueue(item)
@@ -358,22 +340,6 @@ const PhotosList = () => {
           // eslint-disable-next-line no-await-in-loop
           await reducer.removeFromQueue(item)
 
-          // eslint-disable-next-line no-await-in-loop
-          // await updatePendingPhotos()
-
-          // show the photo in the photo list immidiately
-
-          // eslint-disable-next-line no-await-in-loop
-          // dispatch({
-          //   type: ACTION_TYPES.PHOTO_UPLOADED_PREPEND,
-          //   photo: item.photo,
-          // })
-
-          // eslint-disable-next-line no-await-in-loop
-          // setPendingPhotos((prevQueue) => [
-          //   ...prevQueue.filter((photo) => item.id !== photo.id),
-          // ])
-
           setAuthContext((prevAuthContext) => ({
             ...prevAuthContext,
             photosList: [item.photo, ...prevAuthContext.photosList].filter(
@@ -401,7 +367,7 @@ const PhotosList = () => {
       }
     } catch (err2) {
       // eslint-disable-next-line no-console
-      // console.log({ err2 })
+      console.error({ err2 })
       Toast.show({
         text1: 'Upload is slow...',
         text2: 'Still trying to upload.',
@@ -414,6 +380,7 @@ const PhotosList = () => {
 
     setUploadingPhoto(false)
     // sleep for 1 second before re-trying
+    // eslint-disable-next-line no-promise-executor-return
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     if ((await reducer.getQueue()).length > 0) {
@@ -501,27 +468,6 @@ const PhotosList = () => {
     }
   }
 
-  const initState = async () => {
-    // /// //////////////////////////////////////
-    // const files = await FileSystem.readDirectoryAsync(FileSystem.cacheDirectory)
-    // files.forEach(file => {
-    //   FileSystem.deleteAsync(`${FileSystem.cacheDirectory}${file}`, { idempotent: true })
-    // })
-    // // cleanup cache folder
-    // /// //////////////////////////////////////
-    const thumbsCount = Math.floor(width / 90)
-    setThumbDimension(
-      Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
-    )
-
-    // checkForUpdate(),
-    // check permissions, retrieve UUID, make sure upload folder exists
-    setIsTandcAccepted(await reducer.getTancAccepted())
-
-    setZeroMoment(await reducer.getZeroMoment())
-    // reload()
-  }
-
   async function checkPermission({
     permissionFunction,
     alertHeader,
@@ -607,7 +553,7 @@ const PhotosList = () => {
     }
   }
 
-  async function getLocation() {
+  async function initLocation() {
     const { topOffset } = authContext
 
     const locationPermission = await checkPermission({
@@ -616,6 +562,8 @@ const PhotosList = () => {
         'WiSaw shows you near-by photos based on your current location.',
       alertBody: 'You need to enable Location in Settings and Try Again.',
     })
+
+    console.log({ locationPermission })
 
     if (locationPermission === 'granted') {
       try {
@@ -628,26 +576,11 @@ const PhotosList = () => {
             accuracy: Location.Accuracy.BestForNavigation,
           })
         }
+        if (loc) setLocation(loc)
 
-        setLocation(loc)
-
-        // Location.watchPositionAsync(
-        //   {
-        //     accuracy: Location.Accuracy.Lowest,
-        //     timeInterval: 10000,
-        //     distanceInterval: 3000,
-        //   },
-        //   async (loc1) => {
-        //     // Toast.show({
-        //     //   text1: 'location udated',
-        //     //   type: "error",
-        //     // topOffset: topOffset,
-        //     // })
-        //     setLocation(loc1)
-        //   },
-        // )
         return loc
-      } catch (err) {
+      } catch (err12) {
+        console.error({ err12 })
         Toast.show({
           text1: 'Unable to get location',
           type: 'error',
@@ -659,20 +592,7 @@ const PhotosList = () => {
   }
 
   useEffect(() => {
-    // TODO: delete next line -- debuggin
-    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
-
-    ;(async () => {
-      await initState()
-      const loc = await getLocation()
-      // console.log({ loc })
-
-      // eslint-disable-next-line no-undef
-      if (!__DEV__) {
-        const branchHelper = await import('../../branch_helper')
-        branchHelper.initBranch({ navigation })
-      }
-    })()
+    console.log(1)
 
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
@@ -686,75 +606,84 @@ const PhotosList = () => {
   }, [])
 
   useEffect(() => {
-    reload()
-  }, [location])
+    console.log(2)
+
+    // TODO: delete next line -- debuggin
+    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
+    ;(async () => {
+      console.log(3)
+
+      await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowBadge: true,
+          allowSound: true,
+          allowAnnouncements: true,
+        },
+      })
+      // eslint-disable-next-line no-undef
+      if (!__DEV__) {
+        const branchHelper = await import('../../branch_helper')
+        branchHelper.initBranch({ navigation })
+      }
+    })()
+    ;(async () => {
+      console.log(4)
+      await registerBackgroundFetchAsync()
+    })()
+    ;(async () => {
+      console.log(41)
+      setIsTandcAccepted(await reducer.getTancAccepted())
+    })()
+    ;(async () => {
+      console.log(42)
+      setZeroMoment(await reducer.getZeroMoment())
+    })()
+  }, [])
+
+  useEffect(() => {
+    console.log(5)
+
+    const thumbsCount = Math.floor(width / 90)
+    setThumbDimension(
+      Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
+    )
+
+    // checkForUpdate(),
+    // check permissions, retrieve UUID, make sure upload folder exists
+
+    console.log(6)
+    initLocation()
+    console.log(7)
+  }, [])
+
+  // useEffect(() => {
+  //   reload()
+  // }, [location])
 
   // useEffect(() => {}, [currentBatch])
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: CONST.BG_COLOR,
-    },
-    thumbContainer: {
-      // height: thumbDimension,
-      // paddingBottom: 10,
-      // marginBottom: 10,
-    },
-  })
-
   useEffect(() => {
+    console.log(12)
     updateNavBar()
   }, [loading])
 
-  useEffect(() => {
-    // console.log({ pageNumber })
+  // useEffect(() => {
+  //   // console.log({ pageNumber })
 
-    ;(async () => {
-      if (!loading) setLoading(true)
-      await load()
-      if (loading) setLoading(false)
-    })()
-  }, [pageNumber, activeSegment])
+  //   ;(async () => {
+  //     if (!loading) setLoading(true)
+  //     await load()
+  //     if (loading) setLoading(false)
+  //   })()
+  // }, [pageNumber, activeSegment])
 
   // useEffect(() => {
-  //   // console.log({ activeSegment })
-  //   updateNavBar()
-  //   // reload()
-  // }, [activeSegment])
-
-  useEffect(() => {
-    if (wantToLoadMore() && loading === false) {
-      setPageNumber((currentPage) => currentPage + 1)
-      // load()
-    }
-  }, [lastViewableRow])
-
-  // const checkForUpdate = async () => {
-  //   try {
-  //     const update = await Updates.checkForUpdateAsync()
-  //     if (update.isAvailable) {
-  //       await Updates.fetchUpdateAsync()
-
-  //       Toast.show({
-  //         text1: 'WiSaw updated',
-  //         text2: "Restart to see changes",
-  //         topOffset,
-  //       })
-  //       // setTimeout(() => { Updates.reloadAsync() }, 3000)
-  //     }
-  //   } catch (error) {
-  //   // handle or log error
-  //     // Toast.show({
-  //     //   text1: `Failed to get over the air update:`,
-  //     //   text2: `${error}`,
-  //     //   type: "error",
-  //     // topOffset: topOffset,
-  //     // })
+  //   if (wantToLoadMore() && loading === false) {
+  //     setPageNumber((currentPage) => currentPage + 1)
+  //     // load()
   //   }
-  // }
-
-  // const sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+  // }, [lastViewableRow])
 
   const renderThumbs = () => {
     const { uuid, topOffset, photosList } = authContext

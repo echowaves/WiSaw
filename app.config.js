@@ -16,6 +16,7 @@ export default {
       //   apiKey: "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4",
       //   iosAppDomain: "link.wisaw.com",
       // },
+      'expo-secure-store',
     ],
     extra: {
       eas: {

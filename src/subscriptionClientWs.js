@@ -45,6 +45,7 @@ class UUIDOperationIdSubscriptionClient extends SubscriptionClient {
       const parsedMessage = JSON.parse(receivedData)
       if (parsedMessage?.type === 'start_ack') return // sent by AppSync but meaningless to us
     } catch (e) {
+      console.error({ e })
       throw new Error(`Message must be JSON-parsable. Got: ${receivedData}`)
     }
     super.processReceivedData(receivedData)

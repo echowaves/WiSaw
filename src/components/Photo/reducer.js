@@ -52,7 +52,8 @@ export async function watchPhoto({ photo, uuid, topOffset }) {
       })
     ).data.watchPhoto
     return watchersCount
-  } catch (err) {
+  } catch (err1) {
+    console.error({ err1 })
     Toast.show({
       text1: 'Unable to Star photo',
       text2: 'Network Issue?',
@@ -79,7 +80,8 @@ export async function unwatchPhoto({ photo, uuid, topOffset }) {
       })
     ).data.unwatchPhoto
     return watchersCount
-  } catch (err) {
+  } catch (err2) {
+    console.error({ err2 })
     Toast.show({
       text1: 'Unable to un-Star photo',
       text2: 'Maybe Network Issue?',
@@ -115,8 +117,8 @@ export async function banPhoto({ photo, uuid, topOffset }) {
       type: 'success',
       topOffset,
     })
-  } catch (err) {
-    console.error({ err })
+  } catch (err3) {
+    console.error({ err3 })
   }
   return null
 }
@@ -140,7 +142,8 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
       topOffset,
     })
     return true
-  } catch (err) {
+  } catch (err3) {
+    console.error({ err3 })
     Toast.show({
       text1: 'Unable to delete',
       text2: 'Network Issue?',
@@ -160,8 +163,8 @@ export async function sharePhoto({ photo, photoDetails, topOffset }) {
     } else {
       alert('The feature is not supported on this device yet, try again later')
     }
-  } catch (err) {
-    // console.log({ err })
+  } catch (err4) {
+    console.error({ err4 })
     Toast.show({
       text1: 'Unable to share photo',
       text2: 'Wait a bit and try again',
@@ -211,11 +214,11 @@ export async function submitComment({ inputText, photo, uuid, topOffset }) {
       topOffset,
       visibilityTime: 500,
     })
-  } catch (err) {
-    // console.log({ err })// eslint-disable-line
+  } catch (err5) {
+    console.error({ err5 }) // eslint-disable-line
     Toast.show({
       text1: 'Unable to add comment',
-      text2: `${err}`,
+      text2: `${err5}`,
       type: 'error',
       topOffset,
     })
@@ -261,8 +264,8 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
       recognitions,
       isPhotoWatched,
     }
-  } catch (err) {
-    console.log({ err }) // eslint-disable-line
+  } catch (err6) {
+    console.error({ err6 }) // eslint-disable-line
   }
   return null
 }
@@ -317,7 +320,8 @@ export async function deleteComment({
     return {
       ...photoDetails,
     }
-  } catch (err) {
+  } catch (err7) {
+    console.error({ err7 })
     Toast.show({
       text1: 'Unable to delete comment',
       text2: 'Network Issue?',
