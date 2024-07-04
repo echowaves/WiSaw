@@ -9,7 +9,7 @@ export default {
       url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee',
     },
     name: 'WiSaw',
-    version: '7.1.13',
+    version: '7.1.14',
     plugins: [
       '@config-plugins/react-native-branch',
       // {
