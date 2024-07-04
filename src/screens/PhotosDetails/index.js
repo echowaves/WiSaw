@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
-import { FontAwesome, AntDesign } from '@expo/vector-icons'
+import { AntDesign, FontAwesome } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 
 import // View,
@@ -127,8 +127,6 @@ const PhotosDetails = ({ route }) => {
     // </GestureHandlerRootView>
   )
 }
-
-PhotosDetails.defaultProps = {}
 
 PhotosDetails.propTypes = {
   route: PropTypes.object.isRequired,

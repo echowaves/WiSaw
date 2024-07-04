@@ -1,37 +1,29 @@
-import React from 'react'
 import { useNavigation } from '@react-navigation/native'
+import React from 'react'
 
-import {
-  View,
-  TouchableHighlight,
-  Text,
-  // Image,
-} from 'react-native'
+import { Text, TouchableHighlight, View } from 'react-native'
 
-import { FontAwesome, AntDesign } from '@expo/vector-icons'
+import { AntDesign, FontAwesome } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
 // import CachedImage from 'expo-cached-image'
-import * as reducer from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
 import Thumb from '../Thumb'
 
-const ThumbWithComments = (props) => {
+const ThumbWithComments = ({
+  thumbDimension = 100,
+  index,
+  item,
+  screenWidth,
+  photosList,
+  searchTerm,
+  activeSegment,
+  topOffset,
+  uuid,
+}) => {
   const navigation = useNavigation()
-
-  const {
-    index,
-    item,
-    thumbDimension,
-    screenWidth,
-    photosList,
-    searchTerm,
-    activeSegment,
-    topOffset,
-    uuid,
-  } = props
 
   const onThumbPress = (thumb) => {
     navigation.navigate('PhotosDetails', {
@@ -145,10 +137,6 @@ ThumbWithComments.propTypes = {
   index: PropTypes.number.isRequired,
   thumbDimension: PropTypes.number,
   screenWidth: PropTypes.number.isRequired,
-}
-
-ThumbWithComments.defaultProps = {
-  thumbDimension: 100,
 }
 
 export default ThumbWithComments

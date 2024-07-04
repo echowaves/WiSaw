@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Alert, View, StyleSheet, TouchableHighlight } from 'react-native'
+import { Alert, StyleSheet, TouchableHighlight, View } from 'react-native'
 
 import CachedImage from 'expo-cached-image'
 
@@ -10,9 +10,7 @@ import * as CONST from '../../consts'
 
 import { removeFromQueue } from '../../screens/PhotosList/reducer'
 
-const ThumbPending = (props) => {
-  const { item, thumbDimension } = props
-
+const ThumbPending = ({ thumbDimension = 100, item }) => {
   const styles = StyleSheet.create({
     container: {
       borderRadius: 5,
@@ -69,10 +67,6 @@ const ThumbPending = (props) => {
 ThumbPending.propTypes = {
   item: PropTypes.object.isRequired,
   thumbDimension: PropTypes.number,
-}
-
-ThumbPending.defaultProps = {
-  thumbDimension: 100,
 }
 
 export default ThumbPending

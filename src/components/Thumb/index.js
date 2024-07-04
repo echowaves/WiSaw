@@ -1,21 +1,13 @@
-import React from 'react'
 import { useNavigation } from '@react-navigation/native'
+import React from 'react'
 
-import {
-  View,
-  StyleSheet,
-  TouchableHighlight,
-  Text,
-  // Image,
-} from 'react-native'
+import { StyleSheet, Text, TouchableHighlight, View } from 'react-native'
 
-import { FontAwesome, AntDesign, FontAwesome5 } from '@expo/vector-icons'
+import { AntDesign, FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
-
-import * as reducer from '../../screens/PhotosList/reducer'
 
 import * as CONST from '../../consts'
 
@@ -34,19 +26,17 @@ const styles = StyleSheet.create({
   },
 })
 
-const Thumb = (props) => {
+const Thumb = ({
+  thumbDimension = 100,
+  index,
+  item,
+  photosList,
+  searchTerm,
+  activeSegment,
+  topOffset,
+  uuid,
+}) => {
   const navigation = useNavigation()
-
-  const {
-    index,
-    item,
-    thumbDimension,
-    photosList,
-    searchTerm,
-    activeSegment,
-    topOffset,
-    uuid,
-  } = props
 
   const onThumbPress = (thumb) => {
     // console.log({ index })
@@ -65,7 +55,7 @@ const Thumb = (props) => {
     width: thumbDimension,
     height: thumbDimension,
   }
-
+  // console.log({ item })
   return (
     <View>
       <TouchableHighlight
@@ -167,10 +157,6 @@ Thumb.propTypes = {
   item: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   thumbDimension: PropTypes.number,
-}
-
-Thumb.defaultProps = {
-  thumbDimension: 100,
 }
 
 export default Thumb

@@ -5,7 +5,9 @@
  * @flow strict-local
  */
 
-import React, { useEffect, useState } from 'react'
+import { useAtom } from 'jotai'
+import React, { useEffect } from 'react'
+
 // import { StyleSheet, View } from 'react-native'
 import 'react-native-get-random-values'
 
@@ -17,12 +19,13 @@ import { NavigationContainer } from '@react-navigation/native'
 
 import { createDrawerNavigator } from '@react-navigation/drawer'
 
-import { ThemeProvider } from '@rneui/themed'
+import { ThemeProvider, createTheme } from '@rneui/themed'
 import Toast from 'react-native-toast-message'
 
 import { createStackNavigator } from '@react-navigation/stack'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as CONST from './src/consts'
+import * as STATE from './src/state'
 
 import PinchableView from './src/components/Photo/PinchableView'
 import FeedbackScreen from './src/screens/Feedback'
@@ -39,31 +42,23 @@ import ConfirmFriendship from './src/screens/FriendsList/ConfirmFriendship'
 import 'react-native-gesture-handler'
 import * as SecretReducer from './src/screens/Secret/reducer'
 
-const { AuthContext } = CONST
-
 // import StackNavigator from './src/nav/stackNavigator.js'
 
 const Drawer = createDrawerNavigator()
 const Stack = createStackNavigator()
 
 const App = () => {
-  const [authContext, setAuthContext] = useState({
-    uuid: '',
-    nickName: '',
-    topOffset: 10,
-    photosList: [],
-    friendsList: [],
-  })
+  const theme = createTheme({})
+
   const { width, height } = useWindowDimensions()
 
+  const [uuis, setUuid] = useAtom(STATE.uuid)
+  const [nickName, setNickName] = useAtom(STATE.nickName)
+
   const init = async () => {
-    setAuthContext({
-      uuid: await SecretReducer.getUUID(),
-      nickName: await SecretReducer.getStoredNickName(),
-      topOffset: height / 3,
-      photosList: [],
-      friendsList: [],
-    })
+    setUuid(await SecretReducer.getUUID())
+    setNickName(await SecretReducer.getStoredNickName())
+
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
   }
 
@@ -136,95 +131,93 @@ const App = () => {
     )
   }
   return (
-    <AuthContext.Provider value={{ authContext, setAuthContext }}>
-      <ThemeProvider>
-        <NavigationContainer>
-          <Drawer.Navigator
-            screenOptions={{ gestureEnabled: true, headerShown: false }}
+    <ThemeProvider theme={theme}>
+      <NavigationContainer>
+        <Drawer.Navigator
+          screenOptions={{ gestureEnabled: true, headerShown: false }}
+        >
+          <Drawer.Screen
+            name="Home"
+            // component={MyStack}
+            options={{
+              drawerIcon: (config) => (
+                <FontAwesome
+                  name="chevron-left"
+                  size={30}
+                  style={{
+                    marginLeft: 10,
+                    color: CONST.MAIN_COLOR,
+                    width: 60,
+                  }}
+                />
+              ),
+              drawerLabel: '',
+            }}
           >
-            <Drawer.Screen
-              name="Home"
-              // component={MyStack}
-              options={{
-                drawerIcon: (config) => (
-                  <FontAwesome
-                    name="chevron-left"
-                    size={30}
-                    style={{
-                      marginLeft: 10,
-                      color: CONST.MAIN_COLOR,
-                      width: 60,
-                    }}
-                  />
-                ),
-                drawerLabel: '',
-              }}
-            >
-              {(props) => MyStack()}
-            </Drawer.Screen>
-            <Drawer.Screen
-              name="SecretScreen"
-              component={IdentityScreen}
-              options={{
-                drawerIcon: (config) => (
-                  <FontAwesome
-                    name="user-secret"
-                    size={30}
-                    style={{
-                      marginLeft: 10,
-                      color: CONST.MAIN_COLOR,
-                      width: 60,
-                    }}
-                  />
-                ),
-                drawerLabel: 'secret',
-                headerShown: true,
-              }}
-            />
-            <Drawer.Screen
-              name="FriendsList"
-              component={FriendsList}
-              options={{
-                drawerIcon: (config) => (
-                  <FontAwesome5
-                    name="user-friends"
-                    size={30}
-                    style={{
-                      marginLeft: 10,
-                      color: CONST.MAIN_COLOR,
-                      width: 60,
-                    }}
-                  />
-                ),
-                drawerLabel: 'friends',
-                headerShown: true,
-              }}
-            />
+            {(props) => MyStack()}
+          </Drawer.Screen>
+          <Drawer.Screen
+            name="SecretScreen"
+            component={IdentityScreen}
+            options={{
+              drawerIcon: (config) => (
+                <FontAwesome
+                  name="user-secret"
+                  size={30}
+                  style={{
+                    marginLeft: 10,
+                    color: CONST.MAIN_COLOR,
+                    width: 60,
+                  }}
+                />
+              ),
+              drawerLabel: 'secret',
+              headerShown: true,
+            }}
+          />
+          <Drawer.Screen
+            name="FriendsList"
+            component={FriendsList}
+            options={{
+              drawerIcon: (config) => (
+                <FontAwesome5
+                  name="user-friends"
+                  size={30}
+                  style={{
+                    marginLeft: 10,
+                    color: CONST.MAIN_COLOR,
+                    width: 60,
+                  }}
+                />
+              ),
+              drawerLabel: 'friends',
+              headerShown: true,
+            }}
+          />
 
-            <Drawer.Screen
-              name="Feedback"
-              component={FeedbackScreen}
-              options={{
-                drawerIcon: (config) => (
-                  <MaterialIcons
-                    name="feedback"
-                    size={30}
-                    style={{
-                      marginLeft: 10,
-                      color: CONST.MAIN_COLOR,
-                      width: 60,
-                    }}
-                  />
-                ),
-                drawerLabel: 'feedback',
-                headerShown: true,
-              }}
-            />
-          </Drawer.Navigator>
-        </NavigationContainer>
-      </ThemeProvider>
+          <Drawer.Screen
+            name="Feedback"
+            component={FeedbackScreen}
+            options={{
+              drawerIcon: (config) => (
+                <MaterialIcons
+                  name="feedback"
+                  size={30}
+                  style={{
+                    marginLeft: 10,
+                    color: CONST.MAIN_COLOR,
+                    width: 60,
+                  }}
+                />
+              ),
+              drawerLabel: 'feedback',
+              headerShown: true,
+            }}
+          />
+        </Drawer.Navigator>
+      </NavigationContainer>
       <Toast ref={(ref) => Toast.setRef(ref)} />
-    </AuthContext.Provider>
+    </ThemeProvider>
   )
 }
 export default App

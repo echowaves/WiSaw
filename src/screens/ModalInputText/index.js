@@ -1,17 +1,9 @@
-import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import React, { useEffect, useState } from 'react'
 
-import { TextInput, StyleSheet, useWindowDimensions } from 'react-native'
+import { StyleSheet, TextInput, useWindowDimensions } from 'react-native'
 
-import {
-  Text,
-  Input,
-  LinearProgress,
-  Card,
-  ListItem,
-  Button,
-  Icon,
-} from '@rneui/themed'
+import { Button, Icon, Text } from '@rneui/themed'
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
@@ -155,9 +147,6 @@ const ModalInputText = ({ route }) => {
       </Button>
     </KeyboardAwareScrollView>
   )
-}
-ModalInputText.defaultProps = {
-  photo: {},
 }
 
 ModalInputText.propTypes = {
