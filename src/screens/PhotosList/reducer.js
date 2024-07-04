@@ -559,6 +559,7 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
     // eslint-disable-next-line no-console
     console.error(xscwdjhb)
   }
+  return null
 }
 
 const uploadFile = async ({ assetKey, contentType, assetUri }) => {
@@ -589,6 +590,7 @@ const uploadFile = async ({ assetKey, contentType, assetUri }) => {
     // eslint-disable-next-line no-console
     console.error({ cnijedfjknwkejn })
   }
+  return null
 }
 
 export const uploadItem = async ({ item }) => {

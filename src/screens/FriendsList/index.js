@@ -28,9 +28,7 @@ const FriendsList = () => {
   const navigation = useNavigation()
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [nickName, setNickName] = useAtom(STATE.nickName)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
-  const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const {

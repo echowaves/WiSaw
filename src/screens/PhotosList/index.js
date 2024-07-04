@@ -119,7 +119,6 @@ async function registerBackgroundFetchAsync() {
 
 const FOOTER_HEIGHT = 90
 
-let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 let activeSegment = 0
 
 const PhotosList = () => {
@@ -133,6 +132,9 @@ const PhotosList = () => {
 
   const { width, height } = useWindowDimensions()
 
+  const [currentBatch, setCurrentBatch] = useState(
+    `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+  )
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
 
@@ -149,7 +151,7 @@ const PhotosList = () => {
 
   // const [isLastPage, setIsLastPage] = useState(false)
 
-  const [pageNumber, setPageNumber] = useState(0)
+  const [pageNumber, setPageNumber] = useState()
 
   const [pendingPhotos, setPendingPhotos] = useState([])
 
@@ -203,8 +205,8 @@ const PhotosList = () => {
 
     if (batch === currentBatch) {
       // avoid duplicates
-      setPhotosList(
-        [...photosList, ...photos]
+      setPhotosList((currentList) =>
+        [...currentList, ...photos]
           .sort((a, b) => a.row_number - b.row_number)
           .filter(
             (obj, pos, arr) =>
@@ -338,10 +340,11 @@ const PhotosList = () => {
           await reducer.removeFromQueue(item)
 
           setPhotosList(
-            [item.photo, ...photosList].filter(
-              (obj, pos, arr) =>
-                arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
-            ), // fancy way to remove duplicate photos
+            (currentList) =>
+              [item.photo, ...currentList].filter(
+                (obj, pos, arr) =>
+                  arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+              ), // fancy way to remove duplicate photos
           )
 
           // Toast.show({
@@ -385,11 +388,10 @@ const PhotosList = () => {
   }
 
   const reload = async () => {
+    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+
     setPhotosList([])
-
     setPageNumber(0)
-
-    currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
     setPendingPhotos(await reducer.getQueue())
 
@@ -401,9 +403,7 @@ const PhotosList = () => {
         }),
       )
 
-      const unreadCounts = await friendsHelper.getUnreadCountsList({ uuid })
-
-      setUnreadCountList(unreadCounts) // the list of enhanced friends list has to be loaded earlier on
+      setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     }
     // setPendingPhotos(await reducer.getQueue())
   }
