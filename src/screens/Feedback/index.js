@@ -1,22 +1,26 @@
-import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import { useAtom } from 'jotai'
+import React, { useEffect, useState } from 'react'
 
-import { SafeAreaView, TextInput, StyleSheet } from 'react-native'
+import { SafeAreaView, StyleSheet, TextInput } from 'react-native'
 
 import { gql } from '@apollo/client'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
 
-import PropTypes from 'prop-types'
-
 import * as CONST from '../../consts'
+import * as STATE from '../../state'
 
 const maxStringLength = 2000
 
 const FeedbackScreen = () => {
   const navigation = useNavigation()
-  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+  const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+  const [photosList, setPhotosList] = useAtom(STATE.photosList)
+  const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   // const [diskSpace, setDiskSpace] = useState('')
   // const [diskCapacity, setDiskCapacity] = useState('')
@@ -30,8 +34,6 @@ const FeedbackScreen = () => {
   }
 
   const submitFeedback = async ({ feedbackText }) => {
-    const { uuid, topOffset } = authContext
-
     try {
       if (feedbackText.trim().length < 5) {
         throw Error('unable to submit empty feedback')

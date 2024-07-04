@@ -1,21 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect } from 'react'
 
 import {
+  ActivityIndicator,
   // Dimensions,
   StyleSheet,
-  Animated,
-  ActivityIndicator,
-  View,
   useWindowDimensions,
 } from 'react-native'
-import PropTypes from 'prop-types'
 
-import {
-  PinchGestureHandler,
-  TapGestureHandler,
-  State,
-} from 'react-native-gesture-handler'
-import { FontAwesome, AntDesign } from '@expo/vector-icons'
+import { FontAwesome } from '@expo/vector-icons'
 import ReactNativeZoomableView from '@openspacelabs/react-native-zoomable-view/src/ReactNativeZoomableView'
 
 import CachedImage from 'expo-cached-image'
@@ -25,16 +17,6 @@ import * as CONST from '../../consts'
 const PinchableView = ({ route, navigation }) => {
   const { photo } = route.params
   const { width, height } = useWindowDimensions()
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerLeft: renderHeaderLeft,
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const renderHeaderLeft = () => (
     <FontAwesome
@@ -50,6 +32,16 @@ const PinchableView = ({ route, navigation }) => {
   )
 
   const renderHeaderTitle = () => {}
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: renderHeaderTitle,
+      headerLeft: renderHeaderLeft,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
+  }, [])
 
   const styles = StyleSheet.create({
     photoContainer: {

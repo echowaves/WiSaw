@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import { useAtom } from 'jotai'
+import React, { useEffect, useState } from 'react'
 
 import {
   Alert,
@@ -8,33 +9,29 @@ import {
   useWindowDimensions,
 } from 'react-native'
 
-import { Text, Card, ListItem, Badge } from '@rneui/themed'
+import { Badge, Card, ListItem, Text } from '@rneui/themed'
 
 // import Toast from 'react-native-toast-message'
 import FlatGrid from 'react-native-super-grid'
 
-import {
-  FontAwesome,
-  FontAwesome5,
-  // Ionicons,
-  // MaterialCommunityIcons,
-  // SimpleLineIcons,
-  // AntDesign,
-} from '@expo/vector-icons'
-
-import PropTypes from 'prop-types'
+import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 
 import * as CONST from '../../consts'
+import * as STATE from '../../state'
 
 import * as reducer from './reducer'
 
-import * as friendsHelper from './friends_helper'
 import NamePicker from '../../components/NamePicker'
+import * as friendsHelper from './friends_helper'
 
 const FriendsList = () => {
   const navigation = useNavigation()
 
-  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+  const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+  const [photosList, setPhotosList] = useAtom(STATE.photosList)
+  const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const {
     width,
@@ -81,15 +78,11 @@ const FriendsList = () => {
     />
   )
   const reload = async () => {
-    const { uuid, topOffset } = authContext
-
-    const friendsList = await friendsHelper.getEnhancedListOfFriendships({
-      uuid,
-    })
-    setAuthContext((prevAuthContext) => ({
-      ...prevAuthContext,
-      friendsList, // the list of enhanced friends list has to be loaded earlier on
-    }))
+    setFriendsList(
+      await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      }),
+    )
   }
 
   useEffect(() => {
@@ -117,16 +110,12 @@ const FriendsList = () => {
   })
 
   const sendFriendshipRequest = async ({ contactName }) => {
-    const { uuid, topOffset } = authContext
-
     const friendship = await reducer.createFriendship({ uuid, contactName })
 
     return friendship
   }
 
   const setContactName = async (contactName) => {
-    const { uuid, topOffset } = authContext
-
     // this is edit existing name
     if (!friendshipUuid) {
       // this is new friendship, let's create it and then send the invite
@@ -146,20 +135,17 @@ const FriendsList = () => {
     await setShowNamePicker(false)
     setFriendshipUuid(null) // reset friendshipUuid for next request
 
-    const friendsList = await friendsHelper.getEnhancedListOfFriendships({
-      uuid,
-    })
-    setAuthContext((prevAuthContext) => ({
-      ...prevAuthContext,
-      friendsList, // the list of enhanced friends list has to be loaded earlier on
-    }))
+    setFriendsList(
+      await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      }),
+    )
 
     // const unreadCounts = await friendsHelper.getUnreadCountsList({ uuid })
   }
 
+  // eslint-disable-next-line no-shadow
   const handleRemoveFriend = ({ friendshipUuid }) => {
-    const { uuid, topOffset } = authContext
-
     Alert.alert(
       'Delete Friendship?',
       "This can't be undone. Are you sure? ",
@@ -244,7 +230,7 @@ const FriendsList = () => {
   //   navigation.navigate('LocalContacts', { friendshipUuid })
   // }
 
-  if (authContext.friendsList.length === 0) {
+  if (friendsList.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <NamePicker
@@ -286,7 +272,7 @@ const FriendsList = () => {
       <FlatGrid
         itemDimension={width}
         // spacing={3}
-        data={authContext.friendsList}
+        data={friendsList}
         renderItem={({ item }) => renderFriend({ friend: item })}
         keyExtractor={(item) => item.friendshipUuid}
         style={{

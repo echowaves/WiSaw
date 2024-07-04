@@ -1,15 +1,16 @@
-import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import { useAtom } from 'jotai'
+import React, { useEffect, useState } from 'react'
 
-import { Alert, SafeAreaView, StyleSheet, ScrollView } from 'react-native'
+import { Alert, SafeAreaView, ScrollView, StyleSheet } from 'react-native'
 
 import {
-  Text,
+  Button,
+  Card,
   Input,
   LinearProgress,
-  Card,
   ListItem,
-  Button,
+  Text,
 } from '@rneui/themed'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
@@ -20,11 +21,10 @@ import {
   MaterialCommunityIcons,
 } from '@expo/vector-icons'
 
-import PropTypes from 'prop-types'
-
 import zxcvbn from '../../zxcvbn'
 
 import * as CONST from '../../consts'
+import * as STATE from '../../state'
 
 import * as reducer from './reducer'
 
@@ -34,7 +34,11 @@ const minNickNameLength = 5 // will also use this parameter for the secret lengt
 const SecretScreen = () => {
   const navigation = useNavigation()
 
-  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+  const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+  const [photosList, setPhotosList] = useAtom(STATE.photosList)
+  const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const [nickNameEntered, setNickNameEntered] = useState(false)
   const [nickNameText, setNickNameText] = useState('')
@@ -66,8 +70,6 @@ const SecretScreen = () => {
     setSecretConfirm('')
   }
   const handleSubmit = async () => {
-    const { uuid, topOffset, nickName } = authContext
-
     if (nickNameEntered) {
       reducer.updateSecret({
         nickName: nickNameText,
@@ -84,10 +86,7 @@ const SecretScreen = () => {
         uuid,
       })
     }
-    setAuthContext((prevAuthContext) => ({
-      ...prevAuthContext,
-      nickName: nickNameText,
-    }))
+    setNickName(nickNameText)
 
     await resetFields()
   }
@@ -201,8 +200,6 @@ const SecretScreen = () => {
   })
 
   const handleReset = async () => {
-    const { uuid, topOffset, nickName } = authContext
-
     await reducer.resetSecret({ topOffset })
     await resetFields()
     Toast.show({

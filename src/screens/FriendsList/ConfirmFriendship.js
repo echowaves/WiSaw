@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react'
 import { useNavigation } from '@react-navigation/native'
+import { useAtom } from 'jotai'
+import React, { useEffect, useState } from 'react'
 
 import { SafeAreaView, StyleSheet } from 'react-native'
 
@@ -12,15 +13,20 @@ import PropTypes from 'prop-types'
 import NamePicker from '../../components/NamePicker'
 
 import * as CONST from '../../consts'
+import * as STATE from '../../state'
 
 import * as reducer from './reducer'
 
 import * as friendsHelper from './friends_helper'
 
 const ConfirmFriendship = ({ route }) => {
-  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
-
   const { friendshipUuid } = route.params
+
+  const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+  const [photosList, setPhotosList] = useAtom(STATE.photosList)
+  const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const navigation = useNavigation()
 
@@ -66,19 +72,15 @@ const ConfirmFriendship = ({ route }) => {
   })
 
   const setContactName = async (contactName) => {
-    const { uuid, topOffset } = authContext
-
     // alert(JSON.stringify({ friendshipUuid, contactName }))
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
-      const friendsList = await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
-      })
-      setAuthContext((prevAuthContext) => ({
-        ...prevAuthContext,
-        friendsList, // the list of enhanced friends list has to be loaded earlier on
-      }))
+      setFriendsList(
+        await friendsHelper.getEnhancedListOfFriendships({
+          uuid,
+        }),
+      )
 
       reducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier o
 

@@ -1,19 +1,19 @@
-import React, { useState, useRef } from 'react'
+import { useNavigation } from '@react-navigation/native'
+import PropTypes from 'prop-types'
+import React, { useRef } from 'react'
 import {
+  ActivityIndicator,
+  Animated,
   // Dimensions,
   StyleSheet,
-  Animated,
-  ActivityIndicator,
 } from 'react-native'
-import PropTypes from 'prop-types'
-import { useFocusEffect, useNavigation } from '@react-navigation/native'
 
+import CachedImage from 'expo-cached-image'
 import {
   PinchGestureHandler,
-  TapGestureHandler,
   State,
+  TapGestureHandler,
 } from 'react-native-gesture-handler'
-import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
 

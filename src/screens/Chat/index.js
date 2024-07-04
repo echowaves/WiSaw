@@ -1,25 +1,25 @@
-import React, { useEffect, useState, useCallback, useContext } from 'react'
+import { useAtom } from 'jotai'
+
 import { useNavigation } from '@react-navigation/native'
+import React, { useCallback, useEffect, useState } from 'react'
 
-import { GiftedChat, Send } from 'react-native-gifted-chat'
-import moment from 'moment'
-import { v4 as uuidv4 } from 'uuid'
 import * as MediaLibrary from 'expo-media-library'
+import moment from 'moment'
+import { GiftedChat, Send } from 'react-native-gifted-chat'
+import { v4 as uuidv4 } from 'uuid'
 
-import * as ImagePicker from 'expo-image-picker'
-import * as Linking from 'expo-linking'
 import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
+import * as ImagePicker from 'expo-image-picker'
+import * as Linking from 'expo-linking'
 
 import {
+  ActivityIndicator,
   Alert,
   SafeAreaView,
   StyleSheet,
   // ScrollView,
   View,
-  ActivityIndicator,
-  TouchableHighlight,
-  Pressable,
 } from 'react-native'
 
 // import * as FileSystem from 'expo-file-system'
@@ -40,12 +40,17 @@ import * as reducer from './reducer'
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as CONST from '../../consts'
+import * as STATE from '../../state'
 import subscriptionClient from '../../subscriptionClientWs'
 
 import ChatPhoto from './ChatPhoto'
 
 const Chat = ({ route }) => {
-  const { authContext, setAuthContext } = useContext(CONST.AuthContext)
+  const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+  const [photosList, setPhotosList] = useAtom(STATE.photosList)
+  const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const { chatUuid, contact } = route.params
 
@@ -55,42 +60,34 @@ const Chat = ({ route }) => {
   // .format("YYYY-MM-DD HH:mm:ss.SSS")
   // const [lastRead, setLastRead] = useState(moment())
 
-  const goBack = async ({ uuid }) => {
-    const friendsList = await friendsHelper.getEnhancedListOfFriendships({
-      uuid,
-    })
-    console.log({ friendsList })
-    setAuthContext((prevAuthContext) => ({
-      ...prevAuthContext,
-      friendsList, // the list of enhanced friends list has to be loaded earlier on
-    }))
+  const goBack = async () => {
+    setFriendsList(
+      await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      }),
+    )
+
     navigation.pop()
   }
 
   const renderHeaderRight = () => {}
 
-  const renderHeaderLeft = () => {
-    const { uuid, topOffset } = authContext
+  const renderHeaderLeft = () => (
+    <FontAwesome
+      name="chevron-left"
+      size={30}
+      style={{
+        marginLeft: 10,
+        color: CONST.MAIN_COLOR,
+        width: 60,
+      }}
+      onPress={() => {
+        goBack()
+      }}
+    />
+  )
 
-    return (
-      <FontAwesome
-        name="chevron-left"
-        size={30}
-        style={{
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }}
-        onPress={() => {
-          goBack({ uuid })
-        }}
-      />
-    )
-  }
-
-  const loadMessages = async ({ chatUuid, lastLoaded }) => {
-    const { uuid, topOffset, friendsList } = authContext
-
+  const loadMessages = async ({ lastLoaded }) => {
     try {
       const messagesList = (
         await CONST.gqlClient.query({
@@ -150,8 +147,6 @@ const Chat = ({ route }) => {
   }
 
   useEffect(() => {
-    const { uuid, topOffset } = authContext
-
     ;(async () => {
       navigation.setOptions({
         headerTitle: `chat with: ${contact}`,
@@ -164,7 +159,7 @@ const Chat = ({ route }) => {
         },
       })
 
-      setMessages(await loadMessages({ chatUuid, lastLoaded: moment() }))
+      setMessages(await loadMessages({ lastLoaded: moment() }))
       friendsHelper.resetUnreadCount({ chatUuid, uuid })
     })()
 
@@ -174,8 +169,6 @@ const Chat = ({ route }) => {
   }, [])
 
   useEffect(() => {
-    const { uuid, topOffset, friendsList } = authContext
-
     console.log(`subscribing to ${chatUuid}`)
     // add subscription listener
     const observableObject = subscriptionClient.subscribe({
@@ -207,10 +200,12 @@ const Chat = ({ route }) => {
       // },
       next(data) {
         // console.log('observableObject:: ', { data })
+        // eslint-disable-next-line no-unsafe-optional-chaining
         const { onSendMessage } = data?.data
         // console.log({ onSendMessage })
         setMessages((previousMessages) => {
           const updatedMessages = previousMessages.map((message) => {
+            // eslint-disable-next-line no-underscore-dangle
             if (message._id === onSendMessage.messageUuid) {
               // this is the update of the message which is already in the feed
               return {
@@ -239,6 +234,7 @@ const Chat = ({ route }) => {
           // this is a new message which was not present in the feed, let's append it to the end
           if (
             updatedMessages.find(
+              // eslint-disable-next-line no-underscore-dangle
               (message) => message._id === onSendMessage.messageUuid,
             ) === undefined
           ) {
@@ -285,6 +281,7 @@ const Chat = ({ route }) => {
         console.log(
           '------------------------- this is the whole new begining --------------------------------------',
         )
+        // eslint-disable-next-line no-use-before-define
         subscription.unsubscribe()
         observableObject.subscribe(subscriptionParameters)
         // // _return({ uuid })
@@ -308,9 +305,8 @@ const Chat = ({ route }) => {
     }
   }, [])
 
+  // eslint-disable-next-line no-shadow
   const onSend = useCallback((messages = []) => {
-    const { uuid, topOffset, friendsList } = authContext
-
     messages.forEach((message) => {
       ;(async () => {
         try {
@@ -434,6 +430,7 @@ const Chat = ({ route }) => {
           // marginBottom: 10,
           color: CONST.MAIN_COLOR,
         }}
+        // eslint-disable-next-line no-use-before-define
         onPress={async () => takePhoto()}
       />
       <FontAwesome
@@ -444,6 +441,7 @@ const Chat = ({ route }) => {
           // marginBottom: 10,
           color: CONST.MAIN_COLOR,
         }}
+        // eslint-disable-next-line no-use-before-define
         onPress={async () => pickAsset()}
       />
       <View />
@@ -451,8 +449,6 @@ const Chat = ({ route }) => {
   )
 
   const uploadAsset = async ({ uri }) => {
-    const { uuid, topOffset, friendsList } = authContext
-
     const fileContents = await FileSystem.readAsStringAsync(uri, {
       encoding: FileSystem.EncodingType.Base64,
     })
@@ -566,9 +562,10 @@ const Chat = ({ route }) => {
     <SafeAreaView style={styles.container}>
       <GiftedChat
         messages={messages}
+        // eslint-disable-next-line no-shadow
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: authContext.uuid,
+          _id: uuid,
         }}
         // alwaysShowSend
         renderSend={renderSend}
