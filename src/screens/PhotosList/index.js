@@ -389,7 +389,7 @@ const PhotosList = () => {
 
   const reload = async () => {
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
-
+    setPageNumber(null)
     setPhotosList([])
     setPageNumber(0)
 
@@ -639,9 +639,9 @@ const PhotosList = () => {
     // console.log({ pageNumber })
 
     ;(async () => {
-      if (!loading) setLoading(true)
-      await load()
-      if (loading) setLoading(false)
+      setLoading(true)
+      if (pageNumber !== null) await load()
+      setLoading(false)
     })()
   }, [pageNumber, activeSegment])
 
@@ -909,8 +909,8 @@ const PhotosList = () => {
   //   />
   // )
   const submitSearch = async () => {
-    reload()
     if (searchTerm && searchTerm.length >= 3) {
+      reload()
       if (keyboardVisible) {
         dismissKeyboard()
       }
