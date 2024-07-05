@@ -191,6 +191,7 @@ const PhotosList = () => {
   }
 
   const load = async () => {
+    setLoading(true)
     const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
       zeroMoment,
@@ -219,6 +220,7 @@ const PhotosList = () => {
       setPageNumber((currentPage) => currentPage + 1)
       // await load()
     }
+    setLoading(false)
   }
 
   const segment0 = () => (
@@ -411,7 +413,8 @@ const PhotosList = () => {
   const updateIndex = async (index) => {
     activeSegment = index
     // setActiveSegment(index)
-    // updateNavBar()
+    // eslint-disable-next-line no-use-before-define
+    updateNavBar()
     reload()
   }
 
@@ -445,11 +448,11 @@ const PhotosList = () => {
       })
     } else {
       navigation.setOptions({
-        headerTitle: '',
-        headerLeft: '',
-        headerRight: '',
+        headerTitle: renderHeaderTitle,
+        // headerLeft: renderHeaderLeft,
+        // headerRight: renderHeaderRight,
         headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
+          backgroundColor: CONST.SECONDARY_COLOR,
         },
       })
     }
@@ -585,6 +588,10 @@ const PhotosList = () => {
   }, [])
 
   useEffect(() => {
+    updateNavBar()
+  }, [netAvailable])
+
+  useEffect(() => {
     // TODO: delete next line -- debuggin
     // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
     ;(async () => {
@@ -631,18 +638,14 @@ const PhotosList = () => {
 
   // useEffect(() => {}, [currentBatch])
 
-  useEffect(() => {
-    updateNavBar()
-  }, [loading])
+  // useEffect(() => {
+  //   updateNavBar()
+  // }, [loading])
 
   useEffect(() => {
-    // console.log({ pageNumber })
-
-    ;(async () => {
-      setLoading(true)
-      if (pageNumber !== null) await load()
-      setLoading(false)
-    })()
+    if (pageNumber !== null) {
+      load()
+    }
   }, [pageNumber, activeSegment])
 
   useEffect(() => {
@@ -910,7 +913,8 @@ const PhotosList = () => {
   // )
   const submitSearch = async () => {
     if (searchTerm && searchTerm.length >= 3) {
-      reload()
+      await reload()
+      await load()
       if (keyboardVisible) {
         dismissKeyboard()
       }
