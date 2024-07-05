@@ -17,10 +17,7 @@ const maxStringLength = 2000
 const FeedbackScreen = () => {
   const navigation = useNavigation()
   const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [nickName, setNickName] = useAtom(STATE.nickName)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
-  const [photosList, setPhotosList] = useAtom(STATE.photosList)
-  const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   // const [diskSpace, setDiskSpace] = useState('')
   // const [diskCapacity, setDiskCapacity] = useState('')

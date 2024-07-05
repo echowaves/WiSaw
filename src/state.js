@@ -4,7 +4,7 @@ export const uuid = atom('')
 
 export const nickName = atom('')
 
-export const topOffset = atom(10)
+export const topOffset = atom(40)
 
 export const photosList = atom([])
 
