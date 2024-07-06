@@ -17,6 +17,20 @@ export default {
       //   iosAppDomain: "link.wisaw.com",
       // },
       'expo-secure-store',
+      [
+        'expo-build-properties',
+        {
+          android: {
+            compileSdkVersion: 34,
+            targetSdkVersion: 34,
+            buildToolsVersion: '34.0.0',
+            kotlinVersion: '2.0.0',
+          },
+          ios: {
+            deploymentTarget: '13.4',
+          },
+        },
+      ],
     ],
     extra: {
       eas: {
@@ -39,7 +53,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '279',
+      buildNumber: '280',
       supportsTablet: true,
       infoPlist: {
         UIBackgroundModes: ['fetch'],
@@ -74,7 +88,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 279,
+      versionCode: 280,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

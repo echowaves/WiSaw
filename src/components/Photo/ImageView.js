@@ -9,11 +9,7 @@ import {
 } from 'react-native'
 
 import CachedImage from 'expo-cached-image'
-import {
-  PinchGestureHandler,
-  State,
-  TapGestureHandler,
-} from 'react-native-gesture-handler'
+import { State, TapGestureHandler } from 'react-native-gesture-handler'
 
 import * as CONST from '../../consts'
 
@@ -22,11 +18,13 @@ const ImageView = ({ width, height, photo }) => {
   const navigation = useNavigation()
 
   const onPinchEvent = (event) => {
+    console.log('pinch')
     navigation.navigate('PinchableView', { photo })
   }
 
   const onSingleTapEvent = (event) => {
     if (event.nativeEvent.state === State.ACTIVE) {
+      console.log('tap')
       navigation.navigate('PinchableView', { photo })
     }
   }
@@ -45,52 +43,56 @@ const ImageView = ({ width, height, photo }) => {
   })
 
   return (
-    <TapGestureHandler onHandlerStateChange={onSingleTapEvent} numberOfTaps={1}>
-      <PinchGestureHandler
-        //   waitFor={100}
-        // onGestureEvent={onPinchEvent}
-        onHandlerStateChange={onPinchEvent}
+    // <PinchGestureHandler
+    //   waitFor={100}
+    //   // onGestureEvent={onPinchEvent}
+    //   onHandlerStateChange={onPinchEvent}
+    // >
+    <TapGestureHandler
+      onHandlerStateChange={onSingleTapEvent}
+      numberOfTaps={1}
+      maxDelayMs={1}
+    >
+      <Animated.View
+        style={{
+          width,
+          height,
+        }}
+        resizeMode="contain"
       >
-        <Animated.View
-          style={{
-            width,
-            height,
+        <CachedImage
+          source={{
+            uri: `${photo.thumbUrl}`,
+            // expiresIn: 5, // seconds. This field is optional
           }}
+          cacheKey={`${photo.id}-thumb`}
           resizeMode="contain"
-        >
-          <CachedImage
-            source={{
-              uri: `${photo.thumbUrl}`,
-              // expiresIn: 5, // seconds. This field is optional
-            }}
-            cacheKey={`${photo.id}-thumb`}
-            resizeMode="contain"
-            style={styles.photoContainer}
-          />
-          <CachedImage
-            source={{
-              uri: `${photo.imgUrl}`,
-              // next field is optional, if not set -- will never expire and will be managed by the OS
-              // expiresIn: 2_628_288, // 1 month in seconds
-            }}
-            cacheKey={`${photo.id}`}
-            placeholderContent={
-              // optional
-              <ActivityIndicator
-                color={CONST.MAIN_COLOR}
-                size="small"
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                }}
-              />
-            }
-            resizeMode="contain"
-            style={styles.photoContainer}
-          />
-        </Animated.View>
-      </PinchGestureHandler>
+          style={styles.photoContainer}
+        />
+        <CachedImage
+          source={{
+            uri: `${photo.imgUrl}`,
+            // next field is optional, if not set -- will never expire and will be managed by the OS
+            // expiresIn: 2_628_288, // 1 month in seconds
+          }}
+          cacheKey={`${photo.id}`}
+          placeholderContent={
+            // optional
+            <ActivityIndicator
+              color={CONST.MAIN_COLOR}
+              size="small"
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+              }}
+            />
+          }
+          resizeMode="contain"
+          style={styles.photoContainer}
+        />
+      </Animated.View>
     </TapGestureHandler>
+    // </PinchGestureHandler>
   )
 }
 

@@ -151,7 +151,7 @@ const PhotosList = () => {
 
   // const [isLastPage, setIsLastPage] = useState(false)
 
-  const [pageNumber, setPageNumber] = useState()
+  const [pageNumber, setPageNumber] = useState(0)
 
   const [pendingPhotos, setPendingPhotos] = useState([])
 
@@ -913,11 +913,11 @@ const PhotosList = () => {
   // )
   const submitSearch = async () => {
     if (searchTerm && searchTerm.length >= 3) {
-      await reload()
-      await load()
       if (keyboardVisible) {
         dismissKeyboard()
       }
+      await reload()
+      await load()
     } else {
       Toast.show({
         text1: 'Search for more than 3 characters',
