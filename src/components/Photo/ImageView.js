@@ -18,13 +18,11 @@ const ImageView = ({ width, height, photo }) => {
   const navigation = useNavigation()
 
   const onPinchEvent = (event) => {
-    console.log('pinch')
     navigation.navigate('PinchableView', { photo })
   }
 
   const onSingleTapEvent = (event) => {
     if (event.nativeEvent.state === State.ACTIVE) {
-      console.log('tap')
       navigation.navigate('PinchableView', { photo })
     }
   }
@@ -44,15 +42,10 @@ const ImageView = ({ width, height, photo }) => {
 
   return (
     // <PinchGestureHandler
-    //   waitFor={100}
     //   // onGestureEvent={onPinchEvent}
     //   onHandlerStateChange={onPinchEvent}
     // >
-    <TapGestureHandler
-      onHandlerStateChange={onSingleTapEvent}
-      numberOfTaps={1}
-      maxDelayMs={1}
-    >
+    <TapGestureHandler onHandlerStateChange={onSingleTapEvent} numberOfTaps={1}>
       <Animated.View
         style={{
           width,
