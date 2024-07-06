@@ -7684,10 +7684,10 @@ react-native-base64@^0.2.1:
   resolved "https://registry.yarnpkg.com/react-native-base64/-/react-native-base64-0.2.1.tgz#3d0e73a649c4c0129f7b7695d3912456aebae847"
   integrity sha512-eHgt/MA8y5ZF0aHfZ1aTPcIkDWxza9AaEk4GcpIX+ZYfZ04RcaNahO+527KR7J44/mD3efYfM23O2C1N44ByWA==
 
-react-native-branch@^5.7.0:
-  version "5.9.2"
-  resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-5.9.2.tgz#72c7e2fb2f13d48fa52bf4d9d7876eb0e251f5b2"
-  integrity sha512-gOiFtlQNAvnNKBWB0yfZssDSgg6KJ4LyBvTD399+dW4i/iWW6xOiWDwS15huXQ1QLCsjyseiKxy90UBYOKJsPw==
+react-native-branch@^6.2.2:
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-6.2.2.tgz#08dd83232251d382c59ce15dd380b27a4422b3f4"
+  integrity sha512-zXc90/IoZKR0RBEhpjLKHnm2rSrZdAuEdMnmGg0tC63n11MUhkHEB78KKnC1ooQV9DBjdyhkhg25D1tA7xdprw==
 
 react-native-clean-project@4.0.1:
   version "4.0.1"
