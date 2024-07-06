@@ -274,6 +274,12 @@ const PhotosList = () => {
         (image) => !image.photo,
       )
 
+      Toast.show({
+        text1: 'uploading photos',
+        text2: `there are ${generatePhotoQueue?.length} photos to upload`,
+        // type: 'error',
+        topOffset,
+      })
       // first pass iteration to generate photos ID and the photo record on the backend
       for (i = 0; i < generatePhotoQueue.length; i += 1) {
         const item = generatePhotoQueue[i]
@@ -286,12 +292,12 @@ const PhotosList = () => {
             video: item?.type === 'video',
           })
           // eslint-disable-next-line no-await-in-loop
-          CacheManager.addToCache({
+          await CacheManager.addToCache({
             file: item.localThumbUrl,
             key: `${photo.id}-thumb`,
           })
           // eslint-disable-next-line no-await-in-loop
-          CacheManager.addToCache({
+          await CacheManager.addToCache({
             file: item.localImgUrl,
             key: `${photo.id}`,
           })
