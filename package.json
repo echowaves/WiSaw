@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@apollo/client": "3.7.6",
-    "@config-plugins/react-native-branch": "5.0.0",
+    "@config-plugins/react-native-branch": "8.0.0",
     "@expo/metro-config": "~0.18.1",
     "@expo/vector-icons": "^14.0.2",
     "@openspacelabs/react-native-zoomable-view": "^2.1.6",
