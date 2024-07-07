@@ -562,7 +562,12 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
   return null
 }
 
-const uploadFile = async ({ assetKey, contentType, assetUri }) => {
+const uploadFile = async ({
+  assetKey,
+  contentType,
+  assetUri,
+  topOffset = 100,
+}) => {
   try {
     // console.log({ assetKey })
     const uploadUrl = (
@@ -589,6 +594,12 @@ const uploadFile = async ({ assetKey, contentType, assetUri }) => {
   } catch (cnijedfjknwkejn) {
     // eslint-disable-next-line no-console
     console.error({ cnijedfjknwkejn })
+    Toast.show({
+      text1: 'upload failed',
+      text2: cnijedfjknwkejn,
+      type: 'error',
+      topOffset,
+    })
   }
   return null
 }
