@@ -9,7 +9,7 @@ export default {
       url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee',
     },
     name: 'WiSaw',
-    version: '7.1.14',
+    version: '7.1.15',
     plugins: [
       '@config-plugins/react-native-branch',
       // {
@@ -21,9 +21,9 @@ export default {
         'expo-build-properties',
         {
           android: {
-            // compileSdkVersion: 34,
-            // targetSdkVersion: 34,
-            // buildToolsVersion: '34.0.0',
+            compileSdkVersion: 34,
+            targetSdkVersion: 34,
+            buildToolsVersion: '34.0.0',
             // kotlinVersion: '2.0.0',
           },
           ios: {
@@ -53,7 +53,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '280',
+      buildNumber: '281',
       supportsTablet: true,
       infoPlist: {
         UIBackgroundModes: ['fetch'],
@@ -88,7 +88,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 280,
+      versionCode: 281,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

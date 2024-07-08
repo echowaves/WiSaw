@@ -306,6 +306,12 @@ const PhotosList = () => {
           // setPendingPhotos(await reducer.getQueue())
         } catch (err123) {
           // eslint-disable-next-line no-console
+          Toast.show({
+            text1: 'Error Uploading',
+            text2: `${err123}`,
+            type: 'error',
+            topOffset,
+          })
           console.error({ err123 })
           if (`${err123}`.includes('banned')) {
             // eslint-disable-next-line no-await-in-loop
@@ -313,12 +319,12 @@ const PhotosList = () => {
             // eslint-disable-next-line no-await-in-loop
             setPendingPhotos(await reducer.getQueue())
 
-            Toast.show({
-              text1: "Sorry, you've been banned",
-              text2: 'Try again later',
-              type: 'error',
-              topOffset,
-            })
+            // Toast.show({
+            //   text1: "Sorry, you've been banned",
+            //   text2: 'Try again later',
+            //   type: 'error',
+            //   topOffset,
+            // })
           }
         }
       }

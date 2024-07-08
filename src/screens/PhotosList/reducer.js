@@ -558,8 +558,9 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
   } catch (xscwdjhb) {
     // eslint-disable-next-line no-console
     console.error(xscwdjhb)
+    throw xscwdjhb
   }
-  return null
+  // return null
 }
 
 const uploadFile = async ({
