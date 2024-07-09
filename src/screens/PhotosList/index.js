@@ -1018,20 +1018,41 @@ const PhotosList = () => {
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
 
-  if (
-    isTandcAccepted &&
-    // netAvailable &&
-    location &&
-    photosList?.length > 0
-  ) {
+  if (!netAvailable) {
     return (
       <View style={styles.container}>
-        {netAvailable && activeSegment === 2 && renderSearchBar(false)}
+        <Card
+          borderRadius={5}
+          containerStyle={{
+            borderWidth: 0,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 20,
+              textAlign: 'center',
+              margin: 10,
+            }}
+          >
+            No network available, you can still snap photos -- they will be
+            uploaded later.
+          </Text>
+        </Card>
+        {renderPendingPhotos()}
+        {renderFooter({ unreadCount })}
+      </View>
+    )
+  }
+
+  if (isTandcAccepted && location && photosList?.length > 0) {
+    return (
+      <View style={styles.container}>
+        {activeSegment === 2 && renderSearchBar(false)}
         {renderPendingPhotos()}
         {/* photos */}
-        {netAvailable && activeSegment === 0 && renderThumbs()}
-        {netAvailable && activeSegment === 1 && renderThumbsWithComments()}
-        {netAvailable && activeSegment === 2 && renderThumbsWithComments()}
+        {activeSegment === 0 && renderThumbs()}
+        {activeSegment === 1 && renderThumbsWithComments()}
+        {activeSegment === 2 && renderThumbsWithComments()}
         {renderFooter({ unreadCount })}
       </View>
     )
@@ -1096,32 +1117,6 @@ const PhotosList = () => {
             </Card>
           </ScrollView>
         </Overlay>
-      </View>
-    )
-  }
-
-  if (!netAvailable) {
-    return (
-      <View style={styles.container}>
-        <Card
-          borderRadius={5}
-          containerStyle={{
-            borderWidth: 0,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              textAlign: 'center',
-              margin: 10,
-            }}
-          >
-            No network available, you can still snap photos -- they will be
-            uploaded later.
-          </Text>
-        </Card>
-        {renderPendingPhotos()}
-        {renderFooter({ unreadCount })}
       </View>
     )
   }
