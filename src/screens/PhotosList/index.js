@@ -594,6 +594,9 @@ const PhotosList = () => {
   }, [])
 
   useEffect(() => {
+    if (netAvailable) {
+      reload()
+    }
     updateNavBar()
   }, [netAvailable])
 
