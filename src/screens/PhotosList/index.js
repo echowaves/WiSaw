@@ -1014,6 +1014,39 @@ const PhotosList = () => {
     return null
   }
 
+  const renderRefresheable = (textToRender) => (
+    <FlatGrid
+      itemDimension={width}
+      spacing={3}
+      data={[textToRender, 'Pull down to refresh']}
+      renderItem={({ item, index }) => (
+        <Text
+          style={{
+            fontSize: 20,
+            textAlign: 'center',
+            margin: 10,
+            backfaceVisibility: CONST.EMPHASIZED_COLOR,
+          }}
+        >
+          {item}
+        </Text>
+      )}
+      keyExtractor={(item) => item}
+      style={{
+        ...styles.container,
+        marginBottom: 95,
+      }}
+      showsVerticalScrollIndicator={false}
+      horizontal={false}
+      refreshing={false}
+      onRefresh={() => {
+        reload()
+      }}
+      onViewableItemsChanged={onViewRef.current}
+      // viewabilityConfig={viewConfigRef.current}
+    />
+  )
+
   /// //////////////////////////////////////////////////////////////////////////
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
@@ -1021,23 +1054,9 @@ const PhotosList = () => {
   if (!netAvailable) {
     return (
       <View style={styles.container}>
-        <Card
-          borderRadius={5}
-          containerStyle={{
-            borderWidth: 0,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              textAlign: 'center',
-              margin: 10,
-            }}
-          >
-            No network available, you can still snap photos -- they will be
-            uploaded later.
-          </Text>
-        </Card>
+        {renderRefresheable(
+          'No network available, you can still snap photos -- they will be uploaded later.',
+        )}
         {renderPendingPhotos()}
         {renderFooter({ unreadCount })}
       </View>
@@ -1124,22 +1143,9 @@ const PhotosList = () => {
   if (!location) {
     return (
       <View style={styles.container}>
-        <Card
-          borderRadius={5}
-          containerStyle={{
-            borderWidth: 0,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              textAlign: 'center',
-              margin: 10,
-            }}
-          >
-            Acquiring location, make sure to enable Location Service.
-          </Text>
-        </Card>
+        {renderRefresheable(
+          'Acquiring location, make sure to enable Location Service.',
+        )}
         {renderPendingPhotos()}
         {renderFooter({ renderFooter })}
       </View>
@@ -1150,62 +1156,18 @@ const PhotosList = () => {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
-        {activeSegment === 2 && (
-          <Card
-            borderRadius={5}
-            containerStyle={{
-              borderWidth: 0,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                textAlign: 'center',
-                margin: 10,
-              }}
-            >
-              Nothing found. Try to search for something else.
-            </Text>
-          </Card>
-        )}
-        {activeSegment === 0 && (
-          <Card
-            borderRadius={5}
-            containerStyle={{
-              borderWidth: 0,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                textAlign: 'center',
-                margin: 10,
-              }}
-            >
-              No Photos found in your location. Try to take some photos.
-            </Text>
-          </Card>
-        )}
-        {activeSegment === 1 && (
-          <Card
-            borderRadius={5}
-            containerStyle={{
-              borderWidth: 0,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                textAlign: 'center',
-                margin: 10,
-              }}
-            >
-              Don&apos;t have anything Starred? Try to take a photo, comment on
-              other&apos;s photos, or Star somebody else&apos;s photo -- they
-              will all appear here.
-            </Text>
-          </Card>
-        )}
+        {/* {activeSegment === 2 &&
+          renderRefresheable(
+            'Nothing found. Try to search for something else.',
+          )} */}
+        {activeSegment === 0 &&
+          renderRefresheable(
+            'No Photos found in your location. Try to take some photos.',
+          )}
+        {activeSegment === 1 &&
+          renderRefresheable(
+            `Don't have anything Starred? Try to take a photo, comment on other's photos, or Star somebody else's photo -- they will all appear here.`,
+          )}
         {renderPendingPhotos()}
         {renderFooter({ unreadCount })}
       </View>
