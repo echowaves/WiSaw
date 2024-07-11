@@ -137,6 +137,7 @@ const PhotosList = () => {
   )
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
+  const [stopLoading, setStopLoading] = useState(false)
 
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
   const [zeroMoment, setZeroMoment] = useState(0)
@@ -177,6 +178,7 @@ const PhotosList = () => {
   }, [unreadCountList])
 
   const wantToLoadMore = () => {
+    if (stopLoading) return false
     if (photosList.length === 0) return true
     const screenColumns = /* Math.floor */ width / thumbDimension
     const screenRows = /* Math.floor */ height / thumbDimension
@@ -203,6 +205,11 @@ const PhotosList = () => {
       batch: currentBatch,
       pageNumber,
     })
+
+    if (noMoreData) {
+      setStopLoading(noMoreData)
+    }
+    // console.log({ noMoreData, batch, pageNumber })
 
     if (batch === currentBatch) {
       // avoid duplicates
@@ -398,6 +405,7 @@ const PhotosList = () => {
   const reload = async () => {
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
     setPageNumber(null)
+    setStopLoading(false)
     setPhotosList([])
     setPageNumber(0)
 
@@ -443,25 +451,25 @@ const PhotosList = () => {
   )
 
   const updateNavBar = async () => {
-    if (netAvailable) {
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle,
-        // headerLeft: renderHeaderLeft,
-        // headerRight: renderHeaderRight,
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-    } else {
-      navigation.setOptions({
-        headerTitle: renderHeaderTitle,
-        // headerLeft: renderHeaderLeft,
-        // headerRight: renderHeaderRight,
-        headerStyle: {
-          backgroundColor: CONST.SECONDARY_COLOR,
-        },
-      })
-    }
+    // if (netAvailable) {
+    navigation.setOptions({
+      headerTitle: renderHeaderTitle,
+      // headerLeft: renderHeaderLeft,
+      // headerRight: renderHeaderRight,
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
+    // } else {
+    //   navigation.setOptions({
+    //     headerTitle: renderHeaderTitle,
+    //     // headerLeft: renderHeaderLeft,
+    //     // headerRight: renderHeaderRight,
+    //     headerStyle: {
+    //       backgroundColor: CONST.SECONDARY_COLOR,
+    //     },
+    //   })
+    // }
   }
 
   async function checkPermission({
@@ -597,7 +605,7 @@ const PhotosList = () => {
     if (netAvailable) {
       reload()
     }
-    updateNavBar()
+    // updateNavBar()
   }, [netAvailable])
 
   useEffect(() => {
@@ -642,6 +650,7 @@ const PhotosList = () => {
   }, [])
 
   useEffect(() => {
+    updateNavBar()
     reload()
   }, [location])
 
@@ -1018,7 +1027,7 @@ const PhotosList = () => {
     <FlatGrid
       itemDimension={width}
       spacing={3}
-      data={[textToRender, 'Pull down to refresh']}
+      data={[textToRender, '', '***', 'Pull down to refresh']}
       renderItem={({ item, index }) => (
         <Text
           style={{
