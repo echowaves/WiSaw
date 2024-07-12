@@ -120,8 +120,11 @@ async function registerBackgroundFetchAsync() {
 const FOOTER_HEIGHT = 90
 
 let activeSegment = 0
+let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
 const PhotosList = () => {
+  // console.log({ activeSegment, currentBatch })
+
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
@@ -132,9 +135,10 @@ const PhotosList = () => {
 
   const { width, height } = useWindowDimensions()
 
-  const [currentBatch, setCurrentBatch] = useState(
-    `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
-  )
+  // const [currentBatch, setCurrentBatch] = useState(
+  //   `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`,
+  // )
+
   const [thumbDimension, setThumbDimension] = useState(100)
   const [lastViewableRow, setLastViewableRow] = useState(1)
   const [stopLoading, setStopLoading] = useState(false)
@@ -202,10 +206,11 @@ const PhotosList = () => {
       searchTerm,
       topOffset,
       activeSegment,
-      batch: currentBatch,
+      batch: `${currentBatch}`, // clone
       pageNumber,
     })
 
+    // console.log({ batch, currentBatch })
     if (noMoreData) {
       setStopLoading(noMoreData)
     }
@@ -404,7 +409,7 @@ const PhotosList = () => {
 
   const reload = async () => {
     setPageNumber(null)
-    setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
+    currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
     setStopLoading(false)
     setPhotosList([])
     // setPageNumber(null)
@@ -669,7 +674,7 @@ const PhotosList = () => {
     if (pageNumber !== null) {
       load()
     }
-  }, [pageNumber, activeSegment])
+  }, [pageNumber])
 
   useEffect(() => {
     if (wantToLoadMore() && loading === false) {
