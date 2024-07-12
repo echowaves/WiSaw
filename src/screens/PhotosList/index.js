@@ -218,8 +218,8 @@ const PhotosList = () => {
 
     if (batch === currentBatch) {
       // avoid duplicates
-      setPhotosList((currentList) =>
-        [...currentList, ...photos]
+      setPhotosList(
+        [...photosList, ...photos]
           .sort((a, b) => a.row_number - b.row_number)
           .filter(
             (obj, pos, arr) =>
