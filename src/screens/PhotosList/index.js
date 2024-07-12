@@ -1166,14 +1166,14 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList?.length === 0 && loading === false) {
+  if (photosList?.length === 0 && stopLoading) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
-        {/* {activeSegment === 2 &&
+        {activeSegment === 2 &&
           renderRefresheable(
             'Nothing found. Try to search for something else.',
-          )} */}
+          )}
         {activeSegment === 0 &&
           renderRefresheable(
             'No Photos found in your location. Try to take some photos.',
