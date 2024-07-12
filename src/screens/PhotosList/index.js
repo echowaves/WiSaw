@@ -403,6 +403,7 @@ const PhotosList = () => {
   }
 
   const reload = async () => {
+    setPageNumber(null)
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
     setStopLoading(false)
     setPhotosList([])
