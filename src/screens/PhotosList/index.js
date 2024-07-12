@@ -411,7 +411,6 @@ const PhotosList = () => {
     // setStopLoading(false)
     setPageNumber(0)
 
-    await load()
     setPendingPhotos(await reducer.getQueue())
 
     uploadPendingPhotos()
@@ -425,6 +424,7 @@ const PhotosList = () => {
       setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     }
     // setPendingPhotos(await reducer.getQueue())
+    load()
   }
 
   const updateIndex = async (index) => {
