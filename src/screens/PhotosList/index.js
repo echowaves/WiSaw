@@ -404,11 +404,13 @@ const PhotosList = () => {
 
   const reload = async () => {
     setCurrentBatch(`${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`)
-    setPageNumber(null)
     setStopLoading(false)
     setPhotosList([])
+    // setPageNumber(null)
+    // setStopLoading(false)
     setPageNumber(0)
 
+    await load()
     setPendingPhotos(await reducer.getQueue())
 
     uploadPendingPhotos()
@@ -425,11 +427,13 @@ const PhotosList = () => {
   }
 
   const updateIndex = async (index) => {
-    activeSegment = index
-    // setActiveSegment(index)
-    // eslint-disable-next-line no-use-before-define
-    updateNavBar()
-    reload()
+    if (activeSegment !== index) {
+      activeSegment = index
+      // setActiveSegment(index)
+      // eslint-disable-next-line no-use-before-define
+      updateNavBar()
+      reload()
+    }
   }
 
   const renderHeaderTitle = () => (
@@ -934,8 +938,8 @@ const PhotosList = () => {
       if (keyboardVisible) {
         dismissKeyboard()
       }
-      await reload()
-      await load()
+      reload()
+      // await load()
     } else {
       Toast.show({
         text1: 'Search for more than 3 characters',
@@ -1161,7 +1165,7 @@ const PhotosList = () => {
     )
   }
 
-  if (photosList?.length === 0 && !loading) {
+  if (photosList?.length === 0 && loading === false) {
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
