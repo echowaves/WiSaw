@@ -206,7 +206,7 @@ const PhotosList = () => {
       searchTerm,
       topOffset,
       activeSegment,
-      batch: `${currentBatch}`, // clone
+      batch: currentBatch, // clone
       pageNumber,
     })
 
@@ -408,10 +408,13 @@ const PhotosList = () => {
   }
 
   const reload = async () => {
-    setPageNumber(null)
     currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
+    load()
+
     setStopLoading(false)
+    setPageNumber(null)
     setPhotosList([])
+
     // setPageNumber(null)
     // setStopLoading(false)
     setPageNumber(0)
@@ -429,7 +432,7 @@ const PhotosList = () => {
       setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     }
     // setPendingPhotos(await reducer.getQueue())
-    load()
+    // load()
   }
 
   const updateIndex = async (index) => {
