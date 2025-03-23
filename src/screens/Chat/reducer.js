@@ -71,7 +71,7 @@ const addToQueue = async (image) => {
 
   await Storage.setItem({
     key: CONST.PENDING_CHAT_UPLOADS_KEY,
-    value: JSON.stringify([...pendingImages, image]),
+    value: [...pendingImages, image],
   })
 }
 
@@ -91,7 +91,7 @@ const removeFromQueue = async (imageToRemove) => {
 
   await Storage.setItem({
     key: CONST.PENDING_CHAT_UPLOADS_KEY,
-    value: JSON.stringify(pendingImagesAfter),
+    value: pendingImagesAfter,
   })
 }
 
@@ -113,7 +113,7 @@ const getQueue = async () => {
     imagesInQueue = []
     await Storage.setItem({
       key: CONST.PENDING_CHAT_UPLOADS_KEY,
-      value: JSON.stringify([]),
+      value: [],
     })
   }
   // remove images from the queue if corresponding file does not exist

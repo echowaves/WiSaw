@@ -340,7 +340,7 @@ export const removeFromQueue = async (imageToRemove) => {
 
     await Storage.setItem({
       key: CONST.PENDING_UPLOADS_KEY,
-      value: JSON.stringify(pendingImagesAfter),
+      value: pendingImagesAfter,
     })
   } catch (sdjfhjhbdf) {
     console.error({ sdjfhjhbdf })
@@ -366,7 +366,7 @@ export const getQueue = async () => {
       imagesInQueue = []
       await Storage.setItem({
         key: CONST.PENDING_UPLOADS_KEY,
-        value: JSON.stringify([]),
+        value: [],
       })
     }
     // remove images from the queue if corresponding file does not exist
@@ -477,7 +477,7 @@ export const addToQueue = async (image) => {
 
     await Storage.setItem({
       key: CONST.PENDING_UPLOADS_KEY,
-      value: JSON.stringify([...pendingImages, image]),
+      value: [...pendingImages, image],
     })
   } catch (cbwdjkfnkjsd) {
     console.error({ cbwdjkfnkjsd })
@@ -603,6 +603,20 @@ const uploadFile = async ({
     })
   }
   return null
+}
+
+export const initPendingUploads = async () => {
+  try {
+    const pendingImages = JSON.parse(
+      await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+    )
+  } catch (cbwdjkfnkdlksdfkjsd) {
+    console.error({ cbwdjkfnkdlksdfkjsd })
+    await Storage.setItem({
+      key: CONST.PENDING_UPLOADS_KEY,
+      value: [],
+    })
+  }
 }
 
 export const uploadItem = async ({ item }) => {

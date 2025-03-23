@@ -603,6 +603,8 @@ const PhotosList = () => {
   }
 
   useEffect(() => {
+    reducer.initPendingUploads()
+
     // add network availability listener
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (state) {
