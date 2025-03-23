@@ -27,7 +27,7 @@ export default {
             // kotlinVersion: '2.0.0',
           },
           ios: {
-            deploymentTarget: '13.4',
+            deploymentTarget: '15.1',
           },
         },
       ],
