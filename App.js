@@ -6,7 +6,7 @@
  */
 
 import { useAtom } from 'jotai'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 
 // import { StyleSheet, View } from 'react-native'
 import 'react-native-get-random-values'
@@ -14,6 +14,8 @@ import 'react-native-get-random-values'
 import { useWindowDimensions } from 'react-native'
 
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import { useFonts } from 'expo-font'
+import * as SplashScreen from 'expo-splash-screen'
 
 import { NavigationContainer } from '@react-navigation/native'
 
@@ -55,6 +57,13 @@ const App = () => {
   const [uuis, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
 
+  // Load the fonts used by vector-icons
+  const [fontsLoaded] = useFonts({
+    ...FontAwesome.font,
+    ...FontAwesome5.font,
+    ...MaterialIcons.font,
+  })
+
   const init = async () => {
     setUuid(await SecretReducer.getUUID())
     setNickName(await SecretReducer.getStoredNickName())
@@ -65,6 +74,12 @@ const App = () => {
   useEffect(() => {
     init()
   }, [])
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync()
+    }
+  }, [fontsLoaded])
 
   function MyStack() {
     return (
@@ -86,19 +101,13 @@ const App = () => {
         <Stack.Screen
           name="PhotosDetails"
           component={PhotosDetails}
-          options={{
-            headerTintColor: CONST.MAIN_COLOR,
-            gestureEnabled: false,
-          }}
+          options={{ headerTintColor: CONST.MAIN_COLOR, gestureEnabled: false }}
           screenOptions={{ headerShown: false }}
         />
         <Stack.Screen
           name="PinchableView"
           component={PinchableView}
-          options={{
-            headerTintColor: CONST.MAIN_COLOR,
-            gestureEnabled: false,
-          }}
+          options={{ headerTintColor: CONST.MAIN_COLOR, gestureEnabled: false }}
           screenOptions={{ headerShown: false }}
         />
 
@@ -130,6 +139,16 @@ const App = () => {
       </Stack.Navigator>
     )
   }
+
+  if (!fontsLoaded) {
+    return (
+      <ThemeProvider theme={theme}>
+        {/* Display nothing while fonts are loading */}
+        <></>
+      </ThemeProvider>
+    )
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>
@@ -144,11 +163,7 @@ const App = () => {
                 <FontAwesome
                   name="chevron-left"
                   size={30}
-                  style={{
-                    marginLeft: 10,
-                    color: CONST.MAIN_COLOR,
-                    width: 60,
-                  }}
+                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
                 />
               ),
               drawerLabel: '',
@@ -164,11 +179,7 @@ const App = () => {
                 <FontAwesome
                   name="user-secret"
                   size={30}
-                  style={{
-                    marginLeft: 10,
-                    color: CONST.MAIN_COLOR,
-                    width: 60,
-                  }}
+                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
                 />
               ),
               drawerLabel: 'secret',
@@ -183,11 +194,7 @@ const App = () => {
                 <FontAwesome5
                   name="user-friends"
                   size={30}
-                  style={{
-                    marginLeft: 10,
-                    color: CONST.MAIN_COLOR,
-                    width: 60,
-                  }}
+                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
                 />
               ),
               drawerLabel: 'friends',
@@ -203,11 +210,7 @@ const App = () => {
                 <MaterialIcons
                   name="feedback"
                   size={30}
-                  style={{
-                    marginLeft: 10,
-                    color: CONST.MAIN_COLOR,
-                    width: 60,
-                  }}
+                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
                 />
               ),
               drawerLabel: 'feedback',
@@ -220,4 +223,5 @@ const App = () => {
     </ThemeProvider>
   )
 }
+
 export default App

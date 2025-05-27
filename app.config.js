@@ -1,13 +1,9 @@
 export default {
   expo: {
     owner: 'echowaves',
-    runtimeVersion: {
-      policy: 'sdkVersion',
-    },
+    runtimeVersion: { policy: 'sdkVersion' },
     jsEngine: 'hermes',
-    updates: {
-      url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee',
-    },
+    updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
     version: '7.1.15',
     plugins: [
@@ -26,16 +22,12 @@ export default {
             buildToolsVersion: '34.0.0',
             // kotlinVersion: '2.0.0',
           },
-          ios: {
-            deploymentTarget: '15.1',
-          },
+          ios: { deploymentTarget: '16.0' },
         },
       ],
     ],
     extra: {
-      eas: {
-        projectId: 'd1624159-fed7-42bf-b11b-7ea8f38a8dee',
-      },
+      eas: { projectId: 'd1624159-fed7-42bf-b11b-7ea8f38a8dee' },
       API_URI: process.env.API_URI,
       REALTIME_API_URI: process.env.REALTIME_API_URI,
       API_KEY: process.env.API_KEY,
@@ -77,9 +69,7 @@ export default {
       associatedDomains: ['applinks:link.wisaw.com'],
       config: {
         usesNonExemptEncryption: false,
-        branch: {
-          apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4',
-        },
+        branch: { apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4' },
       },
     },
     android: {
@@ -100,39 +90,25 @@ export default {
         'com.google.android.gms.permission.AD_ID',
       ],
       config: {
-        branch: {
-          apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4',
-        },
+        branch: { apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4' },
       },
       intentFilters: [
         {
           action: 'VIEW',
           autoVerify: true,
           data: [
-            {
-              scheme: 'https',
-              host: '*.wisaw.com',
-              pathPrefix: '/photos',
-            },
-            {
-              scheme: 'https',
-              host: '*.wisaw.com',
-              pathPrefix: '/friends',
-            },
+            { scheme: 'https', host: '*.wisaw.com', pathPrefix: '/photos' },
+            { scheme: 'https', host: '*.wisaw.com', pathPrefix: '/friends' },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
       ],
     },
-    web: {
-      favicon: './assets/favicon.png',
-    },
+    web: { favicon: './assets/favicon.png' },
     slug: 'WiSaw',
     scheme: 'wisaw',
     icon: './assets/icon.png',
-    notification: {
-      iosDisplayInForeground: true,
-    },
+    notification: { iosDisplayInForeground: true },
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',
