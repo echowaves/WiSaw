@@ -10,6 +10,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "build": "eas build",
+    "deps": "npm install --legacy-peer-deps",
     "publish:prod": "eas update --branch production"
   },
   "dependencies": {
