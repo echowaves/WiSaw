@@ -32,7 +32,7 @@
     "@rnhooks/keyboard": "^1.0.0",
     "expo": "53.0.11",
     "expo-audio": "^0.4.6",
-    "expo-background-fetch": "13.1.5",
+    "expo-background-task": "^0.2.7",
     "expo-build-properties": "~0.14.0",
     "expo-cached-image": "^53.0.11",
     "expo-constants": "17.1.6",

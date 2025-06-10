@@ -17,12 +17,14 @@ export default {
         'expo-build-properties',
         {
           android: {
-            compileSdkVersion: 34,
-            targetSdkVersion: 34,
-            buildToolsVersion: '34.0.0',
+            // compileSdkVersion: 34,
+            // targetSdkVersion: 34,
+            // buildToolsVersion: '34.0.0',
             // kotlinVersion: '2.0.0',
           },
-          ios: { deploymentTarget: '16.0' },
+          ios: {
+            // deploymentTarget: '16.0'
+          },
         },
       ],
     ],
@@ -48,7 +50,7 @@ export default {
       buildNumber: '283',
       supportsTablet: true,
       infoPlist: {
-        UIBackgroundModes: ['fetch'],
+        UIBackgroundModes: ['processing'],
         NSCameraUsageDescription:
           'This will allow you to take photos with WiSaw app. When you take a photo with WiSaw, it will be stored in your photo album on your device and will be shared with other near-by users of the app. Any user who finds content objectionable or abusive will be able to remove it permanently, so that no one will be able to see it any more.',
         NSLocationAlwaysUsageDescription:
