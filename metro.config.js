@@ -1,18 +1,12 @@
 const { getDefaultConfig } = require('@expo/metro-config')
 
+// Get the default Expo Metro config
 const config = getDefaultConfig(__dirname, {
   // Enable CSS support
   isCSSEnabled: true,
 })
 
-// const { resolver: defaultResolver } = config
-// exports.resolver = {
-//   ...defaultResolver,
-//   sourceExts: [
-//     ...defaultResolver.sourceExts, // 'js', 'json', 'ts', 'tsx',
-//     "cjs",
-//   ],
-// }
+// Add 'cjs' to source extensions
 config.resolver.sourceExts.push('cjs')
 
 module.exports = config
