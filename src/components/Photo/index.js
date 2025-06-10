@@ -26,7 +26,7 @@ import { Col, Grid, Row } from 'react-native-easy-grid'
 
 import PropTypes from 'prop-types'
 
-import { Video } from 'expo-av'
+import { useVideoPlayer, VideoView } from 'expo-video'
 
 import * as reducer from './reducer'
 
@@ -46,7 +46,17 @@ const Photo = ({ photo }) => {
 
   const componentIsMounted = useRef(true)
 
-  const videoRef = useRef(null)
+  // Create video player instance
+  const videoPlayer = useVideoPlayer(
+    photo?.video ? photo.videoUrl : null,
+    (player) => {
+      if (player && photo?.video) {
+        // Configure the player
+        player.loop = true // eslint-disable-line no-param-reassign
+        // Don't auto-play the video initially
+      }
+    },
+  )
 
   const [bans, setBans] = useState([])
 
@@ -725,25 +735,16 @@ const Photo = ({ photo }) => {
       return <ImageView width={width} height={imageHeight} photo={photo} />
     }
     return (
-      <Video
-        ref={videoRef}
+      <VideoView
+        player={videoPlayer}
         style={{
           flex: 1,
           height: imageHeight,
         }}
-        // style={
-        //   styles.photoContainer
-        // }
-        source={{
-          uri: `${photo.videoUrl}`,
-        }}
-        useNativeControls
-        // overrideFileExtensionAndroid
-        resizeMode="contain"
-        // onPlaybackStatusUpdate={status => setStatus(() => status)}
-        usePoster={false}
-        posterSource={{ uri: `${photo.thumbUrl}` }}
-        isLooping
+        nativeControls
+        contentFit="contain"
+        allowsFullscreen
+        allowsPictureInPicture
       />
     )
   }
