@@ -5,7 +5,7 @@ export default {
     jsEngine: 'hermes',
     updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
-    version: '7.1.15',
+    version: '7.1.16',
     plugins: [
       '@config-plugins/react-native-branch',
       // {
@@ -47,7 +47,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '283',
+      buildNumber: '284',
       supportsTablet: true,
       infoPlist: {
         UIBackgroundModes: ['processing'],
@@ -80,7 +80,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 283,
+      versionCode: 284,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
