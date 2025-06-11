@@ -633,11 +633,9 @@ const PhotosList = () => {
           allowAnnouncements: true,
         },
       })
-      // eslint-disable-next-line no-undef
-      if (!__DEV__) {
-        const linkingHelper = await import('../../linking_helper')
-        linkingHelper.initLinking({ navigation })
-      }
+      // Initialize deep linking for both development and production
+      const linkingHelper = await import('../../linking_helper')
+      linkingHelper.initLinking({ navigation })
     })()
     ;(async () => {
       await registerBackgroundFetchAsync()

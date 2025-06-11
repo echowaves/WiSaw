@@ -43,7 +43,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '287',
+      buildNumber: '288',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -95,7 +95,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 287,
+      versionCode: 288,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
@@ -114,8 +114,10 @@ export default {
           action: 'VIEW',
           autoVerify: true,
           data: [
-            { scheme: 'https', host: '*.wisaw.com', pathPrefix: '/photos' },
-            { scheme: 'https', host: '*.wisaw.com', pathPrefix: '/friends' },
+            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/photos' },
+            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/friends' },
+            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/photos' },
+            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/friends' },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },

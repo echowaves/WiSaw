@@ -10,20 +10,23 @@ const handleDeepLink = async ({ url, navigation }) => {
 
     // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
     if (path && path.includes('/photos/')) {
-      const photoId = path.split('/photos/')[1]
+      const photoId = path.split('/photos/')[1]?.split('?')[0]?.split('#')[0] // Remove query params and fragments
       if (photoId) {
         await navigation.popToTop()
-        await navigation.navigate('PhotosDetailsShared', { photoId })
+        navigation.navigate('PhotosDetailsShared', { photoId })
         return
       }
     }
 
     // Handle friendship links: https://wisaw.com/friends/uuid or https://link.wisaw.com/friends/uuid
     if (path && path.includes('/friends/')) {
-      const friendshipUuid = path.split('/friends/')[1]
+      const friendshipUuid = path
+        .split('/friends/')[1]
+        ?.split('?')[0]
+        ?.split('#')[0] // Remove query params and fragments
       if (friendshipUuid) {
         await navigation.popToTop()
-        await navigation.navigate('ConfirmFriendship', { friendshipUuid })
+        navigation.navigate('ConfirmFriendship', { friendshipUuid })
         return
       }
     }
@@ -42,12 +45,11 @@ const handleDeepLink = async ({ url, navigation }) => {
       await navigation.navigate('ConfirmFriendship', {
         friendshipUuid: queryParams.friendshipUuid,
       })
-      return
     }
 
-    console.log('Unhandled deep link:', url)
+    // Unhandled deep link
   } catch (error) {
-    console.error('Error handling deep link:', error)
+    // Error handling deep link - silently fail
   }
 }
 
@@ -147,6 +149,5 @@ export const shareFriend = async ({ friendshipUuid, contactName }) => {
     }
   } catch (error) {
     Alert.alert('Error', 'Unable to share friendship request')
-    console.error('Share error:', error)
   }
 }
