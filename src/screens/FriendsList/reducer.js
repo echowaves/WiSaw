@@ -4,8 +4,6 @@ import { gql } from '@apollo/client'
 
 import * as CONST from '../../consts'
 
-import * as friendsHelper from './friends_helper'
-
 export const initialState = {
   friendsList: [],
   unreadCountsList: [],
@@ -82,8 +80,8 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
 
     // eslint-disable-next-line no-undef
     if (!__DEV__) {
-      const branchHelper = await import('../../branch_helper')
-      await branchHelper.shareFriend({
+      const linkingHelper = await import('../../linking_helper')
+      await linkingHelper.shareFriend({
         friendshipUuid: friendship?.friendshipUuid,
         contactName,
       })

@@ -7,11 +7,7 @@ export default {
     name: 'WiSaw',
     version: '7.1.16',
     plugins: [
-      '@config-plugins/react-native-branch',
-      // {
-      //   apiKey: "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4",
-      //   iosAppDomain: "link.wisaw.com",
-      // },
+      // Branch removed - using native deep linking instead
       'expo-secure-store',
       [
         'expo-build-properties',
@@ -68,10 +64,10 @@ export default {
         NSMicrophoneUsageDescription:
           'WiSaw allows your to record video with sound. In order for the sound to be captured, you need to allow access to the microphone.',
       },
-      associatedDomains: ['applinks:link.wisaw.com'],
+      associatedDomains: ['applinks:link.wisaw.com', 'applinks:wisaw.com'],
       config: {
         usesNonExemptEncryption: false,
-        branch: { apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4' },
+        // Branch config removed - using native Universal Links
       },
     },
     android: {
@@ -92,7 +88,7 @@ export default {
         'com.google.android.gms.permission.AD_ID',
       ],
       config: {
-        branch: { apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4' },
+        // Branch config removed - using native App Links
       },
       intentFilters: [
         {

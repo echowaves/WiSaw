@@ -635,8 +635,8 @@ const PhotosList = () => {
       })
       // eslint-disable-next-line no-undef
       if (!__DEV__) {
-        const branchHelper = await import('../../branch_helper')
-        branchHelper.initBranch({ navigation })
+        const linkingHelper = await import('../../linking_helper')
+        linkingHelper.initLinking({ navigation })
       }
     })()
     ;(async () => {

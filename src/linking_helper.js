@@ -1,0 +1,129 @@
+import * as Linking from 'expo-linking'
+import { Alert } from 'react-native'
+
+const handleDeepLink = async ({ url, navigation }) => {
+  if (!url) return
+
+  try {
+    // Parse the URL
+    const { hostname, path, queryParams } = Linking.parse(url)
+
+    // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
+    if (path && path.includes('/photos/')) {
+      const photoId = path.split('/photos/')[1]
+      if (photoId) {
+        await navigation.popToTop()
+        await navigation.navigate('PhotosDetailsShared', { photoId })
+        return
+      }
+    }
+
+    // Handle friendship links: https://wisaw.com/friends/uuid or https://link.wisaw.com/friends/uuid
+    if (path && path.includes('/friends/')) {
+      const friendshipUuid = path.split('/friends/')[1]
+      if (friendshipUuid) {
+        await navigation.popToTop()
+        await navigation.navigate('ConfirmFriendship', { friendshipUuid })
+        return
+      }
+    }
+
+    // Handle query parameters for backward compatibility
+    if (queryParams?.photoId) {
+      await navigation.popToTop()
+      await navigation.navigate('PhotosDetailsShared', {
+        photoId: queryParams.photoId,
+      })
+      return
+    }
+
+    if (queryParams?.friendshipUuid) {
+      await navigation.popToTop()
+      await navigation.navigate('ConfirmFriendship', {
+        friendshipUuid: queryParams.friendshipUuid,
+      })
+      return
+    }
+
+    console.log('Unhandled deep link:', url)
+  } catch (error) {
+    console.error('Error handling deep link:', error)
+  }
+}
+
+export const initLinking = ({ navigation }) => {
+  // Handle app opened from link when app is closed
+  Linking.getInitialURL().then((url) => {
+    if (url) {
+      handleDeepLink({ url, navigation })
+    }
+  })
+
+  // Handle app opened from link when app is in background
+  const subscription = Linking.addEventListener('url', ({ url }) => {
+    handleDeepLink({ url, navigation })
+  })
+
+  return () => subscription?.remove()
+}
+
+export const sharePhoto = async ({ photo, photoDetails }) => {
+  try {
+    const url = `https://link.wisaw.com/photos/${photo?.id}`
+
+    let messageBody = `Check out what I saw today${
+      photo?.video ? ' (video)' : ''
+    }: ${url}`
+
+    if (photoDetails.comments) {
+      // Add first 3 comments
+      messageBody = `${messageBody}\n\n${photoDetails.comments
+        .slice(0, 3)
+        .map((comment) => comment.comment)
+        .join('\n\n')}`
+    }
+
+    const shareOptions = {
+      message: messageBody,
+      url,
+    }
+
+    // Use native sharing
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      await navigator.share(shareOptions)
+    } else {
+      // Fallback to copying URL
+      await Linking.openURL(
+        `mailto:?subject=WiSaw: Check out what I saw today&body=${encodeURIComponent(messageBody)}`,
+      )
+    }
+  } catch (error) {
+    Alert.alert('Error', 'Unable to share photo')
+    console.error('Share error:', error)
+  }
+}
+
+export const shareFriend = async ({ friendshipUuid, contactName }) => {
+  try {
+    const url = `https://link.wisaw.com/friends/${friendshipUuid}`
+    const messageBody = `${contactName}, you've got WiSaw friendship request. To confirm, follow the url: ${url}`
+
+    const shareOptions = {
+      message: messageBody,
+      url,
+    }
+
+    // Use native sharing
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      await navigator.share(shareOptions)
+    } else {
+      // Fallback to copying URL
+      await Linking.openURL(
+        `mailto:?subject=WiSaw friendship request&body=${encodeURIComponent(messageBody)}`,
+      )
+    }
+  } catch (error) {
+    Alert.alert('Error', 'Unable to share friendship request')
+    console.error('Share error:', error)
+  }
+}
