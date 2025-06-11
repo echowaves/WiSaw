@@ -10,22 +10,10 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview",
-      "ios": {
-        "buildNumber": "285"
-      },
-      "android": {
-        "versionCode": 285
-      }
+      "channel": "preview"
     },
     "production": {
-      "channel": "production",
-      "ios": {
-        "buildNumber": "285"
-      },
-      "android": {
-        "versionCode": 285
-      }
+      "channel": "production"
     }
   }
 }
