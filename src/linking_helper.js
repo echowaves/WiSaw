@@ -5,13 +5,20 @@ const handleDeepLink = async ({ url, navigation }) => {
   if (!url) return
 
   try {
+    // Show debug info - remove this after testing
+    Alert.alert('Deep Link Debug', `URL: ${url}`)
+
     // Parse the URL
     const { hostname, path, queryParams } = Linking.parse(url)
+
+    // Show parsed info - remove this after testing
+    Alert.alert('Parsed Info', `Path: ${path}\nHost: ${hostname}`)
 
     // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
     if (path && path.includes('/photos/')) {
       const photoId = path.split('/photos/')[1]?.split('?')[0]?.split('#')[0] // Remove query params and fragments
       if (photoId) {
+        Alert.alert('Navigation', `Navigating to photo: ${photoId}`)
         await navigation.popToTop()
         navigation.navigate('PhotosDetailsShared', { photoId })
         return
