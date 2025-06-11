@@ -32,11 +32,11 @@ import { useVideoPlayer, VideoView } from 'expo-video'
 import * as reducer from './reducer'
 
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
+import * as sharingHelper from '../../utils/sharingHelper'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
-import ShareModal from '../ShareModal'
 import ImageView from './ImageView'
 
 const Photo = ({ photo }) => {
@@ -98,7 +98,6 @@ const Photo = ({ photo }) => {
 
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
-  const [shareModalVisible, setShareModalVisible] = useState(false)
 
   const navigation = useNavigation()
 
@@ -736,8 +735,45 @@ const Photo = ({ photo }) => {
               justifyContent: 'center',
               alignItems: 'center',
             }}
-            onPress={() => {
-              setShareModalVisible(true)
+            onPress={async () => {
+              try {
+                const currentShareData = {
+                  type: 'photo',
+                  photo,
+                  photoDetails,
+                }
+
+                const result =
+                  await sharingHelper.shareWithNativeSheet(currentShareData)
+
+                if (result?.success) {
+                  Toast.show({
+                    text1: 'Shared successfully!',
+                    text2: result.activityType
+                      ? `Shared via ${result.activityType}`
+                      : '',
+                    type: 'success',
+                    topOffset,
+                  })
+                } else if (result && !result.success && !result.dismissed) {
+                  const message =
+                    result.reason || 'Sharing action was not successful.'
+                  Toast.show({
+                    text1: 'Sharing failed',
+                    text2: message,
+                    type: 'error',
+                    topOffset,
+                  })
+                }
+              } catch (shareError) {
+                const message = shareError.message || 'Unable to share content'
+                Toast.show({
+                  text1: 'Sharing failed',
+                  text2: message,
+                  type: 'error',
+                  topOffset,
+                })
+              }
             }}
           >
             <FontAwesome
@@ -874,17 +910,6 @@ const Photo = ({ photo }) => {
         </Grid>
       </ScrollView>
       {renderFooter()}
-
-      <ShareModal
-        visible={shareModalVisible}
-        onClose={() => setShareModalVisible(false)}
-        shareData={{
-          type: 'photo',
-          photo,
-          photoDetails,
-        }}
-        topOffset={topOffset}
-      />
     </View>
   )
 }
