@@ -43,7 +43,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '286',
+      buildNumber: '287',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -95,7 +95,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 286,
+      versionCode: 287,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

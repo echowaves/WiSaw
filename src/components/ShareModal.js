@@ -1,5 +1,5 @@
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react' // Added useCallback
 import {
   ActivityIndicator,
   Modal,
@@ -25,7 +25,7 @@ const APP_ICONS = {
   pinterest: { name: 'pinterest', library: 'FontAwesome', color: '#BD081C' },
   snapchat: { name: 'snapchat', library: 'FontAwesome', color: '#FFFC00' },
   tiktok: { name: 'musical-note', library: 'MaterialIcons', color: '#000000' },
-  imessage: { name: 'message', library: 'MaterialIcons', color: '#007AFF' },
+  imessage: { name: 'message', library: 'MaterialIcons', color: '#007AFF' }, // Scheme is 'sms'
   gmail: { name: 'email', library: 'MaterialIcons', color: '#DB4437' },
   outlook: { name: 'email', library: 'MaterialIcons', color: '#0078D4' },
   reddit: { name: 'reddit', library: 'FontAwesome', color: '#FF4500' },
@@ -38,47 +38,67 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
   const [availableApps, setAvailableApps] = useState([])
   const [loading, setLoading] = useState(true)
   const [sharing, setSharing] = useState(false)
+  const [errorInfo, setErrorInfo] = useState(null)
 
-  useEffect(() => {
-    if (visible) {
-      loadAvailableApps()
-    }
-  }, [visible])
-
-  const loadAvailableApps = async () => {
+  const loadAvailableApps = useCallback(async () => {
+    setLoading(true)
+    setErrorInfo(null)
     try {
-      setLoading(true)
       const apps = await sharingHelper.getAvailableApps()
       setAvailableApps(apps)
     } catch (error) {
-      console.error('Error loading available apps:', error)
+      setErrorInfo(error.message || 'Unknown error loading apps')
+      setAvailableApps([])
       Toast.show({
         text1: 'Error loading apps',
-        text2: 'Unable to check available sharing apps',
+        text2: error.message || 'Unable to check available sharing apps',
         type: 'error',
         topOffset,
       })
     } finally {
       setLoading(false)
     }
-  }
+  }, [topOffset])
+
+  useEffect(() => {
+    if (visible) {
+      loadAvailableApps()
+    } else {
+      setLoading(true) // Reset to loading for next open
+      setAvailableApps([])
+      setErrorInfo(null)
+    }
+  }, [visible, loadAvailableApps])
 
   const handleShare = async (method, app = null) => {
+    setSharing(true)
+    setErrorInfo(null)
     try {
-      setSharing(true)
-
       let result
+      const currentShareData = shareData || {}
+
       if (method === 'native') {
-        result = await sharingHelper.shareWithNativeSheet(shareData)
+        result = await sharingHelper.shareWithNativeSheet(currentShareData)
       } else if (method === 'app' && app) {
         result = await sharingHelper.shareToSpecificApp({
-          app: app.name,
-          ...shareData,
+          app: app.name, // Ensure app.name is passed
+          ...currentShareData,
         })
       } else if (method === 'sms') {
         const content = sharingHelper.createShareContent
-          ? sharingHelper.createShareContent(shareData)
+          ? sharingHelper.createShareContent(currentShareData)
           : { message: 'Check out this content from WiSaw!' }
+        if (!content || !content.message) {
+          setErrorInfo('Could not create content for SMS.')
+          Toast.show({
+            text1: 'SMS Error',
+            text2: 'Could not create content for SMS.',
+            type: 'error',
+            topOffset,
+          })
+          setSharing(false)
+          return
+        }
         result = await sharingHelper.shareViaSMS({ content })
       }
 
@@ -91,14 +111,30 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
         })
         onClose()
       } else if (result?.dismissed) {
-        // User dismissed the share sheet - this is normal, don't show error
         onClose()
+      } else if (result && !result.success) {
+        const message = result.reason || 'Sharing action was not successful.'
+        setErrorInfo(message)
+        Toast.show({
+          text1: 'Sharing failed',
+          text2: message,
+          type: 'error',
+          topOffset,
+        })
+      } else if (
+        !result &&
+        method !== 'native' &&
+        method !== 'sms' &&
+        !(method === 'app' && app?.name)
+      ) {
+        // Avoid showing error if result is undefined from a path that might not return one (e.g. some native dismissals)
       }
     } catch (error) {
-      console.error('Share error:', error)
+      const message = error.message || 'Unable to share content'
+      setErrorInfo(message)
       Toast.show({
         text1: 'Sharing failed',
-        text2: error.message || 'Unable to share content',
+        text2: message,
         type: 'error',
         topOffset,
       })
@@ -113,14 +149,9 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
       library: 'MaterialIcons',
       color: CONST.MAIN_COLOR,
     }
-
-    const IconComponent =
-      iconConfig.library === 'FontAwesome'
-        ? FontAwesome
-        : iconConfig.library === 'FontAwesome5'
-          ? FontAwesome5
-          : MaterialIcons
-
+    let IconComponent = MaterialIcons
+    if (iconConfig.library === 'FontAwesome') IconComponent = FontAwesome
+    else if (iconConfig.library === 'FontAwesome5') IconComponent = FontAwesome5
     return (
       <IconComponent
         name={iconConfig.name}
@@ -135,7 +166,7 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
       key={app.name}
       style={styles.appButton}
       onPress={() => handleShare('app', app)}
-      disabled={sharing}
+      disabled={sharing || loading}
     >
       <View style={styles.appIconContainer}>{renderIcon(app)}</View>
       <Text style={styles.appName} numberOfLines={1}>
@@ -143,6 +174,79 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
       </Text>
     </TouchableOpacity>
   )
+
+  let mainContent
+  if (loading) {
+    mainContent = (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={CONST.MAIN_COLOR} />
+        <Text style={styles.loadingText}>Loading sharing options...</Text>
+      </View>
+    )
+  } else {
+    mainContent = (
+      <ScrollView
+        style={styles.scrollContent}
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>System Share</Text>
+          <TouchableOpacity
+            style={styles.nativeShareButton}
+            onPress={() => handleShare('native')}
+            disabled={sharing}
+          >
+            <MaterialIcons name="share" size={24} color="white" />
+            <Text style={styles.nativeShareText}>Open Native Share Sheet</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickActionsRow}>
+            <TouchableOpacity
+              style={styles.quickActionButton}
+              onPress={() => handleShare('sms')}
+              disabled={sharing}
+            >
+              <MaterialIcons name="sms" size={24} color={CONST.MAIN_COLOR} />
+              <Text style={styles.quickActionText}>SMS</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {availableApps.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Available Apps ({availableApps.length})
+            </Text>
+            <View style={styles.appsGrid}>
+              {availableApps.map(renderAppButton)}
+            </View>
+          </View>
+        )}
+        {availableApps.length === 0 && (
+          <View style={styles.noAppsContainer}>
+            <MaterialIcons
+              name="info"
+              size={48}
+              color={CONST.SECONDARY_COLOR}
+            />
+            <Text style={styles.noAppsText}>
+              No specific sharing apps detected.
+            </Text>
+            {errorInfo && (
+              <Text style={[styles.noAppsText, styles.debugErrorText]}>
+                Error: {errorInfo}
+              </Text>
+            )}
+            <Text style={styles.noAppsText}>
+              Use Native Share or SMS options above.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    )
+  }
 
   return (
     <Modal
@@ -159,79 +263,21 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
               <MaterialIcons name="close" size={24} color={CONST.MAIN_COLOR} />
             </TouchableOpacity>
           </View>
-
-          {loading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={CONST.MAIN_COLOR} />
-              <Text style={styles.loadingText}>Loading sharing options...</Text>
-            </View>
-          ) : (
-            <ScrollView
-              style={styles.content}
-              showsVerticalScrollIndicator={false}
-            >
-              {/* Native Share Option */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>System Share</Text>
-                <TouchableOpacity
-                  style={styles.nativeShareButton}
-                  onPress={() => handleShare('native')}
-                  disabled={sharing}
-                >
-                  <MaterialIcons name="share" size={24} color="white" />
-                  <Text style={styles.nativeShareText}>
-                    Open Native Share Sheet
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Quick Actions */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Quick Actions</Text>
-                <View style={styles.quickActionsRow}>
-                  <TouchableOpacity
-                    style={styles.quickActionButton}
-                    onPress={() => handleShare('sms')}
-                    disabled={sharing}
-                  >
-                    <MaterialIcons
-                      name="sms"
-                      size={24}
-                      color={CONST.MAIN_COLOR}
-                    />
-                    <Text style={styles.quickActionText}>SMS</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Available Apps */}
-              {availableApps.length > 0 && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>
-                    Available Apps ({availableApps.length})
-                  </Text>
-                  <View style={styles.appsGrid}>
-                    {availableApps.map(renderAppButton)}
-                  </View>
-                </View>
-              )}
-
-              {availableApps.length === 0 && !loading && (
-                <View style={styles.noAppsContainer}>
-                  <MaterialIcons
-                    name="info"
-                    size={48}
-                    color={CONST.SECONDARY_COLOR}
-                  />
-                  <Text style={styles.noAppsText}>
-                    No sharing apps detected. You can still use the native share
-                    sheet above.
-                  </Text>
-                </View>
-              )}
-            </ScrollView>
-          )}
-
+          <View style={styles.debugInfoContainer}>
+            <Text style={styles.debugInfoTextBold}>Debug Info:</Text>
+            <Text style={styles.debugInfoText}>
+              Loading: {loading.toString()}
+            </Text>
+            <Text style={styles.debugInfoText}>
+              Apps Found: {availableApps.length}
+            </Text>
+            {errorInfo && (
+              <Text style={styles.debugErrorText}>
+                Error Details: {errorInfo}
+              </Text>
+            )}
+          </View>
+          {mainContent}
           {sharing && (
             <View style={styles.sharingOverlay}>
               <ActivityIndicator size="large" color={CONST.MAIN_COLOR} />
@@ -254,40 +300,53 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '80%',
-    paddingBottom: 20,
-  },
+    maxHeight: '85%',
+    paddingBottom: 0,
+  }, // Adjusted paddingBottom
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  title: {
-    fontSize: 20,
+  title: { fontSize: 20, fontWeight: 'bold', color: CONST.MAIN_COLOR },
+  closeButton: { padding: 5 },
+  debugInfoContainer: {
+    padding: 10,
+    backgroundColor: '#f8f8f8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  debugInfoText: { fontSize: 12, color: '#333', marginBottom: 2 },
+  debugInfoTextBold: {
+    fontSize: 13,
+    color: '#000',
     fontWeight: 'bold',
-    color: CONST.MAIN_COLOR,
+    marginBottom: 3,
   },
-  closeButton: {
-    padding: 5,
+  debugErrorText: {
+    fontSize: 12,
+    color: 'red',
+    marginTop: 3,
+    fontWeight: 'bold',
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    /* flex: 1 by default within its container if modalContent has fixed/max height */
   },
+  scrollContentContainer: { paddingBottom: 20 },
   loadingContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
+    paddingVertical: 40,
   },
-  loadingText: {
-    marginTop: 10,
-    color: CONST.SECONDARY_COLOR,
-  },
+  loadingText: { marginTop: 10, fontSize: 14, color: CONST.SECONDARY_COLOR },
   section: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
@@ -301,7 +360,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: CONST.MAIN_COLOR,
-    padding: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
     borderRadius: 10,
     justifyContent: 'center',
   },
@@ -309,17 +369,16 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
     marginLeft: 10,
+    fontSize: 16,
   },
-  quickActionsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
+  quickActionsRow: { flexDirection: 'row' },
   quickActionButton: {
     alignItems: 'center',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     borderRadius: 10,
     backgroundColor: '#f8f9fa',
-    minWidth: 80,
+    marginRight: 10,
   },
   quickActionText: {
     marginTop: 5,
@@ -330,19 +389,19 @@ const styles = StyleSheet.create({
   appsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   appButton: {
-    width: '22%',
+    width: '23%',
     alignItems: 'center',
     marginBottom: 15,
-    padding: 10,
+    marginRight: '2%',
   },
   appIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
@@ -355,13 +414,15 @@ const styles = StyleSheet.create({
   },
   noAppsContainer: {
     alignItems: 'center',
-    padding: 40,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
   },
   noAppsText: {
-    marginTop: 10,
+    marginTop: 8,
     textAlign: 'center',
     color: CONST.SECONDARY_COLOR,
-    lineHeight: 20,
+    lineHeight: 18,
+    fontSize: 13,
   },
   sharingOverlay: {
     position: 'absolute',
@@ -375,11 +436,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
-  sharingText: {
-    marginTop: 10,
-    color: CONST.MAIN_COLOR,
-    fontWeight: '600',
-  },
+  sharingText: { marginTop: 10, color: CONST.MAIN_COLOR, fontWeight: '600' },
 })
 
 export default ShareModal
