@@ -1,7 +1,7 @@
 export default {
   expo: {
     owner: 'echowaves',
-    runtimeVersion: { policy: 'sdkVersion' },
+    runtimeVersion: { policy: 'nativeVersion' },
     jsEngine: 'hermes',
     updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
