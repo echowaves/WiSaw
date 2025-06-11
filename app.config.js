@@ -43,9 +43,27 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '285',
+      buildNumber: '286',
       supportsTablet: true,
       infoPlist: {
+        LSApplicationQueriesSchemes: [
+          'fb', // Facebook
+          'twitter', // Twitter
+          'instagram', // Instagram
+          'tiktok', // TikTok
+          'snapchat', // Snapchat
+          'linkedin', // LinkedIn
+          'pinterest', // Pinterest
+          'whatsapp', // WhatsApp
+          'tg', // Telegram
+          'slack', // Slack
+          'discord', // Discord
+          'googlegmail', // Gmail
+          'ms-outlook', // Outlook
+          'reddit', // Reddit
+          'youtube', // YouTube
+          'sms', // Messages (for SMS/iMessage)
+        ],
         UIBackgroundModes: ['processing'],
         BGTaskSchedulerPermittedIdentifiers: ['background-task'],
         NSCameraUsageDescription:
@@ -77,7 +95,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 285,
+      versionCode: 286,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
@@ -102,6 +120,33 @@ export default {
           category: ['BROWSABLE', 'DEFAULT'],
         },
       ],
+      queries: {
+        package: [
+          'com.facebook.katana',
+          'com.twitter.android',
+          'com.instagram.android',
+          'com.zhiliaoapp.musically', // TikTok
+          'com.snapchat.android',
+          'com.linkedin.android',
+          'com.pinterest',
+          'com.whatsapp',
+          'org.telegram.messenger',
+          'com.Slack',
+          'com.discord',
+          'com.google.android.gm',
+          'com.microsoft.office.outlook',
+          'com.reddit.frontpage',
+          'com.google.android.youtube',
+        ],
+        intent: [
+          {
+            action: 'android.intent.action.SENDTO',
+            data: {
+              scheme: 'smsto',
+            },
+          },
+        ],
+      },
     },
     web: { favicon: './assets/favicon.png' },
     slug: 'WiSaw',
