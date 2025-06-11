@@ -9,7 +9,7 @@
     "reset:simulator": "xcrun simctl erase all",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "build": "eas build", 
+    "build": "eas build",
     "publish:prod": "eas update --branch production"
   },
   "dependencies": {
