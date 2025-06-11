@@ -36,6 +36,7 @@ import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
+import ShareModal from '../ShareModal'
 import ImageView from './ImageView'
 
 const Photo = ({ photo }) => {
@@ -97,6 +98,7 @@ const Photo = ({ photo }) => {
 
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
+  const [shareModalVisible, setShareModalVisible] = useState(false)
 
   const navigation = useNavigation()
 
@@ -734,8 +736,8 @@ const Photo = ({ photo }) => {
               justifyContent: 'center',
               alignItems: 'center',
             }}
-            onPress={async () => {
-              await reducer.sharePhoto({ photo, photoDetails, topOffset })
+            onPress={() => {
+              setShareModalVisible(true)
             }}
           >
             <FontAwesome
@@ -872,6 +874,17 @@ const Photo = ({ photo }) => {
         </Grid>
       </ScrollView>
       {renderFooter()}
+
+      <ShareModal
+        visible={shareModalVisible}
+        onClose={() => setShareModalVisible(false)}
+        shareData={{
+          type: 'photo',
+          photo,
+          photoDetails,
+        }}
+        topOffset={topOffset}
+      />
     </View>
   )
 }

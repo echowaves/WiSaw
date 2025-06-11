@@ -15,7 +15,7 @@ export default {
           android: {
             // compileSdkVersion: 34,
             // targetSdkVersion: 34,
-            // buildToolsVersion: '34.0.0',
+            // buildToolsVersion: '34.0.0',y
             // kotlinVersion: '2.0.0',
           },
           ios: {
