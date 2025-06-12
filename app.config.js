@@ -43,7 +43,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '29',
+      buildNumber: '291',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
