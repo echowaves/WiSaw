@@ -6,7 +6,7 @@ import * as CONST from '../../consts'
 export const addFriendshipLocally = async ({ friendshipUuid, contactName }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
   await Storage.removeItem({ key }) // always cleanup first
-  await Storage.setItem({ key, contactName })
+  await Storage.setItem({ key, value: contactName })
 }
 
 export const deleteFriendship = async ({ friendshipUuid }) => {
@@ -95,7 +95,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
 // Helper functions defined before they are used
 const getLocalContact = async ({ friendshipUuid }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
-  const localFriendshipName = JSON.parse(await Storage.getItem({ key }))
+  const localFriendshipName = await Storage.getItem({ key })
   if (!localFriendshipName) {
     return null
   }
