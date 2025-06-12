@@ -131,27 +131,3 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
     }
   }
 }
-
-export const shareFriend = async ({ friendshipUuid, contactName }) => {
-  try {
-    const url = `https://link.wisaw.com/friends/${friendshipUuid}`
-    const messageBody = `${contactName}, you've got WiSaw friendship request. To confirm, follow the url: ${url}`
-
-    const shareOptions = {
-      message: messageBody,
-      url,
-    }
-
-    // Use native sharing
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      await navigator.share(shareOptions)
-    } else {
-      // Fallback to copying URL
-      await Linking.openURL(
-        `mailto:?subject=WiSaw friendship request&body=${encodeURIComponent(messageBody)}`,
-      )
-    }
-  } catch (error) {
-    Alert.alert('Error', 'Unable to share friendship request')
-  }
-}

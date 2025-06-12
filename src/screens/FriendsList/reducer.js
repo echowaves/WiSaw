@@ -78,15 +78,38 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
       })
     ).data.createFriendship
 
-    // eslint-disable-next-line no-undef
-    if (!__DEV__) {
-      const linkingHelper = await import('../../linking_helper')
-      await linkingHelper.shareFriend({
+    try {
+      const sharingHelper = await import('../../utils/sharingHelper')
+      const result = await sharingHelper.shareWithNativeSheet({
+        type: 'friend',
         friendshipUuid: friendship?.friendshipUuid,
         contactName,
       })
-    } else {
-      alert('The feature is not supported on this device yet, try again later')
+
+      if (result?.success) {
+        Toast.show({
+          text1: 'Friendship request shared!',
+          text2: result.activityType ? `Shared via ${result.activityType}` : '',
+          type: 'success',
+          topOffset,
+        })
+      } else if (result && !result.success && !result.dismissed) {
+        const message = result.reason || 'Sharing action was not successful.'
+        Toast.show({
+          text1: 'Sharing failed',
+          text2: message,
+          type: 'error',
+          topOffset,
+        })
+      }
+    } catch (shareError) {
+      const message = shareError.message || 'Unable to share friendship request'
+      Toast.show({
+        text1: 'Sharing failed',
+        text2: message,
+        type: 'error',
+        topOffset,
+      })
     }
     // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
 
