@@ -5,14 +5,8 @@ const handleDeepLink = async ({ url, navigation }) => {
   if (!url) return
 
   try {
-    // Show debug info - remove this after testing
-    Alert.alert('Deep Link Debug', `URL: ${url}`)
-
     // Parse the URL
     const { hostname, path, queryParams } = Linking.parse(url)
-
-    // Show parsed info - remove this after testing
-    Alert.alert('Parsed Info', `Path: ${path}\nHost: ${hostname}`)
 
     // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
     if (path && (path.includes('/photos/') || path.includes('photos/'))) {
@@ -21,19 +15,10 @@ const handleDeepLink = async ({ url, navigation }) => {
         ? path.split('/photos/')[1]?.split('?')[0]?.split('#')[0]
         : path.split('photos/')[1]?.split('?')[0]?.split('#')[0]
 
-      Alert.alert('Photo ID Debug', `Extracted photoId: ${photoId}`)
-
       if (photoId) {
-        Alert.alert('Navigation', `Navigating to photo: ${photoId}`)
-        try {
-          await navigation.popToTop()
-          navigation.navigate('PhotosDetailsShared', { photoId })
-          Alert.alert('Success', 'Navigation completed successfully')
-          return
-        } catch (navError) {
-          Alert.alert('Navigation Error', `Error: ${navError.message}`)
-          return
-        }
+        await navigation.popToTop()
+        navigation.navigate('PhotosDetailsShared', { photoId })
+        return
       }
     }
 
@@ -68,8 +53,7 @@ const handleDeepLink = async ({ url, navigation }) => {
 
     // Unhandled deep link
   } catch (error) {
-    // Error handling deep link - show error for debugging
-    Alert.alert('Deep Link Error', `Error: ${error.message}`)
+    // Error handling deep link - silently fail
   }
 }
 
