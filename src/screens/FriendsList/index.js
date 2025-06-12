@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { useAtom } from 'jotai'
-import React, { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import {
   Alert,
@@ -11,7 +11,7 @@ import {
 
 import { Badge, Card, ListItem, Text } from '@rneui/themed'
 
-// import Toast from 'react-native-toast-message'
+import Toast from 'react-native-toast-message'
 import FlatGrid from 'react-native-super-grid'
 
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
@@ -61,27 +61,29 @@ const FriendsList = () => {
     />
   )
 
-  const renderHeaderRight = () => renderAddFriendButton()
+  const renderHeaderRight = useCallback(() => renderAddFriendButton(), [])
 
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => navigation.goBack()}
-    />
+  const renderHeaderLeft = useCallback(
+    () => (
+      <FontAwesome
+        name="chevron-left"
+        size={30}
+        style={{
+          marginLeft: 10,
+          color: CONST.MAIN_COLOR,
+          width: 60,
+        }}
+        onPress={() => navigation.goBack()}
+      />
+    ),
+    [navigation],
   )
-  const reload = async () => {
-    setFriendsList(
-      await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
-      }),
-    )
-  }
+  const reload = useCallback(async () => {
+    const result = await friendsHelper.getEnhancedListOfFriendships({
+      uuid,
+    })
+    setFriendsList(result)
+  }, [uuid])
 
   useEffect(() => {
     ;(async () => {
@@ -97,9 +99,13 @@ const FriendsList = () => {
       })
       // a friendship with no locally assigned contact can never show in the list on the screen
       // await friendsHelper.cleanupAbandonedFriendships({ uuid })
-      reload()
+
+      // Only load friendships when uuid is properly initialized
+      if (uuid && uuid !== '') {
+        reload()
+      }
     })()
-  }, [])
+  }, [uuid])
 
   const styles = StyleSheet.create({
     container: {
@@ -205,7 +211,7 @@ const FriendsList = () => {
       />
       <ListItem.Content>
         <ListItem.Title>
-          <Text>{`${friend?.contact}`}</Text>
+          <Text>{friend?.contact || 'Unnamed Friend'}</Text>
         </ListItem.Title>
         {friend.uuid2 === null && (
           <ListItem.Subtitle>

@@ -14,7 +14,7 @@ export const deleteFriendship = async ({ friendshipUuid }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
   await Storage.removeItem({ key })
 
-  const { deleteFriendship } = (
+  const { deleteFriendship: deleteFriendshipResult } = (
     await CONST.gqlClient.mutate({
       mutation: gql`
         mutation deleteFriendship($friendshipUuid: String!) {
@@ -27,9 +27,9 @@ export const deleteFriendship = async ({ friendshipUuid }) => {
     })
   ).data
 
-  // console.log({ deleteFriendship })
+  // console.log({ deleteFriendshipResult })
 
-  if (deleteFriendship !== 'OK') {
+  if (deleteFriendshipResult !== 'OK') {
     throw Error('Deleting Friendship failed')
   }
 }
@@ -92,56 +92,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
   return { friendship, chat, chatUser }
 }
 
-export const getEnhancedListOfFriendships = async ({ uuid }) => {
-  const [remoteFriendships, unreadCountsList] = await Promise.all([
-    getRemoteListOfFriendships({ uuid }),
-    getUnreadCountsList({ uuid }),
-  ])
-
-  // console.log({ remoteFriendships })
-
-  const enhancedFriendships = await Promise.all(
-    // not sure if this is going to scale
-    remoteFriendships.map(async (friendship) => {
-      const { friendshipUuid } = friendship
-      const contact = await getLocalContact({ friendshipUuid })
-      const unread = unreadCountsList.find(
-        (unreadChat) => unreadChat.chatUuid === friendship.chatUuid,
-      )
-
-      const localContact = {
-        key: friendship.friendshipUuid,
-        contact,
-        ...friendship,
-        unreadCount: unread?.unread || 0,
-        updatedAt: unread?.updatedAt || Date.now(),
-      }
-      // console.log({ localContact })
-      return localContact
-    }),
-  )
-  // console.log({ enhancedFriendships }, "--------------------------------------")
-  return enhancedFriendships.sort(
-    (a, b) => new Date(a.updatedAt).getTime() < new Date(b.updatedAt).getTime(),
-  )
-}
-
-export const resetUnreadCount = async ({ chatUuid, uuid }) => {
-  const lastReadAt = await CONST.gqlClient.mutate({
-    mutation: gql`
-      mutation resetUnreadCount($chatUuid: String!, $uuid: String!) {
-        resetUnreadCount(chatUuid: $chatUuid, uuid: $uuid)
-      }
-    `,
-    variables: {
-      chatUuid,
-      uuid,
-    },
-  })
-  // console.log({ lastReadAt })
-  return lastReadAt
-}
-
+// Helper functions defined before they are used
 const getLocalContact = async ({ friendshipUuid }) => {
   const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
   const localFriendshipName = JSON.parse(await Storage.getItem({ key }))
@@ -206,4 +157,50 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
     console.log({ err555 }) // eslint-disable-line
   }
   return []
+}
+
+export const getEnhancedListOfFriendships = async ({ uuid }) => {
+  const [remoteFriendships, unreadCountsList] = await Promise.all([
+    getRemoteListOfFriendships({ uuid }),
+    getUnreadCountsList({ uuid }),
+  ])
+
+  const enhancedFriendships = await Promise.all(
+    // not sure if this is going to scale
+    remoteFriendships.map(async (friendship) => {
+      const { friendshipUuid } = friendship
+      const contact = await getLocalContact({ friendshipUuid })
+      const unread = unreadCountsList.find(
+        (unreadChat) => unreadChat.chatUuid === friendship.chatUuid,
+      )
+
+      const localContact = {
+        key: friendship.friendshipUuid,
+        contact,
+        ...friendship,
+        unreadCount: unread?.unread || 0,
+        updatedAt: unread?.updatedAt || Date.now(),
+      }
+      return localContact
+    }),
+  )
+  return enhancedFriendships.sort(
+    (a, b) => new Date(a.updatedAt).getTime() < new Date(b.updatedAt).getTime(),
+  )
+}
+
+export const resetUnreadCount = async ({ chatUuid, uuid }) => {
+  const lastReadAt = await CONST.gqlClient.mutate({
+    mutation: gql`
+      mutation resetUnreadCount($chatUuid: String!, $uuid: String!) {
+        resetUnreadCount(chatUuid: $chatUuid, uuid: $uuid)
+      }
+    `,
+    variables: {
+      chatUuid,
+      uuid,
+    },
+  })
+  // console.log({ lastReadAt })
+  return lastReadAt
 }
