@@ -79,11 +79,22 @@ const FriendsList = () => {
     [navigation],
   )
   const reload = useCallback(async () => {
-    const result = await friendsHelper.getEnhancedListOfFriendships({
-      uuid,
-    })
-    setFriendsList(result)
-  }, [uuid])
+    try {
+      const result = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
+      setFriendsList(result)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error loading friends list:', error)
+      Toast.show({
+        text1: 'Failed to load friends',
+        text2: 'Please try again',
+        type: 'error',
+        topOffset,
+      })
+    }
+  }, [uuid, topOffset])
 
   useEffect(() => {
     ;(async () => {
@@ -114,38 +125,63 @@ const FriendsList = () => {
   })
 
   const sendFriendshipRequest = async ({ contactName }) => {
-    const friendship = await reducer.createFriendship({ uuid, contactName })
-
-    return friendship
+    try {
+      const friendship = await reducer.createFriendship({
+        uuid,
+        topOffset,
+        contactName,
+      })
+      return friendship
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error creating friendship:', error)
+      Toast.show({
+        text1: 'Failed to create friendship request',
+        text2: error.message || 'Please try again',
+        type: 'error',
+        topOffset,
+      })
+      return null
+    }
   }
 
   const setContactName = async (contactName) => {
-    // this is edit existing name
-    if (!friendshipUuid) {
-      // this is new friendship, let's create it and then send the invite
-      const friendship = await sendFriendshipRequest({ contactName })
-      await friendsHelper.addFriendshipLocally({
-        friendshipUuid: friendship.friendshipUuid,
-        contactName,
+    try {
+      // this is edit existing name
+      if (!friendshipUuid) {
+        // this is new friendship, let's create it and then send the invite
+        const friendship = await sendFriendshipRequest({ contactName })
+        if (friendship) {
+          await friendsHelper.addFriendshipLocally({
+            friendshipUuid: friendship.friendshipUuid,
+            contactName,
+          })
+        }
+      } else {
+        await friendsHelper.addFriendshipLocally({
+          friendshipUuid,
+          contactName,
+        })
+      }
+
+      await setShowNamePicker(false)
+      setFriendshipUuid(null) // reset friendshipUuid for next request
+
+      setFriendsList(
+        await friendsHelper.getEnhancedListOfFriendships({
+          uuid,
+        }),
+      )
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error setting contact name:', error)
+      Toast.show({
+        text1: 'Failed to save friend name',
+        text2: error.message || 'Please try again',
+        type: 'error',
+        topOffset,
       })
-    } else {
-      await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
     }
-
-    // alert(JSON.stringify({ friendship }))
-    // await setFriendshipUuid(friendship.friendshipUuid)
-
-    // alert(JSON.stringify({ friendshipUuid, contactName }))
-    await setShowNamePicker(false)
-    setFriendshipUuid(null) // reset friendshipUuid for next request
-
-    setFriendsList(
-      await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
-      }),
-    )
-
-    // const unreadCounts = await friendsHelper.getUnreadCountsList({ uuid })
   }
 
   // eslint-disable-next-line no-shadow

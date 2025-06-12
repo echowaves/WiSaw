@@ -70,7 +70,6 @@ const ConfirmFriendship = ({ route }) => {
   })
 
   const setContactName = async (contactName) => {
-    // alert(JSON.stringify({ friendshipUuid, contactName }))
     try {
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
@@ -80,15 +79,23 @@ const ConfirmFriendship = ({ route }) => {
         }),
       )
 
-      reducer.reloadUnreadCountsList({ uuid }) // the list of enhanced friends list has to be loaded earlier o
+      reducer.reloadUnreadCountsList({ uuid })
+
+      Toast.show({
+        text1: 'Friendship confirmed!',
+        text2: `You are now friends with ${contactName}`,
+        type: 'success',
+        topOffset,
+      })
 
       await navigation.popToTop()
       await navigation.navigate('FriendsList')
     } catch (err) {
-      // console.log({ err })
+      // eslint-disable-next-line no-console
+      console.error('Error confirming friendship:', err)
       Toast.show({
         text1: 'Unable to confirm Friendship',
-        text2: err.toString(),
+        text2: err.message || err.toString(),
         type: 'error',
         topOffset,
       })

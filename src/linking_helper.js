@@ -32,11 +32,12 @@ const handleDeepLink = async ({ url, navigation }) => {
         : path.split('friends/')[1]?.split('?')[0]?.split('#')[0]
 
       if (friendshipUuid) {
+        // Navigate to top first
         await navigation.popToTop()
-        // Add a small delay to ensure navigation is ready
+        // Add a delay to ensure navigation state is ready
         setTimeout(() => {
           navigation.navigate('ConfirmFriendship', { friendshipUuid })
-        }, 100)
+        }, 200)
         return
       }
     }

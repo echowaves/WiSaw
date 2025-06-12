@@ -42,9 +42,6 @@ export const initialState = {
 // }
 
 export async function createFriendship({ uuid, topOffset, contactName }) {
-  // console.log({ uuid })
-  // console.log({ nickName, secret, uuid })
-
   try {
     const { friendship } = (
       await CONST.gqlClient.mutate({
@@ -111,11 +108,11 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
         topOffset,
       })
     }
-    // const linkProperties = { feature: 'friendship_request', channel: 'RNApp' }
 
     return friendship
   } catch (err) {
-    // console.log({ err })
+    // eslint-disable-next-line no-console
+    console.error('createFriendship error:', err)
     Toast.show({
       text1: 'Unable to create Friend',
       text2: err.toString(),

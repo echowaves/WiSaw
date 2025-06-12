@@ -93,20 +93,33 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
     return { friendship, chat, chatUser }
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('confirmFriendship error:', error)
-    throw error
+    console.error('confirmFriendship GraphQL error:', error)
+    // eslint-disable-next-line no-console
+    console.error('Error details:', {
+      message: error.message,
+      graphQLErrors: error.graphQLErrors,
+      networkError: error.networkError,
+      extraInfo: error.extraInfo,
+    })
+    // Re-throw with more context
+    throw new Error(`Failed to accept friendship request: ${error.message}`)
   }
 }
 
 // Helper functions defined before they are used
 const getLocalContact = async ({ friendshipUuid }) => {
-  const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
-  const localFriendshipName = await Storage.getItem({ key })
-  if (!localFriendshipName) {
+  try {
+    const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
+    const localFriendshipName = await Storage.getItem({ key })
+    if (!localFriendshipName) {
+      return null
+    }
+    return localFriendshipName
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error getting local contact:', error)
     return null
   }
-  // console.log({ friendshipUuid, localFriendshipName })
-  return localFriendshipName
 }
 
 export const getUnreadCountsList = async ({ uuid }) => {
