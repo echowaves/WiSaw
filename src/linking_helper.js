@@ -8,6 +8,11 @@ const handleDeepLink = async ({ url, navigation }) => {
     // Parse the URL
     const { hostname, path, queryParams } = Linking.parse(url)
 
+    // Debug: Show what URL we received
+    if (path && (path.includes('/friends/') || path.includes('friends/'))) {
+      Alert.alert('Debug', `Received friendship link: ${url}\nPath: ${path}`)
+    }
+
     // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
     if (path && (path.includes('/photos/') || path.includes('photos/'))) {
       // Handle both "/photos/" and "photos/" patterns
@@ -23,14 +28,22 @@ const handleDeepLink = async ({ url, navigation }) => {
     }
 
     // Handle friendship links: https://wisaw.com/friends/uuid or https://link.wisaw.com/friends/uuid
-    if (path && path.includes('/friends/')) {
-      const friendshipUuid = path
-        .split('/friends/')[1]
-        ?.split('?')[0]
-        ?.split('#')[0] // Remove query params and fragments
+    if (path && (path.includes('/friends/') || path.includes('friends/'))) {
+      // Handle both "/friends/" and "friends/" patterns
+      const friendshipUuid = path.includes('/friends/')
+        ? path.split('/friends/')[1]?.split('?')[0]?.split('#')[0]
+        : path.split('friends/')[1]?.split('?')[0]?.split('#')[0]
+
       if (friendshipUuid) {
+        Alert.alert(
+          'Debug',
+          `About to navigate to ConfirmFriendship with UUID: ${friendshipUuid}`,
+        )
         await navigation.popToTop()
-        navigation.navigate('ConfirmFriendship', { friendshipUuid })
+        // Add a small delay to ensure navigation is ready
+        setTimeout(() => {
+          navigation.navigate('ConfirmFriendship', { friendshipUuid })
+        }, 100)
         return
       }
     }
