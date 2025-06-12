@@ -623,7 +623,9 @@ const PhotosList = () => {
 
   useEffect(() => {
     // TODO: delete next line -- debuggin
-    // navigation.navigate('ConfirmFriendship', { friendshipUuid: "544e4564-1fb2-429f-917c-3495f545552b" })
+    // navigation.navigate('ConfirmFriendship', {
+    //   friendshipUuid: '544e4564-1fb2-429f-917c-3495f545552b',
+    // })
     ;(async () => {
       await Notifications.requestPermissionsAsync({
         ios: {

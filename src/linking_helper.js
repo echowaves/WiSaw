@@ -8,10 +8,7 @@ const handleDeepLink = async ({ url, navigation }) => {
     // Parse the URL
     const { hostname, path, queryParams } = Linking.parse(url)
 
-    // Debug: Show what URL we received
-    if (path && (path.includes('/friends/') || path.includes('friends/'))) {
-      Alert.alert('Debug', `Received friendship link: ${url}\nPath: ${path}`)
-    }
+    // Handle friendship links: https://wisaw.com/friends/uuid or https://link.wisaw.com/friends/uuid
 
     // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
     if (path && (path.includes('/photos/') || path.includes('photos/'))) {
@@ -35,10 +32,6 @@ const handleDeepLink = async ({ url, navigation }) => {
         : path.split('friends/')[1]?.split('?')[0]?.split('#')[0]
 
       if (friendshipUuid) {
-        Alert.alert(
-          'Debug',
-          `About to navigate to ConfirmFriendship with UUID: ${friendshipUuid}`,
-        )
         await navigation.popToTop()
         // Add a small delay to ensure navigation is ready
         setTimeout(() => {

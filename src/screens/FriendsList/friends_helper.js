@@ -50,8 +50,8 @@ export const getLocalContactName = ({ uuid, friendUuid, friendsList }) => {
 
 export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
   // console.log({ friendshipUuid, uuid })
-  const { friendship, chat, chatUser } = (
-    await CONST.gqlClient.mutate({
+  try {
+    const result = await CONST.gqlClient.mutate({
       mutation: gql`
         mutation acceptFriendshipRequest(
           $friendshipUuid: String!
@@ -87,9 +87,15 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
         uuid,
       },
     })
-  ).data.acceptFriendshipRequest
-  // console.log({ friendship, chat, chatUser })
-  return { friendship, chat, chatUser }
+    
+    const { friendship, chat, chatUser } = result.data.acceptFriendshipRequest
+    // console.log({ friendship, chat, chatUser })
+    return { friendship, chat, chatUser }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('confirmFriendship error:', error)
+    throw error
+  }
 }
 
 // Helper functions defined before they are used

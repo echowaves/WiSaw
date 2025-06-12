@@ -125,3 +125,17 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
     return null
   }
 }
+
+export async function reloadUnreadCountsList({ uuid }) {
+  try {
+    // This function would typically reload the unread counts list
+    // Since the functionality is already in friends_helper, we can just return
+    // The actual reloading is handled by getEnhancedListOfFriendships
+    const friendsHelper = await import('./friends_helper')
+    return await friendsHelper.getUnreadCountsList({ uuid })
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log('Error reloading unread counts:', err)
+    return []
+  }
+}
