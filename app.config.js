@@ -1,41 +1,31 @@
 export default {
   expo: {
     owner: 'echowaves',
-    runtimeVersion: {
-      policy: 'sdkVersion',
-    },
+    runtimeVersion: { policy: 'appVersion' },
     jsEngine: 'hermes',
-    updates: {
-      url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee',
-    },
+    updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
-    version: '7.1.15',
+    version: '7.1.16',
     plugins: [
-      '@config-plugins/react-native-branch',
-      // {
-      //   apiKey: "key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4",
-      //   iosAppDomain: "link.wisaw.com",
-      // },
+      // Branch removed - using native deep linking instead
       'expo-secure-store',
       [
         'expo-build-properties',
         {
           android: {
-            compileSdkVersion: 34,
-            targetSdkVersion: 34,
-            buildToolsVersion: '34.0.0',
+            // compileSdkVersion: 34,
+            // targetSdkVersion: 34,
+            // buildToolsVersion: '34.0.0',y
             // kotlinVersion: '2.0.0',
           },
           ios: {
-            deploymentTarget: '15.1',
+            // deploymentTarget: '16.0'
           },
         },
       ],
     ],
     extra: {
-      eas: {
-        projectId: 'd1624159-fed7-42bf-b11b-7ea8f38a8dee',
-      },
+      eas: { projectId: 'd1624159-fed7-42bf-b11b-7ea8f38a8dee' },
       API_URI: process.env.API_URI,
       REALTIME_API_URI: process.env.REALTIME_API_URI,
       API_KEY: process.env.API_KEY,
@@ -53,10 +43,29 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '283',
+      buildNumber: '292',
       supportsTablet: true,
       infoPlist: {
-        UIBackgroundModes: ['fetch'],
+        LSApplicationQueriesSchemes: [
+          'fb', // Facebook
+          'twitter', // Twitter
+          'instagram', // Instagram
+          'tiktok', // TikTok
+          'snapchat', // Snapchat
+          'linkedin', // LinkedIn
+          'pinterest', // Pinterest
+          'whatsapp', // WhatsApp
+          'tg', // Telegram
+          'slack', // Slack
+          'discord', // Discord
+          'googlegmail', // Gmail
+          'ms-outlook', // Outlook
+          'reddit', // Reddit
+          'youtube', // YouTube
+          'sms', // Messages (for SMS/iMessage)
+        ],
+        UIBackgroundModes: ['processing'],
+        BGTaskSchedulerPermittedIdentifiers: ['background-task'],
         NSCameraUsageDescription:
           'This will allow you to take photos with WiSaw app. When you take a photo with WiSaw, it will be stored in your photo album on your device and will be shared with other near-by users of the app. Any user who finds content objectionable or abusive will be able to remove it permanently, so that no one will be able to see it any more.',
         NSLocationAlwaysUsageDescription:
@@ -74,12 +83,10 @@ export default {
         NSMicrophoneUsageDescription:
           'WiSaw allows your to record video with sound. In order for the sound to be captured, you need to allow access to the microphone.',
       },
-      associatedDomains: ['applinks:link.wisaw.com'],
+      associatedDomains: ['applinks:link.wisaw.com', 'applinks:wisaw.com'],
       config: {
         usesNonExemptEncryption: false,
-        branch: {
-          apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4',
-        },
+        // Branch config removed - using native Universal Links
       },
     },
     android: {
@@ -88,7 +95,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 283,
+      versionCode: 292,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
@@ -100,39 +107,54 @@ export default {
         'com.google.android.gms.permission.AD_ID',
       ],
       config: {
-        branch: {
-          apiKey: 'key_live_bfxOER1DaZ6pQzOMj9chBffdwFaB8vg4',
-        },
+        // Branch config removed - using native App Links
       },
       intentFilters: [
         {
           action: 'VIEW',
           autoVerify: true,
           data: [
-            {
-              scheme: 'https',
-              host: '*.wisaw.com',
-              pathPrefix: '/photos',
-            },
-            {
-              scheme: 'https',
-              host: '*.wisaw.com',
-              pathPrefix: '/friends',
-            },
+            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/photos' },
+            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/friends' },
+            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/photos' },
+            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/friends' },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
       ],
+      queries: {
+        package: [
+          'com.facebook.katana',
+          'com.twitter.android',
+          'com.instagram.android',
+          'com.zhiliaoapp.musically', // TikTok
+          'com.snapchat.android',
+          'com.linkedin.android',
+          'com.pinterest',
+          'com.whatsapp',
+          'org.telegram.messenger',
+          'com.Slack',
+          'com.discord',
+          'com.google.android.gm',
+          'com.microsoft.office.outlook',
+          'com.reddit.frontpage',
+          'com.google.android.youtube',
+        ],
+        intent: [
+          {
+            action: 'android.intent.action.SENDTO',
+            data: {
+              scheme: 'smsto',
+            },
+          },
+        ],
+      },
     },
-    web: {
-      favicon: './assets/favicon.png',
-    },
+    web: { favicon: './assets/favicon.png' },
     slug: 'WiSaw',
     scheme: 'wisaw',
     icon: './assets/icon.png',
-    notification: {
-      iosDisplayInForeground: true,
-    },
+    notification: { iosDisplayInForeground: true },
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',

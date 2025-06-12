@@ -26,11 +26,13 @@ import { Col, Grid, Row } from 'react-native-easy-grid'
 
 import PropTypes from 'prop-types'
 
-import { Video } from 'expo-av'
+import { useEvent } from 'expo'
+import { useVideoPlayer, VideoView } from 'expo-video'
 
 import * as reducer from './reducer'
 
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
+import * as sharingHelper from '../../utils/sharingHelper'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -46,7 +48,51 @@ const Photo = ({ photo }) => {
 
   const componentIsMounted = useRef(true)
 
-  const videoRef = useRef(null)
+  // Create video player instance
+  const videoPlayer = useVideoPlayer(
+    photo?.video ? photo.videoUrl : null,
+    (player) => {
+      if (player && photo?.video) {
+        // Configure the player
+        player.loop = true // eslint-disable-line no-param-reassign
+        // Don't auto-play the video - let user control playback
+      }
+    },
+  )
+
+  // Track video playing state
+  const { isPlaying } = useEvent(videoPlayer, 'playingChange', {
+    isPlaying: videoPlayer?.playing || false,
+  })
+
+  // Track video status for debugging and error handling
+  const { status, error } = useEvent(videoPlayer, 'statusChange', {
+    status: videoPlayer?.status || 'idle',
+    error: null,
+  })
+
+  // Handle video play/pause toggle
+  const handleVideoToggle = () => {
+    if (videoPlayer) {
+      if (isPlaying) {
+        videoPlayer.pause()
+      } else {
+        videoPlayer.play()
+      }
+    }
+  }
+
+  // Optional: Handle video errors
+  const handleVideoError = () => {
+    if (error) {
+      Toast.show({
+        text1: 'Video Error',
+        text2: 'Unable to play video. Please try again.',
+        type: 'error',
+        topOffset,
+      })
+    }
+  }
 
   const [bans, setBans] = useState([])
 
@@ -690,7 +736,44 @@ const Photo = ({ photo }) => {
               alignItems: 'center',
             }}
             onPress={async () => {
-              await reducer.sharePhoto({ photo, photoDetails, topOffset })
+              try {
+                const currentShareData = {
+                  type: 'photo',
+                  photo,
+                  photoDetails,
+                }
+
+                const result =
+                  await sharingHelper.shareWithNativeSheet(currentShareData)
+
+                if (result?.success) {
+                  Toast.show({
+                    text1: 'Shared successfully!',
+                    text2: result.activityType
+                      ? `Shared via ${result.activityType}`
+                      : '',
+                    type: 'success',
+                    topOffset,
+                  })
+                } else if (result && !result.success && !result.dismissed) {
+                  const message =
+                    result.reason || 'Sharing action was not successful.'
+                  Toast.show({
+                    text1: 'Sharing failed',
+                    text2: message,
+                    type: 'error',
+                    topOffset,
+                  })
+                }
+              } catch (shareError) {
+                const message = shareError.message || 'Unable to share content'
+                Toast.show({
+                  text1: 'Sharing failed',
+                  text2: message,
+                  type: 'error',
+                  topOffset,
+                })
+              }
             }}
           >
             <FontAwesome
@@ -725,26 +808,85 @@ const Photo = ({ photo }) => {
       return <ImageView width={width} height={imageHeight} photo={photo} />
     }
     return (
-      <Video
-        ref={videoRef}
-        style={{
-          flex: 1,
-          height: imageHeight,
-        }}
-        // style={
-        //   styles.photoContainer
-        // }
-        source={{
-          uri: `${photo.videoUrl}`,
-        }}
-        useNativeControls
-        // overrideFileExtensionAndroid
-        resizeMode="contain"
-        // onPlaybackStatusUpdate={status => setStatus(() => status)}
-        usePoster={false}
-        posterSource={{ uri: `${photo.thumbUrl}` }}
-        isLooping
-      />
+      <View style={{ position: 'relative' }}>
+        <VideoView
+          player={videoPlayer}
+          style={{
+            flex: 1,
+            height: imageHeight,
+          }}
+          nativeControls={false}
+          contentFit="contain"
+          allowsFullscreen
+          allowsPictureInPicture
+        />
+        {/* Custom play/pause overlay - show play when paused, pause when playing */}
+        {!isPlaying && (
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: [{ translateX: -35 }, { translateY: -35 }],
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              borderRadius: 35,
+              width: 70,
+              height: 70,
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderWidth: 2,
+              borderColor: 'rgba(255,255,255,0.8)',
+            }}
+            onPress={handleVideoToggle}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="play"
+              size={36}
+              color="white"
+              style={{ marginLeft: 3 }} // Adjust play icon position
+            />
+          </TouchableOpacity>
+        )}
+        {/* Pause button - show when playing */}
+        {isPlaying && (
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 20,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              borderRadius: 25,
+              width: 50,
+              height: 50,
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.8)',
+            }}
+            onPress={handleVideoToggle}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="pause" size={24} color="white" />
+          </TouchableOpacity>
+        )}
+        {/* Video status indicator */}
+        {status === 'loading' && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 20,
+              right: 20,
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              borderRadius: 15,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 12 }}>Loading...</Text>
+          </View>
+        )}
+      </View>
     )
   }
 
