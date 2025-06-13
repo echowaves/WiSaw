@@ -6,10 +6,11 @@ import {
   Alert,
   SafeAreaView,
   StyleSheet,
+  Text,
+  TouchableOpacity,
   useWindowDimensions,
+  View,
 } from 'react-native'
-
-import { Badge, Card, ListItem, Text } from '@rneui/themed'
 
 import FlatGrid from 'react-native-super-grid'
 import Toast from 'react-native-toast-message'
@@ -121,6 +122,110 @@ const FriendsList = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: '#f8f9fa',
+    },
+    friendItem: {
+      backgroundColor: 'white',
+      marginHorizontal: 16,
+      marginVertical: 4,
+      borderRadius: 12,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    friendContent: {
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      flex: 1,
+    },
+    friendHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    friendInfo: {
+      // flex: 1, // Remove this again - it causes the name rendering issue
+      marginRight: 12,
+      maxWidth: '70%', // Keep this to ensure space for buttons
+      // minWidth: 1, // Remove this too
+    },
+    friendName: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#1a1a1a',
+      marginBottom: 4,
+      // flex: 1, // Remove this too
+    },
+    friendStatus: {
+      fontSize: 14,
+      color: '#666',
+    },
+    pendingStatus: {
+      fontSize: 14,
+      color: '#ff6b35',
+      fontWeight: '500',
+    },
+    actionButtons: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    actionButton: {
+      padding: 8,
+      borderRadius: 8,
+      backgroundColor: '#f5f5f5',
+    },
+    unreadBadge: {
+      position: 'absolute',
+      top: -4,
+      right: -4,
+      minWidth: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: CONST.MAIN_COLOR,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    unreadText: {
+      color: 'white',
+      fontSize: 12,
+      fontWeight: 'bold',
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 32,
+    },
+    emptyTitle: {
+      fontSize: 24,
+      fontWeight: '600',
+      color: '#1a1a1a',
+      marginBottom: 12,
+      textAlign: 'center',
+    },
+    emptySubtitle: {
+      fontSize: 16,
+      color: '#666',
+      textAlign: 'center',
+      lineHeight: 24,
+      marginBottom: 32,
+    },
+    addFriendButton: {
+      backgroundColor: CONST.MAIN_COLOR,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderRadius: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    addFriendText: {
+      color: 'white',
+      fontSize: 16,
+      fontWeight: '600',
     },
   })
 
@@ -203,68 +308,96 @@ const FriendsList = () => {
     )
   }
 
-  const renderFriend = ({ friend }) => (
-    <ListItem
-      style={{
-        height: 70,
-      }}
-      onPress={() => {
-        navigation.navigate('Chat', {
-          chatUuid: friend?.chatUuid,
-          contact: friend?.contact,
-        })
-      }}
-    >
-      {friend.unreadCount > 0 && (
-        <Badge
-          value={friend.unreadCount}
-          badgeStyle={{
-            backgroundColor: CONST.MAIN_COLOR,
-          }}
-          containerStyle={{ marginTop: -20 }}
-        />
-      )}
-      <FontAwesome5
-        name="user-edit"
-        size={30}
-        style={{
-          color: CONST.MAIN_COLOR,
-        }}
-        onPress={async () => {
-          await setFriendshipUuid(friend?.friendshipUuid)
-          setShowNamePicker(true)
-        }}
-      />
-      <FontAwesome
-        name="user-times"
-        size={30}
-        style={{
-          color: CONST.MAIN_COLOR,
-        }}
-        onPress={() =>
-          handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
-        }
-      />
-      <ListItem.Content>
-        <ListItem.Title>
-          <Text>{friend?.contact || 'Unnamed Friend'}</Text>
-        </ListItem.Title>
-        {friend.uuid2 === null && (
-          <ListItem.Subtitle>
-            <Text
-              style={{
-                color: 'red',
-              }}
-            >
-              pending confirmation
-            </Text>
-          </ListItem.Subtitle>
-        )}
-      </ListItem.Content>
+  const renderFriend = ({ friend }) => {
+    const displayName = friend?.contact || 'Unnamed Friend'
+    const isPending = friend.uuid2 === null
+    const hasUnread = friend.unreadCount > 0
 
-      <ListItem.Chevron size={40} color={CONST.MAIN_COLOR} />
-    </ListItem>
-  )
+    // console.log('Rendering friend object:', JSON.stringify(friend, null, 2));
+    // console.log('Value of friend.contact:', friend?.contact);
+    // console.log('Calculated displayName:', displayName);
+
+    return (
+      <View style={styles.friendItem}>
+        <TouchableOpacity
+          style={styles.friendContent}
+          onPress={() => {
+            if (!isPending) {
+              navigation.navigate('Chat', {
+                chatUuid: friend?.chatUuid,
+                contact: friend?.contact,
+              })
+            }
+          }}
+          disabled={isPending}
+        >
+          <View style={styles.friendHeader}>
+            <View style={styles.friendInfo}>
+              <Text
+                style={styles.friendName}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {displayName}
+              </Text>
+              {isPending ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <FontAwesome5
+                    name="clock"
+                    size={12}
+                    color="#ff6b35"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.pendingStatus}>
+                    Waiting for confirmation
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.friendStatus}>
+                  {hasUnread
+                    ? `${friend.unreadCount} new messages`
+                    : 'Tap to chat'}
+                </Text>
+              )}
+            </View>
+
+            <View style={styles.actionButtons}>
+              {hasUnread && (
+                <View style={styles.unreadBadge}>
+                  <Text style={styles.unreadText}>
+                    {friend.unreadCount > 99 ? '99+' : friend.unreadCount}
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={async () => {
+                  await setFriendshipUuid(friend?.friendshipUuid)
+                  setShowNamePicker(true)
+                }}
+              >
+                <FontAwesome5
+                  name="user-edit"
+                  size={18}
+                  color={CONST.MAIN_COLOR}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() =>
+                  handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
+                }
+              >
+                <FontAwesome name="user-times" size={18} color="#dc3545" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
+    )
+  }
 
   // const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
   //   navigation.navigate('LocalContacts', { friendshipUuid })
@@ -279,24 +412,26 @@ const FriendsList = () => {
           setContactName={setContactName}
           headerText={headerText}
         />
-        <Card
-          borderRadius={5}
-          containerStyle={{
-            borderWidth: 0,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              textAlign: 'center',
-              margin: 10,
-            }}
-          >
-            You don&apos;t have any friends yet. To start a conversation, send
-            invitation to a friend.
+        <View style={styles.emptyContainer}>
+          <FontAwesome5
+            name="user-friends"
+            size={64}
+            color="#e0e0e0"
+            style={{ marginBottom: 24 }}
+          />
+          <Text style={styles.emptyTitle}>No Friends Yet</Text>
+          <Text style={styles.emptySubtitle}>
+            Start connecting with friends by sending them an invitation.
+            {'\n'}They will receive a link to accept your friendship request.
           </Text>
-          {renderAddFriendButton()}
-        </Card>
+          <TouchableOpacity
+            style={styles.addFriendButton}
+            onPress={handleAddFriend}
+          >
+            <FontAwesome name="user-plus" size={16} color="white" />
+            <Text style={styles.addFriendText}>Add Your First Friend</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     )
   }
