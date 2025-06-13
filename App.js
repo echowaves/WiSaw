@@ -1,9 +1,4 @@
-/**
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+// React Native App
 
 import { useAtom } from 'jotai'
 import { useEffect } from 'react'
@@ -11,17 +6,22 @@ import { useEffect } from 'react'
 // import { StyleSheet, View } from 'react-native'
 import 'react-native-get-random-values'
 
-import { useWindowDimensions } from 'react-native'
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import Constants from 'expo-constants'
 import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 
 import { NavigationContainer } from '@react-navigation/native'
 
-import { createDrawerNavigator } from '@react-navigation/drawer'
+import {
+  createDrawerNavigator,
+  DrawerContentScrollView,
+  DrawerItemList,
+} from '@react-navigation/drawer'
 
-import { ThemeProvider, createTheme } from '@rneui/themed'
+import { createTheme, ThemeProvider } from '@rneui/themed'
 import Toast from 'react-native-toast-message'
 
 import { createStackNavigator } from '@react-navigation/stack'
@@ -48,6 +48,46 @@ import * as SecretReducer from './src/screens/Secret/reducer'
 
 const Drawer = createDrawerNavigator()
 const Stack = createStackNavigator()
+
+const styles = StyleSheet.create({
+  buildInfoContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    backgroundColor: '#f5f5f5',
+  },
+  buildInfoText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    fontFamily: 'monospace',
+  },
+})
+
+// Custom Drawer Content with Build Number
+function CustomDrawerContent(props) {
+  const buildNumber =
+    Constants.expoConfig?.ios?.buildNumber ||
+    Constants.expoConfig?.version ||
+    '299'
+  const appVersion = Constants.expoConfig?.version || '7.1.16'
+
+  return (
+    <View style={{ flex: 1 }}>
+      <DrawerContentScrollView
+        {...props}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+      <View style={styles.buildInfoContainer}>
+        <Text style={styles.buildInfoText}>
+          v{appVersion} ({buildNumber})
+        </Text>
+      </View>
+    </View>
+  )
+}
 
 const App = () => {
   const theme = createTheme({})
@@ -154,6 +194,7 @@ const App = () => {
       <NavigationContainer>
         <Drawer.Navigator
           screenOptions={{ gestureEnabled: true, headerShown: false }}
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Screen
             name="Home"
