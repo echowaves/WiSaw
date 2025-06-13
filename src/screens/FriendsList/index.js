@@ -11,8 +11,8 @@ import {
 
 import { Badge, Card, ListItem, Text } from '@rneui/themed'
 
-import Toast from 'react-native-toast-message'
 import FlatGrid from 'react-native-super-grid'
+import Toast from 'react-native-toast-message'
 
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 

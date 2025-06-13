@@ -87,7 +87,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
         uuid,
       },
     })
-    
+
     const { friendship, chat, chatUser } = result.data.acceptFriendshipRequest
     // console.log({ friendship, chat, chatUser })
     return { friendship, chat, chatUser }
