@@ -41,7 +41,7 @@ export const PENDING_UPLOADS_FOLDER_CHAT = `${FileSystem.documentDirectory}pendi
 export const PENDING_UPLOADS_KEY = 'PENDING_UPLOADS'
 export const PENDING_CHAT_UPLOADS_KEY = 'PENDING_CHAT_UPLOADS'
 
-export const FRIENDSHIP_PREFIX = 'FRIENDSHIP'
+export const FRIENDSHIP_PREFIX = 'FRIENDSHIP-'
 
 const authLink = setContext((_, { headers }) => {
   const token = API_KEY

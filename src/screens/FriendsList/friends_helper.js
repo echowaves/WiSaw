@@ -4,14 +4,14 @@ import { Storage } from 'expo-storage'
 import * as CONST from '../../consts'
 
 export const addFriendshipLocally = async ({ friendshipUuid, contactName }) => {
-  const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
+  const key = `${CONST.FRIENDSHIP_PREFIX}${friendshipUuid}`
   await Storage.removeItem({ key }) // always cleanup first
   await Storage.setItem({ key, value: contactName })
 }
 
 export const deleteFriendship = async ({ friendshipUuid }) => {
   // cleanup local contact
-  const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
+  const key = `${CONST.FRIENDSHIP_PREFIX}${friendshipUuid}`
   await Storage.removeItem({ key })
 
   const { deleteFriendship: deleteFriendshipResult } = (
@@ -109,7 +109,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
 // Helper functions defined before they are used
 const getLocalContact = async ({ friendshipUuid }) => {
   try {
-    const key = `${CONST.FRIENDSHIP_PREFIX}:${friendshipUuid}`
+    const key = `${CONST.FRIENDSHIP_PREFIX}${friendshipUuid}`
     const localFriendshipName = await Storage.getItem({ key })
     if (!localFriendshipName) {
       return null
