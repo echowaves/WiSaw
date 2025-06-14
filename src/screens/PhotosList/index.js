@@ -15,6 +15,7 @@ import Toast from 'react-native-toast-message'
 
 import * as BackgroundTask from 'expo-background-task'
 import * as TaskManager from 'expo-task-manager'
+import * as Haptics from 'expo-haptics'
 
 import useKeyboard from '@rnhooks/keyboard'
 import { CacheManager } from 'expo-cached-image'
@@ -467,10 +468,18 @@ const PhotosList = () => {
   }
 
   const updateIndex = async (index) => {
+    // Provide haptic feedback for better UX
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    } catch (error) {
+      // Haptics might not be available on all devices - fail silently
+    }
+
     if (activeSegment !== index) {
       setActiveSegment(index)
-      reload()
     }
+    // Always reload content when any segment is clicked (including current one)
+    reload()
   }
 
   const renderHeaderTitle = () => (
