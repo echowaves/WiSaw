@@ -18,10 +18,10 @@ To see your and others photos visit https://www.wisaw.com
 
 ## Download WiSaw:
 
-<p align="center" style="line-height: 0;">
+<p align="center" style="line-height: 0; vertical-align: top;">
 <a href="http://itunes.apple.com/us/app/wisaw/id1299949122" style="text-decoration: none; display: inline-block;">
     <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" alt="Download on the App Store" width="180" style="display: inline-block; vertical-align: top;">
-</a>&nbsp;&nbsp;
+</a>
 <a href="http://play.google.com/store/apps/details?id=com.echowaves.wisaw" style="text-decoration: none; display: inline-block;">
     <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" width="220" style="display: inline-block; vertical-align: top;">
 </a>
