@@ -6,14 +6,7 @@ import { useEffect } from 'react'
 // import { StyleSheet, View } from 'react-native'
 import 'react-native-get-random-values'
 
-import {
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-  TouchableOpacity,
-  Animated,
-} from 'react-native'
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import Constants from 'expo-constants'
