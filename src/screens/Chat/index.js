@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai'
 
 import { useNavigation } from '@react-navigation/native'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import * as MediaLibrary from 'expo-media-library'
 import moment from 'moment'
@@ -43,8 +43,8 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import subscriptionClient from '../../subscriptionClientWs'
 
-import ChatPhoto from './ChatPhoto'
 import ModernHeaderButton from '../../components/ModernHeaderButton'
+import ChatPhoto from './ChatPhoto'
 
 const Chat = ({ route }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)

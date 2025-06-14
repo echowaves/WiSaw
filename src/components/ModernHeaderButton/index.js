@@ -1,6 +1,5 @@
-import React from 'react'
-import { TouchableOpacity, View, StyleSheet } from 'react-native'
 import { FontAwesome } from '@expo/vector-icons'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import * as CONST from '../../consts'
 
 const styles = StyleSheet.create({

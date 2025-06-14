@@ -44,7 +44,6 @@ import FlatGrid from 'react-native-super-grid'
 import {
   Badge,
   Button,
-  ButtonGroup,
   Card,
   Divider,
   LinearProgress,
