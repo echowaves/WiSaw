@@ -6,7 +6,14 @@ import { useEffect } from 'react'
 // import { StyleSheet, View } from 'react-native'
 import 'react-native-get-random-values'
 
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native'
+import {
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+  TouchableOpacity,
+  Animated,
+} from 'react-native'
 
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import Constants from 'expo-constants'
@@ -63,22 +70,38 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
   },
   drawerHeader: {
-    height: 120,
-    backgroundColor: CONST.HEADER_GRADIENT_END,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: CONST.HEADER_BORDER_COLOR,
+    height: 160,
+    backgroundColor: CONST.MAIN_COLOR,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+    paddingLeft: 20,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   drawerHeaderText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: CONST.MAIN_COLOR,
-    marginTop: 20,
+    fontSize: 32,
+    fontWeight: '700',
+    color: 'white',
+    letterSpacing: 1,
+  },
+  drawerSubtext: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 4,
+    fontWeight: '400',
   },
 })
 
-// Custom Drawer Content with Build Number
+// Custom Drawer Content with Modern Design
 function CustomDrawerContent(props) {
   const buildNumber =
     Constants.expoConfig?.ios?.buildNumber ||
@@ -87,19 +110,47 @@ function CustomDrawerContent(props) {
   const appVersion = Constants.expoConfig?.version || '7.1.16'
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
       <View style={styles.drawerHeader}>
         <Text style={styles.drawerHeaderText}>WiSaw</Text>
+        <Text style={styles.drawerSubtext}>Capture & Share Moments</Text>
       </View>
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingTop: 20,
+        }}
+        showsVerticalScrollIndicator={false}
       >
-        <DrawerItemList {...props} />
+        <View style={{ paddingHorizontal: 10 }}>
+          <DrawerItemList {...props} />
+        </View>
       </DrawerContentScrollView>
-      <View style={styles.buildInfoContainer}>
-        <Text style={styles.buildInfoText}>
-          v{appVersion} ({buildNumber})
+
+      <View
+        style={[
+          styles.buildInfoContainer,
+          {
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            margin: 15,
+            padding: 15,
+            borderRadius: 12,
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.buildInfoText,
+            {
+              fontSize: 13,
+              color: '#666',
+              textAlign: 'center',
+              fontWeight: '500',
+            },
+          ]}
+        >
+          Version {appVersion} • Build {buildNumber}
         </Text>
       </View>
     </View>
@@ -252,6 +303,25 @@ const App = () => {
               color: CONST.TEXT_COLOR,
             },
             headerTintColor: CONST.MAIN_COLOR,
+            drawerStyle: {
+              backgroundColor: '#FAFAFA',
+              width: 280,
+            },
+            drawerActiveTintColor: 'white',
+            drawerActiveBackgroundColor: CONST.MAIN_COLOR,
+            drawerInactiveTintColor: '#666',
+            drawerItemStyle: {
+              borderRadius: 12,
+              marginVertical: 4,
+              marginHorizontal: 8,
+              paddingHorizontal: 12,
+            },
+            drawerLabelStyle: {
+              fontSize: 16,
+              fontWeight: '600',
+              marginLeft: -10,
+              textTransform: 'capitalize',
+            },
           }}
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
@@ -259,14 +329,10 @@ const App = () => {
             name="Home"
             // component={MyStack}
             options={{
-              drawerIcon: (config) => (
-                <FontAwesome
-                  name="chevron-left"
-                  size={30}
-                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
-                />
+              drawerIcon: ({ color, size }) => (
+                <FontAwesome5 name="home" size={22} color={color} />
               ),
-              drawerLabel: '',
+              drawerLabel: 'Home',
             }}
           >
             {(props) => MyStack()}
@@ -275,14 +341,10 @@ const App = () => {
             name="SecretScreen"
             component={IdentityScreen}
             options={{
-              drawerIcon: (config) => (
-                <FontAwesome
-                  name="user-secret"
-                  size={30}
-                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
-                />
+              drawerIcon: ({ color, size }) => (
+                <FontAwesome name="user-secret" size={22} color={color} />
               ),
-              drawerLabel: 'secret',
+              drawerLabel: 'Identity',
               headerShown: true,
             }}
           />
@@ -290,14 +352,10 @@ const App = () => {
             name="FriendsList"
             component={FriendsList}
             options={{
-              drawerIcon: (config) => (
-                <FontAwesome5
-                  name="user-friends"
-                  size={30}
-                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
-                />
+              drawerIcon: ({ color, size }) => (
+                <FontAwesome5 name="user-friends" size={22} color={color} />
               ),
-              drawerLabel: 'friends',
+              drawerLabel: 'Friends',
               headerShown: true,
             }}
           />
@@ -306,14 +364,10 @@ const App = () => {
             name="Feedback"
             component={FeedbackScreen}
             options={{
-              drawerIcon: (config) => (
-                <MaterialIcons
-                  name="feedback"
-                  size={30}
-                  style={{ marginLeft: 10, color: CONST.MAIN_COLOR, width: 60 }}
-                />
+              drawerIcon: ({ color, size }) => (
+                <MaterialIcons name="feedback" size={22} color={color} />
               ),
-              drawerLabel: 'feedback',
+              drawerLabel: 'Feedback',
               headerShown: true,
             }}
           />
