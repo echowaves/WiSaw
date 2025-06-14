@@ -258,7 +258,7 @@ const PhotosList = () => {
     return false
   }
 
-  const load = async () => {
+  const load = async (segmentOverride = null) => {
     setLoading(true)
     const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
@@ -267,7 +267,7 @@ const PhotosList = () => {
       netAvailable,
       searchTerm,
       topOffset,
-      activeSegment,
+      activeSegment: segmentOverride !== null ? segmentOverride : activeSegment,
       batch: currentBatch, // clone
       pageNumber,
     })
@@ -439,10 +439,9 @@ const PhotosList = () => {
     return Promise.resolve()
   }
 
-  const reload = async () => {
+  const reload = async (segmentOverride = null) => {
     currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
-    load()
-
+    
     setStopLoading(false)
     setPageNumber(null)
     setPhotosList([])
@@ -463,6 +462,9 @@ const PhotosList = () => {
 
       setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     }
+    
+    // Load new content after state is reset, using the specific segment if provided
+    load(segmentOverride)
     // setPendingPhotos(await reducer.getQueue())
     // load()
   }
@@ -475,11 +477,17 @@ const PhotosList = () => {
       // Haptics might not be available on all devices - fail silently
     }
 
+    // Immediately reset state when switching segments to prevent showing old data
+    setPhotosList([])
+    setStopLoading(false)
+    setPageNumber(null)
+    
     if (activeSegment !== index) {
       setActiveSegment(index)
     }
     // Always reload content when any segment is clicked (including current one)
-    reload()
+    // Pass the new segment index directly to ensure immediate use
+    reload(index)
   }
 
   const renderHeaderTitle = () => (
