@@ -60,6 +60,7 @@ import * as reducer from './reducer'
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
+import EmptyStateCard from '../../components/EmptyStateCard'
 import Thumb from '../../components/Thumb'
 import ThumbPending from '../../components/ThumbPending'
 import ThumbWithComments from '../../components/ThumbWithComments'
@@ -1152,9 +1153,14 @@ const PhotosList = () => {
   if (!netAvailable) {
     return (
       <View style={styles.container}>
-        {renderRefresheable(
-          'No network available, you can still snap photos -- they will be uploaded later.',
-        )}
+        <EmptyStateCard
+          icon="wifi-off"
+          iconType="MaterialIcons"
+          title="No Internet Connection"
+          subtitle="You can still take photos offline. They'll be uploaded automatically when you're back online."
+          actionText="Try Again"
+          onActionPress={reload}
+        />
         {renderPendingPhotos()}
         {renderFooter({ unreadCount })}
       </View>
@@ -1241,9 +1247,14 @@ const PhotosList = () => {
   if (!location) {
     return (
       <View style={styles.container}>
-        {renderRefresheable(
-          'Acquiring location, make sure to enable Location Service.',
-        )}
+        <EmptyStateCard
+          icon="location-on"
+          iconType="MaterialIcons"
+          title="Location Access Needed"
+          subtitle="WiSaw needs location access to show you photos from your area and let others discover your content."
+          actionText="Enable Location"
+          onActionPress={reload}
+        />
         {renderPendingPhotos()}
         {renderFooter({ renderFooter })}
       </View>
@@ -1251,21 +1262,60 @@ const PhotosList = () => {
   }
 
   if (photosList?.length === 0 && stopLoading) {
+    const getEmptyStateProps = () => {
+      switch (activeSegment) {
+        case 0: // Global photos
+          return {
+            icon: 'globe',
+            title: 'No Photos in Your Area',
+            subtitle:
+              "Be the first to share a moment! Take a photo and let others discover what's happening around you.",
+            actionText: 'Take a Photo',
+            onActionPress: () => {
+              // TODO: Add photo taking functionality
+              reload()
+            },
+          }
+        case 1: // Starred photos
+          return {
+            icon: 'star',
+            title: 'No Starred Content Yet',
+            subtitle:
+              "Start building your collection! Take photos, comment on others' posts, or star content you love.",
+            actionText: 'Discover Content',
+            onActionPress: () => {
+              // Switch to global view to discover content
+              updateIndex(0)
+            },
+          }
+        case 2: // Search
+          return {
+            icon: 'search',
+            title: 'No Results Found',
+            subtitle:
+              "Try different keywords or explore what's trending in your area.",
+            actionText: 'Clear Search',
+            onActionPress: () => {
+              // TODO: Clear search and reload
+              reload()
+            },
+          }
+        default:
+          return {
+            icon: 'photo',
+            iconType: 'MaterialIcons',
+            title: 'No Photos Available',
+            subtitle: 'Start your journey by taking your first photo!',
+            actionText: 'Get Started',
+            onActionPress: reload,
+          }
+      }
+    }
+
     return (
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(true)}
-        {activeSegment === 2 &&
-          renderRefresheable(
-            'Nothing found. Try to search for something else.',
-          )}
-        {activeSegment === 0 &&
-          renderRefresheable(
-            'No Photos found in your location. Try to take some photos.',
-          )}
-        {activeSegment === 1 &&
-          renderRefresheable(
-            `Don't have anything Starred? Try to take a photo, comment on other's photos, or Star somebody else's photo -- they will all appear here.`,
-          )}
+        <EmptyStateCard {...getEmptyStateProps()} />
         {renderPendingPhotos()}
         {renderFooter({ unreadCount })}
       </View>
