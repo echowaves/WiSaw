@@ -1,14 +1,13 @@
-import React, { useEffect, useRef /* useState */ } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
-import { AntDesign, FontAwesome } from '@expo/vector-icons'
+import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 
-import // View,
-'react-native'
+import { StatusBar, StyleSheet, View } from 'react-native'
 
 import { Text } from '@rneui/themed'
 
@@ -19,6 +18,32 @@ import Photo from '../../components/Photo'
 import { getPhotos } from '../PhotosList/reducer'
 
 import * as CONST from '../../consts'
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  headerButton: {
+    padding: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 8,
+  },
+  headerIcon: {
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+})
 
 const PhotosDetails = ({ route }) => {
   const { index, photosList, searchTerm, activeSegment, topOffset, uuid } =
@@ -32,46 +57,74 @@ const PhotosDetails = ({ route }) => {
     switch (activeSegment) {
       case 0:
         return (
-          <FontAwesome
-            name="globe"
-            size={30}
-            style={{ color: CONST.SECONDARY_COLOR }}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome
+              name="globe"
+              size={20}
+              color="#fff"
+              style={styles.headerIcon}
+            />
+            <Text style={[styles.headerTitle, { marginLeft: 8 }]}>
+              All Photos
+            </Text>
+          </View>
         )
       case 1:
         return (
-          <AntDesign
-            name="star"
-            size={30}
-            style={{ color: CONST.SECONDARY_COLOR }}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <AntDesign
+              name="star"
+              size={20}
+              color="#FFD700"
+              style={styles.headerIcon}
+            />
+            <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Starred</Text>
+          </View>
         )
       case 2:
         return (
-          <Text style={{ color: CONST.SECONDARY_COLOR }}>{searchTerm}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#4FC3F7"
+              style={styles.headerIcon}
+            />
+            <Text
+              style={[styles.headerTitle, { marginLeft: 8 }]}
+              numberOfLines={1}
+            >
+              {searchTerm || 'Search'}
+            </Text>
+          </View>
         )
       default:
         return (
-          <FontAwesome
-            name="globe"
-            size={30}
-            style={{ color: CONST.SECONDARY_COLOR }}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <FontAwesome
+              name="globe"
+              size={20}
+              color="#fff"
+              style={styles.headerIcon}
+            />
+            <Text style={[styles.headerTitle, { marginLeft: 8 }]}>
+              All Photos
+            </Text>
+          </View>
         )
     }
   }
 
   const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => navigation.goBack()}
-    />
+    <View style={styles.headerButton}>
+      <Ionicons
+        name="chevron-back"
+        size={24}
+        color="#fff"
+        style={styles.headerIcon}
+        onPress={() => navigation.goBack()}
+      />
+    </View>
   )
 
   useEffect(() => {
@@ -79,52 +132,61 @@ const PhotosDetails = ({ route }) => {
       headerTitle: renderHeaderTitle,
       headerLeft: renderHeaderLeft,
       headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        borderBottomWidth: 0,
+        elevation: 0,
+        shadowOpacity: 0,
       },
+      headerTitleAlign: 'center',
+      headerTransparent: true,
     })
-  }, [])
+  }, [activeSegment, searchTerm])
 
   return (
-    // <GestureHandlerRootView>
-    <Swiper
-      ref={swiper}
-      keyboardShouldPersistTaps="always"
-      removeClippedSubviews={false}
-      // height="100%"
-      // width="100%"
-      bounces
-      autoplay={false}
-      horizontal
-      loop={false}
-      index={index}
-      onIndexChanged={(newIndex) => {
-        if (newIndex > photosList.length - 5) {
-          getPhotos() // pre-load more photos when nearing the end
-        }
-        if (newIndex === 0 || newIndex === photosList.length - 1) {
-          Toast.show({
-            text1: 'No scrolling beyond this point',
-            topOffset,
-            visibilityTime: 500,
-          })
-        }
-      }} // otherwise will jump to wrong photo onLayout
-      loadMinimal
-      scrollEnabled
-      loadMinimalSize={1}
-      showsPagination={false}
-      pagingEnabled
-    >
-      {photosList.map((photo) => (
-        <Photo
-          photo={photo}
-          key={photo.id}
-          swiper={swiper}
-          photosList={photosList}
-        />
-      ))}
-    </Swiper>
-    // </GestureHandlerRootView>
+    <View style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+      <Swiper
+        ref={swiper}
+        keyboardShouldPersistTaps="always"
+        removeClippedSubviews={false}
+        bounces
+        autoplay={false}
+        horizontal
+        loop={false}
+        index={index}
+        onIndexChanged={(newIndex) => {
+          if (newIndex > photosList.length - 5) {
+            getPhotos() // pre-load more photos when nearing the end
+          }
+          if (newIndex === 0 || newIndex === photosList.length - 1) {
+            Toast.show({
+              text1: 'No scrolling beyond this point',
+              topOffset,
+              visibilityTime: 500,
+            })
+          }
+        }}
+        loadMinimal
+        scrollEnabled
+        loadMinimalSize={1}
+        showsPagination={false}
+        pagingEnabled
+        style={{ backgroundColor: '#000' }}
+      >
+        {photosList.map((photo) => (
+          <Photo
+            photo={photo}
+            key={photo.id}
+            swiper={swiper}
+            photosList={photosList}
+          />
+        ))}
+      </Swiper>
+    </View>
   )
 }
 

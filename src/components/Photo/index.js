@@ -20,10 +20,6 @@ import { Badge, Card, Divider, LinearProgress, Text } from '@rneui/themed'
 
 import { Col, Grid, Row } from 'react-native-easy-grid'
 
-// import ReactNativeZoomableView from '@openspacelabs/react-native-zoomable-view/src/ReactNativeZoomableView'
-
-// import ImageZoom from 'react-native-image-pan-zoom'
-
 import PropTypes from 'prop-types'
 
 import { useEvent } from 'expo'
@@ -38,6 +34,150 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
 import ImageView from './ImageView'
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  contentContainer: {
+    backgroundColor: '#000',
+    paddingBottom: 120,
+  },
+  headerInfo: {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    padding: 16,
+    margin: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  authorRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  authorName: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    flexShrink: 1,
+    marginRight: 12,
+  },
+  dateText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
+    textAlign: 'right',
+    flexShrink: 0,
+  },
+  statsText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  commentsSection: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    margin: 12,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  commentCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    marginHorizontal: 12,
+    marginVertical: 6,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  commentText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+  commentMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  commentAuthor: {
+    color: '#4FC3F7',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  commentDate: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 12,
+  },
+  addCommentButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    marginHorizontal: 12,
+    marginVertical: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(79, 195, 247, 0.3)',
+    borderStyle: 'dashed',
+  },
+  addCommentContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCommentText: {
+    color: '#4FC3F7',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backdropFilter: 'blur(20px)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  footerGrid: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  footerButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    marginHorizontal: 4,
+    minHeight: 60,
+  },
+  footerButtonText: {
+    fontSize: 11,
+    marginTop: 6,
+    fontWeight: '600',
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+})
 
 const Photo = ({ photo }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -144,75 +284,57 @@ const Photo = ({ photo }) => {
   }
 
   const renderCommentsStats = () => {
-    // console.log({ friendsList })
-
-    if (!photoDetails?.comments || photoDetails?.comments?.length === 0) {
-      return (
-        <View style={{ flex: 1, flexDirection: 'row' }}>
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                marginLeft: 10,
-                color: CONST.MAIN_COLOR,
-              }}
-            >
-              {friendsHelper.getLocalContactName({
-                uuid,
-                friendUuid: photo.uuid,
-                friendsList,
-              })}
-              {'\n'}
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                marginRight: 10,
-                color: CONST.MAIN_COLOR,
-                textAlign: 'right',
-              }}
-            >
-              {renderDateTime(photo.createdAt)}
-            </Text>
-            <Text />
-          </View>
-        </View>
-      )
-    }
+    const authorName = friendsHelper.getLocalContactName({
+      uuid,
+      friendUuid: photo.uuid,
+      friendsList,
+    })
+    
+    const commentsCount = photoDetails?.comments?.length || 0
+    const watchersCount = photoDetails?.watchersCount || 0
 
     return (
-      <View style={{ flex: 1, flexDirection: 'row' }}>
-        <View style={{ flex: 1 }}>
+      <View style={styles.headerInfo}>
+        <View style={styles.authorRow}>
           <Text
-            style={{
-              marginLeft: 10,
-              color: CONST.MAIN_COLOR,
-            }}
+            style={styles.authorName}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
-            {friendsHelper.getLocalContactName({
-              uuid,
-              friendUuid: photo.uuid,
-              friendsList,
-            })}
-            {'\n'}
-            {photoDetails?.comments ? photoDetails?.comments?.length : 0}{' '}
-            Comment
-            {(photoDetails?.comments ? photoDetails?.comments?.length : 0) !== 1
-              ? 's'
-              : ''}
+            {authorName}
           </Text>
+          <Text style={styles.dateText}>{renderDateTime(photo.createdAt)}</Text>
         </View>
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{
-              marginRight: 10,
-              color: CONST.MAIN_COLOR,
-              textAlign: 'right',
-            }}
+        
+        {(commentsCount > 0 || watchersCount > 0) && (
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}
           >
-            {renderDateTime(photo.createdAt)}
-          </Text>
-        </View>
+            {commentsCount > 0 && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginRight: 16,
+                }}
+              >
+                <FontAwesome name="comment" size={14} color="#4FC3F7" />
+                <Text style={[styles.statsText, { marginLeft: 6 }]}>
+                  {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
+                </Text>
+              </View>
+            )}
+            
+            {watchersCount > 0 && (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <AntDesign name="star" size={14} color="#FFD700" />
+                <Text style={[styles.statsText, { marginLeft: 6 }]}>
+                  {watchersCount} Star{watchersCount !== 1 ? 's' : ''}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
       </View>
     )
   }
@@ -273,75 +395,40 @@ const Photo = ({ photo }) => {
   const renderCommentsRows = () => {
     if (photoDetails?.comments) {
       return (
-        <View>
+        <View style={styles.commentsSection}>
           {photoDetails?.comments.map((comment, i) => (
-            <Row key={comment.id}>
-              <TouchableOpacity
-                onPress={() => {
-                  setPhotoDetails(
-                    reducer.toggleCommentButtons({
-                      photoDetails,
-                      commentId: comment.id,
-                    }),
-                  )
-                }}
-              >
-                <Card
-                  width={width - 30}
-                  containerStyle={{
-                    paddingTop: 5,
-                    paddingBottom: 5,
-                    marginTop: 5,
-                    marginBottom: 5,
-                    borderWidth: 0,
-                    elevation: 0,
-                    shadowColor: 'rgba(0,0,0, .2)',
-                    shadowOffset: { height: 0, width: 0 },
-                    shadowOpacity: 0, // default is 1
-                    shadowRadius: 0, // default is 1
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: CONST.TEXT_COLOR,
-                      fontSize: 20,
-                    }}
-                  >
-                    {comment.comment}
-                  </Text>
-                  {renderCommentButtons({ comment })}
-                </Card>
+            <TouchableOpacity
+              key={comment.id}
+              onPress={() => {
+                setPhotoDetails(
+                  reducer.toggleCommentButtons({
+                    photoDetails,
+                    commentId: comment.id,
+                  }),
+                )
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.commentCard}>
+                <Text style={styles.commentText}>{comment.comment}</Text>
+                
                 {!comment.hiddenButtons && (
-                  <View style={{ flex: 1, flexDirection: 'row' }}>
-                    <Text
-                      style={{
-                        color: CONST.MAIN_COLOR,
-                        // fontSize: 10,
-                        marginLeft: 10,
-                      }}
-                    >
+                  <View style={styles.commentMeta}>
+                    <Text style={styles.commentAuthor}>
                       {friendsHelper.getLocalContactName({
                         uuid,
                         friendUuid: comment.uuid,
                         friendsList,
                       })}
                     </Text>
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          marginRight: 10,
-                          color: CONST.MAIN_COLOR,
-                          textAlign: 'right',
-                        }}
-                      >
-                        {renderDateTime(comment.updatedAt)}
-                      </Text>
-                    </View>
+                    <Text style={styles.commentDate}>
+                      {renderDateTime(comment.updatedAt)}
+                    </Text>
                   </View>
                 )}
-                <Divider />
-              </TouchableOpacity>
-            </Row>
+                {renderCommentButtons({ comment })}
+              </View>
+            </TouchableOpacity>
           ))}
         </View>
       )
@@ -355,10 +442,7 @@ const Photo = ({ photo }) => {
     }
     return (
       <TouchableOpacity
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-        }}
+        style={styles.addCommentButton}
         onPress={() =>
           navigation.navigate('ModalInputTextScreen', {
             photo,
@@ -366,30 +450,17 @@ const Photo = ({ photo }) => {
             topOffset,
           })
         }
+        activeOpacity={0.8}
       >
-        <Col size={2} />
-        <Col
-          size={6}
-          style={{ flex: 3, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <Text
-            style={{
-              fontSize: 25,
-              color: CONST.MAIN_COLOR,
-            }}
-          >
-            add comment
-          </Text>
-        </Col>
-        <Col size={2}>
+        <View style={styles.addCommentContent}>
           <Ionicons
             name="add-circle"
-            style={{
-              fontSize: 45,
-              color: CONST.MAIN_COLOR,
-            }}
+            size={24}
+            color="#4FC3F7"
+            style={{ marginRight: 12 }}
           />
-        </Col>
+          <Text style={styles.addCommentText}>Add Comment</Text>
+        </View>
       </TouchableOpacity>
     )
   }
@@ -627,181 +698,135 @@ const Photo = ({ photo }) => {
   }
 
   const renderFooter = () => (
-    <SafeAreaView
-      style={{
-        backgroundColor: CONST.NAV_COLOR,
-        width,
-        borderWidth: 0.5,
-        borderColor: 'rgba(100,100,100,0.1)',
-        height: 85,
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        left: 0,
-      }}
-    >
+    <SafeAreaView style={styles.footer}>
       {photoDetails?.isPhotoWatched === undefined && (
         <LinearProgress
-          color={CONST.MAIN_COLOR}
+          color="#4FC3F7"
           style={{
             position: 'absolute',
-            bottom: 0,
+            top: 0,
             right: 0,
             left: 0,
+            height: 2,
           }}
         />
       )}
       {photoDetails?.isPhotoWatched !== undefined && (
-        <Grid
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 0,
-            left: 0,
-          }}
-        >
-          {/* delete button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={() => handleDelete()}
-          >
-            <FontAwesome
-              name="trash"
-              style={{
-                color: photoDetails?.isPhotoWatched
-                  ? CONST.SECONDARY_COLOR
-                  : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Delete</Text>
-          </Col>
-          {/* ban button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={() => handleBan()}
-          >
-            <FontAwesome
-              name="ban"
-              style={{
-                color:
-                  photoDetails?.isPhotoWatched || isPhotoBannedByMe()
-                    ? CONST.SECONDARY_COLOR
-                    : CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Report Abuse</Text>
-          </Col>
-          {/* watch button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={async () => {
-              handleFlipWatch()
-            }}
-          >
-            {photoDetails.watchersCount > 0 && (
-              <Badge
-                badgeStyle={{
-                  backgroundColor: CONST.MAIN_COLOR,
-                }}
-                containerStyle={{ position: 'absolute', top: -9, right: -9 }}
-                value={photoDetails.watchersCount}
+        <Grid style={styles.footerGrid}>
+          {/* Delete button */}
+          <Col>
+            <TouchableOpacity
+              style={styles.footerButton}
+              onPress={() => handleDelete()}
+              activeOpacity={0.7}
+            >
+              <FontAwesome
+                name="trash"
+                color={
+                  photoDetails?.isPhotoWatched
+                    ? 'rgba(255, 255, 255, 0.5)'
+                    : '#FF6B6B'
+                }
+                size={24}
               />
-            )}
-            <AntDesign
-              name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
-              style={{
-                color: CONST.MAIN_COLOR,
-              }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>
-              {`${photoDetails?.isPhotoWatched ? 'un-Star' : 'Star'}`}
-            </Text>
+              <Text
+                style={[
+                  styles.footerButtonText,
+                  {
+                    color: photoDetails?.isPhotoWatched
+                      ? 'rgba(255, 255, 255, 0.5)'
+                      : '#FF6B6B',
+                  },
+                ]}
+              >
+                Delete
+              </Text>
+            </TouchableOpacity>
           </Col>
-          {/* share button */}
-          <Col
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={async () => {
-              try {
-                const currentShareData = {
-                  type: 'photo',
-                  photo,
-                  photoDetails,
-                }
 
-                const result =
-                  await sharingHelper.shareWithNativeSheet(currentShareData)
-
-                if (result?.success) {
-                  Toast.show({
-                    text1: 'Shared successfully!',
-                    text2: result.activityType
-                      ? `Shared via ${result.activityType}`
-                      : '',
-                    type: 'success',
-                    topOffset,
-                  })
-                } else if (result && !result.success && !result.dismissed) {
-                  const message =
-                    result.reason || 'Sharing action was not successful.'
-                  Toast.show({
-                    text1: 'Sharing failed',
-                    text2: message,
-                    type: 'error',
-                    topOffset,
-                  })
+          {/* Star button */}
+          <Col>
+            <TouchableOpacity
+              style={styles.footerButton}
+              onPress={() => handleFlipWatch()}
+              activeOpacity={0.7}
+            >
+              <AntDesign
+                name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
+                color={
+                  photoDetails?.isPhotoWatched
+                    ? '#FFD700'
+                    : 'rgba(255, 255, 255, 0.7)'
                 }
-              } catch (shareError) {
-                const message = shareError.message || 'Unable to share content'
-                Toast.show({
-                  text1: 'Sharing failed',
-                  text2: message,
-                  type: 'error',
-                  topOffset,
-                })
-              }
-            }}
-          >
-            <FontAwesome
-              name="share"
-              style={{
-                color: CONST.MAIN_COLOR,
+                size={24}
+              />
+              <Text
+                style={[
+                  styles.footerButtonText,
+                  {
+                    color: photoDetails?.isPhotoWatched
+                      ? '#FFD700'
+                      : 'rgba(255, 255, 255, 0.7)',
+                  },
+                ]}
+              >
+                {photoDetails?.isPhotoWatched ? 'Starred' : 'Star'}
+              </Text>
+            </TouchableOpacity>
+          </Col>
+
+          {/* Share button */}
+          <Col>
+            <TouchableOpacity
+              style={styles.footerButton}
+              onPress={() => {
+                // Use the sharing helper to share the photo
+                sharingHelper.sharePhoto({ photo, topOffset })
               }}
-              size={30}
-            />
-            <Text style={{ fontSize: 10 }}>Share</Text>
+              activeOpacity={0.7}
+            >
+              <Ionicons name="share-outline" color="#4FC3F7" size={24} />
+              <Text style={[styles.footerButtonText, { color: '#4FC3F7' }]}>
+                Share
+              </Text>
+            </TouchableOpacity>
+          </Col>
+
+          {/* Report/Ban button */}
+          <Col>
+            <TouchableOpacity
+              style={styles.footerButton}
+              onPress={() => handleBan()}
+              activeOpacity={0.7}
+            >
+              <FontAwesome
+                name="ban"
+                color={
+                  photoDetails?.isPhotoWatched || isPhotoBannedByMe()
+                    ? 'rgba(255, 255, 255, 0.5)'
+                    : '#FF9500'
+                }
+                size={24}
+              />
+              <Text
+                style={[
+                  styles.footerButtonText,
+                  {
+                    color:
+                      photoDetails?.isPhotoWatched || isPhotoBannedByMe()
+                        ? 'rgba(255, 255, 255, 0.5)'
+                        : '#FF9500',
+                  },
+                ]}
+              >
+                Report
+              </Text>
+            </TouchableOpacity>
           </Col>
         </Grid>
       )}
     </SafeAreaView>
   )
-
-  const styles = StyleSheet.create({
-    photoContainer: {
-      width,
-      height,
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      left: 0,
-      backgroundColor: 'transparent',
-    },
-  })
 
   const renderPhotoRow = () => {
     if (!photo.video) {
@@ -891,22 +916,22 @@ const Photo = ({ photo }) => {
   }
 
   return (
-    <View>
+    <View style={styles.container}>
       <ScrollView
-        // disableScrollViewPanResponder
-        // nestedScrollEnabled
-        // overScrollMode="always"
-        showsVerticalScrollIndicator
-        style={{ margin: 1, backgroundColor: 'white' }}
+        showsVerticalScrollIndicator={false}
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
       >
         {renderPhotoRow()}
         <Grid>
           <Row>{renderCommentsStats()}</Row>
-          <Row>{renderCommentsRows()}</Row>
-          <Row>{renderAddCommentsRow()}</Row>
+        </Grid>
+        {renderCommentsRows()}
+        {renderAddCommentsRow()}
+        <Grid>
           <Divider />
           <Row>{renderRecognitions()}</Row>
-          <Row style={{ height: 110 }} />
+          <Row style={{ height: 120 }} />
         </Grid>
       </ScrollView>
       {renderFooter()}
