@@ -14,6 +14,11 @@ This works best for events, large and small. Wedding or celebration party, at a 
 
 To see your and others photos visit https://www.wisaw.com
 
+Download WiSaw:
+
+[![Download on the App Store](assets/app-store-badge.png){width=200px}](http://itunes.apple.com/us/app/wisaw/id1299949122)
+[![Get it on Google Play](assets/google-play-badge.png){width=200px}](http://play.google.com/store/apps/details?id=com.echowaves.wisaw)
+
 
 
 ## ApolloClient config
