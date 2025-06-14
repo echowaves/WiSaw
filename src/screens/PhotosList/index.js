@@ -14,8 +14,8 @@ import * as Location from 'expo-location'
 import Toast from 'react-native-toast-message'
 
 import * as BackgroundTask from 'expo-background-task'
-import * as TaskManager from 'expo-task-manager'
 import * as Haptics from 'expo-haptics'
+import * as TaskManager from 'expo-task-manager'
 
 import useKeyboard from '@rnhooks/keyboard'
 import { CacheManager } from 'expo-cached-image'
@@ -441,7 +441,7 @@ const PhotosList = () => {
 
   const reload = async (segmentOverride = null) => {
     currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
-    
+
     setStopLoading(false)
     setPageNumber(null)
     setPhotosList([])
@@ -462,7 +462,7 @@ const PhotosList = () => {
 
       setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
     }
-    
+
     // Load new content after state is reset, using the specific segment if provided
     load(segmentOverride)
     // setPendingPhotos(await reducer.getQueue())
@@ -481,7 +481,7 @@ const PhotosList = () => {
     setPhotosList([])
     setStopLoading(false)
     setPageNumber(null)
-    
+
     if (activeSegment !== index) {
       setActiveSegment(index)
     }
