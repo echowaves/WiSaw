@@ -21,6 +21,7 @@ import useKeyboard from '@rnhooks/keyboard'
 import { CacheManager } from 'expo-cached-image'
 import {
   Alert,
+  Animated,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -110,6 +111,11 @@ const styles = StyleSheet.create({
   },
   activeSegmentButton: {
     backgroundColor: CONST.SEGMENT_BACKGROUND_ACTIVE,
+  },
+  segmentText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
   },
   buttonGroupContainer: {
     width: 220,
@@ -230,6 +236,10 @@ const PhotosList = () => {
 
   const [unreadCount, setUnreadCount] = useState(0)
 
+  const [textVisible, setTextVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
+  const textAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
+
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
   const onViewRef = React.useRef((viewableItems) => {
@@ -295,6 +305,37 @@ const PhotosList = () => {
       // await load()
     }
     setLoading(false)
+  }
+
+  const handleScroll = (event) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y
+    const isAtTop = currentScrollY <= 10 // Consider "top" as within 10px of the very top
+
+    if (isAtTop) {
+      // At the top - show text with slow animation
+      if (!textVisible) {
+        setTextVisible(true)
+        Animated.timing(textAnimation, {
+          toValue: 1,
+          duration: 1600, // Extra slow motion - 1600ms (2x slower)
+          useNativeDriver: true,
+        }).start()
+      }
+    }
+
+    if (!isAtTop) {
+      // Not at top - hide text with slow animation
+      if (textVisible) {
+        setTextVisible(false)
+        Animated.timing(textAnimation, {
+          toValue: 0,
+          duration: 1600, // Extra slow motion - 1600ms (2x slower)
+          useNativeDriver: true,
+        }).start()
+      }
+    }
+
+    setLastScrollY(currentScrollY)
   }
 
   async function uploadPendingPhotos() {
@@ -490,63 +531,139 @@ const PhotosList = () => {
     reload(index)
   }
 
-  const renderHeaderTitle = () => (
-    <View style={styles.headerContainer}>
-      <View style={styles.customSegmentedControl}>
-        <TouchableOpacity
-          style={[
-            styles.segmentButton,
-            activeSegment === 0 && styles.activeSegmentButton,
-          ]}
-          onPress={() => updateIndex(0)}
-        >
-          <FontAwesome
-            name="globe"
-            size={20}
-            color={
-              activeSegment === 0
-                ? CONST.ACTIVE_SEGMENT_COLOR
-                : CONST.INACTIVE_SEGMENT_COLOR
-            }
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.segmentButton,
-            activeSegment === 1 && styles.activeSegmentButton,
-          ]}
-          onPress={() => updateIndex(1)}
-        >
-          <AntDesign
-            name="star"
-            size={20}
-            color={
-              activeSegment === 1
-                ? CONST.ACTIVE_SEGMENT_COLOR
-                : CONST.INACTIVE_SEGMENT_COLOR
-            }
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.segmentButton,
-            activeSegment === 2 && styles.activeSegmentButton,
-          ]}
-          onPress={() => updateIndex(2)}
-        >
-          <FontAwesome
-            name="search"
-            size={20}
-            color={
-              activeSegment === 2
-                ? CONST.ACTIVE_SEGMENT_COLOR
-                : CONST.INACTIVE_SEGMENT_COLOR
-            }
-          />
-        </TouchableOpacity>
+  const renderHeaderTitle = () => {
+    const segmentTitles = ['Global', 'Starred', 'Search']
+
+    return (
+      <View style={styles.headerContainer}>
+        <View style={styles.customSegmentedControl}>
+          <TouchableOpacity
+            style={[
+              styles.segmentButton,
+              activeSegment === 0 && styles.activeSegmentButton,
+            ]}
+            onPress={() => updateIndex(0)}
+          >
+            <FontAwesome
+              name="globe"
+              size={20}
+              color={
+                activeSegment === 0
+                  ? CONST.ACTIVE_SEGMENT_COLOR
+                  : CONST.INACTIVE_SEGMENT_COLOR
+              }
+            />
+            {textVisible && (
+              <Animated.Text
+                style={[
+                  styles.segmentText,
+                  {
+                    color:
+                      activeSegment === 0
+                        ? CONST.ACTIVE_SEGMENT_COLOR
+                        : CONST.INACTIVE_SEGMENT_COLOR,
+                    opacity: textAnimation,
+                    transform: [
+                      {
+                        translateY: textAnimation.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [10, 0], // Slide down when hiding, slide up when showing
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                {segmentTitles[0]}
+              </Animated.Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.segmentButton,
+              activeSegment === 1 && styles.activeSegmentButton,
+            ]}
+            onPress={() => updateIndex(1)}
+          >
+            <AntDesign
+              name="star"
+              size={20}
+              color={
+                activeSegment === 1
+                  ? CONST.ACTIVE_SEGMENT_COLOR
+                  : CONST.INACTIVE_SEGMENT_COLOR
+              }
+            />
+            {textVisible && (
+              <Animated.Text
+                style={[
+                  styles.segmentText,
+                  {
+                    color:
+                      activeSegment === 1
+                        ? CONST.ACTIVE_SEGMENT_COLOR
+                        : CONST.INACTIVE_SEGMENT_COLOR,
+                    opacity: textAnimation,
+                    transform: [
+                      {
+                        translateY: textAnimation.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [10, 0], // Slide down when hiding, slide up when showing
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                {segmentTitles[1]}
+              </Animated.Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.segmentButton,
+              activeSegment === 2 && styles.activeSegmentButton,
+            ]}
+            onPress={() => updateIndex(2)}
+          >
+            <FontAwesome
+              name="search"
+              size={20}
+              color={
+                activeSegment === 2
+                  ? CONST.ACTIVE_SEGMENT_COLOR
+                  : CONST.INACTIVE_SEGMENT_COLOR
+              }
+            />
+            {textVisible && (
+              <Animated.Text
+                style={[
+                  styles.segmentText,
+                  {
+                    color:
+                      activeSegment === 2
+                        ? CONST.ACTIVE_SEGMENT_COLOR
+                        : CONST.INACTIVE_SEGMENT_COLOR,
+                    opacity: textAnimation,
+                    transform: [
+                      {
+                        translateY: textAnimation.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [10, 0], // Slide down when hiding, slide up when showing
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                {segmentTitles[2]}
+              </Animated.Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  )
+    )
+  }
 
   const updateNavBar = async () => {
     navigation.setOptions({
@@ -767,6 +884,11 @@ const PhotosList = () => {
     updateNavBar()
   }, [activeSegment])
 
+  // Update navigation bar when text visibility changes
+  useEffect(() => {
+    updateNavBar()
+  }, [textVisible])
+
   useEffect(() => {
     if (pageNumber !== null) {
       load()
@@ -785,6 +907,8 @@ const PhotosList = () => {
       itemDimension={thumbDimension}
       spacing={3}
       data={photosList}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
       renderItem={({ item, index }) => (
         <Thumb
           item={item}
@@ -818,6 +942,8 @@ const PhotosList = () => {
       itemDimension={width}
       spacing={3}
       data={photosList}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
       renderItem={({ item, index }) => (
         <ThumbWithComments
           item={item}
@@ -1103,6 +1229,8 @@ const PhotosList = () => {
             itemDimension={thumbDimension}
             spacing={3}
             data={pendingPhotos}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
             renderItem={({ item }) => (
               <ThumbPending
                 item={item}
@@ -1135,6 +1263,8 @@ const PhotosList = () => {
       itemDimension={width}
       spacing={3}
       data={[textToRender, '', '***', 'Pull down to refresh']}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
       renderItem={({ item, index }) => (
         <Text
           style={{
