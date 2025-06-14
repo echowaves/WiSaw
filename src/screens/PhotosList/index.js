@@ -50,7 +50,6 @@ import {
   LinearProgress,
   ListItem,
   Overlay,
-  SearchBar,
   Text,
 } from '@rneui/themed'
 
@@ -1274,7 +1273,7 @@ const PhotosList = () => {
           </TouchableOpacity>
         ) : null}
       </View>
-      
+
       <TouchableOpacity
         onPress={() => submitSearch()}
         style={{

@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 
 import {
   Animated,
@@ -138,7 +138,7 @@ const ThumbWithComments = ({
             <Text style={styles.commentText} numberOfLines={3}>
               {item.lastComment}
             </Text>
-            
+
             {/* Stats Section */}
             <View style={styles.statsContainer}>
               {/* Comments Count */}
@@ -150,7 +150,7 @@ const ThumbWithComments = ({
                   </Text>
                 </View>
               )}
-              
+
               {/* Stars Count */}
               {item.watchersCount > 0 && (
                 <View style={styles.statItem}>

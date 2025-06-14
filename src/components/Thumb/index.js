@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 
 import {
   Animated,
@@ -14,8 +14,6 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
-
-import * as CONST from '../../consts'
 
 const styles = StyleSheet.create({
   container: {
@@ -152,7 +150,7 @@ const Thumb = ({
         duration: 200,
       }),
     ]).start()
-    
+
     // Navigate to video
     onThumbPress(item)
   }
@@ -192,7 +190,7 @@ const Thumb = ({
           cacheKey={`${item.id}-thumb`}
           style={styles.thumbnail}
         />
-        
+
         {/* Video Play Button */}
         {item?.video && (
           <View style={styles.playButtonContainer}>

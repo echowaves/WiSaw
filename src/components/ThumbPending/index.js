@@ -1,16 +1,16 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 
 import {
-  Animated,
   Alert,
+  Animated,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
 
+import { MaterialIcons } from '@expo/vector-icons'
 import CachedImage from 'expo-cached-image'
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -20,7 +20,7 @@ import { removeFromQueue } from '../../screens/PhotosList/reducer'
 
 const ThumbPending = ({ thumbDimension = 100, item }) => {
   const scaleValue = useRef(new Animated.Value(1)).current
-  
+
   const handlePressIn = () => {
     Animated.spring(scaleValue, {
       toValue: 0.95,
@@ -113,7 +113,7 @@ const ThumbPending = ({ thumbDimension = 100, item }) => {
     width: thumbDimension,
     height: thumbDimension,
   }
-  
+
   return (
     <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
       <TouchableOpacity
