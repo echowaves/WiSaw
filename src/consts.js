@@ -27,6 +27,16 @@ export const SECONDARY_COLOR = '#C0C0C0'
 export const NAV_COLOR = '#f0f0f0'
 export const BG_COLOR = '#ffffff'
 
+// Modern header color scheme
+export const HEADER_GRADIENT_START = '#ffffff'
+export const HEADER_GRADIENT_END = '#f8f9fa'
+export const HEADER_SHADOW_COLOR = 'rgba(0, 0, 0, 0.08)'
+export const HEADER_BORDER_COLOR = 'rgba(0, 0, 0, 0.06)'
+export const ACTIVE_SEGMENT_COLOR = '#EA5E3D'
+export const INACTIVE_SEGMENT_COLOR = '#8E8E93'
+export const SEGMENT_BACKGROUND_ACTIVE = 'rgba(234, 94, 61, 0.1)'
+export const SEGMENT_BACKGROUND_INACTIVE = 'transparent'
+
 export const FOOTER_COLOR = 'rgba(240,240,240,.9)'
 
 export const TEXT_COLOR = '#555f61'

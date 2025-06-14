@@ -44,6 +44,7 @@ import * as STATE from '../../state'
 import subscriptionClient from '../../subscriptionClientWs'
 
 import ChatPhoto from './ChatPhoto'
+import ModernHeaderButton from '../../components/ModernHeaderButton'
 
 const Chat = ({ route }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -71,17 +72,13 @@ const Chat = ({ route }) => {
   const renderHeaderRight = () => {}
 
   const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
+    <ModernHeaderButton
+      iconName="chevron-left"
+      iconSize={18}
       onPress={() => {
         goBack()
       }}
+      containerStyle={{ marginLeft: 8 }}
     />
   )
 
@@ -153,7 +150,22 @@ const Chat = ({ route }) => {
         headerLeft: renderHeaderLeft,
         headerBackTitle: '',
         headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
+          backgroundColor: CONST.HEADER_GRADIENT_END,
+          borderBottomWidth: 1,
+          borderBottomColor: CONST.HEADER_BORDER_COLOR,
+          shadowColor: CONST.HEADER_SHADOW_COLOR,
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 1,
+          shadowRadius: 4,
+          elevation: 3,
+        },
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: '600',
+          color: CONST.TEXT_COLOR,
         },
       })
 

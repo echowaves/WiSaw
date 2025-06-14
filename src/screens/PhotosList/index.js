@@ -23,6 +23,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native'
@@ -76,6 +77,69 @@ const styles = StyleSheet.create({
     // paddingBottom: 10,
     // marginBottom: 10,
   },
+  // Modern header styles
+  headerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  customSegmentedControl: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: CONST.HEADER_BORDER_COLOR,
+    shadowColor: CONST.HEADER_SHADOW_COLOR,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 2,
+    padding: 4,
+  },
+  segmentButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    marginHorizontal: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 50,
+  },
+  activeSegmentButton: {
+    backgroundColor: CONST.SEGMENT_BACKGROUND_ACTIVE,
+  },
+  buttonGroupContainer: {
+    width: 220,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: 1,
+    borderColor: CONST.HEADER_BORDER_COLOR,
+    shadowColor: CONST.HEADER_SHADOW_COLOR,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  buttonContainer: {
+    borderRadius: 18,
+    margin: 2,
+  },
+  buttonStyle: {
+    backgroundColor: 'transparent',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  selectedButtonStyle: {
+    backgroundColor: CONST.SEGMENT_BACKGROUND_ACTIVE,
+    borderRadius: 16,
+  },
 })
 
 // 1. Define the task by providing a name and the function that should be executed
@@ -117,7 +181,6 @@ async function registerBackgroundFetchAsync() {
 
 const FOOTER_HEIGHT = 90
 
-let activeSegment = 0
 let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
 const PhotosList = () => {
@@ -158,7 +221,7 @@ const PhotosList = () => {
 
   const [pendingPhotos, setPendingPhotos] = useState([])
 
-  // const [activeSegment, setActiveSegment] = useState(0)
+  const [activeSegment, setActiveSegment] = useState(0)
 
   const [loading, setLoading] = useState(false)
 
@@ -232,36 +295,6 @@ const PhotosList = () => {
     }
     setLoading(false)
   }
-
-  const segment0 = () => (
-    <FontAwesome
-      name="globe"
-      size={23}
-      color={
-        activeSegment === 0 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment1 = () => (
-    <AntDesign
-      name="star"
-      size={23}
-      color={
-        activeSegment === 1 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
-
-  const segment2 = () => (
-    <FontAwesome
-      name="search"
-      size={23}
-      color={
-        activeSegment === 2 ? CONST.MAIN_COLOR : CONST.TRANSPARENT_ICONS_COLOR
-      }
-    />
-  )
 
   async function uploadPendingPhotos() {
     // return Promise.resolve()
@@ -435,52 +468,91 @@ const PhotosList = () => {
 
   const updateIndex = async (index) => {
     if (activeSegment !== index) {
-      activeSegment = index
-      // setActiveSegment(index)
-      // eslint-disable-next-line no-use-before-define
-      updateNavBar()
+      setActiveSegment(index)
       reload()
     }
   }
 
   const renderHeaderTitle = () => (
-    <>
-      <ButtonGroup
-        onPress={updateIndex}
-        containerStyle={{
-          width: 200,
-          height: 35,
-        }}
-        buttonStyle={{ alignSelf: 'center' }}
-        buttons={[
-          { element: segment0 },
-          { element: segment1 },
-          { element: segment2 },
-        ]}
-      />
-    </>
+    <View style={styles.headerContainer}>
+      <View style={styles.customSegmentedControl}>
+        <TouchableOpacity
+          style={[
+            styles.segmentButton,
+            activeSegment === 0 && styles.activeSegmentButton,
+          ]}
+          onPress={() => updateIndex(0)}
+        >
+          <FontAwesome
+            name="globe"
+            size={20}
+            color={
+              activeSegment === 0
+                ? CONST.ACTIVE_SEGMENT_COLOR
+                : CONST.INACTIVE_SEGMENT_COLOR
+            }
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.segmentButton,
+            activeSegment === 1 && styles.activeSegmentButton,
+          ]}
+          onPress={() => updateIndex(1)}
+        >
+          <AntDesign
+            name="star"
+            size={20}
+            color={
+              activeSegment === 1
+                ? CONST.ACTIVE_SEGMENT_COLOR
+                : CONST.INACTIVE_SEGMENT_COLOR
+            }
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.segmentButton,
+            activeSegment === 2 && styles.activeSegmentButton,
+          ]}
+          onPress={() => updateIndex(2)}
+        >
+          <FontAwesome
+            name="search"
+            size={20}
+            color={
+              activeSegment === 2
+                ? CONST.ACTIVE_SEGMENT_COLOR
+                : CONST.INACTIVE_SEGMENT_COLOR
+            }
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
   )
 
   const updateNavBar = async () => {
-    // if (netAvailable) {
     navigation.setOptions({
       headerTitle: renderHeaderTitle,
-      // headerLeft: renderHeaderLeft,
-      // headerRight: renderHeaderRight,
       headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
+        backgroundColor: CONST.HEADER_GRADIENT_END,
+        borderBottomWidth: 1,
+        borderBottomColor: CONST.HEADER_BORDER_COLOR,
+        shadowColor: CONST.HEADER_SHADOW_COLOR,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 3,
+      },
+      headerTitleStyle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: CONST.TEXT_COLOR,
       },
     })
-    // } else {
-    //   navigation.setOptions({
-    //     headerTitle: renderHeaderTitle,
-    //     // headerLeft: renderHeaderLeft,
-    //     // headerRight: renderHeaderRight,
-    //     headerStyle: {
-    //       backgroundColor: CONST.SECONDARY_COLOR,
-    //     },
-    //   })
-    // }
   }
 
   async function checkPermission({
@@ -672,6 +744,11 @@ const PhotosList = () => {
   // useEffect(() => {
   //   updateNavBar()
   // }, [loading])
+
+  // Update navigation bar when activeSegment changes
+  useEffect(() => {
+    updateNavBar()
+  }, [activeSegment])
 
   useEffect(() => {
     if (pageNumber !== null) {

@@ -53,14 +53,28 @@ const styles = StyleSheet.create({
   buildInfoContainer: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    backgroundColor: '#f5f5f5',
+    borderTopColor: CONST.HEADER_BORDER_COLOR,
+    backgroundColor: CONST.HEADER_GRADIENT_END,
   },
   buildInfoText: {
     fontSize: 12,
     color: '#666',
     textAlign: 'center',
     fontFamily: 'monospace',
+  },
+  drawerHeader: {
+    height: 120,
+    backgroundColor: CONST.HEADER_GRADIENT_END,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: CONST.HEADER_BORDER_COLOR,
+  },
+  drawerHeaderText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: CONST.MAIN_COLOR,
+    marginTop: 20,
   },
 })
 
@@ -74,6 +88,9 @@ function CustomDrawerContent(props) {
 
   return (
     <View style={{ flex: 1 }}>
+      <View style={styles.drawerHeader}>
+        <Text style={styles.drawerHeaderText}>WiSaw</Text>
+      </View>
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={{ flexGrow: 1 }}
@@ -124,9 +141,29 @@ const App = () => {
   function MyStack() {
     return (
       <Stack.Navigator
-        // headerMode="none"
-        // initialRouteName="PhotosList"
-        screenOptions={{ gestureEnabled: true, headerShown: true }}
+        screenOptions={{
+          gestureEnabled: true,
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: CONST.HEADER_GRADIENT_END,
+            borderBottomWidth: 1,
+            borderBottomColor: CONST.HEADER_BORDER_COLOR,
+            shadowColor: CONST.HEADER_SHADOW_COLOR,
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 1,
+            shadowRadius: 4,
+            elevation: 3,
+          },
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: CONST.TEXT_COLOR,
+          },
+          headerTintColor: CONST.MAIN_COLOR,
+        }}
       >
         <Stack.Screen
           name="PhotosList"
@@ -193,7 +230,29 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <NavigationContainer>
         <Drawer.Navigator
-          screenOptions={{ gestureEnabled: true, headerShown: false }}
+          screenOptions={{
+            gestureEnabled: true,
+            headerShown: false,
+            headerStyle: {
+              backgroundColor: CONST.HEADER_GRADIENT_END,
+              borderBottomWidth: 1,
+              borderBottomColor: CONST.HEADER_BORDER_COLOR,
+              shadowColor: CONST.HEADER_SHADOW_COLOR,
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 1,
+              shadowRadius: 4,
+              elevation: 3,
+            },
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: '600',
+              color: CONST.TEXT_COLOR,
+            },
+            headerTintColor: CONST.MAIN_COLOR,
+          }}
           drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
           <Drawer.Screen
