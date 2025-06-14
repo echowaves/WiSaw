@@ -37,8 +37,6 @@ import {
   Ionicons,
 } from '@expo/vector-icons'
 
-import { Col, /* Row, */ Grid } from 'react-native-easy-grid'
-
 import NetInfo from '@react-native-community/netinfo'
 
 import FlatGrid from 'react-native-super-grid'
@@ -980,140 +978,151 @@ const PhotosList = () => {
       location && (
         <SafeAreaView
           style={{
-            backgroundColor: CONST.NAV_COLOR,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
             width,
             height: FOOTER_HEIGHT,
             position: 'absolute',
             bottom: 0,
             right: 0,
             left: 0,
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(0, 0, 0, 0.1)',
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: -2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 10,
           }}
         >
-          <Grid
+          <View
             style={{
-              position: 'absolute',
-              top: 5,
-              right: 0,
-              left: 0,
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              paddingHorizontal: 20,
+              paddingTop: 10,
+              height: '100%',
             }}
           >
-            {/* drawer button */}
-            <Col
+            {/* Navigation Menu Button */}
+            <TouchableOpacity
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-              }}
-            >
-              {netAvailable && (
-                <FontAwesome
-                  onPress={() => navigation.openDrawer()}
-                  name="navicon"
-                  size={25}
-                  style={{
-                    color: CONST.MAIN_COLOR,
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 15,
-                  }}
-                />
-              )}
-            </Col>
-
-            {/*  video button */}
-            <Col
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderRadius: 45,
-                backgroundColor: 'white',
+                width: 50,
                 height: 50,
-                width: 80,
+                borderRadius: 25,
+                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+              }}
+              onPress={() => navigation.openDrawer()}
+              disabled={!netAvailable}
+            >
+              <FontAwesome
+                name="navicon"
+                size={22}
+                color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
+              />
+            </TouchableOpacity>
+
+            {/* Video Recording Button */}
+            <TouchableOpacity
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                backgroundColor: '#FF6B6B',
+                shadowColor: '#FF6B6B',
+                shadowOffset: {
+                  width: 0,
+                  height: 4,
+                },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
               }}
               onPress={() => {
                 checkPermissionsForPhotoTaking({ cameraType: 'video' })
               }}
             >
-              <FontAwesome5
-                name="video"
-                color={CONST.EMPHASIZED_COLOR}
-                size={30}
-                style={{
-                  alignSelf: 'center',
-                }}
-                containerStyle={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              />
-            </Col>
-            <Col
+              <FontAwesome5 name="video" color="white" size={24} />
+            </TouchableOpacity>
+
+            {/* Photo Capture Button - Main Action */}
+            <TouchableOpacity
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: 50,
-                width: 25,
-              }}
-            />
-            {/* photo button */}
-            <Col
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 50,
-                width: 80,
-                backgroundColor: 'white',
-                borderRadius: 45,
+                width: 70,
+                height: 70,
+                borderRadius: 35,
+                backgroundColor: CONST.MAIN_COLOR,
+                shadowColor: CONST.MAIN_COLOR,
+                shadowOffset: {
+                  width: 0,
+                  height: 6,
+                },
+                shadowOpacity: 0.4,
+                shadowRadius: 12,
+                elevation: 12,
+                borderWidth: 3,
+                borderColor: 'white',
               }}
               onPress={() => {
                 checkPermissionsForPhotoTaking({ cameraType: 'camera' })
               }}
             >
-              <FontAwesome5
-                name="camera"
-                color={CONST.MAIN_COLOR}
-                size={30}
-                style={{
-                  alignSelf: 'center',
-                }}
-                containerStyle={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              />
-            </Col>
-            {/* drawer button */}
-            <Col
+              <FontAwesome5 name="camera" color="white" size={28} />
+            </TouchableOpacity>
+
+            {/* Friends List Button */}
+            <TouchableOpacity
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
+                width: 50,
+                height: 50,
+                borderRadius: 25,
+                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                position: 'relative',
               }}
+              onPress={() => navigation.navigate('FriendsList')}
+              disabled={!netAvailable}
             >
-              {netAvailable && (
-                <FontAwesome5
-                  onPress={() => navigation.navigate('FriendsList')}
-                  name="user-friends"
-                  size={35}
-                  style={{
-                    color: CONST.MAIN_COLOR,
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 15,
-                  }}
-                />
-              )}
+              <FontAwesome5
+                name="user-friends"
+                size={22}
+                color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
+              />
               {unreadCount > 0 && (
                 <Badge
                   value={unreadCount}
                   badgeStyle={{
-                    backgroundColor: CONST.MAIN_COLOR,
+                    backgroundColor: '#FF4757',
+                    borderWidth: 2,
+                    borderColor: 'white',
+                    minWidth: 20,
+                    height: 20,
+                    borderRadius: 10,
                   }}
-                  containerStyle={{ position: 'absolute', top: 5, right: 5 }}
+                  textStyle={{
+                    fontSize: 11,
+                    fontWeight: 'bold',
+                  }}
+                  containerStyle={{
+                    position: 'absolute',
+                    top: -2,
+                    right: -2,
+                  }}
                 />
               )}
-            </Col>
-          </Grid>
+            </TouchableOpacity>
+          </View>
+
           {loading && (
             <LinearProgress
               color={CONST.MAIN_COLOR}
@@ -1122,6 +1131,7 @@ const PhotosList = () => {
                 top: 0,
                 right: 0,
                 left: 0,
+                height: 3,
               }}
             />
           )}
