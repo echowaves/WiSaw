@@ -16,7 +16,7 @@ import {
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 
-import { Card, Divider, LinearProgress, Text } from '@rneui/themed'
+import { Divider, LinearProgress, Text } from '@rneui/themed'
 
 import { Col, Grid, Row } from 'react-native-easy-grid'
 
