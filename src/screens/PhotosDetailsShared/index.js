@@ -4,15 +4,43 @@ import { useNavigation } from '@react-navigation/native'
 
 import PropTypes from 'prop-types'
 
-import { FontAwesome } from '@expo/vector-icons'
+import { AntDesign, Ionicons } from '@expo/vector-icons'
 
-import { Text } from 'react-native'
+import { StatusBar, StyleSheet, View } from 'react-native'
+
+import { Text } from '@rneui/themed'
 
 import { gql } from '@apollo/client'
 
 import Photo from '../../components/Photo'
 
 import * as CONST from '../../consts'
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  headerButton: {
+    padding: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 8,
+  },
+  headerIcon: {
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+})
 
 const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
@@ -54,24 +82,27 @@ const PhotosDetailsShared = ({ route }) => {
   }
 
   const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => navigation.goBack()}
-    />
+    <View style={styles.headerButton}>
+      <Ionicons
+        name="chevron-back"
+        size={24}
+        color="#fff"
+        style={styles.headerIcon}
+        onPress={() => navigation.goBack()}
+      />
+    </View>
   )
 
   const renderHeaderTitle = () => (
-    <FontAwesome
-      name="share"
-      size={30}
-      style={{ color: CONST.SECONDARY_COLOR }}
-    />
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <AntDesign
+        name="sharealt"
+        size={20}
+        color="#fff"
+        style={styles.headerIcon}
+      />
+      <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
+    </View>
   )
 
   useEffect(() => {
@@ -79,16 +110,41 @@ const PhotosDetailsShared = ({ route }) => {
       headerTitle: renderHeaderTitle,
       headerLeft: renderHeaderLeft,
       headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        borderBottomWidth: 0,
+        elevation: 0,
+        shadowOpacity: 0,
       },
+      headerTitleAlign: 'center',
+      headerTransparent: true,
     })
     loadPhoto(photoId)
   }, [])
 
   if (item) {
-    return <Photo photo={item} key={item.id} />
+    return (
+      <View style={styles.container}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
+        <Photo photo={item} key={item.id} />
+      </View>
+    )
   }
-  return <Text />
+  return (
+    <View style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+      <Text style={{ color: '#fff', textAlign: 'center', marginTop: 100 }}>
+        Loading...
+      </Text>
+    </View>
+  )
 }
 PhotosDetailsShared.propTypes = {
   // photoId: PropTypes.number.isRequired,
