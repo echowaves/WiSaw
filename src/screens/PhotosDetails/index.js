@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
 
@@ -16,8 +16,6 @@ import Swiper from 'react-native-swiper'
 import Photo from '../../components/Photo'
 
 import { getPhotos } from '../PhotosList/reducer'
-
-import * as CONST from '../../consts'
 
 const styles = StyleSheet.create({
   container: {

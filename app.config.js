@@ -5,7 +5,7 @@ export default {
     jsEngine: 'hermes',
     updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
-    version: '7.1.16',
+    version: '7.2.0',
     plugins: [
       // Branch removed - using native deep linking instead
       'expo-secure-store',
@@ -43,7 +43,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '302',
+      buildNumber: '303',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -95,7 +95,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 302,
+      versionCode: 303,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

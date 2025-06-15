@@ -16,7 +16,7 @@ import {
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 
-import { Badge, Card, Divider, LinearProgress, Text } from '@rneui/themed'
+import { Card, Divider, LinearProgress, Text } from '@rneui/themed'
 
 import { Col, Grid, Row } from 'react-native-easy-grid'
 
@@ -39,6 +39,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+    position: 'relative',
+    height: '100%',
+    paddingTop: 100, // Account for transparent header
   },
   scrollView: {
     flex: 1,
@@ -136,6 +139,65 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
+  aiRecognitionContainer: {
+    marginHorizontal: 12,
+    marginVertical: 8,
+  },
+  aiRecognitionCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  aiRecognitionTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  aiRecognitionModerationTitle: {
+    color: '#FF6B6B',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  aiTagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  aiTag: {
+    backgroundColor: 'rgba(79, 195, 247, 0.2)',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(79, 195, 247, 0.4)',
+  },
+  aiTagText: {
+    color: '#4FC3F7',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  aiModerationTag: {
+    backgroundColor: 'rgba(255, 107, 107, 0.2)',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 107, 0.4)',
+  },
+  aiModerationTagText: {
+    color: '#FF6B6B',
+    fontSize: 12,
+    fontWeight: '500',
+  },
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -154,7 +216,8 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 12,
-    elevation: 10,
+    elevation: 1000,
+    zIndex: 1000,
   },
   footerGrid: {
     flex: 1,
@@ -166,7 +229,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: '#333333',
     marginHorizontal: 4,
     minHeight: 60,
   },
@@ -242,7 +305,7 @@ const Photo = ({ photo }) => {
   const navigation = useNavigation()
 
   const { width, height } = useWindowDimensions()
-  const imageHeight = height - 250
+  const imageHeight = height - 380 // Account for header padding, footer, and content
 
   useFocusEffect(
     // use this to make the navigastion to a detailed screen faster
@@ -289,7 +352,7 @@ const Photo = ({ photo }) => {
       friendUuid: photo.uuid,
       friendsList,
     })
-    
+
     const commentsCount = photoDetails?.comments?.length || 0
     const watchersCount = photoDetails?.watchersCount || 0
 
@@ -305,7 +368,7 @@ const Photo = ({ photo }) => {
           </Text>
           <Text style={styles.dateText}>{renderDateTime(photo.createdAt)}</Text>
         </View>
-        
+
         {(commentsCount > 0 || watchersCount > 0) && (
           <View
             style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}
@@ -324,7 +387,7 @@ const Photo = ({ photo }) => {
                 </Text>
               </View>
             )}
-            
+
             {watchersCount > 0 && (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <AntDesign name="star" size={14} color="#FFD700" />
@@ -411,7 +474,7 @@ const Photo = ({ photo }) => {
             >
               <View style={styles.commentCard}>
                 <Text style={styles.commentText}>{comment.comment}</Text>
-                
+
                 {!comment.hiddenButtons && (
                   <View style={styles.commentMeta}>
                     <Text style={styles.commentAuthor}>
@@ -471,7 +534,7 @@ const Photo = ({ photo }) => {
       !photoDetails?.recognitions ||
       photoDetails?.recognitions?.length === 0
     ) {
-      return <Text />
+      return <View />
     }
 
     const labels = JSON.parse(photoDetails?.recognitions[0].metaData).Labels
@@ -481,120 +544,70 @@ const Photo = ({ photo }) => {
     const moderationLabels = JSON.parse(
       photoDetails?.recognitions[0].metaData,
     ).ModerationLabels
+
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.aiRecognitionContainer}>
         {labels?.length > 0 && (
-          <Card
-            width={width - 100}
-            containerStyle={{
-              borderWidth: 0,
-              elevation: 0,
-              shadowColor: 'rgba(0,0,0, .2)',
-              shadowOffset: { height: 0, width: 0 },
-              shadowOpacity: 0, // default is 1
-              shadowRadius: 0, // default is 1
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: 'bold',
-                textAlignVertical: 'center',
-                textAlign: 'center',
-              }}
-            >
-              AI recognized tags:
-            </Text>
-            {labels.map((label) => (
-              <Text
-                key={label.Name}
-                style={{
-                  fontSize: label.Confidence / 5,
-                  textAlignVertical: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                {label.Name}
-              </Text>
-            ))}
-            <Text />
-            <Divider />
-          </Card>
+          <View style={styles.aiRecognitionCard}>
+            <Text style={styles.aiRecognitionTitle}>AI Recognized Tags</Text>
+            <View style={styles.aiTagsContainer}>
+              {labels.map((label) => (
+                <View
+                  key={label.Name}
+                  style={[
+                    styles.aiTag,
+                    { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
+                  ]}
+                >
+                  <Text style={styles.aiTagText}>
+                    {label.Name} {Math.round(label.Confidence)}%
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
         )}
 
         {textDetections?.length > 0 && (
-          <Card
-            width={width - 100}
-            containerStyle={{
-              borderWidth: 0,
-              elevation: 0,
-              shadowColor: 'rgba(0,0,0, .2)',
-              shadowOffset: { height: 0, width: 0 },
-              shadowOpacity: 0, // default is 1
-              shadowRadius: 0, // default is 1
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: 'bold',
-                textAlignVertical: 'center',
-                textAlign: 'center',
-              }}
-            >
-              AI recognized text:
-            </Text>
-            {textDetections.map((text) => (
-              <Text
-                key={text.Id}
-                style={{
-                  fontSize: text.Confidence / 5,
-                  textAlignVertical: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                {text.DetectedText}
-              </Text>
-            ))}
-            <Text />
-            <Divider />
-          </Card>
+          <View style={styles.aiRecognitionCard}>
+            <Text style={styles.aiRecognitionTitle}>AI Recognized Text</Text>
+            <View style={styles.aiTagsContainer}>
+              {textDetections.map((text) => (
+                <View
+                  key={text.Id}
+                  style={[
+                    styles.aiTag,
+                    { opacity: Math.min(text.Confidence / 100 + 0.3, 1) },
+                  ]}
+                >
+                  <Text style={styles.aiTagText}>"{text.DetectedText}"</Text>
+                </View>
+              ))}
+            </View>
+          </View>
         )}
 
         {moderationLabels?.length > 0 && (
-          <Card
-            width={width - 100}
-            containerStyle={{
-              borderWidth: 0,
-              elevation: 0,
-              shadowColor: 'rgba(0,0,0, .2)',
-              shadowOffset: { height: 0, width: 0 },
-              shadowOpacity: 0, // default is 1
-              shadowRadius: 0, // default is 1
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: 'bold',
-                color: 'red',
-                textAlignVertical: 'center',
-                textAlign: 'center',
-              }}
-            >
-              AI moderation tags:
+          <View style={styles.aiRecognitionCard}>
+            <Text style={styles.aiRecognitionModerationTitle}>
+              AI Moderation Tags
             </Text>
-            {moderationLabels.map((label) => (
-              <Text
-                key={label.Name}
-                style={{
-                  fontSize: label.Confidence / 5,
-                  color: 'red',
-                  textAlignVertical: 'center',
-                  textAlign: 'center',
-                }}
-              >
-                {label.Name}
-              </Text>
-            ))}
-          </Card>
+            <View style={styles.aiTagsContainer}>
+              {moderationLabels.map((label) => (
+                <View
+                  key={label.Name}
+                  style={[
+                    styles.aiModerationTag,
+                    { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
+                  ]}
+                >
+                  <Text style={styles.aiModerationTagText}>
+                    {label.Name} {Math.round(label.Confidence)}%
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
         )}
       </View>
     )
@@ -722,72 +735,18 @@ const Photo = ({ photo }) => {
             >
               <FontAwesome
                 name="trash"
-                color={
-                  photoDetails?.isPhotoWatched
-                    ? 'rgba(255, 255, 255, 0.5)'
-                    : '#FF6B6B'
-                }
+                color={photoDetails?.isPhotoWatched ? '#CCCCCC' : '#FF6B6B'}
                 size={24}
               />
               <Text
                 style={[
                   styles.footerButtonText,
                   {
-                    color: photoDetails?.isPhotoWatched
-                      ? 'rgba(255, 255, 255, 0.5)'
-                      : '#FF6B6B',
+                    color: photoDetails?.isPhotoWatched ? '#CCCCCC' : '#FF6B6B',
                   },
                 ]}
               >
                 Delete
-              </Text>
-            </TouchableOpacity>
-          </Col>
-
-          {/* Star button */}
-          <Col>
-            <TouchableOpacity
-              style={styles.footerButton}
-              onPress={() => handleFlipWatch()}
-              activeOpacity={0.7}
-            >
-              <AntDesign
-                name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
-                color={
-                  photoDetails?.isPhotoWatched
-                    ? '#FFD700'
-                    : 'rgba(255, 255, 255, 0.7)'
-                }
-                size={24}
-              />
-              <Text
-                style={[
-                  styles.footerButtonText,
-                  {
-                    color: photoDetails?.isPhotoWatched
-                      ? '#FFD700'
-                      : 'rgba(255, 255, 255, 0.7)',
-                  },
-                ]}
-              >
-                {photoDetails?.isPhotoWatched ? 'Starred' : 'Star'}
-              </Text>
-            </TouchableOpacity>
-          </Col>
-
-          {/* Share button */}
-          <Col>
-            <TouchableOpacity
-              style={styles.footerButton}
-              onPress={() => {
-                // Use the sharing helper to share the photo
-                sharingHelper.sharePhoto({ photo, topOffset })
-              }}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="share-outline" color="#4FC3F7" size={24} />
-              <Text style={[styles.footerButtonText, { color: '#4FC3F7' }]}>
-                Share
               </Text>
             </TouchableOpacity>
           </Col>
@@ -803,7 +762,7 @@ const Photo = ({ photo }) => {
                 name="ban"
                 color={
                   photoDetails?.isPhotoWatched || isPhotoBannedByMe()
-                    ? 'rgba(255, 255, 255, 0.5)'
+                    ? '#CCCCCC'
                     : '#FF9500'
                 }
                 size={24}
@@ -814,12 +773,58 @@ const Photo = ({ photo }) => {
                   {
                     color:
                       photoDetails?.isPhotoWatched || isPhotoBannedByMe()
-                        ? 'rgba(255, 255, 255, 0.5)'
+                        ? '#CCCCCC'
                         : '#FF9500',
                   },
                 ]}
               >
                 Report
+              </Text>
+            </TouchableOpacity>
+          </Col>
+
+          {/* Star button */}
+          <Col>
+            <TouchableOpacity
+              style={styles.footerButton}
+              onPress={() => handleFlipWatch()}
+              activeOpacity={0.7}
+            >
+              <AntDesign
+                name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
+                color={photoDetails?.isPhotoWatched ? '#FFD700' : '#FFFFFF'}
+                size={24}
+              />
+              <Text
+                style={[
+                  styles.footerButtonText,
+                  {
+                    color: photoDetails?.isPhotoWatched ? '#FFD700' : '#FFFFFF',
+                  },
+                ]}
+              >
+                {photoDetails?.isPhotoWatched ? 'Starred' : 'Star'}
+              </Text>
+            </TouchableOpacity>
+          </Col>
+
+          {/* Share button */}
+          <Col>
+            <TouchableOpacity
+              style={styles.footerButton}
+              onPress={() => {
+                // Use the sharing helper to share the photo
+                sharingHelper.shareWithNativeSheet({
+                  type: 'photo',
+                  photo,
+                  photoDetails,
+                })
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="share-outline" color="#4FC3F7" size={24} />
+              <Text style={[styles.footerButtonText, { color: '#4FC3F7' }]}>
+                Share
               </Text>
             </TouchableOpacity>
           </Col>
