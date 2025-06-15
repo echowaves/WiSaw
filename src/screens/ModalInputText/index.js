@@ -14,7 +14,7 @@ import { Button, Icon, Text } from '@rneui/themed'
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 
 import PropTypes from 'prop-types'
 
@@ -207,7 +207,7 @@ const ModalInputText = ({ route }) => {
             },
           ]}
         />
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             autoFocus
