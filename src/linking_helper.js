@@ -1,5 +1,5 @@
 import * as Linking from 'expo-linking'
-import { Alert, Platform, Share } from 'react-native'
+import { Alert, Share } from 'react-native'
 
 const handleDeepLink = async ({ url, navigation }) => {
   if (!url) return
@@ -81,16 +81,17 @@ export const initLinking = ({ navigation }) => {
 }
 
 export const sharePhoto = async ({ photo, photoDetails }) => {
-  try {
-    const url = `https://link.wisaw.com/photos/${photo?.id}`
+  let message
+  const url = `https://link.wisaw.com/photos/${photo?.id}`
 
-    let messageBody = `Check out what I saw today${
+  try {
+    message = `Check out what I saw today${
       photo?.video ? ' (video)' : ''
     }: ${url}`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
       // Add first 3 comments
-      messageBody = `${messageBody}\n\n${photoDetails.comments
+      message = `${message}\n\n${photoDetails.comments
         .slice(0, 3)
         .map((comment) => comment.comment)
         .join('\n\n')}`
@@ -100,11 +101,8 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
     const result = await Share.share(
       {
         title: 'WiSaw - What I Saw Today',
-        message:
-          Platform.OS === 'ios'
-            ? messageBody
-            : `WiSaw - What I Saw Today\n\n${messageBody}`,
-        url: Platform.OS === 'ios' ? url : undefined,
+        message,
+        url,
       },
       {
         subject: 'WiSaw: Check out what I saw today',
@@ -116,20 +114,8 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
   } catch (error) {
     // Fallback to email if Share API fails
     try {
-      const url = `https://link.wisaw.com/photos/${photo?.id}`
-      let messageBody = `Check out what I saw today${
-        photo?.video ? ' (video)' : ''
-      }: ${url}`
-
-      if (photoDetails?.comments && photoDetails.comments.length > 0) {
-        messageBody = `${messageBody}\n\n${photoDetails.comments
-          .slice(0, 3)
-          .map((comment) => comment.comment)
-          .join('\n\n')}`
-      }
-
       await Linking.openURL(
-        `mailto:?subject=WiSaw: Check out what I saw today&body=${encodeURIComponent(messageBody)}`,
+        `mailto:?subject=WiSaw: Check out what I saw today&body=${encodeURIComponent(message)}`,
       )
       return { success: true, method: 'email_fallback' }
     } catch (emailError) {
