@@ -1,5 +1,5 @@
-import * as SMS from 'expo-sms'
 import * as Linking from 'expo-linking'
+import * as SMS from 'expo-sms'
 import { Alert, Platform, Share } from 'react-native'
 
 // =============================================================================
@@ -431,7 +431,7 @@ export const sharePhoto = async ({ photo, photoDetails }) => {
         )
         return { success: true, method: 'email_fallback' }
       }
-      
+
       Alert.alert('Error', 'Unable to share photo')
       return { success: false, error: 'No content to share' }
     } catch (emailError) {
@@ -562,7 +562,7 @@ export default {
   comprehensiveShare,
   createShareContent,
   sharePhoto,
-  
+
   // Linking functions
   initLinking,
 }
