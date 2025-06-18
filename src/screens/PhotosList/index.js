@@ -841,7 +841,7 @@ const PhotosList = () => {
         },
       })
       // Initialize deep linking for both development and production
-      const linkingHelper = await import('../../linking_helper')
+      const linkingHelper = await import('../../utils/linkingAndSharingHelper')
       linkingHelper.initLinking({ navigation })
     })()
     ;(async () => {

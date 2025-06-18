@@ -158,7 +158,7 @@ export async function sharePhoto({ photo, photoDetails, topOffset }) {
   try {
     // eslint-disable-next-line no-undef
     if (!__DEV__) {
-      const linkingHelper = await import('../../linking_helper')
+      const linkingHelper = await import('../../utils/linkingAndSharingHelper')
       await linkingHelper.sharePhoto({ photo, photoDetails })
     } else {
       alert('The feature is not supported on this device yet, try again later')

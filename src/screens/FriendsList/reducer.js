@@ -76,7 +76,7 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
     ).data.createFriendship
 
     try {
-      const sharingHelper = await import('../../utils/sharingHelper')
+      const sharingHelper = await import('../../utils/linkingAndSharingHelper')
       const result = await sharingHelper.shareWithNativeSheet({
         type: 'friend',
         friendshipUuid: friendship?.friendshipUuid,

@@ -12,7 +12,7 @@ import {
 import Toast from 'react-native-toast-message'
 
 import * as CONST from '../consts'
-import * as sharingHelper from '../utils/sharingHelper'
+import * as sharingHelper from '../utils/linkingAndSharingHelper'
 
 // App icons mapping
 const APP_ICONS = {

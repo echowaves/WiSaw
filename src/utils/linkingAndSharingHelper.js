@@ -1,5 +1,10 @@
 import * as SMS from 'expo-sms'
-import { Alert, Linking, Platform, Share } from 'react-native'
+import * as Linking from 'expo-linking'
+import { Alert, Platform, Share } from 'react-native'
+
+// =============================================================================
+// CONSTANTS
+// =============================================================================
 
 // Social media and messaging app deep link schemes
 const APP_SCHEMES = {
@@ -28,30 +33,39 @@ const APP_SCHEMES = {
   youtube: 'youtube://upload',
 }
 
-// Format app name for display
-const formatAppName = (appName) => {
-  const nameMap = {
-    whatsapp: 'WhatsApp',
-    telegram: 'Telegram',
-    facebook: 'Facebook',
-    twitter: 'Twitter',
-    instagram: 'Instagram',
-    tiktok: 'TikTok',
-    snapchat: 'Snapchat',
-    linkedin: 'LinkedIn',
-    pinterest: 'Pinterest',
-    imessage: 'Messages',
-    gmail: 'Gmail',
-    outlook: 'Outlook',
-    reddit: 'Reddit',
-    youtube: 'YouTube',
-    slack: 'Slack',
-    discord: 'Discord',
-  }
-  return nameMap[appName] || appName.charAt(0).toUpperCase() + appName.slice(1)
+// App name mapping for display
+const APP_NAME_MAP = {
+  whatsapp: 'WhatsApp',
+  telegram: 'Telegram',
+  facebook: 'Facebook',
+  twitter: 'Twitter',
+  instagram: 'Instagram',
+  tiktok: 'TikTok',
+  snapchat: 'Snapchat',
+  linkedin: 'LinkedIn',
+  pinterest: 'Pinterest',
+  imessage: 'Messages',
+  gmail: 'Gmail',
+  outlook: 'Outlook',
+  reddit: 'Reddit',
+  youtube: 'YouTube',
+  slack: 'Slack',
+  discord: 'Discord',
 }
 
-// Check if an app is installed
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+
+/**
+ * Format app name for display
+ */
+const formatAppName = (appName) =>
+  APP_NAME_MAP[appName] || appName.charAt(0).toUpperCase() + appName.slice(1)
+
+/**
+ * Check if an app is installed
+ */
 const isAppInstalled = async (scheme) => {
   try {
     return await Linking.canOpenURL(scheme)
@@ -62,7 +76,102 @@ const isAppInstalled = async (scheme) => {
   }
 }
 
-// Create sharing content for different contexts
+// =============================================================================
+// DEEP LINKING FUNCTIONALITY
+// =============================================================================
+
+/**
+ * Handle deep link navigation
+ */
+const handleDeepLink = async ({ url, navigation }) => {
+  if (!url) return
+
+  try {
+    // Parse the URL
+    const { hostname, path, queryParams } = Linking.parse(url)
+
+    // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
+    if (path && (path.includes('/photos/') || path.includes('photos/'))) {
+      // Handle both "/photos/" and "photos/" patterns
+      const photoId = path.includes('/photos/')
+        ? path.split('/photos/')[1]?.split('?')[0]?.split('#')[0]
+        : path.split('photos/')[1]?.split('?')[0]?.split('#')[0]
+
+      if (photoId) {
+        await navigation.popToTop()
+        navigation.navigate('PhotosDetailsShared', { photoId })
+        return
+      }
+    }
+
+    // Handle friendship links: https://wisaw.com/friends/uuid or https://link.wisaw.com/friends/uuid
+    if (path && (path.includes('/friends/') || path.includes('friends/'))) {
+      // Handle both "/friends/" and "friends/" patterns
+      const friendshipUuid = path.includes('/friends/')
+        ? path.split('/friends/')[1]?.split('?')[0]?.split('#')[0]
+        : path.split('friends/')[1]?.split('?')[0]?.split('#')[0]
+
+      if (friendshipUuid) {
+        // Navigate to top first
+        await navigation.popToTop()
+        // Add a delay to ensure navigation state is ready
+        setTimeout(() => {
+          navigation.navigate('ConfirmFriendship', { friendshipUuid })
+        }, 200)
+        return
+      }
+    }
+
+    // Handle query parameters for backward compatibility
+    if (queryParams?.photoId) {
+      await navigation.popToTop()
+      await navigation.navigate('PhotosDetailsShared', {
+        photoId: queryParams.photoId,
+      })
+      return
+    }
+
+    if (queryParams?.friendshipUuid) {
+      await navigation.popToTop()
+      await navigation.navigate('ConfirmFriendship', {
+        friendshipUuid: queryParams.friendshipUuid,
+      })
+    }
+
+    // Unhandled deep link - silently fail
+  } catch (error) {
+    // Error handling deep link - silently fail
+    // eslint-disable-next-line no-console
+    console.log('Deep link error:', error)
+  }
+}
+
+/**
+ * Initialize deep linking
+ */
+export const initLinking = ({ navigation }) => {
+  // Handle app opened from link when app is closed
+  Linking.getInitialURL().then((url) => {
+    if (url) {
+      handleDeepLink({ url, navigation })
+    }
+  })
+
+  // Handle app opened from link when app is in background
+  const subscription = Linking.addEventListener('url', ({ url }) => {
+    handleDeepLink({ url, navigation })
+  })
+
+  return () => subscription?.remove()
+}
+
+// =============================================================================
+// CONTENT CREATION
+// =============================================================================
+
+/**
+ * Create sharing content for different contexts
+ */
 export const createShareContent = ({
   type,
   photo,
@@ -104,7 +213,13 @@ export const createShareContent = ({
   return null
 }
 
-// Share via SMS using Expo SMS
+// =============================================================================
+// SHARING METHODS
+// =============================================================================
+
+/**
+ * Share via SMS using Expo SMS
+ */
 export const shareViaSMS = async ({ content, phoneNumber = null }) => {
   try {
     const isAvailable = await SMS.isAvailableAsync()
@@ -132,7 +247,9 @@ export const shareViaSMS = async ({ content, phoneNumber = null }) => {
   }
 }
 
-// Share using React Native's native Share API
+/**
+ * Share using React Native's native Share API
+ */
 export const shareWithNativeSheet = async ({
   type,
   photo,
@@ -195,7 +312,9 @@ export const shareWithNativeSheet = async ({
   }
 }
 
-// Share to specific app with deep linking
+/**
+ * Share to specific app with deep linking
+ */
 export const shareToSpecificApp = async ({
   app,
   type,
@@ -284,33 +403,82 @@ export const shareToSpecificApp = async ({
   }
 }
 
-// Get list of available sharing apps
+/**
+ * Simple photo sharing function (backward compatibility)
+ * This replaces the sharePhoto function from linking_helper.js
+ */
+export const sharePhoto = async ({ photo, photoDetails }) => {
+  try {
+    const result = await shareWithNativeSheet({
+      type: 'photo',
+      photo,
+      photoDetails,
+    })
+
+    return { success: result.success }
+  } catch (error) {
+    // Fallback to email if Share API fails
+    try {
+      const content = createShareContent({
+        type: 'photo',
+        photo,
+        photoDetails,
+      })
+
+      if (content) {
+        await Linking.openURL(
+          `mailto:?subject=${encodeURIComponent(content.subject)}&body=${encodeURIComponent(content.message)}`,
+        )
+        return { success: true, method: 'email_fallback' }
+      }
+      
+      Alert.alert('Error', 'Unable to share photo')
+      return { success: false, error: 'No content to share' }
+    } catch (emailError) {
+      Alert.alert('Error', 'Unable to share photo')
+      return { success: false, error: emailError }
+    }
+  }
+}
+
+/**
+ * Get list of available sharing apps
+ */
 export const getAvailableApps = async () => {
   const availableApps = []
 
   const appEntries = Object.entries(APP_SCHEMES)
-  for (let i = 0; i < appEntries.length; i += 1) {
-    const [appName, scheme] = appEntries[i]
+  const appChecks = appEntries.map(async ([appName, scheme]) => {
     try {
-      // eslint-disable-next-line no-await-in-loop
       const isAvailable = await isAppInstalled(scheme)
       if (isAvailable) {
-        availableApps.push({
+        return {
           name: appName,
           displayName: formatAppName(appName),
           scheme,
-        })
+        }
       }
+      return null
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log(`Error checking ${appName}:`, error)
+      return null
     }
-  }
+  })
+
+  const results = await Promise.all(appChecks)
+  results.forEach((app) => {
+    if (app) {
+      availableApps.push(app)
+    }
+  })
 
   return availableApps
 }
 
-// Comprehensive share function with multiple options
+/**
+ * Comprehensive share function with multiple options
+ */
 export const comprehensiveShare = async ({
   type,
   photo,
@@ -380,11 +548,21 @@ export const comprehensiveShare = async ({
   }
 }
 
+// =============================================================================
+// EXPORTS
+// =============================================================================
+
+// Default export for backward compatibility
 export default {
+  // Sharing functions
   shareWithNativeSheet,
   shareToSpecificApp,
   shareViaSMS,
   getAvailableApps,
   comprehensiveShare,
   createShareContent,
+  sharePhoto,
+  
+  // Linking functions
+  initLinking,
 }
