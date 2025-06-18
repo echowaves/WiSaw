@@ -200,7 +200,7 @@ export const createShareContent = ({
 
   if (type === 'friend' && friendshipUuid) {
     const url = `https://link.wisaw.com/friends/${friendshipUuid}`
-    const message = `${contactName}, you've got a WiSaw friendship request. To confirm, follow the url: ${url}`
+    const message = `${contactName}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store. To confirm, follow the url: ${url}`
 
     return {
       title: 'WiSaw Friendship Request',
