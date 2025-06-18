@@ -83,7 +83,11 @@ export default {
         NSMicrophoneUsageDescription:
           'WiSaw allows your to record video with sound. In order for the sound to be captured, you need to allow access to the microphone.',
       },
-      associatedDomains: ['applinks:link.wisaw.com', 'applinks:wisaw.com'],
+      associatedDomains: [
+        'applinks:link.wisaw.com',
+        'applinks:wisaw.com',
+        'applinks:*.wisaw.com',
+      ],
       config: {
         usesNonExemptEncryption: false,
         // Branch config removed - using native Universal Links
