@@ -79,28 +79,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#f5f5f5',
   },
-  shareButton: {
-    backgroundColor: '#ff6b35',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
-    elevation: 3,
-    shadowColor: '#ff6b35',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    transform: [{ scale: 1.05 }],
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 80,
-  },
-  shareButtonText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-    marginLeft: 6,
-  },
   editButton: {
     backgroundColor: '#e6f5ff',
   },
@@ -393,11 +371,13 @@ const FriendsList = () => {
             }
           }}
           onLongPress={() => {
-            Haptics.selectionAsync()
-            handleShareFriend({
-              friendshipUuid: friend.friendshipUuid,
-              contactName: displayName,
-            })
+            if (isPending) {
+              Haptics.selectionAsync()
+              handleShareFriend({
+                friendshipUuid: friend.friendshipUuid,
+                contactName: displayName,
+              })
+            }
           }}
           disabled={isPending}
         >
@@ -444,20 +424,6 @@ const FriendsList = () => {
             </View>
 
             <View style={styles.actionButtons}>
-              {!isPending && (
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.shareButton]}
-                  onPress={() =>
-                    handleShareFriend({
-                      friendshipUuid: friend.friendshipUuid,
-                      contactName: displayName,
-                    })
-                  }
-                >
-                  <FontAwesome5 name="share-alt" size={14} color="white" />
-                  <Text style={styles.shareButtonText}>Share</Text>
-                </TouchableOpacity>
-              )}
               <TouchableOpacity
                 style={[styles.actionButton, styles.editButton]}
                 onPress={() => {
