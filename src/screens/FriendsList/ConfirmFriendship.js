@@ -69,10 +69,24 @@ const ConfirmFriendship = ({ route }) => {
     },
   })
 
-  const setContactName = async (contactName) => {
+  const setContactName = async ({ contactName }) => {
     try {
+      // eslint-disable-next-line no-console
+      console.log('ConfirmFriendship: setContactName called with:', {
+        contactName,
+        friendshipUuid,
+      })
+      
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
+      // eslint-disable-next-line no-console
+      console.log('ConfirmFriendship: Friendship confirmed, now saving locally')
+      
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
+      // eslint-disable-next-line no-console
+      console.log(
+        'ConfirmFriendship: Contact name saved locally, reloading friends list',
+      )
+      
       setFriendsList(
         await friendsHelper.getEnhancedListOfFriendships({
           uuid,
@@ -110,6 +124,7 @@ const ConfirmFriendship = ({ route }) => {
         show={showNamePicker}
         setShow={setShowNamePicker}
         setContactName={setContactName}
+        friendshipUuid={friendshipUuid}
         headerText="You have received a friendship request. Did this message come from friend your know and trust? What is the name of the friend you've got the invitation from?"
       />
     </SafeAreaView>
