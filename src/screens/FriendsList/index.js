@@ -2,320 +2,383 @@ import { useNavigation } from '@react-navigation/native'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 
+import * as Haptics from 'expo-haptics'
+
 import {
   Alert,
+  FlatList,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  useWindowDimensions,
   View,
 } from 'react-native'
 
-import FlatGrid from 'react-native-super-grid'
 import Toast from 'react-native-toast-message'
 
-import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome5 } from '@expo/vector-icons'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
-import * as reducer from './reducer'
-
 import NamePicker from '../../components/NamePicker'
 import * as friendsHelper from './friends_helper'
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  friendItem: {
+    backgroundColor: 'white',
+    marginHorizontal: 16,
+    marginVertical: 4,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  friendContent: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    flex: 1,
+  },
+  friendHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  friendInfo: {
+    marginRight: 12,
+    flex: 1,
+  },
+  friendName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  friendStatus: {
+    fontSize: 14,
+    color: '#666',
+  },
+  pendingStatus: {
+    fontSize: 14,
+    color: '#ff6b35',
+    fontWeight: '500',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  shareButton: {
+    backgroundColor: '#ff6b35',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 10,
+    elevation: 3,
+    shadowColor: '#ff6b35',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    transform: [{ scale: 1.05 }],
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 80,
+  },
+  shareButtonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  editButton: {
+    backgroundColor: '#e6f5ff',
+  },
+  deleteButton: {
+    backgroundColor: '#ffebee',
+  },
+  pendingShareButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginLeft: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255, 107, 53, 0.15)',
+    elevation: 2,
+    shadowColor: '#ff6b35',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 107, 53, 0.3)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pendingShareButtonText: {
+    color: '#ff6b35',
+    fontSize: 11,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  emptyStateTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  emptyStateDescription: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  addFriendButton: {
+    backgroundColor: CONST.MAIN_COLOR,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addFriendButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  headerButton: {
+    paddingHorizontal: 12,
+  },
+})
 
 const FriendsList = () => {
   const navigation = useNavigation()
 
-  const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+  const [uuid] = useAtom(STATE.uuid)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
-  const {
-    width,
-    // height,
-  } = useWindowDimensions()
-
-  const headerText = 'What is your friend name?'
+  const headerText =
+    'Choose a friendly name to help you remember this person when chatting or sharing content.'
 
   const [showNamePicker, setShowNamePicker] = useState(false)
-  const [friendshipUuid, setFriendshipUuid] = useState(null)
+  const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState(null)
 
   const handleAddFriend = async () => {
-    await setFriendshipUuid(null) // make sure we are adding a new friend
-    await setShowNamePicker(true)
+    setSelectedFriendshipUuid(null) // make sure we are adding a new friend
+    setShowNamePicker(true)
   }
 
-  const renderAddFriendButton = () => (
-    <FontAwesome
-      name="user-plus"
-      size={30}
-      style={{
-        marginRight: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => {
-        handleAddFriend()
-      }}
-    />
-  )
+  const handleShareFriend = async ({ friendshipUuid, contactName }) => {
+    try {
+      const result = await friendsHelper.shareFriendship({
+        uuid,
+        friendshipUuid,
+        contactName,
+      })
 
-  const renderHeaderRight = useCallback(() => renderAddFriendButton(), [])
+      if (result) {
+        Toast.show({
+          type: 'success',
+          position: 'top',
+          text1: 'Friendship shared!',
+          text2: `Shared ${contactName}'s friendship request`,
+          visibilityTime: 2000,
+          autoHide: true,
+          topOffset: 60,
+        })
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error sharing friend:', error)
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error sharing friendship',
+        text2: 'Please try again',
+        visibilityTime: 3000,
+        autoHide: true,
+        topOffset: 60,
+      })
+    }
+  }
+
+  const handleRemoveFriend = async ({ friendshipUuid }) => {
+    try {
+      const success = await friendsHelper.removeFriend({
+        uuid,
+        friendshipUuid,
+      })
+      if (success) {
+        Toast.show({
+          type: 'success',
+          position: 'top',
+          text1: 'Friend removed',
+          visibilityTime: 2000,
+          autoHide: true,
+          topOffset: 60,
+        })
+        // need to re-load friendships from local storage
+        const newFriendsList = await friendsHelper.getEnhancedListOfFriendships(
+          {
+            uuid,
+          },
+        )
+        setFriendsList(newFriendsList)
+      } else {
+        Toast.show({
+          type: 'error',
+          position: 'top',
+          text1: 'Error removing friend',
+          text2: 'Please try again',
+          visibilityTime: 3000,
+          autoHide: true,
+          topOffset: 60,
+        })
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Error removing friend:', error)
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error removing friend',
+        text2: 'Please try again',
+        visibilityTime: 3000,
+        autoHide: true,
+        topOffset: 60,
+      })
+    }
+  }
+
+  const setContactName = async ({ friendshipUuid, contactName }) => {
+    try {
+      let actualFriendshipUuid = friendshipUuid
+
+      // If no friendshipUuid provided, we need to create a new friendship on the server
+      if (!actualFriendshipUuid) {
+        // Import the reducer to create friendship
+        const reducer = await import('./reducer')
+
+        const friendship = await reducer.createFriendship({
+          uuid,
+          topOffset: 0, // We don't have access to topOffset here, use 0
+          contactName,
+          autoShare: false, // Don't auto-share, user can share manually later
+        })
+
+        if (!friendship) {
+          throw new Error('Failed to create friendship on server')
+        }
+
+        actualFriendshipUuid = friendship.friendshipUuid
+      }
+
+      // Save/update the contact name locally (for both new and existing friendships)
+      // eslint-disable-next-line no-console
+      console.log(
+        `Saving contact name "${contactName}" for friendship ${actualFriendshipUuid}`,
+      )
+
+      await friendsHelper.setContactName({
+        uuid,
+        friendshipUuid: actualFriendshipUuid,
+        contactName,
+      })
+
+      // reload friendships from server
+      const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
+      setFriendsList(newFriendsList)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error in setContactName:', error)
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'Error saving friend name',
+        text2: 'Please try again',
+        visibilityTime: 3000,
+        autoHide: true,
+        topOffset: 60,
+      })
+    }
+  }
+
+  const reload = useCallback(async () => {
+    try {
+      const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
+      setFriendsList(newFriendsList)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Error loading friendships:', error)
+    }
+  }, [uuid, setFriendsList])
+
+  const renderHeaderRight = useCallback(
+    () => (
+      <TouchableOpacity style={styles.headerButton} onPress={handleAddFriend}>
+        <FontAwesome5 name="user-plus" size={18} color={CONST.MAIN_COLOR} />
+      </TouchableOpacity>
+    ),
+    [],
+  )
 
   const renderHeaderLeft = useCallback(
     () => (
-      <FontAwesome
-        name="chevron-left"
-        size={30}
-        style={{
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }}
+      <TouchableOpacity
+        style={styles.headerButton}
         onPress={() => navigation.goBack()}
-      />
+      >
+        <FontAwesome5 name="arrow-left" size={18} color={CONST.MAIN_COLOR} />
+      </TouchableOpacity>
     ),
     [navigation],
   )
-  const reload = useCallback(async () => {
-    try {
-      const result = await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
-      })
-      setFriendsList(result)
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error loading friends list:', error)
-      Toast.show({
-        text1: 'Failed to load friends',
-        text2: 'Please try again',
-        type: 'error',
-        topOffset,
-      })
-    }
-  }, [uuid, topOffset])
 
   useEffect(() => {
-    ;(async () => {
-      navigation.setOptions({
-        headerTitle: 'friends',
-        headerTintColor: CONST.MAIN_COLOR,
-        headerRight: renderHeaderRight,
-        headerLeft: renderHeaderLeft,
-        headerBackTitle: '',
-        headerStyle: {
-          backgroundColor: CONST.NAV_COLOR,
-        },
-      })
-      // a friendship with no locally assigned contact can never show in the list on the screen
-      // await friendsHelper.cleanupAbandonedFriendships({ uuid })
+    navigation.setOptions({
+      headerTitle: 'friends',
+      headerTintColor: CONST.MAIN_COLOR,
+      headerRight: renderHeaderRight,
+      headerLeft: renderHeaderLeft,
+      headerBackTitle: '',
+      headerStyle: {
+        backgroundColor: CONST.NAV_COLOR,
+      },
+    })
 
-      // Only load friendships when uuid is properly initialized
-      if (uuid && uuid !== '') {
-        reload()
-      }
-    })()
-  }, [uuid])
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#f8f9fa',
-    },
-    friendItem: {
-      backgroundColor: 'white',
-      marginHorizontal: 16,
-      marginVertical: 4,
-      borderRadius: 12,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    },
-    friendContent: {
-      paddingVertical: 16,
-      paddingHorizontal: 16,
-      flex: 1,
-    },
-    friendHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    friendInfo: {
-      // flex: 1, // Remove this again - it causes the name rendering issue
-      marginRight: 12,
-      maxWidth: '70%', // Keep this to ensure space for buttons
-      // minWidth: 1, // Remove this too
-    },
-    friendName: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#1a1a1a',
-      marginBottom: 4,
-      // flex: 1, // Remove this too
-    },
-    friendStatus: {
-      fontSize: 14,
-      color: '#666',
-    },
-    pendingStatus: {
-      fontSize: 14,
-      color: '#ff6b35',
-      fontWeight: '500',
-    },
-    actionButtons: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-    },
-    actionButton: {
-      padding: 8,
-      borderRadius: 8,
-      backgroundColor: '#f5f5f5',
-    },
-    unreadBadge: {
-      position: 'absolute',
-      top: -4,
-      right: -4,
-      minWidth: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: CONST.MAIN_COLOR,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    unreadText: {
-      color: 'white',
-      fontSize: 12,
-      fontWeight: 'bold',
-    },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 32,
-    },
-    emptyTitle: {
-      fontSize: 24,
-      fontWeight: '600',
-      color: '#1a1a1a',
-      marginBottom: 12,
-      textAlign: 'center',
-    },
-    emptySubtitle: {
-      fontSize: 16,
-      color: '#666',
-      textAlign: 'center',
-      lineHeight: 24,
-      marginBottom: 32,
-    },
-    addFriendButton: {
-      backgroundColor: CONST.MAIN_COLOR,
-      paddingHorizontal: 24,
-      paddingVertical: 12,
-      borderRadius: 8,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    addFriendText: {
-      color: 'white',
-      fontSize: 16,
-      fontWeight: '600',
-    },
-  })
-
-  const sendFriendshipRequest = async ({ contactName }) => {
-    try {
-      const friendship = await reducer.createFriendship({
-        uuid,
-        topOffset,
-        contactName,
-      })
-      return friendship
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error creating friendship:', error)
-      Toast.show({
-        text1: 'Failed to create friendship request',
-        text2: error.message || 'Please try again',
-        type: 'error',
-        topOffset,
-      })
-      return null
+    // Only load friendships when uuid is properly initialized
+    if (uuid && uuid !== '') {
+      reload()
     }
-  }
+  }, [uuid, navigation, renderHeaderRight, renderHeaderLeft, reload])
 
-  const setContactName = async (contactName) => {
-    try {
-      // this is edit existing name
-      if (!friendshipUuid) {
-        // this is new friendship, let's create it and then send the invite
-        const friendship = await sendFriendshipRequest({ contactName })
-        if (friendship) {
-          await friendsHelper.addFriendshipLocally({
-            friendshipUuid: friendship.friendshipUuid,
-            contactName,
-          })
-        }
-      } else {
-        await friendsHelper.addFriendshipLocally({
-          friendshipUuid,
-          contactName,
-        })
-      }
-
-      await setShowNamePicker(false)
-      setFriendshipUuid(null) // reset friendshipUuid for next request
-
-      setFriendsList(
-        await friendsHelper.getEnhancedListOfFriendships({
-          uuid,
-        }),
-      )
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error setting contact name:', error)
-      Toast.show({
-        text1: 'Failed to save friend name',
-        text2: error.message || 'Please try again',
-        type: 'error',
-        topOffset,
-      })
-    }
-  }
-
-  // eslint-disable-next-line no-shadow
-  const handleRemoveFriend = ({ friendshipUuid }) => {
-    Alert.alert(
-      'Delete Friendship?',
-      "This can't be undone. Are you sure? ",
-      [
-        { text: 'No', onPress: () => null, style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            await friendsHelper.deleteFriendship({ friendshipUuid, topOffset })
-            reload()
-          },
-        },
-      ],
-      { cancelable: true },
-    )
-  }
-
-  const renderFriend = ({ friend }) => {
+  const renderFriend = ({ item: friend }) => {
     const displayName = friend?.contact || 'Unnamed Friend'
     const isPending = friend.uuid2 === null
     const hasUnread = friend.unreadCount > 0
-
-    // console.log('Rendering friend object:', JSON.stringify(friend, null, 2));
-    // console.log('Value of friend.contact:', friend?.contact);
-    // console.log('Calculated displayName:', displayName);
 
     return (
       <View style={styles.friendItem}>
@@ -328,6 +391,13 @@ const FriendsList = () => {
                 contact: friend?.contact,
               })
             }
+          }}
+          onLongPress={() => {
+            Haptics.selectionAsync()
+            handleShareFriend({
+              friendshipUuid: friend.friendshipUuid,
+              contactName: displayName,
+            })
           }}
           disabled={isPending}
         >
@@ -351,6 +421,18 @@ const FriendsList = () => {
                   <Text style={styles.pendingStatus}>
                     Waiting for confirmation
                   </Text>
+                  <TouchableOpacity
+                    style={[styles.pendingShareButton]}
+                    onPress={() =>
+                      handleShareFriend({
+                        friendshipUuid: friend.friendshipUuid,
+                        contactName: displayName,
+                      })
+                    }
+                  >
+                    <FontAwesome5 name="share-alt" size={12} color="#ff6b35" />
+                    <Text style={styles.pendingShareButtonText}>Share</Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 <Text style={styles.friendStatus}>
@@ -362,35 +444,50 @@ const FriendsList = () => {
             </View>
 
             <View style={styles.actionButtons}>
-              {hasUnread && (
-                <View style={styles.unreadBadge}>
-                  <Text style={styles.unreadText}>
-                    {friend.unreadCount > 99 ? '99+' : friend.unreadCount}
-                  </Text>
-                </View>
+              {!isPending && (
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.shareButton]}
+                  onPress={() =>
+                    handleShareFriend({
+                      friendshipUuid: friend.friendshipUuid,
+                      contactName: displayName,
+                    })
+                  }
+                >
+                  <FontAwesome5 name="share-alt" size={14} color="white" />
+                  <Text style={styles.shareButtonText}>Share</Text>
+                </TouchableOpacity>
               )}
-
               <TouchableOpacity
-                style={styles.actionButton}
-                onPress={async () => {
-                  await setFriendshipUuid(friend?.friendshipUuid)
+                style={[styles.actionButton, styles.editButton]}
+                onPress={() => {
+                  setSelectedFriendshipUuid(friend.friendshipUuid)
                   setShowNamePicker(true)
                 }}
               >
-                <FontAwesome5
-                  name="user-edit"
-                  size={18}
-                  color={CONST.MAIN_COLOR}
-                />
+                <FontAwesome5 name="edit" size={14} color="#007bff" />
               </TouchableOpacity>
-
               <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() =>
-                  handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
-                }
+                style={[styles.actionButton, styles.deleteButton]}
+                onPress={() => {
+                  Alert.alert(
+                    'Remove Friend',
+                    `Are you sure you want to remove ${displayName}?`,
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Remove',
+                        style: 'destructive',
+                        onPress: () =>
+                          handleRemoveFriend({
+                            friendshipUuid: friend.friendshipUuid,
+                          }),
+                      },
+                    ],
+                  )
+                }}
               >
-                <FontAwesome name="user-times" size={18} color="#dc3545" />
+                <FontAwesome5 name="trash" size={14} color="#dc3545" />
               </TouchableOpacity>
             </View>
           </View>
@@ -399,11 +496,7 @@ const FriendsList = () => {
     )
   }
 
-  // const _handleAssociateLocalFriend = ({ friendshipUuid }) => {
-  //   navigation.navigate('LocalContacts', { friendshipUuid })
-  // }
-
-  if (friendsList.length === 0) {
+  if (!friendsList || friendsList.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <NamePicker
@@ -411,25 +504,20 @@ const FriendsList = () => {
           setShow={setShowNamePicker}
           setContactName={setContactName}
           headerText={headerText}
+          friendshipUuid={selectedFriendshipUuid}
         />
-        <View style={styles.emptyContainer}>
-          <FontAwesome5
-            name="user-friends"
-            size={64}
-            color="#e0e0e0"
-            style={{ marginBottom: 24 }}
-          />
-          <Text style={styles.emptyTitle}>No Friends Yet</Text>
-          <Text style={styles.emptySubtitle}>
-            Start connecting with friends by sending them an invitation.
-            {'\n'}They will receive a link to accept your friendship request.
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
+          <Text style={styles.emptyStateDescription}>
+            Add your first friend to start sharing photos and chatting
+            privately.
           </Text>
           <TouchableOpacity
             style={styles.addFriendButton}
             onPress={handleAddFriend}
           >
-            <FontAwesome name="user-plus" size={16} color="white" />
-            <Text style={styles.addFriendText}>Add Your First Friend</Text>
+            <FontAwesome5 name="user-plus" size={16} color="white" />
+            <Text style={styles.addFriendButtonText}>Add a Friend</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -443,23 +531,17 @@ const FriendsList = () => {
         setShow={setShowNamePicker}
         setContactName={setContactName}
         headerText={headerText}
+        friendshipUuid={selectedFriendshipUuid}
       />
-      <FlatGrid
-        itemDimension={width}
-        // spacing={3}
+      <FlatList
         data={friendsList}
-        renderItem={({ item }) => renderFriend({ friend: item })}
+        renderItem={renderFriend}
         keyExtractor={(item) => item.friendshipUuid}
-        style={{
-          ...styles.container,
-          marginBottom: 95,
-        }}
-        showsVerticalScrollIndicator
-        horizontal={false}
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
         refreshing={false}
-        onRefresh={() => {
-          reload()
-        }}
+        onRefresh={reload}
       />
     </SafeAreaView>
   )

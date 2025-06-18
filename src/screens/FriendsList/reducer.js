@@ -41,7 +41,12 @@ export const initialState = {
 //   }
 // }
 
-export async function createFriendship({ uuid, topOffset, contactName }) {
+export async function createFriendship({
+  uuid,
+  topOffset,
+  contactName,
+  autoShare = false,
+}) {
   try {
     const { friendship } = (
       await CONST.gqlClient.mutate({
@@ -75,37 +80,57 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
       })
     ).data.createFriendship
 
-    try {
-      const sharingHelper = await import('../../utils/linkingAndSharingHelper')
-      const result = await sharingHelper.shareWithNativeSheet({
-        type: 'friend',
-        friendshipUuid: friendship?.friendshipUuid,
-        contactName,
-      })
-
-      if (result?.success) {
-        Toast.show({
-          text1: 'Friendship request shared!',
-          text2: result.activityType ? `Shared via ${result.activityType}` : '',
-          type: 'success',
-          topOffset,
+    // Only auto-share if explicitly requested
+    if (autoShare) {
+      try {
+        const sharingHelper = await import(
+          '../../utils/linkingAndSharingHelper'
+        )
+        const result = await sharingHelper.shareWithNativeSheet({
+          type: 'friend',
+          friendshipUuid: friendship?.friendshipUuid,
+          contactName,
         })
-      } else if (result && !result.success && !result.dismissed) {
-        const message = result.reason || 'Sharing action was not successful.'
+
+        if (result?.success) {
+          Toast.show({
+            text1: 'Friendship request shared!',
+            text2: result.activityType
+              ? `Shared via ${result.activityType}`
+              : '',
+            type: 'success',
+            position: 'top',
+            topOffset: 60,
+          })
+        } else if (result && !result.success && !result.dismissed) {
+          const message = result.reason || 'Sharing action was not successful.'
+          Toast.show({
+            text1: 'Sharing failed',
+            text2: message,
+            type: 'error',
+            position: 'top',
+            topOffset: 60,
+          })
+        }
+      } catch (shareError) {
+        const message =
+          shareError.message || 'Unable to share friendship request'
         Toast.show({
           text1: 'Sharing failed',
           text2: message,
           type: 'error',
-          topOffset,
+          position: 'top',
+          topOffset: 60,
         })
       }
-    } catch (shareError) {
-      const message = shareError.message || 'Unable to share friendship request'
+    } else {
+      // Show success message for friend creation without auto-sharing
       Toast.show({
-        text1: 'Sharing failed',
-        text2: message,
-        type: 'error',
-        topOffset,
+        text1: 'Friend added successfully!',
+        text2: 'You can now share the friendship request from the friends list',
+        type: 'success',
+        position: 'top',
+        topOffset: 60,
       })
     }
 
@@ -117,7 +142,8 @@ export async function createFriendship({ uuid, topOffset, contactName }) {
       text1: 'Unable to create Friend',
       text2: err.toString(),
       type: 'error',
-      topOffset,
+      position: 'top',
+      topOffset: 60,
     })
     return null
   }

@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { useAtom } from 'jotai'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { SafeAreaView, StyleSheet } from 'react-native'
 
@@ -85,7 +85,8 @@ const ConfirmFriendship = ({ route }) => {
         text1: 'Friendship confirmed!',
         text2: `You are now friends with ${contactName}`,
         type: 'success',
-        topOffset,
+        position: 'top',
+        topOffset: 60,
       })
 
       await navigation.popToTop()
@@ -97,7 +98,8 @@ const ConfirmFriendship = ({ route }) => {
         text1: 'Unable to confirm Friendship',
         text2: err.message || err.toString(),
         type: 'error',
-        topOffset,
+        position: 'top',
+        topOffset: 60,
       })
     }
   }
