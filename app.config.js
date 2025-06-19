@@ -43,7 +43,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '310',
+      buildNumber: '311',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -99,7 +99,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 310,
+      versionCode: 311,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
@@ -109,24 +109,35 @@ export default {
         'WRITE_EXTERNAL_STORAGE',
         'READ_EXTERNAL_STORAGE',
         'com.google.android.gms.permission.AD_ID',
+        // Additional permissions for Samsung devices and deep linking
+        'android.permission.QUERY_ALL_PACKAGES',
       ],
       config: {
         // Branch config removed - using native App Links
       },
       intentFilters: [
+        // Primary intent filter for App Links verification
         {
           action: 'VIEW',
           autoVerify: true,
           data: [
-            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/photos' },
-            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/friends' },
-            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/photos' },
-            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/friends' },
             { scheme: 'https', host: 'link.wisaw.com' },
             { scheme: 'https', host: 'wisaw.com' },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
+        // Secondary intent filter for specific paths (Samsung browser compatibility)
+        {
+          action: 'VIEW',
+          data: [
+            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/photos' },
+            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/friends' },
+            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/photos' },
+            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/friends' },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        // Custom scheme fallback
         {
           action: 'VIEW',
           data: [{ scheme: 'wisaw' }],
@@ -150,6 +161,8 @@ export default {
           'com.microsoft.office.outlook',
           'com.reddit.frontpage',
           'com.google.android.youtube',
+          // Samsung browser for deep linking
+          'com.sec.android.app.sbrowser',
         ],
         intent: [
           {
