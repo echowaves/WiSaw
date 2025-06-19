@@ -995,7 +995,8 @@ const PhotosList = () => {
             },
             shadowOpacity: 0.1,
             shadowRadius: 8,
-            elevation: 10,
+            elevation: 14,
+            zIndex: 14,
           }}
         >
           <View
@@ -1006,6 +1007,8 @@ const PhotosList = () => {
               paddingHorizontal: 20,
               paddingTop: 10,
               height: '100%',
+              elevation: 14,
+              zIndex: 14,
             }}
           >
             {/* Navigation Menu Button */}
@@ -1017,6 +1020,8 @@ const PhotosList = () => {
                 height: 50,
                 borderRadius: 25,
                 backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                elevation: 15,
+                zIndex: 15,
               }}
               onPress={() => navigation.openDrawer()}
               disabled={!netAvailable}
@@ -1044,7 +1049,8 @@ const PhotosList = () => {
                 },
                 shadowOpacity: 0.3,
                 shadowRadius: 8,
-                elevation: 8,
+                elevation: 15,
+                zIndex: 15,
               }}
               onPress={() => {
                 checkPermissionsForPhotoTaking({ cameraType: 'video' })
@@ -1069,7 +1075,8 @@ const PhotosList = () => {
                 },
                 shadowOpacity: 0.4,
                 shadowRadius: 12,
-                elevation: 12,
+                elevation: 15,
+                zIndex: 15,
                 borderWidth: 3,
                 borderColor: 'white',
               }}
@@ -1090,6 +1097,8 @@ const PhotosList = () => {
                 borderRadius: 25,
                 backgroundColor: 'rgba(0, 0, 0, 0.05)',
                 position: 'relative',
+                elevation: 15,
+                zIndex: 15,
               }}
               onPress={() => navigation.navigate('FriendsList')}
               disabled={!netAvailable}
@@ -1118,6 +1127,8 @@ const PhotosList = () => {
                     position: 'absolute',
                     top: -2,
                     right: -2,
+                    elevation: 20,
+                    zIndex: 20,
                   }}
                 />
               )}
@@ -1205,7 +1216,8 @@ const PhotosList = () => {
         },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
+        elevation: 8,
+        zIndex: 8,
       }}
     >
       <View
@@ -1267,6 +1279,8 @@ const PhotosList = () => {
               alignItems: 'center',
               backgroundColor: 'rgba(0, 0, 0, 0.1)',
               borderRadius: 10,
+              elevation: 6,
+              zIndex: 6,
             }}
           >
             <Ionicons name="close" size={12} color="rgba(0, 0, 0, 0.6)" />
@@ -1290,7 +1304,8 @@ const PhotosList = () => {
           },
           shadowOpacity: 0.3,
           shadowRadius: 4,
-          elevation: 4,
+          elevation: 8,
+          zIndex: 8,
         }}
       >
         <Ionicons name="send" size={20} color="white" />

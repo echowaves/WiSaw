@@ -86,21 +86,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffebee',
   },
   pendingShareButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    marginLeft: 12,
-    borderRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginLeft: 0,
+    borderRadius: 8,
     backgroundColor: 'rgba(255, 107, 53, 0.15)',
-    elevation: 2,
+    elevation: 15,
+    zIndex: 15,
     shadowColor: '#ff6b35',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     borderWidth: 1,
     borderColor: 'rgba(255, 107, 53, 0.3)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    minWidth: 80,
+    minHeight: 36,
   },
   pendingShareButtonText: {
     color: '#ff6b35',
@@ -145,6 +148,10 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     paddingHorizontal: 12,
+  },
+  shareButtonContainer: {
+    marginTop: 8,
+    alignItems: 'flex-start',
   },
 })
 
@@ -380,6 +387,7 @@ const FriendsList = () => {
             }
           }}
           disabled={isPending}
+          activeOpacity={isPending ? 1 : 0.7}
         >
           <View style={styles.friendHeader}>
             <View style={styles.friendInfo}>
@@ -391,29 +399,49 @@ const FriendsList = () => {
                 {displayName}
               </Text>
               {isPending ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <FontAwesome5
-                    name="clock"
-                    size={12}
-                    color="#ff6b35"
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text style={styles.pendingStatus}>
-                    Waiting for confirmation
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.pendingShareButton]}
-                    onPress={() =>
-                      handleShareFriend({
-                        friendshipUuid: friend.friendshipUuid,
-                        contactName: displayName,
-                      })
-                    }
-                  >
-                    <FontAwesome5 name="share-alt" size={12} color="#ff6b35" />
-                    <Text style={styles.pendingShareButtonText}>Share</Text>
-                  </TouchableOpacity>
-                </View>
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <FontAwesome5
+                      name="clock"
+                      size={12}
+                      color="#ff6b35"
+                      style={{ marginRight: 6 }}
+                    />
+                    <Text style={styles.pendingStatus}>
+                      Waiting for confirmation
+                    </Text>
+                  </View>
+                  {/* Share button on its own line */}
+                  <View style={styles.shareButtonContainer}>
+                    <TouchableOpacity
+                      style={[styles.pendingShareButton]}
+                      onPress={() =>
+                        handleShareFriend({
+                          friendshipUuid: friend.friendshipUuid,
+                          contactName: displayName,
+                        })
+                      }
+                      activeOpacity={0.5}
+                      delayPressIn={0}
+                      delayPressOut={0}
+                      hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                      pressRetentionOffset={{
+                        top: 20,
+                        bottom: 20,
+                        left: 20,
+                        right: 20,
+                      }}
+                      importantForAccessibility="yes"
+                    >
+                      <FontAwesome5
+                        name="share-alt"
+                        size={12}
+                        color="#ff6b35"
+                      />
+                      <Text style={styles.pendingShareButtonText}>Share</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
               ) : (
                 <Text style={styles.friendStatus}>
                   {hasUnread
