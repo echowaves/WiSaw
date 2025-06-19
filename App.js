@@ -100,7 +100,7 @@ function CustomDrawerContent(props) {
     Constants.expoConfig?.ios?.buildNumber ||
     Constants.expoConfig?.version ||
     '299'
-  const appVersion = Constants.expoConfig?.version || '7.2.0'
+  const appVersion = Constants.expoConfig?.version || '7.2.1'
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
