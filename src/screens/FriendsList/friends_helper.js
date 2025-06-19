@@ -303,8 +303,9 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
       }
     }),
   )
+  // Sort by most recent updates first (descending order)
   return enhancedFriendships.sort(
-    (a, b) => new Date(a.updatedAt).getTime() < new Date(b.updatedAt).getTime(),
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
   )
 }
 
