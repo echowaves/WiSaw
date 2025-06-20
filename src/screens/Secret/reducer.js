@@ -84,6 +84,7 @@ export async function registerSecret({ secret, topOffset, nickName, uuid }) {
       type: 'error',
       topOffset,
     })
+    throw err9
   }
 }
 
@@ -141,6 +142,7 @@ export async function updateSecret({
       type: 'error',
       topOffset,
     })
+    throw err10
   }
 }
 
@@ -163,6 +165,7 @@ export async function resetSecret({ topOffset }) {
       type: 'error',
       topOffset,
     })
+    throw err11
   }
 }
 
@@ -177,6 +180,7 @@ const storeUUID = async (uuid) => {
       text2: err12.toString(),
       type: 'error',
     })
+    throw err12
   }
 }
 
@@ -211,6 +215,7 @@ const storeNickName = async (nickName) => {
       text2: err14.toString(),
       type: 'error',
     })
+    throw err14
   }
 }
 
