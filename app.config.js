@@ -43,7 +43,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '311',
+      buildNumber: '312',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -99,7 +99,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 311,
+      versionCode: 312,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
@@ -109,8 +109,6 @@ export default {
         'WRITE_EXTERNAL_STORAGE',
         'READ_EXTERNAL_STORAGE',
         'com.google.android.gms.permission.AD_ID',
-        // Additional permissions for Samsung devices and deep linking
-        'android.permission.QUERY_ALL_PACKAGES',
       ],
       config: {
         // Branch config removed - using native App Links
