@@ -840,9 +840,6 @@ const PhotosList = () => {
           allowAnnouncements: true,
         },
       })
-      // Initialize deep linking for both development and production
-      const linkingHelper = await import('../../utils/linkingAndSharingHelper')
-      linkingHelper.initLinking({ navigation })
     })()
     ;(async () => {
       await registerBackgroundFetchAsync()

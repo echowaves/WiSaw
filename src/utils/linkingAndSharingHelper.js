@@ -90,52 +90,97 @@ const handleDeepLink = async ({ url, navigation }) => {
     // Parse the URL
     const { hostname, path, queryParams } = Linking.parse(url)
 
-    // Handle photo links: https://wisaw.com/photos/12345 or https://link.wisaw.com/photos/12345
-    if (path && (path.includes('/photos/') || path.includes('photos/'))) {
-      // Handle both "/photos/" and "photos/" patterns
-      const photoId = path.includes('/photos/')
-        ? path.split('/photos/')[1]?.split('?')[0]?.split('#')[0]
-        : path.split('photos/')[1]?.split('?')[0]?.split('#')[0]
-
-      if (photoId) {
-        await navigation.popToTop()
-        navigation.navigate('PhotosDetailsShared', { photoId })
-        return
+    // Normalize the path by removing leading/trailing slashes and query parameters
+    const cleanPath = path ? path.replace(/^\/+|\/+$/g, '') : ''
+    
+    // Handle photo links with multiple patterns for Samsung compatibility
+    if (cleanPath.includes('photos')) {
+      let photoId = null
+      
+      // Try different patterns that Samsung devices might use
+      if (cleanPath.includes('photos/')) {
+        photoId = cleanPath
+          .split('photos/')[1]
+          ?.split('?')[0]
+          ?.split('#')[0]
+          ?.split('/')[0]
+      } else if (cleanPath.includes('photos')) {
+        // Handle cases where Samsung strips the slash
+        const parts = cleanPath.split('photos')
+        if (parts.length > 1) {
+          photoId = parts[1]
+            .replace(/^\/+/, '')
+            .split('?')[0]
+            ?.split('#')[0]
+            ?.split('/')[0]
+        }
       }
-    }
 
-    // Handle friendship links: https://wisaw.com/friends/uuid or https://link.wisaw.com/friends/uuid
-    if (path && (path.includes('/friends/') || path.includes('friends/'))) {
-      // Handle both "/friends/" and "friends/" patterns
-      const friendshipUuid = path.includes('/friends/')
-        ? path.split('/friends/')[1]?.split('?')[0]?.split('#')[0]
-        : path.split('friends/')[1]?.split('?')[0]?.split('#')[0]
-
-      if (friendshipUuid) {
-        // Navigate to top first
+      if (photoId && photoId.trim()) {
         await navigation.popToTop()
-        // Add a delay to ensure navigation state is ready
+        // Add delay for Samsung devices which sometimes need more time
         setTimeout(() => {
-          navigation.navigate('ConfirmFriendship', { friendshipUuid })
-        }, 200)
+          navigation.navigate('PhotosDetailsShared', {
+            photoId: photoId.trim(),
+          })
+        }, 300)
         return
       }
     }
 
-    // Handle query parameters for backward compatibility
+    // Handle friendship links with multiple patterns for Samsung compatibility
+    if (cleanPath.includes('friends')) {
+      let friendshipUuid = null
+      
+      // Try different patterns that Samsung devices might use
+      if (cleanPath.includes('friends/')) {
+        friendshipUuid = cleanPath
+          .split('friends/')[1]
+          ?.split('?')[0]
+          ?.split('#')[0]
+          ?.split('/')[0]
+      } else if (cleanPath.includes('friends')) {
+        // Handle cases where Samsung strips the slash
+        const parts = cleanPath.split('friends')
+        if (parts.length > 1) {
+          friendshipUuid = parts[1]
+            .replace(/^\/+/, '')
+            .split('?')[0]
+            ?.split('#')[0]
+            ?.split('/')[0]
+        }
+      }
+
+      if (friendshipUuid && friendshipUuid.trim()) {
+        await navigation.popToTop()
+        // Add longer delay for Samsung devices for friendship navigation
+        setTimeout(() => {
+          navigation.navigate('ConfirmFriendship', {
+            friendshipUuid: friendshipUuid.trim(),
+          })
+        }, 400)
+        return
+      }
+    }
+
+    // Handle query parameters for backward compatibility (legacy links)
     if (queryParams?.photoId) {
       await navigation.popToTop()
-      await navigation.navigate('PhotosDetailsShared', {
-        photoId: queryParams.photoId,
-      })
+      setTimeout(() => {
+        navigation.navigate('PhotosDetailsShared', {
+          photoId: queryParams.photoId,
+        })
+      }, 300)
       return
     }
 
     if (queryParams?.friendshipUuid) {
       await navigation.popToTop()
-      await navigation.navigate('ConfirmFriendship', {
-        friendshipUuid: queryParams.friendshipUuid,
-      })
+      setTimeout(() => {
+        navigation.navigate('ConfirmFriendship', {
+          friendshipUuid: queryParams.friendshipUuid,
+        })
+      }, 400)
     }
 
     // Unhandled deep link - silently fail

@@ -1,7 +1,7 @@
 // React Native App
 
 import { useAtom } from 'jotai'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 // import { StyleSheet, View } from 'react-native'
 import 'react-native-get-random-values'
@@ -100,7 +100,7 @@ function CustomDrawerContent(props) {
     Constants.expoConfig?.ios?.buildNumber ||
     Constants.expoConfig?.version ||
     '299'
-  const appVersion = Constants.expoConfig?.version || '7.2.2'
+  const appVersion = Constants.expoConfig?.version || '7.2.3'
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
@@ -152,6 +152,7 @@ function CustomDrawerContent(props) {
 
 const App = () => {
   const theme = createTheme({})
+  const navigationRef = useRef()
 
   const { width, height } = useWindowDimensions()
 
@@ -179,6 +180,24 @@ const App = () => {
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync()
+    }
+  }, [fontsLoaded])
+
+  // Initialize deep linking when navigation is ready
+  useEffect(() => {
+    if (navigationRef.current && fontsLoaded) {
+      // Initialize deep linking for Samsung device compatibility
+      ;(async () => {
+        try {
+          const linkingHelper = await import(
+            './src/utils/linkingAndSharingHelper'
+          )
+          linkingHelper.initLinking({ navigation: navigationRef.current })
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.log('Deep linking initialization error:', error)
+        }
+      })()
     }
   }, [fontsLoaded])
 
@@ -272,7 +291,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Drawer.Navigator
           screenOptions={{
             gestureEnabled: true,
