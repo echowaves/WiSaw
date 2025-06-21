@@ -43,7 +43,7 @@ export default {
       // jsEngine: 'jsc',
       // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '313',
+      buildNumber: '314',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -99,7 +99,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 313,
+      versionCode: 314,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
@@ -114,24 +114,80 @@ export default {
         // Branch config removed - using native App Links
       },
       intentFilters: [
-        // Primary intent filter for App Links verification
+        // Samsung requires each domain to have its own separate intent filter with autoVerify
         {
           action: 'VIEW',
           autoVerify: true,
-          data: [
-            { scheme: 'https', host: 'link.wisaw.com' },
-            { scheme: 'https', host: 'wisaw.com' },
-          ],
+          data: [{ scheme: 'https', host: 'link.wisaw.com' }],
           category: ['BROWSABLE', 'DEFAULT'],
         },
-        // Secondary intent filter for specific paths (Samsung browser compatibility)
+        {
+          action: 'VIEW',
+          autoVerify: true,
+          data: [{ scheme: 'https', host: 'wisaw.com' }],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        // Samsung-specific: separate intent filters for each path on each domain
         {
           action: 'VIEW',
           data: [
             { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/photos' },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          data: [
             { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/friends' },
-            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/photos' },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          data: [{ scheme: 'https', host: 'wisaw.com', pathPrefix: '/photos' }],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          data: [
             { scheme: 'https', host: 'wisaw.com', pathPrefix: '/friends' },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        // Samsung Internet browser specific - sometimes needs explicit path patterns
+        {
+          action: 'VIEW',
+          data: [
+            {
+              scheme: 'https',
+              host: 'link.wisaw.com',
+              pathPattern: '/photos/.*',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          data: [
+            {
+              scheme: 'https',
+              host: 'link.wisaw.com',
+              pathPattern: '/friends/.*',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          data: [
+            { scheme: 'https', host: 'wisaw.com', pathPattern: '/photos/.*' },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          data: [
+            { scheme: 'https', host: 'wisaw.com', pathPattern: '/friends/.*' },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
