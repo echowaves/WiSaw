@@ -1,8 +1,18 @@
-import { useLocalSearchParams } from 'expo-router'
+import { Stack, useLocalSearchParams } from 'expo-router'
 import PhotosDetailsShared from '../../../../src/screens/PhotosDetailsShared'
 
 export default function SharedPhotoDetail() {
   const { photoId } = useLocalSearchParams()
 
-  return <PhotosDetailsShared route={{ params: { photoId } }} />
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: 'Shared Photo',
+          headerBackTitle: 'Back',
+        }}
+      />
+      <PhotosDetailsShared route={{ params: { photoId } }} />
+    </>
+  )
 }

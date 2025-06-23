@@ -48,44 +48,60 @@ export default function RootLayout() {
   }, [setUuid, setNickName])
 
   // Handle deep linking
-  const handleDeepLink = useCallback((url: string) => {
-    console.log('Deep link received:', url)
+  const handleDeepLink = useCallback(
+    (url: string) => {
+      console.log('Deep link received:', url)
 
-    const linkData = parseDeepLink(url)
-    console.log('Parsed link data:', linkData)
+      const linkData = parseDeepLink(url)
+      console.log('Parsed link data:', linkData)
 
-    if (linkData) {
-      // Navigate immediately if app is ready, otherwise wait briefly
-      const navigateToLink = () => {
-        switch (linkData.type) {
-          case 'photo':
-            console.log('Navigating to shared photo:', linkData.photoId)
-            router.push(`/shared/${linkData.photoId}`)
-            break
-          case 'friend':
-            console.log(
-              'Navigating to friend confirmation:',
-              linkData.friendshipUuid,
-            )
-            router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
-            break
-          default:
-            console.log('Unknown link type, navigating to home')
-            router.push('/')
+      if (linkData) {
+        // Navigate immediately if app is ready, otherwise wait briefly
+        const navigateToLink = () => {
+          // Reset navigation stack to ensure clean state
+          router.dismissAll()
+
+          switch (linkData.type) {
+            case 'photo':
+              console.log('Navigating to shared photo:', linkData.photoId)
+              // Navigate to home first to establish a proper navigation stack
+              router.replace('/')
+              // Then navigate to the photo, creating a proper back navigation
+              setTimeout(() => {
+                router.push(`/shared/${linkData.photoId}`)
+              }, 50)
+              break
+            case 'friend':
+              console.log(
+                'Navigating to friend confirmation:',
+                linkData.friendshipUuid,
+              )
+              // Navigate to home first to establish a proper navigation stack
+              router.replace('/')
+              // Then navigate to friend confirmation
+              setTimeout(() => {
+                router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
+              }, 50)
+              break
+            default:
+              console.log('Unknown link type, navigating to home')
+              router.replace('/')
+          }
+        }
+
+        if (fontsLoaded && isAppReady) {
+          // If app is fully ready, navigate immediately
+          console.log('App ready, navigating immediately')
+          navigateToLink()
+        } else {
+          // If app not ready yet, wait briefly
+          console.log('App not ready, waiting briefly...')
+          setTimeout(navigateToLink, 200)
         }
       }
-
-      if (fontsLoaded && isAppReady) {
-        // If app is fully ready, navigate immediately
-        console.log('App ready, navigating immediately')
-        navigateToLink()
-      } else {
-        // If app not ready yet, wait briefly
-        console.log('App not ready, waiting briefly...')
-        setTimeout(navigateToLink, 200)
-      }
-    }
-  }, [fontsLoaded, isAppReady])
+    },
+    [fontsLoaded, isAppReady],
+  )
 
   useEffect(() => {
     // Handle initial URL when app is opened via deep link
@@ -109,16 +125,28 @@ export default function RootLayout() {
       // When app is already running, navigate immediately
       const linkData = parseDeepLink(event.url)
       if (linkData) {
-        console.log('App already running, navigating immediately')
+        console.log('App already running, resetting nav stack and navigating')
+
+        // Reset navigation stack first
+        router.dismissAll()
+
         switch (linkData.type) {
           case 'photo':
-            router.push(`/shared/${linkData.photoId}`)
+            // Navigate to home first to establish proper navigation stack
+            router.replace('/')
+            setTimeout(() => {
+              router.push(`/shared/${linkData.photoId}`)
+            }, 50)
             break
           case 'friend':
-            router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
+            // Navigate to home first to establish proper navigation stack
+            router.replace('/')
+            setTimeout(() => {
+              router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
+            }, 50)
             break
           default:
-            router.push('/')
+            router.replace('/')
         }
       }
     })
