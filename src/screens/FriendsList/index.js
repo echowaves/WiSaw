@@ -18,6 +18,7 @@ import {
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome5 } from '@expo/vector-icons'
+import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
   },
 })
 
-const FriendsList = () => {
+const FriendsList = ({ triggerAddFriend, setTriggerAddFriend }) => {
   const navigation = useNavigation()
 
   const [uuid] = useAtom(STATE.uuid)
@@ -172,6 +173,14 @@ const FriendsList = () => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
     setShowNamePicker(true)
   }
+
+  // Handle external trigger for adding friends
+  useEffect(() => {
+    if (triggerAddFriend) {
+      handleAddFriend()
+      setTriggerAddFriend(false)
+    }
+  }, [triggerAddFriend, setTriggerAddFriend])
 
   const handleShareFriend = async ({ friendshipUuid, contactName }) => {
     try {
@@ -547,6 +556,16 @@ const FriendsList = () => {
       />
     </SafeAreaView>
   )
+}
+
+FriendsList.propTypes = {
+  triggerAddFriend: PropTypes.bool,
+  setTriggerAddFriend: PropTypes.func,
+}
+
+FriendsList.defaultProps = {
+  triggerAddFriend: false,
+  setTriggerAddFriend: () => {},
 }
 
 export default FriendsList
