@@ -5,14 +5,27 @@ const config = getDefaultConfig(__dirname, {
   isCSSEnabled: true,
 })
 
-// const { resolver: defaultResolver } = config
-// exports.resolver = {
-//   ...defaultResolver,
-//   sourceExts: [
-//     ...defaultResolver.sourceExts, // 'js', 'json', 'ts', 'tsx',
-//     "cjs",
-//   ],
-// }
+// Performance optimizations
+config.transformer.minifierConfig = {
+  mangle: {
+    keep_fnames: true,
+  },
+  output: {
+    ascii_only: true,
+    quote_style: 3,
+    wrap_iife: true,
+  },
+  sourceMap: {
+    includeSources: false,
+  },
+  toplevel: false,
+  compress: {
+    reduce_funcs: false,
+  },
+}
+
+// Optimize resolver for faster lookups
 config.resolver.sourceExts.push('cjs')
+config.resolver.platforms = ['ios', 'android', 'native', 'web']
 
 module.exports = config

@@ -16,11 +16,14 @@ export default {
           android: {
             // compileSdkVersion: 34,
             // targetSdkVersion: 34,
-            // buildToolsVersion: '34.0.0',y
+            // buildToolsVersion: '34.0.0',
             // kotlinVersion: '2.0.0',
+            enableProguardInReleaseBuilds: true,
+            enableShrinkResourcesInReleaseBuilds: true,
           },
           ios: {
             // deploymentTarget: '16.0'
+            flipper: false, // Disable Flipper for better performance
           },
         },
       ],
@@ -42,7 +45,7 @@ export default {
     },
     ios: {
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '319',
+      buildNumber: '320',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -93,7 +96,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 319,
+      versionCode: 320,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

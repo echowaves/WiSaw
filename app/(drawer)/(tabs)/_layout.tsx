@@ -16,6 +16,9 @@ export default function TabsLayout() {
           color: CONST.TEXT_COLOR,
         },
         headerTintColor: CONST.MAIN_COLOR,
+        // Performance optimizations
+        animationTypeForReplace: 'push',
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen
@@ -42,19 +45,27 @@ export default function TabsLayout() {
       />
       <Stack.Screen
         name="shared/[photoId]"
-        options={{ headerTintColor: CONST.MAIN_COLOR }}
+        options={{
+          headerTintColor: CONST.MAIN_COLOR,
+        }}
       />
       <Stack.Screen
         name="modal-input"
-        options={{ headerTintColor: CONST.MAIN_COLOR }}
+        options={{
+          headerTintColor: CONST.MAIN_COLOR,
+        }}
       />
       <Stack.Screen
         name="chat"
-        options={{ headerTintColor: CONST.MAIN_COLOR }}
+        options={{
+          headerTintColor: CONST.MAIN_COLOR,
+        }}
       />
       <Stack.Screen
         name="confirm-friendship/[friendshipUuid]"
-        options={{ headerTintColor: CONST.MAIN_COLOR }}
+        options={{
+          headerTintColor: CONST.MAIN_COLOR,
+        }}
       />
     </Stack>
   )

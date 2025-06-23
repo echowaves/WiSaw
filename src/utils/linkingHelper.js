@@ -57,10 +57,12 @@ export const parseDeepLink = (url) => {
     // eslint-disable-next-line no-console
     console.log('Clean path:', cleanPath)
 
-    // Parse photo links
-    if (cleanPath.includes('photos/')) {
+    // Handle different URL patterns
+
+    // Pattern 1: /photos/[id] or /shared/[id]
+    if (cleanPath.includes('photos/') || cleanPath.includes('shared/')) {
       const photoId = cleanPath
-        .split('photos/')[1]
+        .split(/(?:photos|shared)\//)[1]
         ?.split('?')[0]
         ?.split('#')[0]
       if (photoId) {
@@ -71,10 +73,13 @@ export const parseDeepLink = (url) => {
       }
     }
 
-    // Parse friend links
-    if (cleanPath.includes('friends/')) {
+    // Pattern 2: /friends/[uuid] or /confirm-friendship/[uuid]
+    if (
+      cleanPath.includes('friends/') ||
+      cleanPath.includes('confirm-friendship/')
+    ) {
       const friendshipUuid = cleanPath
-        .split('friends/')[1]
+        .split(/(?:friends|confirm-friendship)\//)[1]
         ?.split('?')[0]
         ?.split('#')[0]
       if (friendshipUuid) {

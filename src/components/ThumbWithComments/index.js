@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import * as Haptics from 'expo-haptics'
 import { router } from 'expo-router'
 import { useRef } from 'react'
 
@@ -102,18 +103,36 @@ const ThumbWithComments = ({
   }
 
   const onThumbPress = (thumb) => {
-    // Use Expo Router to navigate to photo details
-    router.push({
-      pathname: '/photos/[id]',
-      params: {
-        id: thumb.id,
-        index,
-        photosList: JSON.stringify(photosList),
-        searchTerm,
-        activeSegment,
-        topOffset,
-        uuid,
-      },
+    // Provide immediate haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+
+    // Provide immediate visual feedback
+    Animated.timing(scale, {
+      toValue: 0.95,
+      duration: 100,
+      useNativeDriver: true,
+    }).start(() => {
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }).start()
+    })
+
+    // Use optimized navigation with minimal params
+    // Use requestAnimationFrame to ensure navigation happens after feedback
+    requestAnimationFrame(() => {
+      router.push({
+        pathname: '/photos/[id]',
+        params: {
+          id: thumb.id,
+          index,
+          searchTerm: searchTerm || '',
+          activeSegment: activeSegment || 'all',
+          topOffset: topOffset || 0,
+          uuid: uuid || '',
+        },
+      })
     })
     // dispatch(reducer.setCurrentIndex(index)) // this order makes it a little faster, maybe
   }
@@ -126,6 +145,9 @@ const ThumbWithComments = ({
         onPressOut={handlePressOut}
         style={styles.container}
         activeOpacity={0.9}
+        delayPressIn={0}
+        delayPressOut={0}
+        delayLongPress={500}
       >
         <View style={{ width: screenWidth, height: thumbDimension }}>
           {/* Comment Card - behind the thumbnail */}

@@ -138,6 +138,11 @@ export default function DrawerLayout() {
             marginLeft: -10,
             textTransform: 'capitalize',
           },
+          // Performance optimizations
+          swipeEnabled: true,
+          swipeEdgeWidth: 20,
+          drawerType: 'front',
+          overlayColor: 'rgba(0, 0, 0, 0.5)',
         }}
       >
         <Drawer.Screen
