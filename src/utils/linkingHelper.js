@@ -43,7 +43,7 @@ export const parseDeepLink = (url) => {
 
   try {
     const { hostname, path, queryParams } = Linking.parse(url)
-    
+
     // Clean the path
     const cleanPath = path ? path.replace(/^\/+|\/+$/g, '') : ''
 
@@ -103,7 +103,7 @@ export const parseDeepLink = (url) => {
  */
 export const handleDeepLink = (url, navigation) => {
   const linkData = parseDeepLink(url)
-  
+
   if (!linkData || !navigation) return
 
   try {

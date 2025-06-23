@@ -14,6 +14,7 @@ The implementation has been simplified and separated into two main modules:
 ### Configuration
 
 **iOS Universal Links** are configured in `app.config.js`:
+
 ```javascript
 ios: {
   associatedDomains: ['applinks:link.wisaw.com', 'applinks:wisaw.com'],
@@ -21,6 +22,7 @@ ios: {
 ```
 
 **Android App Links** are configured with simplified intent filters:
+
 ```javascript
 android: {
   intentFilters: [
@@ -41,6 +43,7 @@ android: {
 - **Android**: `public/.well-known/assetlinks.json`
 
 These files need to be deployed to your web server and properly configured with your:
+
 - Apple Team ID and Bundle Identifier
 - Android Package Name and SHA256 certificates
 
@@ -103,6 +106,7 @@ const content = createShareContent({
 ## Migration from Old Implementation
 
 The old `linkingAndSharingHelper.js` file has been replaced with:
+
 - `linkingHelper.js` - Modern deep linking implementation
 - `sharingHelper.js` - Clean sharing functionality
 
