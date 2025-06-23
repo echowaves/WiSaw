@@ -1,0 +1,10 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appID": "TEAMID.com.echowaves",
+        "paths": ["/photos/*", "/friends/*"]
+      }
+    ]
+  }
+}

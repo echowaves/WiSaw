@@ -345,7 +345,7 @@ export const shareFriendship = async ({
 }) => {
   try {
     // Import the sharing helper dynamically
-    const sharingHelper = await import('../../utils/linkingAndSharingHelper')
+    const sharingHelper = await import('../../utils/sharingHelper')
 
     // Use the comprehensive sharing functionality
     const result = await sharingHelper.shareWithNativeSheet({

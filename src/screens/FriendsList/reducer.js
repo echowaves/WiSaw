@@ -83,9 +83,7 @@ export async function createFriendship({
     // Only auto-share if explicitly requested
     if (autoShare) {
       try {
-        const sharingHelper = await import(
-          '../../utils/linkingAndSharingHelper'
-        )
+        const sharingHelper = await import('../../utils/sharingHelper')
         const result = await sharingHelper.shareWithNativeSheet({
           type: 'friend',
           friendshipUuid: friendship?.friendshipUuid,

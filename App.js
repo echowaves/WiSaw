@@ -28,6 +28,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as CONST from './src/consts'
 import * as STATE from './src/state'
+import { linkingConfig } from './src/utils/linkingHelper'
 
 import PinchableView from './src/components/Photo/PinchableView'
 import FeedbackScreen from './src/screens/Feedback'
@@ -100,7 +101,7 @@ function CustomDrawerContent(props) {
     Constants.expoConfig?.ios?.buildNumber ||
     Constants.expoConfig?.version ||
     '299'
-  const appVersion = Constants.expoConfig?.version || '7.2.3'
+  const appVersion = Constants.expoConfig?.version || '7.2.4'
 
   return (
     <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
@@ -186,13 +187,11 @@ const App = () => {
   // Initialize deep linking when navigation is ready
   useEffect(() => {
     if (navigationRef.current && fontsLoaded) {
-      // Initialize deep linking for Samsung device compatibility
+      // Initialize modern deep linking
       ;(async () => {
         try {
-          const linkingHelper = await import(
-            './src/utils/linkingAndSharingHelper'
-          )
-          linkingHelper.initLinking({ navigation: navigationRef.current })
+          const linkingHelper = await import('./src/utils/linkingHelper')
+          await linkingHelper.initLinking(navigationRef.current)
         } catch (error) {
           // eslint-disable-next-line no-console
           console.log('Deep linking initialization error:', error)
@@ -291,7 +290,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer ref={navigationRef}>
+      <NavigationContainer ref={navigationRef} linking={linkingConfig}>
         <Drawer.Navigator
           screenOptions={{
             gestureEnabled: true,

@@ -12,7 +12,7 @@ import {
 import Toast from 'react-native-toast-message'
 
 import * as CONST from '../consts'
-import * as sharingHelper from '../utils/linkingAndSharingHelper'
+import * as sharingHelper from '../utils/sharingHelper'
 
 // App icons mapping
 const APP_ICONS = {
@@ -33,6 +33,155 @@ const APP_ICONS = {
   slack: { name: 'slack', library: 'FontAwesome', color: '#4A154B' },
   discord: { name: 'discord', library: 'FontAwesome5', color: '#5865F2' },
 }
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '85%',
+    paddingBottom: 0,
+  }, // Adjusted paddingBottom
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  title: { fontSize: 20, fontWeight: 'bold', color: CONST.MAIN_COLOR },
+  closeButton: { padding: 5 },
+  debugInfoContainer: {
+    padding: 10,
+    backgroundColor: '#f8f8f8',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  debugInfoText: { fontSize: 12, color: '#333', marginBottom: 2 },
+  debugInfoTextBold: {
+    fontSize: 13,
+    color: '#000',
+    fontWeight: 'bold',
+    marginBottom: 3,
+  },
+  debugErrorText: {
+    fontSize: 12,
+    color: 'red',
+    marginTop: 3,
+    fontWeight: 'bold',
+  },
+  scrollContent: {
+    /* flex: 1 by default within its container if modalContent has fixed/max height */
+  },
+  scrollContentContainer: { paddingBottom: 20 },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: { marginTop: 10, fontSize: 14, color: CONST.SECONDARY_COLOR },
+  section: {
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: CONST.MAIN_COLOR,
+    marginBottom: 15,
+  },
+  nativeShareButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CONST.MAIN_COLOR,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    justifyContent: 'center',
+  },
+  nativeShareText: {
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  quickActionsRow: { flexDirection: 'row' },
+  quickActionButton: {
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    backgroundColor: '#f8f9fa',
+    marginRight: 10,
+  },
+  quickActionText: {
+    marginTop: 5,
+    fontSize: 12,
+    color: CONST.MAIN_COLOR,
+    fontWeight: '500',
+  },
+  appsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
+  appButton: {
+    width: '23%',
+    alignItems: 'center',
+    marginBottom: 15,
+    marginRight: '2%',
+  },
+  appIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  appName: {
+    fontSize: 11,
+    color: CONST.MAIN_COLOR,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  noAppsContainer: {
+    alignItems: 'center',
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+  },
+  noAppsText: {
+    marginTop: 8,
+    textAlign: 'center',
+    color: CONST.SECONDARY_COLOR,
+    lineHeight: 18,
+    fontSize: 13,
+  },
+  sharingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  sharingText: { marginTop: 10, color: CONST.MAIN_COLOR, fontWeight: '600' },
+})
 
 const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
   const [availableApps, setAvailableApps] = useState([])
@@ -289,154 +438,5 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '85%',
-    paddingBottom: 0,
-  }, // Adjusted paddingBottom
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  title: { fontSize: 20, fontWeight: 'bold', color: CONST.MAIN_COLOR },
-  closeButton: { padding: 5 },
-  debugInfoContainer: {
-    padding: 10,
-    backgroundColor: '#f8f8f8',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  debugInfoText: { fontSize: 12, color: '#333', marginBottom: 2 },
-  debugInfoTextBold: {
-    fontSize: 13,
-    color: '#000',
-    fontWeight: 'bold',
-    marginBottom: 3,
-  },
-  debugErrorText: {
-    fontSize: 12,
-    color: 'red',
-    marginTop: 3,
-    fontWeight: 'bold',
-  },
-  scrollContent: {
-    /* flex: 1 by default within its container if modalContent has fixed/max height */
-  },
-  scrollContentContainer: { paddingBottom: 20 },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  loadingText: { marginTop: 10, fontSize: 14, color: CONST.SECONDARY_COLOR },
-  section: {
-    paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: CONST.MAIN_COLOR,
-    marginBottom: 15,
-  },
-  nativeShareButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: CONST.MAIN_COLOR,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    justifyContent: 'center',
-  },
-  nativeShareText: {
-    color: 'white',
-    fontWeight: '600',
-    marginLeft: 10,
-    fontSize: 16,
-  },
-  quickActionsRow: { flexDirection: 'row' },
-  quickActionButton: {
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    backgroundColor: '#f8f9fa',
-    marginRight: 10,
-  },
-  quickActionText: {
-    marginTop: 5,
-    fontSize: 12,
-    color: CONST.MAIN_COLOR,
-    fontWeight: '500',
-  },
-  appsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  appButton: {
-    width: '23%',
-    alignItems: 'center',
-    marginBottom: 15,
-    marginRight: '2%',
-  },
-  appIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  appName: {
-    fontSize: 11,
-    color: CONST.MAIN_COLOR,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  noAppsContainer: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-  },
-  noAppsText: {
-    marginTop: 8,
-    textAlign: 'center',
-    color: CONST.SECONDARY_COLOR,
-    lineHeight: 18,
-    fontSize: 13,
-  },
-  sharingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  sharingText: { marginTop: 10, color: CONST.MAIN_COLOR, fontWeight: '600' },
-})
 
 export default ShareModal

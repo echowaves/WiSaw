@@ -53,6 +53,7 @@ export async function watchPhoto({ photo, uuid, topOffset }) {
     ).data.watchPhoto
     return watchersCount
   } catch (err1) {
+    // eslint-disable-next-line no-console
     console.error({ err1 })
     Toast.show({
       text1: 'Unable to Star photo',
@@ -81,6 +82,7 @@ export async function unwatchPhoto({ photo, uuid, topOffset }) {
     ).data.unwatchPhoto
     return watchersCount
   } catch (err2) {
+    // eslint-disable-next-line no-console
     console.error({ err2 })
     Toast.show({
       text1: 'Unable to un-Star photo',
@@ -118,6 +120,7 @@ export async function banPhoto({ photo, uuid, topOffset }) {
       topOffset,
     })
   } catch (err3) {
+    // eslint-disable-next-line no-console
     console.error({ err3 })
   }
   return null
@@ -143,6 +146,7 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
     })
     return true
   } catch (err3) {
+    // eslint-disable-next-line no-console
     console.error({ err3 })
     Toast.show({
       text1: 'Unable to delete',
@@ -158,12 +162,14 @@ export async function sharePhoto({ photo, photoDetails, topOffset }) {
   try {
     // eslint-disable-next-line no-undef
     if (!__DEV__) {
-      const linkingHelper = await import('../../utils/linkingAndSharingHelper')
-      await linkingHelper.sharePhoto({ photo, photoDetails })
+      const sharingHelper = await import('../../utils/sharingHelper')
+      await sharingHelper.sharePhoto(photo, photoDetails)
     } else {
+      // eslint-disable-next-line no-alert
       alert('The feature is not supported on this device yet, try again later')
     }
   } catch (err4) {
+    // eslint-disable-next-line no-console
     console.error({ err4 })
     Toast.show({
       text1: 'Unable to share photo',
@@ -321,6 +327,7 @@ export async function deleteComment({
       ...photoDetails,
     }
   } catch (err7) {
+    // eslint-disable-next-line no-console
     console.error({ err7 })
     Toast.show({
       text1: 'Unable to delete comment',

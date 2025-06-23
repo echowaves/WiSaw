@@ -5,7 +5,7 @@ export default {
     jsEngine: 'hermes',
     updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
-    version: '7.2.3',
+    version: '7.2.4',
     plugins: [
       // Branch removed - using native deep linking instead
       'expo-secure-store',
@@ -40,10 +40,8 @@ export default {
       },
     },
     ios: {
-      // jsEngine: 'jsc',
-      // jsEngine: 'hermes',
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '316',
+      buildNumber: '317',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -83,14 +81,9 @@ export default {
         NSMicrophoneUsageDescription:
           'WiSaw allows your to record video with sound. In order for the sound to be captured, you need to allow access to the microphone.',
       },
-      associatedDomains: [
-        'applinks:link.wisaw.com',
-        'applinks:wisaw.com',
-        'applinks:*.wisaw.com',
-      ],
+      associatedDomains: ['applinks:link.wisaw.com', 'applinks:wisaw.com'],
       config: {
         usesNonExemptEncryption: false,
-        // Branch config removed - using native Universal Links
       },
     },
     android: {
@@ -99,7 +92,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 316,
+      versionCode: 317,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
@@ -110,57 +103,8 @@ export default {
         'READ_EXTERNAL_STORAGE',
         'com.google.android.gms.permission.AD_ID',
       ],
-      config: {
-        // Samsung-specific metadata for better deep linking support
-        'samsung:applinks_verification_enabled': 'true',
-        'samsung:applinks_auto_verify': 'true',
-      },
+      config: {},
       intentFilters: [
-        // Primary domain with autoVerify (Samsung requires this to be first)
-        {
-          action: 'VIEW',
-          autoVerify: true,
-          data: [{ scheme: 'https', host: 'link.wisaw.com' }],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        {
-          action: 'VIEW',
-          autoVerify: true,
-          data: [{ scheme: 'https', host: 'wisaw.com' }],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        // Samsung-specific: Explicit paths with autoVerify for better compatibility
-        {
-          action: 'VIEW',
-          autoVerify: true,
-          data: [
-            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/photos' },
-          ],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        {
-          action: 'VIEW',
-          autoVerify: true,
-          data: [
-            { scheme: 'https', host: 'link.wisaw.com', pathPrefix: '/friends' },
-          ],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        {
-          action: 'VIEW',
-          autoVerify: true,
-          data: [{ scheme: 'https', host: 'wisaw.com', pathPrefix: '/photos' }],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        {
-          action: 'VIEW',
-          autoVerify: true,
-          data: [
-            { scheme: 'https', host: 'wisaw.com', pathPrefix: '/friends' },
-          ],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        // Samsung Internet and Samsung Browser specific patterns
         {
           action: 'VIEW',
           autoVerify: true,
@@ -168,7 +112,7 @@ export default {
             {
               scheme: 'https',
               host: 'link.wisaw.com',
-              pathPattern: '/photos/.*',
+              pathPrefix: '/photos',
             },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
@@ -180,7 +124,7 @@ export default {
             {
               scheme: 'https',
               host: 'link.wisaw.com',
-              pathPattern: '/friends/.*',
+              pathPrefix: '/friends',
             },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
@@ -189,7 +133,11 @@ export default {
           action: 'VIEW',
           autoVerify: true,
           data: [
-            { scheme: 'https', host: 'wisaw.com', pathPattern: '/photos/.*' },
+            {
+              scheme: 'https',
+              host: 'wisaw.com',
+              pathPrefix: '/photos',
+            },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
@@ -197,35 +145,17 @@ export default {
           action: 'VIEW',
           autoVerify: true,
           data: [
-            { scheme: 'https', host: 'wisaw.com', pathPattern: '/friends/.*' },
+            {
+              scheme: 'https',
+              host: 'wisaw.com',
+              pathPrefix: '/friends',
+            },
           ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
-        // Additional Samsung-specific intent filter for exact path matching
-        {
-          action: 'VIEW',
-          autoVerify: true,
-          data: [
-            { scheme: 'https', host: 'link.wisaw.com', path: '/photos' },
-            { scheme: 'https', host: 'link.wisaw.com', path: '/friends' },
-            { scheme: 'https', host: 'wisaw.com', path: '/photos' },
-            { scheme: 'https', host: 'wisaw.com', path: '/friends' },
-          ],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        // Custom scheme fallback for deep linking
         {
           action: 'VIEW',
           data: [{ scheme: 'wisaw' }],
-          category: ['BROWSABLE', 'DEFAULT'],
-        },
-        // Samsung Internet specific - handle both com.sec.android.app.sbrowser and Samsung Internet
-        {
-          action: 'VIEW',
-          data: [
-            { scheme: 'https', host: 'link.wisaw.com' },
-            { scheme: 'https', host: 'wisaw.com' },
-          ],
           category: ['BROWSABLE', 'DEFAULT'],
         },
       ],
@@ -246,23 +176,12 @@ export default {
           'com.microsoft.office.outlook',
           'com.reddit.frontpage',
           'com.google.android.youtube',
-          // Samsung browser for deep linking
-          'com.sec.android.app.sbrowser',
-          // Samsung Internet Browser
-          'com.sec.android.app.internet',
         ],
         intent: [
           {
             action: 'android.intent.action.SENDTO',
             data: {
               scheme: 'smsto',
-            },
-          },
-          // Samsung specific intent queries for deep linking
-          {
-            action: 'android.intent.action.VIEW',
-            data: {
-              scheme: 'https',
             },
           },
         ],
