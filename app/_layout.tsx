@@ -6,7 +6,7 @@ import { router, Stack } from 'expo-router'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
 import { useAtom } from 'jotai'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { InteractionManager } from 'react-native'
 import Toast from 'react-native-toast-message'
 
@@ -23,6 +23,7 @@ export default function RootLayout() {
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [isAppReady, setIsAppReady] = useState(false)
 
   // Load the fonts used by vector-icons
   const [fontsLoaded] = useFonts({
@@ -40,6 +41,7 @@ export default function RootLayout() {
       ])
       setUuid(fetchedUuid)
       setNickName(fetchedNickName)
+      setIsAppReady(true) // Mark app as ready after data is loaded
     })
 
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
@@ -53,8 +55,8 @@ export default function RootLayout() {
     console.log('Parsed link data:', linkData)
 
     if (linkData) {
-      // Add a small delay to ensure the app is fully loaded
-      setTimeout(() => {
+      // Navigate immediately if app is ready, otherwise wait briefly
+      const navigateToLink = () => {
         switch (linkData.type) {
           case 'photo':
             console.log('Navigating to shared photo:', linkData.photoId)
@@ -71,9 +73,19 @@ export default function RootLayout() {
             console.log('Unknown link type, navigating to home')
             router.push('/')
         }
-      }, 1500) // 1.5 second delay to ensure app is ready
+      }
+
+      if (fontsLoaded && isAppReady) {
+        // If app is fully ready, navigate immediately
+        console.log('App ready, navigating immediately')
+        navigateToLink()
+      } else {
+        // If app not ready yet, wait briefly
+        console.log('App not ready, waiting briefly...')
+        setTimeout(navigateToLink, 200)
+      }
     }
-  }, [])
+  }, [fontsLoaded, isAppReady])
 
   useEffect(() => {
     // Handle initial URL when app is opened via deep link
@@ -93,33 +105,51 @@ export default function RootLayout() {
 
     // Handle URLs when app is already running
     const subscription = Linking.addEventListener('url', (event) => {
-      console.log('URL event received:', event.url)
-      handleDeepLink(event.url)
+      console.log('URL event received while app running:', event.url)
+      // When app is already running, navigate immediately
+      const linkData = parseDeepLink(event.url)
+      if (linkData) {
+        console.log('App already running, navigating immediately')
+        switch (linkData.type) {
+          case 'photo':
+            router.push(`/shared/${linkData.photoId}`)
+            break
+          case 'friend':
+            router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
+            break
+          default:
+            router.push('/')
+        }
+      }
     })
 
-    // Wait a bit for the app to initialize before checking for initial URL
-    const timer = setTimeout(() => {
+    // Check for initial URL immediately if fonts are loaded
+    if (fontsLoaded) {
       getInitialURL()
-    }, 2000)
-
-    return () => {
-      subscription?.remove()
-      clearTimeout(timer)
+    } else {
+      // If fonts not loaded, wait very briefly
+      const timer = setTimeout(getInitialURL, 100)
+      return () => {
+        subscription?.remove()
+        clearTimeout(timer)
+      }
     }
-  }, [handleDeepLink])
+
+    return () => subscription?.remove()
+  }, [handleDeepLink, fontsLoaded])
 
   useEffect(() => {
     init()
   }, [init])
 
   useEffect(() => {
-    if (fontsLoaded) {
-      // Small delay to ensure smooth transition
+    if (fontsLoaded && isAppReady) {
+      // Hide splash screen only when everything is ready
       setTimeout(() => {
         SplashScreen.hideAsync()
       }, 100)
     }
-  }, [fontsLoaded])
+  }, [fontsLoaded, isAppReady])
 
   if (!fontsLoaded) {
     return null
