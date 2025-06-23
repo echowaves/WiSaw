@@ -1,11 +1,11 @@
+import { FontAwesome5 } from '@expo/vector-icons'
 import { Stack } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useState } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons'
+import * as CONST from '../../src/consts'
 import FriendsList from '../../src/screens/FriendsList'
 import * as STATE from '../../src/state'
-import * as CONST from '../../src/consts'
 
 export default function Friends() {
   const [uuid] = useAtom(STATE.uuid)
@@ -34,7 +34,7 @@ export default function Friends() {
           ),
         }}
       />
-      <FriendsList 
+      <FriendsList
         triggerAddFriend={triggerAddFriend}
         setTriggerAddFriend={setTriggerAddFriend}
       />
