@@ -9,7 +9,7 @@ export default function SharedPhotoDetail() {
       <Stack.Screen
         options={{
           title: 'Shared Photo',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       <PhotosDetailsShared route={{ params: { photoId } }} />
