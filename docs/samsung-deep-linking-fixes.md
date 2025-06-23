@@ -34,6 +34,7 @@ intentFilters: [
 ```
 
 **Key Changes:**
+
 - Added `autoVerify: true` to all HTTPS intent filters
 - Created separate intent filters for exact path matching
 - Added Samsung Internet browser package support
@@ -46,14 +47,18 @@ intentFilters: [
 const handleDeepLink = async ({ url, navigation }) => {
   // Normalize path to handle Samsung URL modifications
   const cleanPath = path ? path.replace(/^\/+|\/+$/g, '') : ''
-  
+
   // Multiple pattern matching for Samsung compatibility
   if (cleanPath.includes('photos')) {
     let photoId = null
-    
+
     // Try different patterns that Samsung devices might use
     if (cleanPath.includes('photos/')) {
-      photoId = cleanPath.split('photos/')[1]?.split('?')[0]?.split('#')[0]?.split('/')[0]
+      photoId = cleanPath
+        .split('photos/')[1]
+        ?.split('?')[0]
+        ?.split('#')[0]
+        ?.split('/')[0]
     } else {
       // Handle cases where Samsung strips the slash
       const parts = cleanPath.split('photos')
@@ -64,6 +69,7 @@ const handleDeepLink = async ({ url, navigation }) => {
 ```
 
 **Key Improvements:**
+
 - Robust path normalization for Samsung URL handling
 - Multiple pattern matching strategies
 - Increased navigation delays (300-400ms) for Samsung devices
@@ -87,6 +93,7 @@ useEffect(() => {
 ```
 
 **Benefits:**
+
 - Earlier initialization ensures Samsung devices can handle links properly
 - Navigation ref ensures proper navigation context
 - Tied to font loading for better timing
@@ -143,6 +150,7 @@ The following URL patterns are now fully supported on Samsung devices:
 ## Legacy Support
 
 Maintained backward compatibility with query parameter patterns:
+
 - `https://wisaw.com?photoId=12345`
 - `https://wisaw.com?friendshipUuid=abc-123`
 
@@ -174,6 +182,7 @@ If deep links still don't work on Samsung devices:
 ## Expected Results
 
 These changes should resolve the Samsung deep linking issues by:
+
 - Providing multiple intent filter patterns for Samsung compatibility
 - Handling Samsung's unique URL parsing behaviors
 - Ensuring proper timing for navigation on Samsung devices

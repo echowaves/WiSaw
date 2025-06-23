@@ -92,11 +92,11 @@ const handleDeepLink = async ({ url, navigation }) => {
 
     // Normalize the path by removing leading/trailing slashes and query parameters
     const cleanPath = path ? path.replace(/^\/+|\/+$/g, '') : ''
-    
+
     // Handle photo links with multiple patterns for Samsung compatibility
     if (cleanPath.includes('photos')) {
       let photoId = null
-      
+
       // Try different patterns that Samsung devices might use
       if (cleanPath.includes('photos/')) {
         photoId = cleanPath
@@ -131,7 +131,7 @@ const handleDeepLink = async ({ url, navigation }) => {
     // Handle friendship links with multiple patterns for Samsung compatibility
     if (cleanPath.includes('friends')) {
       let friendshipUuid = null
-      
+
       // Try different patterns that Samsung devices might use
       if (cleanPath.includes('friends/')) {
         friendshipUuid = cleanPath
