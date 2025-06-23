@@ -184,14 +184,29 @@ const App = () => {
     }
   }, [fontsLoaded])
 
-  // Initialize deep linking when navigation is ready
+  // Initialize deep linking when navigation is ready - handled by React Navigation linking config
   useEffect(() => {
     if (navigationRef.current && fontsLoaded) {
-      // Initialize modern deep linking
+      // Add a fallback deep linking handler in case React Navigation's built-in linking doesn't work
       ;(async () => {
         try {
           const linkingHelper = await import('./src/utils/linkingHelper')
-          await linkingHelper.initLinking(navigationRef.current)
+
+          // Handle initial URL if app was opened from a link
+          const initialUrl = await linkingHelper.getInitialURL()
+          if (initialUrl) {
+            // Add a small delay to let React Navigation initialize
+            setTimeout(() => {
+              linkingHelper.handleDeepLink(initialUrl, navigationRef.current)
+            }, 1000)
+          }
+
+          // Set up listener for incoming links when app is already open
+          linkingHelper.addLinkingListener(({ url }) => {
+            setTimeout(() => {
+              linkingHelper.handleDeepLink(url, navigationRef.current)
+            }, 500)
+          })
         } catch (error) {
           // eslint-disable-next-line no-console
           console.log('Deep linking initialization error:', error)

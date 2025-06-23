@@ -19,13 +19,12 @@ export const linkingConfig = {
           PhotosDetailsShared: 'photos/:photoId',
           ConfirmFriendship: 'friends/:friendshipUuid',
           Chat: 'chat',
-          FriendsList: 'friends',
           ModalInputTextScreen: 'input',
           PinchableView: 'pinch',
         },
       },
       SecretScreen: 'identity',
-      FriendsList: 'friends',
+      FriendsList: 'friendslist',
       Feedback: 'feedback',
     },
   },
@@ -44,8 +43,14 @@ export const parseDeepLink = (url) => {
   try {
     const { hostname, path, queryParams } = Linking.parse(url)
 
+    // eslint-disable-next-line no-console
+    console.log('Parsing deep link:', { url, hostname, path, queryParams })
+
     // Clean the path
     const cleanPath = path ? path.replace(/^\/+|\/+$/g, '') : ''
+
+    // eslint-disable-next-line no-console
+    console.log('Clean path:', cleanPath)
 
     // Parse photo links
     if (cleanPath.includes('photos/')) {
@@ -102,22 +107,39 @@ export const parseDeepLink = (url) => {
  * Handle deep link navigation
  */
 export const handleDeepLink = (url, navigation) => {
+  // eslint-disable-next-line no-console
+  console.log('handleDeepLink called with:', url)
+
   const linkData = parseDeepLink(url)
+
+  // eslint-disable-next-line no-console
+  console.log('Parsed link data:', linkData)
 
   if (!linkData || !navigation) return
 
   try {
-    // Navigate to top of stack first
-    navigation.popToTop()
-
     // Navigate to the appropriate screen
     if (linkData.type === 'photo') {
-      navigation.navigate('PhotosDetailsShared', {
-        photoId: linkData.photoId,
+      // eslint-disable-next-line no-console
+      console.log(
+        'Navigating to PhotosDetailsShared with photoId:',
+        linkData.photoId,
+      )
+      // Navigate to Home drawer screen first, then to the stack screen
+      navigation.navigate('Home', {
+        screen: 'PhotosDetailsShared',
+        params: { photoId: linkData.photoId },
       })
     } else if (linkData.type === 'friend') {
-      navigation.navigate('ConfirmFriendship', {
-        friendshipUuid: linkData.friendshipUuid,
+      // eslint-disable-next-line no-console
+      console.log(
+        'Navigating to ConfirmFriendship with friendshipUuid:',
+        linkData.friendshipUuid,
+      )
+      // Navigate to Home drawer screen first, then to the stack screen
+      navigation.navigate('Home', {
+        screen: 'ConfirmFriendship',
+        params: { friendshipUuid: linkData.friendshipUuid },
       })
     }
   } catch (error) {
