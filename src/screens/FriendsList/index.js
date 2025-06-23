@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -334,7 +335,7 @@ const FriendsList = () => {
     () => (
       <TouchableOpacity
         style={styles.headerButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
       >
         <FontAwesome5 name="arrow-left" size={18} color={CONST.MAIN_COLOR} />
       </TouchableOpacity>
@@ -342,18 +343,22 @@ const FriendsList = () => {
     [navigation],
   )
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'friends',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
+  // Remove navigation.setOptions as it's not compatible with Expo Router
+  // The header is now controlled by the layout in app/(drawer)/friends.tsx
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: 'friends',
+  //     headerTintColor: CONST.MAIN_COLOR,
+  //     headerRight: renderHeaderRight,
+  //     headerLeft: renderHeaderLeft,
+  //     headerBackTitle: '',
+  //     headerStyle: {
+  //       backgroundColor: CONST.NAV_COLOR,
+  //     },
+  //   })
+  // }, [])
 
+  useEffect(() => {
     // Only load friendships when uuid is properly initialized
     if (uuid && uuid !== '') {
       reload()
@@ -371,9 +376,12 @@ const FriendsList = () => {
           style={styles.friendContent}
           onPress={() => {
             if (!isPending) {
-              navigation.navigate('Chat', {
-                chatUuid: friend?.chatUuid,
-                contact: friend?.contact,
+              router.push({
+                pathname: '/chat',
+                params: {
+                  chatUuid: friend?.chatUuid,
+                  contact: JSON.stringify(friend?.contact),
+                },
               })
             }
           }}

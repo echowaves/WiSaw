@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 
 import PropTypes from 'prop-types'
 
@@ -88,7 +89,7 @@ const PhotosDetailsShared = ({ route }) => {
         size={24}
         color="#fff"
         style={styles.headerIcon}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
       />
     </View>
   )
@@ -105,19 +106,25 @@ const PhotosDetailsShared = ({ route }) => {
     </View>
   )
 
+  // Remove navigation.setOptions as it's not compatible with Expo Router
+  // The header is now controlled by the layout in app/(drawer)/(tabs)/shared/[photoId].tsx
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: renderHeaderTitle,
+  //     headerLeft: renderHeaderLeft,
+  //     headerStyle: {
+  //       backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  //       borderBottomWidth: 0,
+  //       elevation: 0,
+  //       shadowOpacity: 0,
+  //     },
+  //     headerTitleAlign: 'center',
+  //     headerTransparent: true,
+  //   })
+  //   loadPhoto(photoId)
+  // }, [])
+
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerLeft: renderHeaderLeft,
-      headerStyle: {
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderBottomWidth: 0,
-        elevation: 0,
-        shadowOpacity: 0,
-      },
-      headerTitleAlign: 'center',
-      headerTransparent: true,
-    })
     loadPhoto(photoId)
   }, [])
 

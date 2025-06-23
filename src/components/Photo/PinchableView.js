@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { router } from 'expo-router'
 
 import {
   ActivityIndicator,
+  SafeAreaView,
   StatusBar,
   StyleSheet,
   useWindowDimensions,
@@ -58,7 +59,7 @@ const PinchableView = ({ route, navigation }) => {
         size={24}
         color="#fff"
         style={styles.headerIcon}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
       />
     </View>
   )
@@ -75,23 +76,47 @@ const PinchableView = ({ route, navigation }) => {
     </View>
   )
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerLeft: renderHeaderLeft,
-      headerStyle: {
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderBottomWidth: 0,
-        elevation: 0,
-        shadowOpacity: 0,
-      },
-      headerTitleAlign: 'center',
-      headerTransparent: true,
-    })
-  }, [])
+  const renderCustomHeader = () => (
+    <SafeAreaView
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+      }}
+    >
+      {renderHeaderLeft()}
+      {renderHeaderTitle()}
+      <View style={{ width: 40 }} />
+    </SafeAreaView>
+  )
+
+  // Remove the useEffect that was calling navigation.setOptions
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: renderHeaderTitle,
+  //     headerLeft: renderHeaderLeft,
+  //     headerStyle: {
+  //       backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  //       borderBottomWidth: 0,
+  //       elevation: 0,
+  //       shadowOpacity: 0,
+  //     },
+  //     headerTitleAlign: 'center',
+  //     headerTransparent: true,
+  //   })
+  // }, [])
 
   return (
     <View style={styles.container}>
+      {renderCustomHeader()}
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"

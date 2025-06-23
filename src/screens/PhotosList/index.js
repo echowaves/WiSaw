@@ -1,8 +1,9 @@
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 
-import { useNavigation } from '@react-navigation/native'
+import { DrawerActions, useNavigation } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library'
+import { router } from 'expo-router'
 // import * as FileSystem from 'expo-file-system'
 import * as Notifications from 'expo-notifications'
 import * as SecureStore from 'expo-secure-store'
@@ -530,6 +531,181 @@ const PhotosList = () => {
     reload(index)
   }
 
+  // Custom header renderer for Expo Router compatibility
+  const renderCustomHeader = () => {
+    const segmentTitles = ['Global', 'Starred', 'Search']
+
+    return (
+      <SafeAreaView
+        style={{
+          backgroundColor: CONST.HEADER_GRADIENT_END,
+          borderBottomWidth: 1,
+          borderBottomColor: CONST.HEADER_BORDER_COLOR,
+          shadowColor: CONST.HEADER_SHADOW_COLOR,
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 1,
+          shadowRadius: 4,
+          elevation: 3,
+          paddingTop: 0,
+        }}
+      >
+        <View
+          style={{
+            height: 60,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingHorizontal: 16,
+          }}
+        >
+          {/* Left: Empty space */}
+          <View
+            style={{
+              position: 'absolute',
+              left: 16,
+              width: 40,
+              height: 40,
+            }}
+          />
+
+          {/* Center: Three segment control */}
+          <View style={styles.headerContainer}>
+            <View style={styles.customSegmentedControl}>
+              <TouchableOpacity
+                style={[
+                  styles.segmentButton,
+                  activeSegment === 0 && styles.activeSegmentButton,
+                ]}
+                onPress={() => updateIndex(0)}
+              >
+                <FontAwesome
+                  name="globe"
+                  size={20}
+                  color={
+                    activeSegment === 0
+                      ? CONST.ACTIVE_SEGMENT_COLOR
+                      : CONST.INACTIVE_SEGMENT_COLOR
+                  }
+                />
+                {textVisible && (
+                  <Animated.Text
+                    style={[
+                      styles.segmentText,
+                      {
+                        color:
+                          activeSegment === 0
+                            ? CONST.ACTIVE_SEGMENT_COLOR
+                            : CONST.INACTIVE_SEGMENT_COLOR,
+                        opacity: textAnimation,
+                        transform: [
+                          {
+                            translateY: textAnimation.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [10, 0],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    {segmentTitles[0]}
+                  </Animated.Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.segmentButton,
+                  activeSegment === 1 && styles.activeSegmentButton,
+                ]}
+                onPress={() => updateIndex(1)}
+              >
+                <FontAwesome
+                  name="star"
+                  size={20}
+                  color={
+                    activeSegment === 1
+                      ? CONST.ACTIVE_SEGMENT_COLOR
+                      : CONST.INACTIVE_SEGMENT_COLOR
+                  }
+                />
+                {textVisible && (
+                  <Animated.Text
+                    style={[
+                      styles.segmentText,
+                      {
+                        color:
+                          activeSegment === 1
+                            ? CONST.ACTIVE_SEGMENT_COLOR
+                            : CONST.INACTIVE_SEGMENT_COLOR,
+                        opacity: textAnimation,
+                        transform: [
+                          {
+                            translateY: textAnimation.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [10, 0],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    {segmentTitles[1]}
+                  </Animated.Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.segmentButton,
+                  activeSegment === 2 && styles.activeSegmentButton,
+                ]}
+                onPress={() => updateIndex(2)}
+              >
+                <FontAwesome
+                  name="search"
+                  size={20}
+                  color={
+                    activeSegment === 2
+                      ? CONST.ACTIVE_SEGMENT_COLOR
+                      : CONST.INACTIVE_SEGMENT_COLOR
+                  }
+                />
+                {textVisible && (
+                  <Animated.Text
+                    style={[
+                      styles.segmentText,
+                      {
+                        color:
+                          activeSegment === 2
+                            ? CONST.ACTIVE_SEGMENT_COLOR
+                            : CONST.INACTIVE_SEGMENT_COLOR,
+                        opacity: textAnimation,
+                        transform: [
+                          {
+                            translateY: textAnimation.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [10, 0],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    {segmentTitles[2]}
+                  </Animated.Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </SafeAreaView>
+    )
+  }
+
   const renderHeaderTitle = () => {
     const segmentTitles = ['Global', 'Starred', 'Search']
 
@@ -664,29 +840,30 @@ const PhotosList = () => {
     )
   }
 
-  const updateNavBar = async () => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerStyle: {
-        backgroundColor: CONST.HEADER_GRADIENT_END,
-        borderBottomWidth: 1,
-        borderBottomColor: CONST.HEADER_BORDER_COLOR,
-        shadowColor: CONST.HEADER_SHADOW_COLOR,
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 1,
-        shadowRadius: 4,
-        elevation: 3,
-      },
-      headerTitleStyle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: CONST.TEXT_COLOR,
-      },
-    })
-  }
+  // updateNavBar function is no longer needed since we use a custom header with Expo Router
+  // const updateNavBar = async () => {
+  //   navigation.setOptions({
+  //     headerTitle: renderHeaderTitle,
+  //     headerStyle: {
+  //       backgroundColor: CONST.HEADER_GRADIENT_END,
+  //       borderBottomWidth: 1,
+  //       borderBottomColor: CONST.HEADER_BORDER_COLOR,
+  //       shadowColor: CONST.HEADER_SHADOW_COLOR,
+  //       shadowOffset: {
+  //         width: 0,
+  //         height: 2,
+  //       },
+  //       shadowOpacity: 1,
+  //       shadowRadius: 4,
+  //       elevation: 3,
+  //     },
+  //     headerTitleStyle: {
+  //       fontSize: 18,
+  //       fontWeight: '600',
+  //       color: CONST.TEXT_COLOR,
+  //     },
+  //   })
+  // }
 
   async function checkPermission({
     permissionFunction,
@@ -865,7 +1042,7 @@ const PhotosList = () => {
   }, [])
 
   useEffect(() => {
-    updateNavBar()
+    // updateNavBar()
     reload()
   }, [location])
 
@@ -877,12 +1054,12 @@ const PhotosList = () => {
 
   // Update navigation bar when activeSegment changes
   useEffect(() => {
-    updateNavBar()
+    // updateNavBar() // No longer needed with custom header
   }, [activeSegment])
 
   // Update navigation bar when text visibility changes
   useEffect(() => {
-    updateNavBar()
+    // updateNavBar() // No longer needed with custom header
   }, [textVisible])
 
   useEffect(() => {
@@ -1020,7 +1197,13 @@ const PhotosList = () => {
                 elevation: 15,
                 zIndex: 15,
               }}
-              onPress={() => navigation.openDrawer()}
+              onPress={() => {
+                try {
+                  navigation.dispatch(DrawerActions.openDrawer())
+                } catch (error) {
+                  console.log('Could not open drawer:', error)
+                }
+              }}
               disabled={!netAvailable}
             >
               <FontAwesome
@@ -1097,7 +1280,7 @@ const PhotosList = () => {
                 elevation: 15,
                 zIndex: 15,
               }}
-              onPress={() => navigation.navigate('FriendsList')}
+              onPress={() => router.push('/friends')}
               disabled={!netAvailable}
             >
               <FontAwesome5
@@ -1388,31 +1571,37 @@ const PhotosList = () => {
 
   if (!netAvailable) {
     return (
-      <View style={styles.container}>
-        <EmptyStateCard
-          icon="wifi-off"
-          iconType="MaterialIcons"
-          title="No Internet Connection"
-          subtitle="You can still take photos offline. They'll be uploaded automatically when you're back online."
-          actionText="Try Again"
-          onActionPress={reload}
-        />
-        {renderPendingPhotos()}
-        {renderFooter({ unreadCount })}
+      <View style={{ flex: 1 }}>
+        {renderCustomHeader()}
+        <View style={styles.container}>
+          <EmptyStateCard
+            icon="wifi-off"
+            iconType="MaterialIcons"
+            title="No Internet Connection"
+            subtitle="You can still take photos offline. They'll be uploaded automatically when you're back online."
+            actionText="Try Again"
+            onActionPress={reload}
+          />
+          {renderPendingPhotos()}
+          {renderFooter({ unreadCount })}
+        </View>
       </View>
     )
   }
 
   if (isTandcAccepted && location && photosList?.length > 0) {
     return (
-      <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
-        {renderPendingPhotos()}
-        {/* photos */}
-        {activeSegment === 0 && renderThumbs()}
-        {activeSegment === 1 && renderThumbsWithComments()}
-        {activeSegment === 2 && renderThumbsWithComments()}
-        {renderFooter({ unreadCount })}
+      <View style={{ flex: 1 }}>
+        {renderCustomHeader()}
+        <View style={styles.container}>
+          {activeSegment === 2 && renderSearchBar(false)}
+          {renderPendingPhotos()}
+          {/* photos */}
+          {activeSegment === 0 && renderThumbs()}
+          {activeSegment === 1 && renderThumbsWithComments()}
+          {activeSegment === 2 && renderThumbsWithComments()}
+          {renderFooter({ unreadCount })}
+        </View>
       </View>
     )
   }
@@ -1482,17 +1671,20 @@ const PhotosList = () => {
 
   if (!location) {
     return (
-      <View style={styles.container}>
-        <EmptyStateCard
-          icon="location-on"
-          iconType="MaterialIcons"
-          title="Location Access Needed"
-          subtitle="WiSaw needs location access to show you photos from your area and let others discover your content."
-          actionText="Enable Location"
-          onActionPress={reload}
-        />
-        {renderPendingPhotos()}
-        {renderFooter({ renderFooter })}
+      <View style={{ flex: 1 }}>
+        {renderCustomHeader()}
+        <View style={styles.container}>
+          <EmptyStateCard
+            icon="location-on"
+            iconType="MaterialIcons"
+            title="Location Access Needed"
+            subtitle="WiSaw needs location access to show you photos from your area and let others discover your content."
+            actionText="Enable Location"
+            onActionPress={reload}
+          />
+          {renderPendingPhotos()}
+          {renderFooter({ renderFooter })}
+        </View>
       </View>
     )
   }
@@ -1554,21 +1746,27 @@ const PhotosList = () => {
     }
 
     return (
-      <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(true)}
-        <EmptyStateCard {...getEmptyStateProps()} />
-        {renderPendingPhotos()}
-        {renderFooter({ unreadCount })}
+      <View style={{ flex: 1 }}>
+        {renderCustomHeader()}
+        <View style={styles.container}>
+          {activeSegment === 2 && renderSearchBar(true)}
+          <EmptyStateCard {...getEmptyStateProps()} />
+          {renderPendingPhotos()}
+          {renderFooter({ unreadCount })}
+        </View>
       </View>
     )
   }
 
   // dispatch(reducer.getPhotos())
   return (
-    <View style={styles.container}>
-      {activeSegment === 2 && renderSearchBar(false)}
-      {renderPendingPhotos()}
-      {renderFooter({ unreadCount })}
+    <View style={{ flex: 1 }}>
+      {renderCustomHeader()}
+      <View style={styles.container}>
+        {activeSegment === 2 && renderSearchBar(false)}
+        {renderPendingPhotos()}
+        {renderFooter({ unreadCount })}
+      </View>
     </View>
   )
 }

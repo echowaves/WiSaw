@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import { useRef } from 'react'
 
 import {
@@ -126,13 +127,18 @@ const Thumb = ({
   }
 
   const onThumbPress = (thumb) => {
-    navigation.navigate('PhotosDetails', {
-      index,
-      photosList,
-      searchTerm,
-      activeSegment,
-      topOffset,
-      uuid,
+    // Use Expo Router to navigate to photo details
+    router.push({
+      pathname: '/photos/[id]',
+      params: {
+        id: thumb.id,
+        index,
+        photosList: JSON.stringify(photosList),
+        searchTerm,
+        activeSegment,
+        topOffset,
+        uuid,
+      },
     })
   }
 

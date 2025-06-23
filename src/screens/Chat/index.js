@@ -1,6 +1,7 @@
 import { useAtom } from 'jotai'
 
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 
 import * as MediaLibrary from 'expo-media-library'
@@ -66,7 +67,7 @@ const Chat = ({ route }) => {
       }),
     )
 
-    navigation.pop()
+    router.back()
   }
 
   const renderHeaderRight = () => {}
@@ -143,31 +144,33 @@ const Chat = ({ route }) => {
 
   useEffect(() => {
     ;(async () => {
-      navigation.setOptions({
-        headerTitle: `chat with: ${contact}`,
-        headerTintColor: CONST.MAIN_COLOR,
-        headerRight: renderHeaderRight,
-        headerLeft: renderHeaderLeft,
-        headerBackTitle: '',
-        headerStyle: {
-          backgroundColor: CONST.HEADER_GRADIENT_END,
-          borderBottomWidth: 1,
-          borderBottomColor: CONST.HEADER_BORDER_COLOR,
-          shadowColor: CONST.HEADER_SHADOW_COLOR,
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 1,
-          shadowRadius: 4,
-          elevation: 3,
-        },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: '600',
-          color: CONST.TEXT_COLOR,
-        },
-      })
+      // Remove navigation.setOptions as it's not compatible with Expo Router
+      // The header is now controlled by the layout in app/(drawer)/(tabs)/chat.tsx
+      // navigation.setOptions({
+      //   headerTitle: `chat with: ${contact}`,
+      //   headerTintColor: CONST.MAIN_COLOR,
+      //   headerRight: renderHeaderRight,
+      //   headerLeft: renderHeaderLeft,
+      //   headerBackTitle: '',
+      //   headerStyle: {
+      //     backgroundColor: CONST.HEADER_GRADIENT_END,
+      //     borderBottomWidth: 1,
+      //     borderBottomColor: CONST.HEADER_BORDER_COLOR,
+      //     shadowColor: CONST.HEADER_SHADOW_COLOR,
+      //     shadowOffset: {
+      //       width: 0,
+      //       height: 2,
+      //     },
+      //     shadowOpacity: 1,
+      //     shadowRadius: 4,
+      //     elevation: 3,
+      //   },
+      //   headerTitleStyle: {
+      //     fontSize: 18,
+      //     fontWeight: '600',
+      //     color: CONST.TEXT_COLOR,
+      //   },
+      // })
 
       setMessages(await loadMessages({ lastLoaded: moment() }))
       friendsHelper.resetUnreadCount({ chatUuid, uuid })

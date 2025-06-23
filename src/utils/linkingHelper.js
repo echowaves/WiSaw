@@ -1,31 +1,36 @@
 import * as Linking from 'expo-linking'
 
 // =============================================================================
-// LINKING CONFIGURATION
+// EXPO ROUTER LINKING CONFIGURATION
 // =============================================================================
 
-// URL prefix for the app's deep links
+// URL prefix for the app's deep links - Expo Router handles these automatically
 const URL_PREFIX = Linking.createURL('/')
 
-// Define the linking configuration for navigation
+// Expo Router will automatically handle routing based on file structure
+// This configuration is mainly for reference and legacy support
 export const linkingConfig = {
   prefixes: [URL_PREFIX, 'https://link.wisaw.com', 'https://wisaw.com'],
   config: {
     screens: {
-      Home: {
+      '(drawer)': {
         screens: {
-          PhotosList: '',
-          PhotosDetails: 'photos/:id',
-          PhotosDetailsShared: 'photos/:photoId',
-          ConfirmFriendship: 'friends/:friendshipUuid',
-          Chat: 'chat',
-          ModalInputTextScreen: 'input',
-          PinchableView: 'pinch',
+          '(tabs)': {
+            screens: {
+              index: '',
+              'photos/[id]': 'photos/:id',
+              'shared/[photoId]': 'photos/:photoId',
+              'confirm-friendship/[friendshipUuid]': 'friends/:friendshipUuid',
+              chat: 'chat',
+              'modal-input': 'input',
+              pinch: 'pinch',
+            },
+          },
+          identity: 'identity',
+          friends: 'friendslist',
+          feedback: 'feedback',
         },
       },
-      SecretScreen: 'identity',
-      FriendsList: 'friendslist',
-      Feedback: 'feedback',
     },
   },
 }

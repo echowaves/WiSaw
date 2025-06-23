@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -230,7 +231,7 @@ const SecretScreen = () => {
           color: CONST.MAIN_COLOR,
           width: 60,
         }}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
       />
     ),
     [navigation],
@@ -289,31 +290,33 @@ const SecretScreen = () => {
   }, [errorsMap])
 
   useEffect(() => {
-    navigation.setOptions({
-      headerTitle: nickNameEntered ? 'Update Identity' : 'Create Identity',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-        borderBottomWidth: 1,
-        borderBottomColor: CONST.HEADER_BORDER_COLOR,
-        shadowColor: CONST.HEADER_SHADOW_COLOR,
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 1,
-        shadowRadius: 4,
-        elevation: 3,
-      },
-      headerTitleStyle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: CONST.TEXT_COLOR,
-      },
-    })
+    // Remove navigation.setOptions as it's not compatible with Expo Router
+    // The header is now controlled by the layout in app/(drawer)/identity.tsx
+    // navigation.setOptions({
+    //   headerTitle: nickNameEntered ? 'Update Identity' : 'Create Identity',
+    //   headerTintColor: CONST.MAIN_COLOR,
+    //   headerRight: renderHeaderRight,
+    //   headerLeft: renderHeaderLeft,
+    //   headerBackTitle: '',
+    //   headerStyle: {
+    //     backgroundColor: CONST.NAV_COLOR,
+    //     borderBottomWidth: 1,
+    //     borderBottomColor: CONST.HEADER_BORDER_COLOR,
+    //     shadowColor: CONST.HEADER_SHADOW_COLOR,
+    //     shadowOffset: {
+    //       width: 0,
+    //       height: 2,
+    //     },
+    //     shadowOpacity: 1,
+    //     shadowRadius: 4,
+    //     elevation: 3,
+    //   },
+    //   headerTitleStyle: {
+    //     fontSize: 18,
+    //     fontWeight: '600',
+    //     color: CONST.TEXT_COLOR,
+    //   },
+    // })
   }, [canSubmit, isSubmitting, nickNameEntered])
 
   const styles = StyleSheet.create({

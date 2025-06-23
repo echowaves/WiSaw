@@ -1,13 +1,13 @@
-import { useEffect, useRef } from 'react'
-
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
+import { useRef } from 'react'
 
 import PropTypes from 'prop-types'
 
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 
-import { StatusBar, StyleSheet, View } from 'react-native'
+import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native'
 
 import { Text } from '@rneui/themed'
 
@@ -120,28 +120,39 @@ const PhotosDetails = ({ route }) => {
         size={24}
         color="#fff"
         style={styles.headerIcon}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
       />
     </View>
   )
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerLeft: renderHeaderLeft,
-      headerStyle: {
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderBottomWidth: 0,
-        elevation: 0,
-        shadowOpacity: 0,
-      },
-      headerTitleAlign: 'center',
-      headerTransparent: true,
-    })
-  }, [activeSegment, searchTerm])
+  const renderCustomHeader = () => (
+    <SafeAreaView
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+      }}
+    >
+      {renderHeaderLeft()}
+      {renderHeaderTitle()}
+      <View style={{ width: 40 }} />
+    </SafeAreaView>
+  )
+
+  // Remove the useEffect that was calling navigation.setOptions since it doesn't work with Expo Router
+  // The header is now rendered as a custom overlay component
 
   return (
     <View style={styles.container}>
+      {renderCustomHeader()}
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"

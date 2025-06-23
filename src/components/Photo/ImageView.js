@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import PropTypes from 'prop-types'
 import React, { useRef } from 'react'
 import {
@@ -18,12 +19,18 @@ const ImageView = ({ width, height, photo }) => {
   const navigation = useNavigation()
 
   const onPinchEvent = (event) => {
-    navigation.navigate('PinchableView', { photo })
+    router.push({
+      pathname: '/pinch',
+      params: { photo: JSON.stringify(photo) },
+    })
   }
 
   const onSingleTapEvent = (event) => {
     if (event.nativeEvent.state === State.ACTIVE) {
-      navigation.navigate('PinchableView', { photo })
+      router.push({
+        pathname: '/pinch',
+        params: { photo: JSON.stringify(photo) },
+      })
     }
   }
 

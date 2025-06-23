@@ -1,4 +1,5 @@
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import React, { useRef, useState } from 'react'
 
@@ -507,10 +508,13 @@ const Photo = ({ photo }) => {
       <TouchableOpacity
         style={styles.addCommentButton}
         onPress={() =>
-          navigation.navigate('ModalInputTextScreen', {
-            photo,
-            uuid,
-            topOffset,
+          router.push({
+            pathname: '/modal-input',
+            params: {
+              photo: JSON.stringify(photo),
+              uuid,
+              topOffset,
+            },
           })
         }
         activeOpacity={0.8}
@@ -644,7 +648,7 @@ const Photo = ({ photo }) => {
                 ...photosList.filter((item) => item.id !== photo.id),
               ])
             }
-            navigation.goBack()
+            router.back()
           },
         },
       ],

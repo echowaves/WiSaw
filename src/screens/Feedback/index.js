@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 
@@ -94,7 +95,7 @@ const FeedbackScreen = () => {
 
       // Success haptic and navigation
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
-      navigation.goBack()
+      router.back()
       Toast.show({
         text1: 'Thank you! 🎉',
         text2: 'Your feedback has been submitted successfully.',
@@ -158,7 +159,7 @@ const FeedbackScreen = () => {
   )
   const renderHeaderLeft = () => (
     <TouchableOpacity
-      onPress={() => navigation.goBack()}
+      onPress={() => router.back()}
       style={{
         marginLeft: 10,
         padding: 8,
@@ -168,33 +169,35 @@ const FeedbackScreen = () => {
     </TouchableOpacity>
   )
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Share Your Feedback',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-        borderBottomWidth: 1,
-        borderBottomColor: CONST.HEADER_BORDER_COLOR,
-        shadowColor: CONST.HEADER_SHADOW_COLOR,
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 1,
-        shadowRadius: 4,
-        elevation: 3,
-      },
-      headerTitleStyle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: CONST.TEXT_COLOR,
-      },
-    })
-  }, [inputText, isSubmitting])
+  // Remove navigation.setOptions as it's not compatible with Expo Router
+  // The header is now controlled by the layout in app/(drawer)/feedback.tsx
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: 'Share Your Feedback',
+  //     headerTintColor: CONST.MAIN_COLOR,
+  //     headerRight: renderHeaderRight,
+  //     headerLeft: renderHeaderLeft,
+  //     headerBackTitle: '',
+  //     headerStyle: {
+  //       backgroundColor: CONST.NAV_COLOR,
+  //       borderBottomWidth: 1,
+  //       borderBottomColor: CONST.HEADER_BORDER_COLOR,
+  //       shadowColor: CONST.HEADER_SHADOW_COLOR,
+  //       shadowOffset: {
+  //         width: 0,
+  //         height: 2,
+  //       },
+  //       shadowOpacity: 1,
+  //       shadowRadius: 4,
+  //       elevation: 3,
+  //     },
+  //     headerTitleStyle: {
+  //       fontSize: 18,
+  //       fontWeight: '600',
+  //       color: CONST.TEXT_COLOR,
+  //     },
+  //   })
+  // }, [inputText, isSubmitting])
   const styles = StyleSheet.create({
     container: {
       flex: 1,

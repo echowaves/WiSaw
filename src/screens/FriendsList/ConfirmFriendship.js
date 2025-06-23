@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { SafeAreaView, StyleSheet } from 'react-native'
 
@@ -41,22 +42,24 @@ const ConfirmFriendship = ({ route }) => {
         color: CONST.MAIN_COLOR,
         width: 60,
       }}
-      onPress={() => navigation.goBack()}
+      onPress={() => router.back()}
     />
   )
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Confirm friendship',
-      headerTintColor: CONST.MAIN_COLOR,
-      headerRight: renderHeaderRight,
-      headerLeft: renderHeaderLeft,
-      headerBackTitle: '',
-      headerStyle: {
-        backgroundColor: CONST.NAV_COLOR,
-      },
-    })
-  }, [])
+  // Remove navigation.setOptions as it's not compatible with Expo Router
+  // The header is now controlled by the layout in app/(drawer)/(tabs)/confirm-friendship/[friendshipUuid].tsx
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: 'Confirm friendship',
+  //     headerTintColor: CONST.MAIN_COLOR,
+  //     headerRight: renderHeaderRight,
+  //     headerLeft: renderHeaderLeft,
+  //     headerBackTitle: '',
+  //     headerStyle: {
+  //       backgroundColor: CONST.NAV_COLOR,
+  //     },
+  //   })
+  // }, [])
 
   const styles = StyleSheet.create({
     container: {
@@ -76,17 +79,17 @@ const ConfirmFriendship = ({ route }) => {
         contactName,
         friendshipUuid,
       })
-      
+
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
       // eslint-disable-next-line no-console
       console.log('ConfirmFriendship: Friendship confirmed, now saving locally')
-      
+
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
       // eslint-disable-next-line no-console
       console.log(
         'ConfirmFriendship: Contact name saved locally, reloading friends list',
       )
-      
+
       setFriendsList(
         await friendsHelper.getEnhancedListOfFriendships({
           uuid,
@@ -103,8 +106,8 @@ const ConfirmFriendship = ({ route }) => {
         topOffset: 60,
       })
 
-      await navigation.popToTop()
-      await navigation.navigate('FriendsList')
+      router.dismissAll()
+      router.push('/friends')
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Error confirming friendship:', err)

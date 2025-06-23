@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
-import React, { useEffect, useState } from 'react'
+import { router } from 'expo-router'
+import React, { useState } from 'react'
 
 import {
   StatusBar,
@@ -123,7 +124,7 @@ const ModalInputText = ({ route }) => {
         size={24}
         color="#fff"
         style={styles.headerIcon}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
       />
     </View>
   )
@@ -163,21 +164,23 @@ const ModalInputText = ({ route }) => {
     </View>
   )
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: renderHeaderTitle,
-      headerLeft: renderHeaderLeft,
-      headerRight: renderHeaderRight,
-      headerStyle: {
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        borderBottomWidth: 0,
-        elevation: 0,
-        shadowOpacity: 0,
-      },
-      headerTitleAlign: 'center',
-      headerTransparent: true,
-    })
-  }, [])
+  // Remove navigation.setOptions as it's not compatible with Expo Router
+  // The header is now controlled by the layout in app/(drawer)/(tabs)/modal-input.tsx
+  // useEffect(() => {
+  //   navigation.setOptions({
+  //     headerTitle: renderHeaderTitle,
+  //     headerLeft: renderHeaderLeft,
+  //     headerRight: renderHeaderRight,
+  //     headerStyle: {
+  //       backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  //       borderBottomWidth: 0,
+  //       elevation: 0,
+  //       shadowOpacity: 0,
+  //     },
+  //     headerTitleAlign: 'center',
+  //     headerTransparent: true,
+  //   })
+  // }, [])
 
   return (
     <View style={styles.container}>

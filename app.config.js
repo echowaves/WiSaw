@@ -9,6 +9,7 @@ export default {
     plugins: [
       // Branch removed - using native deep linking instead
       'expo-secure-store',
+      'expo-router',
       [
         'expo-build-properties',
         {
@@ -41,7 +42,7 @@ export default {
     },
     ios: {
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '318',
+      buildNumber: '319',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -92,7 +93,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 318,
+      versionCode: 319,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
