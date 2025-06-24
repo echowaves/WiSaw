@@ -46,25 +46,33 @@ export default function TabsLayout() {
       <Stack.Screen
         name="shared/[photoId]"
         options={{
+          title: 'Shared Photo',
           headerTintColor: CONST.MAIN_COLOR,
+          headerBackTitle: '',
         }}
       />
       <Stack.Screen
         name="modal-input"
         options={{
+          title: 'Add Comment',
           headerTintColor: CONST.MAIN_COLOR,
+          headerBackTitle: '',
         }}
       />
       <Stack.Screen
         name="chat"
         options={{
+          title: 'Chat',
           headerTintColor: CONST.MAIN_COLOR,
+          headerBackTitle: '',
         }}
       />
       <Stack.Screen
         name="confirm-friendship/[friendshipUuid]"
         options={{
+          title: 'Friend Request',
           headerTintColor: CONST.MAIN_COLOR,
+          headerBackTitle: '',
         }}
       />
     </Stack>

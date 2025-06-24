@@ -6,10 +6,12 @@ import {
 import Constants from 'expo-constants'
 import { router } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
+import { useAtom } from 'jotai'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import * as CONST from '../../src/consts'
+import * as STATE from '../../src/state'
 
 const styles = StyleSheet.create({
   buildInfoContainer: {
@@ -112,6 +114,29 @@ function CustomDrawerContent(props) {
   )
 }
 
+// Header Right Component for Friends Screen
+function FriendsHeaderRight() {
+  const [, setTriggerAddFriend] = useAtom(STATE.triggerAddFriend)
+
+  const handleAddFriend = () => {
+    setTriggerAddFriend(true)
+  }
+
+  return (
+    <TouchableOpacity
+      onPress={handleAddFriend}
+      style={{
+        marginRight: 15,
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      }}
+    >
+      <FontAwesome5 name="plus" size={18} color={CONST.MAIN_COLOR} />
+    </TouchableOpacity>
+  )
+}
+
 export default function DrawerLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -210,7 +235,44 @@ export default function DrawerLayout() {
             ),
             drawerLabel: 'Friends',
             title: 'Friends',
-            headerShown: false, // Let friends.tsx handle the header
+            headerShown: true,
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{
+                  marginLeft: 15,
+                  padding: 8,
+                  borderRadius: 20,
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <FontAwesome
+                  name="arrow-left"
+                  size={20}
+                  color={CONST.MAIN_COLOR}
+                />
+              </TouchableOpacity>
+            ),
+            headerRight: () => <FriendsHeaderRight />,
+            headerStyle: {
+              backgroundColor: CONST.HEADER_GRADIENT_END,
+              borderBottomWidth: 1,
+              borderBottomColor: CONST.HEADER_BORDER_COLOR,
+              shadowColor: CONST.HEADER_SHADOW_COLOR,
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 1,
+              shadowRadius: 4,
+              elevation: 3,
+            },
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: '600',
+              color: CONST.TEXT_COLOR,
+            },
+            headerTintColor: CONST.MAIN_COLOR,
           }}
         />
         <Drawer.Screen

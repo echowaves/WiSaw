@@ -18,7 +18,6 @@ import {
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome5 } from '@expo/vector-icons'
-import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -154,11 +153,14 @@ const styles = StyleSheet.create({
   },
 })
 
-const FriendsList = ({ triggerAddFriend, setTriggerAddFriend }) => {
+const FriendsList = () => {
   const navigation = useNavigation()
 
   const [uuid] = useAtom(STATE.uuid)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+  const [triggerAddFriend, setTriggerAddFriend] = useAtom(
+    STATE.triggerAddFriend,
+  )
 
   const headerText =
     'Choose a friendly name to help you remember this person when chatting or sharing content.'
@@ -171,7 +173,7 @@ const FriendsList = ({ triggerAddFriend, setTriggerAddFriend }) => {
     setShowNamePicker(true)
   }
 
-  // Handle external trigger for adding friends
+  // Handle external trigger for adding friends from header
   useEffect(() => {
     if (triggerAddFriend) {
       handleAddFriend()
@@ -517,16 +519,6 @@ const FriendsList = ({ triggerAddFriend, setTriggerAddFriend }) => {
       />
     </SafeAreaView>
   )
-}
-
-FriendsList.propTypes = {
-  triggerAddFriend: PropTypes.bool,
-  setTriggerAddFriend: PropTypes.func,
-}
-
-FriendsList.defaultProps = {
-  triggerAddFriend: false,
-  setTriggerAddFriend: () => {},
 }
 
 export default FriendsList

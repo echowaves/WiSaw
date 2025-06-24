@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router'
+import { Stack, useLocalSearchParams } from 'expo-router'
 import ModalInputText from '../../../src/screens/ModalInputText'
 
 export default function ModalInputScreen() {
@@ -14,5 +14,15 @@ export default function ModalInputScreen() {
     topOffset: Number(topOffset),
   }
 
-  return <ModalInputText route={{ params: routeParams }} />
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: 'Add Comment',
+          headerBackTitle: '',
+        }}
+      />
+      <ModalInputText route={{ params: routeParams }} />
+    </>
+  )
 }
