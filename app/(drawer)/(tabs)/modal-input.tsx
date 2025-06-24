@@ -26,21 +26,26 @@ export default function ModalInputScreen() {
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => router.back()}
-              style={{ paddingLeft: 0, paddingRight: 10 }}
+              style={{
+                padding: 12,
+                borderRadius: 20,
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                marginHorizontal: 8,
+              }}
             >
               <Ionicons name="chevron-back" size={24} color="#fff" />
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
           },
           headerTitleStyle: {
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: '600',
             color: '#fff',
           },
           headerTintColor: '#fff',
-          headerTransparent: false,
+          headerTransparent: true,
         }}
       />
       <ModalInputText route={{ params: routeParams }} />
