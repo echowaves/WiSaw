@@ -148,9 +148,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  headerButton: {
-    paddingHorizontal: 12,
-  },
   shareButtonContainer: {
     marginTop: 8,
     alignItems: 'flex-start',
@@ -331,48 +328,12 @@ const FriendsList = ({ triggerAddFriend, setTriggerAddFriend }) => {
     }
   }, [uuid, setFriendsList])
 
-  const renderHeaderRight = useCallback(
-    () => (
-      <TouchableOpacity style={styles.headerButton} onPress={handleAddFriend}>
-        <FontAwesome5 name="user-plus" size={18} color={CONST.MAIN_COLOR} />
-      </TouchableOpacity>
-    ),
-    [],
-  )
-
-  const renderHeaderLeft = useCallback(
-    () => (
-      <TouchableOpacity
-        style={styles.headerButton}
-        onPress={() => router.back()}
-      >
-        <FontAwesome5 name="arrow-left" size={18} color={CONST.MAIN_COLOR} />
-      </TouchableOpacity>
-    ),
-    [navigation],
-  )
-
-  // Remove navigation.setOptions as it's not compatible with Expo Router
-  // The header is now controlled by the layout in app/(drawer)/friends.tsx
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerTitle: 'friends',
-  //     headerTintColor: CONST.MAIN_COLOR,
-  //     headerRight: renderHeaderRight,
-  //     headerLeft: renderHeaderLeft,
-  //     headerBackTitle: '',
-  //     headerStyle: {
-  //       backgroundColor: CONST.NAV_COLOR,
-  //     },
-  //   })
-  // }, [])
-
   useEffect(() => {
     // Only load friendships when uuid is properly initialized
     if (uuid && uuid !== '') {
       reload()
     }
-  }, [uuid, navigation, renderHeaderRight, renderHeaderLeft, reload])
+  }, [uuid, reload])
 
   const renderFriend = ({ item: friend }) => {
     const displayName = friend?.contact || 'Unnamed Friend'
