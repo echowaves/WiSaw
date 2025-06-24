@@ -1,6 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
-import { Stack, router } from 'expo-router'
-import { TouchableOpacity } from 'react-native'
+import { Stack } from 'expo-router'
 import * as CONST from '../../../src/consts'
 
 export default function TabsLayout() {
@@ -71,31 +69,6 @@ export default function TabsLayout() {
             fontWeight: '600',
             color: '#fff',
           },
-        }}
-      />
-      <Stack.Screen
-        name="chat"
-        options={{
-          title: 'Chat',
-          headerTintColor: CONST.MAIN_COLOR,
-          headerBackVisible: false,
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => router.push('/friends')}
-              style={{
-                padding: 12,
-                borderRadius: 20,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                marginHorizontal: 8,
-              }}
-            >
-              <Ionicons
-                name="chevron-back"
-                size={24}
-                color={CONST.MAIN_COLOR}
-              />
-            </TouchableOpacity>
-          ),
         }}
       />
       <Stack.Screen
