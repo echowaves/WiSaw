@@ -9,12 +9,14 @@ import { useAtom } from 'jotai'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
+import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
 import * as STATE from '../../src/state'
 
-// Get version and build number from package.json and app.config.js
-const APP_VERSION = '7.2.4'
-const BUILD_NUMBER = '327'
+// Get version and build number from app.config.js
+// Version comes from package.json, build number is shared between iOS and Android
+const APP_VERSION = appConfig.expo.version
+const BUILD_NUMBER = appConfig.expo.ios.buildNumber
 
 const styles = StyleSheet.create({
   versionContainer: {

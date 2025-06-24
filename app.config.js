@@ -1,3 +1,9 @@
+// Import version from package.json and shared build number
+import packageJson from './package.json'
+
+// Shared build number for both iOS and Android
+const BUILD_NUMBER = 328
+
 export default {
   expo: {
     owner: 'echowaves',
@@ -5,7 +11,7 @@ export default {
     jsEngine: 'hermes',
     updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
-    version: '7.2.4',
+    version: packageJson.version,
     plugins: [
       // Branch removed - using native deep linking instead
       'expo-secure-store',
@@ -45,7 +51,7 @@ export default {
     },
     ios: {
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '328',
+      buildNumber: BUILD_NUMBER.toString(),
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -96,7 +102,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 328,
+      versionCode: BUILD_NUMBER,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

@@ -144,6 +144,9 @@ const Chat = ({ route }) => {
 
   useEffect(() => {
     ;(async () => {
+      // Clear messages when switching to a different chat
+      setMessages([])
+
       // Remove navigation.setOptions as it's not compatible with Expo Router
       // The header is now controlled by the layout in app/(drawer)/(tabs)/chat.tsx
       // navigation.setOptions({
@@ -179,7 +182,7 @@ const Chat = ({ route }) => {
     CONST.makeSureDirectoryExists({
       directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
     })
-  }, [])
+  }, [chatUuid, uuid]) // Added dependencies to re-run when chat changes
 
   useEffect(() => {
     console.log(`subscribing to ${chatUuid}`)
@@ -316,7 +319,7 @@ const Chat = ({ route }) => {
       subscription.unsubscribe()
       console.log(`unsubscribing from ${chatUuid}`)
     }
-  }, [])
+  }, [chatUuid, friendsList, uuid]) // Added dependencies to re-run when chat or friends change
 
   // eslint-disable-next-line no-shadow
   const onSend = useCallback((messages = []) => {
