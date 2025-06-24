@@ -24,12 +24,15 @@ export default function TabsLayout() {
       <Stack.Screen
         name="index"
         options={{
+          title: 'Photos',
           headerShown: false, // PhotosList will handle its own header
         }}
       />
       <Stack.Screen
         name="photos/[id]"
         options={{
+          title: 'Photo',
+          headerBackTitle: '',
           headerTintColor: CONST.MAIN_COLOR,
           gestureEnabled: false,
           headerShown: false,
@@ -57,6 +60,7 @@ export default function TabsLayout() {
           title: 'Add Comment',
           headerTintColor: '#fff',
           headerBackTitle: '',
+          headerBackTitleStyle: { fontSize: 0 },
           headerStyle: {
             backgroundColor: 'rgba(0, 0, 0, 0.9)',
           },
