@@ -45,7 +45,7 @@ export default {
     },
     ios: {
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '327',
+      buildNumber: '328',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -96,7 +96,7 @@ export default {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 327,
+      versionCode: 328,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

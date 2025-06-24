@@ -2,11 +2,40 @@ import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
 import { useAtom } from 'jotai'
-import { TouchableOpacity } from 'react-native'
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import {
+  DrawerContentScrollView,
+  DrawerItemList,
+} from '@react-navigation/drawer'
 
 import * as CONST from '../../src/consts'
 import * as STATE from '../../src/state'
+
+// Get version and build number from package.json and app.config.js
+const APP_VERSION = '7.2.4'
+const BUILD_NUMBER = '327'
+
+const styles = StyleSheet.create({
+  versionContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+  },
+  versionText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+  },
+  appName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: CONST.MAIN_COLOR,
+    marginBottom: 4,
+  },
+})
 
 // Header Right Component for Friends Screen
 function FriendsHeaderRight() {
@@ -28,6 +57,22 @@ function FriendsHeaderRight() {
     >
       <FontAwesome5 name="plus" size={18} color={CONST.MAIN_COLOR} />
     </TouchableOpacity>
+  )
+}
+
+// Custom Drawer Content with Version Information
+function CustomDrawerContent(props) {
+  return (
+    <View style={{ flex: 1 }}>
+      <DrawerContentScrollView {...props}>
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+      <View style={styles.versionContainer}>
+        <Text style={styles.appName}>WiSaw</Text>
+        <Text style={styles.versionText}>Version {APP_VERSION}</Text>
+        <Text style={styles.versionText}>Build {BUILD_NUMBER}</Text>
+      </View>
+    </View>
   )
 }
 
@@ -62,6 +107,7 @@ export default function DrawerLayout() {
           drawerType: 'front',
           overlayColor: 'rgba(0, 0, 0, 0.5)',
         }}
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
       >
         <Drawer.Screen
           name="(tabs)"
