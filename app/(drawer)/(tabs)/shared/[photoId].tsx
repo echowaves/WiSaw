@@ -1,4 +1,6 @@
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { AntDesign, Ionicons } from '@expo/vector-icons'
+import { router, Stack, useLocalSearchParams } from 'expo-router'
+import { Text, TouchableOpacity, View } from 'react-native'
 import PhotosDetailsShared from '../../../../src/screens/PhotosDetailsShared'
 
 export default function SharedPhotoDetail() {
@@ -8,8 +10,49 @@ export default function SharedPhotoDetail() {
     <>
       <Stack.Screen
         options={{
-          title: 'Shared Photo',
-          headerBackTitle: '',
+          headerStyle: {
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+          },
+          headerTitleStyle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: '#fff',
+          },
+          headerTintColor: '#fff',
+          headerTransparent: true,
+          headerBackVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{
+                padding: 12,
+                borderRadius: 20,
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                marginHorizontal: 8,
+              }}
+            >
+              <Ionicons name="chevron-back" size={24} color="#fff" />
+            </TouchableOpacity>
+          ),
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <AntDesign
+                name="sharealt"
+                size={20}
+                color="#fff"
+                style={{ marginRight: 8 }}
+              />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: '#fff',
+                }}
+              >
+                Shared Photo
+              </Text>
+            </View>
+          ),
         }}
       />
       <PhotosDetailsShared route={{ params: { photoId } }} />
