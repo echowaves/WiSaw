@@ -1,13 +1,13 @@
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
-import { router } from 'expo-router'
-import { Drawer } from 'expo-router/drawer'
-import { useAtom } from 'jotai'
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer'
+import { router } from 'expo-router'
+import { Drawer } from 'expo-router/drawer'
+import { useAtom } from 'jotai'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import * as CONST from '../../src/consts'
 import * as STATE from '../../src/state'
