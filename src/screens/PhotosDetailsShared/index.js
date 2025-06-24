@@ -47,7 +47,7 @@ const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
 
-  const { photoId } = route.params
+  const { photoId, refreshKey } = route.params
 
   const loadPhoto = async (photoid) => {
     try {
@@ -125,8 +125,10 @@ const PhotosDetailsShared = ({ route }) => {
   // }, [])
 
   useEffect(() => {
+    // Clear previous photo data when refreshing
+    setItem(null)
     loadPhoto(photoId)
-  }, [])
+  }, [photoId, refreshKey]) // Added refreshKey to dependencies to refresh comments when returning from add comment
 
   if (item) {
     return (
@@ -136,7 +138,7 @@ const PhotosDetailsShared = ({ route }) => {
           backgroundColor="transparent"
           translucent
         />
-        <Photo photo={item} key={item.id} />
+        <Photo photo={item} key={item.id} refreshKey={refreshKey} />
       </View>
     )
   }

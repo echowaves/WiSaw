@@ -1,10 +1,25 @@
 import { AntDesign, Ionicons } from '@expo/vector-icons'
-import { router, Stack, useLocalSearchParams } from 'expo-router'
+import {
+  router,
+  Stack,
+  useFocusEffect,
+  useLocalSearchParams,
+} from 'expo-router'
+import { useCallback, useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import PhotosDetailsShared from '../../../../src/screens/PhotosDetailsShared'
 
 export default function SharedPhotoDetail() {
   const { photoId } = useLocalSearchParams()
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Refresh comments when screen comes back into focus (e.g., after adding a comment)
+  useFocusEffect(
+    useCallback(() => {
+      // Trigger a refresh by updating the key
+      setRefreshKey((prev) => prev + 1)
+    }, []),
+  )
 
   return (
     <>
@@ -55,7 +70,7 @@ export default function SharedPhotoDetail() {
           ),
         }}
       />
-      <PhotosDetailsShared route={{ params: { photoId } }} />
+      <PhotosDetailsShared route={{ params: { photoId, refreshKey } }} />
     </>
   )
 }
