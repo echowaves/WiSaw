@@ -30,7 +30,7 @@ export default function ChatScreen() {
           headerBackVisible: false,
           headerLeft: () => (
             <TouchableOpacity
-              onPress={() => router.push('/friends')}
+              onPress={() => router.replace('/friends')}
               style={{
                 paddingLeft: 16,
                 paddingRight: 16,

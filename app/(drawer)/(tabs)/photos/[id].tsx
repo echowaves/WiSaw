@@ -1,6 +1,6 @@
-import { useLocalSearchParams } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import PhotosDetails from '../../../../src/screens/PhotosDetails'
 import * as STATE from '../../../../src/state'
@@ -11,6 +11,15 @@ export default function PhotoDetail() {
 
   const [globalPhotosList] = useAtom(STATE.photosList)
   const [isReady, setIsReady] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Refresh comments when screen comes back into focus (e.g., after adding a comment)
+  useFocusEffect(
+    useCallback(() => {
+      // Trigger a refresh by updating the key
+      setRefreshKey((prev) => prev + 1)
+    }, []),
+  )
 
   useEffect(() => {
     // Mark as ready immediately if we have data, or after a short delay
@@ -46,6 +55,7 @@ export default function PhotoDetail() {
     activeSegment: Number(activeSegment) || 0,
     topOffset: Number(topOffset) || 0,
     uuid: uuid || '',
+    refreshKey, // Add refresh key to trigger re-render
   }
 
   return <PhotosDetails route={{ params: routeParams }} />

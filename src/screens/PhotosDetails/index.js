@@ -44,8 +44,15 @@ const styles = StyleSheet.create({
 })
 
 const PhotosDetails = ({ route }) => {
-  const { index, photosList, searchTerm, activeSegment, topOffset, uuid } =
-    route.params
+  const {
+    index,
+    photosList,
+    searchTerm,
+    activeSegment,
+    topOffset,
+    uuid,
+    refreshKey,
+  } = route.params
 
   const navigation = useNavigation()
 
@@ -192,6 +199,7 @@ const PhotosDetails = ({ route }) => {
             key={photo.id}
             swiper={swiper}
             photosList={photosList}
+            refreshKey={refreshKey}
           />
         ))}
       </Swiper>

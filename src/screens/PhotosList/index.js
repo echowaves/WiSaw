@@ -1,9 +1,8 @@
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 
-import { DrawerActions, useNavigation } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library'
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
 // import * as FileSystem from 'expo-file-system'
 import * as Notifications from 'expo-notifications'
 import * as SecureStore from 'expo-secure-store'
@@ -1199,8 +1198,9 @@ const PhotosList = () => {
               }}
               onPress={() => {
                 try {
-                  navigation.dispatch(DrawerActions.openDrawer())
+                  navigation.openDrawer()
                 } catch (error) {
+                  // Fallback if drawer navigation is not available
                   console.log('Could not open drawer:', error)
                 }
               }}

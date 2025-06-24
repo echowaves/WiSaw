@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native'
 import * as Haptics from 'expo-haptics'
 import { router } from 'expo-router'
 import { useRef } from 'react'
@@ -109,7 +108,7 @@ const Thumb = ({
   topOffset,
   uuid,
 }) => {
-  const navigation = useNavigation()
+  // Navigation removed - using router directly for navigation
   const scaleValue = useRef(new Animated.Value(1)).current
   const playButtonScale = useRef(new Animated.Value(1)).current
 

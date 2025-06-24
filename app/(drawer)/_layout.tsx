@@ -1,118 +1,12 @@
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
-import {
-  DrawerContentScrollView,
-  DrawerItemList,
-} from '@react-navigation/drawer'
-import Constants from 'expo-constants'
 import { router } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
 import { useAtom } from 'jotai'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import * as CONST from '../../src/consts'
 import * as STATE from '../../src/state'
-
-const styles = StyleSheet.create({
-  buildInfoContainer: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: CONST.HEADER_BORDER_COLOR,
-    backgroundColor: CONST.HEADER_GRADIENT_END,
-  },
-  buildInfoText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    fontFamily: 'monospace',
-  },
-  drawerHeader: {
-    height: 160,
-    backgroundColor: CONST.MAIN_COLOR,
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-    paddingLeft: 20,
-    paddingBottom: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  drawerHeaderText: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: 'white',
-    letterSpacing: 1,
-  },
-  drawerSubtext: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginTop: 4,
-    fontWeight: '400',
-  },
-})
-
-// Custom Drawer Content with Modern Design
-function CustomDrawerContent(props) {
-  const buildNumber =
-    Constants.expoConfig?.ios?.buildNumber ||
-    Constants.expoConfig?.version ||
-    '299'
-  const appVersion = Constants.expoConfig?.version || '7.2.4'
-
-  return (
-    <View style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
-      <View style={styles.drawerHeader}>
-        <Text style={styles.drawerHeaderText}>WiSaw</Text>
-        <Text style={styles.drawerSubtext}>Capture & Share Moments</Text>
-      </View>
-      <DrawerContentScrollView
-        {...props}
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 20,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={{ paddingHorizontal: 10 }}>
-          <DrawerItemList {...props} />
-        </View>
-      </DrawerContentScrollView>
-
-      <View
-        style={[
-          styles.buildInfoContainer,
-          {
-            backgroundColor: 'rgba(0, 0, 0, 0.05)',
-            margin: 15,
-            padding: 15,
-            borderRadius: 12,
-          },
-        ]}
-      >
-        <Text
-          style={[
-            styles.buildInfoText,
-            {
-              fontSize: 13,
-              color: '#666',
-              textAlign: 'center',
-              fontWeight: '500',
-            },
-          ]}
-        >
-          Version {appVersion} • Build {buildNumber}
-        </Text>
-      </View>
-    </View>
-  )
-}
 
 // Header Right Component for Friends Screen
 function FriendsHeaderRight() {
@@ -141,7 +35,6 @@ export default function DrawerLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
           headerShown: false,
           drawerStyle: {
@@ -238,7 +131,7 @@ export default function DrawerLayout() {
             headerShown: true,
             headerLeft: () => (
               <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => router.push('/(tabs)')}
                 style={{
                   marginLeft: 15,
                   padding: 8,

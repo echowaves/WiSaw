@@ -129,13 +129,13 @@ const ModalInputText = ({ route }) => {
     </View>
   )
 
-  const handleSubmit = () => {
-    reducer.submitComment({
+  const handleSubmit = async () => {
+    await reducer.submitComment({
       inputText: inputTextRef.current.trim(),
       uuid,
       photo,
     })
-    navigation.pop()
+    router.back()
   }
 
   const renderHeaderRight = () => (

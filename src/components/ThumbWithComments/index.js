@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native'
 import * as Haptics from 'expo-haptics'
 import { router } from 'expo-router'
 import { useRef } from 'react'
@@ -85,7 +84,7 @@ const ThumbWithComments = ({
   topOffset,
   uuid,
 }) => {
-  const navigation = useNavigation()
+  // Navigation removed - using router directly for navigation
   const scale = useRef(new Animated.Value(1)).current
 
   const handlePressIn = () => {

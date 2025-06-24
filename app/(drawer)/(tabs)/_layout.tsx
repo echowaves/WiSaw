@@ -79,6 +79,17 @@ export default function TabsLayout() {
           headerBackTitle: '',
         }}
       />
+      <Stack.Screen
+        name="chat"
+        options={{
+          title: 'Chat',
+          headerTintColor: CONST.MAIN_COLOR,
+          headerBackTitle: '',
+          headerStyle: {
+            backgroundColor: CONST.HEADER_GRADIENT_END,
+          } as any,
+        }}
+      />
     </Stack>
   )
 }

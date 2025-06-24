@@ -1,7 +1,6 @@
-import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import React, { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
@@ -243,7 +242,7 @@ const styles = StyleSheet.create({
   },
 })
 
-const Photo = ({ photo }) => {
+const Photo = ({ photo, refreshKey = 0 }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
@@ -303,14 +302,14 @@ const Photo = ({ photo }) => {
   // const [status, setStatus] = useState({})
   const [photoDetails, setPhotoDetails] = useState(null)
 
-  const navigation = useNavigation()
+  // Removed navigation as it's not used in this component
 
   const { width, height } = useWindowDimensions()
   const imageHeight = height - 380 // Account for header padding, footer, and content
 
-  useFocusEffect(
-    // use this to make the navigastion to a detailed screen faster
-    React.useCallback(() => {
+  useEffect(
+    // use this to make the navigation to a detailed screen faster
+    () => {
       const task = InteractionManager.runAfterInteractions(async () => {
         if (componentIsMounted) {
           const loadedPhotoDetails = await reducer.getPhotoDetails({
@@ -328,8 +327,9 @@ const Photo = ({ photo }) => {
         componentIsMounted.current = false
         task.cancel()
       }
-    }, []),
-  )
+    },
+    [photo?.id, uuid, refreshKey],
+  ) // Added refreshKey dependency to refresh comments when returning from add comment
 
   // useEffect(() => {
   //   if (videoRef?.current) {
@@ -950,6 +950,7 @@ const Photo = ({ photo }) => {
 
 Photo.propTypes = {
   photo: PropTypes.object.isRequired,
+  refreshKey: PropTypes.number,
 }
 
 export default Photo
