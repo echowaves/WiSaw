@@ -20,6 +20,16 @@ export default function ModalInputScreen() {
         options={{
           title: 'Add Comment',
           headerBackTitle: '',
+          headerStyle: {
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          },
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: '#fff',
+          },
+          headerTintColor: '#fff',
+          headerTransparent: false,
         }}
       />
       <ModalInputText route={{ params: routeParams }} />

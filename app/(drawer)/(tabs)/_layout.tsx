@@ -55,8 +55,16 @@ export default function TabsLayout() {
         name="modal-input"
         options={{
           title: 'Add Comment',
-          headerTintColor: CONST.MAIN_COLOR,
+          headerTintColor: '#fff',
           headerBackTitle: '',
+          headerStyle: {
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          },
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: '#fff',
+          },
         }}
       />
       <Stack.Screen
