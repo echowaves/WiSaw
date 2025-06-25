@@ -1,8 +1,8 @@
 // Import version from package.json and shared build number
-import packageJson from './package.json'
-import { BUILD_NUMBER } from './version'
+const packageJson = require('./package.json')
+const { BUILD_NUMBER } = require('./version')
 
-export default {
+module.exports = {
   expo: {
     owner: 'echowaves',
     runtimeVersion: { policy: 'appVersion' },
