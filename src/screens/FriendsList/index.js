@@ -70,22 +70,7 @@ const styles = StyleSheet.create({
     color: '#ff6b35',
     fontWeight: '500',
   },
-  actionButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  actionButton: {
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
-  },
-  editButton: {
-    backgroundColor: '#e6f5ff',
-  },
-  deleteButton: {
-    backgroundColor: '#ffebee',
-  },
+
   pendingShareButton: {
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -353,6 +338,7 @@ const FriendsList = () => {
                 params: {
                   chatUuid: friend?.chatUuid,
                   contact: JSON.stringify(friend?.contact),
+                  friendshipUuid: friend?.friendshipUuid,
                 },
               })
             }
@@ -429,40 +415,6 @@ const FriendsList = () => {
                     : 'Tap to chat'}
                 </Text>
               )}
-            </View>
-
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.editButton]}
-                onPress={() => {
-                  setSelectedFriendshipUuid(friend.friendshipUuid)
-                  setShowNamePicker(true)
-                }}
-              >
-                <FontAwesome5 name="edit" size={14} color="#007bff" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => {
-                  Alert.alert(
-                    'Remove Friend',
-                    `Are you sure you want to remove ${displayName}?`,
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Remove',
-                        style: 'destructive',
-                        onPress: () =>
-                          handleRemoveFriend({
-                            friendshipUuid: friend.friendshipUuid,
-                          }),
-                      },
-                    ],
-                  )
-                }}
-              >
-                <FontAwesome5 name="trash" size={14} color="#dc3545" />
-              </TouchableOpacity>
             </View>
           </View>
         </TouchableOpacity>
