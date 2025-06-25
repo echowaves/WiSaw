@@ -2,7 +2,7 @@
 import packageJson from './package.json'
 
 // Shared build number for both iOS and Android
-const BUILD_NUMBER = 331
+const BUILD_NUMBER = 332
 
 export default {
   expo: {

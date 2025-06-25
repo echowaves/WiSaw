@@ -6,7 +6,6 @@ import { useCallback, useEffect, useState } from 'react'
 import * as Haptics from 'expo-haptics'
 
 import {
-  Alert,
   FlatList,
   SafeAreaView,
   StyleSheet,

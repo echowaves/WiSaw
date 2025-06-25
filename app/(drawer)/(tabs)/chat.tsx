@@ -1,14 +1,14 @@
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 import { Stack, router, useLocalSearchParams } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useState, useEffect } from 'react'
-import { TouchableOpacity, View, Alert } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Alert, TouchableOpacity, View } from 'react-native'
 import Toast from 'react-native-toast-message'
-import * as CONST from '../../../src/consts'
-import * as STATE from '../../../src/state'
-import * as friendsHelper from '../../../src/screens/FriendsList/friends_helper'
 import NamePicker from '../../../src/components/NamePicker'
+import * as CONST from '../../../src/consts'
 import Chat from '../../../src/screens/Chat'
+import * as friendsHelper from '../../../src/screens/FriendsList/friends_helper'
+import * as STATE from '../../../src/state'
 
 export default function ChatScreen() {
   const params = useLocalSearchParams()
@@ -22,20 +22,23 @@ export default function ChatScreen() {
   // Local state for name picker and current display name
   const [showNamePicker, setShowNamePicker] = useState(false)
   const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState('')
-  
+
   // Parse the contact back from JSON string if it exists
   // The contact is a JSON stringified string, so we just parse it directly
   const contactName = contact ? JSON.parse(contact as string) : 'Chat'
-  
+
   // Local state for the current display name (can be updated when editing)
   const [currentDisplayName, setCurrentDisplayName] = useState(
-    contactName && typeof contactName === 'string' ? contactName : 'Chat'
+    contactName && typeof contactName === 'string' ? contactName : 'Chat',
   )
 
   // Sync display name when route params change (e.g., navigating to different chat)
   useEffect(() => {
     const newContactName = contact ? JSON.parse(contact as string) : 'Chat'
-    const newDisplayName = newContactName && typeof newContactName === 'string' ? newContactName : 'Chat'
+    const newDisplayName =
+      newContactName && typeof newContactName === 'string'
+        ? newContactName
+        : 'Chat'
     setCurrentDisplayName(newDisplayName)
   }, [contact])
 
@@ -48,9 +51,11 @@ export default function ChatScreen() {
       })
       if (success) {
         // Refresh the friends list
-        const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
-          uuid,
-        })
+        const newFriendsList = await friendsHelper.getEnhancedListOfFriendships(
+          {
+            uuid,
+          },
+        )
         setFriendsList(newFriendsList)
 
         Toast.show({
@@ -94,7 +99,13 @@ export default function ChatScreen() {
   }
 
   // Handle setting contact name after editing
-  const setContactName = async ({ friendshipUuid: editFriendshipUuid, contactName }: { friendshipUuid: string, contactName: string }) => {
+  const setContactName = async ({
+    friendshipUuid: editFriendshipUuid,
+    contactName,
+  }: {
+    friendshipUuid: string
+    contactName: string
+  }) => {
     try {
       await friendsHelper.setContactName({
         uuid,
@@ -163,7 +174,14 @@ export default function ChatScreen() {
             </TouchableOpacity>
           ),
           headerRight: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginRight: 8 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                marginRight: 8,
+              }}
+            >
               <TouchableOpacity
                 onPress={handleEditFriend}
                 style={{
