@@ -1,8 +1,6 @@
 // Import version from package.json and shared build number
 import packageJson from './package.json'
-
-// Shared build number for both iOS and Android
-const BUILD_NUMBER = 335
+import { BUILD_NUMBER } from './version'
 
 export default {
   expo: {
