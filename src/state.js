@@ -11,3 +11,5 @@ export const photosList = atom([])
 export const friendsList = atom([])
 
 export const triggerAddFriend = atom(false)
+
+export const triggerSearch = atom(null)

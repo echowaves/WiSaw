@@ -248,6 +248,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+  const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
 
   const componentIsMounted = useRef(true)
 
@@ -553,20 +554,29 @@ const Photo = ({ photo, refreshKey = 0 }) => {
       <View style={styles.aiRecognitionContainer}>
         {labels?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <Text style={styles.aiRecognitionTitle}>AI Recognized Tags</Text>
+            <Text style={styles.aiRecognitionTitle}>
+              AI Recognized Tags (tap to search)
+            </Text>
             <View style={styles.aiTagsContainer}>
               {labels.map((label) => (
-                <View
+                <TouchableOpacity
                   key={label.Name}
                   style={[
                     styles.aiTag,
                     { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
                   ]}
+                  onPress={() => {
+                    // Trigger search using global state
+                    setTriggerSearch(label.Name)
+                    // Navigate back to main screen
+                    router.back()
+                  }}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.aiTagText}>
                     {label.Name} {Math.round(label.Confidence)}%
                   </Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -574,20 +584,29 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
         {textDetections?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <Text style={styles.aiRecognitionTitle}>AI Recognized Text</Text>
+            <Text style={styles.aiRecognitionTitle}>
+              AI Recognized Text (tap to search)
+            </Text>
             <View style={styles.aiTagsContainer}>
               {textDetections.map((text) => (
-                <View
+                <TouchableOpacity
                   key={text.Id}
                   style={[
                     styles.aiTag,
                     { opacity: Math.min(text.Confidence / 100 + 0.3, 1) },
                   ]}
+                  onPress={() => {
+                    // Trigger search using global state
+                    setTriggerSearch(text.DetectedText)
+                    // Navigate back to main screen
+                    router.back()
+                  }}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.aiTagText}>
                     {text.DetectedText} {Math.round(text.Confidence)}%
                   </Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -600,17 +619,24 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             </Text>
             <View style={styles.aiTagsContainer}>
               {moderationLabels.map((label) => (
-                <View
+                <TouchableOpacity
                   key={label.Name}
                   style={[
                     styles.aiModerationTag,
                     { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
                   ]}
+                  onPress={() => {
+                    // Trigger search using global state
+                    setTriggerSearch(label.Name)
+                    // Navigate back to main screen
+                    router.back()
+                  }}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.aiModerationTagText}>
                     {label.Name} {Math.round(label.Confidence)}%
                   </Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>

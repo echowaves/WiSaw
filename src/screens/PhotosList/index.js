@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types'
+
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 
@@ -188,7 +190,7 @@ const FOOTER_HEIGHT = 90
 
 let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
-const PhotosList = () => {
+const PhotosList = ({ searchFromUrl }) => {
   // console.log({ activeSegment, currentBatch })
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -196,6 +198,7 @@ const PhotosList = () => {
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+  const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
 
   const navigation = useNavigation()
 
@@ -267,14 +270,14 @@ const PhotosList = () => {
     return false
   }
 
-  const load = async (segmentOverride = null) => {
+  const load = async (segmentOverride = null, searchTermOverride = null) => {
     setLoading(true)
     const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
       zeroMoment,
       location,
       netAvailable,
-      searchTerm,
+      searchTerm: searchTermOverride !== null ? searchTermOverride : searchTerm,
       topOffset,
       activeSegment: segmentOverride !== null ? segmentOverride : activeSegment,
       batch: currentBatch, // clone
@@ -479,7 +482,7 @@ const PhotosList = () => {
     return Promise.resolve()
   }
 
-  const reload = async (segmentOverride = null) => {
+  const reload = async (segmentOverride = null, searchTermOverride = null) => {
     currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
     setStopLoading(false)
@@ -504,7 +507,7 @@ const PhotosList = () => {
     }
 
     // Load new content after state is reset, using the specific segment if provided
-    load(segmentOverride)
+    load(segmentOverride, searchTermOverride)
     // setPendingPhotos(await reducer.getQueue())
     // load()
   }
@@ -1073,6 +1076,85 @@ const PhotosList = () => {
       // load()
     }
   }, [lastViewableRow])
+
+  // Handle search from URL parameter (e.g., from AI tag clicks)
+  useEffect(() => {
+    if (searchFromUrl && searchFromUrl.trim().length > 0) {
+      const searchTermToUse = searchFromUrl.trim()
+
+      // Set the search term
+      setSearchTerm(searchTermToUse)
+
+      // Switch to search segment
+      setActiveSegment(2)
+
+      // Immediately clear photos list
+      setPhotosList([])
+
+      // Reset pagination and loading state
+      setPageNumber(0)
+      setStopLoading(false)
+      currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
+
+      // Focus the search bar if it exists
+      setTimeout(() => {
+        if (searchBarRef.current) {
+          searchBarRef.current.focus()
+        }
+      }, 200)
+
+      // Trigger search immediately with the search term directly passed
+      const performSearch = async () => {
+        try {
+          await reload(2, searchTermToUse)
+        } catch (error) {
+          // Search failed, but don't break the app
+        }
+      }
+      performSearch()
+    }
+  }, [searchFromUrl])
+
+  // Handle search triggered from AI tag clicks
+  useEffect(() => {
+    if (triggerSearch && triggerSearch.trim().length > 0) {
+      const searchTermToUse = triggerSearch.trim()
+
+      // Set the search term
+      setSearchTerm(searchTermToUse)
+
+      // Switch to search segment
+      setActiveSegment(2)
+
+      // Immediately clear photos list
+      setPhotosList([])
+
+      // Reset pagination and loading state
+      setPageNumber(0)
+      setStopLoading(false)
+      currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
+
+      // Focus the search bar after a delay
+      setTimeout(() => {
+        if (searchBarRef.current) {
+          searchBarRef.current.focus()
+        }
+      }, 300)
+
+      // Trigger search immediately with the search term directly passed
+      const performSearch = async () => {
+        try {
+          await reload(2, searchTermToUse)
+        } catch (error) {
+          // Search failed, but don't break the app
+        }
+      }
+      performSearch()
+
+      // Clear the trigger
+      setTriggerSearch(null)
+    }
+  }, [triggerSearch])
 
   const renderThumbs = () => (
     <FlatGrid
@@ -1769,6 +1851,14 @@ const PhotosList = () => {
       </View>
     </View>
   )
+}
+
+PhotosList.propTypes = {
+  searchFromUrl: PropTypes.string,
+}
+
+PhotosList.defaultProps = {
+  searchFromUrl: null,
 }
 
 export default PhotosList
