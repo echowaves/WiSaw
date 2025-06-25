@@ -584,7 +584,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                     { opacity: Math.min(text.Confidence / 100 + 0.3, 1) },
                   ]}
                 >
-                  <Text style={styles.aiTagText}>"{text.DetectedText}"</Text>
+                  <Text style={styles.aiTagText}>
+                    {text.DetectedText} {Math.round(text.Confidence)}%
+                  </Text>
                 </View>
               ))}
             </View>
