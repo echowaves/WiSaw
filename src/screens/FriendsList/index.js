@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 import * as Haptics from 'expo-haptics'
 
 import {
+  Alert,
   FlatList,
   SafeAreaView,
   StyleSheet,
@@ -134,6 +135,34 @@ const styles = StyleSheet.create({
   shareButtonContainer: {
     marginTop: 8,
     alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  pendingDeleteButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginLeft: 0,
+    borderRadius: 8,
+    backgroundColor: 'rgba(220, 53, 69, 0.15)',
+    elevation: 15,
+    zIndex: 15,
+    shadowColor: '#dc3545',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(220, 53, 69, 0.3)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 80,
+    minHeight: 36,
+  },
+  pendingDeleteButtonText: {
+    color: '#dc3545',
+    fontSize: 11,
+    fontWeight: '600',
+    marginLeft: 4,
   },
 })
 
@@ -245,6 +274,21 @@ const FriendsList = () => {
         topOffset: 60,
       })
     }
+  }
+
+  const handleDeletePendingFriend = async ({ friendshipUuid, contactName }) => {
+    Alert.alert(
+      'Remove Pending Friend',
+      `Are you sure you want to remove the pending friendship with ${contactName}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => handleRemoveFriend({ friendshipUuid }),
+        },
+      ],
+    )
   }
 
   const setContactName = async ({ friendshipUuid, contactName }) => {
@@ -376,7 +420,7 @@ const FriendsList = () => {
                       Waiting for confirmation
                     </Text>
                   </View>
-                  {/* Share button on its own line */}
+                  {/* Share and Delete buttons container */}
                   <View style={styles.shareButtonContainer}>
                     <TouchableOpacity
                       style={[styles.pendingShareButton]}
@@ -404,6 +448,29 @@ const FriendsList = () => {
                         color="#ff6b35"
                       />
                       <Text style={styles.pendingShareButtonText}>Share</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.pendingDeleteButton]}
+                      onPress={() =>
+                        handleDeletePendingFriend({
+                          friendshipUuid: friend.friendshipUuid,
+                          contactName: displayName,
+                        })
+                      }
+                      activeOpacity={0.5}
+                      delayPressIn={0}
+                      delayPressOut={0}
+                      hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                      pressRetentionOffset={{
+                        top: 20,
+                        bottom: 20,
+                        left: 20,
+                        right: 20,
+                      }}
+                      importantForAccessibility="yes"
+                    >
+                      <FontAwesome5 name="trash" size={12} color="#dc3545" />
+                      <Text style={styles.pendingDeleteButtonText}>Delete</Text>
                     </TouchableOpacity>
                   </View>
                 </>

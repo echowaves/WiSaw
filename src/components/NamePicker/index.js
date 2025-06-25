@@ -232,7 +232,7 @@ const NamePicker = ({
               color="#fff"
               style={[styles.headerIcon, { marginRight: 8 }]}
             />
-            <Text style={styles.headerTitle}>Add Friend</Text>
+            <Text style={styles.headerTitle}>Save Friend</Text>
           </View>
 
           <View style={styles.headerButton}>
@@ -289,7 +289,7 @@ const NamePicker = ({
               {/* Action Buttons */}
               <View style={styles.buttonContainer}>
                 <Button
-                  title={isSaving ? 'Adding...' : 'Add Friend'}
+                  title={isSaving ? 'Adding...' : 'Save Friend'}
                   icon={
                     <FontAwesome5
                       name="user-plus"
