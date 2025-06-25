@@ -272,14 +272,26 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const load = async (segmentOverride = null, searchTermOverride = null) => {
     setLoading(true)
+
+    // Use current values if overrides are not provided
+    const effectiveSegment =
+      segmentOverride !== null ? segmentOverride : activeSegment
+
+    // Only use search term for search segment (segment 2)
+    let effectiveSearchTerm = ''
+    if (effectiveSegment === 2) {
+      effectiveSearchTerm =
+        searchTermOverride !== null ? searchTermOverride : searchTerm
+    }
+
     const { photos, noMoreData, batch } = await reducer.getPhotos({
       uuid,
       zeroMoment,
       location,
       netAvailable,
-      searchTerm: searchTermOverride !== null ? searchTermOverride : searchTerm,
+      searchTerm: effectiveSearchTerm,
       topOffset,
-      activeSegment: segmentOverride !== null ? segmentOverride : activeSegment,
+      activeSegment: effectiveSegment,
       batch: currentBatch, // clone
       pageNumber,
     })
@@ -507,7 +519,7 @@ const PhotosList = ({ searchFromUrl }) => {
     }
 
     // Load new content after state is reset, using the specific segment if provided
-    load(segmentOverride, searchTermOverride)
+    await load(segmentOverride, searchTermOverride)
     // setPendingPhotos(await reducer.getQueue())
     // load()
   }
@@ -520,14 +532,19 @@ const PhotosList = ({ searchFromUrl }) => {
       // Haptics might not be available on all devices - fail silently
     }
 
-    // Immediately reset state when switching segments to prevent showing old data
-    setPhotosList([])
-    setStopLoading(false)
-    setPageNumber(null)
-
+    // Only clear photos and reset if actually switching segments
     if (activeSegment !== index) {
+      setPhotosList([])
+      setStopLoading(false)
+      setPageNumber(null)
       setActiveSegment(index)
+
+      // Clear search term when switching away from search segment
+      if (index !== 2) {
+        setSearchTerm('')
+      }
     }
+
     // Always reload content when any segment is clicked (including current one)
     // Pass the new segment index directly to ensure immediate use
     reload(index)
