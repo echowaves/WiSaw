@@ -91,9 +91,7 @@ export const createShareContent = ({
 }) => {
   if (type === 'photo' && photo) {
     const url = `https://link.wisaw.com/photos/${photo.id}`
-    let message = `Check out what I saw today${
-      photo?.video ? ' (video)' : ''
-    }: ${url}`
+    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
       message += `\n\n${photoDetails.comments
