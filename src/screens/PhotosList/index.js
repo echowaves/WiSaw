@@ -495,17 +495,6 @@ const PhotosList = ({ searchFromUrl }) => {
   }
 
   const reload = async (segmentOverride = null, searchTermOverride = null) => {
-    // Ensure we have necessary data before proceeding
-    if (!uuid || uuid.length === 0) {
-      // eslint-disable-next-line no-console
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(
-          'PhotosList: Cannot reload without UUID, waiting for initialization...',
-        )
-      }
-      return
-    }
-
     currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
     setStopLoading(false)
@@ -1033,42 +1022,6 @@ const PhotosList = ({ searchFromUrl }) => {
     // updateNavBar()
   }, [netAvailable])
 
-  // Hot reload fix: Ensure photos are loaded when uuid becomes available
-  useEffect(() => {
-    if (uuid && uuid.length > 0 && location && location.coords) {
-      // Only reload if we have essential data and no photos are currently loaded
-      if (photosList.length === 0 && !loading) {
-        // Add a small delay to ensure all async initialization is complete
-        const timer = setTimeout(() => {
-          reload()
-        }, 100)
-        return () => clearTimeout(timer)
-      }
-    }
-    return undefined
-  }, [uuid, location, photosList.length, loading])
-
-  // Additional hot reload detection for development
-  useEffect(() => {
-    const isDev = process.env.NODE_ENV === 'development'
-    if (
-      isDev &&
-      uuid &&
-      uuid.length > 0 &&
-      photosList.length === 0 &&
-      location
-    ) {
-      // In development, if we have uuid but no photos after initial load, force reload
-      const timer = setTimeout(() => {
-        if (photosList.length === 0 && !loading) {
-          reload()
-        }
-      }, 1000) // Wait 1 second for initial load
-      return () => clearTimeout(timer)
-    }
-    return undefined
-  }, [uuid, photosList.length, location, loading])
-
   useEffect(() => {
     // TODO: delete next line -- debuggin
     // navigation.navigate('ConfirmFriendship', {
@@ -1109,11 +1062,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
   useEffect(() => {
     // updateNavBar()
-    // Only reload if we have the necessary data
-    if (location && uuid && uuid.length > 0) {
-      reload()
-    }
-  }, [location, uuid]) // Added uuid as dependency
+    reload()
+  }, [location])
 
   // useEffect(() => {}, [currentBatch])
 

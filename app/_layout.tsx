@@ -47,13 +47,6 @@ export default function RootLayout() {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
   }, [setUuid, setNickName])
 
-  // Hot reload fix: Re-initialize if UUID is missing but app is ready
-  useEffect(() => {
-    if (isAppReady && (!uuid || uuid.length === 0)) {
-      init()
-    }
-  }, [isAppReady, uuid, init])
-
   // Handle deep linking
   const handleDeepLink = useCallback(
     (url: string) => {
