@@ -1,6 +1,6 @@
 {
   "name": "wisaw",
-  "version": "7.2.6",
+  "version": "7.2.5",
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",

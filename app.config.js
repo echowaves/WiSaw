@@ -7,7 +7,7 @@ module.exports = {
     jsEngine: 'hermes',
     updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
-    version: '7.2.6',
+    version: '7.2.5',
     plugins: [
       // Branch removed - using native deep linking instead
       'expo-secure-store',
