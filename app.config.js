@@ -1,6 +1,4 @@
 // Import version from package.json and shared build number
-const packageJson = require('./package.json')
-const { BUILD_NUMBER } = require('./version')
 
 module.exports = {
   expo: {
@@ -9,7 +7,7 @@ module.exports = {
     jsEngine: 'hermes',
     updates: { url: 'https://u.expo.dev/d1624159-fed7-42bf-b11b-7ea8f38a8dee' },
     name: 'WiSaw',
-    version: packageJson.version,
+    version: '7.2.5',
     plugins: [
       // Branch removed - using native deep linking instead
       'expo-secure-store',
@@ -49,7 +47,7 @@ module.exports = {
     },
     ios: {
       bundleIdentifier: 'com.echowaves',
-      buildNumber: BUILD_NUMBER.toString(),
+      buildNumber: '337',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -100,7 +98,7 @@ module.exports = {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: BUILD_NUMBER,
+      versionCode: 337,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',
