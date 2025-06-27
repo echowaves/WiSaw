@@ -7,13 +7,14 @@ import PropTypes from 'prop-types'
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 
-import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native'
+import { StatusBar, StyleSheet, View } from 'react-native'
 
 import { Text } from '@rneui/themed'
 
 import Swiper from 'react-native-swiper'
 
 import Photo from '../../components/Photo'
+import SafeAreaView from '../../components/SafeAreaView'
 
 import { getPhotos } from '../PhotosList/reducer'
 
@@ -141,16 +142,21 @@ const PhotosDetails = ({ route }) => {
         right: 0,
         zIndex: 1000,
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
       }}
     >
-      {renderHeaderLeft()}
-      {renderHeaderTitle()}
-      <View style={{ width: 40 }} />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 8,
+        }}
+      >
+        {renderHeaderLeft()}
+        {renderHeaderTitle()}
+        <View style={{ width: 40 }} />
+      </View>
     </SafeAreaView>
   )
 

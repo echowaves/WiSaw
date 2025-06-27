@@ -47,7 +47,7 @@ module.exports = {
     },
     ios: {
       bundleIdentifier: 'com.echowaves',
-      buildNumber: '339',
+      buildNumber: '340',
       supportsTablet: true,
       infoPlist: {
         LSApplicationQueriesSchemes: [
@@ -98,7 +98,7 @@ module.exports = {
         backgroundColor: '#FFFFFF',
       },
       package: 'com.echowaves.wisaw',
-      versionCode: 339,
+      versionCode: 340,
       permissions: [
         'INTERNET',
         'SYSTEM_ALERT_WINDOW',

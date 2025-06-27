@@ -8,6 +8,7 @@ import {
 import { useCallback, useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import PhotosDetailsShared from '../../../../src/screens/PhotosDetailsShared'
+import { getTransparentHeaderStyle } from '../../../../src/utils/navigationStyles'
 
 export default function SharedPhotoDetail() {
   const { photoId } = useLocalSearchParams()
@@ -25,9 +26,7 @@ export default function SharedPhotoDetail() {
     <>
       <Stack.Screen
         options={{
-          headerStyle: {
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          },
+          headerStyle: getTransparentHeaderStyle(),
           headerTitleStyle: {
             fontSize: 16,
             fontWeight: '600',

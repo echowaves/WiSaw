@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
 import * as STATE from '../../src/state'
+import { getDefaultHeaderStyle } from '../../src/utils/navigationStyles'
 
 // Get version and build number from app.config.js
 // Version comes from package.json, build number is shared between iOS and Android
@@ -147,19 +148,7 @@ export default function DrawerLayout() {
                 />
               </TouchableOpacity>
             ),
-            headerStyle: {
-              backgroundColor: CONST.HEADER_GRADIENT_END,
-              borderBottomWidth: 1,
-              borderBottomColor: CONST.HEADER_BORDER_COLOR,
-              shadowColor: CONST.HEADER_SHADOW_COLOR,
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 1,
-              shadowRadius: 4,
-              elevation: 3,
-            },
+            headerStyle: getDefaultHeaderStyle(),
             headerTitleStyle: {
               fontSize: 18,
               fontWeight: '600',
@@ -195,19 +184,7 @@ export default function DrawerLayout() {
               </TouchableOpacity>
             ),
             headerRight: () => <FriendsHeaderRight />,
-            headerStyle: {
-              backgroundColor: CONST.HEADER_GRADIENT_END,
-              borderBottomWidth: 1,
-              borderBottomColor: CONST.HEADER_BORDER_COLOR,
-              shadowColor: CONST.HEADER_SHADOW_COLOR,
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 1,
-              shadowRadius: 4,
-              elevation: 3,
-            },
+            headerStyle: getDefaultHeaderStyle(),
             headerTitleStyle: {
               fontSize: 18,
               fontWeight: '600',
@@ -242,19 +219,7 @@ export default function DrawerLayout() {
                 />
               </TouchableOpacity>
             ),
-            headerStyle: {
-              backgroundColor: CONST.HEADER_GRADIENT_END,
-              borderBottomWidth: 1,
-              borderBottomColor: CONST.HEADER_BORDER_COLOR,
-              shadowColor: CONST.HEADER_SHADOW_COLOR,
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 1,
-              shadowRadius: 4,
-              elevation: 3,
-            },
+            headerStyle: getDefaultHeaderStyle(),
             headerTitleStyle: {
               fontSize: 18,
               fontWeight: '600',

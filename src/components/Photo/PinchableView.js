@@ -2,7 +2,6 @@ import { router } from 'expo-router'
 
 import {
   ActivityIndicator,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   useWindowDimensions,
@@ -16,6 +15,7 @@ import { Text } from '@rneui/themed'
 import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
+import SafeAreaView from '../SafeAreaView'
 
 const styles = StyleSheet.create({
   container: {
@@ -85,16 +85,21 @@ const PinchableView = ({ route, navigation }) => {
         right: 0,
         zIndex: 1000,
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
       }}
     >
-      {renderHeaderLeft()}
-      {renderHeaderTitle()}
-      <View style={{ width: 40 }} />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          paddingVertical: 8,
+        }}
+      >
+        {renderHeaderLeft()}
+        {renderHeaderTitle()}
+        <View style={{ width: 40 }} />
+      </View>
     </SafeAreaView>
   )
 

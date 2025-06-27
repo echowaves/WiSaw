@@ -1,26 +1,10 @@
 import { Stack } from 'expo-router'
 import * as CONST from '../../../src/consts'
+import { getDefaultScreenOptions } from '../../../src/utils/navigationStyles'
 
 export default function TabsLayout() {
   return (
-    <Stack
-      screenOptions={{
-        gestureEnabled: true,
-        headerShown: true,
-        headerStyle: {
-          backgroundColor: CONST.HEADER_GRADIENT_END,
-        } as any,
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: '600',
-          color: CONST.TEXT_COLOR,
-        },
-        headerTintColor: CONST.MAIN_COLOR,
-        // Performance optimizations
-        animationTypeForReplace: 'push',
-        animation: 'slide_from_right',
-      }}
-    >
+    <Stack screenOptions={getDefaultScreenOptions()}>
       <Stack.Screen
         name="index"
         options={{
