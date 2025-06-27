@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 import { useAtom } from 'jotai'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import {
   Animated,
@@ -63,6 +63,16 @@ const FeedbackScreen = () => {
     ]).start()
   }, [])
 
+  // Clear form when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      // Reset form state when navigating to the screen
+      setInputText('')
+      setIsSubmitting(false)
+      setIsFocused(false)
+    }, []),
+  )
+
   const submitFeedback = async ({ feedbackText }) => {
     if (isSubmitting) return
 
@@ -95,6 +105,12 @@ const FeedbackScreen = () => {
 
       // Success haptic and navigation
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+      
+      // Clear the form
+      setInputText('')
+      setIsSubmitting(false)
+      setIsFocused(false)
+      
       router.back()
       Toast.show({
         text1: 'Thank you! 🎉',
