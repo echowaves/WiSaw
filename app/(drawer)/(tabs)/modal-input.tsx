@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { useState } from 'react'
 import { TouchableOpacity } from 'react-native'
-import ModalInputText from '../../../src/screens/ModalInputText'
 import * as reducer from '../../../src/components/Photo/reducer'
-import { useRef, useState } from 'react'
+import ModalInputText from '../../../src/screens/ModalInputText'
 
 export default function ModalInputScreen() {
   const params = useLocalSearchParams()
@@ -25,7 +25,7 @@ export default function ModalInputScreen() {
 
   const handleSubmit = async () => {
     if (isSubmitting || !inputText.trim()) return
-    
+
     setIsSubmitting(true)
     try {
       await reducer.submitComment({
@@ -72,10 +72,10 @@ export default function ModalInputScreen() {
                 opacity: isSubmitting || !inputText.trim() ? 0.5 : 1,
               }}
             >
-              <Ionicons 
-                name={isSubmitting ? "hourglass-outline" : "send"} 
-                size={24} 
-                color="#fff" 
+              <Ionicons
+                name={isSubmitting ? 'hourglass-outline' : 'send'}
+                size={24}
+                color="#fff"
               />
             </TouchableOpacity>
           ),

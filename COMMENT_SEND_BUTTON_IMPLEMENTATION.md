@@ -9,16 +9,18 @@ Successfully added a send button to the right side of the top navigation bar on 
 ### 1. **Updated Route Component** (`/app/(drawer)/(tabs)/modal-input.tsx`)
 
 #### ✅ **Added State Management**
+
 ```tsx
 const [inputText, setInputText] = useState('')
 const [isSubmitting, setIsSubmitting] = useState(false)
 ```
 
 #### ✅ **Added Submit Handler**
+
 ```tsx
 const handleSubmit = async () => {
   if (isSubmitting || !inputText.trim()) return
-  
+
   setIsSubmitting(true)
   try {
     await reducer.submitComment({
@@ -36,6 +38,7 @@ const handleSubmit = async () => {
 ```
 
 #### ✅ **Added Header Right Button**
+
 ```tsx
 headerRight: () => (
   <TouchableOpacity
@@ -49,10 +52,10 @@ headerRight: () => (
       opacity: isSubmitting || !inputText.trim() ? 0.5 : 1,
     }}
   >
-    <Ionicons 
-      name={isSubmitting ? "hourglass-outline" : "send"} 
-      size={24} 
-      color="#fff" 
+    <Ionicons
+      name={isSubmitting ? "hourglass-outline" : "send"}
+      size={24}
+      color="#fff"
     />
   </TouchableOpacity>
 ),
@@ -61,6 +64,7 @@ headerRight: () => (
 ### 2. **Updated ModalInputText Component** (`/src/screens/ModalInputText/index.js`)
 
 #### ✅ **Added Text Change Callback**
+
 ```javascript
 const setInputText = (data) => {
   inputTextRef.current = data
@@ -73,6 +77,7 @@ const setInputText = (data) => {
 ```
 
 #### ✅ **Fixed Submit Function**
+
 ```javascript
 const handleSubmit = async () => {
   await reducer.submitComment({
@@ -88,17 +93,20 @@ const handleSubmit = async () => {
 ## Features Implemented
 
 ### 🎯 **Smart Send Button Behavior**
+
 - **Disabled State**: Button is disabled and semi-transparent when no text is entered
 - **Loading State**: Shows hourglass icon when submitting
 - **Active State**: Shows send icon when ready to submit
 - **Error Handling**: Properly handles submission errors
 
 ### 🎨 **Consistent Design**
+
 - **Matches Back Button**: Same styling as the left navigation button
 - **Transparent Background**: Fits with the overlay design
 - **Visual Feedback**: Opacity changes based on state
 
 ### 🔄 **Real-time Sync**
+
 - **Text Sync**: Input text is synchronized between route and screen components
 - **State Management**: Proper state management prevents double submissions
 - **Navigation Integration**: Seamlessly integrates with Expo Router navigation
@@ -106,11 +114,13 @@ const handleSubmit = async () => {
 ## User Experience
 
 ### 📱 **Navigation Bar Controls**
+
 - **Left**: Back button (← chevron)
 - **Center**: "Add Comment" title
 - **Right**: Send button (✈️ send icon) - **NEW!**
 
 ### ⚡ **Interaction Flow**
+
 1. User types comment text
 2. Send button becomes enabled (full opacity)
 3. User taps send button in nav bar
@@ -119,11 +129,13 @@ const handleSubmit = async () => {
 6. User returns to photo view
 
 ### 🛡️ **Error Prevention**
+
 - Button disabled when no text entered
 - Prevents double submissions during loading
 - Graceful error handling with console logging
 
 ## Files Modified
+
 - `/app/(drawer)/(tabs)/modal-input.tsx` - Added send button to navigation
 - `/src/screens/ModalInputText/index.js` - Added text sync and fixed submit function
 

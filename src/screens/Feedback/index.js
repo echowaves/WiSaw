@@ -105,12 +105,12 @@ const FeedbackScreen = () => {
 
       // Success haptic and navigation
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
-      
+
       // Clear the form
       setInputText('')
       setIsSubmitting(false)
       setIsFocused(false)
-      
+
       router.back()
       Toast.show({
         text1: 'Thank you! 🎉',
