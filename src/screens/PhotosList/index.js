@@ -24,6 +24,7 @@ import { CacheManager } from 'expo-cached-image'
 import {
   Alert,
   Animated,
+  Keyboard,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -1137,6 +1138,9 @@ const PhotosList = ({ searchFromUrl }) => {
     if (triggerSearch && triggerSearch.trim().length > 0) {
       const searchTermToUse = triggerSearch.trim()
 
+      // Dismiss keyboard immediately since search is automatic
+      Keyboard.dismiss()
+
       // Set the search term
       setSearchTerm(searchTermToUse)
 
@@ -1151,12 +1155,8 @@ const PhotosList = ({ searchFromUrl }) => {
       setStopLoading(false)
       currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
-      // Focus the search bar after a delay
-      setTimeout(() => {
-        if (searchBarRef.current) {
-          searchBarRef.current.focus()
-        }
-      }, 300)
+      // Don't focus the search bar for automatic searches triggered by AI labels
+      // The search is already performed and keyboard is not needed
 
       // Trigger search immediately with the search term directly passed
       const performSearch = async () => {
