@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
 
 const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
-  const { photo, topOffset, uuid } = route.params
+  const { photo, topOffset, uuid, onTextChange } = route.params
   const { height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
 
@@ -115,6 +115,10 @@ const ModalInputText = ({ route }) => {
   const setInputText = (data) => {
     inputTextRef.current = data
     _setInputText(data)
+    // Notify parent component of text changes
+    if (onTextChange) {
+      onTextChange(data)
+    }
   }
 
   const renderHeaderLeft = () => (
@@ -134,6 +138,7 @@ const ModalInputText = ({ route }) => {
       inputText: inputTextRef.current.trim(),
       uuid,
       photo,
+      topOffset,
     })
     router.back()
   }
