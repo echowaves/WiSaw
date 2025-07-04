@@ -1415,16 +1415,23 @@ const PhotosList = ({ searchFromUrl }) => {
           </View>
 
           {loading && (
-            <LinearProgress
-              color={CONST.MAIN_COLOR}
+            <View
               style={{
                 position: 'absolute',
                 top: 0,
-                right: 0,
                 left: 0,
+                right: 0,
                 height: 3,
               }}
-            />
+            >
+              <LinearProgress
+                color={CONST.MAIN_COLOR}
+                style={{
+                  flex: 1,
+                  height: 3,
+                }}
+              />
+            </View>
           )}
         </SafeAreaView>
       )
@@ -1609,6 +1616,7 @@ const PhotosList = ({ searchFromUrl }) => {
             shadowOpacity: 0.1,
             shadowRadius: 4,
             elevation: 3,
+            position: 'relative',
           }}
         >
           <MaterialIcons
@@ -1639,18 +1647,33 @@ const PhotosList = ({ searchFromUrl }) => {
               Your photos are being uploaded in the background
             </Text>
           </View>
-          <LinearProgress
-            color={CONST.MAIN_COLOR}
+          <View
             style={{
               position: 'absolute',
               bottom: 0,
-              right: 0,
               left: 0,
-              width: '100%',
+              right: 0,
+              height: 4,
               borderBottomLeftRadius: 12,
               borderBottomRightRadius: 12,
+              overflow: 'hidden',
             }}
-          />
+          >
+            <LinearProgress
+              color={CONST.MAIN_COLOR}
+              style={{
+                flex: 1,
+                height: 4,
+                borderBottomLeftRadius: 12,
+                borderBottomRightRadius: 12,
+              }}
+              trackStyle={{
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                borderBottomLeftRadius: 12,
+                borderBottomRightRadius: 12,
+              }}
+            />
+          </View>
         </View>
       )
     }
