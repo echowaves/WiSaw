@@ -322,57 +322,60 @@ const Chat = ({ route }) => {
   }, [chatUuid, friendsList, uuid]) // Added dependencies to re-run when chat or friends change
 
   // eslint-disable-next-line no-shadow
-  const onSend = useCallback((messages = []) => {
-    messages.forEach((message) => {
-      ;(async () => {
-        try {
-          const { _id, text } = message
-          const messageUuid = _id
+  const onSend = useCallback(
+    (messages = []) => {
+      messages.forEach((message) => {
+        ;(async () => {
+          try {
+            const { _id, text } = message
+            const messageUuid = _id
 
-          setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, [
-              {
-                _id,
-                text,
-                pending: true,
-                createdAt: moment(),
-                user: {
-                  _id: uuid,
-                  name: friendsHelper.getLocalContactName({
-                    uuid,
-                    friendUuid: uuid,
-                    friendsList,
-                  }),
-                  // avatar: 'https://placeimg.com/140/140/any',
+            setMessages((previousMessages) =>
+              GiftedChat.append(previousMessages, [
+                {
+                  _id,
+                  text,
+                  pending: true,
+                  createdAt: moment(),
+                  user: {
+                    _id: uuid,
+                    name: friendsHelper.getLocalContactName({
+                      uuid,
+                      friendUuid: uuid,
+                      friendsList,
+                    }),
+                    // avatar: 'https://placeimg.com/140/140/any',
+                  },
+                  image: message?.chatPhotoHash
+                    ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
+                    : null,
+                  chatPhotoHash: message?.chatPhotoHash,
                 },
-                image: message?.chatPhotoHash
-                  ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
-                  : null,
-                chatPhotoHash: message?.chatPhotoHash,
-              },
-            ]),
-          )
+              ]),
+            )
 
-          const returnedMessage = await reducer.sendMessage({
-            chatUuid,
-            uuid,
-            messageUuid,
-            text,
-            pending: false,
-            chatPhotoHash: '',
-          })
-        } catch (e) {
-          console.log('failed to send message: ', { e })
-          Toast.show({
-            text1: `Failed to send message:`,
-            text2: `${e}`,
-            type: 'error',
-            topOffset,
-          })
-        }
-      })()
-    })
-  }, [])
+            const returnedMessage = await reducer.sendMessage({
+              chatUuid,
+              uuid,
+              messageUuid,
+              text,
+              pending: false,
+              chatPhotoHash: '',
+            })
+          } catch (e) {
+            console.log('failed to send message: ', { e })
+            Toast.show({
+              text1: `Failed to send message:`,
+              text2: `${e}`,
+              type: 'error',
+              topOffset,
+            })
+          }
+        })()
+      })
+    },
+    [chatUuid, uuid, friendsList, topOffset],
+  )
 
   const styles = StyleSheet.create({
     container: {
