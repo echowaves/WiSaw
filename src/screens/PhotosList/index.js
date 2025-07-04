@@ -39,6 +39,7 @@ import {
   FontAwesome,
   FontAwesome5,
   Ionicons,
+  MaterialIcons,
 } from '@expo/vector-icons'
 
 import NetInfo from '@react-native-community/netinfo'
@@ -65,7 +66,6 @@ import * as STATE from '../../state'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import Thumb from '../../components/Thumb'
-import ThumbPending from '../../components/ThumbPending'
 import ThumbWithComments from '../../components/ThumbWithComments'
 
 const BACKGROUND_TASK_NAME = 'background-task'
@@ -1595,25 +1595,50 @@ const PhotosList = ({ searchFromUrl }) => {
   const renderPendingPhotos = () => {
     if (pendingPhotos.length > 0) {
       return (
-        <View>
-          <FlatGrid
-            itemDimension={thumbDimension}
-            spacing={3}
-            data={pendingPhotos}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-            renderItem={({ item }) => (
-              <ThumbPending
-                item={item}
-                thumbDimension={thumbDimension}
-                uuid={uuid}
-              />
-            )}
-            keyExtractor={(item) => item.localImageName}
-            showsVerticalScrollIndicator={false}
-            horizontal={false}
-            fixed
+        <View
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: 12,
+            padding: 16,
+            marginHorizontal: 16,
+            marginVertical: 8,
+            flexDirection: 'row',
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+        >
+          <MaterialIcons
+            name="cloud-upload"
+            size={24}
+            color={CONST.MAIN_COLOR}
+            style={{ marginRight: 12 }}
           />
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: CONST.TEXT_COLOR,
+                marginBottom: 4,
+              }}
+            >
+              {pendingPhotos.length}{' '}
+              {pendingPhotos.length === 1 ? 'photo' : 'photos'} uploading
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: CONST.TEXT_COLOR,
+                opacity: 0.7,
+              }}
+            >
+              Your photos are being uploaded in the background
+            </Text>
+          </View>
           <LinearProgress
             color={CONST.MAIN_COLOR}
             style={{
@@ -1621,6 +1646,9 @@ const PhotosList = ({ searchFromUrl }) => {
               bottom: 0,
               right: 0,
               left: 0,
+              width: '100%',
+              borderBottomLeftRadius: 12,
+              borderBottomRightRadius: 12,
             }}
           />
         </View>
