@@ -16,7 +16,7 @@ const APP_SCHEMES = {
   linkedin: 'linkedin://share',
   pinterest: 'pinterest://create',
 
-  // Messaging
+  // Messaging - using app schemes for detection
   whatsapp: 'whatsapp://send',
   telegram: 'tg://msg',
   imessage: 'sms:',
@@ -72,6 +72,32 @@ const isAppInstalled = async (scheme) => {
     // eslint-disable-next-line no-console
     console.log('Error checking app availability:', error)
     return false
+  }
+}
+
+/**
+ * Check if a URL has proper Open Graph meta tags for WhatsApp previews
+ */
+export const checkUrlForPreview = async (url) => {
+  try {
+    console.log('Checking URL for Open Graph tags:', url)
+
+    // Simple test - try to fetch the URL to see if it's accessible
+    const response = await fetch(url, {
+      method: 'HEAD',
+      timeout: 5000,
+    })
+
+    if (response.ok) {
+      console.log('URL is accessible, status:', response.status)
+      return { accessible: true, status: response.status }
+    } else {
+      console.log('URL returned non-OK status:', response.status)
+      return { accessible: false, status: response.status }
+    }
+  } catch (error) {
+    console.log('URL check failed:', error.message)
+    return { accessible: false, error: error.message }
   }
 }
 
@@ -262,20 +288,9 @@ export const shareToSpecificApp = async ({
 
     switch (app.toLowerCase()) {
       case 'whatsapp':
-        // WhatsApp link preview requirements:
-        // 1. URL must be publicly accessible
-        // 2. URL must have proper Open Graph meta tags
-        // 3. URL should not be too long
-        // 4. WhatsApp may not show previews for URLs from deep links
-
-        const whatsappMessage = `${content.message}\n\n${content.url}`
-        shareUrl = `whatsapp://send?text=${encodeURIComponent(whatsappMessage)}`
-
-        // Log for debugging
-        console.log('WhatsApp share URL:', shareUrl)
-        console.log('WhatsApp message:', whatsappMessage)
-        console.log('Content URL:', content.url)
-        break
+        // Use specialized WhatsApp function for better preview support
+        const whatsappResult = await shareToWhatsApp(content)
+        return whatsappResult
       case 'telegram':
         // Telegram also benefits from URL separation for previews
         const telegramMessage = `${content.message}\n\n${content.url}`
@@ -379,6 +394,106 @@ export const comprehensiveShare = async ({
       console.error('All sharing methods failed:', fallbackError)
       throw fallbackError
     }
+  }
+}
+
+// =============================================================================
+// SPECIALIZED SHARING FUNCTIONS
+// =============================================================================
+
+/**
+ * Enhanced WhatsApp sharing with multiple fallback methods
+ */
+export const shareToWhatsApp = async (content) => {
+  try {
+    if (!content || !content.message || !content.url) {
+      throw new Error('Invalid content for WhatsApp sharing')
+    }
+
+    // Check if WhatsApp is installed
+    const whatsappInstalled = await isAppInstalled('whatsapp://send')
+    if (!whatsappInstalled) {
+      throw new Error('WhatsApp is not installed')
+    }
+
+    // Optional: Check if URL is accessible (for debugging)
+    const urlCheck = await checkUrlForPreview(content.url)
+    if (!urlCheck.accessible) {
+      console.warn('URL may not be accessible for previews:', urlCheck)
+    }
+
+    // Method 1: Try URL-first approach (sometimes works better for previews)
+    try {
+      const urlFirstMessage = `${content.url}\n\n${content.message}`
+      const urlFirstLink = `https://wa.me/?text=${encodeURIComponent(urlFirstMessage)}`
+
+      console.log('Attempting WhatsApp URL-first approach:', urlFirstLink)
+      await Linking.openURL(urlFirstLink)
+      return { success: true, method: 'url_first_universal' }
+    } catch (urlFirstError) {
+      console.log(
+        'URL-first approach failed, trying standard message format:',
+        urlFirstError.message,
+      )
+
+      // Method 2: Try standard message format with universal link
+      const message = `${content.message}\n\n${content.url}`
+      const universalLink = `https://wa.me/?text=${encodeURIComponent(message)}`
+
+      try {
+        console.log('Attempting WhatsApp universal link:', universalLink)
+        await Linking.openURL(universalLink)
+        return { success: true, method: 'universal' }
+      } catch (universalError) {
+        console.log(
+          'Universal link failed, trying deep link:',
+          universalError.message,
+        )
+
+        // Method 3: Fallback to deep link
+        const deepLink = `whatsapp://send?text=${encodeURIComponent(message)}`
+
+        try {
+          console.log('Attempting WhatsApp deep link:', deepLink)
+          await Linking.openURL(deepLink)
+          return { success: true, method: 'deep_link' }
+        } catch (deepLinkError) {
+          console.log('Deep link failed:', deepLinkError.message)
+          throw new Error('All WhatsApp sharing methods failed')
+        }
+      }
+    }
+  } catch (error) {
+    console.error('WhatsApp share error:', error)
+    throw error
+  }
+}
+
+/**
+ * Alternative WhatsApp sharing with URL-first approach
+ */
+export const shareToWhatsAppUrlFirst = async (content) => {
+  try {
+    if (!content || !content.message || !content.url) {
+      throw new Error('Invalid content for WhatsApp sharing')
+    }
+
+    // Check if WhatsApp is installed
+    const whatsappInstalled = await isAppInstalled('whatsapp://send')
+    if (!whatsappInstalled) {
+      throw new Error('WhatsApp is not installed')
+    }
+
+    // Try URL-first approach - sometimes WhatsApp previews work better this way
+    const urlFirstMessage = `${content.url}\n\n${content.message}`
+    const universalLink = `https://wa.me/?text=${encodeURIComponent(urlFirstMessage)}`
+
+    console.log('Attempting WhatsApp URL-first approach:', universalLink)
+    await Linking.openURL(universalLink)
+    return { success: true, method: 'url_first' }
+  } catch (error) {
+    console.error('WhatsApp URL-first share error:', error)
+    throw error
   }
 }
 
