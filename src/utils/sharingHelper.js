@@ -90,10 +90,8 @@ export const createShareContent = ({
   contactName,
 }) => {
   if (type === 'photo' && photo) {
-    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}:
-    ` // new line at the end for better formatting
-    const url = `https://link.wisaw.com/photos/${photo.id}
-    ` // new line at the end for better formatting
+    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}:`
+    const url = `https://link.wisaw.com/photos/${photo.id}`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
       message += `\n\n${photoDetails.comments
@@ -101,6 +99,9 @@ export const createShareContent = ({
         .map((comment) => comment.comment)
         .join('\n\n')}`
     }
+
+    message += '\n'
+    url += '\n'
 
     return {
       title: 'WiSaw - What I Saw Today',
