@@ -337,22 +337,21 @@ export const removeFriend = async ({ uuid, friendshipUuid }) => {
   }
 }
 
-// Function to share a friendship using the comprehensive sharing system
+// Function to share a friendship using the simplified sharing system
 export const shareFriendship = async ({
   uuid,
   friendshipUuid,
   contactName,
 }) => {
   try {
-    // Import the sharing helper dynamically
-    const sharingHelper = await import('../../utils/sharingHelper')
+    // Import the simplified sharing helper
+    const sharingHelper = await import('../../utils/simpleSharingHelper')
 
-    // Use the comprehensive sharing functionality
-    const result = await sharingHelper.shareWithNativeSheet({
-      type: 'friend',
+    // Use the simplified sharing functionality
+    const result = await sharingHelper.shareFriendship(
       friendshipUuid,
       contactName,
-    })
+    )
 
     if (result?.success) {
       return true

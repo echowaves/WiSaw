@@ -28,7 +28,7 @@ import { useVideoPlayer, VideoView } from 'expo-video'
 import * as reducer from './reducer'
 
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
-import * as sharingHelper from '../../utils/sharingHelper'
+import * as sharingHelper from '../../utils/simpleSharingHelper'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -845,12 +845,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             <TouchableOpacity
               style={styles.footerButton}
               onPress={() => {
-                // Use the sharing helper to share the photo
-                sharingHelper.shareWithNativeSheet({
-                  type: 'photo',
-                  photo,
-                  photoDetails,
-                })
+                // Use the simplified sharing helper to share the photo
+                sharingHelper.sharePhoto(photo, photoDetails, topOffset)
               }}
               activeOpacity={0.7}
             >

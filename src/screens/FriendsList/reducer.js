@@ -83,19 +83,17 @@ export async function createFriendship({
     // Only auto-share if explicitly requested
     if (autoShare) {
       try {
-        const sharingHelper = await import('../../utils/sharingHelper')
-        const result = await sharingHelper.shareWithNativeSheet({
-          type: 'friend',
-          friendshipUuid: friendship?.friendshipUuid,
+        const sharingHelper = await import('../../utils/simpleSharingHelper')
+        const result = await sharingHelper.shareFriendship(
+          friendship?.friendshipUuid,
           contactName,
-        })
+          topOffset,
+        )
 
         if (result?.success) {
           Toast.show({
             text1: 'Friendship request shared!',
-            text2: result.activityType
-              ? `Shared via ${result.activityType}`
-              : '',
+            text2: 'Shared via system share sheet',
             type: 'success',
             position: 'top',
             topOffset: 60,

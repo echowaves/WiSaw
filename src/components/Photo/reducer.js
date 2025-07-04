@@ -160,14 +160,8 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
 
 export async function sharePhoto({ photo, photoDetails, topOffset }) {
   try {
-    // eslint-disable-next-line no-undef
-    if (!__DEV__) {
-      const sharingHelper = await import('../../utils/sharingHelper')
-      await sharingHelper.sharePhoto(photo, photoDetails)
-    } else {
-      // eslint-disable-next-line no-alert
-      alert('The feature is not supported on this device yet, try again later')
-    }
+    const sharingHelper = await import('../../utils/simpleSharingHelper')
+    await sharingHelper.sharePhoto(photo, photoDetails, topOffset)
   } catch (err4) {
     // eslint-disable-next-line no-console
     console.error({ err4 })
