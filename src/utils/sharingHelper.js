@@ -262,10 +262,15 @@ export const shareToSpecificApp = async ({
 
     switch (app.toLowerCase()) {
       case 'whatsapp':
-        shareUrl = `whatsapp://send?text=${encodedMessage}`
+        // WhatsApp shows previews better when URL is separated from text
+        // Format: message text + line break + URL (not encoded separately)
+        const whatsappMessage = `${content.message}\n\n${content.url}`
+        shareUrl = `whatsapp://send?text=${encodeURIComponent(whatsappMessage)}`
         break
       case 'telegram':
-        shareUrl = `tg://msg?text=${encodedMessage}`
+        // Telegram also benefits from URL separation for previews
+        const telegramMessage = `${content.message}\n\n${content.url}`
+        shareUrl = `tg://msg?text=${encodeURIComponent(telegramMessage)}`
         break
       case 'twitter':
         shareUrl = `twitter://post?message=${encodedMessage}`
@@ -274,7 +279,9 @@ export const shareToSpecificApp = async ({
         shareUrl = `fb://share?url=${encodedUrl}`
         break
       case 'imessage':
-        shareUrl = `sms:&body=${encodedMessage}`
+        // iMessage also needs the URL included
+        const imessageMessage = `${content.message}\n\n${content.url}`
+        shareUrl = `sms:&body=${encodeURIComponent(imessageMessage)}`
         break
       default:
         // For apps without specific URL formats, try opening the app
