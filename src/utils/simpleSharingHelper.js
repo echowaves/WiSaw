@@ -1,9 +1,8 @@
-import * as Sharing from 'expo-sharing'
-import { Platform } from 'react-native'
+import { Share } from 'react-native'
 import Toast from 'react-native-toast-message'
 
 /**
- * Simple sharing helper using expo-sharing for a cleaner, more maintainable approach
+ * Simple sharing helper using React Native's built-in Share API for text content and links
  */
 
 /**
@@ -29,7 +28,7 @@ export const createShareContent = ({
 
     return {
       title: 'WiSaw - What I Saw Today',
-      message: `${message}\n\n${url}`,
+      message: `${message}`,
       url,
     }
   }
@@ -49,19 +48,7 @@ export const createShareContent = ({
 }
 
 /**
- * Check if sharing is available on the device
- */
-export const isAvailableAsync = async () => {
-  try {
-    return await Sharing.isAvailableAsync()
-  } catch (error) {
-    console.error('Error checking sharing availability:', error)
-    return false
-  }
-}
-
-/**
- * Simple sharing function using expo-sharing
+ * Simple sharing function using React Native's built-in Share API
  */
 export const shareContent = async ({
   type,
@@ -72,12 +59,6 @@ export const shareContent = async ({
   topOffset = 100,
 }) => {
   try {
-    // Check if sharing is available
-    const available = await isAvailableAsync()
-    if (!available) {
-      throw new Error('Sharing is not available on this device')
-    }
-
     // Create sharing content
     const content = createShareContent({
       type,
@@ -91,27 +72,27 @@ export const shareContent = async ({
       throw new Error('Unable to create sharing content')
     }
 
-    // Use expo-sharing to share the content
+    // Use React Native's built-in Share API for sharing text and links
     const shareOptions = {
-      mimeType: 'text/plain',
-      dialogTitle: content.title,
+      title: content.title,
+      message: content.message,
+      url: content.url,
     }
 
-    if (Platform.OS === 'android') {
-      shareOptions.UTI = 'public.text'
-    }
-
-    await Sharing.shareAsync(content.message, shareOptions)
+    const result = await Share.share(shareOptions)
 
     // Show success toast
     Toast.show({
       text1: 'Shared successfully!',
-      text2: 'Content shared via system share sheet',
+      text2:
+        result.action === Share.sharedAction
+          ? 'Content shared'
+          : 'Share dismissed',
       type: 'success',
       topOffset,
     })
 
-    return { success: true }
+    return { success: true, action: result.action }
   } catch (error) {
     console.error('Sharing error:', error)
 

@@ -51,24 +51,6 @@ module.exports = {
       buildNumber,
       supportsTablet: true,
       infoPlist: {
-        LSApplicationQueriesSchemes: [
-          'fb', // Facebook
-          'twitter', // Twitter
-          'instagram', // Instagram
-          'tiktok', // TikTok
-          'snapchat', // Snapchat
-          'linkedin', // LinkedIn
-          'pinterest', // Pinterest
-          'whatsapp', // WhatsApp
-          'tg', // Telegram
-          'slack', // Slack
-          'discord', // Discord
-          'googlegmail', // Gmail
-          'ms-outlook', // Outlook
-          'reddit', // Reddit
-          'youtube', // YouTube
-          'sms', // Messages (for SMS/iMessage)
-        ],
         UIBackgroundModes: ['processing'],
         BGTaskSchedulerPermittedIdentifiers: ['background-task'],
         NSCameraUsageDescription:
@@ -167,23 +149,6 @@ module.exports = {
         },
       ],
       queries: {
-        package: [
-          'com.facebook.katana',
-          'com.twitter.android',
-          'com.instagram.android',
-          'com.zhiliaoapp.musically', // TikTok
-          'com.snapchat.android',
-          'com.linkedin.android',
-          'com.pinterest',
-          'com.whatsapp',
-          'org.telegram.messenger',
-          'com.Slack',
-          'com.discord',
-          'com.google.android.gm',
-          'com.microsoft.office.outlook',
-          'com.reddit.frontpage',
-          'com.google.android.youtube',
-        ],
         intent: [
           {
             action: 'android.intent.action.SENDTO',

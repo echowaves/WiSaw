@@ -2,7 +2,7 @@
 
 ## Overview
 
-The WiSaw app's sharing implementation has been significantly simplified by moving from a complex custom solution to using `expo-sharing`, which provides a cleaner, more maintainable approach.
+The WiSaw app's sharing implementation has been significantly simplified by moving from a complex custom solution to using React Native's built-in Share API, which provides a cleaner, more maintainable approach for sharing text and links.
 
 ## Changes Made
 
@@ -19,7 +19,7 @@ The WiSaw app's sharing implementation has been significantly simplified by movi
 
 **After:**
 
-- Simple `expo-sharing` integration
+- Simple React Native Share API integration for text and links
 - Single sharing function that uses system share sheet
 - Automatic handling of available apps by the OS
 - Cleaner, more maintainable code
@@ -47,11 +47,11 @@ The WiSaw app's sharing implementation has been significantly simplified by movi
 
 #### Added:
 
-- `expo-sharing` - Simple, reliable sharing functionality
+- React Native Share API - Simple, reliable sharing functionality for text and links
 
 #### Kept:
 
-- `expo-sms` - Still available if needed for specific SMS functionality
+- All existing dependencies remain unchanged
 
 ## Benefits
 
@@ -164,7 +164,7 @@ The sharing content is created with proper deep links:
 
 If needed, specific sharing features can be added back selectively:
 
-1. SMS sharing using existing `expo-sms`
+1. Custom SMS sharing functionality if required
 2. Specific app deep linking for special cases
 3. Custom share content formatting
 
