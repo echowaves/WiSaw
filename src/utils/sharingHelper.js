@@ -90,9 +90,8 @@ export const createShareContent = ({
   contactName,
 }) => {
   if (type === 'photo' && photo) {
-    let message =
-      `Check out what I saw today${photo?.video ? ' (video)' : ''}`.join('\n')
-    const url = `https://link.wisaw.com/photos/${photo.id}`.join('\n')
+    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}`
+    const url = `https://link.wisaw.com/photos/${photo.id}`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
       message += `\n\n${photoDetails.comments
