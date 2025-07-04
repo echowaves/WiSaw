@@ -262,10 +262,19 @@ export const shareToSpecificApp = async ({
 
     switch (app.toLowerCase()) {
       case 'whatsapp':
-        // WhatsApp shows previews better when URL is separated from text
-        // Format: message text + line break + URL (not encoded separately)
+        // WhatsApp link preview requirements:
+        // 1. URL must be publicly accessible
+        // 2. URL must have proper Open Graph meta tags
+        // 3. URL should not be too long
+        // 4. WhatsApp may not show previews for URLs from deep links
+
         const whatsappMessage = `${content.message}\n\n${content.url}`
         shareUrl = `whatsapp://send?text=${encodeURIComponent(whatsappMessage)}`
+
+        // Log for debugging
+        console.log('WhatsApp share URL:', shareUrl)
+        console.log('WhatsApp message:', whatsappMessage)
+        console.log('Content URL:', content.url)
         break
       case 'telegram':
         // Telegram also benefits from URL separation for previews

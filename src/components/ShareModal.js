@@ -230,7 +230,7 @@ const ShareModal = ({ visible, onClose, shareData, topOffset = 100 }) => {
         result = await sharingHelper.shareWithNativeSheet(currentShareData)
       } else if (method === 'app' && app) {
         result = await sharingHelper.shareToSpecificApp({
-          app: app.name, // Ensure app.name is passed
+          app: app.id, // Use app.id instead of app.name for proper matching
           ...currentShareData,
         })
       } else if (method === 'sms') {
