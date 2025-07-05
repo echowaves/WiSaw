@@ -16,19 +16,20 @@ export const createShareContent = ({
   contactName,
 }) => {
   if (type === 'photo' && photo) {
-    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}`
     const url = `https://link.wisaw.com/photos/${photo.id}`
+    let message = `${url}\n\nCheck out what I saw today${photo?.video ? ' (video)' : ''}`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
-      message += `\n\n${photoDetails.comments
+      const comments = photoDetails.comments
         .slice(0, 3)
         .map((comment) => comment.comment)
-        .join('\n\n')}`
+        .join('\n\n')
+      message += `\n\n${comments}`
     }
 
     return {
       title: 'WiSaw - What I Saw Today',
-      message: `${message}`,
+      message,
       url,
     }
   }
