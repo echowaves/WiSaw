@@ -28,7 +28,7 @@ export const createShareContent = ({
     }
 
     return {
-      message: `${message}\n\n${url}`,
+      message: `${message}\n\n${url}\n`,
     }
   }
 
@@ -37,7 +37,7 @@ export const createShareContent = ({
     const message = `${contactName || 'You'}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store.`
 
     return {
-      message: `${message}\n\n${url}`,
+      message: `${message}\n\n${url}\n`,
     }
   }
 
