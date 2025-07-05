@@ -17,7 +17,7 @@ export const createShareContent = ({
 }) => {
   if (type === 'photo' && photo) {
     const url = `https://link.wisaw.com/photos/${photo.id}`
-    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}\n\n${url}`
+    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}\n`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
       const comments = photoDetails.comments
@@ -28,16 +28,16 @@ export const createShareContent = ({
     }
 
     return {
-      message,
+      message: `${message}\n\n${url}`,
     }
   }
 
   if (type === 'friend' && friendshipUuid) {
     const url = `https://link.wisaw.com/friends/${friendshipUuid}`
-    const message = `${contactName || 'You'}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store.\n\n${url}`
+    const message = `${contactName || 'You'}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store.`
 
     return {
-      message,
+      message: `${message}\n\n${url}`,
     }
   }
 
