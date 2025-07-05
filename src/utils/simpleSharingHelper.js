@@ -30,7 +30,7 @@ export const createShareContent = ({
     return {
       title: 'WiSaw - What I Saw Today',
       message,
-      url,
+      url: '',
     }
   }
 
