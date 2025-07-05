@@ -17,7 +17,7 @@ export const createShareContent = ({
 }) => {
   if (type === 'photo' && photo) {
     const url = `https://link.wisaw.com/photos/${photo.id}`
-    let message = `${url}\n\nCheck out what I saw today${photo?.video ? ' (video)' : ''}`
+    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}\n\n${url}`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
       const comments = photoDetails.comments
@@ -28,20 +28,16 @@ export const createShareContent = ({
     }
 
     return {
-      // title: 'WiSaw - What I Saw Today',
       message,
-      // url,
     }
   }
 
   if (type === 'friend' && friendshipUuid) {
     const url = `https://link.wisaw.com/friends/${friendshipUuid}`
-    const message = `${url}\n\n${contactName || 'You'}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store. To confirm, follow the url: ${url}`
+    const message = `${contactName || 'You'}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store.\n\n${url}`
 
     return {
-      // title: 'WiSaw Friendship Request',
       message,
-      // url,
     }
   }
 
@@ -75,9 +71,7 @@ export const shareContent = async ({
 
     // Use React Native's built-in Share API for sharing text and links
     const shareOptions = {
-      // title: content.title,
       message: content.message,
-      // url: content.url,
     }
 
     const result = await Share.share(shareOptions)
