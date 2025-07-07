@@ -1723,6 +1723,7 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1 }}>
         {renderCustomHeader()}
+        {renderPendingPhotos()}
         <View style={styles.container}>
           <EmptyStateCard
             icon="wifi-off"
@@ -1732,7 +1733,6 @@ const PhotosList = ({ searchFromUrl }) => {
             actionText="Try Again"
             onActionPress={reload}
           />
-          {renderPendingPhotos()}
           {renderFooter({ unreadCount })}
         </View>
       </View>
@@ -1743,9 +1743,9 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1 }}>
         {renderCustomHeader()}
+        {renderPendingPhotos()}
         <View style={styles.container}>
           {activeSegment === 2 && renderSearchBar(false)}
-          {renderPendingPhotos()}
           {/* photos */}
           {activeSegment === 0 && renderThumbs()}
           {activeSegment === 1 && renderThumbsWithComments()}
@@ -1823,6 +1823,7 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1 }}>
         {renderCustomHeader()}
+        {renderPendingPhotos()}
         <View style={styles.container}>
           <EmptyStateCard
             icon="location-on"
@@ -1832,7 +1833,6 @@ const PhotosList = ({ searchFromUrl }) => {
             actionText="Enable Location"
             onActionPress={reload}
           />
-          {renderPendingPhotos()}
           {renderFooter({ renderFooter })}
         </View>
       </View>
@@ -1898,10 +1898,10 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1 }}>
         {renderCustomHeader()}
+        {renderPendingPhotos()}
         <View style={styles.container}>
           {activeSegment === 2 && renderSearchBar(true)}
           <EmptyStateCard {...getEmptyStateProps()} />
-          {renderPendingPhotos()}
           {renderFooter({ unreadCount })}
         </View>
       </View>
@@ -1912,9 +1912,9 @@ const PhotosList = ({ searchFromUrl }) => {
   return (
     <View style={{ flex: 1 }}>
       {renderCustomHeader()}
+      {renderPendingPhotos()}
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
-        {renderPendingPhotos()}
         {renderFooter({ unreadCount })}
       </View>
     </View>
