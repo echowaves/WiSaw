@@ -1622,7 +1622,7 @@ const PhotosList = ({ searchFromUrl }) => {
           <MaterialIcons
             name="cloud-upload"
             size={24}
-            color={CONST.MAIN_COLOR}
+            color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
             style={{ marginRight: 12 }}
           />
           <View style={{ flex: 1 }}>
@@ -1635,7 +1635,8 @@ const PhotosList = ({ searchFromUrl }) => {
               }}
             >
               {pendingPhotos.length}{' '}
-              {pendingPhotos.length === 1 ? 'photo' : 'photos'} uploading
+              {pendingPhotos.length === 1 ? 'photo' : 'photos'}{' '}
+              {netAvailable ? 'uploading' : 'waiting to upload'}
             </Text>
             <Text
               style={{
@@ -1644,36 +1645,40 @@ const PhotosList = ({ searchFromUrl }) => {
                 opacity: 0.7,
               }}
             >
-              Your photos are being uploaded in the background
+              {netAvailable
+                ? 'Your photos are being uploaded in the background'
+                : 'Will upload automatically when connection is restored'}
             </Text>
           </View>
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 4,
-              borderBottomLeftRadius: 12,
-              borderBottomRightRadius: 12,
-              overflow: 'hidden',
-            }}
-          >
-            <LinearProgress
-              color={CONST.MAIN_COLOR}
+          {netAvailable && (
+            <View
               style={{
-                flex: 1,
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
                 height: 4,
                 borderBottomLeftRadius: 12,
                 borderBottomRightRadius: 12,
+                overflow: 'hidden',
               }}
-              trackStyle={{
-                backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                borderBottomLeftRadius: 12,
-                borderBottomRightRadius: 12,
-              }}
-            />
-          </View>
+            >
+              <LinearProgress
+                color={CONST.MAIN_COLOR}
+                style={{
+                  flex: 1,
+                  height: 4,
+                  borderBottomLeftRadius: 12,
+                  borderBottomRightRadius: 12,
+                }}
+                trackStyle={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                  borderBottomLeftRadius: 12,
+                  borderBottomRightRadius: 12,
+                }}
+              />
+            </View>
+          )}
         </View>
       )
     }
