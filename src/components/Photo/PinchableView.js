@@ -45,6 +45,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'transparent',
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
   },
 })
 
@@ -139,6 +144,14 @@ const PinchableView = ({ route, navigation }) => {
         }}
         resizeMode="contain"
       >
+        <CachedImage
+          source={{
+            uri: `${photo.thumbUrl}`,
+          }}
+          cacheKey={`${photo.id}-thumb`}
+          resizeMode="contain"
+          style={styles.photoContainer}
+        />
         <CachedImage
           source={{
             uri: `${photo.imgUrl}`,
