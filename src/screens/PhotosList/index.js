@@ -243,6 +243,11 @@ const PhotosList = ({ searchFromUrl }) => {
   const textAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
   const searchBarRef = React.useRef(null)
 
+  // Animation states for pending photos
+  const pendingPhotosAnimation = React.useRef(new Animated.Value(0)).current // 0 = hidden, 1 = visible
+  const uploadIconAnimation = React.useRef(new Animated.Value(1)).current // For pulsing upload icon
+  const [previousPendingCount, setPreviousPendingCount] = useState(0)
+
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
   const onViewRef = React.useRef((viewableItems) => {
@@ -255,6 +260,54 @@ const PhotosList = ({ searchFromUrl }) => {
   useEffect(() => {
     setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
   }, [unreadCountList])
+
+  // Animation effect for pending photos
+  useEffect(() => {
+    if (pendingPhotos.length > 0 && previousPendingCount === 0) {
+      // Animate in when photos are added
+      Animated.spring(pendingPhotosAnimation, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 80,
+        friction: 8,
+      }).start()
+    } else if (pendingPhotos.length === 0 && previousPendingCount > 0) {
+      // Animate out when all photos are uploaded
+      Animated.timing(pendingPhotosAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start()
+    }
+
+    // Start pulsing animation for upload icon when uploading
+    if (pendingPhotos.length > 0 && netAvailable) {
+      const pulseAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(uploadIconAnimation, {
+            toValue: 0.6,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(uploadIconAnimation, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ]),
+      )
+      pulseAnimation.start()
+
+      return () => {
+        pulseAnimation.stop()
+        uploadIconAnimation.setValue(1)
+      }
+    } else {
+      uploadIconAnimation.setValue(1)
+    }
+
+    setPreviousPendingCount(pendingPhotos.length)
+  }, [pendingPhotos.length, netAvailable, previousPendingCount])
 
   const wantToLoadMore = () => {
     if (stopLoading) return false
@@ -1602,7 +1655,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const renderPendingPhotos = () => {
     if (pendingPhotos.length > 0) {
       return (
-        <View
+        <Animated.View
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
             borderRadius: 12,
@@ -1617,41 +1670,56 @@ const PhotosList = ({ searchFromUrl }) => {
             shadowRadius: 4,
             elevation: 3,
             position: 'relative',
+            opacity: pendingPhotosAnimation,
+            transform: [
+              {
+                translateY: pendingPhotosAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-50, 0],
+                }),
+              },
+              {
+                scale: pendingPhotosAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.8, 1],
+                }),
+              },
+            ],
           }}
         >
-          <MaterialIcons
-            name="cloud-upload"
-            size={24}
-            color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
-            style={{ marginRight: 12 }}
-          />
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  scale: uploadIconAnimation,
+                },
+              ],
+            }}
+          >
+            <MaterialIcons
+              name="cloud-upload"
+              size={24}
+              color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
+              style={{ marginRight: 12 }}
+            />
+          </Animated.View>
           <View style={{ flex: 1 }}>
-            <Text
+            <Animated.Text
               style={{
                 fontSize: 16,
                 fontWeight: '600',
                 color: CONST.TEXT_COLOR,
                 marginBottom: 4,
+                opacity: pendingPhotosAnimation,
               }}
             >
               {pendingPhotos.length}{' '}
               {pendingPhotos.length === 1 ? 'photo' : 'photos'}{' '}
               {netAvailable ? 'uploading' : 'waiting to upload'}
-            </Text>
-            <Text
-              style={{
-                fontSize: 14,
-                color: CONST.TEXT_COLOR,
-                opacity: 0.7,
-              }}
-            >
-              {netAvailable
-                ? 'Your photos are being uploaded in the background'
-                : 'Will upload automatically when connection is restored'}
-            </Text>
+            </Animated.Text>
           </View>
           {netAvailable && (
-            <View
+            <Animated.View
               style={{
                 position: 'absolute',
                 bottom: 0,
@@ -1661,6 +1729,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 borderBottomLeftRadius: 12,
                 borderBottomRightRadius: 12,
                 overflow: 'hidden',
+                opacity: pendingPhotosAnimation,
               }}
             >
               <LinearProgress
@@ -1677,9 +1746,9 @@ const PhotosList = ({ searchFromUrl }) => {
                   borderBottomRightRadius: 12,
                 }}
               />
-            </View>
+            </Animated.View>
           )}
-        </View>
+        </Animated.View>
       )
     }
     return null
