@@ -16,7 +16,7 @@ export const createShareContent = ({
   contactName,
 }) => {
   if (type === 'photo' && photo) {
-    const url = `https://link.wisaw.com/photos/${photo.id}`
+    const url = `https://link.wisaw.com/photos/${photo.id}.webp`
     let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}\n`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
