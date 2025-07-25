@@ -41,7 +41,7 @@ export async function watchPhoto({ photo, uuid, topOffset }) {
     const watchersCount = (
       await CONST.gqlClient.mutate({
         mutation: gql`
-          mutation watchPhoto($photoId: ID!, $uuid: String!) {
+          mutation watchPhoto($photoId: String!, $uuid: String!) {
             watchPhoto(photoId: $photoId, uuid: $uuid)
           }
         `,
@@ -70,7 +70,7 @@ export async function unwatchPhoto({ photo, uuid, topOffset }) {
     const watchersCount = (
       await CONST.gqlClient.mutate({
         mutation: gql`
-          mutation unwatchPhoto($photoId: ID!, $uuid: String!) {
+          mutation unwatchPhoto($photoId: String!, $uuid: String!) {
             unwatchPhoto(photoId: $photoId, uuid: $uuid)
           }
         `,
@@ -99,7 +99,7 @@ export async function banPhoto({ photo, uuid, topOffset }) {
     // const abuseReport =
     await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation createAbuseReport($uuid: String!, $photoId: ID!) {
+        mutation createAbuseReport($uuid: String!, $photoId: String!) {
           createAbuseReport(uuid: $uuid, photoId: $photoId) {
             createdAt
             id
@@ -130,7 +130,7 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
   try {
     await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation deletePhoto($photoId: ID!, $uuid: String!) {
+        mutation deletePhoto($photoId: String!, $uuid: String!) {
           deletePhoto(photoId: $photoId, uuid: $uuid)
         }
       `,
@@ -181,7 +181,7 @@ export async function submitComment({ inputText, photo, uuid, topOffset }) {
       await CONST.gqlClient.mutate({
         mutation: gql`
           mutation createComment(
-            $photoId: ID!
+            $photoId: String!
             $uuid: String!
             $description: String!
           ) {
@@ -231,7 +231,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
-        query getPhotoDetails($photoId: ID!, $uuid: String!) {
+        query getPhotoDetails($photoId: String!, $uuid: String!) {
           getPhotoDetails(photoId: $photoId, uuid: $uuid) {
             comments {
               id
@@ -300,7 +300,7 @@ export async function deleteComment({
     const lastComment = (
       await CONST.gqlClient.mutate({
         mutation: gql`
-          mutation deleteComment($commentId: ID!, $uuid: String!) {
+          mutation deleteComment($commentId: String!, $uuid: String!) {
             deleteComment(commentId: $commentId, uuid: $uuid)
           }
         `,

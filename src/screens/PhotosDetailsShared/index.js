@@ -54,7 +54,7 @@ const PhotosDetailsShared = ({ route }) => {
       const response = (
         await CONST.gqlClient.query({
           query: gql`
-            query getPhotoAllCurr($photoId: ID!) {
+            query getPhotoAllCurr($photoId: String!) {
               getPhotoAllCurr(photoId: $photoId) {
                 photo {
                   id
@@ -156,7 +156,6 @@ const PhotosDetailsShared = ({ route }) => {
   )
 }
 PhotosDetailsShared.propTypes = {
-  // photoId: PropTypes.number.isRequired,
   route: PropTypes.object.isRequired,
 }
 
