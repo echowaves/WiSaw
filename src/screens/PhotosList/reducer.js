@@ -427,7 +427,7 @@ const genLocalThumbs = async (image) => {
       const manipResult = await ImageManipulator.manipulateAsync(
         image.localImgUrl,
         [{ resize: { height: 300 } }],
-        { compress: 1, format: ImageManipulator.SaveFormat.PNG },
+        { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP }, // Changed to JPEG with 0.8 compression for smaller file sizes
       )
       return {
         ...image,
@@ -441,7 +441,7 @@ const genLocalThumbs = async (image) => {
     const manipResult = await ImageManipulator.manipulateAsync(
       uri,
       [{ resize: { height: 300 } }],
-      { compress: 1, format: ImageManipulator.SaveFormat.PNG },
+      { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP }, // Changed to JPEG with 0.8 compression for smaller file sizes
     )
 
     return {
@@ -492,11 +492,28 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
     const localCacheKey = localImageName.split('.')[0]
 
     const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
-    // copy file to cacheDir
-    await FileSystem.moveAsync({
-      from: cameraImgUrl,
-      to: localImgUrl,
-    })
+
+    // For images, compress the main image before storing to reduce file size
+    if (type === 'image') {
+      // Compress the main image to reduce upload size while maintaining good quality
+      const compressedResult = await ImageManipulator.manipulateAsync(
+        cameraImgUrl,
+        [], // No resize, just compress
+        { compress: 0.9, format: ImageManipulator.SaveFormat.WEBP },
+      )
+
+      // Move the compressed file to cache directory
+      await FileSystem.moveAsync({
+        from: compressedResult.uri,
+        to: localImgUrl,
+      })
+    } else {
+      // For videos, just move the file as-is
+      await FileSystem.moveAsync({
+        from: cameraImgUrl,
+        to: localImgUrl,
+      })
+    }
 
     const image = {
       localImgUrl,
@@ -568,39 +585,54 @@ const uploadFile = async ({
   contentType,
   assetUri,
   topOffset = 100,
+  retries = 3,
 }) => {
-  try {
-    // console.log({ assetKey })
-    const uploadUrl = (
-      await CONST.gqlClient.query({
-        query: gql`
-          query generateUploadUrl($assetKey: String!, $contentType: String!) {
-            generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
-          }
-        `,
-        variables: {
-          assetKey,
-          contentType,
-        },
-      })
-    ).data.generateUploadUrl
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      // console.log({ assetKey })
+      const uploadUrl = (
+        await CONST.gqlClient.query({
+          query: gql`
+            query generateUploadUrl($assetKey: String!, $contentType: String!) {
+              generateUploadUrl(assetKey: $assetKey, contentType: $contentType)
+            }
+          `,
+          variables: {
+            assetKey,
+            contentType,
+          },
+        })
+      ).data.generateUploadUrl
 
-    const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
-      httpMethod: 'PUT',
-      headers: {
-        'Content-Type': contentType,
-      },
-    })
-    return { responseData }
-  } catch (cnijedfjknwkejn) {
-    // eslint-disable-next-line no-console
-    console.error({ cnijedfjknwkejn })
-    Toast.show({
-      text1: 'upload failed',
-      text2: cnijedfjknwkejn,
-      type: 'error',
-      topOffset,
-    })
+      const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
+        httpMethod: 'PUT',
+        headers: {
+          'Content-Type': contentType,
+        },
+        uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+        sessionType: FileSystem.FileSystemSessionType.BACKGROUND, // Enable background uploads
+      })
+      return { responseData }
+    } catch (cnijedfjknwkejn) {
+      // eslint-disable-next-line no-console
+      console.error(`Upload attempt ${attempt}/${retries} failed:`, {
+        cnijedfjknwkejn,
+      })
+
+      if (attempt === retries) {
+        // Only show error toast on final attempt
+        Toast.show({
+          text1: 'Upload failed after retries',
+          text2: `${cnijedfjknwkejn}`,
+          type: 'error',
+          topOffset,
+        })
+        return null
+      }
+
+      // Wait before retry (exponential backoff)
+      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt))
+    }
   }
   return null
 }

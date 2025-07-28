@@ -418,6 +418,7 @@ const PhotosList = ({ searchFromUrl }) => {
       return Promise.resolve()
     }
     setUploadingPhoto(true)
+
     try {
       let i
       // here let's iterate over the items and upload one file at a time
@@ -471,13 +472,6 @@ const PhotosList = ({ searchFromUrl }) => {
             await reducer.removeFromQueue(item)
             // eslint-disable-next-line no-await-in-loop
             setPendingPhotos(await reducer.getQueue())
-
-            // Toast.show({
-            //   text1: "Sorry, you've been banned",
-            //   text2: 'Try again later',
-            //   type: 'error',
-            //   topOffset,
-            // })
           }
         }
       }
@@ -495,7 +489,7 @@ const PhotosList = ({ searchFromUrl }) => {
           item,
         })
 
-        if (responseData.status === 200) {
+        if (responseData?.status === 200) {
           // console.log('uploaded', { item: item?.id })
           // eslint-disable-next-line no-await-in-loop
           await reducer.removeFromQueue(item)
@@ -533,14 +527,13 @@ const PhotosList = ({ searchFromUrl }) => {
         visibilityTime: 500,
         topOffset,
       })
-      // console.log({ error }) // eslint-disable-line no-console
-      // dispatch(uploadPendingPhotos())
+      console.error('Upload process error:', err2)
     }
 
     setUploadingPhoto(false)
-    // sleep for 1 second before re-trying
+    // sleep for 500ms before re-trying
     // eslint-disable-next-line no-promise-executor-return
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     if ((await reducer.getQueue()).length > 0) {
       uploadPendingPhotos()
@@ -965,7 +958,7 @@ const PhotosList = ({ searchFromUrl }) => {
       cameraReturn = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         // allowsEditing: true,
-        quality: 1.0,
+        quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
         exif: false,
       })
     } else {
@@ -974,7 +967,7 @@ const PhotosList = ({ searchFromUrl }) => {
         mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         // allowsEditing: true,
         videoMaxDuration: 5,
-        quality: 1.0,
+        quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
         exif: false,
       })
     }
