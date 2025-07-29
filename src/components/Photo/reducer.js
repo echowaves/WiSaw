@@ -300,7 +300,7 @@ export async function deleteComment({
     const lastComment = (
       await CONST.gqlClient.mutate({
         mutation: gql`
-          mutation deleteComment($commentId: String!, $uuid: String!) {
+          mutation deleteComment($commentId: ID!, $uuid: String!) {
             deleteComment(commentId: $commentId, uuid: $uuid)
           }
         `,
