@@ -1072,6 +1072,7 @@ const PhotosList = ({ searchFromUrl }) => {
         setNetAvailable(state.isInternetReachable)
       }
     })
+
     return () => {
       unsubscribeNetInfo()
     }
@@ -1274,13 +1275,11 @@ const PhotosList = ({ searchFromUrl }) => {
           reload()
         }}
         onViewableItemsChanged={onViewRef.current}
-        // Add memory management props
+        // Memory management props
         removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        initialNumToRender={10}
-        windowSize={10}
-        getItemLayout={undefined} // Let it calculate automatically for masonry
+        maxToRenderPerBatch={8}
+        initialNumToRender={12}
+        windowSize={8}
       />
     )
   }
@@ -1318,12 +1317,11 @@ const PhotosList = ({ searchFromUrl }) => {
         reload()
       }}
       onViewableItemsChanged={onViewRef.current}
-      // Add memory management props
+      // Memory management props
       removeClippedSubviews={true}
-      maxToRenderPerBatch={10}
-      updateCellsBatchingPeriod={50}
-      initialNumToRender={10}
-      windowSize={10}
+      maxToRenderPerBatch={8}
+      initialNumToRender={12}
+      windowSize={8}
       // viewabilityConfig={viewConfigRef.current}
     />
   )

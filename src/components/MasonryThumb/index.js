@@ -166,7 +166,6 @@ const MasonryThumb = memo(
     )
 
     const handlePressIn = useCallback(() => {
-      // Stop any existing animation before starting new one
       scaleValue.stopAnimation()
       Animated.spring(scaleValue, {
         toValue: 0.95,
@@ -177,7 +176,6 @@ const MasonryThumb = memo(
     }, [scaleValue])
 
     const handlePressOut = useCallback(() => {
-      // Stop any existing animation before starting new one
       scaleValue.stopAnimation()
       Animated.spring(scaleValue, {
         toValue: 1,
@@ -206,10 +204,7 @@ const MasonryThumb = memo(
     )
 
     const handlePlayButtonPress = useCallback(() => {
-      // Stop any existing animation before starting new one
       playButtonScale.stopAnimation()
-
-      // Animate play button press
       Animated.sequence([
         Animated.spring(playButtonScale, {
           toValue: 0.9,
@@ -225,7 +220,6 @@ const MasonryThumb = memo(
         }),
       ]).start()
 
-      // Navigate to video
       onThumbPress(item)
     }, [playButtonScale, onThumbPress, item])
 
@@ -249,16 +243,11 @@ const MasonryThumb = memo(
       [itemWidth],
     )
 
-    // Cleanup effect to prevent memory leaks
+    // Simple cleanup for animations
     useEffect(() => {
       return () => {
-        // Stop any running animations
         scaleValue.stopAnimation()
         playButtonScale.stopAnimation()
-
-        // Reset animated values to prevent memory retention
-        scaleValue.setValue(1)
-        playButtonScale.setValue(1)
       }
     }, [scaleValue, playButtonScale])
 
@@ -267,7 +256,7 @@ const MasonryThumb = memo(
       item.lastComment || item.commentsCount > 5 || item.watchersCount > 5
 
     // Calculate total height including comment section if present
-    const totalHeight = hasComments ? imageHeight + 40 : imageHeight // 40px for comment section
+    const totalHeight = hasComments ? imageHeight + 40 : imageHeight
 
     return (
       <Animated.View
@@ -299,18 +288,12 @@ const MasonryThumb = memo(
           delayLongPress={500}
         >
           <CachedImage
-            source={{
-              uri: `${item.thumbUrl}`,
-            }}
+            source={{ uri: item.thumbUrl }}
             cacheKey={`${item.id}-thumb`}
             style={[styles.thumbnail, { height: imageHeight }]}
             onLoad={handleImageLoad}
             resizeMode="cover"
-            // Add memory management props
             allowDownscaling={true}
-            fallback={{
-              uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-            }}
           />
 
           {/* Video Play Button */}
