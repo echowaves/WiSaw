@@ -106,6 +106,7 @@ async function requestGeoPhotos({
               video
               commentsCount
               watchersCount
+              lastComment
               createdAt
             }
             batch

@@ -65,7 +65,8 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
-import Thumb from '../../components/Thumb'
+import MasonryGrid from '../../components/MasonryGrid'
+import MasonryThumb from '../../components/MasonryThumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
 
 const BACKGROUND_TASK_NAME = 'background-task'
@@ -312,9 +313,23 @@ const PhotosList = ({ searchFromUrl }) => {
   const wantToLoadMore = () => {
     if (stopLoading) return false
     if (photosList.length === 0) return true
-    const screenColumns = /* Math.floor */ width / thumbDimension
-    const screenRows = /* Math.floor */ height / thumbDimension
-    const totalNumRows = /* Math.floor */ photosList.length / screenColumns
+
+    // For masonry layout (segment 0), use the calculated columns and item dimensions
+    let screenColumns, screenRows, totalNumRows
+    if (activeSegment === 0) {
+      // Use the same calculation as in renderThumbs for masonry
+      const thumbsCount = Math.floor(width / 90)
+      const calculatedItemWidth =
+        Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2
+      screenColumns = thumbsCount
+      screenRows = Math.floor(height / (calculatedItemWidth * 1.2)) // Estimate based on aspect ratio
+      totalNumRows = Math.floor(photosList.length / screenColumns)
+    } else {
+      // For other segments, use the original calculation
+      screenColumns = /* Math.floor */ width / thumbDimension
+      screenRows = /* Math.floor */ height / thumbDimension
+      totalNumRows = /* Math.floor */ photosList.length / screenColumns
+    }
 
     if (screenRows * 2 + lastViewableRow > totalNumRows) {
       // console.log(`(screenRows * 2 + lastViewableRow) > totalNumRows : ${screenRows * 2 + lastViewableRow} > ${totalNumRows}`)
@@ -1219,40 +1234,48 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }, [triggerSearch])
 
-  const renderThumbs = () => (
-    <FlatGrid
-      itemDimension={thumbDimension}
-      spacing={3}
-      data={photosList}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-      renderItem={({ item, index }) => (
-        <Thumb
-          item={item}
-          index={index}
-          thumbDimension={thumbDimension}
-          photosList={photosList}
-          searchTerm={searchTerm}
-          activeSegment={activeSegment}
-          topOffset={topOffset}
-          uuid={uuid}
-        />
-      )}
-      keyExtractor={(item) => item.id}
-      style={{
-        ...styles.container,
-        marginBottom: FOOTER_HEIGHT,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
+  const renderThumbs = () => {
+    // Use the same formula as the original thumbnail width calculation
+    const spacing = 3
+    const thumbsCount = Math.floor(width / 90) // Number of thumbs that can fit
+    const calculatedItemWidth =
+      Math.floor((width - thumbsCount * spacing * 2) / thumbsCount) + 2
+    const columns = thumbsCount
+
+    return (
+      <MasonryGrid
+        data={photosList}
+        numColumns={columns}
+        itemWidth={calculatedItemWidth}
+        spacing={spacing}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        renderItem={({ item, index, itemWidth }) => (
+          <MasonryThumb
+            item={item}
+            index={index}
+            itemWidth={itemWidth}
+            photosList={photosList}
+            searchTerm={searchTerm}
+            activeSegment={activeSegment}
+            topOffset={topOffset}
+            uuid={uuid}
+          />
+        )}
+        keyExtractor={(item) => item.id}
+        style={{
+          ...styles.container,
+          marginBottom: FOOTER_HEIGHT,
+        }}
+        showsVerticalScrollIndicator={false}
+        refreshing={false}
+        onRefresh={() => {
+          reload()
+        }}
+        onViewableItemsChanged={onViewRef.current}
+      />
+    )
+  }
 
   const renderThumbsWithComments = () => (
     <FlatGrid
