@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics'
 import { router } from 'expo-router'
-import { memo, useCallback, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import {
   Animated,
@@ -166,16 +166,24 @@ const MasonryThumb = memo(
     )
 
     const handlePressIn = useCallback(() => {
+      // Stop any existing animation before starting new one
+      scaleValue.stopAnimation()
       Animated.spring(scaleValue, {
         toValue: 0.95,
         useNativeDriver: true,
+        tension: 300,
+        friction: 10,
       }).start()
     }, [scaleValue])
 
     const handlePressOut = useCallback(() => {
+      // Stop any existing animation before starting new one
+      scaleValue.stopAnimation()
       Animated.spring(scaleValue, {
         toValue: 1,
         useNativeDriver: true,
+        tension: 300,
+        friction: 10,
       }).start()
     }, [scaleValue])
 
@@ -198,17 +206,22 @@ const MasonryThumb = memo(
     )
 
     const handlePlayButtonPress = useCallback(() => {
+      // Stop any existing animation before starting new one
+      playButtonScale.stopAnimation()
+
       // Animate play button press
       Animated.sequence([
         Animated.spring(playButtonScale, {
           toValue: 0.9,
           useNativeDriver: true,
-          duration: 100,
+          tension: 300,
+          friction: 10,
         }),
         Animated.spring(playButtonScale, {
           toValue: 1,
           useNativeDriver: true,
-          duration: 200,
+          tension: 300,
+          friction: 10,
         }),
       ]).start()
 
@@ -235,6 +248,19 @@ const MasonryThumb = memo(
       },
       [itemWidth],
     )
+
+    // Cleanup effect to prevent memory leaks
+    useEffect(() => {
+      return () => {
+        // Stop any running animations
+        scaleValue.stopAnimation()
+        playButtonScale.stopAnimation()
+
+        // Reset animated values to prevent memory retention
+        scaleValue.setValue(1)
+        playButtonScale.setValue(1)
+      }
+    }, [scaleValue, playButtonScale])
 
     // Calculate if we have comments to display
     const hasComments =
@@ -280,6 +306,11 @@ const MasonryThumb = memo(
             style={[styles.thumbnail, { height: imageHeight }]}
             onLoad={handleImageLoad}
             resizeMode="cover"
+            // Add memory management props
+            allowDownscaling={true}
+            fallback={{
+              uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+            }}
           />
 
           {/* Video Play Button */}
@@ -351,6 +382,19 @@ const MasonryThumb = memo(
           </View>
         )}
       </Animated.View>
+    )
+  },
+  // Custom comparison function to prevent unnecessary re-renders
+  (prevProps, nextProps) => {
+    // Only re-render if essential props change
+    return (
+      prevProps.item.id === nextProps.item.id &&
+      prevProps.itemWidth === nextProps.itemWidth &&
+      prevProps.item.thumbUrl === nextProps.item.thumbUrl &&
+      prevProps.item.commentsCount === nextProps.item.commentsCount &&
+      prevProps.item.watchersCount === nextProps.item.watchersCount &&
+      prevProps.item.lastComment === nextProps.item.lastComment &&
+      prevProps.activeSegment === nextProps.activeSegment
     )
   },
 )
