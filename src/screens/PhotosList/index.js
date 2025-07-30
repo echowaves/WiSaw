@@ -1252,6 +1252,7 @@ const PhotosList = ({ searchFromUrl }) => {
         scrollEventThrottle={16}
         renderItem={({ item, index, itemWidth }) => (
           <MasonryThumb
+            key={`${item.id}-${index}`} // Add stable key
             item={item}
             index={index}
             itemWidth={itemWidth}
@@ -1262,7 +1263,7 @@ const PhotosList = ({ searchFromUrl }) => {
             uuid={uuid}
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `${item.id}-${index}`} // More stable key
         style={{
           ...styles.container,
           marginBottom: FOOTER_HEIGHT,
@@ -1273,6 +1274,13 @@ const PhotosList = ({ searchFromUrl }) => {
           reload()
         }}
         onViewableItemsChanged={onViewRef.current}
+        // Add memory management props
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={10}
+        windowSize={10}
+        getItemLayout={undefined} // Let it calculate automatically for masonry
       />
     )
   }
@@ -1286,6 +1294,7 @@ const PhotosList = ({ searchFromUrl }) => {
       scrollEventThrottle={16}
       renderItem={({ item, index }) => (
         <ThumbWithComments
+          key={`${item.id}-${index}`} // Add stable key
           item={item}
           index={index}
           thumbDimension={thumbDimension}
@@ -1297,7 +1306,7 @@ const PhotosList = ({ searchFromUrl }) => {
           uuid={uuid}
         />
       )}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => `${item.id}-${index}`} // More stable key
       style={{
         ...styles.container,
         marginBottom: 95,
@@ -1309,6 +1318,12 @@ const PhotosList = ({ searchFromUrl }) => {
         reload()
       }}
       onViewableItemsChanged={onViewRef.current}
+      // Add memory management props
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={10}
+      updateCellsBatchingPeriod={50}
+      initialNumToRender={10}
+      windowSize={10}
       // viewabilityConfig={viewConfigRef.current}
     />
   )
