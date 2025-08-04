@@ -31,6 +31,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  VirtualizedList,
   useWindowDimensions,
 } from 'react-native'
 
@@ -1220,40 +1221,102 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }, [triggerSearch])
 
-  const renderThumbs = () => (
-    <FlatGrid
-      itemDimension={thumbDimension}
-      spacing={3}
-      data={photosList}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-      renderItem={({ item, index }) => (
-        <Thumb
-          item={item}
-          index={index}
-          thumbDimension={thumbDimension}
-          photosList={photosList}
-          searchTerm={searchTerm}
-          activeSegment={activeSegment}
-          topOffset={topOffset}
-          uuid={uuid}
-        />
-      )}
-      keyExtractor={(item) => item.id}
-      style={{
-        ...styles.container,
-        marginBottom: FOOTER_HEIGHT,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
+  // Helper function to convert flat array to grid rows for VirtualizedList
+  const getGridData = (data, numColumns) => {
+    const rows = []
+    for (let i = 0; i < data.length; i += numColumns) {
+      rows.push(data.slice(i, i + numColumns))
+    }
+    return rows
+  }
+
+  const renderThumbs = () => {
+    const numColumns = Math.floor(width / thumbDimension)
+    const gridData = getGridData(photosList, numColumns)
+    const itemHeight = thumbDimension + 6 // thumbDimension + spacing
+
+    return (
+      <VirtualizedList
+        data={gridData}
+        initialNumToRender={6}
+        renderItem={({ item: rowData, index: rowIndex }) => (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+              marginBottom: 3,
+              paddingHorizontal: 3,
+            }}
+          >
+            {rowData.map((item, itemIndex) => (
+              <Thumb
+                key={item.id}
+                item={item}
+                index={rowIndex * numColumns + itemIndex}
+                thumbDimension={thumbDimension}
+                photosList={photosList}
+                searchTerm={searchTerm}
+                activeSegment={activeSegment}
+                topOffset={topOffset}
+                uuid={uuid}
+              />
+            ))}
+            {/* Fill empty spaces in the last row */}
+            {rowData.length < numColumns &&
+              Array.from({ length: numColumns - rowData.length }).map(
+                (_, emptyIndex) => (
+                  <View
+                    key={`empty-${rowIndex}-${emptyIndex}`}
+                    style={{ width: thumbDimension, height: thumbDimension }}
+                  />
+                ),
+              )}
+          </View>
+        )}
+        keyExtractor={(item, index) => `row-${index}`}
+        getItemCount={(data) => data.length}
+        getItem={(data, index) => data[index]}
+        getItemLayout={(data, index) => ({
+          length: itemHeight,
+          offset: itemHeight * index,
+          index,
+        })}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        onViewableItemsChanged={(info) => {
+          // Convert row-based viewable items back to individual items for existing logic
+          const viewableItems = info.viewableItems.flatMap(
+            (viewableRow, rowIndex) =>
+              viewableRow.item.map((item, itemIndex) => ({
+                item,
+                index: viewableRow.index * numColumns + itemIndex,
+                isViewable: true,
+              })),
+          )
+
+          if (onViewRef.current && viewableItems.length > 0) {
+            onViewRef.current({
+              viewableItems,
+              changed: viewableItems,
+            })
+          }
+        }}
+        style={{
+          ...styles.container,
+          marginBottom: FOOTER_HEIGHT,
+        }}
+        showsVerticalScrollIndicator={false}
+        refreshing={false}
+        onRefresh={() => {
+          reload()
+        }}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={6}
+        updateCellsBatchingPeriod={100}
+        windowSize={10}
+      />
+    )
+  }
 
   const renderThumbsWithComments = () => (
     <FlatGrid
