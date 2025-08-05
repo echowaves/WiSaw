@@ -108,6 +108,8 @@ async function requestGeoPhotos({
               watchersCount
               lastComment
               createdAt
+              width
+              height
             }
             batch
             noMoreData
@@ -161,6 +163,8 @@ async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
               watchersCount
               lastComment
               createdAt
+              width
+              height
             }
             batch
             noMoreData

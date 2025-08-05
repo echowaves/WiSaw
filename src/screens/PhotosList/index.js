@@ -310,6 +310,230 @@ const PhotosList = ({ searchFromUrl }) => {
     setPreviousPendingCount(pendingPhotos.length)
   }, [pendingPhotos.length, netAvailable, previousPendingCount])
 
+  // Function to calculate row-based masonry layout with vertical scrolling
+  const calculateRowMasonryLayout = (data, spacing = 6) => {
+    const rows = []
+    const screenWidth = width - spacing * 2 // Account for left/right padding
+    const baseHeight = 100 // Base height for initial scaling
+
+    let currentRowItems = []
+    let remainingItems = [...data]
+    let itemIndex = 0
+
+    while (remainingItems.length > 0) {
+      currentRowItems = []
+      let currentRowWidth = 0
+
+      // Step 1: Add items to row, scaling them to base height while maintaining aspect ratio
+      for (let i = 0; i < remainingItems.length; i++) {
+        const item = remainingItems[i]
+
+        // Use actual image dimensions from GraphQL data if available
+        let aspectRatio = 1.0 // Default square aspect ratio
+        if (item.width && item.height) {
+          // Calculate aspect ratio from actual image dimensions
+          aspectRatio = item.width / item.height
+        } else if (item.id) {
+          // Fallback to realistic aspect ratios if dimensions not available
+          const seed = item.id
+            .toString()
+            .split('')
+            .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+
+          // Use seed to pick from realistic aspect ratios
+          const aspectRatios = [
+            0.56, // 9:16 (portrait)
+            0.67, // 2:3 (portrait)
+            0.75, // 3:4 (portrait)
+            1.0, // 1:1 (square)
+            1.33, // 4:3 (landscape)
+            1.5, // 3:2 (landscape)
+            1.78, // 16:9 (landscape)
+          ]
+          aspectRatio = aspectRatios[seed % aspectRatios.length]
+        } else {
+          // Fallback for items without ID
+          const aspectRatios = [0.67, 1.0, 1.33, 1.5]
+          aspectRatio = aspectRatios[(itemIndex + i) % aspectRatios.length]
+        }
+
+        // Scale to base height maintaining aspect ratio
+        const scaledWidth = Math.floor(baseHeight * aspectRatio)
+        const scaledHeight = baseHeight
+
+        // Check if this item would fit in the current row
+        const spacingNeeded = currentRowItems.length > 0 ? spacing : 0
+        const wouldFitInRow =
+          currentRowWidth + scaledWidth + spacingNeeded <= screenWidth
+
+        if (wouldFitInRow && currentRowItems.length < 6) {
+          currentRowItems.push({
+            ...item,
+            width: scaledWidth,
+            height: scaledHeight,
+            masonryIndex: itemIndex + i,
+            aspectRatio: aspectRatio,
+          })
+          currentRowWidth += scaledWidth + spacingNeeded
+        } else {
+          // Row is full, stop adding items
+          break
+        }
+      }
+
+      // If no items could fit, force at least one item to prevent infinite loop
+      if (currentRowItems.length === 0) {
+        const item = remainingItems[0]
+        let aspectRatio = 1.0
+        if (item.width && item.height) {
+          // Calculate aspect ratio from actual image dimensions
+          aspectRatio = item.width / item.height
+        } else if (item.id) {
+          // Fallback to realistic aspect ratios if dimensions not available
+          const seed = item.id
+            .toString()
+            .split('')
+            .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+
+          // Use realistic aspect ratios
+          const aspectRatios = [
+            0.56, // 9:16 (portrait)
+            0.67, // 2:3 (portrait)
+            0.75, // 3:4 (portrait)
+            1.0, // 1:1 (square)
+            1.33, // 4:3 (landscape)
+            1.5, // 3:2 (landscape)
+            1.78, // 16:9 (landscape)
+          ]
+          aspectRatio = aspectRatios[seed % aspectRatios.length]
+        }
+
+        currentRowItems.push({
+          ...item,
+          width: Math.floor(baseHeight * aspectRatio),
+          height: baseHeight,
+          masonryIndex: itemIndex,
+          aspectRatio: aspectRatio,
+        })
+      }
+
+      // Step 2: Find the item with maximum height (they should all be baseHeight, but just in case)
+      const maxHeight = Math.max(...currentRowItems.map((item) => item.height))
+
+      // Step 3: Scale all items to match the maximum height
+      currentRowItems.forEach((item) => {
+        const heightScaleFactor = maxHeight / item.height
+        item.width = Math.floor(item.width * heightScaleFactor)
+        item.height = maxHeight
+      })
+
+      // Step 4: Calculate total width and find ratio to fit screen width
+      const totalItemWidth = currentRowItems.reduce(
+        (sum, item) => sum + item.width,
+        0,
+      )
+      const totalSpacing = (currentRowItems.length - 1) * spacing
+      const totalUsedWidth = totalItemWidth + totalSpacing
+      const screenWidthRatio = screenWidth / totalUsedWidth
+
+      // Step 5: Apply the ratio to every dimension of every image in the row
+      currentRowItems.forEach((item) => {
+        item.width = Math.floor(item.width * screenWidthRatio)
+        item.height = Math.floor(item.height * screenWidthRatio)
+      })
+
+      // Calculate final row height
+      const finalRowHeight = Math.max(
+        ...currentRowItems.map((item) => item.height),
+      )
+
+      // Add the completed row
+      rows.push({
+        items: currentRowItems,
+        height: finalRowHeight,
+        rowIndex: rows.length,
+      })
+
+      // Remove processed items from remaining items
+      remainingItems = remainingItems.slice(currentRowItems.length)
+      itemIndex += currentRowItems.length
+    }
+
+    // Calculate positions within each row
+    rows.forEach((row) => {
+      let currentLeft = spacing // Include left padding
+      row.items.forEach((item) => {
+        item.left = currentLeft
+        item.top = (row.height - item.height) / 2 // Center vertically within row
+        currentLeft += item.width + spacing
+      })
+    })
+
+    // Calculate total height and row offsets
+    let totalHeight = 0
+    rows.forEach((row) => {
+      row.top = totalHeight
+      totalHeight += row.height + spacing
+    })
+
+    return {
+      rows,
+      totalHeight,
+    }
+  }
+
+  // Memoize the row masonry layout calculation to avoid recalculating on every render
+  const rowMasonryData = React.useMemo(() => {
+    const spacing = 6
+    return calculateRowMasonryLayout(photosList, spacing)
+  }, [photosList, width, thumbDimension])
+
+  // Render function for row-based masonry layout
+  const renderRowMasonryItem = React.useCallback(
+    ({ item }) => {
+      // Safety check to ensure row exists and has items
+      if (!item || !item.items || item.items.length === 0) {
+        return null
+      }
+
+      return (
+        <View
+          style={{
+            height: item.height,
+            marginBottom: 6,
+            position: 'relative',
+          }}
+        >
+          {item.items.map((photo) => (
+            <View
+              key={photo.id}
+              style={{
+                position: 'absolute',
+                top: photo.top,
+                left: photo.left,
+                width: photo.width,
+                height: photo.height,
+              }}
+            >
+              <Thumb
+                item={photo}
+                index={photo.masonryIndex}
+                thumbWidth={photo.width}
+                thumbHeight={photo.height}
+                photosList={photosList}
+                searchTerm={searchTerm}
+                activeSegment={activeSegment}
+                topOffset={topOffset}
+                uuid={uuid}
+              />
+            </View>
+          ))}
+        </View>
+      )
+    },
+    [photosList, searchTerm, activeSegment, topOffset, uuid],
+  )
+
   const wantToLoadMore = () => {
     if (stopLoading) return false
     if (photosList.length === 0) return true
@@ -1231,89 +1455,81 @@ const PhotosList = ({ searchFromUrl }) => {
   }
 
   const renderThumbs = () => {
-    const numColumns = Math.floor(width / thumbDimension)
-    const gridData = getGridData(photosList, numColumns)
-    const itemHeight = thumbDimension + 6 // thumbDimension + spacing
+    const { rows, totalHeight } = rowMasonryData
 
     return (
       <VirtualizedList
-        data={gridData}
-        initialNumToRender={6}
-        renderItem={({ item: rowData, index: rowIndex }) => (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              marginBottom: 3,
-              paddingHorizontal: 3,
-            }}
-          >
-            {rowData.map((item, itemIndex) => (
-              <Thumb
-                key={item.id}
-                item={item}
-                index={rowIndex * numColumns + itemIndex}
-                thumbDimension={thumbDimension}
-                photosList={photosList}
-                searchTerm={searchTerm}
-                activeSegment={activeSegment}
-                topOffset={topOffset}
-                uuid={uuid}
-              />
-            ))}
-            {/* Fill empty spaces in the last row */}
-            {rowData.length < numColumns &&
-              Array.from({ length: numColumns - rowData.length }).map(
-                (_, emptyIndex) => (
-                  <View
-                    key={`empty-${rowIndex}-${emptyIndex}`}
-                    style={{ width: thumbDimension, height: thumbDimension }}
-                  />
-                ),
-              )}
-          </View>
-        )}
-        keyExtractor={(item, index) => `row-${index}`}
+        data={rows}
+        horizontal={false}
+        initialNumToRender={10}
+        renderItem={renderRowMasonryItem}
+        keyExtractor={(item) => `row-${item.rowIndex}`}
         getItemCount={(data) => data.length}
         getItem={(data, index) => data[index]}
-        getItemLayout={(data, index) => ({
-          length: itemHeight,
-          offset: itemHeight * index,
-          index,
-        })}
+        getItemLayout={(data, index) => {
+          const row = data[index]
+          if (!row) {
+            return {
+              length: thumbDimension,
+              offset: index * thumbDimension,
+              index,
+            }
+          }
+
+          return {
+            length: row.height + 6, // height + spacing
+            offset: row.top || 0,
+            index,
+          }
+        }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         onViewableItemsChanged={(info) => {
-          // Convert row-based viewable items back to individual items for existing logic
-          const viewableItems = info.viewableItems.flatMap(
-            (viewableRow, rowIndex) =>
-              viewableRow.item.map((item, itemIndex) => ({
-                item,
-                index: viewableRow.index * numColumns + itemIndex,
-                isViewable: true,
-              })),
-          )
-
-          if (onViewRef.current && viewableItems.length > 0) {
-            onViewRef.current({
-              viewableItems,
-              changed: viewableItems,
+          if (onViewRef.current && info.viewableItems.length > 0) {
+            // Convert rows back to individual items for existing logic
+            const convertedItems = []
+            info.viewableItems.forEach((viewableRow) => {
+              if (viewableRow.item && viewableRow.item.items) {
+                viewableRow.item.items.forEach((photo) => {
+                  convertedItems.push({
+                    item: photo,
+                    index: photo.masonryIndex,
+                    isViewable: true,
+                  })
+                })
+              }
             })
+
+            if (convertedItems.length > 0) {
+              onViewRef.current({
+                viewableItems: convertedItems,
+                changed: convertedItems,
+              })
+            }
           }
         }}
         style={{
           ...styles.container,
           marginBottom: FOOTER_HEIGHT,
         }}
+        contentContainerStyle={{
+          paddingBottom: 100,
+        }}
+        showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         refreshing={false}
         onRefresh={() => {
           reload()
         }}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={6}
+        removeClippedSubviews={false} // Keep for better performance with absolute positioning
+        maxToRenderPerBatch={15}
         updateCellsBatchingPeriod={100}
-        windowSize={10}
+        windowSize={21}
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+          autoscrollToTopThreshold: 10,
+        }}
+        legacyImplementation={false}
       />
     )
   }

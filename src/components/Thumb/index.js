@@ -100,6 +100,8 @@ const styles = StyleSheet.create({
 
 const Thumb = ({
   thumbDimension = 100,
+  thumbWidth = null,
+  thumbHeight = null,
   index,
   item,
   photosList,
@@ -188,8 +190,8 @@ const Thumb = ({
   }
 
   const thumbWidthStyles = {
-    width: thumbDimension,
-    height: thumbDimension,
+    width: thumbWidth || thumbDimension,
+    height: thumbHeight || thumbDimension,
   }
 
   return (
@@ -216,6 +218,7 @@ const Thumb = ({
           }}
           cacheKey={`${item.id}-thumb`}
           style={styles.thumbnail}
+          resizeMode="cover"
         />
 
         {/* Video Play Button */}
@@ -255,6 +258,8 @@ Thumb.propTypes = {
   item: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   thumbDimension: PropTypes.number,
+  thumbWidth: PropTypes.number,
+  thumbHeight: PropTypes.number,
 }
 
 export default Thumb
