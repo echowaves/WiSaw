@@ -1,4 +1,5 @@
 import * as Linking from 'expo-linking'
+import base64 from 'react-native-base64'
 
 // =============================================================================
 // EXPO ROUTER LINKING CONFIGURATION
@@ -86,6 +87,32 @@ export const parseDeepLink = (url) => {
         return {
           type: 'friend',
           friendshipUuid: friendshipUuid.trim(),
+        }
+      }
+    }
+
+    // Pattern 3: /friendships/name (for QR code friendship name sharing)
+    if (cleanPath.includes('friendships/name')) {
+      const encodedData = queryParams?.data
+      if (encodedData) {
+        try {
+          const decodedData = base64.decode(decodeURIComponent(encodedData))
+          const friendshipData = JSON.parse(decodedData)
+
+          if (
+            friendshipData.action === 'friendshipName' &&
+            friendshipData.friendshipUuid &&
+            friendshipData.friendName
+          ) {
+            return {
+              type: 'friendshipName',
+              friendshipUuid: friendshipData.friendshipUuid,
+              friendName: friendshipData.friendName,
+              timestamp: friendshipData.timestamp,
+            }
+          }
+        } catch (error) {
+          console.log('Error parsing friendship name data:', error)
         }
       }
     }

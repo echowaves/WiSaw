@@ -144,6 +144,30 @@ module.exports = {
         },
         {
           action: 'VIEW',
+          autoVerify: true,
+          data: [
+            {
+              scheme: 'https',
+              host: 'link.wisaw.com',
+              pathPrefix: '/friendships',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
+          autoVerify: true,
+          data: [
+            {
+              scheme: 'https',
+              host: 'wisaw.com',
+              pathPrefix: '/friendships',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+        {
+          action: 'VIEW',
           data: [{ scheme: 'wisaw' }],
           category: ['BROWSABLE', 'DEFAULT'],
         },

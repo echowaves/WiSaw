@@ -23,6 +23,7 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
 import NamePicker from '../../components/NamePicker'
+import QRCodeModal from '../../components/QRCodeModal'
 import * as friendsHelper from './friends_helper'
 
 const styles = StyleSheet.create({
@@ -180,6 +181,8 @@ const FriendsList = () => {
 
   const [showNamePicker, setShowNamePicker] = useState(false)
   const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState(null)
+  const [showQRModal, setShowQRModal] = useState(false)
+  const [qrFriendshipData, setQrFriendshipData] = useState(null)
 
   const handleAddFriend = async () => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
@@ -291,6 +294,39 @@ const FriendsList = () => {
     )
   }
 
+  const handleGenerateQR = async ({ friendshipUuid, friendName }) => {
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+
+      setQrFriendshipData({
+        friendshipUuid,
+        friendName,
+      })
+      setShowQRModal(true)
+
+      Toast.show({
+        type: 'info',
+        position: 'top',
+        text1: 'QR Code Generated',
+        text2: `Share ${friendName}'s name with your other devices`,
+        visibilityTime: 2000,
+        autoHide: true,
+        topOffset: 60,
+      })
+    } catch (error) {
+      console.error('Error generating QR:', error)
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        text1: 'QR Generation Failed',
+        text2: 'Unable to generate QR code',
+        visibilityTime: 3000,
+        autoHide: true,
+        topOffset: 60,
+      })
+    }
+  }
+
   const setContactName = async ({ friendshipUuid, contactName }) => {
     try {
       let actualFriendshipUuid = friendshipUuid
@@ -387,11 +423,18 @@ const FriendsList = () => {
             }
           }}
           onLongPress={() => {
+            Haptics.selectionAsync()
             if (isPending) {
-              Haptics.selectionAsync()
+              // For pending friends, share the friendship request
               handleShareFriend({
                 friendshipUuid: friend.friendshipUuid,
                 contactName: displayName,
+              })
+            } else {
+              // For confirmed friends, generate QR code for name sharing
+              handleGenerateQR({
+                friendshipUuid: friend.friendshipUuid,
+                friendName: displayName,
               })
             }
           }}
@@ -498,6 +541,13 @@ const FriendsList = () => {
           headerText={headerText}
           friendshipUuid={selectedFriendshipUuid}
         />
+        <QRCodeModal
+          visible={showQRModal}
+          onClose={() => setShowQRModal(false)}
+          friendshipUuid={qrFriendshipData?.friendshipUuid}
+          friendName={qrFriendshipData?.friendName}
+          topOffset={60}
+        />
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
           <Text style={styles.emptyStateDescription}>
@@ -524,6 +574,13 @@ const FriendsList = () => {
         setContactName={setContactName}
         headerText={headerText}
         friendshipUuid={selectedFriendshipUuid}
+      />
+      <QRCodeModal
+        visible={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        friendshipUuid={qrFriendshipData?.friendshipUuid}
+        friendName={qrFriendshipData?.friendName}
+        topOffset={60}
       />
       <FlatList
         data={friendsList}

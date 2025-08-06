@@ -1,8 +1,8 @@
 {
   "name": "wisaw",
   "version": "7.2.7",
-  "buildNumber": "382",
-  "versionCode": 382,
+  "buildNumber": "383",
+  "versionCode": 383,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",
@@ -71,10 +71,12 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-super-grid": "^5.0.0",
+    "react-native-svg": "^15.12.1",
     "react-native-swiper": "^1.6.0",
     "react-native-toast-message": "^2.2.0",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "^0.20.0",
+    "react-qr-code": "^2.0.18",
     "react-timer-mixin": "^0.13.4",
     "subscriptions-transport-ws": "^0.11.0",
     "uuid": "^9.0.1"
