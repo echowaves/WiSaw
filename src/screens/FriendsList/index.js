@@ -243,6 +243,7 @@ const FriendsList = () => {
   const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState(null)
   const [showQRModal, setShowQRModal] = useState(false)
   const [qrFriendshipData, setQrFriendshipData] = useState(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleAddFriend = async () => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
@@ -454,6 +455,21 @@ const FriendsList = () => {
     }
   }, [uuid, setFriendsList])
 
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true)
+    try {
+      const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
+        uuid,
+      })
+      setFriendsList(newFriendsList)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('Error refreshing friendships:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [uuid, setFriendsList])
+
   useEffect(() => {
     // Only load friendships when uuid is properly initialized
     if (uuid && uuid !== '') {
@@ -607,6 +623,9 @@ const FriendsList = () => {
         <PanGestureHandler
           onHandlerStateChange={handleSwipeGesture}
           enabled={!isPending}
+          activeOffsetX={[-20, 20]}
+          failOffsetY={[-20, 20]}
+          shouldCancelWhenOutside={true}
         >
           <Animated.View
             style={[
@@ -815,8 +834,8 @@ const FriendsList = () => {
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
-        refreshing={false}
-        onRefresh={reload}
+        refreshing={isRefreshing}
+        onRefresh={handleRefresh}
       />
     </SafeAreaView>
   )
