@@ -162,8 +162,8 @@ export const createFriendshipNameDeepLink = ({
   })
   const encodedData = encodeURIComponent(base64.encode(qrData))
 
-  // Use simple custom scheme without path to avoid Expo Router conflicts
-  return `wisaw://friendship?data=${encodedData}`
+  // Use simple custom scheme with query parameter only to avoid Expo Router conflicts
+  return `wisaw://?type=friendship&data=${encodedData}`
 }
 
 /**

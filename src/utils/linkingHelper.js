@@ -108,10 +108,17 @@ export const parseDeepLink = (url) => {
         queryParams,
       })
 
-      // Handle friendship links (simplified path)
-      if (cleanPath === 'friendship' || cleanPath === 'friendships/name') {
+      // Handle friendship links - new format with type parameter
+      if (queryParams.type === 'friendship' && queryParams.data) {
         const encodedData = queryParams.data
         console.log('Encoded data from QR:', encodedData)
+        return parseFriendshipData(encodedData)
+      }
+
+      // Handle legacy friendship links (old format)
+      if (cleanPath === 'friendship' || cleanPath === 'friendships/name') {
+        const encodedData = queryParams.data
+        console.log('Encoded data from QR (legacy):', encodedData)
         return parseFriendshipData(encodedData)
       }
 

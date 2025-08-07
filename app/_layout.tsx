@@ -193,6 +193,54 @@ export default function RootLayout() {
               router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
             }, 50)
             break
+          case 'friendshipName':
+            console.log(
+              'Processing friendship name update while app running:',
+              linkData.friendshipUuid,
+              linkData.friendName,
+            )
+            // Navigate to friends list and trigger name update
+            router.replace('/friends')
+            // Trigger friendship name update after navigation
+            setTimeout(async () => {
+              try {
+                // Get current user UUID
+                const secretReducer = await import(
+                  '../src/screens/Secret/reducer'
+                )
+                const currentUuid = await secretReducer.getUUID()
+
+                const friendsHelper = await import(
+                  '../src/screens/FriendsList/friends_helper'
+                )
+                await friendsHelper.setContactName({
+                  uuid: currentUuid,
+                  friendshipUuid: linkData.friendshipUuid,
+                  contactName: linkData.friendName,
+                })
+
+                // Show success message
+                const Toast = (await import('react-native-toast-message'))
+                  .default
+                Toast.show({
+                  text1: 'Friend name updated!',
+                  text2: `Updated to "${linkData.friendName}"`,
+                  type: 'success',
+                  topOffset: 100,
+                })
+              } catch (error) {
+                console.error('Error updating friend name:', error)
+                const Toast = (await import('react-native-toast-message'))
+                  .default
+                Toast.show({
+                  text1: 'Update failed',
+                  text2: 'Could not update friend name',
+                  type: 'error',
+                  topOffset: 100,
+                })
+              }
+            }, 100)
+            break
           default:
             router.replace('/')
         }
