@@ -11,12 +11,7 @@ const URL_PREFIX = Linking.createURL('/')
 // Expo Router will automatically handle routing based on file structure
 // This configuration is mainly for reference and legacy support
 export const linkingConfig = {
-  prefixes: [
-    URL_PREFIX,
-    'https://link.wisaw.com',
-    'https://wisaw.com',
-    'wisaw://',
-  ],
+  prefixes: [URL_PREFIX, 'https://link.wisaw.com', 'https://wisaw.com'],
   config: {
     screens: {
       '(drawer)': {
@@ -35,7 +30,6 @@ export const linkingConfig = {
           identity: 'identity',
           friends: 'friendslist',
           feedback: 'feedback',
-          'friendships/name': 'friendships/name',
         },
       },
     },
@@ -45,6 +39,54 @@ export const linkingConfig = {
 // =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
+
+/**
+ * Parse friendship data from encoded parameter
+ */
+const parseFriendshipData = (encodedData) => {
+  if (!encodedData) {
+    console.log('No data parameter found')
+    return null
+  }
+
+  try {
+    const decodedData = base64.decode(decodeURIComponent(encodedData))
+    console.log('Decoded data:', decodedData)
+
+    const friendshipData = JSON.parse(decodedData)
+    console.log('Parsed friendship data:', friendshipData)
+
+    if (
+      friendshipData.action === 'friendshipName' &&
+      friendshipData.friendshipUuid &&
+      friendshipData.friendName
+    ) {
+      console.log('Successfully parsed friendship data')
+      return {
+        type: 'friendshipName',
+        friendshipUuid: friendshipData.friendshipUuid,
+        friendName: friendshipData.friendName,
+        timestamp: friendshipData.timestamp,
+      }
+    } else {
+      console.log('Invalid friendship data structure:', {
+        hasAction: !!friendshipData.action,
+        actionValue: friendshipData.action,
+        hasUuid: !!friendshipData.friendshipUuid,
+        hasName: !!friendshipData.friendName,
+      })
+    }
+  } catch (error) {
+    console.log('Error parsing friendship data:', error)
+    console.log('Error details:', {
+      name: error.name,
+      message: error.message,
+      encodedData,
+    })
+  }
+
+  return null
+}
 
 /**
  * Parse URL to extract parameters
@@ -66,55 +108,11 @@ export const parseDeepLink = (url) => {
         queryParams,
       })
 
-      // Handle friendships/name for custom scheme
-      if (cleanPath === 'friendships/name') {
+      // Handle friendship links (simplified path)
+      if (cleanPath === 'friendship' || cleanPath === 'friendships/name') {
         const encodedData = queryParams.data
         console.log('Encoded data from QR:', encodedData)
-
-        if (encodedData) {
-          try {
-            const decodedData = base64.decode(decodeURIComponent(encodedData))
-            console.log('Decoded data:', decodedData)
-
-            const friendshipData = JSON.parse(decodedData)
-            console.log('Parsed friendship data:', friendshipData)
-
-            if (
-              friendshipData.action === 'friendshipName' &&
-              friendshipData.friendshipUuid &&
-              friendshipData.friendName
-            ) {
-              console.log(
-                'Successfully parsed friendship data for custom scheme',
-              )
-              return {
-                type: 'friendshipName',
-                friendshipUuid: friendshipData.friendshipUuid,
-                friendName: friendshipData.friendName,
-                timestamp: friendshipData.timestamp,
-              }
-            } else {
-              console.log('Invalid friendship data structure:', {
-                hasAction: !!friendshipData.action,
-                actionValue: friendshipData.action,
-                hasUuid: !!friendshipData.friendshipUuid,
-                hasName: !!friendshipData.friendName,
-              })
-            }
-          } catch (error) {
-            console.log(
-              'Error parsing friendship name data from custom scheme:',
-              error,
-            )
-            console.log('Error details:', {
-              name: error.name,
-              message: error.message,
-              encodedData,
-            })
-          }
-        } else {
-          console.log('No data parameter found in custom scheme URL')
-        }
+        return parseFriendshipData(encodedData)
       }
 
       return null
@@ -168,27 +166,7 @@ export const parseDeepLink = (url) => {
     // Pattern 3: /friendships/name (for QR code friendship name sharing)
     if (cleanPath.includes('friendships/name')) {
       const encodedData = queryParams?.data
-      if (encodedData) {
-        try {
-          const decodedData = base64.decode(decodeURIComponent(encodedData))
-          const friendshipData = JSON.parse(decodedData)
-
-          if (
-            friendshipData.action === 'friendshipName' &&
-            friendshipData.friendshipUuid &&
-            friendshipData.friendName
-          ) {
-            return {
-              type: 'friendshipName',
-              friendshipUuid: friendshipData.friendshipUuid,
-              friendName: friendshipData.friendName,
-              timestamp: friendshipData.timestamp,
-            }
-          }
-        } catch (error) {
-          console.log('Error parsing friendship name data:', error)
-        }
-      }
+      return parseFriendshipData(encodedData)
     }
 
     // Handle legacy query parameters

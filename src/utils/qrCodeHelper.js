@@ -162,8 +162,8 @@ export const createFriendshipNameDeepLink = ({
   })
   const encodedData = encodeURIComponent(base64.encode(qrData))
 
-  // Use custom scheme for better QR code compatibility
-  return `wisaw://friendships/name?data=${encodedData}`
+  // Use simple custom scheme without path to avoid Expo Router conflicts
+  return `wisaw://friendship?data=${encodedData}`
 }
 
 /**
