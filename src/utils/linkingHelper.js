@@ -11,7 +11,12 @@ const URL_PREFIX = Linking.createURL('/')
 // Expo Router will automatically handle routing based on file structure
 // This configuration is mainly for reference and legacy support
 export const linkingConfig = {
-  prefixes: [URL_PREFIX, 'https://link.wisaw.com', 'https://wisaw.com'],
+  prefixes: [
+    URL_PREFIX,
+    'https://link.wisaw.com',
+    'https://wisaw.com',
+    'wisaw://',
+  ],
   config: {
     screens: {
       '(drawer)': {
@@ -30,6 +35,7 @@ export const linkingConfig = {
           identity: 'identity',
           friends: 'friendslist',
           feedback: 'feedback',
+          'friendships/name': 'friendships/name',
         },
       },
     },
@@ -47,6 +53,52 @@ export const parseDeepLink = (url) => {
   if (!url) return null
 
   try {
+    // Handle custom scheme URLs differently
+    if (url.startsWith('wisaw://')) {
+      // Parse custom scheme manually
+      const urlObj = new URL(url)
+      const cleanPath = urlObj.pathname.replace(/^\/+|\/+$/g, '')
+      const queryParams = Object.fromEntries(urlObj.searchParams.entries())
+
+      console.log('Parsing custom scheme deep link:', {
+        url,
+        cleanPath,
+        queryParams,
+      })
+
+      // Handle friendships/name for custom scheme
+      if (cleanPath === 'friendships/name') {
+        const encodedData = queryParams.data
+        if (encodedData) {
+          try {
+            const decodedData = base64.decode(decodeURIComponent(encodedData))
+            const friendshipData = JSON.parse(decodedData)
+
+            if (
+              friendshipData.action === 'friendshipName' &&
+              friendshipData.friendshipUuid &&
+              friendshipData.friendName
+            ) {
+              return {
+                type: 'friendshipName',
+                friendshipUuid: friendshipData.friendshipUuid,
+                friendName: friendshipData.friendName,
+                timestamp: friendshipData.timestamp,
+              }
+            }
+          } catch (error) {
+            console.log(
+              'Error parsing friendship name data from custom scheme:',
+              error,
+            )
+          }
+        }
+      }
+
+      return null
+    }
+
+    // Handle standard URLs (https://, etc.)
     const { hostname, path, queryParams } = Linking.parse(url)
 
     // eslint-disable-next-line no-console

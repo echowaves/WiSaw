@@ -14,7 +14,10 @@ import {
 import Toast from 'react-native-toast-message'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
-import { createFriendshipNameDeepLink } from '../utils/qrCodeHelper'
+import {
+  createFriendshipNameDeepLink,
+  createFriendshipNameUniversalLink,
+} from '../utils/qrCodeHelper'
 
 const { width } = Dimensions.get('window')
 
@@ -25,16 +28,29 @@ const QRCodeModal = ({
   friendName,
   topOffset = 100,
 }) => {
-  const [shareUrl, setShareUrl] = useState('')
+  const [qrUrl, setQrUrl] = useState('') // For QR code (custom scheme)
+  const [shareUrl, setShareUrl] = useState('') // For sharing (universal link)
 
   useEffect(() => {
     if (visible && friendshipUuid && friendName) {
-      // Create shareable deep link
-      const deepLink = createFriendshipNameDeepLink({
+      // Create QR-friendly deep link (custom scheme)
+      const qrDeepLink = createFriendshipNameDeepLink({
         friendshipUuid,
         friendName,
       })
-      setShareUrl(deepLink)
+      setQrUrl(qrDeepLink)
+
+      // Create share-friendly universal link
+      const universalLink = createFriendshipNameUniversalLink({
+        friendshipUuid,
+        friendName,
+      })
+      setShareUrl(universalLink)
+
+      console.log('QR Code URLs generated:', {
+        qrUrl: qrDeepLink,
+        shareUrl: universalLink,
+      })
     }
   }, [visible, friendshipUuid, friendName])
 
@@ -130,9 +146,9 @@ const QRCodeModal = ({
           {/* QR Code */}
           <View style={styles.qrContainer}>
             <View style={styles.qrCodeWrapper}>
-              {shareUrl ? (
+              {qrUrl ? (
                 <QRCode
-                  value={shareUrl}
+                  value={qrUrl}
                   size={180}
                   bgColor="#ffffff"
                   fgColor="#000000"

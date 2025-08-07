@@ -162,6 +162,24 @@ export const createFriendshipNameDeepLink = ({
   })
   const encodedData = encodeURIComponent(base64.encode(qrData))
 
+  // Use custom scheme for better QR code compatibility
+  return `wisaw://friendships/name?data=${encodedData}`
+}
+
+/**
+ * Create a universal link for sharing (fallback to web)
+ */
+export const createFriendshipNameUniversalLink = ({
+  friendshipUuid,
+  friendName,
+}) => {
+  const qrData = createFriendshipQRData({
+    friendshipUuid: friendshipUuid || '',
+    friendName: friendName || 'Unknown Friend',
+  })
+  const encodedData = encodeURIComponent(base64.encode(qrData))
+
+  // Use universal link for sharing compatibility
   return `https://link.wisaw.com/friendships/name?data=${encodedData}`
 }
 
