@@ -69,29 +69,51 @@ export const parseDeepLink = (url) => {
       // Handle friendships/name for custom scheme
       if (cleanPath === 'friendships/name') {
         const encodedData = queryParams.data
+        console.log('Encoded data from QR:', encodedData)
+
         if (encodedData) {
           try {
             const decodedData = base64.decode(decodeURIComponent(encodedData))
+            console.log('Decoded data:', decodedData)
+
             const friendshipData = JSON.parse(decodedData)
+            console.log('Parsed friendship data:', friendshipData)
 
             if (
               friendshipData.action === 'friendshipName' &&
               friendshipData.friendshipUuid &&
               friendshipData.friendName
             ) {
+              console.log(
+                'Successfully parsed friendship data for custom scheme',
+              )
               return {
                 type: 'friendshipName',
                 friendshipUuid: friendshipData.friendshipUuid,
                 friendName: friendshipData.friendName,
                 timestamp: friendshipData.timestamp,
               }
+            } else {
+              console.log('Invalid friendship data structure:', {
+                hasAction: !!friendshipData.action,
+                actionValue: friendshipData.action,
+                hasUuid: !!friendshipData.friendshipUuid,
+                hasName: !!friendshipData.friendName,
+              })
             }
           } catch (error) {
             console.log(
               'Error parsing friendship name data from custom scheme:',
               error,
             )
+            console.log('Error details:', {
+              name: error.name,
+              message: error.message,
+              encodedData,
+            })
           }
+        } else {
+          console.log('No data parameter found in custom scheme URL')
         }
       }
 
