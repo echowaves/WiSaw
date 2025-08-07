@@ -1,12 +1,13 @@
 import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import * as Haptics from 'expo-haptics'
 
 import {
   Alert,
+  Animated,
   FlatList,
   SafeAreaView,
   StyleSheet,
@@ -15,6 +16,7 @@ import {
   View,
 } from 'react-native'
 
+import { PanGestureHandler, State } from 'react-native-gesture-handler'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome5 } from '@expo/vector-icons'
@@ -33,14 +35,7 @@ const styles = StyleSheet.create({
   },
   friendItem: {
     backgroundColor: 'white',
-    marginHorizontal: 16,
-    marginVertical: 4,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    flex: 1,
   },
   friendContent: {
     paddingVertical: 16,
@@ -164,6 +159,38 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     marginLeft: 4,
+  },
+  swipeAction: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: '#4A90E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    width: 100,
+  },
+  swipeActionText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  friendItemContainer: {
+    marginHorizontal: 16,
+    marginVertical: 4,
+    overflow: 'hidden',
+    borderRadius: 12,
+    backgroundColor: 'white',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
 })
 
@@ -401,134 +428,237 @@ const FriendsList = () => {
     }
   }, [uuid, reload])
 
-  const renderFriend = ({ item: friend }) => {
+  const FriendItem = ({ friend }) => {
+    const translateX = useRef(new Animated.Value(0)).current
+    const [isSwipeOpen, setIsSwipeOpen] = useState(false)
+
     const displayName = friend?.contact || 'Unnamed Friend'
     const isPending = friend.uuid2 === null
     const hasUnread = friend.unreadCount > 0
 
+    const handleSwipeGesture = (event) => {
+      if (isPending) return // Don't allow swipe for pending friends
+
+      const { translationX, state } = event.nativeEvent
+
+      if (state === State.ACTIVE) {
+        // Only allow swipe to the right (positive translation)
+        if (translationX > 0) {
+          const clampedTranslation = Math.min(translationX, 100)
+          translateX.setValue(clampedTranslation)
+        }
+      } else if (state === State.END || state === State.CANCELLED) {
+        // Determine if swipe should be open or closed
+        if (translationX > 50) {
+          // Open the swipe action
+          Animated.spring(translateX, {
+            toValue: 100,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start()
+          setIsSwipeOpen(true)
+        } else {
+          // Close the swipe action
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start()
+          setIsSwipeOpen(false)
+        }
+      }
+    }
+
+    const closeSwipe = () => {
+      Animated.spring(translateX, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 8,
+      }).start()
+      setIsSwipeOpen(false)
+    }
+
+    const handleShareName = () => {
+      closeSwipe()
+      handleGenerateQR({
+        friendshipUuid: friend.friendshipUuid,
+        friendName: displayName,
+      })
+    }
+
     return (
-      <View style={styles.friendItem}>
-        <TouchableOpacity
-          style={styles.friendContent}
-          onPress={() => {
-            if (!isPending) {
-              router.push({
-                pathname: '/chat',
-                params: {
-                  chatUuid: friend?.chatUuid,
-                  contact: JSON.stringify(friend?.contact),
-                  friendshipUuid: friend?.friendshipUuid,
-                },
-              })
-            }
-          }}
-          onLongPress={() => {
-            Haptics.selectionAsync()
-            if (isPending) {
-              // For pending friends, share the friendship request
-              handleShareFriend({
-                friendshipUuid: friend.friendshipUuid,
-                contactName: displayName,
-              })
-            } else {
-              // For confirmed friends, generate QR code for name sharing
-              handleGenerateQR({
-                friendshipUuid: friend.friendshipUuid,
-                friendName: displayName,
-              })
-            }
-          }}
-          disabled={isPending}
-          activeOpacity={isPending ? 1 : 0.7}
+      <View style={styles.friendItemContainer}>
+        {/* Swipe Action Background - only show for confirmed friends */}
+        {!isPending && (
+          <TouchableOpacity
+            style={styles.swipeAction}
+            onPress={handleShareName}
+            activeOpacity={0.7}
+          >
+            <FontAwesome5 name="qrcode" size={20} color="white" />
+            <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Main Friend Item */}
+        <PanGestureHandler
+          onHandlerStateChange={handleSwipeGesture}
+          enabled={!isPending}
         >
-          <View style={styles.friendHeader}>
-            <View style={styles.friendInfo}>
-              <Text
-                style={styles.friendName}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {displayName}
-              </Text>
-              {isPending ? (
-                <>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <FontAwesome5
-                      name="clock"
-                      size={12}
-                      color="#ff6b35"
-                      style={{ marginRight: 6 }}
-                    />
-                    <Text style={styles.pendingStatus}>
-                      Waiting for confirmation
+          <Animated.View
+            style={[
+              styles.friendItem,
+              {
+                transform: [{ translateX }],
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.friendContent}
+              onPress={() => {
+                if (isSwipeOpen) {
+                  closeSwipe()
+                  return
+                }
+
+                if (!isPending) {
+                  router.push({
+                    pathname: '/chat',
+                    params: {
+                      chatUuid: friend?.chatUuid,
+                      contact: JSON.stringify(friend?.contact),
+                      friendshipUuid: friend?.friendshipUuid,
+                    },
+                  })
+                }
+              }}
+              onLongPress={() => {
+                if (isSwipeOpen) {
+                  closeSwipe()
+                  return
+                }
+
+                // Only allow long press for pending friends to share friendship request
+                if (isPending) {
+                  Haptics.selectionAsync()
+                  handleShareFriend({
+                    friendshipUuid: friend.friendshipUuid,
+                    contactName: displayName,
+                  })
+                }
+              }}
+              disabled={isPending}
+              activeOpacity={isPending ? 1 : 0.7}
+            >
+              <View style={styles.friendHeader}>
+                <View style={styles.friendInfo}>
+                  <Text
+                    style={styles.friendName}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {displayName}
+                  </Text>
+                  {isPending ? (
+                    <>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <FontAwesome5
+                          name="clock"
+                          size={12}
+                          color="#ff6b35"
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text style={styles.pendingStatus}>
+                          Waiting for confirmation
+                        </Text>
+                      </View>
+                      {/* Share and Delete buttons container */}
+                      <View style={styles.shareButtonContainer}>
+                        <TouchableOpacity
+                          style={[styles.pendingShareButton]}
+                          onPress={() =>
+                            handleShareFriend({
+                              friendshipUuid: friend.friendshipUuid,
+                              contactName: displayName,
+                            })
+                          }
+                          activeOpacity={0.5}
+                          delayPressIn={0}
+                          delayPressOut={0}
+                          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                          pressRetentionOffset={{
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20,
+                          }}
+                          importantForAccessibility="yes"
+                        >
+                          <FontAwesome5
+                            name="share-alt"
+                            size={12}
+                            color="#ff6b35"
+                          />
+                          <Text style={styles.pendingShareButtonText}>
+                            Share
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.pendingDeleteButton]}
+                          onPress={() =>
+                            handleDeletePendingFriend({
+                              friendshipUuid: friend.friendshipUuid,
+                              contactName: displayName,
+                            })
+                          }
+                          activeOpacity={0.5}
+                          delayPressIn={0}
+                          delayPressOut={0}
+                          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                          pressRetentionOffset={{
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20,
+                          }}
+                          importantForAccessibility="yes"
+                        >
+                          <FontAwesome5
+                            name="trash"
+                            size={12}
+                            color="#dc3545"
+                          />
+                          <Text style={styles.pendingDeleteButtonText}>
+                            Delete
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  ) : (
+                    <Text style={styles.friendStatus}>
+                      {hasUnread
+                        ? `${friend.unreadCount} new messages`
+                        : isSwipeOpen
+                          ? 'Swipe left to close'
+                          : 'Tap to chat • Swipe right to share name'}
                     </Text>
-                  </View>
-                  {/* Share and Delete buttons container */}
-                  <View style={styles.shareButtonContainer}>
-                    <TouchableOpacity
-                      style={[styles.pendingShareButton]}
-                      onPress={() =>
-                        handleShareFriend({
-                          friendshipUuid: friend.friendshipUuid,
-                          contactName: displayName,
-                        })
-                      }
-                      activeOpacity={0.5}
-                      delayPressIn={0}
-                      delayPressOut={0}
-                      hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                      pressRetentionOffset={{
-                        top: 20,
-                        bottom: 20,
-                        left: 20,
-                        right: 20,
-                      }}
-                      importantForAccessibility="yes"
-                    >
-                      <FontAwesome5
-                        name="share-alt"
-                        size={12}
-                        color="#ff6b35"
-                      />
-                      <Text style={styles.pendingShareButtonText}>Share</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.pendingDeleteButton]}
-                      onPress={() =>
-                        handleDeletePendingFriend({
-                          friendshipUuid: friend.friendshipUuid,
-                          contactName: displayName,
-                        })
-                      }
-                      activeOpacity={0.5}
-                      delayPressIn={0}
-                      delayPressOut={0}
-                      hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                      pressRetentionOffset={{
-                        top: 20,
-                        bottom: 20,
-                        left: 20,
-                        right: 20,
-                      }}
-                      importantForAccessibility="yes"
-                    >
-                      <FontAwesome5 name="trash" size={12} color="#dc3545" />
-                      <Text style={styles.pendingDeleteButtonText}>Delete</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              ) : (
-                <Text style={styles.friendStatus}>
-                  {hasUnread
-                    ? `${friend.unreadCount} new messages`
-                    : 'Tap to chat'}
-                </Text>
-              )}
-            </View>
-          </View>
-        </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+        </PanGestureHandler>
       </View>
     )
+  }
+
+  const renderFriend = ({ item: friend }) => {
+    return <FriendItem friend={friend} />
   }
 
   if (!friendsList || friendsList.length === 0) {
