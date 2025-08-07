@@ -2,7 +2,7 @@ import { useAtom } from 'jotai'
 
 import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import * as MediaLibrary from 'expo-media-library'
 import moment from 'moment'
@@ -17,11 +17,16 @@ import * as Linking from 'expo-linking'
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   SafeAreaView,
   StyleSheet,
+  Text,
   // ScrollView,
   View,
 } from 'react-native'
+
+import * as Haptics from 'expo-haptics'
+import { PanGestureHandler, State } from 'react-native-gesture-handler'
 
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
@@ -52,13 +57,17 @@ const Chat = ({ route }) => {
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
-  const { chatUuid, contact } = route.params
+  const { chatUuid, contact, friendshipUuid } = route.params
 
   const navigation = useNavigation()
 
   const [messages, setMessages] = useState([])
   // .format("YYYY-MM-DD HH:mm:ss.SSS")
   // const [lastRead, setLastRead] = useState(moment())
+
+  // Swipe gesture state
+  const translateX = useRef(new Animated.Value(0)).current
+  const [isSwipeOpen, setIsSwipeOpen] = useState(false)
 
   const goBack = async () => {
     setFriendsList(
@@ -68,6 +77,113 @@ const Chat = ({ route }) => {
     )
 
     router.back()
+  }
+
+  // Handle swipe gesture for delete chat
+  const handleSwipeGesture = (event) => {
+    const { translationX, state } = event.nativeEvent
+
+    if (state === State.ACTIVE) {
+      // Only allow swipe to the left (negative translation)
+      if (translationX < 0) {
+        const clampedTranslation = Math.max(translationX, -120)
+        translateX.setValue(clampedTranslation)
+      }
+    } else if (state === State.END || state === State.CANCELLED) {
+      // Determine if swipe should trigger delete action
+      if (translationX < -60) {
+        // Trigger delete chat action
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+        handleDeleteChat()
+        // Reset swipe position
+        Animated.spring(translateX, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 8,
+        }).start()
+      } else {
+        // Close the swipe action
+        Animated.spring(translateX, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 8,
+        }).start()
+      }
+    }
+  }
+
+  // Handle delete chat functionality
+  const handleDeleteChat = () => {
+    // Parse contact name from JSON string if needed
+    const contactName =
+      typeof contact === 'string' && contact.startsWith('"')
+        ? JSON.parse(contact)
+        : contact || 'this friend'
+
+    Alert.alert(
+      'Delete Chat',
+      `Are you sure you want to delete all messages with ${contactName}? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Remove the friend which will also delete the chat
+              const success = await friendsHelper.removeFriend({
+                uuid,
+                friendshipUuid,
+              })
+
+              if (success) {
+                // Refresh the friends list
+                const newFriendsList =
+                  await friendsHelper.getEnhancedListOfFriendships({
+                    uuid,
+                  })
+                setFriendsList(newFriendsList)
+
+                Toast.show({
+                  type: 'success',
+                  position: 'top',
+                  text1: 'Chat Deleted',
+                  text2: 'All messages have been deleted',
+                  visibilityTime: 2000,
+                  autoHide: true,
+                  topOffset: topOffset || 60,
+                })
+
+                // Navigate back to friends list
+                router.replace('/friends')
+              } else {
+                Toast.show({
+                  type: 'error',
+                  position: 'top',
+                  text1: 'Failed to delete chat',
+                  text2: 'Please try again',
+                  visibilityTime: 3000,
+                  autoHide: true,
+                  topOffset: topOffset || 60,
+                })
+              }
+            } catch (error) {
+              Toast.show({
+                type: 'error',
+                position: 'top',
+                text1: 'Failed to delete chat',
+                text2: 'Please try again',
+                visibilityTime: 3000,
+                autoHide: true,
+                topOffset: topOffset || 60,
+              })
+            }
+          },
+        },
+      ],
+    )
   }
 
   const renderHeaderRight = () => {}
@@ -381,6 +497,27 @@ const Chat = ({ route }) => {
     container: {
       flex: 1,
     },
+    deleteAction: {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      width: 120,
+      backgroundColor: '#dc3545',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: -1,
+    },
+    deleteActionText: {
+      color: 'white',
+      fontSize: 14,
+      fontWeight: '600',
+      marginTop: 4,
+    },
+    chatContainer: {
+      flex: 1,
+      backgroundColor: 'white',
+    },
   })
 
   const renderSend = (props) => (
@@ -579,24 +716,44 @@ const Chat = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <GiftedChat
-        messages={messages}
-        // eslint-disable-next-line no-shadow
-        onSend={(messages) => onSend(messages)}
-        user={{
-          _id: uuid,
-        }}
-        // alwaysShowSend
-        renderSend={renderSend}
-        renderLoading={renderLoading}
-        renderMessageImage={(props) => <ChatPhoto {...props} />}
-        // scrollToBottomComponent={scrollToBottomComponent}
-        infiniteScroll
-        loadEarlier
-        onLoadEarlier={onLoadEarlier}
-        renderUsernameOnMessage
-        // renderAccessory={renderAccessory} // disabled photo taking for now
-      />
+      <View style={styles.container}>
+        {/* Delete Action Background */}
+        <View style={styles.deleteAction}>
+          <FontAwesome name="trash" size={24} color="white" />
+          <Text style={styles.deleteActionText}>Delete{'\n'}Chat</Text>
+        </View>
+
+        {/* Main Chat Container with Swipe */}
+        <PanGestureHandler onHandlerStateChange={handleSwipeGesture}>
+          <Animated.View
+            style={[
+              styles.chatContainer,
+              {
+                transform: [{ translateX }],
+              },
+            ]}
+          >
+            <GiftedChat
+              messages={messages}
+              // eslint-disable-next-line no-shadow
+              onSend={(messages) => onSend(messages)}
+              user={{
+                _id: uuid,
+              }}
+              // alwaysShowSend
+              renderSend={renderSend}
+              renderLoading={renderLoading}
+              renderMessageImage={(props) => <ChatPhoto {...props} />}
+              // scrollToBottomComponent={scrollToBottomComponent}
+              infiniteScroll
+              loadEarlier
+              onLoadEarlier={onLoadEarlier}
+              renderUsernameOnMessage
+              // renderAccessory={renderAccessory} // disabled photo taking for now
+            />
+          </Animated.View>
+        </PanGestureHandler>
+      </View>
     </SafeAreaView>
   )
 }

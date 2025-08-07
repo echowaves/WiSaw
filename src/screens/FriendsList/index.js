@@ -165,17 +165,50 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: 0,
-    backgroundColor: '#4A90E2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    flexDirection: 'row',
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
-    width: 100,
+    width: 240, // Increased width to fit 3 actions
+  },
+  rightSwipeAction: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    flexDirection: 'row',
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    width: 160, // 2 actions = 160px
+  },
+  leftSwipeAction: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    flexDirection: 'row',
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+    width: 80, // 1 action = 80px
+  },
+  swipeActionButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    height: '100%',
+  },
+  shareAction: {
+    backgroundColor: '#4A90E2',
+  },
+  editAction: {
+    backgroundColor: '#28a745',
+  },
+  deleteAction: {
+    backgroundColor: '#dc3545',
   },
   swipeActionText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     marginTop: 4,
     textAlign: 'center',
@@ -431,6 +464,7 @@ const FriendsList = () => {
   const FriendItem = ({ friend }) => {
     const translateX = useRef(new Animated.Value(0)).current
     const [isSwipeOpen, setIsSwipeOpen] = useState(false)
+    const [swipeDirection, setSwipeDirection] = useState(null) // 'left' or 'right'
 
     const displayName = friend?.contact || 'Unnamed Friend'
     const isPending = friend.uuid2 === null
@@ -442,22 +476,38 @@ const FriendsList = () => {
       const { translationX, state } = event.nativeEvent
 
       if (state === State.ACTIVE) {
-        // Only allow swipe to the right (positive translation)
+        // Allow swipe in both directions
         if (translationX > 0) {
-          const clampedTranslation = Math.min(translationX, 100)
+          // Swipe right - show share and edit actions
+          const clampedTranslation = Math.min(translationX, 160) // 2 actions = 160px
+          translateX.setValue(clampedTranslation)
+        } else if (translationX < 0) {
+          // Swipe left - show delete action
+          const clampedTranslation = Math.max(translationX, -80) // 1 action = 80px
           translateX.setValue(clampedTranslation)
         }
       } else if (state === State.END || state === State.CANCELLED) {
         // Determine if swipe should be open or closed
-        if (translationX > 50) {
-          // Open the swipe action
+        if (translationX > 80) {
+          // Open right swipe action (share/edit)
           Animated.spring(translateX, {
-            toValue: 100,
+            toValue: 160,
             useNativeDriver: true,
             tension: 100,
             friction: 8,
           }).start()
           setIsSwipeOpen(true)
+          setSwipeDirection('right')
+        } else if (translationX < -40) {
+          // Open left swipe action (delete)
+          Animated.spring(translateX, {
+            toValue: -80,
+            useNativeDriver: true,
+            tension: 100,
+            friction: 8,
+          }).start()
+          setIsSwipeOpen(true)
+          setSwipeDirection('left')
         } else {
           // Close the swipe action
           Animated.spring(translateX, {
@@ -467,6 +517,7 @@ const FriendsList = () => {
             friction: 8,
           }).start()
           setIsSwipeOpen(false)
+          setSwipeDirection(null)
         }
       }
     }
@@ -479,6 +530,7 @@ const FriendsList = () => {
         friction: 8,
       }).start()
       setIsSwipeOpen(false)
+      setSwipeDirection(null)
     }
 
     const handleShareName = () => {
@@ -489,18 +541,66 @@ const FriendsList = () => {
       })
     }
 
+    const handleEditFriend = () => {
+      closeSwipe()
+      setSelectedFriendshipUuid(friend.friendshipUuid)
+      setShowNamePicker(true)
+    }
+
+    const handleDeleteFriend = () => {
+      closeSwipe()
+      Alert.alert(
+        'Remove Friend',
+        `Are you sure you want to remove ${displayName}?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Remove',
+            style: 'destructive',
+            onPress: () =>
+              handleRemoveFriend({ friendshipUuid: friend.friendshipUuid }),
+          },
+        ],
+      )
+    }
+
     return (
       <View style={styles.friendItemContainer}>
-        {/* Swipe Action Background - only show for confirmed friends */}
-        {!isPending && (
-          <TouchableOpacity
-            style={styles.swipeAction}
-            onPress={handleShareName}
-            activeOpacity={0.7}
-          >
-            <FontAwesome5 name="qrcode" size={20} color="white" />
-            <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
-          </TouchableOpacity>
+        {/* Right Swipe Action Background - Share and Edit */}
+        {!isPending && swipeDirection === 'right' && (
+          <View style={styles.rightSwipeAction}>
+            <TouchableOpacity
+              style={[styles.swipeActionButton, styles.shareAction]}
+              onPress={handleShareName}
+              activeOpacity={0.7}
+            >
+              <FontAwesome5 name="qrcode" size={18} color="white" />
+              <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.swipeActionButton, styles.editAction]}
+              onPress={handleEditFriend}
+              activeOpacity={0.7}
+            >
+              <FontAwesome5 name="edit" size={18} color="white" />
+              <Text style={styles.swipeActionText}>Edit{'\n'}Name</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Left Swipe Action Background - Delete */}
+        {!isPending && swipeDirection === 'left' && (
+          <View style={styles.leftSwipeAction}>
+            <TouchableOpacity
+              style={[styles.swipeActionButton, styles.deleteAction]}
+              onPress={handleDeleteFriend}
+              activeOpacity={0.7}
+            >
+              <FontAwesome5 name="trash" size={18} color="white" />
+              <Text style={styles.swipeActionText}>Delete{'\n'}Friend</Text>
+            </TouchableOpacity>
+          </View>
         )}
 
         {/* Main Friend Item */}
@@ -641,11 +741,7 @@ const FriendsList = () => {
                     </>
                   ) : (
                     <Text style={styles.friendStatus}>
-                      {hasUnread
-                        ? `${friend.unreadCount} new messages`
-                        : isSwipeOpen
-                          ? 'Swipe left to close'
-                          : 'Tap to chat • Swipe right to share name'}
+                      {hasUnread ? `${friend.unreadCount} new messages` : ''}
                     </Text>
                   )}
                 </View>
