@@ -257,28 +257,30 @@ const PhotosList = ({ searchFromUrl }) => {
   const onViewRef = React.useRef((viewableItems) => {
     if (viewableItems.changed && viewableItems.changed.length > 0) {
       // Get all currently visible items
-      const visibleItems = viewableItems.changed.filter(item => item.isViewable)
-      
+      const visibleItems = viewableItems.changed.filter(
+        (item) => item.isViewable,
+      )
+
       if (visibleItems.length > 0) {
         // Find the item with the highest index
         const lastVisibleItem = visibleItems.reduce((max, current) => {
-          return (current.index > max.index) ? current : max
+          return current.index > max.index ? current : max
         })
-        
+
         if (lastVisibleItem && lastVisibleItem.index !== undefined) {
           setLastViewableRow(lastVisibleItem.index)
         }
       }
     }
-    
+
     // Alternative: use viewableItems directly if it has viewableItems property
     if (viewableItems.viewableItems && viewableItems.viewableItems.length > 0) {
       const visibleItems = viewableItems.viewableItems
-      
+
       const lastVisibleItem = visibleItems.reduce((max, current) => {
-        return (current.index > max.index) ? current : max
+        return current.index > max.index ? current : max
       })
-      
+
       if (lastVisibleItem && lastVisibleItem.index !== undefined) {
         setLastViewableRow(lastVisibleItem.index)
       }
@@ -362,7 +364,7 @@ const PhotosList = ({ searchFromUrl }) => {
     if (photosList.length === 0) {
       return true
     }
-    
+
     // Primary check: use lastViewableRow if it's reasonable
     const screenColumns = width / thumbDimension
     const screenRows = height / thumbDimension
@@ -407,20 +409,20 @@ const PhotosList = ({ searchFromUrl }) => {
     if (batch === currentBatch) {
       // Track consecutive empty responses
       if (!photos || photos.length === 0) {
-        setConsecutiveEmptyResponses(prev => {
+        setConsecutiveEmptyResponses((prev) => {
           const newCount = prev + 1
-          
+
           // Stop loading only after 10 consecutive empty responses
           if (newCount >= 10) {
             setStopLoading(true)
           }
-          
+
           return newCount
         })
       } else {
         // Reset consecutive empty count when we get data
         setConsecutiveEmptyResponses(0)
-        
+
         // Add photos to list
         setPhotosList((currentList) =>
           [...currentList, ...photos]
@@ -445,20 +447,20 @@ const PhotosList = ({ searchFromUrl }) => {
     const currentScrollY = event.nativeEvent.contentOffset.y
     const layoutHeight = event.nativeEvent.layoutMeasurement.height
     const contentSizeHeight = event.nativeEvent.contentSize.height
-    
+
     // Update scroll tracking
     setLastScrollY(currentScrollY)
     setScrollViewHeight(layoutHeight)
     setContentHeight(contentSizeHeight)
-    
+
     // Calculate how close we are to the bottom
     const scrollProgress = (currentScrollY + layoutHeight) / contentSizeHeight
-    
+
     // Trigger loading when we're 80% down the content
     if (scrollProgress > 0.8 && !loading && !stopLoading) {
       setPageNumber((currentPage) => currentPage + 1)
     }
-    
+
     const isAtTop = currentScrollY <= 10 // Consider "top" as within 10px of the very top
 
     if (isAtTop) {
