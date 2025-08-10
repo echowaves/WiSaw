@@ -45,7 +45,6 @@ import {
 import NetInfo from '@react-native-community/netinfo'
 
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
-import FlatGrid from 'react-native-super-grid'
 
 import {
   Badge,
@@ -67,7 +66,6 @@ import * as STATE from '../../state'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import Thumb from '../../components/Thumb'
-import ThumbWithComments from '../../components/ThumbWithComments'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -341,19 +339,22 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Render function for individual masonry items
   const renderMasonryItem = React.useCallback(
-    ({ item, index, dimensions }) => (
-      <Thumb
-        item={item}
-        index={index}
-        thumbWidth={dimensions.width}
-        thumbHeight={dimensions.height}
-        photosList={photosList}
-        searchTerm={searchTerm}
-        activeSegment={activeSegment}
-        topOffset={topOffset}
-        uuid={uuid}
-      />
-    ),
+    ({ item, index, dimensions }) => {
+      // All segments now use the same Thumb component
+      return (
+        <Thumb
+          item={item}
+          index={index}
+          thumbWidth={dimensions.width}
+          thumbHeight={dimensions.height}
+          photosList={photosList}
+          searchTerm={searchTerm}
+          activeSegment={activeSegment}
+          topOffset={topOffset}
+          uuid={uuid}
+        />
+      )
+    },
     [photosList, searchTerm, activeSegment, topOffset, uuid],
   )
 
@@ -1307,22 +1308,82 @@ const PhotosList = ({ searchFromUrl }) => {
   }, [triggerSearch])
 
   const renderThumbs = () => {
+    // Different configurations for each segment
+    const getSegmentConfig = () => {
+      switch (activeSegment) {
+        case 0: // Near You - compact masonry layout
+          return {
+            spacing: 5,
+            maxItemsPerRow: 12,
+            baseHeight: 100,
+            aspectRatioFallbacks: [
+              0.56, // 9:16 (portrait)
+              0.67, // 2:3 (portrait)
+              0.75, // 3:4 (portrait)
+              1.0, // 1:1 (square)
+              1.33, // 4:3 (landscape)
+              1.5, // 3:2 (landscape)
+              1.78, // 16:9 (landscape)
+            ],
+          }
+        case 1: // Watched - larger items with comments
+          return {
+            spacing: 5,
+            maxItemsPerRow: 12,
+            baseHeight: 100,
+            aspectRatioFallbacks: [
+              0.56, // 9:16 (portrait)
+              0.67, // 2:3 (portrait)
+              0.75, // 3:4 (portrait)
+              1.0, // 1:1 (square)
+              1.33, // 4:3 (landscape)
+              1.5, // 3:2 (landscape)
+              1.78, // 16:9 (landscape)
+            ],
+          }
+        case 2: // Search - same masonry layout as Global for consistent experience
+          return {
+            spacing: 5,
+            maxItemsPerRow: 12,
+            baseHeight: 100,
+            aspectRatioFallbacks: [
+              0.56, // 9:16 (portrait)
+              0.67, // 2:3 (portrait)
+              0.75, // 3:4 (portrait)
+              1.0, // 1:1 (square)
+              1.33, // 4:3 (landscape)
+              1.5, // 3:2 (landscape)
+              1.78, // 16:9 (landscape)
+            ],
+          }
+        default:
+          return {
+            spacing: 5,
+            maxItemsPerRow: 12,
+            baseHeight: 100,
+            aspectRatioFallbacks: [
+              0.56, // 9:16 (portrait)
+              0.67, // 2:3 (portrait)
+              0.75, // 3:4 (portrait)
+              1.0, // 1:1 (square)
+              1.33, // 4:3 (landscape)
+              1.5, // 3:2 (landscape)
+              1.78, // 16:9 (landscape)
+            ],
+          }
+      }
+    }
+
+    const config = getSegmentConfig()
+
     return (
       <ExpoMasonryLayout
         data={photosList}
         renderItem={renderMasonryItem}
-        spacing={5}
-        maxItemsPerRow={12}
-        baseHeight={100}
-        aspectRatioFallbacks={[
-          0.56, // 9:16 (portrait)
-          0.67, // 2:3 (portrait)
-          0.75, // 3:4 (portrait)
-          1.0, // 1:1 (square)
-          1.33, // 4:3 (landscape)
-          1.5, // 3:2 (landscape)
-          1.78, // 16:9 (landscape)
-        ]}
+        spacing={config.spacing}
+        maxItemsPerRow={config.maxItemsPerRow}
+        baseHeight={config.baseHeight}
+        aspectRatioFallbacks={config.aspectRatioFallbacks}
         keyExtractor={(item) => item.id}
         onEndReached={() => {
           // Always try to load more when reaching the end, regardless of lastViewableRow calculation
@@ -1360,42 +1421,6 @@ const PhotosList = ({ searchFromUrl }) => {
       />
     )
   }
-
-  const renderThumbsWithComments = () => (
-    <FlatGrid
-      itemDimension={width}
-      spacing={3}
-      data={photosList}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-      renderItem={({ item, index }) => (
-        <ThumbWithComments
-          item={item}
-          index={index}
-          thumbDimension={thumbDimension}
-          screenWidth={width}
-          photosList={photosList}
-          searchTerm={searchTerm}
-          activeSegment={activeSegment}
-          topOffset={topOffset}
-          uuid={uuid}
-        />
-      )}
-      keyExtractor={(item) => item.id}
-      style={{
-        ...styles.container,
-        marginBottom: 95,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
 
   const renderFooter = () => {
     Notifications.setBadgeCountAsync(unreadCount || 0)
@@ -1854,41 +1879,6 @@ const PhotosList = ({ searchFromUrl }) => {
     return null
   }
 
-  const renderRefresheable = (textToRender) => (
-    <FlatGrid
-      itemDimension={width}
-      spacing={3}
-      data={[textToRender, '', '***', 'Pull down to refresh']}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-      renderItem={({ item, index }) => (
-        <Text
-          style={{
-            fontSize: 20,
-            textAlign: 'center',
-            margin: 10,
-            backfaceVisibility: CONST.EMPHASIZED_COLOR,
-          }}
-        >
-          {item}
-        </Text>
-      )}
-      keyExtractor={(item) => item}
-      style={{
-        ...styles.container,
-        marginBottom: 95,
-      }}
-      showsVerticalScrollIndicator={false}
-      horizontal={false}
-      refreshing={false}
-      onRefresh={() => {
-        reload()
-      }}
-      onViewableItemsChanged={onViewRef.current}
-      // viewabilityConfig={viewConfigRef.current}
-    />
-  )
-
   /// //////////////////////////////////////////////////////////////////////////
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
@@ -1920,10 +1910,8 @@ const PhotosList = ({ searchFromUrl }) => {
         {renderPendingPhotos()}
         <View style={styles.container}>
           {activeSegment === 2 && renderSearchBar(false)}
-          {/* photos */}
-          {activeSegment === 0 && renderThumbs()}
-          {activeSegment === 1 && renderThumbsWithComments()}
-          {activeSegment === 2 && renderThumbsWithComments()}
+          {/* photos - unified masonry layout for all segments */}
+          {renderThumbs()}
           {renderFooter({ unreadCount })}
         </View>
       </View>

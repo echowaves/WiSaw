@@ -1,8 +1,8 @@
 {
   "name": "wisaw",
   "version": "7.3.0",
-  "buildNumber": "396",
-  "versionCode": 396,
+  "buildNumber": "397",
+  "versionCode": 397,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",
@@ -71,7 +71,6 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-super-grid": "^5.0.0",
     "react-native-svg": "15.11.2",
     "react-native-swiper": "^1.6.0",
     "react-native-toast-message": "^2.2.0",
