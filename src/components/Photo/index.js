@@ -475,43 +475,25 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   // Calculate optimal photo/video dimensions based on photo's actual dimensions
   const calculatePhotoDimensions = () => {
     const screenWidth = width
-    const headerSpace = 120 // Account for header padding
-    const footerSpace = 120 // Account for footer
-    const contentSpace = 200 // Account for photo info and other content
-    const availableHeight = height - headerSpace - footerSpace - contentSpace
-    const minHeight = 300 // Minimum height for photos
-    const maxHeight = Math.max(availableHeight * 0.8, minHeight) // Maximum 80% of available screen height
+    const topPadding = 120 // Container paddingTop for header
+    const bottomSpace = 100 // Space for content below photo and safe area
+    const maxHeight = height - topPadding - bottomSpace
 
     // Get photo dimensions or use defaults
     const photoWidth = photo?.width || 1080
     const photoHeight = photo?.height || 1080
     const aspectRatio = photoWidth / photoHeight
 
-    // Always use full screen width as the starting point
-    let calculatedWidth = screenWidth
-    let calculatedHeight = screenWidth / aspectRatio
+    // Calculate scale factors for both width and height constraints
+    const widthScale = screenWidth / photoWidth
+    const heightScale = maxHeight / photoHeight
 
-    // If calculated height is too small, scale up to minimum
-    if (calculatedHeight < minHeight) {
-      calculatedHeight = minHeight
-      calculatedWidth = minHeight * aspectRatio
-      // If width exceeds screen width after scaling, use screen width and recalculate height
-      if (calculatedWidth > screenWidth) {
-        calculatedWidth = screenWidth
-        calculatedHeight = screenWidth / aspectRatio
-      }
-    }
+    // Use the smaller scale factor to ensure the image fits within both constraints
+    const scale = Math.min(widthScale, heightScale)
 
-    // If calculated height is too large, scale down to maximum
-    if (calculatedHeight > maxHeight) {
-      calculatedHeight = maxHeight
-      calculatedWidth = maxHeight * aspectRatio
-      // If width is less than screen width, scale up to use full width
-      if (calculatedWidth < screenWidth) {
-        calculatedWidth = screenWidth
-        calculatedHeight = screenWidth / aspectRatio
-      }
-    }
+    // Apply the scale factor to get final dimensions
+    const calculatedWidth = photoWidth * scale
+    const calculatedHeight = photoHeight * scale
 
     return {
       width: calculatedWidth,
