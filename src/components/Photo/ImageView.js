@@ -45,21 +45,17 @@ const ImageView = ({ width, height, photo }) => {
       left: 0,
       backgroundColor: 'transparent',
     },
+    imageContainer: {
+      width,
+      height,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   })
 
   return (
-    // <PinchGestureHandler
-    //   // onGestureEvent={onPinchEvent}
-    //   onHandlerStateChange={onPinchEvent}
-    // >
     <TapGestureHandler onHandlerStateChange={onSingleTapEvent} numberOfTaps={1}>
-      <Animated.View
-        style={{
-          width,
-          height,
-        }}
-        resizeMode="contain"
-      >
+      <Animated.View style={styles.imageContainer} resizeMode="contain">
         <CachedImage
           source={{
             uri: `${photo.thumbUrl}`,
@@ -92,7 +88,6 @@ const ImageView = ({ width, height, photo }) => {
         />
       </Animated.View>
     </TapGestureHandler>
-    // </PinchGestureHandler>
   )
 }
 
