@@ -12,8 +12,8 @@
     "reset:simulator": "xcrun simctl erase all",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "build": "eas build",
-    "publish:prod": "eas update --branch production"
+    "build": "source .env && eas build",
+    "publish:prod": "source .env && eas update --branch production"
   },
   "dependencies": {
     "@apollo/client": "^3.9.7",
