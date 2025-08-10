@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   loadingProgress: {
     marginHorizontal: 16,
     marginVertical: 8,
-    height: 3,
+    height: 4,
     borderRadius: 2,
   },
 })
@@ -1294,10 +1294,37 @@ const Photo = ({ photo, refreshKey = 0 }) => {
         contentContainerStyle={styles.contentContainer}
       >
         {renderActionCard()}
-        {renderPhotoRow()}
-        {photoDetails?.isPhotoWatched === undefined && (
-          <LinearProgress color="#4FC3F7" style={styles.loadingProgress} />
-        )}
+        <View style={{ position: 'relative' }}>
+          {photoDetails?.isPhotoWatched === undefined && (
+            <LinearProgress
+              color="#4FC3F7"
+              style={[
+                styles.loadingProgress,
+                {
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 10,
+                  marginHorizontal: 0,
+                  marginVertical: 0,
+                  height: 4,
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                  shadowColor: '#4FC3F7',
+                  shadowOffset: {
+                    width: 0,
+                    height: 2,
+                  },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 5,
+                },
+              ]}
+            />
+          )}
+          {renderPhotoRow()}
+        </View>
         {renderCommentsStats()}
         {renderCommentsRows()}
         {renderAddCommentsRow()}
