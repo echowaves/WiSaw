@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import * as Haptics from 'expo-haptics'
 
@@ -477,7 +477,7 @@ const FriendsList = () => {
     }
   }, [uuid, reload])
 
-  const FriendItem = ({ friend }) => {
+  const FriendItem = memo(({ friend }) => {
     const translateX = useRef(new Animated.Value(0)).current
     const [isSwipeOpen, setIsSwipeOpen] = useState(false)
     const [swipeDirection, setSwipeDirection] = useState(null) // 'left' or 'right'
@@ -770,7 +770,7 @@ const FriendsList = () => {
         </PanGestureHandler>
       </View>
     )
-  }
+  })
 
   const renderFriend = ({ item: friend }) => {
     return <FriendItem friend={friend} />
@@ -836,6 +836,16 @@ const FriendsList = () => {
         showsVerticalScrollIndicator={false}
         refreshing={isRefreshing}
         onRefresh={handleRefresh}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={15}
+        updateCellsBatchingPeriod={50}
+        removeClippedSubviews={true}
+        getItemLayout={(data, index) => ({
+          length: 80, // Approximate height of each friend item
+          offset: 80 * index,
+          index,
+        })}
       />
     </SafeAreaView>
   )

@@ -1,10 +1,8 @@
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 
 import { TouchableHighlight, View, useWindowDimensions } from 'react-native'
 
 // import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
-
-import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
 
@@ -108,4 +106,4 @@ const ChatPhoto = (props) => {
   )
 }
 
-export default ChatPhoto
+export default memo(ChatPhoto)

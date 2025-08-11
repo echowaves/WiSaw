@@ -355,7 +355,7 @@ const PhotosList = ({ searchFromUrl }) => {
         />
       )
     },
-    [photosList, searchTerm, activeSegment, topOffset, uuid],
+    [photosList?.length, searchTerm, activeSegment, topOffset, uuid],
   )
 
   const wantToLoadMore = () => {
@@ -1404,10 +1404,10 @@ const PhotosList = ({ searchFromUrl }) => {
           reload()
         }}
         onScroll={handleScroll}
-        initialNumToRender={10}
-        maxToRenderPerBatch={15}
-        windowSize={21}
-        updateCellsBatchingPeriod={100}
+        initialNumToRender={8}
+        maxToRenderPerBatch={10}
+        windowSize={15}
+        updateCellsBatchingPeriod={50}
         scrollEventThrottle={16}
         style={{
           ...styles.container,
@@ -1417,7 +1417,7 @@ const PhotosList = ({ searchFromUrl }) => {
           paddingBottom: 100,
         }}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={false}
+        removeClippedSubviews={true}
       />
     )
   }

@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics'
 import { router } from 'expo-router'
-import { useRef } from 'react'
+import { memo, useRef } from 'react'
 
 import {
   Animated,
@@ -262,4 +262,4 @@ Thumb.propTypes = {
   thumbHeight: PropTypes.number,
 }
 
-export default Thumb
+export default memo(Thumb)

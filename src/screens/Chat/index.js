@@ -750,6 +750,14 @@ const Chat = ({ route }) => {
               onLoadEarlier={onLoadEarlier}
               renderUsernameOnMessage
               // renderAccessory={renderAccessory} // disabled photo taking for now
+              // Performance optimizations
+              listViewProps={{
+                initialNumToRender: 10,
+                maxToRenderPerBatch: 10,
+                windowSize: 15,
+                updateCellsBatchingPeriod: 50,
+                removeClippedSubviews: true,
+              }}
             />
           </Animated.View>
         </PanGestureHandler>
