@@ -167,7 +167,7 @@ export const createFriendshipNameDeepLink = ({
 }
 
 /**
- * Create a universal link for sharing (fallback to web)
+ * Create a universal link for sharing (using custom scheme for consistency)
  */
 export const createFriendshipNameUniversalLink = ({
   friendshipUuid,
@@ -179,8 +179,9 @@ export const createFriendshipNameUniversalLink = ({
   })
   const encodedData = encodeURIComponent(base64.encode(qrData))
 
-  // Use universal link for sharing compatibility
-  return `https://link.wisaw.com/friendships/name?data=${encodedData}`
+  // Use custom scheme for sharing to ensure it opens in app consistently
+  // This matches the same URL format used for QR codes to maintain consistency
+  return `wisaw://?type=friendship&data=${encodedData}`
 }
 
 /**

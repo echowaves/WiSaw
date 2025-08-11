@@ -59,7 +59,7 @@ const QRCodeModal = ({
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 
       const shareOptions = {
-        message: `Share ${friendName || 'Unknown Friend'}'s friendship name in WiSaw\n\n${shareUrl}\n\nTap this link to update the friend name on your device.`,
+        message: `Share ${friendName || 'Unknown Friend'}'s friendship name in WiSaw\n\n${shareUrl}\n\nTap this link to update the friend name on your device. Make sure you have the WiSaw app installed.`,
         url: shareUrl,
       }
 
@@ -92,7 +92,7 @@ const QRCodeModal = ({
       // Show link in an alert since we don't have clipboard library
       Alert.alert(
         'Share Link',
-        `${shareUrl}\n\nTap "Share" to send this link to another device.`,
+        `${shareUrl}\n\nTap "Share" to send this link to another device. The link will open directly in the WiSaw app.`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
@@ -166,7 +166,7 @@ const QRCodeModal = ({
 
             <Text style={styles.qrDescription}>
               Scan this QR code with another device to share{' '}
-              {friendName || 'Unknown Friend'}'s name
+              {friendName || 'Unknown Friend'}'s name in the WiSaw app
             </Text>
           </View>
 
