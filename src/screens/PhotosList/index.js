@@ -20,7 +20,6 @@ import * as Haptics from 'expo-haptics'
 import * as TaskManager from 'expo-task-manager'
 
 import useKeyboard from '@rnhooks/keyboard'
-import { CacheManager } from 'expo-cached-image'
 import {
   Alert,
   Animated,
@@ -487,48 +486,40 @@ const PhotosList = ({ searchFromUrl }) => {
     setUploadingPhoto(true)
 
     try {
-      let i
-      // here let's iterate over the items and upload one file at a time
+      // Get all pending items once
+      const pendingQueue = await reducer.getQueue()
 
-      // generatePhotoQueue will only contain item with undefined photo
-      const generatePhotoQueue = (await reducer.getQueue()).filter(
-        (image) => !image.photo,
-      )
+      // Process each item completely from start to finish
+      for (let i = 0; i < pendingQueue.length; i += 1) {
+        const originalItem = pendingQueue[i]
 
-      // first pass iteration to generate photos ID and the photo record on the backend
-      for (i = 0; i < generatePhotoQueue.length; i += 1) {
-        const item = generatePhotoQueue[i]
         try {
-          // Process the file if it hasn't been processed yet (compress, generate thumbnails, etc.)
+          // Complete upload sequence for this item
           // eslint-disable-next-line no-await-in-loop
-          const processedItem = await reducer.processQueuedItemForUpload(item)
-
-          // eslint-disable-next-line no-await-in-loop
-          const photo = await reducer.generatePhoto({
+          const uploadedPhoto = await reducer.processCompleteUpload({
+            item: originalItem,
             uuid,
-            lat: processedItem.location.coords.latitude,
-            lon: processedItem.location.coords.longitude,
-            video: processedItem?.type === 'video',
+            topOffset,
           })
-          // eslint-disable-next-line no-await-in-loop
-          CacheManager.addToCache({
-            file: processedItem.localThumbUrl,
-            key: `${photo.id}-thumb`,
-          })
-          // eslint-disable-next-line no-await-in-loop
-          CacheManager.addToCache({
-            file: processedItem.localImgUrl,
-            key: `${photo.id}`,
-          })
-          // eslint-disable-next-line no-await-in-loop
-          await reducer.removeFromQueue(processedItem)
-          // eslint-disable-next-line no-await-in-loop
-          await reducer.addToQueue({
-            ...processedItem,
-            photo,
-          })
-          // eslint-disable-next-line no-await-in-loop
-          // setPendingPhotos(await reducer.getQueue())
+
+          if (uploadedPhoto) {
+            // Successfully uploaded - remove from queue and update UI
+            // eslint-disable-next-line no-await-in-loop
+            await reducer.removeFromQueue(originalItem)
+
+            // Add to photos list
+            setPhotosList(
+              (currentList) =>
+                [uploadedPhoto, ...currentList].filter(
+                  (obj, pos, arr) =>
+                    arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+                ), // fancy way to remove duplicate photos
+            )
+
+            // Update pending photos count
+            // eslint-disable-next-line no-await-in-loop
+            setPendingPhotos(await reducer.getQueue())
+          }
         } catch (err123) {
           // eslint-disable-next-line no-console
           Toast.show({
@@ -538,56 +529,14 @@ const PhotosList = ({ searchFromUrl }) => {
             topOffset,
           })
           console.error({ err123 })
+
+          // If banned, remove the item from queue
           if (`${err123}`.includes('banned')) {
             // eslint-disable-next-line no-await-in-loop
-            await reducer.removeFromQueue(item)
+            await reducer.removeFromQueue(originalItem)
             // eslint-disable-next-line no-await-in-loop
             setPendingPhotos(await reducer.getQueue())
           }
-        }
-      }
-
-      // uploadQueue will only contain item with photo generated on the backend
-      const uploadQueue = (await reducer.getQueue()).filter(
-        (image) => image.photo,
-      )
-      // second pass -- upload files
-      for (i = 0; i < uploadQueue.length; i += 1) {
-        const item = uploadQueue[i]
-
-        // eslint-disable-next-line no-await-in-loop
-        const { responseData } = await reducer.uploadItem({
-          item,
-        })
-
-        if (responseData?.status === 200) {
-          // console.log('uploaded', { item: item?.id })
-          // eslint-disable-next-line no-await-in-loop
-          await reducer.removeFromQueue(item)
-
-          setPhotosList(
-            (currentList) =>
-              [item.photo, ...currentList].filter(
-                (obj, pos, arr) =>
-                  arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
-              ), // fancy way to remove duplicate photos
-          )
-
-          // Toast.show({
-          //   text1: `${item.photo.video ? 'Video' : 'Photo'} uploaded`,
-          //   topOffset,
-          //   visibilityTime: 500,
-          // })
-          // eslint-disable-next-line no-await-in-loop
-          setPendingPhotos(await reducer.getQueue())
-        } else {
-          // alert(JSON.stringify({ responseData }))
-          Toast.show({
-            text1: 'Upload is going slooooow...',
-            text2: 'Still trying to upload.',
-            visibilityTime: 500,
-            topOffset,
-          })
         }
       }
     } catch (err2) {

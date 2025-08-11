@@ -507,6 +507,60 @@ export const addToQueue = async (image) => {
   }
 }
 
+export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
+  try {
+    // Step 1: Process the file if it hasn't been processed yet
+    let processedItem = item
+    if (!item.localImgUrl) {
+      processedItem = await processQueuedFile(item)
+    }
+
+    // Step 2: Generate photo record on backend if not already done
+    let photo = processedItem.photo
+    if (!photo) {
+      photo = await generatePhoto({
+        uuid,
+        lat: processedItem.location.coords.latitude,
+        lon: processedItem.location.coords.longitude,
+        video: processedItem?.type === 'video',
+      })
+
+      // Add processed files to cache with the photo ID
+      CacheManager.addToCache({
+        file: processedItem.localThumbUrl,
+        key: `${photo.id}-thumb`,
+      })
+      CacheManager.addToCache({
+        file: processedItem.localImgUrl,
+        key: `${photo.id}`,
+      })
+
+      processedItem = { ...processedItem, photo }
+    }
+
+    // Step 3: Upload the actual files
+    const { responseData } = await uploadItem({
+      item: processedItem,
+    })
+
+    // Step 4: Check if upload was successful
+    if (responseData?.status === 200) {
+      return photo // Return the photo object for UI update
+    } else {
+      Toast.show({
+        text1: 'Upload is going slooooow...',
+        text2: 'Still trying to upload.',
+        visibilityTime: 500,
+        topOffset,
+      })
+      return null // Upload failed, will retry later
+    }
+  } catch (error) {
+    console.error('Complete upload process error:', error)
+    throw error
+  }
+}
+
 export const processQueuedItemForUpload = async (queuedItem) => {
   try {
     // Process the file (compress, move, generate thumbnails)
