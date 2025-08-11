@@ -511,12 +511,12 @@ const PhotosList = ({ searchFromUrl }) => {
             video: processedItem?.type === 'video',
           })
           // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({
+          CacheManager.addToCache({
             file: processedItem.localThumbUrl,
             key: `${photo.id}-thumb`,
           })
           // eslint-disable-next-line no-await-in-loop
-          await CacheManager.addToCache({
+          CacheManager.addToCache({
             file: processedItem.localImgUrl,
             key: `${photo.id}`,
           })
