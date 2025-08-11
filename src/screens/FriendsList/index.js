@@ -25,7 +25,8 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
 import NamePicker from '../../components/NamePicker'
-import QRCodeModal from '../../components/QRCodeModal'
+import ShareFriendNameModal from '../../components/ShareFriendNameModal'
+import ShareOptionsModal from '../../components/ShareOptionsModal'
 import * as friendsHelper from './friends_helper'
 
 const styles = StyleSheet.create({
@@ -241,8 +242,10 @@ const FriendsList = () => {
 
   const [showNamePicker, setShowNamePicker] = useState(false)
   const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState(null)
-  const [showQRModal, setShowQRModal] = useState(false)
-  const [qrFriendshipData, setQrFriendshipData] = useState(null)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [shareModalData, setShareModalData] = useState(null)
+  const [showShareNameModal, setShowShareNameModal] = useState(false)
+  const [shareNameModalData, setShareNameModalData] = useState(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleAddFriend = async () => {
@@ -258,33 +261,37 @@ const FriendsList = () => {
     }
   }, [triggerAddFriend, setTriggerAddFriend])
 
-  const handleShareFriend = async ({ friendshipUuid, contactName }) => {
+  const handleShareFriend = async ({
+    friendshipUuid,
+    contactName,
+    isPending = true,
+  }) => {
     try {
-      const result = await friendsHelper.shareFriendship({
-        uuid,
-        friendshipUuid,
-        contactName,
-      })
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 
-      if (result) {
-        Toast.show({
-          type: 'success',
-          position: 'top',
-          text1: 'Friendship shared!',
-          text2: `Shared ${contactName}'s friendship request`,
-          visibilityTime: 2000,
-          autoHide: true,
-          topOffset: 60,
+      if (isPending) {
+        // Share friendship invitation for pending friends
+        setShareModalData({
+          friendshipUuid,
+          friendName: contactName,
+          isPending,
         })
+        setShowShareModal(true)
+      } else {
+        // Share friend name for confirmed friends
+        setShareNameModalData({
+          friendshipUuid,
+          friendName: contactName,
+        })
+        setShowShareNameModal(true)
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error sharing friend:', error)
+      console.error('Error opening share modal:', error)
       Toast.show({
         type: 'error',
         position: 'top',
-        text1: 'Error sharing friendship',
-        text2: 'Please try again',
+        text1: 'Error',
+        text2: 'Unable to open sharing options',
         visibilityTime: 3000,
         autoHide: true,
         topOffset: 60,
@@ -353,39 +360,6 @@ const FriendsList = () => {
         },
       ],
     )
-  }
-
-  const handleGenerateQR = async ({ friendshipUuid, friendName }) => {
-    try {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-
-      setQrFriendshipData({
-        friendshipUuid,
-        friendName,
-      })
-      setShowQRModal(true)
-
-      Toast.show({
-        type: 'info',
-        position: 'top',
-        text1: 'QR Code Generated',
-        text2: `Share ${friendName}'s name with your other devices`,
-        visibilityTime: 2000,
-        autoHide: true,
-        topOffset: 60,
-      })
-    } catch (error) {
-      console.error('Error generating QR:', error)
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'QR Generation Failed',
-        text2: 'Unable to generate QR code',
-        visibilityTime: 3000,
-        autoHide: true,
-        topOffset: 60,
-      })
-    }
   }
 
   const setContactName = async ({ friendshipUuid, contactName }) => {
@@ -551,9 +525,10 @@ const FriendsList = () => {
 
     const handleShareName = () => {
       closeSwipe()
-      handleGenerateQR({
+      handleShareFriend({
         friendshipUuid: friend.friendshipUuid,
-        friendName: displayName,
+        contactName: displayName,
+        isPending: false,
       })
     }
 
@@ -590,7 +565,7 @@ const FriendsList = () => {
               onPress={handleShareName}
               activeOpacity={0.7}
             >
-              <FontAwesome5 name="qrcode" size={18} color="white" />
+              <FontAwesome5 name="share-alt" size={18} color="white" />
               <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
             </TouchableOpacity>
 
@@ -666,6 +641,7 @@ const FriendsList = () => {
                   handleShareFriend({
                     friendshipUuid: friend.friendshipUuid,
                     contactName: displayName,
+                    isPending: true,
                   })
                 }
               }}
@@ -704,6 +680,7 @@ const FriendsList = () => {
                             handleShareFriend({
                               friendshipUuid: friend.friendshipUuid,
                               contactName: displayName,
+                              isPending: true,
                             })
                           }
                           activeOpacity={0.5}
@@ -759,9 +736,11 @@ const FriendsList = () => {
                       </View>
                     </>
                   ) : (
-                    <Text style={styles.friendStatus}>
-                      {hasUnread ? `${friend.unreadCount} new messages` : ''}
-                    </Text>
+                    <>
+                      <Text style={styles.friendStatus}>
+                        {hasUnread ? `${friend.unreadCount} new messages` : ''}
+                      </Text>
+                    </>
                   )}
                 </View>
               </View>
@@ -786,11 +765,19 @@ const FriendsList = () => {
           headerText={headerText}
           friendshipUuid={selectedFriendshipUuid}
         />
-        <QRCodeModal
-          visible={showQRModal}
-          onClose={() => setShowQRModal(false)}
-          friendshipUuid={qrFriendshipData?.friendshipUuid}
-          friendName={qrFriendshipData?.friendName}
+        <ShareOptionsModal
+          visible={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          friendshipUuid={shareModalData?.friendshipUuid}
+          friendName={shareModalData?.friendName}
+          uuid={uuid}
+          topOffset={60}
+        />
+        <ShareFriendNameModal
+          visible={showShareNameModal}
+          onClose={() => setShowShareNameModal(false)}
+          friendshipUuid={shareNameModalData?.friendshipUuid}
+          friendName={shareNameModalData?.friendName}
           topOffset={60}
         />
         <View style={styles.emptyState}>
@@ -820,11 +807,19 @@ const FriendsList = () => {
         headerText={headerText}
         friendshipUuid={selectedFriendshipUuid}
       />
-      <QRCodeModal
-        visible={showQRModal}
-        onClose={() => setShowQRModal(false)}
-        friendshipUuid={qrFriendshipData?.friendshipUuid}
-        friendName={qrFriendshipData?.friendName}
+      <ShareOptionsModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        friendshipUuid={shareModalData?.friendshipUuid}
+        friendName={shareModalData?.friendName}
+        uuid={uuid}
+        topOffset={60}
+      />
+      <ShareFriendNameModal
+        visible={showShareNameModal}
+        onClose={() => setShowShareNameModal(false)}
+        friendshipUuid={shareNameModalData?.friendshipUuid}
+        friendName={shareNameModalData?.friendName}
         topOffset={60}
       />
       <FlatList
