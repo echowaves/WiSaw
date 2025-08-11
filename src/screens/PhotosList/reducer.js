@@ -561,22 +561,6 @@ export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
   }
 }
 
-export const processQueuedItemForUpload = async (queuedItem) => {
-  try {
-    // Process the file (compress, move, generate thumbnails)
-    const processedItem = await processQueuedFile(queuedItem)
-
-    // Update the queue with the processed item
-    await removeFromQueue(queuedItem)
-    await addToQueue(processedItem)
-
-    return processedItem
-  } catch (error) {
-    console.error('Error processing queued item for upload:', error)
-    throw error
-  }
-}
-
 export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
   try {
     const localImageName = cameraImgUrl.substr(
