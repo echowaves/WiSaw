@@ -355,14 +355,6 @@ export const removeFromQueue = async (imageToRemove) => {
 // returns an array that has everything needed for rendering
 export const getQueue = async () => {
   try {
-    // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
-    await CONST.makeSureDirectoryExists({
-      directory: CONST.PENDING_UPLOADS_FOLDER,
-    })
-
-    const filesInStorage = await FileSystem.readDirectoryAsync(
-      CONST.PENDING_UPLOADS_FOLDER,
-    )
     let imagesInQueue = JSON.parse(
       await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
     )
@@ -374,29 +366,6 @@ export const getQueue = async () => {
         value: [],
       })
     }
-    // remove images from the queue if corresponding file does not exist
-    imagesInQueue.forEach((image) => {
-      if (!filesInStorage.some((f) => f === image.localImageName)) {
-        removeFromQueue(image)
-      }
-    })
-
-    // get images in queue again after filtering
-    imagesInQueue = JSON.parse(
-      await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-    )
-    if (!imagesInQueue) {
-      imagesInQueue = []
-    }
-
-    // remove image from storage if corresponding recorsd does not exist in the queue
-    filesInStorage.forEach((file) => {
-      if (!imagesInQueue.some((i) => i.localImageName === file)) {
-        FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER}${file}`, {
-          idempotent: true,
-        })
-      }
-    })
 
     return imagesInQueue
   } catch (cbushdugw) {
@@ -469,6 +438,55 @@ const genLocalThumbs = async (image) => {
   }
 }
 
+export const processQueuedFile = async (queuedItem) => {
+  try {
+    // Generate local file path in pending uploads folder
+    const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${queuedItem.localImageName}`
+
+    // For images, compress the main image before storing to reduce file size
+    if (queuedItem.type === 'image') {
+      // Compress the main image to reduce upload size while maintaining good quality
+      const compressedResult = await ImageManipulator.manipulateAsync(
+        queuedItem.originalCameraUrl,
+        [], // No resize, just compress
+        { compress: 0.9, format: ImageManipulator.SaveFormat.WEBP },
+      )
+
+      // Move the compressed file to cache directory
+      await FileSystem.moveAsync({
+        from: compressedResult.uri,
+        to: localImgUrl,
+      })
+    } else {
+      // For videos, just move the file as-is
+      await FileSystem.moveAsync({
+        from: queuedItem.originalCameraUrl,
+        to: localImgUrl,
+      })
+    }
+
+    // Create processed image object
+    const processedImage = {
+      ...queuedItem,
+      localImgUrl,
+    }
+
+    // Generate thumbnails
+    const thumbEnhancedImage = await genLocalThumbs(processedImage)
+
+    // Add thumbnail to cache
+    await CacheManager.addToCache({
+      file: thumbEnhancedImage.localThumbUrl,
+      key: thumbEnhancedImage.localCacheKey,
+    })
+
+    return thumbEnhancedImage
+  } catch (error) {
+    console.error('Error processing queued file:', error)
+    throw error
+  }
+}
+
 export const addToQueue = async (image) => {
   try {
     // localImgUrl, localImageName, type, location, localThumbUrl, localVideoUrl
@@ -489,6 +507,22 @@ export const addToQueue = async (image) => {
   }
 }
 
+export const processQueuedItemForUpload = async (queuedItem) => {
+  try {
+    // Process the file (compress, move, generate thumbnails)
+    const processedItem = await processQueuedFile(queuedItem)
+
+    // Update the queue with the processed item
+    await removeFromQueue(queuedItem)
+    await addToQueue(processedItem)
+
+    return processedItem
+  } catch (error) {
+    console.error('Error processing queued item for upload:', error)
+    throw error
+  }
+}
+
 export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
   try {
     const localImageName = cameraImgUrl.substr(
@@ -496,48 +530,19 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
     )
     const localCacheKey = localImageName.split('.')[0]
 
-    const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${localImageName}`
-
-    // For images, compress the main image before storing to reduce file size
-    if (type === 'image') {
-      // Compress the main image to reduce upload size while maintaining good quality
-      const compressedResult = await ImageManipulator.manipulateAsync(
-        cameraImgUrl,
-        [], // No resize, just compress
-        { compress: 0.9, format: ImageManipulator.SaveFormat.WEBP },
-      )
-
-      // Move the compressed file to cache directory
-      await FileSystem.moveAsync({
-        from: compressedResult.uri,
-        to: localImgUrl,
-      })
-    } else {
-      // For videos, just move the file as-is
-      await FileSystem.moveAsync({
-        from: cameraImgUrl,
-        to: localImgUrl,
-      })
-    }
-
+    // Just store reference to original camera file - no manipulation yet
     const image = {
-      localImgUrl,
+      originalCameraUrl: cameraImgUrl, // Reference to original camera file
       localImageName,
       type,
       location,
       localCacheKey,
     }
-    const thumbEnhansedImage = await genLocalThumbs(image)
-    await CacheManager.addToCache({
-      file: thumbEnhansedImage.localThumbUrl,
-      key: thumbEnhansedImage.localCacheKey,
-    })
 
-    await addToQueue(thumbEnhansedImage)
+    await addToQueue(image)
   } catch (cqwyefyttyf) {
     console.error({ cqwyefyttyf })
   }
-  // updatePendingPhotos()
 }
 
 export const generatePhoto = async ({ uuid, lat, lon, video }) => {

@@ -515,28 +515,32 @@ const PhotosList = ({ searchFromUrl }) => {
       for (i = 0; i < generatePhotoQueue.length; i += 1) {
         const item = generatePhotoQueue[i]
         try {
+          // Process the file if it hasn't been processed yet (compress, generate thumbnails, etc.)
+          // eslint-disable-next-line no-await-in-loop
+          const processedItem = await reducer.processQueuedItemForUpload(item)
+
           // eslint-disable-next-line no-await-in-loop
           const photo = await reducer.generatePhoto({
             uuid,
-            lat: item.location.coords.latitude,
-            lon: item.location.coords.longitude,
-            video: item?.type === 'video',
+            lat: processedItem.location.coords.latitude,
+            lon: processedItem.location.coords.longitude,
+            video: processedItem?.type === 'video',
           })
           // eslint-disable-next-line no-await-in-loop
           await CacheManager.addToCache({
-            file: item.localThumbUrl,
+            file: processedItem.localThumbUrl,
             key: `${photo.id}-thumb`,
           })
           // eslint-disable-next-line no-await-in-loop
           await CacheManager.addToCache({
-            file: item.localImgUrl,
+            file: processedItem.localImgUrl,
             key: `${photo.id}`,
           })
           // eslint-disable-next-line no-await-in-loop
-          await reducer.removeFromQueue(item)
+          await reducer.removeFromQueue(processedItem)
           // eslint-disable-next-line no-await-in-loop
           await reducer.addToQueue({
-            ...item,
+            ...processedItem,
             photo,
           })
           // eslint-disable-next-line no-await-in-loop
