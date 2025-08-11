@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
@@ -472,7 +472,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   const { width, height } = useWindowDimensions()
 
   // Calculate optimal photo/video dimensions based on photo's actual dimensions
-  const calculatePhotoDimensions = () => {
+  const photoDimensions = useMemo(() => {
     const screenWidth = width
     const topPadding = 120 // Container paddingTop for header
     const bottomSpace = 100 // Space for content below photo and safe area
@@ -499,9 +499,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
       height: calculatedHeight,
       aspectRatio,
     }
-  }
-
-  const photoDimensions = calculatePhotoDimensions()
+  }, [width, height, photo?.width, photo?.height])
 
   useEffect(
     // use this to make the navigation to a detailed screen faster
@@ -962,7 +960,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               handleBan()
             }
           }}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
+          delayPressIn={0}
+          delayPressOut={0}
         >
           <FontAwesome
             name="ban"
@@ -1012,7 +1012,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               handleDelete()
             }
           }}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
+          delayPressIn={0}
+          delayPressOut={0}
         >
           <FontAwesome
             name="trash"
@@ -1048,7 +1050,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               styles.actionButtonDisabled,
           ]}
           onPress={() => handleFlipWatch()}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
+          delayPressIn={0}
+          delayPressOut={0}
           disabled={photoDetails?.isPhotoWatched === undefined}
         >
           <AntDesign
@@ -1089,7 +1093,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
           onPress={() => {
             sharingHelper.sharePhoto(photo, photoDetails, topOffset)
           }}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
+          delayPressIn={0}
+          delayPressOut={0}
           disabled={photoDetails?.isPhotoWatched === undefined}
         >
           <Ionicons
