@@ -365,7 +365,6 @@ const styles = StyleSheet.create({
   },
   actionButtonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     gap: 6,
   },
   actionButton: {
@@ -942,6 +941,105 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   const renderActionCard = () => (
     <View style={styles.actionCard}>
       <View style={styles.actionButtonsContainer}>
+        {/* Report/Ban button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            (photoDetails?.isPhotoWatched === undefined ||
+              photoDetails?.isPhotoWatched ||
+              isPhotoBannedByMe()) &&
+              styles.actionButtonDisabled,
+          ]}
+          onPress={() => {
+            if (photoDetails?.isPhotoWatched) {
+              Toast.show({
+                text1: 'Unable to Report Starred photo',
+                text2: 'Un-Star photo first',
+                type: 'error',
+                topOffset,
+              })
+            } else {
+              handleBan()
+            }
+          }}
+          activeOpacity={0.7}
+        >
+          <FontAwesome
+            name="ban"
+            color={
+              photoDetails?.isPhotoWatched === undefined ||
+              photoDetails?.isPhotoWatched ||
+              isPhotoBannedByMe()
+                ? '#666666'
+                : '#FF9500'
+            }
+            size={16}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              {
+                color:
+                  photoDetails?.isPhotoWatched === undefined ||
+                  photoDetails?.isPhotoWatched ||
+                  isPhotoBannedByMe()
+                    ? '#666666'
+                    : '#FF9500',
+              },
+            ]}
+          >
+            Report
+          </Text>
+        </TouchableOpacity>
+
+        {/* Delete button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            (photoDetails?.isPhotoWatched === undefined ||
+              photoDetails?.isPhotoWatched) &&
+              styles.actionButtonDisabled,
+          ]}
+          onPress={() => {
+            if (photoDetails?.isPhotoWatched) {
+              Toast.show({
+                text1: 'Unable to delete Starred photo',
+                text2: 'Un-Star photo first',
+                type: 'error',
+                topOffset,
+              })
+            } else {
+              handleDelete()
+            }
+          }}
+          activeOpacity={0.7}
+        >
+          <FontAwesome
+            name="trash"
+            color={
+              photoDetails?.isPhotoWatched === undefined ||
+              photoDetails?.isPhotoWatched
+                ? '#666666'
+                : '#FF6B6B'
+            }
+            size={16}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              {
+                color:
+                  photoDetails?.isPhotoWatched === undefined ||
+                  photoDetails?.isPhotoWatched
+                    ? '#666666'
+                    : '#FF6B6B',
+              },
+            ]}
+          >
+            Delete
+          </Text>
+        </TouchableOpacity>
+
         {/* Star button */}
         <TouchableOpacity
           style={[
@@ -1013,92 +1111,6 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             ]}
           >
             Share
-          </Text>
-        </TouchableOpacity>
-
-        {/* Report/Ban button */}
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            (photoDetails?.isPhotoWatched === undefined ||
-              photoDetails?.isPhotoWatched ||
-              isPhotoBannedByMe()) &&
-              styles.actionButtonDisabled,
-          ]}
-          onPress={() => handleBan()}
-          activeOpacity={0.7}
-          disabled={
-            photoDetails?.isPhotoWatched === undefined ||
-            photoDetails?.isPhotoWatched ||
-            isPhotoBannedByMe()
-          }
-        >
-          <FontAwesome
-            name="ban"
-            color={
-              photoDetails?.isPhotoWatched === undefined ||
-              photoDetails?.isPhotoWatched ||
-              isPhotoBannedByMe()
-                ? '#666666'
-                : '#FF9500'
-            }
-            size={16}
-          />
-          <Text
-            style={[
-              styles.actionButtonText,
-              {
-                color:
-                  photoDetails?.isPhotoWatched === undefined ||
-                  photoDetails?.isPhotoWatched ||
-                  isPhotoBannedByMe()
-                    ? '#666666'
-                    : '#FF9500',
-              },
-            ]}
-          >
-            Report
-          </Text>
-        </TouchableOpacity>
-
-        {/* Delete button */}
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            (photoDetails?.isPhotoWatched === undefined ||
-              photoDetails?.isPhotoWatched) &&
-              styles.actionButtonDisabled,
-          ]}
-          onPress={() => handleDelete()}
-          activeOpacity={0.7}
-          disabled={
-            photoDetails?.isPhotoWatched === undefined ||
-            photoDetails?.isPhotoWatched
-          }
-        >
-          <FontAwesome
-            name="trash"
-            color={
-              photoDetails?.isPhotoWatched === undefined ||
-              photoDetails?.isPhotoWatched
-                ? '#666666'
-                : '#FF6B6B'
-            }
-            size={16}
-          />
-          <Text
-            style={[
-              styles.actionButtonText,
-              {
-                color:
-                  photoDetails?.isPhotoWatched === undefined ||
-                  photoDetails?.isPhotoWatched
-                    ? '#666666'
-                    : '#FF6B6B',
-              },
-            ]}
-          >
-            Delete
           </Text>
         </TouchableOpacity>
       </View>
