@@ -366,17 +366,14 @@ const PhotosList = ({ searchFromUrl }) => {
       return true
     }
 
-    // Primary check: use lastViewableRow if it's reasonable
+    // Conservative check for preemptive loading
+    // This is used for background preloading, not for onEndReached
     const screenColumns = width / thumbDimension
     const screenRows = height / thumbDimension
     const totalNumRows = photosList.length / screenColumns
 
-    // If lastViewableRow seems stuck at 1, be more aggressive
-    if (lastViewableRow <= 1) {
-      return true
-    }
-
-    const shouldLoad = screenRows * 2 + lastViewableRow > totalNumRows
+    // Only preload when we're within 2 screens of the end
+    const shouldLoad = lastViewableRow + screenRows * 2 >= totalNumRows
 
     return shouldLoad
   }
@@ -434,11 +431,6 @@ const PhotosList = ({ searchFromUrl }) => {
             ),
         )
       }
-
-      // Continue loading if we haven't hit the stop condition and user wants more
-      if (!stopLoading && wantToLoadMore()) {
-        setPageNumber((currentPage) => currentPage + 1)
-      }
     }
 
     setLoading(false)
@@ -453,14 +445,6 @@ const PhotosList = ({ searchFromUrl }) => {
     setLastScrollY(currentScrollY)
     setScrollViewHeight(layoutHeight)
     setContentHeight(contentSizeHeight)
-
-    // Calculate how close we are to the bottom
-    const scrollProgress = (currentScrollY + layoutHeight) / contentSizeHeight
-
-    // Trigger loading when we're 80% down the content
-    if (scrollProgress > 0.8 && !loading && !stopLoading) {
-      setPageNumber((currentPage) => currentPage + 1)
-    }
 
     const isAtTop = currentScrollY <= 10 // Consider "top" as within 10px of the very top
 
@@ -1224,13 +1208,6 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }, [pageNumber])
 
-  useEffect(() => {
-    if (wantToLoadMore() && loading === false) {
-      setPageNumber((currentPage) => currentPage + 1)
-      // load()
-    }
-  }, [lastViewableRow])
-
   // Handle search from URL parameter (e.g., from AI tag clicks)
   useEffect(() => {
     if (searchFromUrl && searchFromUrl.trim().length > 0) {
@@ -1390,7 +1367,7 @@ const PhotosList = ({ searchFromUrl }) => {
         aspectRatioFallbacks={config.aspectRatioFallbacks}
         keyExtractor={(item) => item.id}
         onEndReached={() => {
-          // Always try to load more when reaching the end, regardless of lastViewableRow calculation
+          // Load more when user reaches the end
           if (!loading && !stopLoading) {
             setPageNumber((currentPage) => {
               const newPage = currentPage + 1
@@ -1398,7 +1375,7 @@ const PhotosList = ({ searchFromUrl }) => {
             })
           }
         }}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.2}
         onViewableItemsChanged={onViewRef.current}
         viewabilityConfig={{
           itemVisiblePercentThreshold: 10,
