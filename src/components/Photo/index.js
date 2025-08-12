@@ -555,15 +555,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   }
 
   const renderCommentsRows = () => {
-    if (photoDetails?.comments) {
+    if (photoDetails?.comments && photoDetails.comments.length > 0) {
       return (
         <View style={styles.commentsCard}>
-          <View style={styles.commentsHeader}>
-            <FontAwesome name="comment" size={20} color="#4FC3F7" />
-            <Text style={styles.commentsTitle}>
-              Comments ({photoDetails.comments.length})
-            </Text>
-          </View>
           <View style={styles.commentsSection}>
             {photoDetails?.comments.map((comment, i) => (
               <TouchableOpacity
