@@ -228,6 +228,13 @@ export default function DrawerLayout() {
             headerTintColor: CONST.MAIN_COLOR,
           }}
         />
+        <Drawer.Screen
+          name="friendships"
+          options={{
+            drawerItemStyle: { display: 'none' },
+            headerShown: false,
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   )
