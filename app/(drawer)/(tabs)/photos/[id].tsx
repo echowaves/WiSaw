@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import PhotosDetails from '../../../../src/screens/PhotosDetails'
 import * as STATE from '../../../../src/state'
+import { SHARED_STYLES } from '../../../../src/theme/sharedStyles'
 
 export default function PhotoDetail() {
   const params = useLocalSearchParams()
@@ -39,10 +40,13 @@ export default function PhotoDetail() {
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#000',
+          backgroundColor: SHARED_STYLES.theme.BACKGROUND,
         }}
       >
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator
+          size="large"
+          color={SHARED_STYLES.theme.TEXT_PRIMARY}
+        />
       </View>
     )
   }

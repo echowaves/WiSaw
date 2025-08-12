@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
 import { LinearProgress, Text } from '@rneui/themed'
@@ -30,59 +31,33 @@ import * as sharingHelper from '../../utils/simpleSharingHelper'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 import ImageView from './ImageView'
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
     position: 'relative',
     height: '100%',
-    paddingTop: 120, // Increased padding to prevent header overlap
+    // Dynamic paddingTop will be applied inline based on device
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
   },
   contentContainer: {
-    backgroundColor: '#0A0A0A',
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
     paddingBottom: 40,
   },
   // Enhanced card container for all content sections
   cardContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 20,
-    marginVertical: 8,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    ...SHARED_STYLES.containers.card,
   },
   // Photo info card
   photoInfoCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    ...SHARED_STYLES.containers.infoCard,
   },
   headerInfo: {
     backgroundColor: 'transparent',
@@ -92,24 +67,16 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   authorRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    ...SHARED_STYLES.layout.spaceBetween,
+    ...SHARED_STYLES.layout.separator,
   },
   authorName: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+    ...SHARED_STYLES.text.heading,
     flexShrink: 1,
     marginRight: 12,
   },
   dateText: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 14,
+    ...SHARED_STYLES.text.secondary,
     textAlign: 'right',
     flexShrink: 0,
     fontWeight: '500',
@@ -121,52 +88,21 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...SHARED_STYLES.interactive.statItem,
   },
   statsText: {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 6,
+    ...SHARED_STYLES.interactive.statText,
   },
   // Enhanced comments section
   commentsCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    ...SHARED_STYLES.containers.card,
   },
   commentsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    ...SHARED_STYLES.layout.row,
+    ...SHARED_STYLES.layout.separator,
   },
   commentsTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
+    ...SHARED_STYLES.text.heading,
     marginLeft: 8,
   },
   commentsSection: {
@@ -176,51 +112,44 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   commentCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
     borderRadius: 16,
     marginVertical: 8,
     padding: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
     borderLeftWidth: 4,
-    borderLeftColor: '#4FC3F7',
+    borderLeftColor: SHARED_STYLES.theme.STATUS_SUCCESS,
   },
   commentText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    ...SHARED_STYLES.text.primary,
     lineHeight: 24,
     marginBottom: 12,
-    fontWeight: '400',
   },
   commentMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    ...SHARED_STYLES.layout.spaceBetween,
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopColor: SHARED_STYLES.theme.CARD_BORDER,
   },
   commentAuthor: {
-    color: '#4FC3F7',
-    fontSize: 14,
-    fontWeight: '600',
+    ...SHARED_STYLES.text.subheading,
+    color: SHARED_STYLES.theme.STATUS_SUCCESS,
   },
   commentDate: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: 12,
-    fontWeight: '500',
+    ...SHARED_STYLES.text.caption,
   },
   addCommentCard: {
-    backgroundColor: 'rgba(79, 195, 247, 0.05)',
+    backgroundColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}05`,
     borderRadius: 20,
     marginVertical: 8,
     marginHorizontal: 16,
     padding: 20,
     borderWidth: 2,
-    borderColor: 'rgba(79, 195, 247, 0.2)',
+    borderColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}20`,
     borderStyle: 'dashed',
-    shadowColor: '#4FC3F7',
+    shadowColor: SHARED_STYLES.theme.STATUS_SUCCESS,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -242,7 +171,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addCommentText: {
-    color: '#4FC3F7',
+    color: SHARED_STYLES.theme.STATUS_SUCCESS,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
@@ -253,32 +182,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   aiRecognitionCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 20,
-    padding: 20,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    ...SHARED_STYLES.containers.card,
   },
   aiRecognitionTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
+    ...SHARED_STYLES.text.heading,
     textAlign: 'center',
     marginBottom: 16,
   },
   aiRecognitionModerationTitle: {
-    color: '#FF6B6B',
-    fontSize: 18,
-    fontWeight: '700',
+    ...SHARED_STYLES.text.heading,
+    color: SHARED_STYLES.theme.STATUS_ERROR,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -290,13 +203,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   aiTag: {
-    backgroundColor: 'rgba(79, 195, 247, 0.15)',
+    backgroundColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}15`,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(79, 195, 247, 0.3)',
-    shadowColor: '#4FC3F7',
+    borderColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}30`,
+    shadowColor: SHARED_STYLES.theme.STATUS_SUCCESS,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -306,18 +219,18 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   aiTagText: {
-    color: '#4FC3F7',
+    color: SHARED_STYLES.theme.STATUS_SUCCESS,
     fontSize: 13,
     fontWeight: '600',
   },
   aiModerationTag: {
-    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    backgroundColor: `${SHARED_STYLES.theme.STATUS_ERROR}15`,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 107, 107, 0.3)',
-    shadowColor: '#FF6B6B',
+    borderColor: `${SHARED_STYLES.theme.STATUS_ERROR}30`,
+    shadowColor: SHARED_STYLES.theme.STATUS_ERROR,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -327,40 +240,22 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   aiModerationTagText: {
-    color: '#FF6B6B',
+    color: SHARED_STYLES.theme.STATUS_ERROR,
     fontSize: 13,
     fontWeight: '600',
   },
   // Action card styles
   actionCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 20,
+    ...SHARED_STYLES.containers.card,
     marginVertical: 4,
-    marginHorizontal: 16,
     padding: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
   actionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    ...SHARED_STYLES.layout.row,
+    ...SHARED_STYLES.layout.separator,
   },
   actionTitle: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    ...SHARED_STYLES.text.subheading,
     marginLeft: 8,
   },
   actionButtonsContainer: {
@@ -369,15 +264,15 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
     borderRadius: 10,
     paddingVertical: 6,
     paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: '#000',
+    borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
+    shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -388,15 +283,19 @@ const styles = StyleSheet.create({
     minHeight: 42,
   },
   actionButtonDisabled: {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND_DISABLED,
+    borderColor: SHARED_STYLES.theme.BORDER_DISABLED,
+    opacity: 0.8,
+    shadowOpacity: 0.1,
   },
   actionButtonText: {
+    ...SHARED_STYLES.text.caption,
     fontSize: 10,
     marginTop: 4,
     fontWeight: '600',
     textAlign: 'center',
     letterSpacing: 0.3,
+    color: SHARED_STYLES.theme.TEXT_PRIMARY,
   },
   loadingProgress: {
     marginHorizontal: 16,
@@ -413,6 +312,16 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
   const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
+
+  // Get dynamic safe area and window dimensions
+  const insets = useSafeAreaInsets()
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+
+  // Calculate dynamic header offset using shared function
+  const headerOffset = useMemo(() => {
+    const isSmallDevice = screenWidth < 768 // Phone vs tablet
+    return SHARED_STYLES.header.getDynamicHeight(insets.top, isSmallDevice)
+  }, [screenWidth, insets.top])
 
   const componentIsMounted = useRef(true)
 
@@ -473,10 +382,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
   // Calculate optimal photo/video dimensions based on photo's actual dimensions
   const photoDimensions = useMemo(() => {
-    const screenWidth = width
-    const topPadding = 120 // Container paddingTop for header
+    const topPadding = headerOffset // Use dynamic header offset
     const bottomSpace = 100 // Space for content below photo and safe area
-    const maxHeight = height - topPadding - bottomSpace
+    const maxHeight = screenHeight - topPadding - bottomSpace
 
     // Get photo dimensions or use defaults
     const photoWidth = photo?.width || 1080
@@ -499,7 +407,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
       height: calculatedHeight,
       aspectRatio,
     }
-  }, [width, height, photo?.width, photo?.height])
+  }, [screenWidth, screenHeight, headerOffset, photo?.width, photo?.height])
 
   useEffect(
     // use this to make the navigation to a detailed screen faster
@@ -970,8 +878,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               photoDetails?.isPhotoWatched === undefined ||
               photoDetails?.isPhotoWatched ||
               isPhotoBannedByMe()
-                ? '#666666'
-                : '#FF9500'
+                ? SHARED_STYLES.theme.TEXT_DISABLED
+                : SHARED_STYLES.theme.STATUS_CAUTION
             }
             size={16}
           />
@@ -983,8 +891,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                   photoDetails?.isPhotoWatched === undefined ||
                   photoDetails?.isPhotoWatched ||
                   isPhotoBannedByMe()
-                    ? '#666666'
-                    : '#FF9500',
+                    ? SHARED_STYLES.theme.TEXT_DISABLED
+                    : SHARED_STYLES.theme.STATUS_CAUTION,
               },
             ]}
           >
@@ -1021,8 +929,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             color={
               photoDetails?.isPhotoWatched === undefined ||
               photoDetails?.isPhotoWatched
-                ? '#666666'
-                : '#FF6B6B'
+                ? SHARED_STYLES.theme.TEXT_DISABLED
+                : SHARED_STYLES.theme.STATUS_ERROR
             }
             size={16}
           />
@@ -1033,8 +941,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                 color:
                   photoDetails?.isPhotoWatched === undefined ||
                   photoDetails?.isPhotoWatched
-                    ? '#666666'
-                    : '#FF6B6B',
+                    ? SHARED_STYLES.theme.TEXT_DISABLED
+                    : SHARED_STYLES.theme.STATUS_ERROR,
               },
             ]}
           >
@@ -1059,10 +967,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
             color={
               photoDetails?.isPhotoWatched === undefined
-                ? '#666666'
+                ? SHARED_STYLES.theme.TEXT_DISABLED
                 : photoDetails?.isPhotoWatched
                   ? '#FFD700'
-                  : '#FFFFFF'
+                  : SHARED_STYLES.theme.TEXT_PRIMARY
             }
             size={18}
           />
@@ -1072,10 +980,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               {
                 color:
                   photoDetails?.isPhotoWatched === undefined
-                    ? '#666666'
+                    ? SHARED_STYLES.theme.TEXT_DISABLED
                     : photoDetails?.isPhotoWatched
                       ? '#FFD700'
-                      : '#FFFFFF',
+                      : SHARED_STYLES.theme.TEXT_PRIMARY,
               },
             ]}
           >
@@ -1101,7 +1009,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
           <Ionicons
             name="share-outline"
             color={
-              photoDetails?.isPhotoWatched === undefined ? '#666666' : '#4FC3F7'
+              photoDetails?.isPhotoWatched === undefined
+                ? SHARED_STYLES.theme.TEXT_DISABLED
+                : SHARED_STYLES.theme.STATUS_SUCCESS
             }
             size={18}
           />
@@ -1111,8 +1021,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               {
                 color:
                   photoDetails?.isPhotoWatched === undefined
-                    ? '#666666'
-                    : '#4FC3F7',
+                    ? SHARED_STYLES.theme.TEXT_DISABLED
+                    : SHARED_STYLES.theme.STATUS_SUCCESS,
               },
             ]}
           >
@@ -1143,7 +1053,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             height: photoHeight,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: '#000',
+            backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
             marginTop: 8,
             marginBottom: 8,
           }}
@@ -1161,7 +1071,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
           height: photoHeight,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: '#000',
+          backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
           marginTop: 8,
           marginBottom: 8,
         }}
@@ -1287,7 +1197,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: headerOffset }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={styles.scrollView}

@@ -15,18 +15,29 @@ import { Text } from '@rneui/themed'
 import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 import SafeAreaView from '../SafeAreaView'
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
   },
   headerButton: {
     padding: 12,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   headerIcon: {
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
@@ -34,9 +45,9 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   headerTitle: {
-    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.95)',
+    fontSize: 17,
     fontWeight: '600',
-    color: '#fff',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
@@ -62,7 +73,7 @@ const PinchableView = ({ route, navigation }) => {
       <Ionicons
         name="chevron-back"
         size={24}
-        color="#fff"
+        color="rgba(255, 255, 255, 0.95)"
         style={styles.headerIcon}
         onPress={() => router.back()}
       />
@@ -74,7 +85,7 @@ const PinchableView = ({ route, navigation }) => {
       <Ionicons
         name="expand-outline"
         size={20}
-        color="#fff"
+        color="rgba(255, 255, 255, 0.95)"
         style={styles.headerIcon}
       />
       <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Full View</Text>
@@ -89,7 +100,7 @@ const PinchableView = ({ route, navigation }) => {
         left: 0,
         right: 0,
         zIndex: 1000,
-        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
     >
       <View

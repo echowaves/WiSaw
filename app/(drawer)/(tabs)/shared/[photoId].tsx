@@ -8,6 +8,7 @@ import {
 import { useCallback, useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import PhotosDetailsShared from '../../../../src/screens/PhotosDetailsShared'
+import { SHARED_STYLES } from '../../../../src/theme/sharedStyles'
 import { getTransparentHeaderStyle } from '../../../../src/utils/navigationStyles'
 
 export default function SharedPhotoDetail() {
@@ -26,26 +27,28 @@ export default function SharedPhotoDetail() {
     <>
       <Stack.Screen
         options={{
-          headerStyle: getTransparentHeaderStyle(),
+          headerStyle: {
+            ...getTransparentHeaderStyle(),
+            ...SHARED_STYLES.header.routeStyle,
+          },
           headerTitleStyle: {
             fontSize: 16,
             fontWeight: '600',
-            color: '#fff',
+            color: SHARED_STYLES.theme.TEXT_PRIMARY,
           },
-          headerTintColor: '#fff',
+          headerTintColor: SHARED_STYLES.theme.TEXT_PRIMARY,
           headerTransparent: true,
           headerBackVisible: false,
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => router.back()}
-              style={{
-                padding: 12,
-                borderRadius: 20,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                marginHorizontal: 8,
-              }}
+              style={SHARED_STYLES.interactive.headerButton}
             >
-              <Ionicons name="chevron-back" size={24} color="#fff" />
+              <Ionicons
+                name="chevron-back"
+                size={24}
+                color={SHARED_STYLES.theme.TEXT_PRIMARY}
+              />
             </TouchableOpacity>
           ),
           headerTitle: () => (
@@ -53,14 +56,14 @@ export default function SharedPhotoDetail() {
               <AntDesign
                 name="sharealt"
                 size={20}
-                color="#fff"
+                color={SHARED_STYLES.theme.TEXT_PRIMARY}
                 style={{ marginRight: 8 }}
               />
               <Text
                 style={{
                   fontSize: 16,
                   fontWeight: '600',
-                  color: '#fff',
+                  color: SHARED_STYLES.theme.TEXT_PRIMARY,
                 }}
               >
                 Shared Photo

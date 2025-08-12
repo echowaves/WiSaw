@@ -220,6 +220,8 @@ async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
               watchersCount
               lastComment
               createdAt
+              width
+              height
             }
             batch
             noMoreData

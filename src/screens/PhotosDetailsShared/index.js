@@ -7,7 +7,8 @@ import PropTypes from 'prop-types'
 
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 
-import { StatusBar, StyleSheet, View } from 'react-native'
+import { StatusBar, StyleSheet, View, useWindowDimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text } from '@rneui/themed'
 
@@ -16,28 +17,21 @@ import { gql } from '@apollo/client'
 import Photo from '../../components/Photo'
 
 import * as CONST from '../../consts'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
-  },
-  headerButton: {
-    padding: 12,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginHorizontal: 8,
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
   },
   headerIcon: {
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowColor: SHARED_STYLES.theme.CARD_SHADOW,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    ...SHARED_STYLES.header.title,
+    textShadowColor: SHARED_STYLES.theme.CARD_SHADOW,
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
@@ -46,6 +40,9 @@ const styles = StyleSheet.create({
 const PhotosDetailsShared = ({ route }) => {
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
+  const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
+  const isSmallDevice = width < 768
 
   const { photoId, refreshKey } = route.params
 
@@ -83,11 +80,11 @@ const PhotosDetailsShared = ({ route }) => {
   }
 
   const renderHeaderLeft = () => (
-    <View style={styles.headerButton}>
+    <View style={SHARED_STYLES.interactive.headerButton}>
       <Ionicons
         name="chevron-back"
         size={24}
-        color="#fff"
+        color={SHARED_STYLES.theme.TEXT_PRIMARY}
         style={styles.headerIcon}
         onPress={() => router.back()}
       />
@@ -99,7 +96,7 @@ const PhotosDetailsShared = ({ route }) => {
       <AntDesign
         name="sharealt"
         size={20}
-        color="#fff"
+        color={SHARED_STYLES.theme.TEXT_PRIMARY}
         style={styles.headerIcon}
       />
       <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
@@ -145,11 +142,17 @@ const PhotosDetailsShared = ({ route }) => {
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle="light-content"
+        barStyle="dark-content"
         backgroundColor="transparent"
         translucent
       />
-      <Text style={{ color: '#fff', textAlign: 'center', marginTop: 100 }}>
+      <Text
+        style={{
+          color: SHARED_STYLES.theme.TEXT_PRIMARY,
+          textAlign: 'center',
+          marginTop: 100,
+        }}
+      >
         Loading...
       </Text>
     </View>

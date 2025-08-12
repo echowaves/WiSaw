@@ -15,13 +15,13 @@ import { Button, Icon, Text } from '@rneui/themed'
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
-import { Ionicons } from '@expo/vector-icons'
-
 import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
+
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 import * as reducer from '../../components/Photo/reducer'
 
@@ -30,31 +30,11 @@ const maxStringLength = 140
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
-  },
-  headerButton: {
-    padding: 12,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginHorizontal: 8,
-  },
-  headerIcon: {
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
   },
   photoContainer: {
     alignSelf: 'center',
-    marginTop: 20,
-    marginBottom: 20,
+    marginBottom: 10,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -63,15 +43,25 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   inputContainer: {
-    margin: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    marginHorizontal: 20,
+    marginTop: 0,
+    marginBottom: 20,
+    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: SHARED_STYLES.theme.CARD_BORDER,
     overflow: 'hidden',
+    shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   textInput: {
-    color: '#fff',
+    color: SHARED_STYLES.theme.TEXT_PRIMARY,
     fontSize: 16,
     padding: 20,
     textAlignVertical: 'top',
@@ -81,7 +71,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 16,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: SHARED_STYLES.theme.TEXT_SECONDARY,
     fontSize: 12,
     fontWeight: '500',
   },
@@ -106,8 +96,29 @@ const styles = StyleSheet.create({
 const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
   const { photo, topOffset, uuid, onTextChange } = route.params
-  const { height } = useWindowDimensions()
+  const { height, width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
+  const isSmallDevice = width < 768
+
+  // Calculate photo dimensions with fixed height of 200px
+  const calculatePhotoDimensions = () => {
+    const targetHeight = 200
+    if (photo?.width && photo?.height) {
+      const aspectRatio = photo.width / photo.height
+      const scaledWidth = targetHeight * aspectRatio
+      return {
+        width: scaledWidth,
+        height: targetHeight,
+      }
+    }
+    // Fallback to square if dimensions not available
+    return {
+      width: targetHeight,
+      height: targetHeight,
+    }
+  }
+
+  const photoDimensions = calculatePhotoDimensions()
 
   const [inputText, _setInputText] = useState('')
 
@@ -121,18 +132,6 @@ const ModalInputText = ({ route }) => {
     }
   }
 
-  const renderHeaderLeft = () => (
-    <View style={styles.headerButton}>
-      <Ionicons
-        name="chevron-back"
-        size={24}
-        color="#fff"
-        style={styles.headerIcon}
-        onPress={() => router.back()}
-      />
-    </View>
-  )
-
   const handleSubmit = async () => {
     await reducer.submitComment({
       inputText: inputTextRef.current.trim(),
@@ -142,32 +141,6 @@ const ModalInputText = ({ route }) => {
     })
     router.back()
   }
-
-  const renderHeaderRight = () => (
-    <View style={styles.headerButton}>
-      <Ionicons
-        onPress={() => {
-          handleSubmit()
-        }}
-        name="send"
-        size={24}
-        color="#fff"
-        style={styles.headerIcon}
-      />
-    </View>
-  )
-
-  const renderHeaderTitle = () => (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <Ionicons
-        name="chatbubble-outline"
-        size={20}
-        color="#fff"
-        style={styles.headerIcon}
-      />
-      <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Add Comment</Text>
-    </View>
-  )
 
   // Remove navigation.setOptions as it's not compatible with Expo Router
   // The header is now controlled by the layout in app/(drawer)/(tabs)/modal-input.tsx
@@ -190,7 +163,7 @@ const ModalInputText = ({ route }) => {
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle="light-content"
+        barStyle="dark-content"
         backgroundColor="transparent"
         translucent
       />
@@ -198,7 +171,7 @@ const ModalInputText = ({ route }) => {
         style={{ flex: 1 }}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
-          paddingTop: insets.top + 60, // Account for header height
+          paddingTop: 10,
           paddingBottom: insets.bottom + 20,
         }}
         keyboardShouldPersistTaps="handled"
@@ -210,8 +183,8 @@ const ModalInputText = ({ route }) => {
           style={[
             styles.photoContainer,
             {
-              width: height < 700 ? 100 : 150,
-              height: height < 700 ? 100 : 150,
+              width: photoDimensions.width,
+              height: photoDimensions.height,
             },
           ]}
         />
@@ -223,7 +196,7 @@ const ModalInputText = ({ route }) => {
             multiline
             numberOfLines={6}
             placeholder="Share your thoughts about this photo..."
-            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            placeholderTextColor={SHARED_STYLES.theme.TEXT_SECONDARY}
             maxLength={maxStringLength}
             style={[styles.textInput, { height: height < 700 ? 120 : 150 }]}
             onChangeText={(inputValue) => {

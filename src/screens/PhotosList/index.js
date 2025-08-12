@@ -62,6 +62,7 @@ import * as reducer from './reducer'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import Thumb from '../../components/Thumb'
@@ -71,7 +72,7 @@ const BACKGROUND_TASK_NAME = 'background-task'
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: CONST.BG_COLOR,
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
   },
   thumbContainer: {
     // height: thumbDimension,
@@ -85,11 +86,11 @@ const styles = StyleSheet.create({
   },
   customSegmentedControl: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: CONST.HEADER_BORDER_COLOR,
-    shadowColor: CONST.HEADER_SHADOW_COLOR,
+    borderColor: SHARED_STYLES.theme.HEADER_BORDER,
+    shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     minWidth: 50,
   },
   activeSegmentButton: {
-    backgroundColor: CONST.SEGMENT_BACKGROUND_ACTIVE,
+    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_ACTIVE,
   },
   segmentText: {
     fontSize: 12,
@@ -120,10 +121,10 @@ const styles = StyleSheet.create({
     width: 220,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
     borderWidth: 1,
-    borderColor: CONST.HEADER_BORDER_COLOR,
-    shadowColor: CONST.HEADER_SHADOW_COLOR,
+    borderColor: SHARED_STYLES.theme.HEADER_BORDER,
+    shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   selectedButtonStyle: {
-    backgroundColor: CONST.SEGMENT_BACKGROUND_ACTIVE,
+    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_ACTIVE,
     borderRadius: 16,
   },
 })
@@ -2007,6 +2008,19 @@ const PhotosList = ({ searchFromUrl }) => {
       {renderPendingPhotos()}
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
+        {activeSegment === 2 && (
+          <EmptyStateCard
+            icon="search"
+            title="Ready to Search"
+            subtitle="Enter a search term above to find photos from your area and beyond."
+            actionText="Start Exploring"
+            onActionPress={() => {
+              if (searchBarRef.current) {
+                searchBarRef.current.focus()
+              }
+            }}
+          />
+        )}
         {renderFooter({ unreadCount })}
       </View>
     </View>
