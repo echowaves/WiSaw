@@ -260,6 +260,45 @@ export const SHARED_INTERACTIVE = {
     fontWeight: '600',
   },
 
+  // Primary button styles for forms and actions
+  primaryButton: {
+    borderRadius: 12,
+    backgroundColor: CONST.MAIN_COLOR,
+    shadowColor: CONST.MAIN_COLOR,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    paddingVertical: 16,
+  },
+
+  primaryButtonTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    paddingRight: 8,
+  },
+
+  // Secondary button styles
+  secondaryButton: {
+    marginTop: 12,
+    borderRadius: 12,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: THEME.BORDER_LIGHT,
+    paddingVertical: 14,
+  },
+
+  secondaryButtonTitle: {
+    ...SHARED_TEXT.secondary,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+
+  // Button container for consistent spacing
+  buttonContainer: {
+    marginTop: 20,
+  },
+
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',

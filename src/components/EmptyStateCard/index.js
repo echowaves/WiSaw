@@ -1,7 +1,7 @@
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons'
 import { Button } from '@rneui/themed'
 import { StyleSheet, Text, View } from 'react-native'
-import * as CONST from '../../consts'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 const styles = StyleSheet.create({
   container: {
@@ -12,11 +12,11 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
     borderRadius: 24,
     padding: 32,
     alignItems: 'center',
-    shadowColor: CONST.HEADER_SHADOW_COLOR,
+    shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 1,
-    borderColor: CONST.HEADER_BORDER_COLOR,
+    borderColor: SHARED_STYLES.theme.BORDER_LIGHT,
     maxWidth: 320,
     width: '100%',
   },
@@ -44,14 +44,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: CONST.TEXT_COLOR,
+    color: SHARED_STYLES.theme.TEXT_PRIMARY,
     textAlign: 'center',
     marginBottom: 12,
     lineHeight: 28,
   },
   subtitle: {
     fontSize: 16,
-    color: CONST.INACTIVE_SEGMENT_COLOR,
+    color: SHARED_STYLES.theme.TEXT_SECONDARY,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 32,
@@ -61,11 +61,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   actionButton: {
-    backgroundColor: CONST.MAIN_COLOR,
+    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_PRIMARY,
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 20,
-    shadowColor: CONST.MAIN_COLOR,
+    shadowColor: SHARED_STYLES.theme.INTERACTIVE_PRIMARY,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -88,7 +88,7 @@ const EmptyStateCard = ({
   subtitle,
   actionText,
   onActionPress,
-  iconColor = CONST.MAIN_COLOR,
+  iconColor = SHARED_STYLES.theme.TEXT_PRIMARY,
 }) => {
   const IconComponent =
     iconType === 'MaterialIcons' ? MaterialIcons : FontAwesome

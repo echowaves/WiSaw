@@ -19,8 +19,6 @@ import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
 
-import * as CONST from '../../consts'
-
 import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 import * as reducer from '../../components/Photo/reducer'
@@ -76,20 +74,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   submitButton: {
+    ...SHARED_STYLES.interactive.primaryButton,
     margin: 20,
     marginTop: 10,
-    borderRadius: 12,
-    backgroundColor: CONST.MAIN_COLOR,
-    shadowColor: CONST.MAIN_COLOR,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
   submitButtonTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    paddingRight: 8,
+    ...SHARED_STYLES.interactive.primaryButtonTitle,
   },
 })
 

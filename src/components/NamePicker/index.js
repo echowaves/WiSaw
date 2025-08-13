@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import {
   Keyboard,
   Modal,
+  Text as RNText,
   StatusBar,
   StyleSheet,
   TextInput,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   useWindowDimensions,
   View,
@@ -19,8 +21,8 @@ import * as Haptics from 'expo-haptics'
 
 import PropTypes from 'prop-types'
 
-import * as CONST from '../../consts'
 import { SHARED_STYLES } from '../../theme/sharedStyles'
+import AppHeader from '../AppHeader'
 
 const NamePicker = ({
   show,
@@ -44,30 +46,13 @@ const NamePicker = ({
     container: {
       ...SHARED_STYLES.containers.main,
     },
-    headerContainer: {
-      ...SHARED_STYLES.header.container,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingTop: insets.top + 10,
-      paddingBottom: 15,
-    },
-    headerButton: {
-      ...SHARED_STYLES.interactive.headerButton,
-    },
-    headerIcon: {
-      color: CONST.MAIN_COLOR,
-    },
     headerTitle: {
       ...SHARED_STYLES.header.title,
-      fontSize: 18,
-      fontWeight: '600',
     },
     contentContainer: {
       flex: 1,
       paddingHorizontal: 20,
-      paddingTop: 40,
+      paddingTop: 16,
     },
     iconContainer: {
       alignSelf: 'center',
@@ -105,9 +90,9 @@ const NamePicker = ({
         width: 0,
         height: 2,
       },
-      shadowOpacity: 0.1,
+      shadowOpacity: 0.2,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 4,
     },
     textInput: {
       ...SHARED_STYLES.text.primary,
@@ -121,39 +106,21 @@ const NamePicker = ({
       top: 12,
       right: 16,
       ...SHARED_STYLES.text.caption,
-      fontSize: 12,
-      fontWeight: '500',
     },
     buttonContainer: {
-      marginTop: 20,
+      ...SHARED_STYLES.interactive.buttonContainer,
     },
     saveButton: {
-      borderRadius: 12,
-      backgroundColor: CONST.MAIN_COLOR,
-      shadowColor: CONST.MAIN_COLOR,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
-      paddingVertical: 16,
+      ...SHARED_STYLES.interactive.primaryButton,
     },
     saveButtonTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      paddingRight: 8,
+      ...SHARED_STYLES.interactive.primaryButtonTitle,
     },
     cancelButton: {
-      marginTop: 12,
-      borderRadius: 12,
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-      paddingVertical: 14,
+      ...SHARED_STYLES.interactive.secondaryButton,
     },
     cancelButtonTitle: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: SHARED_STYLES.theme.TEXT_SECONDARY,
+      ...SHARED_STYLES.interactive.secondaryButtonTitle,
     },
   })
 
@@ -214,61 +181,72 @@ const NamePicker = ({
           translucent={false}
         />
 
-        {/* Custom Header */}
-        <View style={styles.headerContainer}>
-          <View style={styles.headerButton}>
-            <Ionicons
-              name="chevron-back"
-              size={24}
-              style={styles.headerIcon}
-              onPress={handleCancel}
-            />
-          </View>
-
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <FontAwesome5
-              name="user-plus"
-              size={18}
-              color={CONST.MAIN_COLOR}
-              style={{ marginRight: 8 }}
-            />
-            <Text style={styles.headerTitle}>Add Friend</Text>
-          </View>
-
-          <View style={styles.headerButton}>
-            <Ionicons
-              name="checkmark"
-              size={24}
-              color={
-                inputText.trim()
-                  ? CONST.MAIN_COLOR
-                  : SHARED_STYLES.theme.TEXT_DISABLED
-              }
+        {/* Use AppHeader for consistency */}
+        <AppHeader
+          onBack={handleCancel}
+          title={
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <FontAwesome5
+                name={friendshipUuid ? 'edit' : 'user-plus'}
+                size={18}
+                color={SHARED_STYLES.theme.TEXT_PRIMARY}
+                style={{ marginRight: 8 }}
+              />
+              <RNText style={styles.headerTitle}>
+                {friendshipUuid ? 'Edit Friend Name' : 'Add Friend'}
+              </RNText>
+            </View>
+          }
+          rightSlot={
+            <TouchableOpacity
               onPress={handleSave}
               disabled={!inputText.trim() || isSaving}
-            />
-          </View>
-        </View>
+              style={[
+                SHARED_STYLES.interactive.headerButton,
+                { opacity: inputText.trim() && !isSaving ? 1 : 0.6 },
+              ]}
+            >
+              <Ionicons
+                name="checkmark"
+                size={24}
+                color={
+                  inputText.trim() && !isSaving
+                    ? SHARED_STYLES.theme.TEXT_PRIMARY
+                    : SHARED_STYLES.theme.TEXT_DISABLED
+                }
+              />
+            </TouchableOpacity>
+          }
+          safeTopOnly={true}
+        />
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={styles.contentContainer}
+          contentContainerStyle={[
+            styles.contentContainer,
+            { paddingBottom: insets.bottom + 20 },
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic"
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={{ flex: 1 }}>
               {/* Icon */}
               <View style={styles.iconContainer}>
                 <FontAwesome5
-                  name="user-friends"
+                  name="users"
                   size={32}
-                  color={CONST.MAIN_COLOR}
+                  color={SHARED_STYLES.theme.TEXT_PRIMARY}
                 />
               </View>
 
               {/* Title and Subtitle */}
-              <Text style={styles.titleText}>What's your friend's name?</Text>
+              <Text style={styles.titleText}>
+                {friendshipUuid
+                  ? "Update your friend's name"
+                  : "What's your friend's name?"}
+              </Text>
               <Text style={styles.subtitleText}>
                 {headerText ||
                   'Give your friend a memorable name so you can easily find them later.'}
@@ -297,16 +275,25 @@ const NamePicker = ({
               {/* Action Buttons */}
               <View style={styles.buttonContainer}>
                 <Button
-                  title={isSaving ? 'Adding...' : 'Save Friend'}
+                  title={
+                    isSaving
+                      ? friendshipUuid
+                        ? 'Updating...'
+                        : 'Adding...'
+                      : friendshipUuid
+                        ? 'Update Friend'
+                        : 'Save Friend'
+                  }
                   icon={
                     <FontAwesome5
-                      name="user-plus"
+                      name={friendshipUuid ? 'edit' : 'user-plus'}
                       size={16}
                       color="white"
                       style={{ marginRight: 8 }}
                     />
                   }
-                  buttonStyle={styles.saveButton}
+                  size="lg"
+                  buttonStyle={[styles.saveButton, { marginBottom: 12 }]}
                   titleStyle={styles.saveButtonTitle}
                   onPress={handleSave}
                   disabled={!inputText.trim() || isSaving}
@@ -315,6 +302,7 @@ const NamePicker = ({
 
                 <Button
                   title="Cancel"
+                  size="lg"
                   buttonStyle={styles.cancelButton}
                   titleStyle={styles.cancelButtonTitle}
                   onPress={handleCancel}

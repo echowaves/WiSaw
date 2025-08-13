@@ -21,9 +21,9 @@ import Toast from 'react-native-toast-message'
 
 import { FontAwesome5 } from '@expo/vector-icons'
 
-import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
+import EmptyStateCard from '../../components/EmptyStateCard'
 import NamePicker from '../../components/NamePicker'
 import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
   pendingStatus: {
     fontSize: 14,
-    color: CONST.MAIN_COLOR,
+    color: SHARED_STYLES.theme.TEXT_PRIMARY,
     fontWeight: '500',
   },
 
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     backgroundColor: SHARED_STYLES.theme.INTERACTIVE_SECONDARY,
     elevation: 15,
     zIndex: 15,
-    shadowColor: CONST.MAIN_COLOR,
+    shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -87,44 +87,10 @@ const styles = StyleSheet.create({
     minHeight: 36,
   },
   pendingShareButtonText: {
-    color: CONST.MAIN_COLOR,
+    color: SHARED_STYLES.theme.TEXT_PRIMARY,
     fontSize: 11,
     fontWeight: '600',
     marginLeft: 4,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 32,
-  },
-  emptyStateTitle: {
-    ...SHARED_STYLES.text.heading,
-    fontSize: 22,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  emptyStateDescription: {
-    ...SHARED_STYLES.text.secondary,
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  addFriendButton: {
-    backgroundColor: CONST.MAIN_COLOR,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addFriendButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
   },
   shareButtonContainer: {
     marginTop: 8,
@@ -659,7 +625,7 @@ const FriendsList = () => {
                         <FontAwesome5
                           name="clock"
                           size={12}
-                          color={CONST.MAIN_COLOR}
+                          color={SHARED_STYLES.theme.TEXT_PRIMARY}
                           style={{ marginRight: 6 }}
                         />
                         <Text style={styles.pendingStatus}>
@@ -692,7 +658,7 @@ const FriendsList = () => {
                           <FontAwesome5
                             name="share-alt"
                             size={12}
-                            color={CONST.MAIN_COLOR}
+                            color={SHARED_STYLES.theme.TEXT_PRIMARY}
                           />
                           <Text style={styles.pendingShareButtonText}>
                             Share
@@ -774,20 +740,14 @@ const FriendsList = () => {
           friendName={shareNameModalData?.friendName}
           topOffset={60}
         />
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateTitle}>No Friends Yet</Text>
-          <Text style={styles.emptyStateDescription}>
-            Add your first friend to start sharing photos and chatting
-            privately.
-          </Text>
-          <TouchableOpacity
-            style={styles.addFriendButton}
-            onPress={handleAddFriend}
-          >
-            <FontAwesome5 name="user-plus" size={16} color="white" />
-            <Text style={styles.addFriendButtonText}>Add a Friend</Text>
-          </TouchableOpacity>
-        </View>
+        <EmptyStateCard
+          icon="users"
+          title="No Friends Yet"
+          subtitle="Add your first friend to start sharing photos and chatting privately. Build your network and stay connected!"
+          actionText="Add a Friend"
+          onActionPress={handleAddFriend}
+          iconColor={SHARED_STYLES.theme.TEXT_PRIMARY}
+        />
       </SafeAreaView>
     )
   }

@@ -1,22 +1,15 @@
-import {
-  FontAwesome,
-  FontAwesome5,
-  Ionicons,
-  MaterialIcons,
-} from '@expo/vector-icons'
+import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import {
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer'
 import { router } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
-import { useAtom } from 'jotai'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
-import * as STATE from '../../src/state'
 import { SHARED_STYLES } from '../../src/theme/sharedStyles'
 import { getDefaultHeaderStyle } from '../../src/utils/navigationStyles'
 
@@ -46,31 +39,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
 })
-
-// Header Right Component for Friends Screen
-function FriendsHeaderRight() {
-  const [, setTriggerAddFriend] = useAtom(STATE.triggerAddFriend)
-
-  const handleAddFriend = () => {
-    setTriggerAddFriend(true)
-  }
-
-  return (
-    <TouchableOpacity
-      onPress={handleAddFriend}
-      style={{
-        marginRight: 15,
-        padding: 8,
-        borderRadius: 20,
-        backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
-        borderWidth: 1,
-        borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-      }}
-    >
-      <FontAwesome5 name="plus" size={18} color={CONST.MAIN_COLOR} />
-    </TouchableOpacity>
-  )
-}
 
 // Custom Drawer Content with Version Information
 function CustomDrawerContent(props) {
@@ -150,27 +118,7 @@ export default function DrawerLayout() {
             ),
             drawerLabel: 'Friends',
             title: 'Friends',
-            headerShown: true,
-            headerLeft: () => (
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={SHARED_STYLES.interactive.headerButton}
-              >
-                <Ionicons
-                  name="chevron-back"
-                  size={24}
-                  color={SHARED_STYLES.theme.TEXT_PRIMARY}
-                />
-              </TouchableOpacity>
-            ),
-            headerRight: () => <FriendsHeaderRight />,
-            headerStyle: SHARED_STYLES.header.drawerStyle,
-            headerTitleStyle: {
-              fontSize: 16,
-              fontWeight: '600',
-              color: SHARED_STYLES.theme.TEXT_PRIMARY,
-            },
-            headerTintColor: SHARED_STYLES.theme.TEXT_PRIMARY,
+            headerShown: false,
           }}
         />
         <Drawer.Screen
