@@ -1,12 +1,5 @@
-import {
-  router,
-  Stack,
-  useFocusEffect,
-  useLocalSearchParams,
-} from 'expo-router'
+import { Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { View } from 'react-native'
-import AppHeader from '../../../../src/components/AppHeader'
 import PhotosDetailsShared from '../../../../src/screens/PhotosDetailsShared'
 
 export default function SharedPhotoDetail() {
@@ -25,15 +18,7 @@ export default function SharedPhotoDetail() {
     <>
       <Stack.Screen
         options={{
-          headerShown: true,
-          header: () => (
-            <AppHeader
-              debugId="photo-details"
-              onBack={() => router.back()}
-              title="Shared Photo"
-              rightSlot={<View style={{ width: 44, height: 44 }} />}
-            />
-          ),
+          headerShown: false, // Hide the Stack header since we use custom overlay
         }}
       />
       <PhotosDetailsShared route={{ params: { photoId, refreshKey } }} />

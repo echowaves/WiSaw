@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 
 import PropTypes from 'prop-types'
+
+import { AntDesign } from '@expo/vector-icons'
 
 import { StatusBar, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -11,6 +14,7 @@ import { Text } from '@rneui/themed'
 
 import { gql } from '@apollo/client'
 
+import AppHeader from '../../components/AppHeader'
 import Photo from '../../components/Photo'
 
 import * as CONST from '../../consts'
@@ -76,23 +80,35 @@ const PhotosDetailsShared = ({ route }) => {
     }
   }
 
-  // Remove navigation.setOptions as it's not compatible with Expo Router
-  // The header is now controlled by the layout in app/(drawer)/(tabs)/shared/[photoId].tsx
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerTitle: renderHeaderTitle,
-  //     headerLeft: renderHeaderLeft,
-  //     headerStyle: {
-  //       backgroundColor: 'rgba(0, 0, 0, 0.9)',
-  //       borderBottomWidth: 0,
-  //       elevation: 0,
-  //       shadowOpacity: 0,
-  //     },
-  //     headerTitleAlign: 'center',
-  //     headerTransparent: true,
-  //   })
-  //   loadPhoto(photoId)
-  // }, [])
+  const renderHeaderTitle = () => (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <AntDesign
+        name="sharealt"
+        size={20}
+        color={SHARED_STYLES.theme.TEXT_PRIMARY}
+        style={styles.headerIcon}
+      />
+      <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
+    </View>
+  )
+
+  const renderCustomHeader = () => (
+    <View
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+      }}
+    >
+      <AppHeader
+        safeTopOnly
+        onBack={() => router.back()}
+        title={renderHeaderTitle()}
+      />
+    </View>
+  )
 
   useEffect(() => {
     // Clear previous photo data when refreshing
@@ -103,6 +119,7 @@ const PhotosDetailsShared = ({ route }) => {
   if (item) {
     return (
       <View style={styles.container}>
+        {renderCustomHeader()}
         <StatusBar
           barStyle="dark-content"
           backgroundColor="transparent"
@@ -114,6 +131,7 @@ const PhotosDetailsShared = ({ route }) => {
   }
   return (
     <View style={styles.container}>
+      {renderCustomHeader()}
       <StatusBar
         barStyle="dark-content"
         backgroundColor="transparent"
@@ -123,7 +141,11 @@ const PhotosDetailsShared = ({ route }) => {
         style={{
           color: SHARED_STYLES.theme.TEXT_PRIMARY,
           textAlign: 'center',
-          marginTop: 100,
+          marginTop:
+            SHARED_STYLES.header.getDynamicHeight(insets.top, isSmallDevice) +
+            40,
+          fontSize: 18,
+          fontWeight: '500',
         }}
       >
         Loading...
