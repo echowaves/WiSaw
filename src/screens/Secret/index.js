@@ -1,7 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
-import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   Alert,
@@ -18,16 +17,13 @@ import { Button, Input, Text } from '@rneui/themed'
 import * as Haptics from 'expo-haptics'
 import Toast from 'react-native-toast-message'
 
-import {
-  FontAwesome,
-  FontAwesome5,
-  MaterialCommunityIcons,
-} from '@expo/vector-icons'
+import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
 
 import zxcvbn from '../../zxcvbn'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 import * as reducer from './reducer'
 
@@ -189,53 +185,7 @@ const SecretScreen = () => {
       setIsSubmitting(false)
     }
   }
-  const renderHeaderRight = useCallback(
-    () => (
-      <Button
-        onPress={canSubmit && !isSubmitting ? handleSubmit : null}
-        disabled={!canSubmit || isSubmitting}
-        buttonStyle={{
-          backgroundColor:
-            canSubmit && !isSubmitting ? CONST.MAIN_COLOR : '#E0E0E0',
-          paddingHorizontal: 20,
-          paddingVertical: 10,
-          borderRadius: 20,
-          minWidth: 80,
-          shadowColor: '#000',
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 3,
-        }}
-        titleStyle={{
-          color: canSubmit && !isSubmitting ? 'white' : CONST.SECONDARY_COLOR,
-          fontSize: 16,
-          fontWeight: '700',
-        }}
-        title={isSubmitting ? 'Saving...' : 'Save'}
-      />
-    ),
-    [canSubmit, isSubmitting],
-  )
-
-  const renderHeaderLeft = useCallback(
-    () => (
-      <FontAwesome
-        name="chevron-left"
-        size={30}
-        style={{
-          marginLeft: 10,
-          color: CONST.MAIN_COLOR,
-          width: 60,
-        }}
-        onPress={() => router.back()}
-      />
-    ),
-    [navigation],
-  )
+  // Header actions are now handled by parent component using AppHeader
 
   useEffect(() => {
     resetFields()
@@ -322,7 +272,7 @@ const SecretScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#f8f9fa',
+      backgroundColor: SHARED_STYLES.theme.BACKGROUND,
     },
     scrollView: {
       flex: 1,
@@ -332,11 +282,11 @@ const SecretScreen = () => {
       paddingTop: 30,
     },
     headerCard: {
-      backgroundColor: 'white',
+      backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
       borderRadius: 16,
       padding: 24,
       marginBottom: 24,
-      shadowColor: CONST.HEADER_SHADOW_COLOR,
+      shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
         height: 2,
@@ -345,7 +295,7 @@ const SecretScreen = () => {
       shadowRadius: 8,
       elevation: 4,
       borderWidth: 1,
-      borderColor: CONST.HEADER_BORDER_COLOR,
+      borderColor: SHARED_STYLES.theme.BORDER_LIGHT,
     },
     iconContainer: {
       alignSelf: 'center',
@@ -360,22 +310,22 @@ const SecretScreen = () => {
     title: {
       fontSize: 24,
       fontWeight: '700',
-      color: CONST.TEXT_COLOR,
+      color: SHARED_STYLES.theme.TEXT_PRIMARY,
       textAlign: 'center',
       marginBottom: 8,
     },
     subtitle: {
       fontSize: 16,
-      color: CONST.INACTIVE_SEGMENT_COLOR,
+      color: SHARED_STYLES.theme.TEXT_SECONDARY,
       textAlign: 'center',
       lineHeight: 22,
     },
     formCard: {
-      backgroundColor: 'white',
+      backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
       borderRadius: 16,
       padding: 20,
       marginBottom: 20,
-      shadowColor: CONST.HEADER_SHADOW_COLOR,
+      shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
         height: 2,
@@ -384,7 +334,7 @@ const SecretScreen = () => {
       shadowRadius: 8,
       elevation: 4,
       borderWidth: 1,
-      borderColor: CONST.HEADER_BORDER_COLOR,
+      borderColor: SHARED_STYLES.theme.BORDER_LIGHT,
     },
     inputContainer: {
       marginBottom: 16,
@@ -427,7 +377,7 @@ const SecretScreen = () => {
     },
     warningText: {
       fontSize: 14,
-      color: CONST.TEXT_COLOR,
+      color: SHARED_STYLES.theme.TEXT_SECONDARY,
       lineHeight: 20,
     },
     resetCard: {
@@ -445,7 +395,7 @@ const SecretScreen = () => {
     },
     resetText: {
       fontSize: 14,
-      color: CONST.TEXT_COLOR,
+      color: SHARED_STYLES.theme.TEXT_PRIMARY,
       lineHeight: 20,
       marginBottom: 16,
     },
@@ -463,7 +413,7 @@ const SecretScreen = () => {
     },
     strengthBar: {
       height: 8,
-      backgroundColor: '#E0E0E0',
+      backgroundColor: SHARED_STYLES.theme.BACKGROUND_DISABLED,
       borderRadius: 4,
       overflow: 'hidden',
     },
@@ -537,7 +487,7 @@ const SecretScreen = () => {
                       size={20}
                       color={
                         nickNameEntered
-                          ? CONST.SECONDARY_COLOR
+                          ? SHARED_STYLES.theme.TEXT_DISABLED
                           : CONST.MAIN_COLOR
                       }
                     />
@@ -549,8 +499,8 @@ const SecretScreen = () => {
                   inputStyle={{
                     fontSize: 16,
                     color: nickNameEntered
-                      ? CONST.SECONDARY_COLOR
-                      : CONST.TEXT_COLOR,
+                      ? SHARED_STYLES.theme.TEXT_DISABLED
+                      : SHARED_STYLES.theme.TEXT_PRIMARY,
                   }}
                   containerStyle={{ paddingHorizontal: 0 }}
                 />
@@ -580,7 +530,7 @@ const SecretScreen = () => {
                       <FontAwesome5
                         name={showOldPassword ? 'eye-slash' : 'eye'}
                         size={20}
-                        color={CONST.INACTIVE_SEGMENT_COLOR}
+                        color={SHARED_STYLES.theme.TEXT_SECONDARY}
                         onPress={() => setShowOldPassword(!showOldPassword)}
                         style={styles.passwordToggle}
                       />
@@ -620,7 +570,7 @@ const SecretScreen = () => {
                     <FontAwesome5
                       name={showPassword ? 'eye-slash' : 'eye'}
                       size={20}
-                      color={CONST.INACTIVE_SEGMENT_COLOR}
+                      color={SHARED_STYLES.theme.TEXT_SECONDARY}
                       onPress={() => setShowPassword(!showPassword)}
                       style={styles.passwordToggle}
                     />
@@ -702,7 +652,7 @@ const SecretScreen = () => {
                     <FontAwesome5
                       name={showConfirmPassword ? 'eye-slash' : 'eye'}
                       size={20}
-                      color={CONST.INACTIVE_SEGMENT_COLOR}
+                      color={SHARED_STYLES.theme.TEXT_SECONDARY}
                       onPress={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }

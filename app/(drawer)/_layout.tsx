@@ -139,31 +139,7 @@ export default function DrawerLayout() {
             ),
             drawerLabel: 'Identity',
             title: 'Identity',
-            headerShown: true,
-            headerLeft: () => (
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={{
-                  marginLeft: 15,
-                  padding: 8,
-                  borderRadius: 20,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <FontAwesome
-                  name="arrow-left"
-                  size={20}
-                  color={CONST.MAIN_COLOR}
-                />
-              </TouchableOpacity>
-            ),
-            headerStyle: getDefaultHeaderStyle(),
-            headerTitleStyle: {
-              fontSize: 18,
-              fontWeight: '600',
-              color: CONST.TEXT_COLOR,
-            },
-            headerTintColor: CONST.MAIN_COLOR,
+            headerShown: false,
           }}
         />
         <Drawer.Screen
