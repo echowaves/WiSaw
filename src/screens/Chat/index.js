@@ -48,6 +48,7 @@ import * as friendsHelper from '../FriendsList/friends_helper'
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import subscriptionClient from '../../subscriptionClientWs'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 import ModernHeaderButton from '../../components/ModernHeaderButton'
 import ChatPhoto from './ChatPhoto'
@@ -76,7 +77,7 @@ const Chat = ({ route }) => {
       }),
     )
 
-    router.back()
+    router.replace('/friends')
   }
 
   // Handle swipe gesture for delete chat
@@ -496,6 +497,7 @@ const Chat = ({ route }) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: SHARED_STYLES.theme.BACKGROUND,
     },
     deleteAction: {
       position: 'absolute',
@@ -503,7 +505,7 @@ const Chat = ({ route }) => {
       bottom: 0,
       right: 0,
       width: 120,
-      backgroundColor: '#dc3545',
+      backgroundColor: SHARED_STYLES.theme.STATUS_ERROR,
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: -1,
@@ -516,7 +518,7 @@ const Chat = ({ route }) => {
     },
     chatContainer: {
       flex: 1,
-      backgroundColor: 'white',
+      backgroundColor: SHARED_STYLES.theme.BACKGROUND,
     },
   })
 
@@ -534,7 +536,7 @@ const Chat = ({ route }) => {
           style={{
             marginRight: 10,
             marginBottom: 10,
-            color: CONST.MAIN_COLOR,
+            color: SHARED_STYLES.theme.STATUS_SUCCESS,
           }}
         />
       </View>
@@ -549,7 +551,10 @@ const Chat = ({ route }) => {
         justifyContent: 'center',
       }}
     >
-      <ActivityIndicator size="large" color={CONST.MAIN_COLOR} />
+      <ActivityIndicator
+        size="large"
+        color={SHARED_STYLES.theme.STATUS_SUCCESS}
+      />
     </View>
   )
 
@@ -572,9 +577,11 @@ const Chat = ({ route }) => {
     <View
       style={{
         flexDirection: 'row',
-        // alignItems: 'center',
         justifyContent: 'space-evenly',
-        padding: 10,
+        padding: 16,
+        backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
+        borderTopWidth: 1,
+        borderTopColor: SHARED_STYLES.theme.CARD_BORDER,
       }}
     >
       <View />
@@ -584,7 +591,7 @@ const Chat = ({ route }) => {
         style={{
           // marginRight: 10,
           // marginBottom: 10,
-          color: CONST.MAIN_COLOR,
+          color: SHARED_STYLES.theme.STATUS_SUCCESS,
         }}
         // eslint-disable-next-line no-use-before-define
         onPress={async () => takePhoto()}
@@ -595,7 +602,7 @@ const Chat = ({ route }) => {
         style={{
           // marginRight: 10,
           // marginBottom: 10,
-          color: CONST.MAIN_COLOR,
+          color: SHARED_STYLES.theme.STATUS_SUCCESS,
         }}
         // eslint-disable-next-line no-use-before-define
         onPress={async () => pickAsset()}

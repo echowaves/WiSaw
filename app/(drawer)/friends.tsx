@@ -22,7 +22,7 @@ export default function Friends() {
           headerShown: true,
           header: () => (
             <AppHeader
-              onBack={() => router.back()}
+              onBack={() => router.replace('/')}
               title="Friends"
               rightSlot={
                 <TouchableOpacity

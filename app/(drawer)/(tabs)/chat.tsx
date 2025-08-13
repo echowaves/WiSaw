@@ -1,9 +1,8 @@
-import { Ionicons } from '@expo/vector-icons'
 import { Stack, router, useLocalSearchParams } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
-import { TouchableOpacity } from 'react-native'
-import * as CONST from '../../../src/consts'
+import { View } from 'react-native'
+import AppHeader from '../../../src/components/AppHeader'
 import Chat from '../../../src/screens/Chat'
 import * as STATE from '../../../src/state'
 
@@ -44,25 +43,13 @@ export default function ChatScreen() {
     <>
       <Stack.Screen
         options={{
-          title: currentDisplayName,
-          headerTintColor: CONST.MAIN_COLOR,
-          headerBackVisible: false,
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => router.replace('/friends')}
-              style={{
-                paddingLeft: 16,
-                paddingRight: 16,
-                paddingVertical: 8,
-                marginLeft: -8,
-              }}
-            >
-              <Ionicons
-                name="chevron-back"
-                size={28}
-                color={CONST.MAIN_COLOR}
-              />
-            </TouchableOpacity>
+          headerShown: true,
+          header: () => (
+            <AppHeader
+              onBack={() => router.replace('/friends')}
+              title={currentDisplayName}
+              rightSlot={<View style={{ width: 44, height: 44 }} />}
+            />
           ),
         }}
       />
