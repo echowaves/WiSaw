@@ -7,17 +7,15 @@ import { SafeAreaView, StyleSheet } from 'react-native'
 
 import Toast from 'react-native-toast-message'
 
-import { FontAwesome } from '@expo/vector-icons'
-
 import PropTypes from 'prop-types'
 
 import NamePicker from '../../components/NamePicker'
 
-import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
 import * as reducer from './reducer'
 
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
 const ConfirmFriendship = ({ route }) => {
@@ -31,39 +29,12 @@ const ConfirmFriendship = ({ route }) => {
 
   const [showNamePicker, setShowNamePicker] = useState(true)
 
-  const renderHeaderRight = () => {}
-
-  const renderHeaderLeft = () => (
-    <FontAwesome
-      name="chevron-left"
-      size={30}
-      style={{
-        marginLeft: 10,
-        color: CONST.MAIN_COLOR,
-        width: 60,
-      }}
-      onPress={() => router.back()}
-    />
-  )
-
-  // Remove navigation.setOptions as it's not compatible with Expo Router
-  // The header is now controlled by the layout in app/(drawer)/(tabs)/confirm-friendship/[friendshipUuid].tsx
-  // useEffect(() => {
-  //   navigation.setOptions({
-  //     headerTitle: 'Confirm friendship',
-  //     headerTintColor: CONST.MAIN_COLOR,
-  //     headerRight: renderHeaderRight,
-  //     headerLeft: renderHeaderLeft,
-  //     headerBackTitle: '',
-  //     headerStyle: {
-  //       backgroundColor: CONST.NAV_COLOR,
-  //     },
-  //   })
-  // }, [])
+  // Header styling is now controlled by the route configuration in app/(drawer)/(tabs)/_layout.tsx
+  // No need for custom renderHeaderLeft or renderHeaderRight functions
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
+      ...SHARED_STYLES.containers.main,
     },
     scrollView: {
       alignItems: 'center',

@@ -319,9 +319,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
   // Calculate dynamic header offset using shared function
   const headerOffset = useMemo(() => {
-    const isSmallDevice = screenWidth < 768 // Phone vs tablet
-    return SHARED_STYLES.header.getDynamicHeight(insets.top, isSmallDevice)
-  }, [screenWidth, insets.top])
+    // For overlay headers using AppHeader with safeTopOnly,
+    // we just need safe area + content height (56)
+    return insets.top + 56
+  }, [insets.top])
 
   const componentIsMounted = useRef(true)
 

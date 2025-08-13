@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
-import { router } from 'expo-router'
 
 import PropTypes from 'prop-types'
-
-import { AntDesign, Ionicons } from '@expo/vector-icons'
 
 import { StatusBar, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -79,30 +76,6 @@ const PhotosDetailsShared = ({ route }) => {
     }
   }
 
-  const renderHeaderLeft = () => (
-    <View style={SHARED_STYLES.interactive.headerButton}>
-      <Ionicons
-        name="chevron-back"
-        size={24}
-        color={SHARED_STYLES.theme.TEXT_PRIMARY}
-        style={styles.headerIcon}
-        onPress={() => router.back()}
-      />
-    </View>
-  )
-
-  const renderHeaderTitle = () => (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <AntDesign
-        name="sharealt"
-        size={20}
-        color={SHARED_STYLES.theme.TEXT_PRIMARY}
-        style={styles.headerIcon}
-      />
-      <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
-    </View>
-  )
-
   // Remove navigation.setOptions as it's not compatible with Expo Router
   // The header is now controlled by the layout in app/(drawer)/(tabs)/shared/[photoId].tsx
   // useEffect(() => {
@@ -131,7 +104,7 @@ const PhotosDetailsShared = ({ route }) => {
     return (
       <View style={styles.container}>
         <StatusBar
-          barStyle="light-content"
+          barStyle="dark-content"
           backgroundColor="transparent"
           translucent
         />

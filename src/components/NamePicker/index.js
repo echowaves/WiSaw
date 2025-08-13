@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics'
 import PropTypes from 'prop-types'
 
 import * as CONST from '../../consts'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 const NamePicker = ({
   show,
@@ -41,39 +42,32 @@ const NamePicker = ({
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
+      ...SHARED_STYLES.containers.main,
     },
     headerContainer: {
+      ...SHARED_STYLES.header.container,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingHorizontal: 20,
       paddingTop: insets.top + 10,
       paddingBottom: 15,
-      backgroundColor: 'transparent',
     },
     headerButton: {
-      padding: 12,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      ...SHARED_STYLES.interactive.headerButton,
     },
     headerIcon: {
-      textShadowColor: 'rgba(0, 0, 0, 0.8)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
+      color: CONST.MAIN_COLOR,
     },
     headerTitle: {
+      ...SHARED_STYLES.header.title,
       fontSize: 18,
       fontWeight: '600',
-      color: '#fff',
-      textShadowColor: 'rgba(0, 0, 0, 0.8)',
-      textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
     },
     contentContainer: {
       flex: 1,
       paddingHorizontal: 20,
+      paddingTop: 40,
     },
     iconContainer: {
       alignSelf: 'center',
@@ -81,35 +75,42 @@ const NamePicker = ({
       width: 80,
       height: 80,
       borderRadius: 40,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
     },
     titleText: {
+      ...SHARED_STYLES.text.heading,
       fontSize: 24,
-      fontWeight: '600',
-      color: '#fff',
       textAlign: 'center',
       marginBottom: 12,
     },
     subtitleText: {
+      ...SHARED_STYLES.text.secondary,
       fontSize: 16,
-      color: 'rgba(255, 255, 255, 0.7)',
       textAlign: 'center',
       lineHeight: 24,
       marginBottom: 40,
     },
     inputContainer: {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderColor: SHARED_STYLES.theme.CARD_BORDER,
       marginBottom: 20,
+      shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     textInput: {
-      color: '#fff',
+      ...SHARED_STYLES.text.primary,
       fontSize: 18,
       padding: 20,
       textAlign: 'center',
@@ -119,7 +120,7 @@ const NamePicker = ({
       position: 'absolute',
       top: 12,
       right: 16,
-      color: 'rgba(255, 255, 255, 0.5)',
+      ...SHARED_STYLES.text.caption,
       fontSize: 12,
       fontWeight: '500',
     },
@@ -146,13 +147,13 @@ const NamePicker = ({
       borderRadius: 12,
       backgroundColor: 'transparent',
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.3)',
+      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
       paddingVertical: 14,
     },
     cancelButtonTitle: {
       fontSize: 16,
       fontWeight: '500',
-      color: 'rgba(255, 255, 255, 0.8)',
+      color: SHARED_STYLES.theme.TEXT_SECONDARY,
     },
   })
 
@@ -208,9 +209,9 @@ const NamePicker = ({
     >
       <View style={styles.container}>
         <StatusBar
-          barStyle="light-content"
-          backgroundColor="transparent"
-          translucent
+          barStyle="dark-content"
+          backgroundColor={SHARED_STYLES.theme.HEADER_BACKGROUND}
+          translucent={false}
         />
 
         {/* Custom Header */}
@@ -219,7 +220,6 @@ const NamePicker = ({
             <Ionicons
               name="chevron-back"
               size={24}
-              color="#fff"
               style={styles.headerIcon}
               onPress={handleCancel}
             />
@@ -229,19 +229,23 @@ const NamePicker = ({
             <FontAwesome5
               name="user-plus"
               size={18}
-              color="#fff"
-              style={[styles.headerIcon, { marginRight: 8 }]}
+              color={CONST.MAIN_COLOR}
+              style={{ marginRight: 8 }}
             />
-            <Text style={styles.headerTitle}>Save Friend</Text>
+            <Text style={styles.headerTitle}>Add Friend</Text>
           </View>
 
           <View style={styles.headerButton}>
             <Ionicons
               name="checkmark"
               size={24}
-              color={inputText.trim() ? '#fff' : 'rgba(255, 255, 255, 0.3)'}
-              style={styles.headerIcon}
+              color={
+                inputText.trim()
+                  ? CONST.MAIN_COLOR
+                  : SHARED_STYLES.theme.TEXT_DISABLED
+              }
               onPress={handleSave}
+              disabled={!inputText.trim() || isSaving}
             />
           </View>
         </View>
@@ -256,7 +260,11 @@ const NamePicker = ({
             <View style={{ flex: 1 }}>
               {/* Icon */}
               <View style={styles.iconContainer}>
-                <FontAwesome5 name="user-friends" size={32} color="#fff" />
+                <FontAwesome5
+                  name="user-friends"
+                  size={32}
+                  color={CONST.MAIN_COLOR}
+                />
               </View>
 
               {/* Title and Subtitle */}
@@ -270,7 +278,7 @@ const NamePicker = ({
               <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="Enter friend's name..."
-                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                  placeholderTextColor={SHARED_STYLES.theme.TEXT_SECONDARY}
                   autoFocus
                   style={styles.textInput}
                   maxLength={50}

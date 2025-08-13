@@ -50,6 +50,12 @@ export const THEME = {
   STATUS_WARNING: '#FFD700',
   STATUS_ERROR: '#FF4757',
   STATUS_CAUTION: '#FF9500',
+
+  // Status indicator backgrounds (transparent variants)
+  STATUS_ERROR_BACKGROUND: 'rgba(255, 71, 87, 0.15)',
+  STATUS_ERROR_BORDER: 'rgba(255, 71, 87, 0.3)',
+  STATUS_SUCCESS_BACKGROUND: 'rgba(79, 195, 247, 0.15)',
+  STATUS_SUCCESS_BORDER: 'rgba(79, 195, 247, 0.3)',
 }
 
 // Shared container styles
@@ -174,6 +180,48 @@ export const SHARED_HEADER = {
     paddingHorizontal: 16,
     paddingVertical: HEADER_HEIGHTS.PADDING_VERTICAL,
     minHeight: HEADER_HEIGHTS.CONTENT_HEIGHT,
+  },
+
+  // Reusable header style configurations
+  drawerStyle: {
+    backgroundColor: THEME.HEADER_BACKGROUND,
+    borderBottomWidth: 1,
+    borderBottomColor: THEME.HEADER_BORDER,
+    shadowColor: THEME.HEADER_SHADOW,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  modalStyle: {
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  },
+
+  modalTitleStyle: {
+    fontSize: 18,
+    fontWeight: 600,
+    color: '#fff',
+  },
+
+  // Transparent overlay header style for photo details and similar screens
+  transparentStyle: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    height: HEADER_HEIGHTS.TOTAL_HEIGHT,
+    ...Platform.select({
+      android: {
+        height: HEADER_HEIGHTS.TOTAL_HEIGHT + (StatusBar.currentHeight || 0),
+      },
+    }),
+  },
+
+  transparentTitleStyle: {
+    fontSize: 16,
+    fontWeight: 600,
+    color: THEME.TEXT_PRIMARY,
   },
 
   // For Expo Router headers to ensure consistent height

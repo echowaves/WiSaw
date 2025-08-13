@@ -1,4 +1,9 @@
-import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import {
+  FontAwesome,
+  FontAwesome5,
+  Ionicons,
+  MaterialIcons,
+} from '@expo/vector-icons'
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -12,6 +17,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
 import * as STATE from '../../src/state'
+import { SHARED_STYLES } from '../../src/theme/sharedStyles'
 import { getDefaultHeaderStyle } from '../../src/utils/navigationStyles'
 
 // Get version and build number from app.config.js
@@ -23,13 +29,14 @@ const styles = StyleSheet.create({
   versionContainer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-    backgroundColor: '#F5F5F5',
+    borderTopColor: SHARED_STYLES.theme.BORDER_LIGHT,
+    backgroundColor: SHARED_STYLES.theme.HEADER_BACKGROUND,
     alignItems: 'center',
   },
   versionText: {
     fontSize: 12,
-    color: '#666',
+    color: SHARED_STYLES.theme.TEXT_SECONDARY,
+    fontWeight: '500',
     textAlign: 'center',
   },
   appName: {
@@ -55,7 +62,9 @@ function FriendsHeaderRight() {
         marginRight: 15,
         padding: 8,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
+        borderWidth: 1,
+        borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
       }}
     >
       <FontAwesome5 name="plus" size={18} color={CONST.MAIN_COLOR} />
@@ -168,29 +177,24 @@ export default function DrawerLayout() {
             headerShown: true,
             headerLeft: () => (
               <TouchableOpacity
-                onPress={() => router.push('/(tabs)')}
-                style={{
-                  marginLeft: 15,
-                  padding: 8,
-                  borderRadius: 20,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                }}
+                onPress={() => router.back()}
+                style={SHARED_STYLES.interactive.headerButton}
               >
-                <FontAwesome
-                  name="arrow-left"
-                  size={20}
-                  color={CONST.MAIN_COLOR}
+                <Ionicons
+                  name="chevron-back"
+                  size={24}
+                  color={SHARED_STYLES.theme.TEXT_PRIMARY}
                 />
               </TouchableOpacity>
             ),
             headerRight: () => <FriendsHeaderRight />,
-            headerStyle: getDefaultHeaderStyle(),
+            headerStyle: SHARED_STYLES.header.drawerStyle,
             headerTitleStyle: {
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: '600',
-              color: CONST.TEXT_COLOR,
+              color: SHARED_STYLES.theme.TEXT_PRIMARY,
             },
-            headerTintColor: CONST.MAIN_COLOR,
+            headerTintColor: SHARED_STYLES.theme.TEXT_PRIMARY,
           }}
         />
         <Drawer.Screen

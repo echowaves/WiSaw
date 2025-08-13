@@ -2021,6 +2021,15 @@ const PhotosList = ({ searchFromUrl }) => {
             }}
           />
         )}
+        {activeSegment === 1 && (
+          <EmptyStateCard
+            icon="star"
+            title="No Starred Content Yet"
+            subtitle="Start building your collection! Take photos, comment on others' posts, or star content you love."
+            actionText="Discover Content"
+            onActionPress={() => updateIndex(0)}
+          />
+        )}
         {renderFooter({ unreadCount })}
       </View>
     </View>

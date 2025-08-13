@@ -27,15 +27,16 @@ import * as STATE from '../../state'
 import NamePicker from '../../components/NamePicker'
 import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
+import { SHARED_STYLES } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
+    ...SHARED_STYLES.containers.main,
+    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
   },
   friendItem: {
-    backgroundColor: 'white',
+    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
     flex: 1,
   },
   friendContent: {
@@ -44,27 +45,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   friendHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    ...SHARED_STYLES.layout.spaceBetween,
   },
   friendInfo: {
     marginRight: 12,
     flex: 1,
   },
   friendName: {
+    ...SHARED_STYLES.text.subheading,
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
     marginBottom: 4,
   },
   friendStatus: {
+    ...SHARED_STYLES.text.secondary,
     fontSize: 14,
-    color: '#666',
   },
   pendingStatus: {
     fontSize: 14,
-    color: '#ff6b35',
+    color: CONST.MAIN_COLOR,
     fontWeight: '500',
   },
 
@@ -73,15 +71,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginLeft: 0,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 107, 53, 0.15)',
+    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_SECONDARY,
     elevation: 15,
     zIndex: 15,
-    shadowColor: '#ff6b35',
+    shadowColor: CONST.MAIN_COLOR,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255, 107, 53, 0.3)',
+    borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -89,7 +87,7 @@ const styles = StyleSheet.create({
     minHeight: 36,
   },
   pendingShareButtonText: {
-    color: '#ff6b35',
+    color: CONST.MAIN_COLOR,
     fontSize: 11,
     fontWeight: '600',
     marginLeft: 4,
@@ -101,15 +99,14 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   emptyStateTitle: {
+    ...SHARED_STYLES.text.heading,
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
     marginBottom: 12,
   },
   emptyStateDescription: {
+    ...SHARED_STYLES.text.secondary,
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 22,
@@ -140,15 +137,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginLeft: 0,
     borderRadius: 8,
-    backgroundColor: 'rgba(220, 53, 69, 0.15)',
+    backgroundColor: SHARED_STYLES.theme.STATUS_ERROR_BACKGROUND,
     elevation: 15,
     zIndex: 15,
-    shadowColor: '#dc3545',
+    shadowColor: SHARED_STYLES.theme.STATUS_ERROR,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: 'rgba(220, 53, 69, 0.3)',
+    borderColor: SHARED_STYLES.theme.STATUS_ERROR_BORDER,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -156,7 +153,7 @@ const styles = StyleSheet.create({
     minHeight: 36,
   },
   pendingDeleteButtonText: {
-    color: '#dc3545',
+    color: SHARED_STYLES.theme.STATUS_ERROR,
     fontSize: 11,
     fontWeight: '600',
     marginLeft: 4,
@@ -199,13 +196,13 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   shareAction: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: SHARED_STYLES.theme.STATUS_SUCCESS,
   },
   editAction: {
-    backgroundColor: '#28a745',
+    backgroundColor: SHARED_STYLES.theme.STATUS_SUCCESS,
   },
   deleteAction: {
-    backgroundColor: '#dc3545',
+    backgroundColor: SHARED_STYLES.theme.STATUS_ERROR,
   },
   swipeActionText: {
     color: 'white',
@@ -215,16 +212,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   friendItemContainer: {
+    ...SHARED_STYLES.containers.card,
     marginHorizontal: 16,
     marginVertical: 4,
     overflow: 'hidden',
     borderRadius: 12,
-    backgroundColor: 'white',
+    padding: 0, // Override the default padding from shared card style
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
 })
 
@@ -665,7 +659,7 @@ const FriendsList = () => {
                         <FontAwesome5
                           name="clock"
                           size={12}
-                          color="#ff6b35"
+                          color={CONST.MAIN_COLOR}
                           style={{ marginRight: 6 }}
                         />
                         <Text style={styles.pendingStatus}>
@@ -698,7 +692,7 @@ const FriendsList = () => {
                           <FontAwesome5
                             name="share-alt"
                             size={12}
-                            color="#ff6b35"
+                            color={CONST.MAIN_COLOR}
                           />
                           <Text style={styles.pendingShareButtonText}>
                             Share
@@ -727,7 +721,7 @@ const FriendsList = () => {
                           <FontAwesome5
                             name="trash"
                             size={12}
-                            color="#dc3545"
+                            color={SHARED_STYLES.theme.STATUS_ERROR}
                           />
                           <Text style={styles.pendingDeleteButtonText}>
                             Delete

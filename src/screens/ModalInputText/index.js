@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
-import React, { useState } from 'react'
+import React from 'react'
 
 import {
   StatusBar,
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
 
 const ModalInputText = ({ route }) => {
   const navigation = useNavigation()
-  const { photo, topOffset, uuid, onTextChange } = route.params
+  const { photo, topOffset, uuid, onTextChange, inputText } = route.params
   const { height, width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const isSmallDevice = width < 768
@@ -120,21 +120,9 @@ const ModalInputText = ({ route }) => {
 
   const photoDimensions = calculatePhotoDimensions()
 
-  const [inputText, _setInputText] = useState('')
-
-  const inputTextRef = React.useRef(inputText)
-  const setInputText = (data) => {
-    inputTextRef.current = data
-    _setInputText(data)
-    // Notify parent component of text changes
-    if (onTextChange) {
-      onTextChange(data)
-    }
-  }
-
   const handleSubmit = async () => {
     await reducer.submitComment({
-      inputText: inputTextRef.current.trim(),
+      inputText: inputText.trim(),
       uuid,
       photo,
       topOffset,
@@ -171,7 +159,7 @@ const ModalInputText = ({ route }) => {
         style={{ flex: 1 }}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
-          paddingTop: 10,
+          paddingTop: 16,
           paddingBottom: insets.bottom + 20,
         }}
         keyboardShouldPersistTaps="handled"
@@ -200,7 +188,7 @@ const ModalInputText = ({ route }) => {
             maxLength={maxStringLength}
             style={[styles.textInput, { height: height < 700 ? 120 : 150 }]}
             onChangeText={(inputValue) => {
-              setInputText(inputValue.slice(0, maxStringLength))
+              onTextChange(inputValue.slice(0, maxStringLength))
             }}
             value={inputText}
           />

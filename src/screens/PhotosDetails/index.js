@@ -14,8 +14,8 @@ import { Text } from '@rneui/themed'
 
 import Swiper from 'react-native-swiper'
 
+import AppHeader from '../../components/AppHeader'
 import Photo from '../../components/Photo'
-import SafeAreaView from '../../components/SafeAreaView'
 import { SHARED_STYLES } from '../../theme/sharedStyles'
 
 import { getPhotos } from '../PhotosList/reducer'
@@ -55,6 +55,7 @@ const PhotosDetails = ({ route }) => {
   const isSmallDevice = width < 768
 
   const swiper = useRef(null)
+  // Using shared AppHeader for consistent height and style across screens
 
   const renderHeaderTitle = () => {
     switch (activeSegment) {
@@ -131,26 +132,21 @@ const PhotosDetails = ({ route }) => {
   )
 
   const renderCustomHeader = () => (
-    <SafeAreaView
+    <View
       style={{
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         zIndex: 1000,
-        ...SHARED_STYLES.header.container,
-        height: SHARED_STYLES.header.getDynamicHeight(
-          insets.top,
-          isSmallDevice,
-        ),
       }}
     >
-      <View style={SHARED_STYLES.header.contentContainer}>
-        {renderHeaderLeft()}
-        {renderHeaderTitle()}
-        <View style={{ width: 40 }} />
-      </View>
-    </SafeAreaView>
+      <AppHeader
+        safeTopOnly
+        onBack={() => router.back()}
+        title={renderHeaderTitle()}
+      />
+    </View>
   )
 
   // Remove the useEffect that was calling navigation.setOptions since it doesn't work with Expo Router

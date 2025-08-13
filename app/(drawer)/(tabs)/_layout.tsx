@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router'
 import * as CONST from '../../../src/consts'
+import { SHARED_STYLES } from '../../../src/theme/sharedStyles'
 import { getDefaultScreenOptions } from '../../../src/utils/navigationStyles'
 
 export default function TabsLayout() {
@@ -30,37 +31,32 @@ export default function TabsLayout() {
           headerShown: false,
         }}
       />
-      <Stack.Screen
-        name="shared/[photoId]"
-        options={{
-          title: 'Shared Photo',
-          headerTintColor: CONST.MAIN_COLOR,
-          headerBackTitle: '',
-        }}
-      />
-      <Stack.Screen
-        name="modal-input"
-        options={{
-          title: 'Add Comment',
-          headerTintColor: '#fff',
-          headerBackTitle: '',
-          headerBackTitleStyle: { fontSize: 0 },
-          headerStyle: {
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-          },
-          headerTitleStyle: {
-            fontSize: 18,
-            fontWeight: '600',
-            color: '#fff',
-          },
-        }}
-      />
+      <Stack.Screen name="shared/[photoId]" />
+      <Stack.Screen name="modal-input" />
       <Stack.Screen
         name="confirm-friendship/[friendshipUuid]"
         options={{
           title: 'Friend Request',
           headerTintColor: CONST.MAIN_COLOR,
           headerBackTitle: '',
+          headerStyle: {
+            backgroundColor: SHARED_STYLES.theme.HEADER_BACKGROUND,
+            borderBottomWidth: 1,
+            borderBottomColor: SHARED_STYLES.theme.HEADER_BORDER,
+            shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 1,
+            shadowRadius: 4,
+            elevation: 3,
+          } as any,
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: SHARED_STYLES.theme.TEXT_PRIMARY,
+          } as any,
         }}
       />
       <Stack.Screen
@@ -70,7 +66,22 @@ export default function TabsLayout() {
           headerTintColor: CONST.MAIN_COLOR,
           headerBackTitle: '',
           headerStyle: {
-            backgroundColor: CONST.HEADER_GRADIENT_END,
+            backgroundColor: SHARED_STYLES.theme.HEADER_BACKGROUND,
+            borderBottomWidth: 1,
+            borderBottomColor: SHARED_STYLES.theme.HEADER_BORDER,
+            shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 1,
+            shadowRadius: 4,
+            elevation: 3,
+          } as any,
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: SHARED_STYLES.theme.TEXT_PRIMARY,
           } as any,
         }}
       />
