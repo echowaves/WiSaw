@@ -15,3 +15,5 @@ export const triggerAddFriend = atom(false)
 export const triggerSearch = atom(null)
 
 export const isDarkMode = atom(false)
+
+export const followSystemTheme = atom(false)

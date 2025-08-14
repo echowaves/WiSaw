@@ -15,7 +15,12 @@ import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
 import { getTheme } from '../src/theme/sharedStyles'
 import { parseDeepLink } from '../src/utils/linkingHelper'
-import { loadThemePreference } from '../src/utils/themeStorage'
+import {
+  getSystemTheme,
+  loadFollowSystemPreference,
+  loadThemePreference,
+  subscribeToSystemTheme,
+} from '../src/utils/themeStorage'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync()
@@ -24,6 +29,9 @@ export default function RootLayout() {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
   const [isDarkMode, setIsDarkMode] = useAtom(STATE.isDarkMode)
+  const [followSystemTheme, setFollowSystemTheme] = useAtom(
+    STATE.followSystemTheme,
+  )
   const [isAppReady, setIsAppReady] = useState(false)
 
   // Create dynamic theme based on dark mode state
@@ -70,20 +78,32 @@ export default function RootLayout() {
   const init = useCallback(async () => {
     // Use InteractionManager to defer expensive operations
     InteractionManager.runAfterInteractions(async () => {
-      const [fetchedUuid, fetchedNickName, savedThemePreference] =
-        await Promise.all([
-          SecretReducer.getUUID(),
-          SecretReducer.getStoredNickName(),
-          loadThemePreference(),
-        ])
+      const [
+        fetchedUuid,
+        fetchedNickName,
+        savedThemePreference,
+        savedFollowSystemPreference,
+      ] = await Promise.all([
+        SecretReducer.getUUID(),
+        SecretReducer.getStoredNickName(),
+        loadThemePreference(),
+        loadFollowSystemPreference(),
+      ])
       setUuid(fetchedUuid)
       setNickName(fetchedNickName)
       setIsDarkMode(savedThemePreference)
+      setFollowSystemTheme(savedFollowSystemPreference)
+
+      // If following system theme, set to current system theme
+      if (savedFollowSystemPreference) {
+        setIsDarkMode(getSystemTheme())
+      }
+
       setIsAppReady(true) // Mark app as ready after data is loaded
     })
 
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
-  }, [setUuid, setNickName, setIsDarkMode])
+  }, [setUuid, setNickName, setIsDarkMode, setFollowSystemTheme])
 
   // Handle deep linking
   const handleDeepLink = useCallback(
@@ -303,6 +323,23 @@ export default function RootLayout() {
   useEffect(() => {
     init()
   }, [init])
+
+  // Subscribe to system theme changes
+  useEffect(() => {
+    if (followSystemTheme) {
+      // Set initial system theme
+      const currentSystemTheme = getSystemTheme()
+      setIsDarkMode(currentSystemTheme)
+
+      // Subscribe to changes
+      const subscription = subscribeToSystemTheme((isDark) => {
+        setIsDarkMode(isDark)
+      })
+      return () => {
+        subscription?.remove()
+      }
+    }
+  }, [followSystemTheme, setIsDarkMode])
 
   useEffect(() => {
     if (fontsLoaded && isAppReady) {

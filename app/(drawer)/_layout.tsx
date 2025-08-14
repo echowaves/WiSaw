@@ -12,7 +12,11 @@ import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
 import * as STATE from '../../src/state'
 import { getTheme } from '../../src/theme/sharedStyles'
-import { saveThemePreference } from '../../src/utils/themeStorage'
+import {
+  getSystemTheme,
+  saveFollowSystemPreference,
+  saveThemePreference,
+} from '../../src/utils/themeStorage'
 
 // Get version and build number from app.config.js
 // Version comes from package.json, build number is shared between iOS and Android
@@ -73,13 +77,59 @@ const createStyles = (isDark) => {
 // Custom Drawer Content with Theme Switcher and Version Information
 function CustomDrawerContent(props) {
   const [isDark, setIsDark] = useAtom(STATE.isDarkMode)
+  const [followSystemTheme, setFollowSystemTheme] = useAtom(
+    STATE.followSystemTheme,
+  )
   const styles = createStyles(isDark)
   const theme = getTheme(isDark)
 
-  const toggleTheme = async () => {
-    const newTheme = !isDark
-    setIsDark(newTheme)
-    await saveThemePreference(newTheme)
+  const handleThemeChange = async (themeMode) => {
+    switch (themeMode) {
+      case 'light':
+        setIsDark(false)
+        setFollowSystemTheme(false)
+        await saveThemePreference(false)
+        await saveFollowSystemPreference(false)
+        break
+      case 'dark':
+        setIsDark(true)
+        setFollowSystemTheme(false)
+        await saveThemePreference(true)
+        await saveFollowSystemPreference(false)
+        break
+      case 'system':
+        setFollowSystemTheme(true)
+        setIsDark(getSystemTheme()) // Set immediate system theme
+        await saveFollowSystemPreference(true)
+        break
+    }
+  }
+
+  const getCurrentThemeMode = () => {
+    if (followSystemTheme) return 'system'
+    return isDark ? 'dark' : 'light'
+  }
+
+  const getThemeIcon = (mode) => {
+    switch (mode) {
+      case 'light':
+        return 'sun'
+      case 'dark':
+        return 'moon'
+      case 'system':
+        return 'mobile-alt'
+    }
+  }
+
+  const getThemeLabel = (mode) => {
+    switch (mode) {
+      case 'light':
+        return 'Light Mode'
+      case 'dark':
+        return 'Dark Mode'
+      case 'system':
+        return 'Auto'
+    }
   }
 
   return (
@@ -90,16 +140,56 @@ function CustomDrawerContent(props) {
 
       {/* Theme Switcher */}
       <View style={styles.themeContainer}>
-        <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
-          <FontAwesome5
-            name={isDark ? 'sun' : 'moon'}
-            size={18}
-            color={CONST.MAIN_COLOR}
-          />
-          <Text style={styles.themeText}>
-            {isDark ? 'Light Mode' : 'Dark Mode'}
-          </Text>
-        </TouchableOpacity>
+        <Text
+          style={[
+            styles.themeText,
+            { textAlign: 'center', marginBottom: 12, marginLeft: 0 },
+          ]}
+        >
+          Theme
+        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          {['light', 'dark', 'system'].map((mode) => (
+            <TouchableOpacity
+              key={mode}
+              onPress={() => handleThemeChange(mode)}
+              style={[
+                styles.themeButton,
+                {
+                  flex: 1,
+                  marginHorizontal: 2,
+                  backgroundColor:
+                    getCurrentThemeMode() === mode
+                      ? theme.INTERACTIVE_PRIMARY
+                      : theme.INTERACTIVE_BACKGROUND,
+                },
+              ]}
+            >
+              <FontAwesome5
+                name={getThemeIcon(mode)}
+                size={16}
+                color={
+                  getCurrentThemeMode() === mode ? '#FFFFFF' : CONST.MAIN_COLOR
+                }
+              />
+              <Text
+                style={[
+                  styles.themeText,
+                  {
+                    fontSize: 12,
+                    marginLeft: 4,
+                    color:
+                      getCurrentThemeMode() === mode
+                        ? '#FFFFFF'
+                        : CONST.MAIN_COLOR,
+                  },
+                ]}
+              >
+                {getThemeLabel(mode).split(' ')[0]}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       {/* Version Info */}
