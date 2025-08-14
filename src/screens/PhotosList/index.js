@@ -1742,9 +1742,11 @@ const PhotosList = ({ searchFromUrl }) => {
             marginVertical: 8,
             flexDirection: 'row',
             alignItems: 'center',
-            shadowColor: theme.HEADER_SHADOW,
+            borderWidth: 1,
+            borderColor: theme.CARD_BORDER,
+            shadowColor: theme.CARD_SHADOW,
             shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
+            shadowOpacity: 0.3,
             shadowRadius: 4,
             elevation: 3,
             position: 'relative',
@@ -1840,7 +1842,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   if (!netAvailable) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
         {renderPendingPhotos()}
         <View style={styles.container}>
@@ -1860,7 +1862,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   if (isTandcAccepted && location && photosList?.length > 0) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
         {renderPendingPhotos()}
         <View style={styles.container}>
@@ -1938,7 +1940,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   if (!location) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
         {renderPendingPhotos()}
         <View style={styles.container}>
@@ -2013,7 +2015,7 @@ const PhotosList = ({ searchFromUrl }) => {
     }
 
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
         {renderPendingPhotos()}
         <View style={styles.container}>
@@ -2027,7 +2029,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // dispatch(reducer.getPhotos())
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
       {renderCustomHeader()}
       {renderPendingPhotos()}
       <View style={styles.container}>
