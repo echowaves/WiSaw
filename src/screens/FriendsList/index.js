@@ -27,175 +27,180 @@ import EmptyStateCard from '../../components/EmptyStateCard'
 import NamePicker from '../../components/NamePicker'
 import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
-
-const styles = StyleSheet.create({
-  container: {
-    ...SHARED_STYLES.containers.main,
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-  },
-  friendItem: {
-    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
-    flex: 1,
-  },
-  friendContent: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    flex: 1,
-  },
-  friendHeader: {
-    ...SHARED_STYLES.layout.spaceBetween,
-  },
-  friendInfo: {
-    marginRight: 12,
-    flex: 1,
-  },
-  friendName: {
-    ...SHARED_STYLES.text.subheading,
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  friendStatus: {
-    ...SHARED_STYLES.text.secondary,
-    fontSize: 14,
-  },
-  pendingStatus: {
-    fontSize: 14,
-    color: SHARED_STYLES.theme.TEXT_PRIMARY,
-    fontWeight: '500',
-  },
-
-  pendingShareButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginLeft: 0,
-    borderRadius: 8,
-    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_SECONDARY,
-    elevation: 15,
-    zIndex: 15,
-    shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    borderWidth: 1,
-    borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 80,
-    minHeight: 36,
-  },
-  pendingShareButtonText: {
-    color: SHARED_STYLES.theme.TEXT_PRIMARY,
-    fontSize: 11,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  shareButtonContainer: {
-    marginTop: 8,
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    gap: 8,
-  },
-  pendingDeleteButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginLeft: 0,
-    borderRadius: 8,
-    backgroundColor: SHARED_STYLES.theme.STATUS_ERROR_BACKGROUND,
-    elevation: 15,
-    zIndex: 15,
-    shadowColor: SHARED_STYLES.theme.STATUS_ERROR,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    borderWidth: 1,
-    borderColor: SHARED_STYLES.theme.STATUS_ERROR_BORDER,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 80,
-    minHeight: 36,
-  },
-  pendingDeleteButtonText: {
-    color: SHARED_STYLES.theme.STATUS_ERROR,
-    fontSize: 11,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  swipeAction: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    flexDirection: 'row',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    width: 240, // Increased width to fit 3 actions
-  },
-  rightSwipeAction: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    flexDirection: 'row',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    width: 160, // 2 actions = 160px
-  },
-  leftSwipeAction: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    flexDirection: 'row',
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
-    width: 80, // 1 action = 80px
-  },
-  swipeActionButton: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    height: '100%',
-  },
-  shareAction: {
-    backgroundColor: SHARED_STYLES.theme.STATUS_SUCCESS,
-  },
-  editAction: {
-    backgroundColor: SHARED_STYLES.theme.STATUS_SUCCESS,
-  },
-  deleteAction: {
-    backgroundColor: SHARED_STYLES.theme.STATUS_ERROR,
-  },
-  swipeActionText: {
-    color: 'white',
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  friendItemContainer: {
-    ...SHARED_STYLES.containers.card,
-    marginHorizontal: 16,
-    marginVertical: 4,
-    overflow: 'hidden',
-    borderRadius: 12,
-    padding: 0, // Override the default padding from shared card style
-    elevation: 2,
-  },
-})
 
 const FriendsList = () => {
   const navigation = useNavigation()
 
   const [uuid] = useAtom(STATE.uuid)
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
   const [triggerAddFriend, setTriggerAddFriend] = useAtom(
     STATE.triggerAddFriend,
   )
+
+  const theme = getTheme(isDarkMode)
+
+  const createStyles = (theme) =>
+    StyleSheet.create({
+      container: {
+        ...SHARED_STYLES.containers.main,
+        backgroundColor: theme.BACKGROUND,
+      },
+      friendItem: {
+        backgroundColor: theme.CARD_BACKGROUND,
+        flex: 1,
+      },
+      friendContent: {
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        flex: 1,
+      },
+      friendHeader: {
+        ...SHARED_STYLES.layout.spaceBetween,
+      },
+      friendInfo: {
+        marginRight: 12,
+        flex: 1,
+      },
+      friendName: {
+        ...SHARED_STYLES.text.subheading,
+        fontSize: 16,
+        marginBottom: 4,
+      },
+      friendStatus: {
+        ...SHARED_STYLES.text.secondary,
+        fontSize: 14,
+      },
+      pendingStatus: {
+        fontSize: 14,
+        color: theme.TEXT_PRIMARY,
+        fontWeight: '500',
+      },
+      pendingShareButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        marginLeft: 0,
+        borderRadius: 8,
+        backgroundColor: theme.STATUS_SUCCESS,
+        elevation: 15,
+        zIndex: 15,
+        shadowColor: theme.CARD_SHADOW,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        borderWidth: 1,
+        borderColor: theme.STATUS_SUCCESS_BORDER,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 80,
+        minHeight: 36,
+      },
+      pendingShareButtonText: {
+        color: 'white',
+        fontSize: 11,
+        fontWeight: '600',
+        marginLeft: 4,
+      },
+      shareButtonContainer: {
+        marginTop: 8,
+        alignItems: 'flex-start',
+        flexDirection: 'row',
+        gap: 8,
+      },
+      pendingDeleteButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        marginLeft: 0,
+        borderRadius: 8,
+        backgroundColor: theme.STATUS_ERROR_BACKGROUND,
+        elevation: 15,
+        zIndex: 15,
+        shadowColor: theme.STATUS_ERROR,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        borderWidth: 1,
+        borderColor: theme.STATUS_ERROR_BORDER,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 80,
+        minHeight: 36,
+      },
+      pendingDeleteButtonText: {
+        color: theme.STATUS_ERROR,
+        fontSize: 11,
+        fontWeight: '600',
+        marginLeft: 4,
+      },
+      swipeAction: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        flexDirection: 'row',
+        borderTopLeftRadius: 12,
+        borderBottomLeftRadius: 12,
+        width: 240,
+      },
+      rightSwipeAction: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        flexDirection: 'row',
+        borderTopLeftRadius: 12,
+        borderBottomLeftRadius: 12,
+        width: 160,
+      },
+      leftSwipeAction: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        right: 0,
+        flexDirection: 'row',
+        borderTopRightRadius: 12,
+        borderBottomRightRadius: 12,
+        width: 80,
+      },
+      swipeActionButton: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        height: '100%',
+      },
+      shareAction: {
+        backgroundColor: theme.STATUS_SUCCESS,
+      },
+      editAction: {
+        backgroundColor: theme.STATUS_WARNING,
+      },
+      deleteAction: {
+        backgroundColor: theme.STATUS_ERROR,
+      },
+      swipeActionText: {
+        color: 'white',
+        fontSize: 11,
+        fontWeight: '600',
+        marginTop: 4,
+        textAlign: 'center',
+      },
+      friendItemContainer: {
+        ...SHARED_STYLES.containers.card,
+        marginHorizontal: 16,
+        marginVertical: 4,
+        overflow: 'hidden',
+        borderRadius: 12,
+        padding: 0,
+        elevation: 2,
+      },
+    })
+
+  const styles = createStyles(theme)
 
   const headerText =
     'Choose a friendly name to help you remember this person when chatting or sharing content.'
@@ -625,7 +630,7 @@ const FriendsList = () => {
                         <FontAwesome5
                           name="clock"
                           size={12}
-                          color={SHARED_STYLES.theme.TEXT_PRIMARY}
+                          color={theme.TEXT_PRIMARY}
                           style={{ marginRight: 6 }}
                         />
                         <Text style={styles.pendingStatus}>
@@ -658,7 +663,7 @@ const FriendsList = () => {
                           <FontAwesome5
                             name="share-alt"
                             size={12}
-                            color={SHARED_STYLES.theme.TEXT_PRIMARY}
+                            color="white"
                           />
                           <Text style={styles.pendingShareButtonText}>
                             Share
@@ -687,7 +692,7 @@ const FriendsList = () => {
                           <FontAwesome5
                             name="trash"
                             size={12}
-                            color={SHARED_STYLES.theme.STATUS_ERROR}
+                            color={theme.STATUS_ERROR}
                           />
                           <Text style={styles.pendingDeleteButtonText}>
                             Delete
@@ -746,7 +751,7 @@ const FriendsList = () => {
           subtitle="Add your first friend to start sharing photos and chatting privately. Build your network and stay connected!"
           actionText="Add a Friend"
           onActionPress={handleAddFriend}
-          iconColor={SHARED_STYLES.theme.TEXT_PRIMARY}
+          iconColor={theme.TEXT_PRIMARY}
         />
       </SafeAreaView>
     )

@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import {
   Animated,
   Keyboard,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,15 +21,20 @@ import Toast from 'react-native-toast-message'
 import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 
+import AppHeader from '../../components/AppHeader'
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
+import { getTheme } from '../../theme/sharedStyles'
 
 const maxStringLength = 2000
 
 const FeedbackScreen = () => {
   const navigation = useNavigation()
   const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+
+  const theme = getTheme(isDarkMode)
 
   const [inputText, _setInputText] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -217,73 +221,82 @@ const FeedbackScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#f8f9fa',
+      backgroundColor: theme.BACKGROUND,
     },
     scrollContainer: {
       flex: 1,
+      backgroundColor: theme.BACKGROUND,
     },
     contentContainer: {
+      backgroundColor: theme.BACKGROUND,
+      paddingBottom: 40,
       padding: 20,
       paddingTop: 30,
     },
     headerCard: {
-      backgroundColor: 'white',
-      borderRadius: 16,
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 20,
+      marginVertical: 8,
       padding: 20,
-      marginBottom: 20,
-      shadowColor: CONST.HEADER_SHADOW_COLOR,
+      borderWidth: 1,
+      borderColor: theme.CARD_BORDER,
+      shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 4,
       },
-      shadowOpacity: 1,
+      shadowOpacity: 0.3,
       shadowRadius: 8,
-      elevation: 4,
-      borderWidth: 1,
-      borderColor: CONST.HEADER_BORDER_COLOR,
+      elevation: 8,
+      marginBottom: 20,
+      marginHorizontal: 0,
     },
     iconContainer: {
       alignSelf: 'center',
       width: 80,
       height: 80,
       borderRadius: 40,
-      backgroundColor: 'rgba(234, 94, 61, 0.1)',
+      backgroundColor: theme.interactiveBackground,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 16,
     },
     title: {
+      color: theme.TEXT_PRIMARY,
       fontSize: 24,
       fontWeight: '700',
-      color: CONST.TEXT_COLOR,
       textAlign: 'center',
       marginBottom: 8,
     },
     subtitle: {
+      color: theme.TEXT_SECONDARY,
       fontSize: 16,
-      color: CONST.INACTIVE_SEGMENT_COLOR,
+      fontWeight: '400',
       textAlign: 'center',
       lineHeight: 22,
     },
     inputCard: {
-      backgroundColor: 'white',
-      borderRadius: 16,
-      padding: 0,
-      marginBottom: 20,
-      shadowColor: CONST.HEADER_SHADOW_COLOR,
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 20,
+      marginVertical: 8,
+      borderWidth: 2,
+      borderColor: theme.CARD_BORDER,
+      shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 4,
       },
-      shadowOpacity: 1,
+      shadowOpacity: 0.3,
       shadowRadius: 8,
-      elevation: 4,
-      borderWidth: 2,
+      elevation: 8,
+      padding: 0,
+      marginBottom: 20,
+      marginHorizontal: 0,
       overflow: 'hidden',
     },
     textInput: {
       fontSize: 16,
-      color: CONST.TEXT_COLOR,
+      color: theme.TEXT_PRIMARY,
       padding: 20,
       paddingTop: 20,
       paddingBottom: 60,
@@ -297,18 +310,18 @@ const FeedbackScreen = () => {
       alignItems: 'center',
       paddingHorizontal: 20,
       paddingVertical: 12,
-      backgroundColor: 'rgba(248, 249, 250, 0.8)',
+      backgroundColor: theme.inputFooterBackground,
       borderTopWidth: 1,
-      borderTopColor: 'rgba(0, 0, 0, 0.05)',
+      borderTopColor: theme.BORDER_LIGHT,
     },
     characterCount: {
       fontSize: 14,
       fontWeight: '500',
-      color: CONST.TEXT_COLOR, // Ensure default visibility
+      color: theme.TEXT_PRIMARY,
     },
     validationText: {
       fontSize: 12,
-      color: CONST.INACTIVE_SEGMENT_COLOR,
+      color: theme.TEXT_SECONDARY,
     },
     submitButton: {
       backgroundColor: CONST.MAIN_COLOR,
@@ -329,8 +342,15 @@ const FeedbackScreen = () => {
       marginBottom: 20,
     },
     submitButtonDisabled: {
-      backgroundColor: CONST.SECONDARY_COLOR,
+      backgroundColor: theme.disabledBackground,
+      borderRadius: 16,
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
       shadowOpacity: 0.1,
+      marginBottom: 20,
     },
     submitButtonText: {
       color: 'white',
@@ -339,11 +359,11 @@ const FeedbackScreen = () => {
       marginLeft: 8,
     },
     helpCard: {
-      backgroundColor: 'rgba(79, 195, 247, 0.1)',
+      backgroundColor: theme.helpCardBackground,
       borderRadius: 12,
       padding: 16,
       borderWidth: 1,
-      borderColor: 'rgba(79, 195, 247, 0.2)',
+      borderColor: theme.helpCardBorder,
     },
     helpTitle: {
       fontSize: 16,
@@ -353,7 +373,7 @@ const FeedbackScreen = () => {
     },
     helpText: {
       fontSize: 14,
-      color: CONST.TEXT_COLOR,
+      color: theme.TEXT_PRIMARY,
       lineHeight: 20,
     },
     bulletPoint: {
@@ -363,7 +383,7 @@ const FeedbackScreen = () => {
     },
     bulletText: {
       fontSize: 14,
-      color: CONST.TEXT_COLOR,
+      color: theme.TEXT_PRIMARY,
       lineHeight: 20,
       marginLeft: 8,
       flex: 1,
@@ -371,131 +391,137 @@ const FeedbackScreen = () => {
   })
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          style={styles.scrollContainer}
-          contentContainerStyle={styles.contentContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
-            }}
+    <>
+      <AppHeader title="Feedback" onBack={() => router.back()} />
+      <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            style={styles.scrollContainer}
+            contentContainerStyle={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
-            {/* Header Card */}
-            <View style={styles.headerCard}>
-              <View style={styles.iconContainer}>
-                <FontAwesome5
-                  name="comments"
-                  size={32}
-                  color={CONST.MAIN_COLOR}
+            <Animated.View
+              style={{
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              }}
+            >
+              {/* Header Card */}
+              <View style={styles.headerCard}>
+                <View style={styles.iconContainer}>
+                  <FontAwesome5
+                    name="comments"
+                    size={32}
+                    color={CONST.MAIN_COLOR}
+                  />
+                </View>
+                <Text style={styles.title}>We'd Love Your Feedback!</Text>
+                <Text style={styles.subtitle}>
+                  Help us improve WiSaw by sharing your thoughts, suggestions,
+                  or reporting any issues you've encountered.
+                </Text>
+              </View>
+
+              {/* Input Card */}
+              <View
+                style={[
+                  styles.inputCard,
+                  { borderColor: getInputBorderColor() },
+                ]}
+              >
+                <TextInput
+                  multiline
+                  numberOfLines={8}
+                  placeholder="Tell us what's on your mind... What features would you like to see? Any bugs to report? How can we make WiSaw better for you?"
+                  placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+                  maxLength={maxStringLength}
+                  style={styles.textInput}
+                  onChangeText={(inputValue) => {
+                    setInputText(inputValue.slice(0, maxStringLength))
+                  }}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
+                  value={inputText}
+                  editable={!isSubmitting}
                 />
-              </View>
-              <Text style={styles.title}>We'd Love Your Feedback!</Text>
-              <Text style={styles.subtitle}>
-                Help us improve WiSaw by sharing your thoughts, suggestions, or
-                reporting any issues you've encountered.
-              </Text>
-            </View>
-
-            {/* Input Card */}
-            <View
-              style={[styles.inputCard, { borderColor: getInputBorderColor() }]}
-            >
-              <TextInput
-                multiline
-                numberOfLines={8}
-                placeholder="Tell us what's on your mind... What features would you like to see? Any bugs to report? How can we make WiSaw better for you?"
-                placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
-                maxLength={maxStringLength}
-                style={styles.textInput}
-                onChangeText={(inputValue) => {
-                  setInputText(inputValue.slice(0, maxStringLength))
-                }}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                value={inputText}
-                editable={!isSubmitting}
-              />
-              <View style={styles.inputFooter}>
-                <Text style={styles.validationText}>
-                  {inputText.length < 10
-                    ? 'At least 10 characters needed'
-                    : 'Looking good! 👍'}
-                </Text>
-                <Text
-                  style={[
-                    styles.characterCount,
-                    { color: getCharacterCountColor() },
-                  ]}
-                >
-                  {maxStringLength - inputText.length}
-                </Text>
-              </View>
-            </View>
-
-            {/* Submit Button */}
-            <TouchableOpacity
-              style={[
-                styles.submitButton,
-                (isSubmitting || inputText.trim().length < 10) &&
-                  styles.submitButtonDisabled,
-              ]}
-              onPress={handleSubmit}
-              disabled={isSubmitting || inputText.trim().length < 10}
-              activeOpacity={0.8}
-            >
-              {isSubmitting ? (
-                <Ionicons name="hourglass" size={20} color="white" />
-              ) : (
-                <FontAwesome5 name="paper-plane" size={18} color="white" />
-              )}
-              <Text style={styles.submitButtonText}>
-                {isSubmitting ? 'Sending...' : 'Send Feedback'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Help Card */}
-            <View style={styles.helpCard}>
-              <Text style={styles.helpTitle}>
-                💡 What to include in your feedback:
-              </Text>
-
-              <View style={styles.bulletPoint}>
-                <Text style={{ color: '#4FC3F7' }}>•</Text>
-                <Text style={styles.bulletText}>
-                  Bug reports with steps to reproduce the issue
-                </Text>
+                <View style={styles.inputFooter}>
+                  <Text style={styles.validationText}>
+                    {inputText.length < 10
+                      ? 'At least 10 characters needed'
+                      : 'Looking good! 👍'}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.characterCount,
+                      { color: getCharacterCountColor() },
+                    ]}
+                  >
+                    {maxStringLength - inputText.length}
+                  </Text>
+                </View>
               </View>
 
-              <View style={styles.bulletPoint}>
-                <Text style={{ color: '#4FC3F7' }}>•</Text>
-                <Text style={styles.bulletText}>
-                  Feature requests and improvement suggestions
+              {/* Submit Button */}
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  (isSubmitting || inputText.trim().length < 10) &&
+                    styles.submitButtonDisabled,
+                ]}
+                onPress={handleSubmit}
+                disabled={isSubmitting || inputText.trim().length < 10}
+                activeOpacity={0.8}
+              >
+                {isSubmitting ? (
+                  <Ionicons name="hourglass" size={20} color="white" />
+                ) : (
+                  <FontAwesome5 name="paper-plane" size={18} color="white" />
+                )}
+                <Text style={styles.submitButtonText}>
+                  {isSubmitting ? 'Sending...' : 'Send Feedback'}
                 </Text>
-              </View>
+              </TouchableOpacity>
 
-              <View style={styles.bulletPoint}>
-                <Text style={{ color: '#4FC3F7' }}>•</Text>
-                <Text style={styles.bulletText}>
-                  General thoughts about your WiSaw experience
+              {/* Help Card */}
+              <View style={styles.helpCard}>
+                <Text style={styles.helpTitle}>
+                  💡 What to include in your feedback:
                 </Text>
-              </View>
 
-              <View style={styles.bulletPoint}>
-                <Text style={{ color: '#4FC3F7' }}>•</Text>
-                <Text style={styles.bulletText}>
-                  UI/UX feedback and usability improvements
-                </Text>
+                <View style={styles.bulletPoint}>
+                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={styles.bulletText}>
+                    Bug reports with steps to reproduce the issue
+                  </Text>
+                </View>
+
+                <View style={styles.bulletPoint}>
+                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={styles.bulletText}>
+                    Feature requests and improvement suggestions
+                  </Text>
+                </View>
+
+                <View style={styles.bulletPoint}>
+                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={styles.bulletText}>
+                    General thoughts about your WiSaw experience
+                  </Text>
+                </View>
+
+                <View style={styles.bulletPoint}>
+                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={styles.bulletText}>
+                    UI/UX feedback and usability improvements
+                  </Text>
+                </View>
               </View>
-            </View>
-          </Animated.View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
+            </Animated.View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </View>
+    </>
   )
 }
 

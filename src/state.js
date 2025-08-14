@@ -13,3 +13,5 @@ export const friendsList = atom([])
 export const triggerAddFriend = atom(false)
 
 export const triggerSearch = atom(null)
+
+export const isDarkMode = atom(false)

@@ -62,92 +62,12 @@ import * as reducer from './reducer'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { getTheme } from '../../theme/sharedStyles'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import Thumb from '../../components/Thumb'
 
 const BACKGROUND_TASK_NAME = 'background-task'
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-  },
-  thumbContainer: {
-    // height: thumbDimension,
-    // paddingBottom: 10,
-    // marginBottom: 10,
-  },
-  // Modern header styles
-  headerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  customSegmentedControl: {
-    flexDirection: 'row',
-    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: SHARED_STYLES.theme.HEADER_BORDER,
-    shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 2,
-    elevation: 2,
-    padding: 4,
-  },
-  segmentButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    marginHorizontal: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 50,
-  },
-  activeSegmentButton: {
-    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_ACTIVE,
-  },
-  segmentText: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  buttonGroupContainer: {
-    width: 220,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
-    borderWidth: 1,
-    borderColor: SHARED_STYLES.theme.HEADER_BORDER,
-    shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  buttonContainer: {
-    borderRadius: 18,
-    margin: 2,
-  },
-  buttonStyle: {
-    backgroundColor: 'transparent',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-  },
-  selectedButtonStyle: {
-    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_ACTIVE,
-    borderRadius: 16,
-  },
-})
 
 // 1. Define the task by providing a name and the function that should be executed
 // Note: This needs to be called in the global scope (e.g outside of your React components)
@@ -199,6 +119,133 @@ const PhotosList = ({ searchFromUrl }) => {
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
   const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
+
+  const theme = getTheme(isDarkMode)
+
+  // Dynamic styles based on current theme
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.BACKGROUND,
+    },
+    thumbContainer: {
+      // height: thumbDimension,
+      // paddingBottom: 10,
+      // marginBottom: 10,
+    },
+    // Modern header styles
+    headerContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    customSegmentedControl: {
+      flexDirection: 'row',
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.HEADER_BORDER,
+      shadowColor: theme.HEADER_SHADOW,
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 2,
+      elevation: 2,
+      padding: 4,
+    },
+    segmentButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+      borderRadius: 16,
+      marginHorizontal: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 50,
+    },
+    activeSegmentButton: {
+      backgroundColor: theme.INTERACTIVE_ACTIVE,
+    },
+    segmentText: {
+      fontSize: 12,
+      fontWeight: '600',
+      marginTop: 4,
+    },
+    activeSegmentText: {
+      color: theme.TEXT_PRIMARY,
+    },
+    inactiveSegmentText: {
+      color: theme.TEXT_SECONDARY,
+    },
+    buttonGroupContainer: {
+      width: 220,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderWidth: 1,
+      borderColor: theme.HEADER_BORDER,
+      shadowColor: theme.HEADER_SHADOW,
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    buttonContainer: {
+      borderRadius: 18,
+      margin: 2,
+    },
+    buttonStyle: {
+      backgroundColor: 'transparent',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 16,
+    },
+    selectedButtonStyle: {
+      backgroundColor: theme.INTERACTIVE_ACTIVE,
+      borderRadius: 16,
+    },
+    footerContainer: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      left: 0,
+      borderTopWidth: 1,
+      borderTopColor: theme.BORDER_LIGHT,
+      shadowColor: theme.HEADER_SHADOW,
+    },
+    videoRecordButton: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: theme.STATUS_ERROR,
+      shadowColor: theme.STATUS_ERROR,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 15,
+      zIndex: 15,
+    },
+    badgeStyle: {
+      backgroundColor: theme.STATUS_ERROR,
+      borderWidth: 2,
+      borderColor: theme.BACKGROUND,
+      minWidth: 20,
+      height: 20,
+      borderRadius: 10,
+    },
+    cameraButton: {
+      shadowColor: theme.HEADER_SHADOW,
+    },
+  })
 
   const navigation = useNavigation()
 
@@ -627,10 +674,10 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <SafeAreaView
         style={{
-          backgroundColor: CONST.HEADER_GRADIENT_END,
+          backgroundColor: theme.HEADER_BACKGROUND,
           borderBottomWidth: 1,
-          borderBottomColor: CONST.HEADER_BORDER_COLOR,
-          shadowColor: CONST.HEADER_SHADOW_COLOR,
+          borderBottomColor: theme.HEADER_BORDER,
+          shadowColor: theme.HEADER_SHADOW,
           shadowOffset: {
             width: 0,
             height: 2,
@@ -675,8 +722,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   size={20}
                   color={
                     activeSegment === 0
-                      ? CONST.ACTIVE_SEGMENT_COLOR
-                      : CONST.INACTIVE_SEGMENT_COLOR
+                      ? theme.TEXT_PRIMARY
+                      : theme.TEXT_SECONDARY
                   }
                 />
                 {textVisible && (
@@ -686,8 +733,8 @@ const PhotosList = ({ searchFromUrl }) => {
                       {
                         color:
                           activeSegment === 0
-                            ? CONST.ACTIVE_SEGMENT_COLOR
-                            : CONST.INACTIVE_SEGMENT_COLOR,
+                            ? theme.TEXT_PRIMARY
+                            : theme.TEXT_SECONDARY,
                         opacity: textAnimation,
                         transform: [
                           {
@@ -717,8 +764,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   size={20}
                   color={
                     activeSegment === 1
-                      ? CONST.ACTIVE_SEGMENT_COLOR
-                      : CONST.INACTIVE_SEGMENT_COLOR
+                      ? theme.TEXT_PRIMARY
+                      : theme.TEXT_SECONDARY
                   }
                 />
                 {textVisible && (
@@ -728,8 +775,8 @@ const PhotosList = ({ searchFromUrl }) => {
                       {
                         color:
                           activeSegment === 1
-                            ? CONST.ACTIVE_SEGMENT_COLOR
-                            : CONST.INACTIVE_SEGMENT_COLOR,
+                            ? theme.TEXT_PRIMARY
+                            : theme.TEXT_SECONDARY,
                         opacity: textAnimation,
                         transform: [
                           {
@@ -759,8 +806,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   size={20}
                   color={
                     activeSegment === 2
-                      ? CONST.ACTIVE_SEGMENT_COLOR
-                      : CONST.INACTIVE_SEGMENT_COLOR
+                      ? theme.TEXT_PRIMARY
+                      : theme.TEXT_SECONDARY
                   }
                 />
                 {textVisible && (
@@ -770,8 +817,8 @@ const PhotosList = ({ searchFromUrl }) => {
                       {
                         color:
                           activeSegment === 2
-                            ? CONST.ACTIVE_SEGMENT_COLOR
-                            : CONST.INACTIVE_SEGMENT_COLOR,
+                            ? theme.TEXT_PRIMARY
+                            : theme.TEXT_SECONDARY,
                         opacity: textAnimation,
                         transform: [
                           {
@@ -812,9 +859,7 @@ const PhotosList = ({ searchFromUrl }) => {
               name="globe"
               size={20}
               color={
-                activeSegment === 0
-                  ? CONST.ACTIVE_SEGMENT_COLOR
-                  : CONST.INACTIVE_SEGMENT_COLOR
+                activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
               }
             />
             {textVisible && (
@@ -824,8 +869,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     color:
                       activeSegment === 0
-                        ? CONST.ACTIVE_SEGMENT_COLOR
-                        : CONST.INACTIVE_SEGMENT_COLOR,
+                        ? theme.TEXT_PRIMARY
+                        : theme.TEXT_SECONDARY,
                     opacity: textAnimation,
                     transform: [
                       {
@@ -853,9 +898,7 @@ const PhotosList = ({ searchFromUrl }) => {
               name="star"
               size={20}
               color={
-                activeSegment === 1
-                  ? CONST.ACTIVE_SEGMENT_COLOR
-                  : CONST.INACTIVE_SEGMENT_COLOR
+                activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
               }
             />
             {textVisible && (
@@ -865,8 +908,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     color:
                       activeSegment === 1
-                        ? CONST.ACTIVE_SEGMENT_COLOR
-                        : CONST.INACTIVE_SEGMENT_COLOR,
+                        ? theme.TEXT_PRIMARY
+                        : theme.TEXT_SECONDARY,
                     opacity: textAnimation,
                     transform: [
                       {
@@ -894,9 +937,7 @@ const PhotosList = ({ searchFromUrl }) => {
               name="search"
               size={20}
               color={
-                activeSegment === 2
-                  ? CONST.ACTIVE_SEGMENT_COLOR
-                  : CONST.INACTIVE_SEGMENT_COLOR
+                activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
               }
             />
             {textVisible && (
@@ -906,8 +947,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     color:
                       activeSegment === 2
-                        ? CONST.ACTIVE_SEGMENT_COLOR
-                        : CONST.INACTIVE_SEGMENT_COLOR,
+                        ? theme.TEXT_PRIMARY
+                        : theme.TEXT_SECONDARY,
                     opacity: textAnimation,
                     transform: [
                       {
@@ -1360,16 +1401,10 @@ const PhotosList = ({ searchFromUrl }) => {
       location && (
         <SafeAreaView
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: theme.CARD_BACKGROUND,
             width,
             height: FOOTER_HEIGHT,
-            position: 'absolute',
-            bottom: 0,
-            right: 0,
-            left: 0,
-            borderTopWidth: 1,
-            borderTopColor: 'rgba(0, 0, 0, 0.1)',
-            shadowColor: '#000',
+            ...styles.footerContainer,
             shadowOffset: {
               width: 0,
               height: -2,
@@ -1400,7 +1435,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 width: 50,
                 height: 50,
                 borderRadius: 25,
-                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                backgroundColor: theme.INTERACTIVE_BACKGROUND,
                 elevation: 15,
                 zIndex: 15,
               }}
@@ -1417,29 +1452,13 @@ const PhotosList = ({ searchFromUrl }) => {
               <FontAwesome
                 name="navicon"
                 size={22}
-                color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
+                color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
               />
             </TouchableOpacity>
 
             {/* Video Recording Button */}
             <TouchableOpacity
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: 60,
-                height: 60,
-                borderRadius: 30,
-                backgroundColor: '#FF6B6B',
-                shadowColor: '#FF6B6B',
-                shadowOffset: {
-                  width: 0,
-                  height: 4,
-                },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 15,
-                zIndex: 15,
-              }}
+              style={styles.videoRecordButton}
               onPress={() => {
                 checkPermissionsForPhotoTaking({ cameraType: 'video' })
               }}
@@ -1466,7 +1485,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 elevation: 15,
                 zIndex: 15,
                 borderWidth: 3,
-                borderColor: 'white',
+                borderColor: theme.BACKGROUND,
               }}
               onPress={() => {
                 checkPermissionsForPhotoTaking({ cameraType: 'camera' })
@@ -1483,7 +1502,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 width: 50,
                 height: 50,
                 borderRadius: 25,
-                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                backgroundColor: theme.INTERACTIVE_BACKGROUND,
                 position: 'relative',
                 elevation: 15,
                 zIndex: 15,
@@ -1494,19 +1513,12 @@ const PhotosList = ({ searchFromUrl }) => {
               <FontAwesome5
                 name="user-friends"
                 size={22}
-                color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
+                color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
               />
               {unreadCount > 0 && (
                 <Badge
                   value={unreadCount}
-                  badgeStyle={{
-                    backgroundColor: '#FF4757',
-                    borderWidth: 2,
-                    borderColor: 'white',
-                    minWidth: 20,
-                    height: 20,
-                    borderRadius: 10,
-                  }}
+                  badgeStyle={styles.badgeStyle}
                   textStyle={{
                     fontSize: 11,
                     fontWeight: 'bold',
@@ -1599,12 +1611,12 @@ const PhotosList = ({ searchFromUrl }) => {
     <View
       style={{
         flexDirection: 'row',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: theme.HEADER_BACKGROUND,
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-        shadowColor: '#000',
+        borderBottomColor: theme.BORDER_LIGHT,
+        shadowColor: theme.HEADER_SHADOW,
         shadowOffset: {
           width: 0,
           height: 2,
@@ -1620,7 +1632,7 @@ const PhotosList = ({ searchFromUrl }) => {
           flex: 1,
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+          backgroundColor: theme.INPUT_BACKGROUND,
           borderRadius: 20,
           paddingHorizontal: 16,
           marginRight: 12,
@@ -1629,13 +1641,13 @@ const PhotosList = ({ searchFromUrl }) => {
         <Ionicons
           name="search"
           size={20}
-          color="rgba(0, 0, 0, 0.5)"
+          color={theme.TEXT_SECONDARY}
           style={{ marginRight: 8 }}
         />
         <TextInput
           ref={searchBarRef}
           placeholder="Search photos..."
-          placeholderTextColor="rgba(0, 0, 0, 0.5)"
+          placeholderTextColor={theme.TEXT_SECONDARY}
           onChangeText={(currentTerm) => {
             setSearchTerm(currentTerm)
           }}
@@ -1645,7 +1657,7 @@ const PhotosList = ({ searchFromUrl }) => {
           returnKeyType="search"
           style={{
             flex: 1,
-            color: CONST.TEXT_COLOR,
+            color: theme.TEXT_PRIMARY,
             fontSize: 16,
             fontWeight: '400',
             height: 40,
@@ -1672,13 +1684,13 @@ const PhotosList = ({ searchFromUrl }) => {
               height: 20,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              backgroundColor: theme.INTERACTIVE_SECONDARY,
               borderRadius: 10,
               elevation: 6,
               zIndex: 6,
             }}
           >
-            <Ionicons name="close" size={12} color="rgba(0, 0, 0, 0.6)" />
+            <Ionicons name="close" size={12} color={theme.TEXT_PRIMARY} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -1686,13 +1698,13 @@ const PhotosList = ({ searchFromUrl }) => {
       <TouchableOpacity
         onPress={() => submitSearch()}
         style={{
-          backgroundColor: CONST.MAIN_COLOR,
+          backgroundColor: theme.INTERACTIVE_PRIMARY,
           borderRadius: 20,
           width: 44,
           height: 44,
           justifyContent: 'center',
           alignItems: 'center',
-          shadowColor: CONST.MAIN_COLOR,
+          shadowColor: theme.INTERACTIVE_PRIMARY,
           shadowOffset: {
             width: 0,
             height: 2,
@@ -1713,14 +1725,14 @@ const PhotosList = ({ searchFromUrl }) => {
       return (
         <Animated.View
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backgroundColor: theme.CARD_BACKGROUND,
             borderRadius: 12,
             padding: 16,
             marginHorizontal: 16,
             marginVertical: 8,
             flexDirection: 'row',
             alignItems: 'center',
-            shadowColor: '#000',
+            shadowColor: theme.HEADER_SHADOW,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -1755,7 +1767,9 @@ const PhotosList = ({ searchFromUrl }) => {
             <MaterialIcons
               name="cloud-upload"
               size={24}
-              color={netAvailable ? CONST.MAIN_COLOR : 'rgba(0, 0, 0, 0.3)'}
+              color={
+                netAvailable ? theme.INTERACTIVE_PRIMARY : theme.TEXT_DISABLED
+              }
               style={{ marginRight: 12 }}
             />
           </Animated.View>
@@ -1764,7 +1778,7 @@ const PhotosList = ({ searchFromUrl }) => {
               style={{
                 fontSize: 16,
                 fontWeight: '600',
-                color: CONST.TEXT_COLOR,
+                color: theme.TEXT_PRIMARY,
                 marginBottom: 4,
                 opacity: pendingPhotosAnimation,
               }}
@@ -1789,7 +1803,7 @@ const PhotosList = ({ searchFromUrl }) => {
               }}
             >
               <LinearProgress
-                color={CONST.MAIN_COLOR}
+                color={theme.INTERACTIVE_PRIMARY}
                 style={{
                   flex: 1,
                   height: 4,
@@ -1797,7 +1811,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   borderBottomRightRadius: 12,
                 }}
                 trackStyle={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                  backgroundColor: theme.BORDER_LIGHT,
                   borderBottomLeftRadius: 12,
                   borderBottomRightRadius: 12,
                 }}

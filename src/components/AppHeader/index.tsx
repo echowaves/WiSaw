@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useAtom } from 'jotai'
 import React from 'react'
 import {
   SafeAreaView,
@@ -8,7 +9,8 @@ import {
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import * as STATE from '../../state'
+import { getTheme } from '../../theme/sharedStyles'
 
 type AppHeaderProps = {
   title: string | React.ReactNode
@@ -23,7 +25,70 @@ export default function AppHeader({
   rightSlot,
   safeTopOnly = false,
 }: AppHeaderProps) {
+  const [isDark] = useAtom(STATE.isDarkMode)
+  const theme = getTheme(isDark)
   const insets = useSafeAreaInsets()
+
+  const styles = StyleSheet.create({
+    safeArea: {
+      backgroundColor: theme.HEADER_BACKGROUND,
+    },
+    container: {
+      backgroundColor: theme.HEADER_BACKGROUND,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.HEADER_BORDER,
+      shadowColor: theme.HEADER_SHADOW,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    contentContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      minHeight: 56,
+    },
+    leftArea: {
+      flex: 0,
+      alignItems: 'flex-start',
+      minWidth: 44,
+    },
+    titleArea: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rightArea: {
+      flex: 0,
+      alignItems: 'flex-end',
+      minWidth: 44,
+    },
+    titleText: {
+      color: theme.TEXT_PRIMARY,
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+    headerButton: {
+      padding: 12,
+      borderRadius: 20,
+      backgroundColor: theme.INTERACTIVE_BACKGROUND,
+      marginHorizontal: 8,
+      borderWidth: 1,
+      borderColor: theme.INTERACTIVE_BORDER,
+      shadowColor: theme.CARD_SHADOW,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+  })
 
   const Outer = safeTopOnly ? View : (SafeAreaView as any)
   const outerProps: any = safeTopOnly
@@ -42,13 +107,13 @@ export default function AppHeader({
             {onBack ? (
               <TouchableOpacity
                 onPress={onBack}
-                style={SHARED_STYLES.interactive.headerButton}
+                style={styles.headerButton}
                 accessibilityLabel="Go back"
               >
                 <Ionicons
                   name="chevron-back"
                   size={24}
-                  color={SHARED_STYLES.theme.TEXT_PRIMARY}
+                  color={theme.TEXT_PRIMARY}
                 />
               </TouchableOpacity>
             ) : (
@@ -72,34 +137,3 @@ export default function AppHeader({
     </Outer>
   )
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: SHARED_STYLES.theme.HEADER_BACKGROUND,
-  },
-  container: {
-    backgroundColor: SHARED_STYLES.theme.HEADER_BACKGROUND,
-    borderBottomWidth: 1,
-    borderBottomColor: SHARED_STYLES.theme.HEADER_BORDER,
-    shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  contentContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    height: 56, // Set a fixed height
-  },
-  leftArea: { flex: 1, flexDirection: 'row' },
-  titleArea: { flex: 3, alignItems: 'center', justifyContent: 'center' },
-  rightArea: { flex: 1, alignItems: 'flex-end', flexDirection: 'row' },
-  titleText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: SHARED_STYLES.theme.TEXT_PRIMARY,
-  },
-})

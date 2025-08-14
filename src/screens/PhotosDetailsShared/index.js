@@ -1,3 +1,4 @@
+import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
@@ -7,7 +8,7 @@ import PropTypes from 'prop-types'
 
 import { AntDesign } from '@expo/vector-icons'
 
-import { StatusBar, StyleSheet, View, useWindowDimensions } from 'react-native'
+import { StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text } from '@rneui/themed'
@@ -18,27 +19,33 @@ import AppHeader from '../../components/AppHeader'
 import Photo from '../../components/Photo'
 
 import * as CONST from '../../consts'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { isDarkMode } from '../../state'
+import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-  },
-  headerIcon: {
-    textShadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  headerTitle: {
-    ...SHARED_STYLES.header.title,
-    textShadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-})
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.BACKGROUND,
+    },
+    headerIcon: {
+      textShadowColor: theme.CARD_SHADOW,
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    },
+    headerTitle: {
+      ...SHARED_STYLES.header.title,
+      textShadowColor: theme.CARD_SHADOW,
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    },
+  })
 
 const PhotosDetailsShared = ({ route }) => {
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
+  const styles = createStyles(theme)
+
   const navigation = useNavigation()
   const [item, setItem] = useState(null)
   const insets = useSafeAreaInsets()
@@ -85,7 +92,7 @@ const PhotosDetailsShared = ({ route }) => {
       <AntDesign
         name="sharealt"
         size={20}
-        color={SHARED_STYLES.theme.TEXT_PRIMARY}
+        color={theme.TEXT_PRIMARY}
         style={styles.headerIcon}
       />
       <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
@@ -139,7 +146,7 @@ const PhotosDetailsShared = ({ route }) => {
       />
       <Text
         style={{
-          color: SHARED_STYLES.theme.TEXT_PRIMARY,
+          color: theme.TEXT_PRIMARY,
           textAlign: 'center',
           marginTop:
             SHARED_STYLES.header.getDynamicHeight(insets.top, isSmallDevice) +

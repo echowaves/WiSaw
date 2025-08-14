@@ -3,50 +3,106 @@ import {
   DrawerContentScrollView,
   DrawerItemList,
 } from '@react-navigation/drawer'
-import { router } from 'expo-router'
 import { Drawer } from 'expo-router/drawer'
+import { useAtom } from 'jotai'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
-import { SHARED_STYLES } from '../../src/theme/sharedStyles'
-import { getDefaultHeaderStyle } from '../../src/utils/navigationStyles'
+import * as STATE from '../../src/state'
+import { getTheme } from '../../src/theme/sharedStyles'
+import { saveThemePreference } from '../../src/utils/themeStorage'
 
 // Get version and build number from app.config.js
 // Version comes from package.json, build number is shared between iOS and Android
 const APP_VERSION = appConfig.expo.version
 const BUILD_NUMBER = appConfig.expo.ios.buildNumber
 
-const styles = StyleSheet.create({
-  versionContainer: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: SHARED_STYLES.theme.BORDER_LIGHT,
-    backgroundColor: SHARED_STYLES.theme.HEADER_BACKGROUND,
-    alignItems: 'center',
-  },
-  versionText: {
-    fontSize: 12,
-    color: SHARED_STYLES.theme.TEXT_SECONDARY,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  appName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: CONST.MAIN_COLOR,
-    marginBottom: 4,
-  },
-})
+// Create dynamic styles function
+const createStyles = (isDark) => {
+  const theme = getTheme(isDark)
 
-// Custom Drawer Content with Version Information
+  return StyleSheet.create({
+    themeContainer: {
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.BORDER_LIGHT,
+      backgroundColor: theme.HEADER_BACKGROUND,
+    },
+    themeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.INTERACTIVE_BACKGROUND,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.INTERACTIVE_BORDER,
+    },
+    themeText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: CONST.MAIN_COLOR,
+      marginLeft: 8,
+    },
+    versionContainer: {
+      padding: 20,
+      borderTopWidth: 1,
+      borderTopColor: theme.BORDER_LIGHT,
+      backgroundColor: theme.HEADER_BACKGROUND,
+      alignItems: 'center',
+    },
+    versionText: {
+      fontSize: 12,
+      color: theme.TEXT_SECONDARY,
+      fontWeight: '500',
+      textAlign: 'center',
+    },
+    appName: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: CONST.MAIN_COLOR,
+      marginBottom: 4,
+    },
+  })
+}
+
+// Custom Drawer Content with Theme Switcher and Version Information
 function CustomDrawerContent(props) {
+  const [isDark, setIsDark] = useAtom(STATE.isDarkMode)
+  const styles = createStyles(isDark)
+  const theme = getTheme(isDark)
+
+  const toggleTheme = async () => {
+    const newTheme = !isDark
+    setIsDark(newTheme)
+    await saveThemePreference(newTheme)
+  }
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.BACKGROUND }}>
       <DrawerContentScrollView {...props}>
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
+
+      {/* Theme Switcher */}
+      <View style={styles.themeContainer}>
+        <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
+          <FontAwesome5
+            name={isDark ? 'sun' : 'moon'}
+            size={18}
+            color={CONST.MAIN_COLOR}
+          />
+          <Text style={styles.themeText}>
+            {isDark ? 'Light Mode' : 'Dark Mode'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Version Info */}
       <View style={styles.versionContainer}>
         <Text style={styles.appName}>WiSaw</Text>
         <Text style={styles.versionText}>Version {APP_VERSION}</Text>
@@ -57,18 +113,21 @@ function CustomDrawerContent(props) {
 }
 
 export default function DrawerLayout() {
+  const [isDark] = useAtom(STATE.isDarkMode)
+  const theme = getTheme(isDark)
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
         screenOptions={{
           headerShown: false,
           drawerStyle: {
-            backgroundColor: '#FAFAFA',
+            backgroundColor: theme.BACKGROUND,
             width: 280,
           },
           drawerActiveTintColor: 'white',
           drawerActiveBackgroundColor: CONST.MAIN_COLOR,
-          drawerInactiveTintColor: '#666',
+          drawerInactiveTintColor: isDark ? '#BBB' : '#666',
           drawerItemStyle: {
             borderRadius: 12,
             marginVertical: 4,
@@ -129,31 +188,7 @@ export default function DrawerLayout() {
             ),
             drawerLabel: 'Feedback',
             title: 'Feedback',
-            headerShown: true,
-            headerLeft: () => (
-              <TouchableOpacity
-                onPress={() => router.back()}
-                style={{
-                  marginLeft: 15,
-                  padding: 8,
-                  borderRadius: 20,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <FontAwesome
-                  name="arrow-left"
-                  size={20}
-                  color={CONST.MAIN_COLOR}
-                />
-              </TouchableOpacity>
-            ),
-            headerStyle: getDefaultHeaderStyle(),
-            headerTitleStyle: {
-              fontSize: 18,
-              fontWeight: '600',
-              color: CONST.TEXT_COLOR,
-            },
-            headerTintColor: CONST.MAIN_COLOR,
+            headerShown: false,
           }}
         />
       </Drawer>

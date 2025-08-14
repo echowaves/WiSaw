@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
+import { useAtom } from 'jotai'
 import { useRef } from 'react'
 
 import PropTypes from 'prop-types'
@@ -7,7 +8,7 @@ import PropTypes from 'prop-types'
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 
-import { StatusBar, StyleSheet, View, useWindowDimensions } from 'react-native'
+import { StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text } from '@rneui/themed'
@@ -16,29 +17,35 @@ import Swiper from 'react-native-swiper'
 
 import AppHeader from '../../components/AppHeader'
 import Photo from '../../components/Photo'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { isDarkMode } from '../../state'
+import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 
 import { getPhotos } from '../PhotosList/reducer'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-  },
-  headerIcon: {
-    textShadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  headerTitle: {
-    ...SHARED_STYLES.header.title,
-    textShadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-})
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.BACKGROUND,
+    },
+    headerIcon: {
+      textShadowColor: theme.CARD_SHADOW,
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    },
+    headerTitle: {
+      ...SHARED_STYLES.header.title,
+      textShadowColor: theme.CARD_SHADOW,
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    },
+  })
 
 const PhotosDetails = ({ route }) => {
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
+  const styles = createStyles(theme)
+
   const {
     index,
     photosList,
@@ -65,7 +72,7 @@ const PhotosDetails = ({ route }) => {
             <FontAwesome
               name="globe"
               size={20}
-              color={SHARED_STYLES.theme.TEXT_PRIMARY}
+              color={theme.TEXT_PRIMARY}
               style={styles.headerIcon}
             />
             <Text style={[styles.headerTitle, { marginLeft: 8 }]}>
@@ -79,7 +86,7 @@ const PhotosDetails = ({ route }) => {
             <AntDesign
               name="star"
               size={20}
-              color={SHARED_STYLES.theme.STATUS_WARNING}
+              color={theme.STATUS_WARNING}
               style={styles.headerIcon}
             />
             <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Starred</Text>
@@ -91,7 +98,7 @@ const PhotosDetails = ({ route }) => {
             <Ionicons
               name="search"
               size={20}
-              color={SHARED_STYLES.theme.STATUS_SUCCESS}
+              color={theme.STATUS_SUCCESS}
               style={styles.headerIcon}
             />
             <Text
@@ -108,7 +115,7 @@ const PhotosDetails = ({ route }) => {
             <FontAwesome
               name="globe"
               size={20}
-              color={SHARED_STYLES.theme.TEXT_PRIMARY}
+              color={theme.TEXT_PRIMARY}
               style={styles.headerIcon}
             />
             <Text style={[styles.headerTitle, { marginLeft: 8 }]}>
@@ -124,7 +131,7 @@ const PhotosDetails = ({ route }) => {
       <Ionicons
         name="chevron-back"
         size={24}
-        color={SHARED_STYLES.theme.TEXT_PRIMARY}
+        color={theme.TEXT_PRIMARY}
         style={styles.headerIcon}
         onPress={() => router.back()}
       />
@@ -186,7 +193,7 @@ const PhotosDetails = ({ route }) => {
         loadMinimalSize={1}
         showsPagination={false}
         pagingEnabled
-        style={{ backgroundColor: SHARED_STYLES.theme.BACKGROUND }}
+        style={{ backgroundColor: theme.BACKGROUND }}
       >
         {photosList.map((photo) => (
           <Photo

@@ -6,7 +6,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import * as MediaLibrary from 'expo-media-library'
 import moment from 'moment'
-import { GiftedChat, Send } from 'react-native-gifted-chat'
+import {
+  Bubble,
+  GiftedChat,
+  InputToolbar,
+  Send,
+  Time,
+} from 'react-native-gifted-chat'
 import { v4 as uuidv4 } from 'uuid'
 
 import * as Crypto from 'expo-crypto'
@@ -19,6 +25,7 @@ import {
   Alert,
   Animated,
   SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
   // ScrollView,
@@ -48,15 +55,18 @@ import * as friendsHelper from '../FriendsList/friends_helper'
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import subscriptionClient from '../../subscriptionClientWs'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { getTheme } from '../../theme/sharedStyles'
 
 import ModernHeaderButton from '../../components/ModernHeaderButton'
 import ChatPhoto from './ChatPhoto'
 
 const Chat = ({ route }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+
+  const theme = getTheme(isDarkMode)
 
   const { chatUuid, contact, friendshipUuid } = route.params
 
@@ -494,33 +504,36 @@ const Chat = ({ route }) => {
     [chatUuid, uuid, friendsList, topOffset],
   )
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-    },
-    deleteAction: {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      width: 120,
-      backgroundColor: SHARED_STYLES.theme.STATUS_ERROR,
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: -1,
-    },
-    deleteActionText: {
-      color: 'white',
-      fontSize: 14,
-      fontWeight: '600',
-      marginTop: 4,
-    },
-    chatContainer: {
-      flex: 1,
-      backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-    },
-  })
+  const createStyles = (theme) =>
+    StyleSheet.create({
+      container: {
+        flex: 1,
+        backgroundColor: theme.BACKGROUND,
+      },
+      deleteAction: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        right: 0,
+        width: 120,
+        backgroundColor: theme.STATUS_ERROR,
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: -1,
+      },
+      deleteActionText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: '600',
+        marginTop: 4,
+      },
+      chatContainer: {
+        flex: 1,
+        backgroundColor: theme.BACKGROUND,
+      },
+    })
+
+  const styles = createStyles(theme)
 
   const renderSend = (props) => (
     <Send {...props}>
@@ -536,7 +549,7 @@ const Chat = ({ route }) => {
           style={{
             marginRight: 10,
             marginBottom: 10,
-            color: SHARED_STYLES.theme.STATUS_SUCCESS,
+            color: theme.STATUS_SUCCESS,
           }}
         />
       </View>
@@ -551,10 +564,7 @@ const Chat = ({ route }) => {
         justifyContent: 'center',
       }}
     >
-      <ActivityIndicator
-        size="large"
-        color={SHARED_STYLES.theme.STATUS_SUCCESS}
-      />
+      <ActivityIndicator size="large" color={theme.STATUS_SUCCESS} />
     </View>
   )
 
@@ -579,9 +589,9 @@ const Chat = ({ route }) => {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         padding: 16,
-        backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
+        backgroundColor: theme.CARD_BACKGROUND,
         borderTopWidth: 1,
-        borderTopColor: SHARED_STYLES.theme.CARD_BORDER,
+        borderTopColor: theme.CARD_BORDER,
       }}
     >
       <View />
@@ -591,7 +601,7 @@ const Chat = ({ route }) => {
         style={{
           // marginRight: 10,
           // marginBottom: 10,
-          color: SHARED_STYLES.theme.STATUS_SUCCESS,
+          color: theme.STATUS_SUCCESS,
         }}
         // eslint-disable-next-line no-use-before-define
         onPress={async () => takePhoto()}
@@ -602,7 +612,7 @@ const Chat = ({ route }) => {
         style={{
           // marginRight: 10,
           // marginBottom: 10,
-          color: SHARED_STYLES.theme.STATUS_SUCCESS,
+          color: theme.STATUS_SUCCESS,
         }}
         // eslint-disable-next-line no-use-before-define
         onPress={async () => pickAsset()}
@@ -723,6 +733,11 @@ const Chat = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+      />
       <View style={styles.container}>
         {/* Delete Action Background */}
         <View style={styles.deleteAction}>
@@ -757,6 +772,135 @@ const Chat = ({ route }) => {
               onLoadEarlier={onLoadEarlier}
               renderUsernameOnMessage
               // renderAccessory={renderAccessory} // disabled photo taking for now
+
+              // Dark mode styling props
+              textInputStyle={{
+                color: theme.TEXT_PRIMARY,
+                backgroundColor: theme.CARD_BACKGROUND,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: theme.CARD_BORDER,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                marginHorizontal: 0,
+                marginVertical: 4,
+                flex: 1,
+              }}
+              inputToolbarStyle={{
+                backgroundColor: theme.BACKGROUND,
+                borderTopColor: theme.BORDER,
+                borderTopWidth: 1,
+                paddingVertical: 8,
+                paddingHorizontal: 12,
+                minHeight: 60,
+              }}
+              textInputProps={{
+                style: {
+                  color: theme.TEXT_PRIMARY,
+                  backgroundColor: theme.CARD_BACKGROUND,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: theme.CARD_BORDER,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  marginHorizontal: 0,
+                  marginVertical: 4,
+                  minHeight: 40,
+                  flex: 1,
+                },
+                placeholderTextColor: theme.TEXT_SECONDARY,
+              }}
+              inputToolbarProps={{
+                containerStyle: {
+                  backgroundColor: theme.BACKGROUND,
+                  borderTopColor: theme.BORDER,
+                  borderTopWidth: 1,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                },
+              }}
+              composerStyle={{
+                backgroundColor: theme.CARD_BACKGROUND,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: theme.CARD_BORDER,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                marginHorizontal: 0,
+                marginVertical: 4,
+                minHeight: 40,
+                flex: 1,
+              }}
+              multilineStyle={{
+                backgroundColor: theme.CARD_BACKGROUND,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: theme.CARD_BORDER,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                marginHorizontal: 0,
+                marginVertical: 4,
+                color: theme.TEXT_PRIMARY,
+                minHeight: 40,
+                flex: 1,
+              }}
+              placeholderTextColor={theme.TEXT_SECONDARY}
+              // Message bubble styling for dark mode
+              renderBubble={(props) => (
+                <Bubble
+                  {...props}
+                  wrapperStyle={{
+                    right: {
+                      backgroundColor: theme.STATUS_SUCCESS, // Sent messages
+                    },
+                    left: {
+                      backgroundColor: theme.CARD_BACKGROUND, // Received messages
+                      borderColor: theme.CARD_BORDER,
+                      borderWidth: 1,
+                    },
+                  }}
+                  textStyle={{
+                    right: {
+                      color: '#FFFFFF', // White text on colored background
+                    },
+                    left: {
+                      color: theme.TEXT_PRIMARY, // Themed text color
+                    },
+                  }}
+                />
+              )}
+              // Custom input toolbar for better dark mode container styling
+              renderInputToolbar={(props) => (
+                <InputToolbar
+                  {...props}
+                  containerStyle={{
+                    backgroundColor: theme.BACKGROUND,
+                    borderTopColor: theme.BORDER,
+                    borderTopWidth: 1,
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    minHeight: 60,
+                  }}
+                  primaryStyle={{
+                    alignItems: 'center',
+                    flex: 1,
+                  }}
+                />
+              )}
+              // Time styling
+              renderTime={(props) => (
+                <Time
+                  {...props}
+                  timeTextStyle={{
+                    right: {
+                      color: 'rgba(255, 255, 255, 0.7)', // Light text on sent messages
+                    },
+                    left: {
+                      color: theme.TEXT_SECONDARY, // Themed text for received messages
+                    },
+                  }}
+                />
+              )}
               // Performance optimizations
               listViewProps={{
                 initialNumToRender: 10,

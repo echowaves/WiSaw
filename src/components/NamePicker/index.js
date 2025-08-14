@@ -19,9 +19,15 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 
+import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { isDarkMode as isDarkModeAtom } from '../../state'
+import {
+  getTheme,
+  getThemedStyles,
+  SHARED_STYLES,
+} from '../../theme/sharedStyles'
 import AppHeader from '../AppHeader'
 
 const NamePicker = ({
@@ -33,6 +39,9 @@ const NamePicker = ({
 }) => {
   const { height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
+  const [isDarkMode] = useAtom(isDarkModeAtom)
+  const theme = getTheme(isDarkMode)
+  const themedStyles = getThemedStyles(isDarkMode)
 
   const [inputText, _setInputText] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -42,87 +51,98 @@ const NamePicker = ({
     _setInputText(data)
   }
 
-  const styles = StyleSheet.create({
-    container: {
-      ...SHARED_STYLES.containers.main,
-    },
-    headerTitle: {
-      ...SHARED_STYLES.header.title,
-    },
-    contentContainer: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingTop: 16,
-    },
-    iconContainer: {
-      alignSelf: 'center',
-      marginBottom: 20,
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-    },
-    titleText: {
-      ...SHARED_STYLES.text.heading,
-      fontSize: 24,
-      textAlign: 'center',
-      marginBottom: 12,
-    },
-    subtitleText: {
-      ...SHARED_STYLES.text.secondary,
-      fontSize: 16,
-      textAlign: 'center',
-      lineHeight: 24,
-      marginBottom: 40,
-    },
-    inputContainer: {
-      backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: SHARED_STYLES.theme.CARD_BORDER,
-      marginBottom: 20,
-      shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-      shadowOffset: {
-        width: 0,
-        height: 2,
+  const createStyles = (theme) =>
+    StyleSheet.create({
+      container: {
+        ...themedStyles.containers.main,
       },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-      elevation: 4,
-    },
-    textInput: {
-      ...SHARED_STYLES.text.primary,
-      fontSize: 18,
-      padding: 20,
-      textAlign: 'center',
-      fontWeight: '500',
-    },
-    characterCount: {
-      position: 'absolute',
-      top: 12,
-      right: 16,
-      ...SHARED_STYLES.text.caption,
-    },
-    buttonContainer: {
-      ...SHARED_STYLES.interactive.buttonContainer,
-    },
-    saveButton: {
-      ...SHARED_STYLES.interactive.primaryButton,
-    },
-    saveButtonTitle: {
-      ...SHARED_STYLES.interactive.primaryButtonTitle,
-    },
-    cancelButton: {
-      ...SHARED_STYLES.interactive.secondaryButton,
-    },
-    cancelButtonTitle: {
-      ...SHARED_STYLES.interactive.secondaryButtonTitle,
-    },
-  })
+      headerTitle: {
+        ...SHARED_STYLES.header.title,
+      },
+      contentContainer: {
+        flex: 1,
+        paddingHorizontal: 20,
+        paddingTop: 16,
+      },
+      iconContainer: {
+        alignSelf: 'center',
+        marginBottom: 20,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: theme.INTERACTIVE_BACKGROUND,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.INTERACTIVE_BORDER,
+      },
+      titleText: {
+        ...themedStyles.text.heading,
+        fontSize: 24,
+        textAlign: 'center',
+        marginBottom: 12,
+      },
+      subtitleText: {
+        ...themedStyles.text.secondary,
+        fontSize: 16,
+        textAlign: 'center',
+        lineHeight: 24,
+        marginBottom: 40,
+      },
+      inputContainer: {
+        backgroundColor: theme.CARD_BACKGROUND,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: theme.CARD_BORDER,
+        marginBottom: 20,
+        shadowColor: theme.CARD_SHADOW,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
+      },
+      textInput: {
+        ...themedStyles.text.primary,
+        fontSize: 18,
+        padding: 20,
+        textAlign: 'center',
+        fontWeight: '500',
+      },
+      characterCount: {
+        position: 'absolute',
+        top: 12,
+        right: 16,
+        color: theme.TEXT_SECONDARY,
+        fontSize: 12,
+        fontWeight: '400',
+      },
+      buttonContainer: {
+        ...(themedStyles.interactive.buttonContainer ||
+          SHARED_STYLES.interactive.buttonContainer),
+      },
+      saveButton: {
+        ...SHARED_STYLES.interactive.primaryButton,
+        backgroundColor: theme.STATUS_SUCCESS, // Use theme color for better dark mode support
+      },
+      saveButtonTitle: {
+        ...SHARED_STYLES.interactive.primaryButtonTitle,
+        color: '#FFFFFF', // Ensure white text on colored background
+      },
+      cancelButton: {
+        ...SHARED_STYLES.interactive.secondaryButton,
+        backgroundColor: theme.INTERACTIVE_BACKGROUND,
+        borderColor: theme.INTERACTIVE_BORDER,
+      },
+      cancelButtonTitle: {
+        ...SHARED_STYLES.interactive.secondaryButtonTitle,
+        color: theme.TEXT_PRIMARY,
+      },
+    })
+
+  const styles = createStyles(theme)
 
   const handleSave = async () => {
     if (inputText.trim()) {
@@ -176,8 +196,8 @@ const NamePicker = ({
     >
       <View style={styles.container}>
         <StatusBar
-          barStyle="dark-content"
-          backgroundColor={SHARED_STYLES.theme.HEADER_BACKGROUND}
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={theme.HEADER_BACKGROUND}
           translucent={false}
         />
 
@@ -189,7 +209,7 @@ const NamePicker = ({
               <FontAwesome5
                 name={friendshipUuid ? 'edit' : 'user-plus'}
                 size={18}
-                color={SHARED_STYLES.theme.TEXT_PRIMARY}
+                color={theme.TEXT_PRIMARY}
                 style={{ marginRight: 8 }}
               />
               <RNText style={styles.headerTitle}>
@@ -211,8 +231,8 @@ const NamePicker = ({
                 size={24}
                 color={
                   inputText.trim() && !isSaving
-                    ? SHARED_STYLES.theme.TEXT_PRIMARY
-                    : SHARED_STYLES.theme.TEXT_DISABLED
+                    ? theme.TEXT_PRIMARY
+                    : theme.TEXT_DISABLED
                 }
               />
             </TouchableOpacity>
@@ -237,7 +257,7 @@ const NamePicker = ({
                 <FontAwesome5
                   name="users"
                   size={32}
-                  color={SHARED_STYLES.theme.TEXT_PRIMARY}
+                  color={theme.TEXT_PRIMARY}
                 />
               </View>
 
@@ -256,7 +276,7 @@ const NamePicker = ({
               <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="Enter friend's name..."
-                  placeholderTextColor={SHARED_STYLES.theme.TEXT_SECONDARY}
+                  placeholderTextColor={theme.TEXT_SECONDARY}
                   autoFocus
                   style={styles.textInput}
                   maxLength={50}

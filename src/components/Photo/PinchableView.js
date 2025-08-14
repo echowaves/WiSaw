@@ -1,4 +1,5 @@
 import { router } from 'expo-router'
+import { useAtom } from 'jotai'
 
 import {
   ActivityIndicator,
@@ -15,56 +16,62 @@ import { Text } from '@rneui/themed'
 import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { isDarkMode } from '../../state'
+import { getTheme } from '../../theme/sharedStyles'
 import SafeAreaView from '../SafeAreaView'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-  },
-  headerButton: {
-    padding: 12,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    marginHorizontal: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.BACKGROUND,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  headerIcon: {
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  headerTitle: {
-    color: 'rgba(255, 255, 255, 0.95)',
-    fontSize: 17,
-    fontWeight: '600',
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  photoContainer: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'transparent',
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
-  },
-})
+    headerButton: {
+      padding: 12,
+      borderRadius: 20,
+      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      marginHorizontal: 8,
+      borderWidth: 1,
+      borderColor: 'rgba(255, 255, 255, 0.2)',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    headerIcon: {
+      textShadowColor: 'rgba(0, 0, 0, 0.8)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    },
+    headerTitle: {
+      color: 'rgba(255, 255, 255, 0.95)',
+      fontSize: 17,
+      fontWeight: '600',
+      textShadowColor: 'rgba(0, 0, 0, 0.8)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 2,
+    },
+    photoContainer: {
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'transparent',
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      left: 0,
+    },
+  })
 
 const PinchableView = ({ route, navigation }) => {
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
+  const styles = createStyles(theme)
+
   const { photo } = route.params
   const { width, height } = useWindowDimensions()
 

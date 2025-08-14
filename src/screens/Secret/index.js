@@ -23,7 +23,7 @@ import zxcvbn from '../../zxcvbn'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { getTheme } from '../../theme/sharedStyles'
 
 import * as reducer from './reducer'
 
@@ -35,9 +35,12 @@ const SecretScreen = () => {
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+
+  const theme = getTheme(isDarkMode)
 
   const [nickNameEntered, setNickNameEntered] = useState(false)
   const [nickNameText, setNickNameText] = useState('')
@@ -272,7 +275,7 @@ const SecretScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: SHARED_STYLES.theme.BACKGROUND,
+      backgroundColor: theme.BACKGROUND,
     },
     scrollView: {
       flex: 1,
@@ -282,11 +285,11 @@ const SecretScreen = () => {
       paddingTop: 30,
     },
     headerCard: {
-      backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
+      backgroundColor: theme.CARD_BACKGROUND,
       borderRadius: 16,
       padding: 24,
       marginBottom: 24,
-      shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
+      shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
         height: 2,
@@ -295,7 +298,7 @@ const SecretScreen = () => {
       shadowRadius: 8,
       elevation: 4,
       borderWidth: 1,
-      borderColor: SHARED_STYLES.theme.BORDER_LIGHT,
+      borderColor: theme.BORDER_LIGHT,
     },
     iconContainer: {
       alignSelf: 'center',
@@ -310,22 +313,22 @@ const SecretScreen = () => {
     title: {
       fontSize: 24,
       fontWeight: '700',
-      color: SHARED_STYLES.theme.TEXT_PRIMARY,
+      color: theme.TEXT_PRIMARY,
       textAlign: 'center',
       marginBottom: 8,
     },
     subtitle: {
       fontSize: 16,
-      color: SHARED_STYLES.theme.TEXT_SECONDARY,
+      color: theme.TEXT_SECONDARY,
       textAlign: 'center',
       lineHeight: 22,
     },
     formCard: {
-      backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
+      backgroundColor: theme.CARD_BACKGROUND,
       borderRadius: 16,
       padding: 20,
       marginBottom: 20,
-      shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
+      shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
         height: 2,
@@ -334,7 +337,7 @@ const SecretScreen = () => {
       shadowRadius: 8,
       elevation: 4,
       borderWidth: 1,
-      borderColor: SHARED_STYLES.theme.BORDER_LIGHT,
+      borderColor: theme.BORDER_LIGHT,
     },
     inputContainer: {
       marginBottom: 16,
@@ -377,7 +380,7 @@ const SecretScreen = () => {
     },
     warningText: {
       fontSize: 14,
-      color: SHARED_STYLES.theme.TEXT_SECONDARY,
+      color: theme.TEXT_SECONDARY,
       lineHeight: 20,
     },
     resetCard: {
@@ -395,7 +398,7 @@ const SecretScreen = () => {
     },
     resetText: {
       fontSize: 14,
-      color: SHARED_STYLES.theme.TEXT_PRIMARY,
+      color: theme.TEXT_PRIMARY,
       lineHeight: 20,
       marginBottom: 16,
     },
@@ -413,7 +416,7 @@ const SecretScreen = () => {
     },
     strengthBar: {
       height: 8,
-      backgroundColor: SHARED_STYLES.theme.BACKGROUND_DISABLED,
+      backgroundColor: theme.BACKGROUND_DISABLED,
       borderRadius: 4,
       overflow: 'hidden',
     },
@@ -486,9 +489,7 @@ const SecretScreen = () => {
                       name="user"
                       size={20}
                       color={
-                        nickNameEntered
-                          ? SHARED_STYLES.theme.TEXT_DISABLED
-                          : CONST.MAIN_COLOR
+                        nickNameEntered ? theme.TEXT_DISABLED : CONST.MAIN_COLOR
                       }
                     />
                   }
@@ -499,8 +500,8 @@ const SecretScreen = () => {
                   inputStyle={{
                     fontSize: 16,
                     color: nickNameEntered
-                      ? SHARED_STYLES.theme.TEXT_DISABLED
-                      : SHARED_STYLES.theme.TEXT_PRIMARY,
+                      ? theme.TEXT_DISABLED
+                      : theme.TEXT_PRIMARY,
                   }}
                   containerStyle={{ paddingHorizontal: 0 }}
                 />
@@ -530,7 +531,7 @@ const SecretScreen = () => {
                       <FontAwesome5
                         name={showOldPassword ? 'eye-slash' : 'eye'}
                         size={20}
-                        color={SHARED_STYLES.theme.TEXT_SECONDARY}
+                        color={theme.TEXT_SECONDARY}
                         onPress={() => setShowOldPassword(!showOldPassword)}
                         style={styles.passwordToggle}
                       />
@@ -570,7 +571,7 @@ const SecretScreen = () => {
                     <FontAwesome5
                       name={showPassword ? 'eye-slash' : 'eye'}
                       size={20}
-                      color={SHARED_STYLES.theme.TEXT_SECONDARY}
+                      color={theme.TEXT_SECONDARY}
                       onPress={() => setShowPassword(!showPassword)}
                       style={styles.passwordToggle}
                     />
@@ -652,7 +653,7 @@ const SecretScreen = () => {
                     <FontAwesome5
                       name={showConfirmPassword ? 'eye-slash' : 'eye'}
                       size={20}
-                      color={SHARED_STYLES.theme.TEXT_SECONDARY}
+                      color={theme.TEXT_SECONDARY}
                       onPress={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }

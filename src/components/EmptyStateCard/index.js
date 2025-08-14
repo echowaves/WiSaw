@@ -1,85 +1,88 @@
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons'
 import { Button } from '@rneui/themed'
+import { useAtom } from 'jotai'
 import { StyleSheet, Text, View } from 'react-native'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { isDarkMode } from '../../state'
+import { getTheme } from '../../theme/sharedStyles'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-    paddingVertical: 60,
-  },
-  card: {
-    backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
-    borderRadius: 24,
-    padding: 32,
-    alignItems: 'center',
-    shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-    shadowOffset: {
-      width: 0,
-      height: 4,
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+      paddingVertical: 60,
     },
-    shadowOpacity: 1,
-    shadowRadius: 12,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: SHARED_STYLES.theme.BORDER_LIGHT,
-    maxWidth: 320,
-    width: '100%',
-  },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(234, 94, 61, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  icon: {
-    opacity: 0.8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: SHARED_STYLES.theme.TEXT_PRIMARY,
-    textAlign: 'center',
-    marginBottom: 12,
-    lineHeight: 28,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: SHARED_STYLES.theme.TEXT_SECONDARY,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 32,
-  },
-  actionButtonContainer: {
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  actionButton: {
-    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_PRIMARY,
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 20,
-    shadowColor: SHARED_STYLES.theme.INTERACTIVE_PRIMARY,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    card: {
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 24,
+      padding: 32,
+      alignItems: 'center',
+      shadowColor: theme.CARD_SHADOW,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 1,
+      shadowRadius: 12,
+      elevation: 8,
+      borderWidth: 1,
+      borderColor: theme.BORDER_LIGHT,
+      maxWidth: 320,
+      width: '100%',
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
-  },
-})
+    iconContainer: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: 'rgba(234, 94, 61, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 24,
+    },
+    icon: {
+      opacity: 0.8,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: theme.TEXT_PRIMARY,
+      textAlign: 'center',
+      marginBottom: 12,
+      lineHeight: 28,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: theme.TEXT_SECONDARY,
+      textAlign: 'center',
+      lineHeight: 22,
+      marginBottom: 32,
+    },
+    actionButtonContainer: {
+      borderRadius: 20,
+      overflow: 'hidden',
+    },
+    actionButton: {
+      backgroundColor: theme.INTERACTIVE_PRIMARY,
+      paddingHorizontal: 32,
+      paddingVertical: 12,
+      borderRadius: 20,
+      shadowColor: theme.INTERACTIVE_PRIMARY,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    actionButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: 'white',
+    },
+  })
 
 const EmptyStateCard = ({
   icon,
@@ -88,10 +91,17 @@ const EmptyStateCard = ({
   subtitle,
   actionText,
   onActionPress,
-  iconColor = SHARED_STYLES.theme.TEXT_PRIMARY,
+  iconColor,
 }) => {
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
+  const styles = createStyles(theme)
+
   const IconComponent =
     iconType === 'MaterialIcons' ? MaterialIcons : FontAwesome
+
+  // Use theme color as default if no iconColor is provided
+  const finalIconColor = iconColor || theme.TEXT_PRIMARY
 
   return (
     <View style={styles.container}>
@@ -100,7 +110,7 @@ const EmptyStateCard = ({
           <IconComponent
             name={icon}
             size={64}
-            color={iconColor}
+            color={finalIconColor}
             style={styles.icon}
           />
         </View>

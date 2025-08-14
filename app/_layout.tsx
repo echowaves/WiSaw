@@ -13,17 +13,52 @@ import Toast from 'react-native-toast-message'
 import * as CONST from '../src/consts'
 import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
+import { getTheme } from '../src/theme/sharedStyles'
 import { parseDeepLink } from '../src/utils/linkingHelper'
+import { loadThemePreference } from '../src/utils/themeStorage'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
-  const theme = createTheme({})
-
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [isDarkMode, setIsDarkMode] = useAtom(STATE.isDarkMode)
   const [isAppReady, setIsAppReady] = useState(false)
+
+  // Create dynamic theme based on dark mode state
+  const currentTheme = getTheme(isDarkMode)
+  const theme = createTheme({
+    mode: isDarkMode ? 'dark' : 'light',
+    lightColors: {
+      primary: CONST.MAIN_COLOR,
+      secondary: currentTheme.TEXT_SECONDARY,
+      success: currentTheme.STATUS_SUCCESS,
+      warning: currentTheme.STATUS_WARNING,
+      error: currentTheme.STATUS_ERROR,
+      background: currentTheme.BACKGROUND,
+    },
+    darkColors: {
+      primary: CONST.MAIN_COLOR,
+      secondary: currentTheme.TEXT_SECONDARY,
+      success: currentTheme.STATUS_SUCCESS,
+      warning: currentTheme.STATUS_WARNING,
+      error: currentTheme.STATUS_ERROR,
+      background: currentTheme.BACKGROUND,
+    },
+    components: {
+      Button: {
+        titleStyle: {
+          color: '#FFFFFF', // Keep button text white for contrast with colored backgrounds
+        },
+      },
+      Text: {
+        style: {
+          color: currentTheme.TEXT_PRIMARY,
+        },
+      },
+    },
+  })
 
   // Load the fonts used by vector-icons
   const [fontsLoaded] = useFonts({
@@ -35,17 +70,20 @@ export default function RootLayout() {
   const init = useCallback(async () => {
     // Use InteractionManager to defer expensive operations
     InteractionManager.runAfterInteractions(async () => {
-      const [fetchedUuid, fetchedNickName] = await Promise.all([
-        SecretReducer.getUUID(),
-        SecretReducer.getStoredNickName(),
-      ])
+      const [fetchedUuid, fetchedNickName, savedThemePreference] =
+        await Promise.all([
+          SecretReducer.getUUID(),
+          SecretReducer.getStoredNickName(),
+          loadThemePreference(),
+        ])
       setUuid(fetchedUuid)
       setNickName(fetchedNickName)
+      setIsDarkMode(savedThemePreference)
       setIsAppReady(true) // Mark app as ready after data is loaded
     })
 
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
-  }, [setUuid, setNickName])
+  }, [setUuid, setNickName, setIsDarkMode])
 
   // Handle deep linking
   const handleDeepLink = useCallback(

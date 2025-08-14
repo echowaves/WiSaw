@@ -31,281 +31,298 @@ import * as sharingHelper from '../../utils/simpleSharingHelper'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
-import { SHARED_STYLES } from '../../theme/sharedStyles'
+import { isDarkMode } from '../../state'
+import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 
 import ImageView from './ImageView'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-    position: 'relative',
-    height: '100%',
-    // Dynamic paddingTop will be applied inline based on device
-  },
-  scrollView: {
-    flex: 1,
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-  },
-  contentContainer: {
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND,
-    paddingBottom: 40,
-  },
-  // Enhanced card container for all content sections
-  cardContainer: {
-    ...SHARED_STYLES.containers.card,
-  },
-  // Photo info card
-  photoInfoCard: {
-    ...SHARED_STYLES.containers.infoCard,
-  },
-  headerInfo: {
-    backgroundColor: 'transparent',
-    padding: 0,
-    margin: 0,
-    borderRadius: 0,
-    borderWidth: 0,
-  },
-  authorRow: {
-    ...SHARED_STYLES.layout.spaceBetween,
-    ...SHARED_STYLES.layout.separator,
-  },
-  authorName: {
-    ...SHARED_STYLES.text.heading,
-    flexShrink: 1,
-    marginRight: 12,
-  },
-  dateText: {
-    ...SHARED_STYLES.text.secondary,
-    textAlign: 'right',
-    flexShrink: 0,
-    fontWeight: '500',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
-  },
-  statItem: {
-    ...SHARED_STYLES.interactive.statItem,
-  },
-  statsText: {
-    ...SHARED_STYLES.interactive.statText,
-  },
-  // Enhanced comments section
-  commentsCard: {
-    ...SHARED_STYLES.containers.card,
-  },
-  commentsHeader: {
-    ...SHARED_STYLES.layout.row,
-    ...SHARED_STYLES.layout.separator,
-  },
-  commentsTitle: {
-    ...SHARED_STYLES.text.heading,
-    marginLeft: 8,
-  },
-  commentsSection: {
-    backgroundColor: 'transparent',
-    margin: 0,
-    borderRadius: 0,
-    overflow: 'visible',
-  },
-  commentCard: {
-    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
-    borderRadius: 16,
-    marginVertical: 8,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-    borderLeftWidth: 4,
-    borderLeftColor: SHARED_STYLES.theme.STATUS_SUCCESS,
-  },
-  commentText: {
-    ...SHARED_STYLES.text.primary,
-    lineHeight: 24,
-    marginBottom: 12,
-  },
-  commentMeta: {
-    ...SHARED_STYLES.layout.spaceBetween,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: SHARED_STYLES.theme.CARD_BORDER,
-  },
-  commentAuthor: {
-    ...SHARED_STYLES.text.subheading,
-    color: SHARED_STYLES.theme.STATUS_SUCCESS,
-  },
-  commentDate: {
-    ...SHARED_STYLES.text.caption,
-  },
-  addCommentCard: {
-    backgroundColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}05`,
-    borderRadius: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}20`,
-    borderStyle: 'dashed',
-    shadowColor: SHARED_STYLES.theme.STATUS_SUCCESS,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.BACKGROUND,
+      position: 'relative',
+      height: '100%',
+      // Dynamic paddingTop will be applied inline based on device
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  addCommentButton: {
-    backgroundColor: 'transparent',
-    borderRadius: 0,
-    margin: 0,
-    padding: 0,
-    borderWidth: 0,
-  },
-  addCommentContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addCommentText: {
-    color: SHARED_STYLES.theme.STATUS_SUCCESS,
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  // Enhanced AI recognition cards
-  aiRecognitionContainer: {
-    marginVertical: 8,
-    marginHorizontal: 16,
-  },
-  aiRecognitionCard: {
-    ...SHARED_STYLES.containers.card,
-  },
-  aiRecognitionTitle: {
-    ...SHARED_STYLES.text.heading,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  aiRecognitionModerationTitle: {
-    ...SHARED_STYLES.text.heading,
-    color: SHARED_STYLES.theme.STATUS_ERROR,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  aiTagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-  },
-  aiTag: {
-    backgroundColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}15`,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: `${SHARED_STYLES.theme.STATUS_SUCCESS}30`,
-    shadowColor: SHARED_STYLES.theme.STATUS_SUCCESS,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    scrollView: {
+      flex: 1,
+      backgroundColor: theme.BACKGROUND,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  aiTagText: {
-    color: SHARED_STYLES.theme.STATUS_SUCCESS,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  aiModerationTag: {
-    backgroundColor: `${SHARED_STYLES.theme.STATUS_ERROR}15`,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: `${SHARED_STYLES.theme.STATUS_ERROR}30`,
-    shadowColor: SHARED_STYLES.theme.STATUS_ERROR,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    contentContainer: {
+      backgroundColor: theme.BACKGROUND,
+      paddingTop: 16,
+      paddingBottom: 40,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  aiModerationTagText: {
-    color: SHARED_STYLES.theme.STATUS_ERROR,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  // Action card styles
-  actionCard: {
-    ...SHARED_STYLES.containers.card,
-    marginVertical: 4,
-    padding: 6,
-  },
-  actionHeader: {
-    ...SHARED_STYLES.layout.row,
-    ...SHARED_STYLES.layout.separator,
-  },
-  actionTitle: {
-    ...SHARED_STYLES.text.subheading,
-    marginLeft: 8,
-  },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-    shadowColor: SHARED_STYLES.theme.CARD_SHADOW,
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    // Enhanced card container for all content sections
+    cardContainer: {
+      ...SHARED_STYLES.containers.card,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-    minHeight: 42,
-  },
-  actionButtonDisabled: {
-    backgroundColor: SHARED_STYLES.theme.BACKGROUND_DISABLED,
-    borderColor: SHARED_STYLES.theme.BORDER_DISABLED,
-    opacity: 0.8,
-    shadowOpacity: 0.1,
-  },
-  actionButtonText: {
-    ...SHARED_STYLES.text.caption,
-    fontSize: 10,
-    marginTop: 4,
-    fontWeight: '600',
-    textAlign: 'center',
-    letterSpacing: 0.3,
-    color: SHARED_STYLES.theme.TEXT_PRIMARY,
-  },
-  loadingProgress: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-    height: 4,
-    borderRadius: 2,
-  },
-})
+    // Photo info card
+    photoInfoCard: {
+      ...SHARED_STYLES.containers.infoCard,
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderColor: theme.CARD_BORDER,
+    },
+    headerInfo: {
+      backgroundColor: 'transparent',
+      padding: 0,
+      margin: 0,
+      borderRadius: 0,
+      borderWidth: 0,
+    },
+    authorRow: {
+      ...SHARED_STYLES.layout.spaceBetween,
+      ...SHARED_STYLES.layout.separator,
+    },
+    authorName: {
+      ...SHARED_STYLES.text.heading,
+      flexShrink: 1,
+      marginRight: 12,
+    },
+    dateText: {
+      ...SHARED_STYLES.text.secondary,
+      textAlign: 'right',
+      flexShrink: 0,
+      fontWeight: '500',
+    },
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 8,
+      paddingTop: 8,
+    },
+    statItem: {
+      ...SHARED_STYLES.interactive.statItem,
+    },
+    statsText: {
+      ...SHARED_STYLES.interactive.statText,
+    },
+    // Enhanced comments section
+    commentsCard: {
+      ...SHARED_STYLES.containers.card,
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderColor: theme.CARD_BORDER,
+    },
+    commentsHeader: {
+      ...SHARED_STYLES.layout.row,
+      ...SHARED_STYLES.layout.separator,
+    },
+    commentsTitle: {
+      ...SHARED_STYLES.text.heading,
+      marginLeft: 8,
+    },
+    commentsSection: {
+      backgroundColor: 'transparent',
+      margin: 0,
+      borderRadius: 0,
+      overflow: 'visible',
+    },
+    commentCard: {
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 16,
+      marginVertical: 8,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: theme.CARD_BORDER,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.STATUS_SUCCESS,
+    },
+    commentText: {
+      ...SHARED_STYLES.text.primary,
+      lineHeight: 24,
+      marginBottom: 12,
+    },
+    commentMeta: {
+      ...SHARED_STYLES.layout.spaceBetween,
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.CARD_BORDER,
+    },
+    commentAuthor: {
+      ...SHARED_STYLES.text.subheading,
+      color: theme.STATUS_SUCCESS,
+    },
+    commentDate: {
+      ...SHARED_STYLES.text.caption,
+    },
+    addCommentCard: {
+      backgroundColor: `${theme.STATUS_SUCCESS}05`,
+      borderRadius: 20,
+      marginVertical: 8,
+      marginHorizontal: 16,
+      padding: 20,
+      borderWidth: 2,
+      borderColor: `${theme.STATUS_SUCCESS}20`,
+      borderStyle: 'dashed',
+      shadowColor: theme.STATUS_SUCCESS,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    addCommentButton: {
+      backgroundColor: 'transparent',
+      borderRadius: 0,
+      margin: 0,
+      padding: 0,
+      borderWidth: 0,
+    },
+    addCommentContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    addCommentText: {
+      color: theme.STATUS_SUCCESS,
+      fontSize: 16,
+      fontWeight: '600',
+      marginLeft: 8,
+    },
+    // Enhanced AI recognition cards
+    aiRecognitionContainer: {
+      marginVertical: 8,
+      marginHorizontal: 16,
+    },
+    aiRecognitionCard: {
+      ...SHARED_STYLES.containers.card,
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderColor: theme.CARD_BORDER,
+    },
+    aiRecognitionTitle: {
+      ...SHARED_STYLES.text.heading,
+      textAlign: 'center',
+      marginBottom: 16,
+    },
+    aiRecognitionModerationTitle: {
+      ...SHARED_STYLES.text.heading,
+      color: theme.STATUS_ERROR,
+      textAlign: 'center',
+      marginBottom: 16,
+    },
+    aiTagsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 10,
+    },
+    aiTag: {
+      backgroundColor: `${theme.STATUS_SUCCESS}15`,
+      borderRadius: 20,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderWidth: 1,
+      borderColor: `${theme.STATUS_SUCCESS}30`,
+      shadowColor: theme.STATUS_SUCCESS,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    aiTagText: {
+      color: theme.STATUS_SUCCESS,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    aiModerationTag: {
+      backgroundColor: `${theme.STATUS_ERROR}15`,
+      borderRadius: 20,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderWidth: 1,
+      borderColor: `${theme.STATUS_ERROR}30`,
+      shadowColor: theme.STATUS_ERROR,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    aiModerationTagText: {
+      color: theme.STATUS_ERROR,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    // Action card styles
+    actionCard: {
+      ...SHARED_STYLES.containers.card,
+      backgroundColor: theme.SURFACE, // Use darker surface color for action card
+      marginVertical: 4,
+      marginTop: 24, // Increase space from header significantly
+      padding: 8,
+    },
+    actionHeader: {
+      ...SHARED_STYLES.layout.row,
+      ...SHARED_STYLES.layout.separator,
+    },
+    actionTitle: {
+      ...SHARED_STYLES.text.subheading,
+      marginLeft: 8,
+    },
+    actionButtonsContainer: {
+      flexDirection: 'row',
+      gap: 8,
+      paddingHorizontal: 4,
+    },
+    actionButton: {
+      flex: 1,
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 12,
+      paddingVertical: 8,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: theme.CARD_BORDER,
+      shadowColor: theme.CARD_SHADOW,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+      minHeight: 48,
+    },
+    actionButtonDisabled: {
+      backgroundColor: theme.BACKGROUND,
+      borderColor: theme.BORDER_LIGHT,
+      opacity: 0.5,
+      shadowOpacity: 0.1,
+      elevation: 1,
+    },
+    actionButtonText: {
+      ...SHARED_STYLES.text.caption,
+      fontSize: 11,
+      marginTop: 4,
+      fontWeight: '600',
+      textAlign: 'center',
+      letterSpacing: 0.3,
+      color: theme.TEXT_PRIMARY,
+    },
+    loadingProgress: {
+      marginHorizontal: 16,
+      marginVertical: 8,
+      height: 4,
+      borderRadius: 2,
+    },
+  })
 
 const Photo = ({ photo, refreshKey = 0 }) => {
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
+  const styles = createStyles(theme)
+
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
   const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
@@ -873,10 +890,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               photoDetails?.isPhotoWatched === undefined ||
               photoDetails?.isPhotoWatched ||
               isPhotoBannedByMe()
-                ? SHARED_STYLES.theme.TEXT_DISABLED
-                : SHARED_STYLES.theme.STATUS_CAUTION
+                ? theme.TEXT_DISABLED
+                : theme.STATUS_CAUTION
             }
-            size={16}
+            size={18}
           />
           <Text
             style={[
@@ -886,8 +903,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                   photoDetails?.isPhotoWatched === undefined ||
                   photoDetails?.isPhotoWatched ||
                   isPhotoBannedByMe()
-                    ? SHARED_STYLES.theme.TEXT_DISABLED
-                    : SHARED_STYLES.theme.STATUS_CAUTION,
+                    ? theme.TEXT_DISABLED
+                    : theme.STATUS_CAUTION,
               },
             ]}
           >
@@ -924,10 +941,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             color={
               photoDetails?.isPhotoWatched === undefined ||
               photoDetails?.isPhotoWatched
-                ? SHARED_STYLES.theme.TEXT_DISABLED
-                : SHARED_STYLES.theme.STATUS_ERROR
+                ? theme.TEXT_DISABLED
+                : theme.STATUS_ERROR
             }
-            size={16}
+            size={18}
           />
           <Text
             style={[
@@ -936,8 +953,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                 color:
                   photoDetails?.isPhotoWatched === undefined ||
                   photoDetails?.isPhotoWatched
-                    ? SHARED_STYLES.theme.TEXT_DISABLED
-                    : SHARED_STYLES.theme.STATUS_ERROR,
+                    ? theme.TEXT_DISABLED
+                    : theme.STATUS_ERROR,
               },
             ]}
           >
@@ -962,10 +979,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
             color={
               photoDetails?.isPhotoWatched === undefined
-                ? SHARED_STYLES.theme.TEXT_DISABLED
+                ? theme.TEXT_DISABLED
                 : photoDetails?.isPhotoWatched
                   ? '#FFD700'
-                  : SHARED_STYLES.theme.TEXT_PRIMARY
+                  : theme.TEXT_PRIMARY
             }
             size={18}
           />
@@ -975,10 +992,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               {
                 color:
                   photoDetails?.isPhotoWatched === undefined
-                    ? SHARED_STYLES.theme.TEXT_DISABLED
+                    ? theme.TEXT_DISABLED
                     : photoDetails?.isPhotoWatched
                       ? '#FFD700'
-                      : SHARED_STYLES.theme.TEXT_PRIMARY,
+                      : theme.TEXT_PRIMARY,
               },
             ]}
           >
@@ -1005,8 +1022,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             name="share-outline"
             color={
               photoDetails?.isPhotoWatched === undefined
-                ? SHARED_STYLES.theme.TEXT_DISABLED
-                : SHARED_STYLES.theme.STATUS_SUCCESS
+                ? theme.TEXT_DISABLED
+                : theme.STATUS_SUCCESS
             }
             size={18}
           />
@@ -1016,8 +1033,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               {
                 color:
                   photoDetails?.isPhotoWatched === undefined
-                    ? SHARED_STYLES.theme.TEXT_DISABLED
-                    : SHARED_STYLES.theme.STATUS_SUCCESS,
+                    ? theme.TEXT_DISABLED
+                    : theme.STATUS_SUCCESS,
               },
             ]}
           >
@@ -1048,7 +1065,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             height: photoHeight,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
+            backgroundColor: theme.CARD_BACKGROUND,
             marginTop: 8,
             marginBottom: 8,
           }}
@@ -1066,7 +1083,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
           height: photoHeight,
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: SHARED_STYLES.theme.CARD_BACKGROUND,
+          backgroundColor: theme.CARD_BACKGROUND,
           marginTop: 8,
           marginBottom: 8,
         }}

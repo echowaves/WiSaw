@@ -1,5 +1,6 @@
 import { FontAwesome5 } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
+import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 import {
   Modal,
@@ -12,6 +13,8 @@ import {
 import Toast from 'react-native-toast-message'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
+import * as STATE from '../state'
+import { getTheme } from '../theme/sharedStyles'
 import { createFriendshipNameUniversalLink } from '../utils/qrCodeHelper'
 
 const ShareFriendNameModal = ({
@@ -22,6 +25,9 @@ const ShareFriendNameModal = ({
   topOffset = 100,
 }) => {
   const [shareUrl, setShareUrl] = useState('')
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
+
+  const theme = getTheme(isDarkMode)
 
   useEffect(() => {
     if (visible && friendshipUuid && friendName) {
@@ -71,6 +77,153 @@ const ShareFriendNameModal = ({
     }
   }
 
+  const createStyles = (theme) =>
+    StyleSheet.create({
+      overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        justifyContent: 'flex-end',
+      },
+      modalContainer: {
+        backgroundColor: theme.BACKGROUND,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingBottom: 34, // Safe area padding
+        minHeight: 500,
+        maxHeight: '85%',
+      },
+      header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.BORDER,
+      },
+      title: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: theme.TEXT_PRIMARY,
+        flex: 1,
+        textAlign: 'center',
+      },
+      closeButton: {
+        padding: 4,
+      },
+      contentContainer: {
+        paddingVertical: 10,
+      },
+      friendInfo: {
+        alignItems: 'center',
+        paddingVertical: 20,
+        paddingHorizontal: 20,
+      },
+      friendName: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: theme.TEXT_PRIMARY,
+        marginTop: 12,
+        marginBottom: 4,
+      },
+      description: {
+        fontSize: 14,
+        color: theme.TEXT_SECONDARY,
+        textAlign: 'center',
+      },
+      qrSection: {
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+      },
+      sectionTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: theme.TEXT_PRIMARY,
+        marginBottom: 16,
+      },
+      qrContainer: {
+        alignItems: 'center',
+      },
+      qrCodeWrapper: {
+        padding: 20,
+        backgroundColor: isDarkMode ? '#FFFFFF' : '#FFFFFF', // Keep QR code background white for readability
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+        marginBottom: 12,
+      },
+      qrPlaceholder: {
+        width: 160,
+        height: 160,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: theme.SURFACE,
+        borderRadius: 8,
+      },
+      placeholderText: {
+        marginTop: 12,
+        fontSize: 14,
+        color: theme.TEXT_SECONDARY,
+        textAlign: 'center',
+      },
+      qrDescription: {
+        fontSize: 13,
+        color: theme.TEXT_SECONDARY,
+        textAlign: 'center',
+        maxWidth: 280,
+      },
+      optionsContainer: {
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+      },
+      optionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        backgroundColor: theme.CARD_BACKGROUND,
+        borderRadius: 12,
+        marginBottom: 12,
+      },
+      optionIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 16,
+      },
+      optionContent: {
+        flex: 1,
+      },
+      optionTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: theme.TEXT_PRIMARY,
+        marginBottom: 2,
+      },
+      optionDescription: {
+        fontSize: 13,
+        color: theme.TEXT_SECONDARY,
+        lineHeight: 16,
+      },
+      instructions: {
+        paddingHorizontal: 20,
+        paddingBottom: 10,
+      },
+      instructionText: {
+        fontSize: 12,
+        color: theme.TEXT_SECONDARY,
+        textAlign: 'center',
+        lineHeight: 16,
+      },
+    })
+
+  const styles = createStyles(theme)
+
   return (
     <Modal
       visible={visible}
@@ -88,7 +241,11 @@ const ShareFriendNameModal = ({
               onPress={onClose}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <FontAwesome5 name="times" size={18} color="#666" />
+              <FontAwesome5
+                name="times"
+                size={18}
+                color={theme.TEXT_SECONDARY}
+              />
             </TouchableOpacity>
           </View>
 
@@ -123,7 +280,11 @@ const ShareFriendNameModal = ({
                     />
                   ) : (
                     <View style={styles.qrPlaceholder}>
-                      <FontAwesome5 name="qrcode" size={40} color="#ccc" />
+                      <FontAwesome5
+                        name="qrcode"
+                        size={40}
+                        color={theme.TEXT_SECONDARY}
+                      />
                       <Text style={styles.placeholderText}>
                         Generating QR Code...
                       </Text>
@@ -156,7 +317,11 @@ const ShareFriendNameModal = ({
                     Send friend's name via text/message
                   </Text>
                 </View>
-                <FontAwesome5 name="chevron-right" size={14} color="#ccc" />
+                <FontAwesome5
+                  name="chevron-right"
+                  size={14}
+                  color={theme.TEXT_SECONDARY}
+                />
               </TouchableOpacity>
             </View>
 
@@ -174,149 +339,5 @@ const ShareFriendNameModal = ({
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 34, // Safe area padding
-    minHeight: 500,
-    maxHeight: '85%',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
-    textAlign: 'center',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  contentContainer: {
-    paddingVertical: 10,
-  },
-  friendInfo: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-  },
-  friendName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-  },
-  qrSection: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 16,
-  },
-  qrContainer: {
-    alignItems: 'center',
-  },
-  qrCodeWrapper: {
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    marginBottom: 12,
-  },
-  qrPlaceholder: {
-    width: 160,
-    height: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-  },
-  placeholderText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-  },
-  qrDescription: {
-    fontSize: 13,
-    color: '#666',
-    textAlign: 'center',
-    maxWidth: 280,
-  },
-  optionsContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  optionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  optionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  optionContent: {
-    flex: 1,
-  },
-  optionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 2,
-  },
-  optionDescription: {
-    fontSize: 13,
-    color: '#666',
-    lineHeight: 16,
-  },
-  instructions: {
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-  },
-  instructionText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 16,
-  },
-})
 
 export default ShareFriendNameModal
