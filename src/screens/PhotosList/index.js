@@ -1632,10 +1632,20 @@ const PhotosList = ({ searchFromUrl }) => {
           flex: 1,
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: theme.INPUT_BACKGROUND,
+          backgroundColor: theme.CARD_BACKGROUND,
           borderRadius: 20,
           paddingHorizontal: 16,
           marginRight: 12,
+          borderWidth: 1,
+          borderColor: theme.CARD_BORDER,
+          shadowColor: theme.CARD_SHADOW,
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 2,
+          elevation: 2,
         }}
       >
         <Ionicons
