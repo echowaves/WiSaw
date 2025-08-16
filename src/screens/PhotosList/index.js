@@ -358,6 +358,15 @@ const PhotosList = ({ searchFromUrl }) => {
     // If there are no photos or very few photos, keep header in full mode
     if (!photosList || photosList.length === 0) {
       setHeaderState(false) // false = full header
+
+      // Also ensure the footer is visible when list is empty/reset
+      if (footerAnimation._value !== 1) {
+        Animated.timing(footerAnimation, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start()
+      }
     }
   }, [photosList])
 
@@ -604,6 +613,15 @@ const PhotosList = ({ searchFromUrl }) => {
     setConsecutiveEmptyResponses(0)
     setPageNumber(null)
     setPhotosList([])
+
+    // Show footer when photosList is reloaded/reset
+    if (footerAnimation._value !== 1) {
+      Animated.timing(footerAnimation, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start()
+    }
 
     // setPageNumber(null)
     // setStopLoading(false)
@@ -1289,7 +1307,7 @@ const PhotosList = ({ searchFromUrl }) => {
       const currentScrollY = event.nativeEvent.contentOffset.y
       const contentHeight = event.nativeEvent.contentSize.height
       const scrollViewHeight = event.nativeEvent.layoutMeasurement.height
-      const threshold = 10 // Minimum scroll distance to trigger animation
+      const threshold = 5 // Reduced threshold for more responsive hiding
 
       // Calculate if we're near the bottom (within 50px of the bottom)
       const isNearBottom =
@@ -1321,19 +1339,6 @@ const PhotosList = ({ searchFromUrl }) => {
         return
       }
 
-      // THIRD PRIORITY: Show footer when near the top (but not at very top)
-      if (currentScrollY <= 50) {
-        if (footerAnimation._value !== 1) {
-          Animated.timing(footerAnimation, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-          }).start()
-        }
-        lastScrollY.current = currentScrollY
-        return
-      }
-
       // Skip if scroll distance is too small
       if (Math.abs(currentScrollY - lastScrollY.current) < threshold) {
         return
@@ -1342,17 +1347,27 @@ const PhotosList = ({ searchFromUrl }) => {
       const scrollingDown = currentScrollY > lastScrollY.current
       const currentDirection = scrollingDown ? 'down' : 'up'
 
-      // Only animate if direction changed
-      if (currentDirection !== scrollDirection.current) {
-        scrollDirection.current = currentDirection
-
-        Animated.timing(footerAnimation, {
-          toValue: scrollingDown ? 0 : 1, // 0 = hidden, 1 = visible
-          duration: 200,
-          useNativeDriver: true,
-        }).start()
+      // Always hide immediately when scrolling down (no position restrictions)
+      if (scrollingDown) {
+        if (footerAnimation._value !== 0) {
+          Animated.timing(footerAnimation, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }).start()
+        }
+      } else {
+        // Show footer when scrolling up (unless at bottom)
+        if (footerAnimation._value !== 1) {
+          Animated.timing(footerAnimation, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }).start()
+        }
       }
 
+      scrollDirection.current = currentDirection
       lastScrollY.current = currentScrollY
     }
 
