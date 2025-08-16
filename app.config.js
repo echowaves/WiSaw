@@ -91,9 +91,6 @@ module.exports = {
         'WRITE_EXTERNAL_STORAGE',
         'READ_EXTERNAL_STORAGE',
         'com.google.android.gms.permission.AD_ID',
-        'FOREGROUND_SERVICE',
-        'FOREGROUND_SERVICE_DATA_SYNC',
-        'FOREGROUND_SERVICE_LOCATION',
       ],
       config: {},
       intentFilters: [
