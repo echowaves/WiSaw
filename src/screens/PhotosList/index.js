@@ -156,13 +156,11 @@ const PhotosList = ({ searchFromUrl }) => {
       padding: 4,
     },
     segmentButton: {
-      paddingVertical: 8,
-      paddingHorizontal: 20,
       borderRadius: 16,
       marginHorizontal: 2,
       alignItems: 'center',
       justifyContent: 'center',
-      minWidth: 50,
+      // Removed fixed padding and minWidth - now handled by animations
     },
     activeSegmentButton: {
       backgroundColor: theme.INTERACTIVE_ACTIVE,
@@ -286,10 +284,8 @@ const PhotosList = ({ searchFromUrl }) => {
   const [unreadCount, setUnreadCount] = useState(0)
 
   const [textVisible, setTextVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
-  const [scrollViewHeight, setScrollViewHeight] = useState(0)
-  const [contentHeight, setContentHeight] = useState(0)
   const textAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
+  const headerHeightAnimation = React.useRef(new Animated.Value(1)).current // Start full: 1 = full height, 0 = compact height
   const searchBarRef = React.useRef(null)
 
   // Animation states for pending photos
@@ -299,33 +295,49 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
+  const masonryRef = React.useRef(null)
+
+  // Simplified scroll detection - only use viewable items to determine state
+  const setHeaderState = (shouldBeCompact) => {
+    const targetValue = shouldBeCompact ? 0 : 1
+
+    // Only animate if the state is actually changing
+    if (headerHeightAnimation._value !== targetValue) {
+      setTextVisible(!shouldBeCompact)
+
+      Animated.timing(textAnimation, {
+        toValue: shouldBeCompact ? 0 : 1,
+        duration: 250,
+        useNativeDriver: true,
+      }).start()
+
+      Animated.timing(headerHeightAnimation, {
+        toValue: targetValue,
+        duration: 250,
+        useNativeDriver: false,
+      }).start()
+    }
+  }
+
   const onViewRef = React.useRef((viewableItems) => {
-    if (viewableItems.changed && viewableItems.changed.length > 0) {
-      // Get all currently visible items
-      const visibleItems = viewableItems.changed.filter(
-        (item) => item.isViewable,
+    const currentViewableItems =
+      viewableItems.viewableItems ||
+      viewableItems.changed?.filter((item) => item.isViewable) ||
+      []
+
+    if (currentViewableItems.length > 0) {
+      // Check if the first item (index 0) is visible
+      const firstItemVisible = currentViewableItems.some(
+        (item) => item.index === 0,
       )
 
-      if (visibleItems.length > 0) {
-        // Find the item with the highest index
-        const lastVisibleItem = visibleItems.reduce((max, current) => {
-          return current.index > max.index ? current : max
-        })
+      // Simple two-state logic: compact if first item not visible, full if first item visible
+      setHeaderState(!firstItemVisible)
 
-        if (lastVisibleItem && lastVisibleItem.index !== undefined) {
-          setLastViewableRow(lastVisibleItem.index)
-        }
-      }
-    }
-
-    // Alternative: use viewableItems directly if it has viewableItems property
-    if (viewableItems.viewableItems && viewableItems.viewableItems.length > 0) {
-      const visibleItems = viewableItems.viewableItems
-
-      const lastVisibleItem = visibleItems.reduce((max, current) => {
+      // Keep the original functionality for tracking last viewable row
+      const lastVisibleItem = currentViewableItems.reduce((max, current) => {
         return current.index > max.index ? current : max
       })
-
       if (lastVisibleItem && lastVisibleItem.index !== undefined) {
         setLastViewableRow(lastVisibleItem.index)
       }
@@ -335,6 +347,14 @@ const PhotosList = ({ searchFromUrl }) => {
   useEffect(() => {
     setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
   }, [unreadCountList])
+
+  // Monitor photosList and ensure header is in correct state
+  useEffect(() => {
+    // If there are no photos or very few photos, keep header in full mode
+    if (!photosList || photosList.length === 0) {
+      setHeaderState(false) // false = full header
+    }
+  }, [photosList])
 
   // Animation effect for pending photos
   useEffect(() => {
@@ -481,43 +501,6 @@ const PhotosList = ({ searchFromUrl }) => {
     }
 
     setLoading(false)
-  }
-
-  const handleScroll = (event) => {
-    const currentScrollY = event.nativeEvent.contentOffset.y
-    const layoutHeight = event.nativeEvent.layoutMeasurement.height
-    const contentSizeHeight = event.nativeEvent.contentSize.height
-
-    // Update scroll tracking
-    setLastScrollY(currentScrollY)
-    setScrollViewHeight(layoutHeight)
-    setContentHeight(contentSizeHeight)
-
-    const isAtTop = currentScrollY <= 10 // Consider "top" as within 10px of the very top
-
-    if (isAtTop) {
-      // At the top - show text with slow animation
-      if (!textVisible) {
-        setTextVisible(true)
-        Animated.timing(textAnimation, {
-          toValue: 1,
-          duration: 1600, // Extra slow motion - 1600ms (2x slower)
-          useNativeDriver: true,
-        }).start()
-      }
-    }
-
-    if (!isAtTop) {
-      // Not at top - hide text with slow animation
-      if (textVisible) {
-        setTextVisible(false)
-        Animated.timing(textAnimation, {
-          toValue: 0,
-          duration: 1600, // Extra slow motion - 1600ms (2x slower)
-          useNativeDriver: true,
-        }).start()
-      }
-    }
   }
 
   async function uploadPendingPhotos() {
@@ -671,6 +654,33 @@ const PhotosList = ({ searchFromUrl }) => {
   const renderCustomHeader = () => {
     const segmentTitles = ['Global', 'Starred', 'Search']
 
+    // Calculate dynamic header height: compact when scrolled, appropriately sized at top
+    const animatedHeaderHeight = headerHeightAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [50, 70], // Compact: 50px, Full: 70px (reduced from 90px)
+    })
+
+    // Calculate dynamic segment button padding: smaller when scrolled, just enough for icon+text at top
+    const animatedButtonPaddingVertical = headerHeightAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [8, 8], // Keep vertical padding consistent - text goes below icon
+    })
+
+    const animatedButtonPaddingHorizontal = headerHeightAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [20, 20], // Keep horizontal padding consistent for width
+    })
+
+    const animatedButtonWidth = headerHeightAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [90, 90], // Further increased width to prevent text wrapping - exactly the same for both states
+    })
+
+    const animatedControlPadding = headerHeightAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: [4, 4], // Keep control padding consistent
+    })
+
     return (
       <SafeAreaView
         style={{
@@ -688,9 +698,9 @@ const PhotosList = ({ searchFromUrl }) => {
           paddingTop: 0,
         }}
       >
-        <View
+        <Animated.View
           style={{
-            height: 60,
+            height: animatedHeaderHeight,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
@@ -709,264 +719,185 @@ const PhotosList = ({ searchFromUrl }) => {
 
           {/* Center: Three segment control */}
           <View style={styles.headerContainer}>
-            <View style={styles.customSegmentedControl}>
-              <TouchableOpacity
+            <Animated.View
+              style={[
+                styles.customSegmentedControl,
+                {
+                  padding: animatedControlPadding,
+                },
+              ]}
+            >
+              <Animated.View
                 style={[
                   styles.segmentButton,
                   activeSegment === 0 && styles.activeSegmentButton,
+                  {
+                    paddingVertical: animatedButtonPaddingVertical,
+                    paddingHorizontal: animatedButtonPaddingHorizontal,
+                    width: animatedButtonWidth,
+                  },
                 ]}
-                onPress={() => updateIndex(0)}
               >
-                <FontAwesome
-                  name="globe"
-                  size={20}
-                  color={
-                    activeSegment === 0
-                      ? theme.TEXT_PRIMARY
-                      : theme.TEXT_SECONDARY
-                  }
-                />
-                {textVisible && (
-                  <Animated.Text
-                    style={[
-                      styles.segmentText,
-                      {
-                        color:
-                          activeSegment === 0
-                            ? theme.TEXT_PRIMARY
-                            : theme.TEXT_SECONDARY,
-                        opacity: textAnimation,
-                        transform: [
-                          {
-                            translateY: textAnimation.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [10, 0],
-                            }),
-                          },
-                        ],
-                      },
-                    ]}
-                  >
-                    {segmentTitles[0]}
-                  </Animated.Text>
-                )}
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  onPress={() => updateIndex(0)}
+                >
+                  <FontAwesome
+                    name="globe"
+                    size={20}
+                    color={
+                      activeSegment === 0
+                        ? theme.TEXT_PRIMARY
+                        : theme.TEXT_SECONDARY
+                    }
+                  />
+                  {textVisible && (
+                    <Animated.Text
+                      style={[
+                        styles.segmentText,
+                        {
+                          color:
+                            activeSegment === 0
+                              ? theme.TEXT_PRIMARY
+                              : theme.TEXT_SECONDARY,
+                          opacity: textAnimation,
+                          transform: [
+                            {
+                              translateY: textAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [10, 0],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      {segmentTitles[0]}
+                    </Animated.Text>
+                  )}
+                </TouchableOpacity>
+              </Animated.View>
 
-              <TouchableOpacity
+              <Animated.View
                 style={[
                   styles.segmentButton,
                   activeSegment === 1 && styles.activeSegmentButton,
+                  {
+                    paddingVertical: animatedButtonPaddingVertical,
+                    paddingHorizontal: animatedButtonPaddingHorizontal,
+                    width: animatedButtonWidth,
+                  },
                 ]}
-                onPress={() => updateIndex(1)}
               >
-                <FontAwesome
-                  name="star"
-                  size={20}
-                  color={
-                    activeSegment === 1
-                      ? theme.TEXT_PRIMARY
-                      : theme.TEXT_SECONDARY
-                  }
-                />
-                {textVisible && (
-                  <Animated.Text
-                    style={[
-                      styles.segmentText,
-                      {
-                        color:
-                          activeSegment === 1
-                            ? theme.TEXT_PRIMARY
-                            : theme.TEXT_SECONDARY,
-                        opacity: textAnimation,
-                        transform: [
-                          {
-                            translateY: textAnimation.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [10, 0],
-                            }),
-                          },
-                        ],
-                      },
-                    ]}
-                  >
-                    {segmentTitles[1]}
-                  </Animated.Text>
-                )}
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  onPress={() => updateIndex(1)}
+                >
+                  <AntDesign
+                    name="star"
+                    size={20}
+                    color={
+                      activeSegment === 1
+                        ? theme.TEXT_PRIMARY
+                        : theme.TEXT_SECONDARY
+                    }
+                  />
+                  {textVisible && (
+                    <Animated.Text
+                      style={[
+                        styles.segmentText,
+                        {
+                          color:
+                            activeSegment === 1
+                              ? theme.TEXT_PRIMARY
+                              : theme.TEXT_SECONDARY,
+                          opacity: textAnimation,
+                          transform: [
+                            {
+                              translateY: textAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [10, 0],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      {segmentTitles[1]}
+                    </Animated.Text>
+                  )}
+                </TouchableOpacity>
+              </Animated.View>
 
-              <TouchableOpacity
+              <Animated.View
                 style={[
                   styles.segmentButton,
                   activeSegment === 2 && styles.activeSegmentButton,
-                ]}
-                onPress={() => updateIndex(2)}
-              >
-                <FontAwesome
-                  name="search"
-                  size={20}
-                  color={
-                    activeSegment === 2
-                      ? theme.TEXT_PRIMARY
-                      : theme.TEXT_SECONDARY
-                  }
-                />
-                {textVisible && (
-                  <Animated.Text
-                    style={[
-                      styles.segmentText,
-                      {
-                        color:
-                          activeSegment === 2
-                            ? theme.TEXT_PRIMARY
-                            : theme.TEXT_SECONDARY,
-                        opacity: textAnimation,
-                        transform: [
-                          {
-                            translateY: textAnimation.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [10, 0],
-                            }),
-                          },
-                        ],
-                      },
-                    ]}
-                  >
-                    {segmentTitles[2]}
-                  </Animated.Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </SafeAreaView>
-    )
-  }
-
-  const renderHeaderTitle = () => {
-    const segmentTitles = ['Global', 'Starred', 'Search']
-
-    return (
-      <View style={styles.headerContainer}>
-        <View style={styles.customSegmentedControl}>
-          <TouchableOpacity
-            style={[
-              styles.segmentButton,
-              activeSegment === 0 && styles.activeSegmentButton,
-            ]}
-            onPress={() => updateIndex(0)}
-          >
-            <FontAwesome
-              name="globe"
-              size={20}
-              color={
-                activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
-              }
-            />
-            {textVisible && (
-              <Animated.Text
-                style={[
-                  styles.segmentText,
                   {
-                    color:
-                      activeSegment === 0
-                        ? theme.TEXT_PRIMARY
-                        : theme.TEXT_SECONDARY,
-                    opacity: textAnimation,
-                    transform: [
-                      {
-                        translateY: textAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [10, 0], // Slide down when hiding, slide up when showing
-                        }),
-                      },
-                    ],
+                    paddingVertical: animatedButtonPaddingVertical,
+                    paddingHorizontal: animatedButtonPaddingHorizontal,
+                    width: animatedButtonWidth,
                   },
                 ]}
               >
-                {segmentTitles[0]}
-              </Animated.Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.segmentButton,
-              activeSegment === 1 && styles.activeSegmentButton,
-            ]}
-            onPress={() => updateIndex(1)}
-          >
-            <AntDesign
-              name="star"
-              size={20}
-              color={
-                activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
-              }
-            />
-            {textVisible && (
-              <Animated.Text
-                style={[
-                  styles.segmentText,
-                  {
-                    color:
-                      activeSegment === 1
-                        ? theme.TEXT_PRIMARY
-                        : theme.TEXT_SECONDARY,
-                    opacity: textAnimation,
-                    transform: [
-                      {
-                        translateY: textAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [10, 0], // Slide down when hiding, slide up when showing
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                {segmentTitles[1]}
-              </Animated.Text>
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.segmentButton,
-              activeSegment === 2 && styles.activeSegmentButton,
-            ]}
-            onPress={() => updateIndex(2)}
-          >
-            <FontAwesome
-              name="search"
-              size={20}
-              color={
-                activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
-              }
-            />
-            {textVisible && (
-              <Animated.Text
-                style={[
-                  styles.segmentText,
-                  {
-                    color:
+                <TouchableOpacity
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  onPress={() => updateIndex(2)}
+                >
+                  <FontAwesome
+                    name="search"
+                    size={20}
+                    color={
                       activeSegment === 2
                         ? theme.TEXT_PRIMARY
-                        : theme.TEXT_SECONDARY,
-                    opacity: textAnimation,
-                    transform: [
-                      {
-                        translateY: textAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [10, 0], // Slide down when hiding, slide up when showing
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                {segmentTitles[2]}
-              </Animated.Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
+                        : theme.TEXT_SECONDARY
+                    }
+                  />
+                  {textVisible && (
+                    <Animated.Text
+                      style={[
+                        styles.segmentText,
+                        {
+                          color:
+                            activeSegment === 2
+                              ? theme.TEXT_PRIMARY
+                              : theme.TEXT_SECONDARY,
+                          opacity: textAnimation,
+                          transform: [
+                            {
+                              translateY: textAnimation.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [10, 0],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      {segmentTitles[2]}
+                    </Animated.Text>
+                  )}
+                </TouchableOpacity>
+              </Animated.View>
+            </Animated.View>
+          </View>
+        </Animated.View>
+      </SafeAreaView>
     )
   }
 
@@ -1350,6 +1281,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
     return (
       <ExpoMasonryLayout
+        ref={masonryRef}
         data={photosList}
         renderItem={renderMasonryItem}
         spacing={config.spacing}
@@ -1369,18 +1301,18 @@ const PhotosList = ({ searchFromUrl }) => {
         onEndReachedThreshold={0.2}
         onViewableItemsChanged={onViewRef.current}
         viewabilityConfig={{
-          itemVisiblePercentThreshold: 10,
+          itemVisiblePercentThreshold: 5, // More sensitive - triggers when only 5% visible
+          minimumViewTime: 50, // Shorter time to register changes
         }}
         refreshing={false}
         onRefresh={() => {
           reload()
         }}
-        onScroll={handleScroll}
+        scrollEventThrottle={16}
         initialNumToRender={8}
         maxToRenderPerBatch={10}
         windowSize={15}
         updateCellsBatchingPeriod={50}
-        scrollEventThrottle={16}
         style={{
           ...styles.container,
           marginBottom: FOOTER_HEIGHT,
@@ -1880,52 +1812,129 @@ const PhotosList = ({ searchFromUrl }) => {
       <View style={styles.container}>
         <Overlay isVisible>
           <ScrollView>
-            <Card containerStyle={{ padding: 0 }}>
-              <ListItem style={{ borderRadius: 10 }}>
-                <Text>
+            <Card
+              containerStyle={{
+                padding: 0,
+                backgroundColor: theme.CARD_BACKGROUND,
+              }}
+            >
+              <ListItem
+                style={{
+                  borderRadius: 10,
+                  backgroundColor: theme.CARD_BACKGROUND,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.TEXT_PRIMARY,
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                >
                   When you take a photo with WiSaw app, it will be added to a
                   Photo Album on your phone, as well as posted to global feed in
                   the cloud.
                 </Text>
               </ListItem>
-              <Divider />
-              <ListItem>
-                <Text>Everyone close-by can see your photos.</Text>
+              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
+              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
+                <Text
+                  style={{
+                    color: theme.TEXT_PRIMARY,
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                >
+                  Everyone close-by can see your photos.
+                </Text>
               </ListItem>
-              <Divider />
-              <ListItem>
-                <Text>You can see other&#39;s photos too.</Text>
+              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
+              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
+                <Text
+                  style={{
+                    color: theme.TEXT_PRIMARY,
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                >
+                  You can see other&#39;s photos too.
+                </Text>
               </ListItem>
-              <Divider />
-              <ListItem>
-                <Text>
+              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
+              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
+                <Text
+                  style={{
+                    color: theme.TEXT_PRIMARY,
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                >
                   If you find any photo abusive or inappropriate, you can delete
                   it -- it will be deleted from the cloud so that no one will
                   ever see it again.
                 </Text>
               </ListItem>
-              <Divider />
-              <ListItem>
-                <Text>
+              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
+              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
+                <Text
+                  style={{
+                    color: theme.TEXT_PRIMARY,
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                >
                   No one will tolerate objectionable content or abusive users.
                 </Text>
               </ListItem>
-              <Divider />
-              <ListItem>
-                <Text>
+              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
+              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
+                <Text
+                  style={{
+                    color: theme.TEXT_PRIMARY,
+                    fontSize: 16,
+                    lineHeight: 22,
+                  }}
+                >
                   The abusive users will be banned from WiSaw by other users.
                 </Text>
               </ListItem>
-              <Divider />
-              <ListItem>
-                <Text>By using WiSaw I agree to Terms and Conditions.</Text>
+              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
+              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
+                <Text
+                  style={{
+                    color: theme.TEXT_PRIMARY,
+                    fontSize: 16,
+                    lineHeight: 22,
+                    fontWeight: '600',
+                  }}
+                >
+                  By using WiSaw I agree to Terms and Conditions.
+                </Text>
               </ListItem>
-              <Divider />
+              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
 
-              <ListItem style={{ alignItems: 'center' }}>
+              <ListItem
+                style={{
+                  alignItems: 'center',
+                  backgroundColor: theme.CARD_BACKGROUND,
+                  paddingVertical: 20,
+                }}
+              >
                 <Button
                   title="I Agree"
                   type="outline"
+                  buttonStyle={{
+                    borderColor: theme.INTERACTIVE_PRIMARY,
+                    borderWidth: 2,
+                    paddingHorizontal: 30,
+                    paddingVertical: 12,
+                    borderRadius: 8,
+                  }}
+                  titleStyle={{
+                    color: theme.INTERACTIVE_PRIMARY,
+                    fontSize: 18,
+                    fontWeight: '600',
+                  }}
                   onPress={() => {
                     setIsTandcAccepted(reducer.acceptTandC())
                   }}
