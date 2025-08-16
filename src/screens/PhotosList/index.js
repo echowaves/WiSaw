@@ -293,6 +293,11 @@ const PhotosList = ({ searchFromUrl }) => {
   const uploadIconAnimation = React.useRef(new Animated.Value(1)).current // For pulsing upload icon
   const [previousPendingCount, setPreviousPendingCount] = useState(0)
 
+  // Footer animation states
+  const footerAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
+  const lastScrollY = React.useRef(0) // Track scroll position
+  const scrollDirection = React.useRef('up') // Track scroll direction
+
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
   const masonryRef = React.useRef(null)
@@ -1279,6 +1284,78 @@ const PhotosList = ({ searchFromUrl }) => {
 
     const config = getSegmentConfig()
 
+    // Handle scroll events to show/hide footer
+    const handleScroll = (event) => {
+      const currentScrollY = event.nativeEvent.contentOffset.y
+      const contentHeight = event.nativeEvent.contentSize.height
+      const scrollViewHeight = event.nativeEvent.layoutMeasurement.height
+      const threshold = 10 // Minimum scroll distance to trigger animation
+
+      // Calculate if we're near the bottom (within 50px of the bottom)
+      const isNearBottom =
+        currentScrollY + scrollViewHeight >= contentHeight - 50
+
+      // HIGHEST PRIORITY: Always show footer when at the very top (0-10px)
+      if (currentScrollY <= 10) {
+        if (footerAnimation._value !== 1) {
+          Animated.timing(footerAnimation, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }).start()
+        }
+        lastScrollY.current = currentScrollY
+        return
+      }
+
+      // SECOND PRIORITY: Always hide footer when at the bottom
+      if (isNearBottom) {
+        if (footerAnimation._value !== 0) {
+          Animated.timing(footerAnimation, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }).start()
+        }
+        lastScrollY.current = currentScrollY
+        return
+      }
+
+      // THIRD PRIORITY: Show footer when near the top (but not at very top)
+      if (currentScrollY <= 50) {
+        if (footerAnimation._value !== 1) {
+          Animated.timing(footerAnimation, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }).start()
+        }
+        lastScrollY.current = currentScrollY
+        return
+      }
+
+      // Skip if scroll distance is too small
+      if (Math.abs(currentScrollY - lastScrollY.current) < threshold) {
+        return
+      }
+
+      const scrollingDown = currentScrollY > lastScrollY.current
+      const currentDirection = scrollingDown ? 'down' : 'up'
+
+      // Only animate if direction changed
+      if (currentDirection !== scrollDirection.current) {
+        scrollDirection.current = currentDirection
+
+        Animated.timing(footerAnimation, {
+          toValue: scrollingDown ? 0 : 1, // 0 = hidden, 1 = visible
+          duration: 200,
+          useNativeDriver: true,
+        }).start()
+      }
+
+      lastScrollY.current = currentScrollY
+    }
+
     return (
       <ExpoMasonryLayout
         ref={masonryRef}
@@ -1289,6 +1366,7 @@ const PhotosList = ({ searchFromUrl }) => {
         baseHeight={config.baseHeight}
         aspectRatioFallbacks={config.aspectRatioFallbacks}
         keyExtractor={(item) => item.id}
+        onScroll={handleScroll}
         onEndReached={() => {
           // Load more when user reaches the end
           if (!loading && !stopLoading) {
@@ -1315,10 +1393,10 @@ const PhotosList = ({ searchFromUrl }) => {
         updateCellsBatchingPeriod={50}
         style={{
           ...styles.container,
-          marginBottom: FOOTER_HEIGHT,
+          flex: 1, // Allow the scroll area to take full available height
         }}
         contentContainerStyle={{
-          paddingBottom: 100,
+          paddingBottom: FOOTER_HEIGHT + 20, // Add padding to ensure content is visible above footer
         }}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews={true}
@@ -1331,7 +1409,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
     return (
       location && (
-        <SafeAreaView
+        <Animated.View
           style={{
             backgroundColor: theme.CARD_BACKGROUND,
             width,
@@ -1345,148 +1423,162 @@ const PhotosList = ({ searchFromUrl }) => {
             shadowRadius: 8,
             elevation: 14,
             zIndex: 14,
+            transform: [
+              {
+                translateY: footerAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [FOOTER_HEIGHT, 0], // Slide down to hide, slide up to show
+                }),
+              },
+            ],
           }}
         >
-          <View
+          <SafeAreaView
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              alignItems: 'center',
-              paddingHorizontal: 20,
-              paddingTop: 10,
-              height: '100%',
-              elevation: 14,
-              zIndex: 14,
+              flex: 1,
             }}
           >
-            {/* Navigation Menu Button */}
-            <TouchableOpacity
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: theme.INTERACTIVE_BACKGROUND,
-                elevation: 15,
-                zIndex: 15,
-              }}
-              onPress={() => {
-                try {
-                  navigation.openDrawer()
-                } catch (error) {
-                  // Fallback if drawer navigation is not available
-                  console.log('Could not open drawer:', error)
-                }
-              }}
-              disabled={!netAvailable}
-            >
-              <FontAwesome
-                name="navicon"
-                size={22}
-                color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-              />
-            </TouchableOpacity>
-
-            {/* Video Recording Button */}
-            <TouchableOpacity
-              style={styles.videoRecordButton}
-              onPress={() => {
-                checkPermissionsForPhotoTaking({ cameraType: 'video' })
-              }}
-            >
-              <FontAwesome5 name="video" color="white" size={24} />
-            </TouchableOpacity>
-
-            {/* Photo Capture Button - Main Action */}
-            <TouchableOpacity
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: 70,
-                height: 70,
-                borderRadius: 35,
-                backgroundColor: CONST.MAIN_COLOR,
-                shadowColor: CONST.MAIN_COLOR,
-                shadowOffset: {
-                  width: 0,
-                  height: 6,
-                },
-                shadowOpacity: 0.4,
-                shadowRadius: 12,
-                elevation: 15,
-                zIndex: 15,
-                borderWidth: 3,
-                borderColor: theme.BACKGROUND,
-              }}
-              onPress={() => {
-                checkPermissionsForPhotoTaking({ cameraType: 'camera' })
-              }}
-            >
-              <FontAwesome5 name="camera" color="white" size={28} />
-            </TouchableOpacity>
-
-            {/* Friends List Button */}
-            <TouchableOpacity
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                backgroundColor: theme.INTERACTIVE_BACKGROUND,
-                position: 'relative',
-                elevation: 15,
-                zIndex: 15,
-              }}
-              onPress={() => router.push('/friends')}
-              disabled={!netAvailable}
-            >
-              <FontAwesome5
-                name="user-friends"
-                size={22}
-                color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-              />
-              {unreadCount > 0 && (
-                <Badge
-                  value={unreadCount}
-                  badgeStyle={styles.badgeStyle}
-                  textStyle={{
-                    fontSize: 11,
-                    fontWeight: 'bold',
-                  }}
-                  containerStyle={{
-                    position: 'absolute',
-                    top: -2,
-                    right: -2,
-                    elevation: 20,
-                    zIndex: 20,
-                  }}
-                />
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {loading && (
             <View
               style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 3,
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                paddingHorizontal: 20,
+                paddingTop: 10,
+                height: '100%',
+                elevation: 14,
+                zIndex: 14,
               }}
             >
-              <LinearProgress
-                color={CONST.MAIN_COLOR}
+              {/* Navigation Menu Button */}
+              <TouchableOpacity
                 style={{
-                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: 50,
+                  height: 50,
+                  borderRadius: 25,
+                  backgroundColor: theme.INTERACTIVE_BACKGROUND,
+                  elevation: 15,
+                  zIndex: 15,
+                }}
+                onPress={() => {
+                  try {
+                    navigation.openDrawer()
+                  } catch (error) {
+                    // Fallback if drawer navigation is not available
+                    console.log('Could not open drawer:', error)
+                  }
+                }}
+                disabled={!netAvailable}
+              >
+                <FontAwesome
+                  name="navicon"
+                  size={22}
+                  color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
+                />
+              </TouchableOpacity>
+
+              {/* Video Recording Button */}
+              <TouchableOpacity
+                style={styles.videoRecordButton}
+                onPress={() => {
+                  checkPermissionsForPhotoTaking({ cameraType: 'video' })
+                }}
+              >
+                <FontAwesome5 name="video" color="white" size={24} />
+              </TouchableOpacity>
+
+              {/* Photo Capture Button - Main Action */}
+              <TouchableOpacity
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: 70,
+                  height: 70,
+                  borderRadius: 35,
+                  backgroundColor: CONST.MAIN_COLOR,
+                  shadowColor: CONST.MAIN_COLOR,
+                  shadowOffset: {
+                    width: 0,
+                    height: 6,
+                  },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 12,
+                  elevation: 15,
+                  zIndex: 15,
+                  borderWidth: 3,
+                  borderColor: theme.BACKGROUND,
+                }}
+                onPress={() => {
+                  checkPermissionsForPhotoTaking({ cameraType: 'camera' })
+                }}
+              >
+                <FontAwesome5 name="camera" color="white" size={28} />
+              </TouchableOpacity>
+
+              {/* Friends List Button */}
+              <TouchableOpacity
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  width: 50,
+                  height: 50,
+                  borderRadius: 25,
+                  backgroundColor: theme.INTERACTIVE_BACKGROUND,
+                  position: 'relative',
+                  elevation: 15,
+                  zIndex: 15,
+                }}
+                onPress={() => router.push('/friends')}
+                disabled={!netAvailable}
+              >
+                <FontAwesome5
+                  name="user-friends"
+                  size={22}
+                  color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
+                />
+                {unreadCount > 0 && (
+                  <Badge
+                    value={unreadCount}
+                    badgeStyle={styles.badgeStyle}
+                    textStyle={{
+                      fontSize: 11,
+                      fontWeight: 'bold',
+                    }}
+                    containerStyle={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      elevation: 20,
+                      zIndex: 20,
+                    }}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {loading && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   height: 3,
                 }}
-              />
-            </View>
-          )}
-        </SafeAreaView>
+              >
+                <LinearProgress
+                  color={CONST.MAIN_COLOR}
+                  style={{
+                    flex: 1,
+                    height: 3,
+                  }}
+                />
+              </View>
+            )}
+          </SafeAreaView>
+        </Animated.View>
       )
     )
   }
