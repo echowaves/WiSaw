@@ -66,6 +66,7 @@ import { getTheme } from '../../theme/sharedStyles'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import Thumb from '../../components/Thumb'
+import ThumbWithComments from '../../components/ThumbWithComments'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -261,7 +262,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const [zeroMoment, setZeroMoment] = useState(0)
 
   const [netAvailable, setNetAvailable] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useAtom(STATE.searchTerm)
   const [location, setLocation] = useState({
     coords: { latitude: 0, longitude: 0 },
   })
@@ -421,7 +422,24 @@ const PhotosList = ({ searchFromUrl }) => {
   // Render function for individual masonry items
   const renderMasonryItem = React.useCallback(
     ({ item, index, dimensions }) => {
-      // All segments now use the same Thumb component
+      // Use ThumbWithComments for starred (segment 1) and search (segment 2)
+      // Use simple Thumb for global photos (segment 0)
+      if (activeSegment === 1 || activeSegment === 2) {
+        return (
+          <ThumbWithComments
+            item={item}
+            index={index}
+            thumbWidth={dimensions.width}
+            thumbHeight={dimensions.height}
+            photosList={photosList}
+            searchTerm={searchTerm}
+            activeSegment={activeSegment}
+            topOffset={topOffset}
+            uuid={uuid}
+          />
+        )
+      }
+
       return (
         <Thumb
           item={item}
@@ -662,15 +680,15 @@ const PhotosList = ({ searchFromUrl }) => {
       setPageNumber(null)
       setActiveSegment(index)
 
-      // Clear search term when switching away from search segment
-      if (index !== 2) {
-        setSearchTerm('')
-      }
+      // Note: We no longer clear search term when switching segments
+      // This allows the search term to persist in the atom
     }
 
     // Always reload content when any segment is clicked (including current one)
     // Pass the new segment index directly to ensure immediate use
-    reload(index)
+    // For search segment, pass existing search term if available
+    const searchTermToUse = index === 2 ? searchTerm : null
+    reload(index, searchTermToUse)
   }
 
   // Custom header renderer for Expo Router compatibility
@@ -1254,33 +1272,17 @@ const PhotosList = ({ searchFromUrl }) => {
           }
         case 1: // Watched - larger items with comments
           return {
-            spacing: 5,
-            maxItemsPerRow: 12,
-            baseHeight: 100,
-            aspectRatioFallbacks: [
-              0.56, // 9:16 (portrait)
-              0.67, // 2:3 (portrait)
-              0.75, // 3:4 (portrait)
-              1.0, // 1:1 (square)
-              1.33, // 4:3 (landscape)
-              1.5, // 3:2 (landscape)
-              1.78, // 16:9 (landscape)
-            ],
+            spacing: 8,
+            maxItemsPerRow: 2,
+            baseHeight: 200,
+            aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
           }
-        case 2: // Search - same masonry layout as Global for consistent experience
+        case 2: // Search - same layout as starred to accommodate comments
           return {
-            spacing: 5,
-            maxItemsPerRow: 12,
-            baseHeight: 100,
-            aspectRatioFallbacks: [
-              0.56, // 9:16 (portrait)
-              0.67, // 2:3 (portrait)
-              0.75, // 3:4 (portrait)
-              1.0, // 1:1 (square)
-              1.33, // 4:3 (landscape)
-              1.5, // 3:2 (landscape)
-              1.78, // 16:9 (landscape)
-            ],
+            spacing: 8,
+            maxItemsPerRow: 2,
+            baseHeight: 200,
+            aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
           }
         default:
           return {

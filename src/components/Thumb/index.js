@@ -16,6 +16,10 @@ import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
 
+import { getTheme } from '../../theme/sharedStyles'
+
+const theme = getTheme()
+
 const styles = StyleSheet.create({
   container: {
     borderRadius: 20,
