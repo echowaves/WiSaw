@@ -938,6 +938,22 @@ const PhotosList = ({ searchFromUrl }) => {
             </Animated.View>
           </View>
         </Animated.View>
+        {loading && (
+          <View
+            style={{
+              height: 3,
+              backgroundColor: theme.HEADER_BACKGROUND,
+            }}
+          >
+            <LinearProgress
+              color={CONST.MAIN_COLOR}
+              style={{
+                flex: 1,
+                height: 3,
+              }}
+            />
+          </View>
+        )}
       </SafeAreaView>
     )
   }
@@ -1574,26 +1590,6 @@ const PhotosList = ({ searchFromUrl }) => {
                 )}
               </TouchableOpacity>
             </View>
-
-            {loading && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 3,
-                }}
-              >
-                <LinearProgress
-                  color={CONST.MAIN_COLOR}
-                  style={{
-                    flex: 1,
-                    height: 3,
-                  }}
-                />
-              </View>
-            )}
           </SafeAreaView>
         </Animated.View>
       )
