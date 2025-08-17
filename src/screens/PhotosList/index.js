@@ -1460,7 +1460,7 @@ const PhotosList = ({ searchFromUrl }) => {
               {
                 translateY: footerAnimation.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [FOOTER_HEIGHT - 5, 0], // Slide down partially to keep progress bar visible (reduced from 10px to 5px)
+                  outputRange: [FOOTER_HEIGHT, 0], // Slide down completely to hide footer entirely
                 }),
               },
             ],
