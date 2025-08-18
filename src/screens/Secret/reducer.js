@@ -187,10 +187,22 @@ const storeUUID = async (uuid) => {
 export async function getUUID() {
   let uuid
   try {
-    uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
+    // Add a timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('SecureStore timeout')), 5000)
+    })
+
+    const getItemPromise = SecureStore.getItemAsync(CONST.UUID_KEY)
+    uuid = await Promise.race([getItemPromise, timeoutPromise])
   } catch (err13) {
     console.error('uuid', { err13 })
-
+    // Show toast for UUID loading error (but don't throw to prevent app hang)
+    Toast.show({
+      text1: 'Storage Access Issue',
+      text2: 'Unable to load device ID, generating new one',
+      type: 'error',
+      visibilityTime: 3000,
+    })
     uuid = null
   }
   if (uuid === null) {
@@ -198,7 +210,18 @@ export async function getUUID() {
 
     if (uuid === '' || uuid === null) {
       uuid = uuidv4()
-      await storeUUID(uuid)
+      try {
+        await storeUUID(uuid)
+      } catch (storeError) {
+        console.error('Error storing UUID:', storeError)
+        // Return the generated UUID anyway, don't block app startup
+        Toast.show({
+          text1: 'Storage Warning',
+          text2: 'Device ID generated but may not persist',
+          type: 'error',
+          visibilityTime: 4000,
+        })
+      }
     }
   }
   return uuid
@@ -221,10 +244,22 @@ const storeNickName = async (nickName) => {
 
 export async function getStoredNickName() {
   try {
-    const nickName = await SecureStore.getItemAsync(CONST.NICK_NAME_KEY)
+    // Add timeout protection
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('NickName storage timeout')), 3000)
+    })
+
+    const getItemPromise = SecureStore.getItemAsync(CONST.NICK_NAME_KEY)
+    const nickName = await Promise.race([getItemPromise, timeoutPromise])
     return nickName || ''
   } catch (err15) {
     console.error('nick bname', { err15 })
+    Toast.show({
+      text1: 'Nickname Loading Error',
+      text2: 'Unable to load saved nickname',
+      type: 'error',
+      visibilityTime: 3000,
+    })
   }
   return ''
 }
