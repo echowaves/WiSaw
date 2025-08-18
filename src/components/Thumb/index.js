@@ -15,15 +15,14 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
+import { useAtom } from 'jotai'
 
+import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
-
-const theme = getTheme()
 
 const styles = StyleSheet.create({
   container: {
     borderRadius: 20,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -31,7 +30,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 12,
     elevation: 16,
-    backgroundColor: '#fff',
     transform: [{ scale: 1 }],
   },
   thumbnail: {
@@ -114,6 +112,8 @@ const Thumb = ({
   uuid,
 }) => {
   // Navigation removed - using router directly for navigation
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
   const scaleValue = useRef(new Animated.Value(1)).current
   const playButtonScale = useRef(new Animated.Value(1)).current
 
@@ -197,10 +197,16 @@ const Thumb = ({
     height: thumbHeight || thumbDimension,
   }
 
+  const dynamicContainerStyle = {
+    shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: theme.CARD_BACKGROUND,
+  }
+
   return (
     <Animated.View
       style={[
         styles.container,
+        dynamicContainerStyle,
         thumbWidthStyles,
         { transform: [{ scale: scaleValue }] },
       ]}

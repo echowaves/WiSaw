@@ -2,6 +2,7 @@ import { AntDesign, FontAwesome } from '@expo/vector-icons'
 import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { router } from 'expo-router'
+import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 import { memo, useRef } from 'react'
 import {
@@ -12,14 +13,12 @@ import {
   View,
 } from 'react-native'
 
+import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
-
-const theme = getTheme()
 
 const styles = StyleSheet.create({
   container: {
     borderRadius: 20,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,
@@ -27,7 +26,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 12,
     elevation: 16,
-    backgroundColor: '#fff',
     transform: [{ scale: 1 }],
   },
   thumbnail: {
@@ -96,6 +94,8 @@ const ThumbWithComments = ({
   topOffset,
   uuid,
 }) => {
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
   const scaleValue = useRef(new Animated.Value(1)).current
 
   const onThumbPress = (thumb) => {
@@ -135,6 +135,8 @@ const ThumbWithComments = ({
   const containerStyles = {
     width: thumbWidth || thumbDimension,
     height: thumbHeight || thumbDimension,
+    shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: theme.CARD_BACKGROUND,
   }
 
   // Render comment overlay on top of the photo
