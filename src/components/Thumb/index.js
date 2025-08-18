@@ -23,15 +23,14 @@ const theme = getTheme()
 const styles = StyleSheet.create({
   container: {
     borderRadius: 20,
-    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 6,
+      height: 4,
     },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.6,
     shadowRadius: 12,
-    elevation: 8,
+    elevation: 16,
     backgroundColor: '#fff',
     transform: [{ scale: 1 }],
   },
