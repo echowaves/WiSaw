@@ -354,6 +354,39 @@ export const removeFromQueue = async (imageToRemove) => {
   }
 }
 
+export const clearQueue = async () => {
+  try {
+    // Get current queue items to clean up their files
+    const currentQueue = await getQueue()
+
+    // Delete all local files from the queue
+    for (const item of currentQueue) {
+      try {
+        if (item.localImgUrl) {
+          await FileSystem.deleteAsync(item.localImgUrl, { idempotent: true })
+        }
+        if (item.localThumbUrl) {
+          await FileSystem.deleteAsync(item.localThumbUrl, { idempotent: true })
+        }
+        if (item.localVideoUrl) {
+          await FileSystem.deleteAsync(item.localVideoUrl, { idempotent: true })
+        }
+      } catch (fileDeleteError) {
+        // Continue cleaning up other files even if one fails
+        console.error('Error deleting file:', fileDeleteError)
+      }
+    }
+
+    // Clear the queue in storage
+    await Storage.setItem({
+      key: CONST.PENDING_UPLOADS_KEY,
+      value: [],
+    })
+  } catch (error) {
+    console.error('Error clearing queue:', error)
+  }
+}
+
 // returns an array that has everything needed for rendering
 export const getQueue = async () => {
   try {

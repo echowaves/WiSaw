@@ -95,6 +95,47 @@ const removeFromQueue = async (imageToRemove) => {
   })
 }
 
+export const clearChatQueue = async () => {
+  try {
+    // Get current queue items to clean up their files
+    const currentQueue = await getQueue()
+
+    // Delete all local files from the queue
+    for (const item of currentQueue) {
+      try {
+        if (item.localImgUrl) {
+          await FileSystem.deleteAsync(item.localImgUrl, { idempotent: true })
+        }
+        // Chat uploads might also have thumbnail files based on cache management
+        if (item.chatPhotoHash) {
+          // Clean up cached files if they exist
+          const thumbCacheKey = `${item.chatPhotoHash}-thumb`
+          CacheManager.getCachedImageURI(thumbCacheKey)
+            .then((cachedUri) => {
+              if (cachedUri) {
+                FileSystem.deleteAsync(cachedUri, { idempotent: true }).catch(
+                  () => {},
+                )
+              }
+            })
+            .catch(() => {})
+        }
+      } catch (fileDeleteError) {
+        // Continue cleaning up other files even if one fails
+        console.error('Error deleting chat file:', fileDeleteError)
+      }
+    }
+
+    // Clear the queue in storage
+    await Storage.setItem({
+      key: CONST.PENDING_CHAT_UPLOADS_KEY,
+      value: [],
+    })
+  } catch (error) {
+    console.error('Error clearing chat queue:', error)
+  }
+}
+
 // returns an array that has everything needed for rendering
 const getQueue = async () => {
   // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
