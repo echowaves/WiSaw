@@ -557,6 +557,16 @@ const PhotosList = ({ searchFromUrl }) => {
         const originalItem = pendingQueue[i]
 
         try {
+          // Double-check network before each upload
+          const currentNetState = await NetInfo.fetch()
+          if (
+            !currentNetState.isConnected ||
+            currentNetState.isInternetReachable === false
+          ) {
+            console.log('Network lost during upload, stopping')
+            break
+          }
+
           // Complete upload sequence for this item
           // eslint-disable-next-line no-await-in-loop
           const uploadedPhoto = await reducer.processCompleteUpload({
@@ -585,13 +595,26 @@ const PhotosList = ({ searchFromUrl }) => {
           }
         } catch (err123) {
           // eslint-disable-next-line no-console
+          console.error('Upload error for item:', err123)
+
+          // Handle network/timeout errors
+          const errorMsg = `${err123}`.toLowerCase()
+          if (errorMsg.includes('network') || errorMsg.includes('timeout')) {
+            Toast.show({
+              text1: 'Network Issue',
+              text2: 'Upload will resume when connection is stable',
+              type: 'info',
+              topOffset,
+            })
+            break // Stop processing more items if network issues
+          }
+
           Toast.show({
             text1: 'Error Uploading',
             text2: `${err123}`,
             type: 'error',
             topOffset,
           })
-          console.error({ err123 })
 
           // If banned, remove the item from queue
           if (`${err123}`.includes('banned')) {
@@ -614,9 +637,10 @@ const PhotosList = ({ searchFromUrl }) => {
     }
 
     setUploadingPhoto(false)
-    // sleep for 500ms before re-trying
+
+    // Use 750ms delay for retry to balance responsiveness and system load
     // eslint-disable-next-line no-promise-executor-return
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 750))
 
     if ((await reducer.getQueue()).length > 0) {
       uploadPendingPhotos()
@@ -1103,10 +1127,22 @@ const PhotosList = ({ searchFromUrl }) => {
   useEffect(() => {
     reducer.initPendingUploads()
 
-    // add network availability listener
+    // add network availability listener with improved reliability
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (state) {
-        setNetAvailable(state.isInternetReachable)
+        // Check both isConnected and isInternetReachable for better reliability
+        const isNetworkAvailable =
+          state.isConnected && state.isInternetReachable !== false
+
+        setNetAvailable(isNetworkAvailable)
+
+        // Log network state for debugging
+        console.log('Network state:', {
+          isConnected: state.isConnected,
+          isInternetReachable: state.isInternetReachable,
+          type: state.type,
+          computed: isNetworkAvailable,
+        })
       }
     })
 

@@ -557,6 +557,32 @@ export const addToQueue = async (image) => {
   }
 }
 
+// Helper function to update a specific item in the queue
+export const updateQueueItem = async (originalItem, updatedItem) => {
+  try {
+    let pendingImages = JSON.parse(
+      await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
+    )
+    if (!pendingImages) {
+      return
+    }
+
+    const updatedQueue = pendingImages.map((item) => {
+      if (JSON.stringify(item) === JSON.stringify(originalItem)) {
+        return updatedItem
+      }
+      return item
+    })
+
+    await Storage.setItem({
+      key: CONST.PENDING_UPLOADS_KEY,
+      value: updatedQueue,
+    })
+  } catch (error) {
+    console.error('Error updating queue item:', error)
+  }
+}
+
 export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
   try {
     // Step 1: Process the file if it hasn't been processed yet
@@ -588,24 +614,44 @@ export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
     // Step 2: Generate photo record on backend if not already done
     let photo = processedItem.photo
     if (!photo) {
-      photo = await generatePhoto({
-        uuid,
-        lat: processedItem.location.coords.latitude,
-        lon: processedItem.location.coords.longitude,
-        video: processedItem?.type === 'video',
-      })
+      try {
+        photo = await generatePhoto({
+          uuid,
+          lat: processedItem.location.coords.latitude,
+          lon: processedItem.location.coords.longitude,
+          video: processedItem?.type === 'video',
+        })
 
-      // Add processed files to cache with the photo ID
-      CacheManager.addToCache({
-        file: processedItem.localThumbUrl,
-        key: `${photo.id}-thumb`,
-      })
-      CacheManager.addToCache({
-        file: processedItem.localImgUrl,
-        key: `${photo.id}`,
-      })
+        // Add processed files to cache with the photo ID
+        CacheManager.addToCache({
+          file: processedItem.localThumbUrl,
+          key: `${photo.id}-thumb`,
+        })
+        CacheManager.addToCache({
+          file: processedItem.localImgUrl,
+          key: `${photo.id}`,
+        })
 
-      processedItem = { ...processedItem, photo }
+        processedItem = { ...processedItem, photo }
+
+        // Update the queue with the photo info to prevent re-generation
+        await updateQueueItem(item, processedItem)
+      } catch (photoGenError) {
+        console.error('Photo generation failed:', photoGenError)
+
+        // If photo generation fails, it's likely a network or server issue
+        // Don't remove from queue, just return null to retry later
+        const errorMsg = `${photoGenError}`.toLowerCase()
+        if (errorMsg.includes('timeout') || errorMsg.includes('network')) {
+          Toast.show({
+            text1: 'Upload delayed',
+            text2: 'Connection issues. Will retry automatically.',
+            type: 'info',
+            topOffset,
+          })
+        }
+        return null
+      }
     }
 
     // Step 3: Upload the actual files
@@ -672,44 +718,60 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
 
 export const generatePhoto = async ({ uuid, lat, lon, video }) => {
   try {
+    // Add timeout wrapper for Android compatibility
+    const timeoutMs = 30000 // 30 seconds timeout for photo generation
+
     const photo = (
-      await CONST.gqlClient.mutate({
-        mutation: gql`
-          mutation createPhoto(
-            $lat: Float!
-            $lon: Float!
-            $uuid: String!
-            $video: Boolean
-          ) {
-            createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
-              active
-              commentsCount
-              watchersCount
-              createdAt
-              id
-              imgUrl
-              imgUrl
-              thumbUrl
-              location
-              updatedAt
-              uuid
-              video
+      await withTimeout(
+        CONST.gqlClient.mutate({
+          mutation: gql`
+            mutation createPhoto(
+              $lat: Float!
+              $lon: Float!
+              $uuid: String!
+              $video: Boolean
+            ) {
+              createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
+                active
+                commentsCount
+                watchersCount
+                createdAt
+                id
+                imgUrl
+                imgUrl
+                thumbUrl
+                location
+                updatedAt
+                uuid
+                video
+              }
             }
-          }
-        `,
-        variables: {
-          uuid,
-          lat,
-          lon,
-          video,
-        },
-      })
+          `,
+          variables: {
+            uuid,
+            lat,
+            lon,
+            video,
+          },
+        }),
+        timeoutMs,
+        'Generate photo mutation',
+      )
     ).data.createPhoto
 
     return photo
   } catch (xscwdjhb) {
     // eslint-disable-next-line no-console
-    console.error(xscwdjhb)
+    console.error('generatePhoto error:', xscwdjhb)
+
+    // Check if it's a timeout error and provide better error message
+    const errorMessage = `${xscwdjhb}`.toLowerCase()
+    if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
+      throw new Error(
+        'Photo creation timed out. Please check your connection and try again.',
+      )
+    }
+
     throw xscwdjhb
   }
   // return null
@@ -825,6 +887,38 @@ export const initPendingUploads = async () => {
     const pendingImages = JSON.parse(
       await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
     )
+
+    // Android-specific debugging for upload queue
+    if (pendingImages && pendingImages.length > 0) {
+      console.log(`Found ${pendingImages.length} pending uploads in queue`)
+
+      // Check if any items are stuck (missing localImgUrl but have photo)
+      const stuckItems = pendingImages.filter(
+        (item) => !item.localImgUrl && item.photo,
+      )
+      if (stuckItems.length > 0) {
+        console.warn(
+          `Found ${stuckItems.length} potentially stuck upload items`,
+        )
+      }
+
+      // Check for items with missing files
+      for (let i = 0; i < pendingImages.length; i++) {
+        const item = pendingImages[i]
+        if (item.originalCameraUrl) {
+          try {
+            const info = await FileSystem.getInfoAsync(item.originalCameraUrl)
+            if (!info.exists) {
+              console.warn(
+                `Pending upload has missing original file: ${item.localImageName}`,
+              )
+            }
+          } catch (e) {
+            console.warn(`Cannot check file status for: ${item.localImageName}`)
+          }
+        }
+      }
+    }
   } catch (cbwdjkfnkdlksdfkjsd) {
     console.error({ cbwdjkfnkdlksdfkjsd })
     await Storage.setItem({
