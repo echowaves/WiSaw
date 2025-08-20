@@ -442,6 +442,21 @@ const genLocalThumbs = async (image) => {
 
 export const processQueuedFile = async (queuedItem) => {
   try {
+    // Ensure pending uploads folder exists
+    try {
+      const dirInfo = await FileSystem.getInfoAsync(
+        CONST.PENDING_UPLOADS_FOLDER,
+      )
+      if (!dirInfo.exists) {
+        await FileSystem.makeDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER, {
+          intermediates: true,
+        })
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to ensure pending uploads folder:', e)
+    }
+
     // Generate local file path in pending uploads folder
     const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${queuedItem.localImageName}`
 
@@ -514,6 +529,26 @@ export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
     // Step 1: Process the file if it hasn't been processed yet
     let processedItem = item
     if (!item.localImgUrl) {
+      // Validate original camera file exists before processing
+      try {
+        const info = await FileSystem.getInfoAsync(item.originalCameraUrl)
+        if (!info.exists) {
+          Toast.show({
+            text1: 'Upload skipped',
+            text2: 'Original file is missing on device.',
+            type: 'error',
+            topOffset,
+          })
+          // Remove invalid item from queue
+          await removeFromQueue(item)
+          return null
+        }
+      } catch (e) {
+        // Cannot stat file; best effort remove and continue
+        await removeFromQueue(item)
+        return null
+      }
+
       processedItem = await processQueuedFile(item)
     }
 
@@ -559,7 +594,24 @@ export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
     }
   } catch (error) {
     console.error('Complete upload process error:', error)
-    throw error
+    // If file missing or unrecoverable, remove from queue to avoid infinite loop
+    const errStr = `${error}`.toLowerCase()
+    if (errStr.includes('not found') || errStr.includes('missing')) {
+      try {
+        await removeFromQueue(item)
+      } catch (e2) {
+        // ignore
+      }
+      Toast.show({
+        text1: 'Upload removed',
+        text2: 'Local file was not found on device.',
+        type: 'error',
+        topOffset,
+      })
+      return null
+    }
+    // Non-fatal: signal caller to retry later
+    return null
   }
 }
 
@@ -630,15 +682,52 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
   // return null
 }
 
+// Utility: Wrap a promise with a timeout to prevent hanging uploads
+const withTimeout = (promise, ms, label = 'operation') =>
+  new Promise((resolve, reject) => {
+    let done = false
+    const t = setTimeout(() => {
+      if (!done) reject(new Error(`${label} timed out after ${ms}ms`))
+    }, ms)
+    promise
+      .then((res) => {
+        done = true
+        clearTimeout(t)
+        resolve(res)
+      })
+      .catch((err) => {
+        done = true
+        clearTimeout(t)
+        reject(err)
+      })
+  })
+
+// Utility: verify local file exists before uploading/processing
+const ensureFileExists = async (uri) => {
+  try {
+    const info = await FileSystem.getInfoAsync(uri)
+    return !!info?.exists
+  } catch (e) {
+    return false
+  }
+}
+
 const uploadFile = async ({
   assetKey,
   contentType,
   assetUri,
   topOffset = 100,
   retries = 3,
+  timeoutMs = 180_000,
 }) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
+      // Validate local file exists
+      const exists = await ensureFileExists(assetUri)
+      if (!exists) {
+        throw new Error(`Local file not found: ${assetUri}`)
+      }
+
       // console.log({ assetKey })
       const uploadUrl = (
         await CONST.gqlClient.query({
@@ -654,14 +743,25 @@ const uploadFile = async ({
         })
       ).data.generateUploadUrl
 
-      const responseData = await FileSystem.uploadAsync(uploadUrl, assetUri, {
-        httpMethod: 'PUT',
-        headers: {
-          'Content-Type': contentType,
-        },
-        uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-        sessionType: FileSystem.FileSystemSessionType.BACKGROUND, // Enable background uploads
-      })
+      const responseData = await withTimeout(
+        FileSystem.uploadAsync(uploadUrl, assetUri, {
+          httpMethod: 'PUT',
+          headers: {
+            'Content-Type': contentType,
+          },
+          uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+          sessionType: FileSystem.FileSystemSessionType.BACKGROUND, // Enable background uploads
+        }),
+        timeoutMs,
+        `Upload ${assetKey}`,
+      )
+
+      // Treat non-200 as retryable failure
+      if (!responseData || responseData.status !== 200) {
+        throw new Error(
+          `Upload failed with status ${responseData?.status || 'unknown'}`,
+        )
+      }
       return { responseData }
     } catch (cnijedfjknwkejn) {
       // eslint-disable-next-line no-console
@@ -712,11 +812,11 @@ export const uploadItem = async ({ item }) => {
         assetUri: item.localVideoUrl,
       })
 
-      if (videoResponse?.responseData?.status !== 200) {
+      if (!videoResponse || videoResponse?.responseData?.status !== 200) {
         return {
           responseData:
             'something bad happened during video upload, unable to upload.',
-          status: videoResponse.responseData.status,
+          status: videoResponse?.responseData?.status,
         }
       }
     }
@@ -726,7 +826,7 @@ export const uploadItem = async ({ item }) => {
       contentType: 'image/jpeg',
       assetUri: item.localImgUrl,
     })
-    return { responseData: response.responseData }
+    return { responseData: response?.responseData }
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.error({ err3 })
