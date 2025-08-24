@@ -65,7 +65,7 @@ import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
-import Thumb from '../../components/Thumb'
+import ExpandableThumb from '../../components/ExpandableThumb'
 import ThumbWithComments from '../../components/ThumbWithComments'
 
 const BACKGROUND_TASK_NAME = 'background-task'
@@ -284,6 +284,11 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [unreadCount, setUnreadCount] = useState(0)
 
+  // State for inline photo expansion
+  const [expandedPhotoId, setExpandedPhotoId] = useState(null)
+  const [isPhotoExpanding, setIsPhotoExpanding] = useState(false)
+  const [scrollToIndex, setScrollToIndex] = useState(null)
+
   const [textVisible, setTextVisible] = useState(true)
   const textAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
   const headerHeightAnimation = React.useRef(new Animated.Value(1)).current // Start full: 1 = full height, 0 = compact height
@@ -419,6 +424,124 @@ const PhotosList = ({ searchFromUrl }) => {
     setPreviousPendingCount(pendingPhotos.length)
   }, [pendingPhotos.length, netAvailable, previousPendingCount])
 
+  // Effect to handle scrolling to expanded photo (simplified as backup)
+  useEffect(() => {
+    if (scrollToIndex !== null) {
+      // Clear the scroll target after a delay (cleanup)
+      const timer = setTimeout(() => {
+        setScrollToIndex(null)
+      }, 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [scrollToIndex])
+
+  // Function to handle photo expansion toggle
+  const handlePhotoToggle = React.useCallback(
+    (photoId) => {
+      if (isPhotoExpanding) return // Prevent multiple rapid toggles
+
+      setIsPhotoExpanding(true)
+
+      // Find the index of the photo being toggled
+      const photoIndex = photosList.findIndex((photo) => photo.id === photoId)
+      const isCurrentlyExpanded = photosList.find(
+        (photo) => photo.id === photoId,
+      )?.isExpanded
+
+      // Update the photosList to toggle the expanded state
+      setPhotosList((currentList) => {
+        return currentList.map((photo) => {
+          if (photo.id === photoId) {
+            // Toggle this photo's expanded state
+            const newExpandedState = !photo.isExpanded
+            const screenWidth = width - 20 // Account for padding
+            const aspectRatio =
+              photo.width && photo.height ? photo.width / photo.height : 1
+            const expandedHeight = screenWidth / aspectRatio + 120 // +120 for header and actions
+
+            return {
+              ...photo,
+              isExpanded: newExpandedState,
+              // Override dimensions when expanded
+              overrideWidth: newExpandedState ? screenWidth : undefined,
+              overrideHeight: newExpandedState ? expandedHeight : undefined,
+            }
+          } else if (photo.isExpanded) {
+            // Collapse any other expanded photos
+            return {
+              ...photo,
+              isExpanded: false,
+              overrideWidth: undefined,
+              overrideHeight: undefined,
+            }
+          }
+          return photo
+        })
+      })
+
+      // Update the expandedPhotoId for backwards compatibility
+      setExpandedPhotoId((prevId) => (prevId === photoId ? null : photoId))
+
+      // Scroll to the expanded photo if it's being expanded (not collapsed)
+      if (!isCurrentlyExpanded && photoIndex !== -1) {
+        // Scroll DOWN to position the expanded photo properly on screen
+        setTimeout(() => {
+          if (masonryRef.current && masonryRef.current._scrollRef) {
+            try {
+              // Calculate the full expanded photo height
+              const expandedPhoto = photosList[photoIndex]
+              const screenWidth = width - 20
+              const aspectRatio =
+                expandedPhoto.width && expandedPhoto.height
+                  ? expandedPhoto.width / expandedPhoto.height
+                  : 1
+              const expandedPhotoImageHeight = screenWidth / aspectRatio
+              const totalExpandedHeight = expandedPhotoImageHeight + 120
+
+              // Scroll DOWN by the full expanded height to bring it into view
+              const scrollDownDistance = totalExpandedHeight
+
+              // Use the internal scroll ref and get current position
+              const scrollRef = masonryRef.current._scrollRef
+
+              // Try to get current scroll position
+              if (scrollRef && scrollRef.scrollTo) {
+                // Get current scroll metrics
+                const scrollMetrics = masonryRef.current._getScrollMetrics
+                  ? masonryRef.current._getScrollMetrics()
+                  : null
+
+                let currentY = 0
+                if (scrollMetrics && scrollMetrics.offset !== undefined) {
+                  currentY = scrollMetrics.offset
+                } else if (masonryRef.current._scrollMetrics) {
+                  currentY = masonryRef.current._scrollMetrics.offset || 0
+                } else {
+                  // Fallback: estimate current position
+                  currentY = photoIndex * 80
+                }
+
+                // Calculate new position: current position PLUS scroll down distance
+                const targetY = currentY + scrollDownDistance
+
+                scrollRef.scrollTo({
+                  y: targetY,
+                  animated: true,
+                })
+              }
+            } catch (error) {
+              // Silently handle scroll errors
+            }
+          }
+        }, 300)
+      }
+
+      // Reset expanding state after animation
+      setTimeout(() => setIsPhotoExpanding(false), 500)
+    },
+    [isPhotoExpanding, width, photosList, masonryRef],
+  )
+
   // Render function for individual masonry items
   const renderMasonryItem = React.useCallback(
     ({ item, index, dimensions }) => {
@@ -441,7 +564,7 @@ const PhotosList = ({ searchFromUrl }) => {
       }
 
       return (
-        <Thumb
+        <ExpandableThumb
           item={item}
           index={index}
           thumbWidth={dimensions.width}
@@ -451,10 +574,21 @@ const PhotosList = ({ searchFromUrl }) => {
           activeSegment={activeSegment}
           topOffset={topOffset}
           uuid={uuid}
+          isExpanded={item.isExpanded || false}
+          onToggleExpand={handlePhotoToggle}
+          expandedPhotoId={expandedPhotoId}
         />
       )
     },
-    [photosList?.length, searchTerm, activeSegment, topOffset, uuid],
+    [
+      photosList?.length,
+      searchTerm,
+      activeSegment,
+      topOffset,
+      uuid,
+      expandedPhotoId,
+      handlePhotoToggle,
+    ],
   )
 
   const wantToLoadMore = () => {
@@ -703,6 +837,11 @@ const PhotosList = ({ searchFromUrl }) => {
       setConsecutiveEmptyResponses(0)
       setPageNumber(null)
       setActiveSegment(index)
+
+      // Collapse any expanded photo when switching segments
+      if (expandedPhotoId) {
+        setExpandedPhotoId(null)
+      }
 
       // Note: We no longer clear search term when switching segments
       // This allows the search term to persist in the atom
@@ -1434,7 +1573,19 @@ const PhotosList = ({ searchFromUrl }) => {
         maxItemsPerRow={config.maxItemsPerRow}
         baseHeight={config.baseHeight}
         aspectRatioFallbacks={config.aspectRatioFallbacks}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) =>
+          `${item.id}-${item.isExpanded ? 'expanded' : 'collapsed'}`
+        }
+        // Force recalculation when items have override dimensions
+        getItemDimensions={(item, calculatedDimensions) => {
+          if (item.overrideWidth && item.overrideHeight) {
+            return {
+              width: item.overrideWidth,
+              height: item.overrideHeight,
+            }
+          }
+          return calculatedDimensions
+        }}
         onScroll={handleScroll}
         onEndReached={() => {
           // Load more when user reaches the end
