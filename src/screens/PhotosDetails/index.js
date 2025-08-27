@@ -189,10 +189,10 @@ const PhotosDetails = ({ route }) => {
           }
         }}
         loadMinimal
-        scrollEnabled
+        scrollEnabled={false}
         loadMinimalSize={1}
         showsPagination={false}
-        pagingEnabled
+        pagingEnabled={false}
         style={{ backgroundColor: theme.BACKGROUND }}
       >
         {photosList.map((photo) => (
