@@ -1064,21 +1064,7 @@ const Photo = ({
     const { width: photoWidth, height: photoHeight } = photoDimensions
 
     if (!photo.video) {
-      return (
-        <View
-          style={{
-            width: width,
-            height: photoHeight,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: theme.CARD_BACKGROUND,
-            marginTop: 8,
-            marginBottom: 8,
-          }}
-        >
-          <ImageView width={width} height={photoHeight} photo={photo} />
-        </View>
-      )
+      return <ImageView width={width} height={photoHeight} photo={photo} />
     }
 
     return (
