@@ -346,7 +346,7 @@ const Photo = ({
     photo?.video ? photo.videoUrl : null,
     (player) => {
       if (player && photo?.video) {
-        // Configure the player
+        // Removed screenHeight as it's no longer necessary
         player.loop = true // eslint-disable-line no-param-reassign
         // Don't auto-play the video - let user control playback
       }
@@ -437,52 +437,7 @@ const Photo = ({
     isEmbedded,
   ])
 
-  // Calculate expected total height based on content
-  const calculateExpectedHeight = useMemo(() => {
-    if (!isEmbedded) return null // Only calculate for embedded use
-
-    const { height: imageHeight } = photoDimensions
-    let totalHeight = imageHeight
-
-    // Add heights for different sections
-    totalHeight += 120 // Action card base height
-    totalHeight += isEmbedded ? 0 : headerOffset // Header offset
-    totalHeight += 40 // Bottom spacer
-
-    // Add comment section heights if comments exist
-    if (photoDetails?.comments?.length > 0) {
-      totalHeight += 60 // Comments header
-      totalHeight += photoDetails.comments.length * 80 // Estimated height per comment
-    } else {
-      totalHeight += 80 // Add comment section placeholder
-    }
-
-    // Add recognition section height if recognitions exist
-    if (photoDetails?.recognitions?.length > 0) {
-      totalHeight += 100 // Recognition section base
-      const metaData = JSON.parse(photoDetails.recognitions[0].metaData)
-      const labels = metaData.Labels || []
-      const textDetections = metaData.TextDetections || []
-      const moderationLabels = metaData.ModerationLabels || []
-
-      if (labels.length > 0)
-        totalHeight += 60 + Math.ceil(labels.length / 3) * 40
-      if (textDetections.length > 0)
-        totalHeight += 60 + textDetections.length * 30
-      if (moderationLabels.length > 0)
-        totalHeight += 60 + moderationLabels.length * 30
-    }
-
-    return totalHeight
-  }, [
-    photoDimensions,
-    photoDetails?.comments?.length,
-    photoDetails?.recognitions,
-    isEmbedded,
-    headerOffset,
-  ])
-
-  // Height calculation is now handled by onLayout callback in the main container
+  // Height calculation is handled by onLayout callback; using flex layout allows cards to flow naturally
   // No need for complex pre-calculation since we measure actual rendered height
 
   useEffect(
