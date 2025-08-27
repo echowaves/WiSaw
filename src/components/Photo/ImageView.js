@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
+import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 import React, { useRef } from 'react'
 import {
@@ -13,10 +14,14 @@ import CachedImage from 'expo-cached-image'
 import { State, TapGestureHandler } from 'react-native-gesture-handler'
 
 import * as CONST from '../../consts'
+import { isDarkMode } from '../../state'
+import { getTheme } from '../../theme/sharedStyles'
 
 const ImageView = ({ width, height, photo }) => {
   const scale = useRef(new Animated.Value(1)).current
   const navigation = useNavigation()
+  const [isDark] = useAtom(isDarkMode)
+  const theme = getTheme(isDark)
 
   const onPinchEvent = (event) => {
     router.push({
@@ -50,6 +55,17 @@ const ImageView = ({ width, height, photo }) => {
       height,
       justifyContent: 'center',
       alignItems: 'center',
+      borderRadius: 20,
+      overflow: 'hidden',
+      backgroundColor: theme.CARD_BACKGROUND,
+      shadowColor: theme.CARD_SHADOW,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
     },
   })
 

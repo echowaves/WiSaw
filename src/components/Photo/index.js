@@ -7,8 +7,6 @@ import moment from 'moment'
 import {
   Alert,
   InteractionManager,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
@@ -17,7 +15,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
-import { LinearProgress, Text } from '@rneui/themed'
+import { LinearProgress, Text as ThemedText } from '@rneui/themed'
 
 import PropTypes from 'prop-types'
 
@@ -39,17 +37,6 @@ import ImageView from './ImageView'
 const createStyles = (theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: theme.BACKGROUND,
-      position: 'relative',
-      height: '100%',
-      // Dynamic paddingTop will be applied inline based on device
-    },
-    scrollView: {
-      flex: 1,
-      backgroundColor: theme.BACKGROUND,
-    },
-    contentContainer: {
       backgroundColor: theme.BACKGROUND,
       paddingTop: 16,
       paddingBottom: 40,
@@ -318,7 +305,12 @@ const createStyles = (theme) =>
     },
   })
 
-const Photo = ({ photo, refreshKey = 0 }) => {
+const Photo = ({
+  photo,
+  refreshKey = 0,
+  isEmbedded = false,
+  onHeightMeasured,
+}) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
@@ -332,14 +324,20 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
   // Get dynamic safe area and window dimensions
   const insets = useSafeAreaInsets()
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+  const dimensions = useWindowDimensions()
+  const screenWidth = dimensions.width
+  const screenHeight = dimensions.height || 800 // Fallback to reasonable height
 
   // Calculate dynamic header offset using shared function
   const headerOffset = useMemo(() => {
+    // If embedded in another component (like ExpandableThumb), don't add header offset
+    if (isEmbedded) {
+      return 0
+    }
     // For overlay headers using AppHeader with safeTopOnly,
     // we just need safe area + content height (56)
     return insets.top + 56
-  }, [insets.top])
+  }, [insets.top, isEmbedded])
 
   const componentIsMounted = useRef(true)
 
@@ -398,34 +396,94 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
   const { width, height } = useWindowDimensions()
 
-  // Calculate optimal photo/video dimensions based on photo's actual dimensions
+  // Calculate optimal photo/video dimensions - always use full screen width
   const photoDimensions = useMemo(() => {
     const topPadding = headerOffset // Use dynamic header offset
-    const bottomSpace = 100 // Space for content below photo and safe area
-    const maxHeight = screenHeight - topPadding - bottomSpace
+    const bottomSpace = isEmbedded ? 20 : 100 // Less bottom space when embedded
+    const maxHeight = isEmbedded
+      ? screenHeight * 0.6 // When embedded, use a proportion of screen height
+      : screenHeight - topPadding - bottomSpace
 
     // Get photo dimensions or use defaults
     const photoWidth = photo?.width || 1080
     const photoHeight = photo?.height || 1080
     const aspectRatio = photoWidth / photoHeight
 
-    // Calculate scale factors for both width and height constraints
-    const widthScale = screenWidth / photoWidth
-    const heightScale = maxHeight / photoHeight
+    // Always use full screen width
+    const calculatedWidth = screenWidth
+    const calculatedHeight = screenWidth / aspectRatio
 
-    // Use the smaller scale factor to ensure the image fits within both constraints
-    const scale = Math.min(widthScale, heightScale)
-
-    // Apply the scale factor to get final dimensions
-    const calculatedWidth = photoWidth * scale
-    const calculatedHeight = photoHeight * scale
+    // If the calculated height exceeds the max height, scale down proportionally
+    if (calculatedHeight > maxHeight) {
+      const scale = maxHeight / calculatedHeight
+      return {
+        width: calculatedWidth * scale,
+        height: maxHeight,
+        aspectRatio,
+      }
+    }
 
     return {
       width: calculatedWidth,
       height: calculatedHeight,
       aspectRatio,
     }
-  }, [screenWidth, screenHeight, headerOffset, photo?.width, photo?.height])
+  }, [
+    screenWidth,
+    screenHeight,
+    headerOffset,
+    photo?.width,
+    photo?.height,
+    isEmbedded,
+  ])
+
+  // Calculate expected total height based on content
+  const calculateExpectedHeight = useMemo(() => {
+    if (!isEmbedded) return null // Only calculate for embedded use
+
+    const { height: imageHeight } = photoDimensions
+    let totalHeight = imageHeight
+
+    // Add heights for different sections
+    totalHeight += 120 // Action card base height
+    totalHeight += isEmbedded ? 0 : headerOffset // Header offset
+    totalHeight += 40 // Bottom spacer
+
+    // Add comment section heights if comments exist
+    if (photoDetails?.comments?.length > 0) {
+      totalHeight += 60 // Comments header
+      totalHeight += photoDetails.comments.length * 80 // Estimated height per comment
+    } else {
+      totalHeight += 80 // Add comment section placeholder
+    }
+
+    // Add recognition section height if recognitions exist
+    if (photoDetails?.recognitions?.length > 0) {
+      totalHeight += 100 // Recognition section base
+      const metaData = JSON.parse(photoDetails.recognitions[0].metaData)
+      const labels = metaData.Labels || []
+      const textDetections = metaData.TextDetections || []
+      const moderationLabels = metaData.ModerationLabels || []
+
+      if (labels.length > 0)
+        totalHeight += 60 + Math.ceil(labels.length / 3) * 40
+      if (textDetections.length > 0)
+        totalHeight += 60 + textDetections.length * 30
+      if (moderationLabels.length > 0)
+        totalHeight += 60 + moderationLabels.length * 30
+    }
+
+    return totalHeight
+  }, [
+    photoDimensions,
+    photoDetails?.comments?.length,
+    photoDetails?.recognitions,
+    isEmbedded,
+    headerOffset,
+  ])
+
+  // Height calculation is now handled by onLayout callback in the main container
+  // No need for complex pre-calculation since we measure actual rendered height
 
   useEffect(
     // use this to make the navigation to a detailed screen faster
@@ -481,16 +539,16 @@ const Photo = ({ photo, refreshKey = 0 }) => {
       <View style={styles.photoInfoCard}>
         <View style={styles.headerInfo}>
           <View style={styles.authorRow}>
-            <Text
+            <ThemedText
               style={styles.authorName}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
               {authorName}
-            </Text>
-            <Text style={styles.dateText}>
+            </ThemedText>
+            <ThemedText style={styles.dateText}>
               {renderDateTime(photo.createdAt)}
-            </Text>
+            </ThemedText>
           </View>
 
           {(commentsCount > 0 || watchersCount > 0) && (
@@ -498,18 +556,18 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               {commentsCount > 0 && (
                 <View style={styles.statItem}>
                   <FontAwesome name="comment" size={16} color="#4FC3F7" />
-                  <Text style={styles.statsText}>
+                  <ThemedText style={styles.statsText}>
                     {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
-                  </Text>
+                  </ThemedText>
                 </View>
               )}
 
               {watchersCount > 0 && (
                 <View style={styles.statItem}>
                   <AntDesign name="star" size={16} color="#FFD700" />
-                  <Text style={styles.statsText}>
+                  <ThemedText style={styles.statsText}>
                     {watchersCount} Star{watchersCount !== 1 ? 's' : ''}
-                  </Text>
+                  </ThemedText>
                 </View>
               )}
             </View>
@@ -591,20 +649,22 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                 activeOpacity={0.8}
               >
                 <View style={styles.commentCard}>
-                  <Text style={styles.commentText}>{comment.comment}</Text>
+                  <ThemedText style={styles.commentText}>
+                    {comment.comment}
+                  </ThemedText>
 
                   {!comment.hiddenButtons && (
                     <View style={styles.commentMeta}>
-                      <Text style={styles.commentAuthor}>
+                      <ThemedText style={styles.commentAuthor}>
                         {friendsHelper.getLocalContactName({
                           uuid,
                           friendUuid: comment.uuid,
                           friendsList,
                         })}
-                      </Text>
-                      <Text style={styles.commentDate}>
+                      </ThemedText>
+                      <ThemedText style={styles.commentDate}>
                         {renderDateTime(comment.updatedAt)}
-                      </Text>
+                      </ThemedText>
                     </View>
                   )}
                   {renderCommentButtons({ comment })}
@@ -620,7 +680,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
   const renderAddCommentsRow = () => {
     if (!photoDetails?.comments) {
-      return <Text />
+      return <ThemedText />
     }
     return (
       <View style={styles.addCommentCard}>
@@ -640,7 +700,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
         >
           <View style={styles.addCommentContent}>
             <Ionicons name="add-circle" size={28} color="#4FC3F7" />
-            <Text style={styles.addCommentText}>Add Comment</Text>
+            <ThemedText style={styles.addCommentText}>Add Comment</ThemedText>
           </View>
         </TouchableOpacity>
       </View>
@@ -668,9 +728,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
       <View style={styles.aiRecognitionContainer}>
         {labels?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <Text style={styles.aiRecognitionTitle}>
+            <ThemedText style={styles.aiRecognitionTitle}>
               AI Recognized Tags (tap to search)
-            </Text>
+            </ThemedText>
             <View style={styles.aiTagsContainer}>
               {labels.map((label) => (
                 <TouchableOpacity
@@ -687,9 +747,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.aiTagText}>
+                  <ThemedText style={styles.aiTagText}>
                     {label.Name} {Math.round(label.Confidence)}%
-                  </Text>
+                  </ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -698,9 +758,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
         {textDetections?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <Text style={styles.aiRecognitionTitle}>
+            <ThemedText style={styles.aiRecognitionTitle}>
               AI Recognized Text (tap to search)
-            </Text>
+            </ThemedText>
             <View style={styles.aiTagsContainer}>
               {textDetections.map((text) => (
                 <TouchableOpacity
@@ -717,9 +777,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.aiTagText}>
+                  <ThemedText style={styles.aiTagText}>
                     {text.DetectedText} {Math.round(text.Confidence)}%
-                  </Text>
+                  </ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -728,9 +788,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 
         {moderationLabels?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <Text style={styles.aiRecognitionModerationTitle}>
+            <ThemedText style={styles.aiRecognitionModerationTitle}>
               AI Moderation Tags
-            </Text>
+            </ThemedText>
             <View style={styles.aiTagsContainer}>
               {moderationLabels.map((label) => (
                 <TouchableOpacity
@@ -747,9 +807,9 @@ const Photo = ({ photo, refreshKey = 0 }) => {
                   }}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.aiModerationTagText}>
+                  <ThemedText style={styles.aiModerationTagText}>
                     {label.Name} {Math.round(label.Confidence)}%
-                  </Text>
+                  </ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -895,7 +955,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             }
             size={18}
           />
-          <Text
+          <ThemedText
             style={[
               styles.actionButtonText,
               {
@@ -909,7 +969,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             ]}
           >
             Report
-          </Text>
+          </ThemedText>
         </TouchableOpacity>
 
         {/* Delete button */}
@@ -946,7 +1006,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             }
             size={18}
           />
-          <Text
+          <ThemedText
             style={[
               styles.actionButtonText,
               {
@@ -959,7 +1019,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             ]}
           >
             Delete
-          </Text>
+          </ThemedText>
         </TouchableOpacity>
 
         {/* Star button */}
@@ -986,7 +1046,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             }
             size={18}
           />
-          <Text
+          <ThemedText
             style={[
               styles.actionButtonText,
               {
@@ -1000,7 +1060,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             ]}
           >
             {photoDetails?.isPhotoWatched ? 'Starred' : 'Star'}
-          </Text>
+          </ThemedText>
         </TouchableOpacity>
 
         {/* Share button */}
@@ -1027,7 +1087,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             }
             size={18}
           />
-          <Text
+          <ThemedText
             style={[
               styles.actionButtonText,
               {
@@ -1039,19 +1099,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             ]}
           >
             Share
-          </Text>
+          </ThemedText>
         </TouchableOpacity>
       </View>
     </View>
-  )
-
-  const renderFooter = () => (
-    <SafeAreaView
-      style={{
-        paddingBottom: 20,
-        backgroundColor: 'transparent',
-      }}
-    />
   )
 
   const renderPhotoRow = () => {
@@ -1070,7 +1121,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
             marginBottom: 8,
           }}
         >
-          <ImageView width={photoWidth} height={photoHeight} photo={photo} />
+          <ImageView width={width} height={photoHeight} photo={photo} />
         </View>
       )
     }
@@ -1091,7 +1142,7 @@ const Photo = ({ photo, refreshKey = 0 }) => {
         <VideoView
           player={videoPlayer}
           style={{
-            width: photoWidth,
+            width: width,
             height: photoHeight,
           }}
           nativeControls={false}
@@ -1180,9 +1231,11 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               borderColor: 'rgba(255,255,255,0.2)',
             }}
           >
-            <Text style={{ color: 'white', fontSize: 12, fontWeight: '500' }}>
+            <ThemedText
+              style={{ color: 'white', fontSize: 12, fontWeight: '500' }}
+            >
               Loading...
-            </Text>
+            </ThemedText>
           </View>
         )}
         {/* Photo dimensions info for debugging - remove in production */}
@@ -1198,10 +1251,10 @@ const Photo = ({ photo, refreshKey = 0 }) => {
               paddingVertical: 4,
             }}
           >
-            <Text style={{ color: 'white', fontSize: 10 }}>
+            <ThemedText style={{ color: 'white', fontSize: 10 }}>
               {photo?.width || 'W?'} × {photo?.height || 'H?'} →{' '}
               {Math.round(photoWidth)} × {Math.round(photoHeight)}
-            </Text>
+            </ThemedText>
           </View>
         )}
       </View>
@@ -1209,51 +1262,44 @@ const Photo = ({ photo, refreshKey = 0 }) => {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: headerOffset }]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
-      >
-        {renderActionCard()}
-        <View style={{ position: 'relative' }}>
-          {photoDetails?.isPhotoWatched === undefined && (
-            <LinearProgress
-              color="#4FC3F7"
-              style={[
-                styles.loadingProgress,
-                {
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 10,
-                  marginHorizontal: 0,
-                  marginVertical: 0,
-                  height: 4,
-                  borderTopLeftRadius: 0,
-                  borderTopRightRadius: 0,
-                  shadowColor: '#4FC3F7',
-                  shadowOffset: {
-                    width: 0,
-                    height: 2,
-                  },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 5,
-                },
-              ]}
-            />
-          )}
-          {renderPhotoRow()}
-        </View>
-        {renderCommentsStats()}
-        {renderCommentsRows()}
-        {renderAddCommentsRow()}
-        {renderRecognitions()}
-        <View style={{ height: 40 }} />
-      </ScrollView>
-      {renderFooter()}
+    <View
+      style={[styles.container, { paddingTop: isEmbedded ? 0 : headerOffset }]}
+      onLayout={(event) => {
+        // Measure the actual rendered height and report it back when embedded
+        if (isEmbedded && onHeightMeasured) {
+          const { height } = event.nativeEvent.layout
+          onHeightMeasured(height)
+        }
+      }}
+    >
+      {renderActionCard()}
+      {photoDetails?.isPhotoWatched === undefined && (
+        <LinearProgress
+          color="#4FC3F7"
+          style={[
+            styles.loadingProgress,
+            {
+              marginHorizontal: 16,
+              marginVertical: 0,
+              height: 4,
+              borderRadius: 2,
+              shadowColor: '#4FC3F7',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+              elevation: 5,
+            },
+          ]}
+        />
+      )}
+      {renderPhotoRow()}
+      {renderCommentsStats()}
+      {renderCommentsRows()}
+      {renderAddCommentsRow()}
+      {renderRecognitions()}
     </View>
   )
 }
@@ -1261,6 +1307,8 @@ const Photo = ({ photo, refreshKey = 0 }) => {
 Photo.propTypes = {
   photo: PropTypes.object.isRequired,
   refreshKey: PropTypes.number,
+  isEmbedded: PropTypes.bool,
+  onHeightMeasured: PropTypes.func,
 }
 
 export default Photo

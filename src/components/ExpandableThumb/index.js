@@ -1,7 +1,5 @@
-import { AntDesign, Ionicons } from '@expo/vector-icons'
-import { Text } from '@rneui/themed'
+import { Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
-import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 import React, { useEffect, useRef, useState } from 'react'
@@ -14,6 +12,7 @@ import {
 } from 'react-native'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import Photo from '../Photo'
 
 const ExpandableThumb = ({
   thumbWidth = null,
@@ -28,6 +27,7 @@ const ExpandableThumb = ({
   isExpanded = false,
   onToggleExpand,
   expandedPhotoId,
+  onUpdateDimensions,
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -36,18 +36,25 @@ const ExpandableThumb = ({
   const scaleValue = useRef(new Animated.Value(1)).current
   const expandValue = useRef(new Animated.Value(0)).current
   const [isAnimating, setIsAnimating] = useState(false)
+  const [calculatedHeight, setCalculatedHeight] = useState(null) // Track calculated content height from Photo component
 
   // Calculate expanded dimensions
   const expandedWidth = screenWidth - 20 // Account for padding
   const aspectRatio = item.width && item.height ? item.width / item.height : 1
   const expandedHeight = expandedWidth / aspectRatio
-  const totalExpandedHeight = expandedHeight + 120 // +120 for header and actions
 
-  // Use override dimensions if available (from photosList item)
+  // For expanded Photo component, use calculated height from Photo component when available
+  // Otherwise use minimum height, and for collapsed state use calculated thumbnail height
+  const collapsedHeight = expandedHeight + 120
+  const expandedMinHeight = expandedHeight + 400 // Minimum height for expanded state
+
+  // Use override dimensions if available (from photosList item),
+  // otherwise use calculated height from Photo component for expanded, or calculated height for collapsed
   const finalWidth =
     item.overrideWidth || (isExpanded ? expandedWidth : thumbWidth)
   const finalHeight =
-    item.overrideHeight || (isExpanded ? totalExpandedHeight : thumbHeight)
+    item.overrideHeight ||
+    (isExpanded ? calculatedHeight || expandedMinHeight : collapsedHeight)
 
   useEffect(() => {
     if (isExpanded && !isAnimating) {
@@ -91,21 +98,6 @@ const ExpandableThumb = ({
     onToggleExpand(item.id)
   }
 
-  const handleFullScreenPress = () => {
-    // Navigate to full photo details with the same params structure
-    router.push({
-      pathname: '/photos/[id]',
-      params: {
-        id: item.id,
-        index,
-        searchTerm: searchTerm || '',
-        activeSegment: activeSegment || 'all',
-        topOffset: topOffset || 0,
-        uuid: uuid || '',
-      },
-    })
-  }
-
   const renderCollapsedThumb = () => (
     <Image
       source={{ uri: item.thumbUrl }}
@@ -119,143 +111,19 @@ const ExpandableThumb = ({
   )
 
   const renderExpandedPhoto = () => (
-    <View style={{ width: expandedWidth }}>
-      {/* Header with close button */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          backgroundColor: theme.CARD_BACKGROUND,
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: theme.TEXT_PRIMARY,
-          }}
-        >
-          Photo {index + 1} of {photosList.length}
-        </Text>
-        <TouchableOpacity
-          onPress={onThumbPress}
-          style={{
-            padding: 8,
-            borderRadius: 20,
-            backgroundColor: theme.INTERACTIVE_SECONDARY,
-          }}
-        >
-          <Ionicons name="close" size={16} color={theme.TEXT_PRIMARY} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Full size image */}
-      <Image
-        source={{ uri: item.imgUrl }}
-        style={{
-          width: expandedWidth,
-          height: expandedHeight,
-          borderBottomLeftRadius: 12,
-          borderBottomRightRadius: 12,
-        }}
-        resizeMode="cover"
-      />
-
-      {/* Action buttons */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          paddingVertical: 16,
-          paddingHorizontal: 16,
-          backgroundColor: theme.CARD_BACKGROUND,
-          borderBottomLeftRadius: 12,
-          borderBottomRightRadius: 12,
-          borderTopWidth: 1,
-          borderTopColor: theme.BORDER_LIGHT,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 8,
-            paddingHorizontal: 12,
-            borderRadius: 20,
-            backgroundColor: theme.INTERACTIVE_BACKGROUND,
-          }}
-        >
-          <AntDesign name="star" size={16} color={theme.TEXT_PRIMARY} />
-          <Text
-            style={{
-              marginLeft: 6,
-              color: theme.TEXT_PRIMARY,
-              fontSize: 14,
-              fontWeight: '500',
-            }}
-          >
-            Star
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 8,
-            paddingHorizontal: 12,
-            borderRadius: 20,
-            backgroundColor: theme.INTERACTIVE_BACKGROUND,
-          }}
-        >
-          <Ionicons name="share-outline" size={16} color={theme.TEXT_PRIMARY} />
-          <Text
-            style={{
-              marginLeft: 6,
-              color: theme.TEXT_PRIMARY,
-              fontSize: 14,
-              fontWeight: '500',
-            }}
-          >
-            Share
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 8,
-            paddingHorizontal: 12,
-            borderRadius: 20,
-            backgroundColor: theme.INTERACTIVE_BACKGROUND,
-          }}
-          onPress={handleFullScreenPress}
-        >
-          <Ionicons
-            name="expand-outline"
-            size={16}
-            color={theme.TEXT_PRIMARY}
-          />
-          <Text
-            style={{
-              marginLeft: 6,
-              color: theme.TEXT_PRIMARY,
-              fontSize: 14,
-              fontWeight: '500',
-            }}
-          >
-            Full Screen
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    <Photo
+      photo={item}
+      isEmbedded={true}
+      onHeightMeasured={(height) => {
+        if (height > 0 && height !== calculatedHeight) {
+          setCalculatedHeight(height)
+          // Update the masonry layout with the new measured height
+          if (onUpdateDimensions && isExpanded) {
+            onUpdateDimensions(item.id, height)
+          }
+        }
+      }}
+    />
   )
 
   return (
@@ -331,6 +199,7 @@ ExpandableThumb.propTypes = {
   isExpanded: PropTypes.bool,
   onToggleExpand: PropTypes.func.isRequired,
   expandedPhotoId: PropTypes.string,
+  onUpdateDimensions: PropTypes.func,
 }
 
 ExpandableThumb.displayName = 'ExpandableThumb'

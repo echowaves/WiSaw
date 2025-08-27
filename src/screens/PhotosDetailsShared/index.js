@@ -8,7 +8,13 @@ import PropTypes from 'prop-types'
 
 import { AntDesign } from '@expo/vector-icons'
 
-import { StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native'
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text } from '@rneui/themed'
@@ -132,7 +138,13 @@ const PhotosDetailsShared = ({ route }) => {
           backgroundColor="transparent"
           translucent
         />
-        <Photo photo={item} key={item.id} refreshKey={refreshKey} />
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <Photo photo={item} key={item.id} refreshKey={refreshKey} />
+        </ScrollView>
       </View>
     )
   }

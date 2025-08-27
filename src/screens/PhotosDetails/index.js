@@ -8,7 +8,13 @@ import PropTypes from 'prop-types'
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 
-import { StatusBar, StyleSheet, useWindowDimensions, View } from 'react-native'
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Text } from '@rneui/themed'
@@ -196,13 +202,19 @@ const PhotosDetails = ({ route }) => {
         style={{ backgroundColor: theme.BACKGROUND }}
       >
         {photosList.map((photo) => (
-          <Photo
-            photo={photo}
+          <ScrollView
             key={photo.id}
-            swiper={swiper}
-            photosList={photosList}
-            refreshKey={refreshKey}
-          />
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <Photo
+              photo={photo}
+              swiper={swiper}
+              photosList={photosList}
+              refreshKey={refreshKey}
+            />
+          </ScrollView>
         ))}
       </Swiper>
     </View>

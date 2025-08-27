@@ -457,14 +457,29 @@ const PhotosList = ({ searchFromUrl }) => {
             const screenWidth = width - 20 // Account for padding
             const aspectRatio =
               photo.width && photo.height ? photo.width / photo.height : 1
-            const expandedHeight = screenWidth / aspectRatio + 120 // +120 for header and actions
+            const expandedImageHeight = screenWidth / aspectRatio
+
+            // Calculate total height to match ExpandableThumb logic:
+            // - Photo image height (based on aspect ratio)
+            // - Action card (~100px)
+            // - Comments section (estimate ~300px for multiple comments)
+            // - Recognition section (~150px)
+            // - Padding and margins (~100px)
+            const totalExpandedHeight = newExpandedState
+              ? Math.max(
+                  expandedImageHeight + 650, // Image height + estimated content height
+                  Math.max(screenWidth * 1.8, 800), // Fallback: larger multiple of screen width
+                )
+              : expandedImageHeight + 120
 
             return {
               ...photo,
               isExpanded: newExpandedState,
               // Override dimensions when expanded
               overrideWidth: newExpandedState ? screenWidth : undefined,
-              overrideHeight: newExpandedState ? expandedHeight : undefined,
+              overrideHeight: newExpandedState
+                ? totalExpandedHeight
+                : undefined,
             }
           } else if (photo.isExpanded) {
             // Collapse any other expanded photos
@@ -488,7 +503,7 @@ const PhotosList = ({ searchFromUrl }) => {
         setTimeout(() => {
           if (masonryRef.current && masonryRef.current._scrollRef) {
             try {
-              // Calculate the full expanded photo height
+              // Calculate the full expanded photo height using same logic as above
               const expandedPhoto = photosList[photoIndex]
               const screenWidth = width - 20
               const aspectRatio =
@@ -496,7 +511,10 @@ const PhotosList = ({ searchFromUrl }) => {
                   ? expandedPhoto.width / expandedPhoto.height
                   : 1
               const expandedPhotoImageHeight = screenWidth / aspectRatio
-              const totalExpandedHeight = expandedPhotoImageHeight + 120
+              const totalExpandedHeight = Math.max(
+                expandedPhotoImageHeight + 650, // Image height + estimated content height
+                Math.max(screenWidth * 1.8, 800), // Fallback: larger multiple of screen width
+              )
 
               // Scroll DOWN by the full expanded height to bring it into view
               const scrollDownDistance = totalExpandedHeight
@@ -542,6 +560,26 @@ const PhotosList = ({ searchFromUrl }) => {
     [isPhotoExpanding, width, photosList, masonryRef],
   )
 
+  // Callback to update item dimensions when Photo component measures its actual height
+  const updateItemDimensions = React.useCallback(
+    (itemId, measuredHeight) => {
+      setPhotosList((currentList) =>
+        currentList.map((item) => {
+          if (item.id === itemId) {
+            return {
+              ...item,
+              overrideHeight: measuredHeight,
+              // Keep the calculated width if it exists, otherwise use current override
+              overrideWidth: item.overrideWidth || item.width,
+            }
+          }
+          return item
+        }),
+      )
+    },
+    [setPhotosList],
+  )
+
   // Render function for individual masonry items
   const renderMasonryItem = React.useCallback(
     ({ item, index, dimensions }) => {
@@ -577,6 +615,7 @@ const PhotosList = ({ searchFromUrl }) => {
           isExpanded={item.isExpanded || false}
           onToggleExpand={handlePhotoToggle}
           expandedPhotoId={expandedPhotoId}
+          onUpdateDimensions={updateItemDimensions}
         />
       )
     },
