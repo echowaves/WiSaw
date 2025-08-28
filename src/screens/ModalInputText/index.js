@@ -44,8 +44,9 @@ const ModalInputText = ({ route }) => {
       },
       photoContainer: {
         alignSelf: 'center',
-        marginBottom: 10,
+        marginBottom: 20,
         borderRadius: 16,
+        // overflow: 'hidden', // Ensure rounded corners clip the image content
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
