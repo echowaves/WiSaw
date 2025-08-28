@@ -113,7 +113,6 @@ const ExpandableThumb = ({
   const renderExpandedPhoto = () => (
     <Photo
       photo={item}
-      isEmbedded={true}
       onHeightMeasured={(height) => {
         if (height > 0 && height !== calculatedHeight) {
           setCalculatedHeight(height)

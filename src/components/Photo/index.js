@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
@@ -305,12 +305,7 @@ const createStyles = (theme) =>
     },
   })
 
-const Photo = ({
-  photo,
-  refreshKey = 0,
-  isEmbedded = false,
-  onHeightMeasured,
-}) => {
+const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
@@ -328,18 +323,13 @@ const Photo = ({
   const screenWidth = dimensions.width
   const screenHeight = dimensions.height || 800 // Fallback to reasonable height
 
-  // Calculate dynamic header offset using shared function
-  const headerOffset = useMemo(() => {
-    // If embedded in another component (like ExpandableThumb), don't add header offset
-    if (isEmbedded) {
-      return 0
-    }
-    // For overlay headers using AppHeader with safeTopOnly,
-    // we just need safe area + content height (56)
-    return insets.top + 56
-  }, [insets.top, isEmbedded])
+  // Since Photo is always embedded, no header offset needed
+  const headerOffset = 0
 
   const componentIsMounted = useRef(true)
+
+  // Prevent height measurement cycles
+  const lastReportedHeight = useRef(null)
 
   // Create video player instance
   const videoPlayer = useVideoPlayer(
@@ -397,45 +387,6 @@ const Photo = ({
   const { width, height } = useWindowDimensions()
 
   // Calculate optimal photo/video dimensions - always use full screen width
-  const photoDimensions = useMemo(() => {
-    const topPadding = headerOffset // Use dynamic header offset
-    const bottomSpace = isEmbedded ? 20 : 100 // Less bottom space when embedded
-    const maxHeight = isEmbedded
-      ? screenHeight * 0.6 // When embedded, use a proportion of screen height
-      : screenHeight - topPadding - bottomSpace
-
-    // Get photo dimensions or use defaults
-    const photoWidth = photo?.width || 1080
-    const photoHeight = photo?.height || 1080
-    const aspectRatio = photoWidth / photoHeight
-
-    // Always use full screen width
-    const calculatedWidth = screenWidth
-    const calculatedHeight = screenWidth / aspectRatio
-
-    // If the calculated height exceeds the max height, scale down proportionally
-    if (calculatedHeight > maxHeight) {
-      const scale = maxHeight / calculatedHeight
-      return {
-        width: calculatedWidth * scale,
-        height: maxHeight,
-        aspectRatio,
-      }
-    }
-
-    return {
-      width: calculatedWidth,
-      height: calculatedHeight,
-      aspectRatio,
-    }
-  }, [
-    screenWidth,
-    screenHeight,
-    headerOffset,
-    photo?.width,
-    photo?.height,
-    isEmbedded,
-  ])
 
   // Height calculation is handled by onLayout callback; using flex layout allows cards to flow naturally
   // No need for complex pre-calculation since we measure actual rendered height
@@ -463,6 +414,11 @@ const Photo = ({
     },
     [photo?.id, uuid, refreshKey],
   ) // Added refreshKey dependency to refresh comments when returning from add comment
+
+  // Reset height tracking when photo content changes
+  useEffect(() => {
+    lastReportedHeight.current = null
+  }, [photo?.id, refreshKey])
 
   // useEffect(() => {
   //   if (videoRef?.current) {
@@ -535,54 +491,56 @@ const Photo = ({
   const renderCommentButtons = ({ comment }) => {
     if (!comment?.hiddenButtons) {
       return (
-        <View
+        <TouchableOpacity
           style={{
-            position: 'absolute',
-            right: 1,
-            bottom: 1,
+            alignSelf: 'flex-end',
+            marginTop: 8,
+            padding: 8,
           }}
+          onPress={() => {
+            Alert.alert(
+              'Delete Comment?',
+              "This can't be undone. Are you sure? ",
+              [
+                { text: 'No', onPress: () => null, style: 'cancel' },
+                {
+                  text: 'Yes',
+                  onPress: async () => {
+                    // update commentsCount in global reduce store
+                    await reducer.deleteComment({
+                      photo,
+                      comment,
+                      uuid,
+                      topOffset,
+                    })
+                    // bruit force reload comments to re-render in the photo details screen
+                    const updatedPhotoDetails = await reducer.getPhotoDetails({
+                      photoId: photo.id,
+                      uuid,
+                    })
+                    setPhotoDetails({
+                      ...photoDetails,
+                      ...updatedPhotoDetails,
+                    })
+                  },
+                },
+              ],
+              { cancelable: true },
+            )
+          }}
+          activeOpacity={0.7}
         >
           <FontAwesome
-            onPress={() => {
-              Alert.alert(
-                'Delete Comment?',
-                "This can't be undone. Are you sure? ",
-                [
-                  { text: 'No', onPress: () => null, style: 'cancel' },
-                  {
-                    text: 'Yes',
-                    onPress: async () => {
-                      // update commentsCount in global reduce store
-                      await reducer.deleteComment({
-                        photo,
-                        comment,
-                        uuid,
-                        topOffset,
-                      })
-                      // bruit force reload comments to re-render in the photo details screen
-                      const updatedPhotoDetails = await reducer.getPhotoDetails(
-                        { photoId: photo.id, uuid },
-                      )
-                      setPhotoDetails({
-                        ...photoDetails,
-                        ...updatedPhotoDetails,
-                      })
-                    },
-                  },
-                ],
-                { cancelable: true },
-              )
-            }}
             name="trash"
             style={{
               color: CONST.MAIN_COLOR,
             }}
-            size={30}
+            size={20}
           />
-        </View>
+        </TouchableOpacity>
       )
     }
-    return <View />
+    return null
   }
 
   const renderCommentsRows = () => {
@@ -1061,155 +1019,160 @@ const Photo = ({
   )
 
   const renderPhotoRow = () => {
-    const { width: photoWidth, height: photoHeight } = photoDimensions
+    // Stabilize dimensions to prevent render cycles
+    const imageWidth = width
+    // Calculate height but constrain it to reasonable bounds
+    const calculatedHeight = (photo.height * width) / photo.width
+    const maxHeight = height * 0.8 // Max 80% of screen height
+    const imageHeight = Math.round(Math.min(calculatedHeight, maxHeight))
+
+    console.log('Photo dimensions:', {
+      photoWidth: photo.width,
+      photoHeight: photo.height,
+      screenWidth: width,
+      screenHeight: height,
+      calculatedHeight,
+      constrainedHeight: imageHeight,
+    })
 
     if (!photo.video) {
-      return <ImageView width={width} height={photoHeight} photo={photo} />
+      return (
+        <View
+          style={{
+            width: '100%',
+            alignItems: 'center',
+            marginVertical: 8,
+            backgroundColor: 'rgba(255,0,0,0.2)', // Debug: red background
+            minHeight: 100, // Ensure some minimum height
+          }}
+        >
+          <ImageView width={imageWidth} height={imageHeight} photo={photo} />
+        </View>
+      )
     }
+
+    // Calculate video dimensions with same constraints
+    const videoHeight = imageHeight
 
     return (
       <View
         style={{
-          position: 'relative',
           width: width,
-          height: photoHeight,
-          justifyContent: 'center',
-          alignItems: 'center',
           backgroundColor: theme.CARD_BACKGROUND,
           marginTop: 8,
           marginBottom: 8,
+          flexDirection: 'column',
         }}
       >
-        <VideoView
-          player={videoPlayer}
+        {/* Video container */}
+        <View
           style={{
             width: width,
-            height: photoHeight,
+            height: videoHeight,
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
-          nativeControls={false}
-          contentFit="contain"
-          allowsFullscreen
-          allowsPictureInPicture
-        />
-        {/* Custom play/pause overlay - show play when paused, pause when playing */}
-        {!isPlaying && (
-          <TouchableOpacity
+        >
+          <VideoView
+            player={videoPlayer}
             style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: [{ translateX: -35 }, { translateY: -35 }],
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              borderRadius: 35,
-              width: 70,
-              height: 70,
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderWidth: 2,
-              borderColor: 'rgba(255,255,255,0.9)',
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 4,
-              },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 8,
+              width: width,
+              height: videoHeight,
             }}
-            onPress={handleVideoToggle}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name="play"
-              size={36}
-              color="white"
-              style={{ marginLeft: 3 }} // Adjust play icon position
-            />
-          </TouchableOpacity>
-        )}
-        {/* Pause button - show when playing */}
-        {isPlaying && (
+            nativeControls={false}
+            contentFit="contain"
+            allowsFullscreen
+            allowsPictureInPicture
+          />
+        </View>
+
+        {/* Video controls using flex layout */}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+            paddingVertical: 12,
+            backgroundColor: 'rgba(0,0,0,0.8)',
+          }}
+        >
+          {/* Play/Pause button */}
           <TouchableOpacity
             style={{
-              position: 'absolute',
-              top: 20,
-              right: 20,
-              backgroundColor: 'rgba(0,0,0,0.7)',
+              backgroundColor: 'rgba(255,255,255,0.1)',
               borderRadius: 25,
               width: 50,
               height: 50,
               justifyContent: 'center',
               alignItems: 'center',
               borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.9)',
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              elevation: 4,
+              borderColor: 'rgba(255,255,255,0.3)',
             }}
             onPress={handleVideoToggle}
             activeOpacity={0.8}
           >
-            <Ionicons name="pause" size={24} color="white" />
+            <Ionicons
+              name={isPlaying ? 'pause' : 'play'}
+              size={24}
+              color="white"
+              style={!isPlaying ? { marginLeft: 3 } : {}}
+            />
           </TouchableOpacity>
-        )}
-        {/* Video status indicator */}
-        {status === 'loading' && (
-          <View
-            style={{
-              position: 'absolute',
-              top: 20,
-              left: 20,
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              borderRadius: 15,
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.2)',
-            }}
-          >
-            <ThemedText
-              style={{ color: 'white', fontSize: 12, fontWeight: '500' }}
+
+          {/* Video status indicator */}
+          {status === 'loading' && (
+            <View
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: 15,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.2)',
+              }}
             >
-              Loading...
-            </ThemedText>
-          </View>
-        )}
-        {/* Photo dimensions info for debugging - remove in production */}
-        {__DEV__ && (
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 10,
-              left: 10,
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              borderRadius: 8,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-            }}
-          >
-            <ThemedText style={{ color: 'white', fontSize: 10 }}>
-              {photo?.width || 'W?'} × {photo?.height || 'H?'} →{' '}
-              {Math.round(photoWidth)} × {Math.round(photoHeight)}
-            </ThemedText>
-          </View>
-        )}
+              <ThemedText
+                style={{ color: 'white', fontSize: 12, fontWeight: '500' }}
+              >
+                Loading...
+              </ThemedText>
+            </View>
+          )}
+
+          {/* Debug info in development */}
+          {__DEV__ && (
+            <View
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: 8,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+              }}
+            >
+              <ThemedText style={{ color: 'white', fontSize: 10 }}>
+                {photo?.width || 'W?'} × {photo?.height || 'H?'} →{' '}
+                {Math.round(width)} × {Math.round(videoHeight)}
+              </ThemedText>
+            </View>
+          )}
+        </View>
       </View>
     )
   }
 
   return (
     <View
-      style={[styles.container, { paddingTop: isEmbedded ? 0 : headerOffset }]}
+      style={styles.container}
       onLayout={(event) => {
-        // Measure the actual rendered height and report it back when embedded
-        if (isEmbedded && onHeightMeasured) {
+        // With flex layout, report the final rendered height (but prevent cycles)
+        if (onHeightMeasured) {
           const { height } = event.nativeEvent.layout
-          onHeightMeasured(height)
+          // Only report if height is different from last reported (prevents cycles)
+          if (height > 0 && height !== lastReportedHeight.current) {
+            lastReportedHeight.current = height
+            onHeightMeasured(height)
+          }
         }
       }}
     >
@@ -1248,7 +1211,6 @@ const Photo = ({
 Photo.propTypes = {
   photo: PropTypes.object.isRequired,
   refreshKey: PropTypes.number,
-  isEmbedded: PropTypes.bool,
   onHeightMeasured: PropTypes.func,
 }
 

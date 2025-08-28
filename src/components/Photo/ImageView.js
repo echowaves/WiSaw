@@ -3,12 +3,7 @@ import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 import React, { useRef } from 'react'
-import {
-  ActivityIndicator,
-  Animated,
-  // Dimensions,
-  StyleSheet,
-} from 'react-native'
+import { ActivityIndicator, Animated } from 'react-native'
 
 import CachedImage from 'expo-cached-image'
 import { State, TapGestureHandler } from 'react-native-gesture-handler'
@@ -39,39 +34,34 @@ const ImageView = ({ width, height, photo }) => {
     }
   }
 
-  const styles = StyleSheet.create({
-    photoContainer: {
-      width,
-      height,
-      // position: 'absolute',
-      top: 0,
-      bottom: 0,
-      right: 0,
-      left: 0,
-      backgroundColor: 'transparent',
+  // Use inline styles to prevent recreation on each render
+  const photoContainerStyle = {
+    width,
+    height,
+    backgroundColor: 'transparent',
+  }
+
+  const imageContainerStyle = {
+    width,
+    height,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: theme.CARD_BACKGROUND,
+    shadowColor: theme.CARD_SHADOW,
+    shadowOffset: {
+      width: 0,
+      height: 4,
     },
-    imageContainer: {
-      width,
-      height,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 20,
-      overflow: 'hidden',
-      backgroundColor: theme.CARD_BACKGROUND,
-      shadowColor: theme.CARD_SHADOW,
-      shadowOffset: {
-        width: 0,
-        height: 4,
-      },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8,
-    },
-  })
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  }
 
   return (
     <TapGestureHandler onHandlerStateChange={onSingleTapEvent} numberOfTaps={1}>
-      <Animated.View style={styles.imageContainer} resizeMode="contain">
+      <Animated.View style={imageContainerStyle} resizeMode="contain">
         <CachedImage
           source={{
             uri: `${photo.imgUrl}`,
@@ -79,7 +69,7 @@ const ImageView = ({ width, height, photo }) => {
           }}
           cacheKey={`${photo.id}`}
           resizeMode="contain"
-          style={styles.photoContainer}
+          style={photoContainerStyle}
           placeholderContent={
             <CachedImage
               source={{
@@ -100,7 +90,7 @@ const ImageView = ({ width, height, photo }) => {
                 />
               }
               resizeMode="contain"
-              style={styles.photoContainer}
+              style={photoContainerStyle}
             />
           }
         />
