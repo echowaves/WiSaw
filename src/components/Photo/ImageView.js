@@ -43,7 +43,7 @@ const ImageView = ({ width, height, photo }) => {
     photoContainer: {
       width,
       height,
-      position: 'absolute',
+      // position: 'absolute',
       top: 0,
       bottom: 0,
       right: 0,
@@ -74,33 +74,35 @@ const ImageView = ({ width, height, photo }) => {
       <Animated.View style={styles.imageContainer} resizeMode="contain">
         <CachedImage
           source={{
-            uri: `${photo.thumbUrl}`,
+            uri: `${photo.imgUrl}`,
             // expiresIn: 5, // seconds. This field is optional
           }}
-          cacheKey={`${photo.id}-thumb`}
+          cacheKey={`${photo.id}`}
           resizeMode="contain"
           style={styles.photoContainer}
-        />
-        <CachedImage
-          source={{
-            uri: `${photo.imgUrl}`,
-            // next field is optional, if not set -- will never expire and will be managed by the OS
-            // expiresIn: 2_628_288, // 1 month in seconds
-          }}
-          cacheKey={`${photo.id}`}
           placeholderContent={
-            // optional
-            <ActivityIndicator
-              color={CONST.MAIN_COLOR}
-              size="small"
-              style={{
-                flex: 1,
-                justifyContent: 'center',
+            <CachedImage
+              source={{
+                uri: `${photo.thumbUrl}`,
+                // next field is optional, if not set -- will never expire and will be managed by the OS
+                // expiresIn: 2_628_288, // 1 month in seconds
               }}
+              cacheKey={`${photo.id}-thumb`}
+              placeholderContent={
+                // optional
+                <ActivityIndicator
+                  color={CONST.MAIN_COLOR}
+                  size="small"
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                  }}
+                />
+              }
+              resizeMode="contain"
+              style={styles.photoContainer}
             />
           }
-          resizeMode="contain"
-          style={styles.photoContainer}
         />
       </Animated.View>
     </TapGestureHandler>
