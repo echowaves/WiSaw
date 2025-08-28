@@ -32,7 +32,7 @@ const ModalInputText = ({ route }) => {
   const { photo, topOffset, uuid, onTextChange, inputText } = route.params
   const { height, width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
-  const isSmallDevice = width < 768
+  // const isSmallDevice = width < 768
   const [isDarkMode] = useAtom(isDarkModeAtom)
   const theme = getTheme(isDarkMode)
 
