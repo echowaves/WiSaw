@@ -19,37 +19,22 @@ const ImageView = ({ photo }) => {
   const theme = getTheme(isDark)
   const { width: screenWidth } = useWindowDimensions()
 
-  // Capture original dimensions once and never let them change
-  // This prevents any external mutations from affecting our calculations
-  const originalDimensions = useRef(null)
-  const photoId = useRef(null)
-
-  // Initialize or reset dimensions if this is a new photo
-  if (photo && (photoId.current !== photo.id || !originalDimensions.current)) {
-    photoId.current = photo.id
-    originalDimensions.current = {
-      width: photo.width,
-      height: photo.height,
-    }
-  }
-
-  // Calculate dimensions based on original photo aspect ratio - always scale to full screen width
+  // STATELESS: Always calculate dimensions fresh from photo object
+  // Never store or cache any dimensions to prevent accumulation
   const imageWidth = screenWidth
-  const imageHeight = originalDimensions.current
-    ? (originalDimensions.current.height * screenWidth) /
-      originalDimensions.current.width
-    : 0
+  const imageHeight =
+    photo && photo.width && photo.height
+      ? (photo.height * screenWidth) / photo.width
+      : 0
 
   // Debug: Log the calculated dimensions
   console.log(`ImageView calculated dimensions:`, {
     photoId: photo?.id,
     photo: { width: photo.width, height: photo.height },
-    original: originalDimensions.current,
     screen: { width: screenWidth },
     calculated: { imageWidth, imageHeight },
-    aspectRatio: originalDimensions.current
-      ? originalDimensions.current.width / originalDimensions.current.height
-      : 0,
+    aspectRatio:
+      photo && photo.width && photo.height ? photo.width / photo.height : 0,
   })
 
   const onPinchEvent = (event) => {

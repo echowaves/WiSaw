@@ -328,8 +328,7 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
 
   const componentIsMounted = useRef(true)
 
-  // Prevent height measurement cycles
-  const lastReportedHeight = useRef(null)
+  // No height measurement cycles - let flex layout handle everything
 
   // Create video player instance
   const videoPlayer = useVideoPlayer(
@@ -415,9 +414,9 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
     [photo?.id, uuid, refreshKey],
   ) // Added refreshKey dependency to refresh comments when returning from add comment
 
-  // Reset height tracking when photo content changes
+  // Reset component state when photo content changes (no height tracking)
   useEffect(() => {
-    lastReportedHeight.current = null
+    // Component setup that doesn't involve height measurements
   }, [photo?.id, refreshKey])
 
   // useEffect(() => {
@@ -1151,12 +1150,11 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
     <View
       style={styles.container}
       onLayout={(event) => {
-        // With flex layout, report the final rendered height (but prevent cycles)
+        // Optional: Report height for debugging or external needs without storing it
         if (onHeightMeasured) {
           const { height } = event.nativeEvent.layout
-          // Only report if height is different from last reported (prevents cycles)
-          if (height > 0 && height !== lastReportedHeight.current) {
-            lastReportedHeight.current = height
+          // Always report current height, no state comparison needed
+          if (height > 0) {
             onHeightMeasured(height)
           }
         }

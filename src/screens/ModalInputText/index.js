@@ -46,12 +46,16 @@ const ModalInputText = ({ route }) => {
         alignSelf: 'center',
         marginBottom: 20,
         borderRadius: 16,
-        // overflow: 'hidden', // Ensure rounded corners clip the image content
+        overflow: 'hidden', // Ensure rounded corners clip the image content
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 8,
+      },
+      photoImage: {
+        width: '100%',
+        height: '100%',
       },
       inputContainer: {
         marginHorizontal: 20,
@@ -98,12 +102,17 @@ const ModalInputText = ({ route }) => {
 
   const styles = createStyles(theme)
 
-  // Calculate photo dimensions with fixed height of 200px
+  // Calculate photo dimensions with fixed height of 200px maintaining aspect ratio
   const calculatePhotoDimensions = () => {
     const targetHeight = 200
+
     if (photo?.width && photo?.height) {
-      const aspectRatio = photo.height / photo.width
+      // Use original dimensions safely to avoid mutation issues
+      const originalWidth = Number(photo.width)
+      const originalHeight = Number(photo.height)
+      const aspectRatio = originalWidth / originalHeight
       const scaledWidth = targetHeight * aspectRatio
+
       return {
         width: scaledWidth,
         height: targetHeight,
@@ -165,10 +174,7 @@ const ModalInputText = ({ route }) => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <CachedImage
-          source={{ uri: `${photo.thumbUrl}` }}
-          cacheKey={`${photo.id}-thumb`}
-          resizeMode="contain"
+        <View
           style={[
             styles.photoContainer,
             {
@@ -176,7 +182,14 @@ const ModalInputText = ({ route }) => {
               height: photoDimensions.height,
             },
           ]}
-        />
+        >
+          <CachedImage
+            source={{ uri: `${photo.thumbUrl}` }}
+            cacheKey={`${photo.id}-thumb`}
+            resizeMode="cover"
+            style={styles.photoImage}
+          />
+        </View>
 
         <View style={styles.inputContainer}>
           <TextInput

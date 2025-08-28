@@ -42,7 +42,7 @@
     "expo-image-picker": "16.1.4",
     "expo-linking": "~7.1.7",
     "expo-location": "~18.1.6",
-    "expo-masonry-layout": "1.1.0",
+    "expo-masonry-layout": "1.1.2",
     "expo-media-library": "~17.1.7",
     "expo-notifications": "~0.31.4",
     "expo-router": "~5.1.5",

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import { useAtom } from 'jotai'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import * as MediaLibrary from 'expo-media-library'
 import { router, useNavigation } from 'expo-router'
@@ -63,6 +63,11 @@ import * as reducer from './reducer'
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import {
+  calculatePhotoDimensions,
+  createFrozenPhoto,
+  validateFrozenPhotosList,
+} from '../../utils/photoListHelpers'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import ExpandableThumb from '../../components/ExpandableThumb'
@@ -111,6 +116,10 @@ const FOOTER_HEIGHT = 90
 
 let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
+// IMPORTANT: PhotosList items are frozen to prevent unauthorized mutation of width/height properties
+// by third-party libraries (like masonry layout). When creating new items (expansion, dimension updates),
+// we must always return Object.freeze() wrapped objects to maintain immutability.
+
 const PhotosList = ({ searchFromUrl }) => {
   // console.log({ activeSegment, currentBatch })
 
@@ -121,6 +130,11 @@ const PhotosList = ({ searchFromUrl }) => {
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
   const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+
+  // Development-only: Add guards to detect unauthorized mutations to photo dimensions
+  if (__DEV__) {
+    validateFrozenPhotosList(photosList, 'in PhotosList render')
+  }
 
   const theme = getTheme(isDarkMode)
 
@@ -289,6 +303,14 @@ const PhotosList = ({ searchFromUrl }) => {
   const [isPhotoExpanding, setIsPhotoExpanding] = useState(false)
   const [scrollToIndex, setScrollToIndex] = useState(null)
 
+  // Real-time height tracking using refs (no state storage)
+  const photoHeightRefs = useRef(new Map())
+
+  // Callback to update height refs when Photo components measure themselves
+  const updatePhotoHeight = useCallback((photoId, height) => {
+    photoHeightRefs.current.set(photoId, height)
+  }, [])
+
   const [textVisible, setTextVisible] = useState(true)
   const textAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
   const headerHeightAnimation = React.useRef(new Animated.Value(1)).current // Start full: 1 = full height, 0 = compact height
@@ -435,6 +457,66 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }, [scrollToIndex])
 
+  // Helper function to check if a photo is expanded
+  const isPhotoExpanded = React.useCallback(
+    (photoId) => {
+      return expandedPhotoId === photoId
+    },
+    [expandedPhotoId],
+  )
+
+  // Helper function to get calculated dimensions for a photo
+  const getCalculatedDimensions = React.useCallback(
+    (photo) => {
+      // Simple debug for problem photo
+      if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
+        console.log(
+          `🔍 PROBLEM PHOTO getCalculatedDimensions CALLED for ${photo.id}`,
+        )
+      }
+
+      const screenWidth = width - 20 // Account for padding
+      const isExpanded = isPhotoExpanded(photo.id)
+
+      // For expanded photos, try to use real-time measured height
+      if (isExpanded) {
+        const currentHeight = photoHeightRefs.current.get(photo.id)
+        if (currentHeight) {
+          const result = {
+            width: screenWidth,
+            height: currentHeight,
+          }
+
+          // Debug logging for problem photo
+          if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
+            console.log(
+              `🔍 PROBLEM PHOTO getCalculatedDimensions result (using measured):`,
+              result,
+              `currentHeight=${currentHeight}`,
+            )
+          }
+
+          return result
+        }
+      }
+
+      // Fallback to purely dynamic calculation (for collapsed or unmeasured expanded)
+      const result = calculatePhotoDimensions(photo, isExpanded, screenWidth)
+
+      // Debug logging for problem photo
+      if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
+        console.log(
+          `🔍 PROBLEM PHOTO getCalculatedDimensions result (calculated):`,
+          result,
+          `input params: isExpanded=${isExpanded}, screenWidth=${screenWidth}`,
+        )
+      }
+
+      return result
+    },
+    [isPhotoExpanded, width],
+  )
+
   // Function to handle photo expansion toggle
   const handlePhotoToggle = React.useCallback(
     (photoId) => {
@@ -444,79 +526,62 @@ const PhotosList = ({ searchFromUrl }) => {
 
       // Find the index of the photo being toggled
       const photoIndex = photosList.findIndex((photo) => photo.id === photoId)
-      const isCurrentlyExpanded = photosList.find(
-        (photo) => photo.id === photoId,
-      )?.isExpanded
 
-      // Update the photosList to toggle the expanded state
-      setPhotosList((currentList) => {
-        return currentList.map((photo) => {
-          if (photo.id === photoId) {
-            // Toggle this photo's expanded state
-            const newExpandedState = !photo.isExpanded
-            const screenWidth = width - 20 // Account for padding
-            const aspectRatio =
-              photo.width && photo.height ? photo.width / photo.height : 1
-            const expandedImageHeight = screenWidth / aspectRatio
+      // Simply toggle the expanded photo ID - no need to modify photo objects
+      setExpandedPhotoId((prevId) => {
+        const newId = prevId === photoId ? null : photoId
 
-            // Don't pre-calculate total height - let Photo component determine its natural height
-            // Only use image height as initial estimate
-            const initialHeight = newExpandedState
-              ? expandedImageHeight
-              : undefined
+        // When a photo is collapsed, remove its measured height from the map.
+        // This ensures that if it's expanded again, it will get a fresh measurement.
+        if (newId === null) {
+          setMeasuredHeights((current) => {
+            const updated = new Map(current)
+            updated.delete(photoId)
+            return updated
+          })
+        }
 
-            return {
-              ...photo,
-              isExpanded: newExpandedState,
-              // Override dimensions when expanded
-              overrideWidth: newExpandedState ? screenWidth : undefined,
-              overrideHeight: initialHeight, // Use minimal initial height, let Photo component measure naturally
-            }
-          } else if (photo.isExpanded) {
-            // Collapse any other expanded photos
-            return {
-              ...photo,
-              isExpanded: false,
-              overrideWidth: undefined,
-              overrideHeight: undefined,
-            }
-          }
-          return photo
-        })
+        return newId
       })
-
-      // Update the expandedPhotoId for backwards compatibility
-      setExpandedPhotoId((prevId) => (prevId === photoId ? null : photoId))
 
       // Reset expanding state after animation
       setTimeout(() => setIsPhotoExpanding(false), 500)
     },
-    [isPhotoExpanding, width, photosList, masonryRef],
-  )
-
-  // Callback to update item dimensions when Photo component measures its actual height
-  const updateItemDimensions = React.useCallback(
-    (itemId, measuredHeight) => {
-      setPhotosList((currentList) =>
-        currentList.map((item) => {
-          if (item.id === itemId) {
-            return {
-              ...item,
-              overrideHeight: measuredHeight,
-              // Keep the calculated width if it exists, otherwise use current override
-              overrideWidth: item.overrideWidth || item.width,
-            }
-          }
-          return item
-        }),
-      )
-    },
-    [setPhotosList],
+    [isPhotoExpanding, photosList],
   )
 
   // Render function for individual masonry items
   const renderMasonryItem = React.useCallback(
     ({ item, index, dimensions }) => {
+      // Debug logging for problem photo
+      if (__DEV__ && item.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
+        console.log(
+          `🔍 PROBLEM PHOTO renderMasonryItem called: id=${item.id}, dimensions=${item.width}x${item.height}, calculated=${dimensions.width}x${dimensions.height}`,
+        )
+      }
+
+      // DEFENSIVE FIX: ExpoMasonryLayout sometimes bypasses getItemDimensions and provides corrupted dimensions
+      // If the calculated dimensions don't match the aspect ratio, recalculate them properly
+      let correctedDimensions = dimensions
+      if (item.width && item.height) {
+        const originalAspectRatio = item.width / item.height
+        const calculatedAspectRatio = dimensions.width / dimensions.height
+        const aspectRatioDifference = Math.abs(
+          originalAspectRatio - calculatedAspectRatio,
+        )
+
+        // If aspect ratios differ significantly (more than 5%), recalculate
+        if (aspectRatioDifference > 0.05) {
+          const recalculatedDimensions = getCalculatedDimensions(item)
+          if (__DEV__) {
+            console.log(
+              `🛠️ DIMENSIONS CORRECTION: Photo ${item.id} had corrupted dimensions ${dimensions.width}x${dimensions.height} (AR: ${calculatedAspectRatio.toFixed(3)}), correcting to ${recalculatedDimensions.width}x${recalculatedDimensions.height} (AR: ${(recalculatedDimensions.width / recalculatedDimensions.height).toFixed(3)})`,
+            )
+          }
+          correctedDimensions = recalculatedDimensions
+        }
+      }
+
       // Use ThumbWithComments for starred (segment 1) and search (segment 2)
       // Use simple Thumb for global photos (segment 0)
       if (activeSegment === 1 || activeSegment === 2) {
@@ -524,8 +589,8 @@ const PhotosList = ({ searchFromUrl }) => {
           <ThumbWithComments
             item={item}
             index={index}
-            thumbWidth={dimensions.width}
-            thumbHeight={dimensions.height}
+            thumbWidth={correctedDimensions.width}
+            thumbHeight={correctedDimensions.height}
             photosList={photosList}
             searchTerm={searchTerm}
             activeSegment={activeSegment}
@@ -539,17 +604,17 @@ const PhotosList = ({ searchFromUrl }) => {
         <ExpandableThumb
           item={item}
           index={index}
-          thumbWidth={dimensions.width}
-          thumbHeight={dimensions.height}
+          thumbWidth={correctedDimensions.width}
+          thumbHeight={correctedDimensions.height}
           photosList={photosList}
           searchTerm={searchTerm}
           activeSegment={activeSegment}
           topOffset={topOffset}
           uuid={uuid}
-          isExpanded={item.isExpanded || false}
+          isExpanded={isPhotoExpanded(item.id)}
           onToggleExpand={handlePhotoToggle}
           expandedPhotoId={expandedPhotoId}
-          onUpdateDimensions={updateItemDimensions}
+          updatePhotoHeight={updatePhotoHeight}
         />
       )
     },
@@ -561,6 +626,8 @@ const PhotosList = ({ searchFromUrl }) => {
       uuid,
       expandedPhotoId,
       handlePhotoToggle,
+      isPhotoExpanded,
+      updatePhotoHeight,
     ],
   )
 
@@ -627,15 +694,21 @@ const PhotosList = ({ searchFromUrl }) => {
         // Reset consecutive empty count when we get data
         setConsecutiveEmptyResponses(0)
 
-        // Add photos to list
-        setPhotosList((currentList) =>
-          [...currentList, ...photos.map((photo) => Object.freeze(photo))]
-            .sort((a, b) => a.row_number - b.row_number)
-            .filter(
-              (obj, pos, arr) =>
-                arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
-            ),
-        )
+        // Add photos to list - freeze them immediately to prevent mutations
+        setPhotosList((currentList) => {
+          // Freeze incoming photos before any operations
+          const frozenPhotos = photos.map((photo) => createFrozenPhoto(photo))
+          const combinedList = [...currentList, ...frozenPhotos]
+          const sortedList = combinedList.sort(
+            (a, b) => a.row_number - b.row_number,
+          )
+          const deduplicatedList = sortedList.filter(
+            (obj, pos, arr) =>
+              arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+          )
+
+          return deduplicatedList
+        })
       }
     }
 
@@ -687,14 +760,16 @@ const PhotosList = ({ searchFromUrl }) => {
             // eslint-disable-next-line no-await-in-loop
             await reducer.removeFromQueue(originalItem)
 
-            // Add to photos list
-            setPhotosList(
-              (currentList) =>
-                [uploadedPhoto, ...currentList].filter(
-                  (obj, pos, arr) =>
-                    arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
-                ), // fancy way to remove duplicate photos
-            )
+            // Add to photos list - photos will be frozen by the atom
+            setPhotosList((currentList) => {
+              const newList = [createFrozenPhoto(uploadedPhoto), ...currentList]
+              const deduplicatedList = newList.filter(
+                (obj, pos, arr) =>
+                  arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+              )
+
+              return deduplicatedList
+            })
 
             // Update pending photos count
             // eslint-disable-next-line no-await-in-loop
@@ -1422,7 +1497,7 @@ const PhotosList = ({ searchFromUrl }) => {
         case 0: // Near You - compact masonry layout
           return {
             spacing: 5,
-            maxItemsPerRow: 12,
+            maxItemsPerRow: 4,
             baseHeight: 100,
             aspectRatioFallbacks: [
               0.56, // 9:16 (portrait)
@@ -1451,7 +1526,7 @@ const PhotosList = ({ searchFromUrl }) => {
         default:
           return {
             spacing: 5,
-            maxItemsPerRow: 12,
+            maxItemsPerRow: 4,
             baseHeight: 100,
             aspectRatioFallbacks: [
               0.56, // 9:16 (portrait)
@@ -1540,24 +1615,68 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <ExpoMasonryLayout
         ref={masonryRef}
-        data={photosList}
+        data={(() => {
+          // Validate photos before passing to masonry layout
+          if (__DEV__) {
+            validateFrozenPhotosList(photosList, 'before masonry render')
+
+            // Check if problem photo exists in the data being passed to masonry
+            const problemPhoto = photosList?.find(
+              (p) => p.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2',
+            )
+            if (problemPhoto) {
+              console.log(
+                `🔍 PROBLEM PHOTO found in photosList data: id=${problemPhoto.id}, dimensions=${problemPhoto.width}x${problemPhoto.height}`,
+              )
+            } else {
+              console.log(
+                `🔍 PROBLEM PHOTO NOT FOUND in photosList data (length: ${photosList?.length || 0})`,
+              )
+            }
+          }
+          return photosList
+        })()}
         renderItem={renderMasonryItem}
         spacing={config.spacing}
         maxItemsPerRow={config.maxItemsPerRow}
         baseHeight={config.baseHeight}
         aspectRatioFallbacks={config.aspectRatioFallbacks}
         keyExtractor={(item) =>
-          `${item.id}-${item.isExpanded ? 'expanded' : 'collapsed'}`
+          `${item.id}-${isPhotoExpanded(item.id) ? 'expanded' : 'collapsed'}`
         }
-        // Force recalculation when items have override dimensions
+        // Calculate dimensions dynamically based on expansion state
         getItemDimensions={(item, calculatedDimensions) => {
-          if (item.overrideWidth && item.overrideHeight) {
-            return {
-              width: item.overrideWidth,
-              height: item.overrideHeight,
+          const isExpanded = isPhotoExpanded(item.id)
+
+          if (__DEV__) {
+            const currentHeight = photoHeightRefs.current.get(item.id)
+
+            // Special detailed logging for the problem photo
+            if (item.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
+              console.log(
+                `🔍 PROBLEM PHOTO getItemDimensions: id=${item.id}, item.width=${item.width}, item.height=${item.height}, isExpanded=${isExpanded}, currentHeight=${currentHeight}, calculatedDimensions=`,
+                calculatedDimensions,
+              )
             }
+
+            console.log(
+              `📐 getItemDimensions called for photo ${item.id}: original=${item.width}x${item.height}, expanded=${isExpanded}, currentHeight=${currentHeight}`,
+            )
           }
-          return calculatedDimensions
+
+          // Use our unified dimension calculation
+          const dynamicDimensions = getCalculatedDimensions(item)
+
+          if (__DEV__ && item.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
+            console.log(
+              `🔍 PROBLEM PHOTO final dimensions: ${dynamicDimensions.width}x${dynamicDimensions.height}`,
+            )
+          }
+
+          return {
+            width: dynamicDimensions.width,
+            height: dynamicDimensions.height,
+          }
         }}
         onScroll={handleScroll}
         onEndReached={() => {
@@ -1574,6 +1693,15 @@ const PhotosList = ({ searchFromUrl }) => {
         viewabilityConfig={{
           itemVisiblePercentThreshold: 5, // More sensitive - triggers when only 5% visible
           minimumViewTime: 50, // Shorter time to register changes
+        }}
+        // Add validation callback to detect mutations after masonry operations
+        onLayout={() => {
+          if (__DEV__) {
+            // Validate photos are still frozen after layout operations
+            setTimeout(() => {
+              validateFrozenPhotosList(photosList, 'after masonry layout')
+            }, 0)
+          }
         }}
         refreshing={false}
         onRefresh={() => {

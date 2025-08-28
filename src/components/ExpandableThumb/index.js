@@ -28,6 +28,7 @@ const ExpandableThumb = ({
   onToggleExpand,
   expandedPhotoId,
   onUpdateDimensions,
+  updatePhotoHeight,
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -36,22 +37,50 @@ const ExpandableThumb = ({
   const scaleValue = useRef(new Animated.Value(1)).current
   const expandValue = useRef(new Animated.Value(0)).current
   const [isAnimating, setIsAnimating] = useState(false)
-  const [calculatedHeight, setCalculatedHeight] = useState(null) // Track calculated content height from Photo component
 
-  // Calculate expanded dimensions
+  // CRITICAL: Always use original dimensions to prevent mutation issues
+  // Store original dimensions on first render and never update them
+  // IMPORTANT: Use the original photo data from photosList, not the item which might be modified
+  const originalDimensions = useRef(null)
+  if (!originalDimensions.current && item.width && item.height) {
+    // Find the original photo data from photosList to get unmodified dimensions
+    const originalPhoto = photosList?.find((p) => p.id === item.id)
+    if (originalPhoto) {
+      originalDimensions.current = {
+        width: Number(originalPhoto.width),
+        height: Number(originalPhoto.height),
+      }
+      console.log(
+        `🔒 ExpandableThumb: Stored original dimensions for photo ${item.id}:`,
+        originalDimensions.current,
+      )
+    } else {
+      // Fallback to item dimensions if original not found
+      originalDimensions.current = {
+        width: Number(item.width),
+        height: Number(item.height),
+      }
+      console.log(
+        `⚠️ ExpandableThumb: Using item dimensions for photo ${item.id}:`,
+        originalDimensions.current,
+      )
+    }
+  }
+
+  // Calculate expanded dimensions using ONLY original dimensions
   const expandedWidth = screenWidth - 20 // Account for padding
-  const aspectRatio = item.width && item.height ? item.width / item.height : 1
+  const aspectRatio = originalDimensions.current
+    ? originalDimensions.current.width / originalDimensions.current.height
+    : 1
   const expandedImageHeight = expandedWidth / aspectRatio
 
-  // Use override dimensions if available (from photosList item),
-  // otherwise for expanded state use natural height from Photo component, for collapsed use thumbnail size
-  const finalWidth =
-    item.overrideWidth || (isExpanded ? expandedWidth : thumbWidth)
-  const finalHeight =
-    item.overrideHeight ||
-    (isExpanded
-      ? calculatedHeight || expandedImageHeight // Use just image height as initial estimate
-      : thumbHeight)
+  // STATELESS: Use only aspect ratio calculation, no stored height
+  // For expanded state always use flex layout (let Photo component grow naturally)
+  // For collapsed use thumbnail size
+  const finalWidth = isExpanded ? expandedWidth : thumbWidth
+  const finalHeight = isExpanded
+    ? null // Let the Photo component determine its own height through flex layout
+    : thumbHeight
 
   useEffect(() => {
     if (isExpanded && !isAnimating) {
@@ -108,20 +137,52 @@ const ExpandableThumb = ({
     />
   )
 
-  const renderExpandedPhoto = () => (
-    <Photo
-      photo={item}
-      onHeightMeasured={(height) => {
-        if (height > 0 && height !== calculatedHeight) {
-          setCalculatedHeight(height)
-          // Update the masonry layout with the new measured height
-          if (onUpdateDimensions && isExpanded) {
-            onUpdateDimensions(item.id, height)
+  const renderExpandedPhoto = () => {
+    // CRITICAL: Only use stored original dimensions, NEVER item.width/height
+    if (!originalDimensions.current) {
+      console.error(
+        `❌ ExpandableThumb: No original dimensions stored for photo ${item.id}!`,
+      )
+      return null
+    }
+
+    // Create a clean copy with ONLY the stored original dimensions
+    const cleanPhoto = {
+      ...item,
+      width: originalDimensions.current.width,
+      height: originalDimensions.current.height,
+    }
+
+    console.log(`🔧 ExpandableThumb: Creating clean photo for ${item.id}:`, {
+      original: originalDimensions.current,
+      itemDimensions: { width: item.width, height: item.height },
+      cleanDimensions: { width: cleanPhoto.width, height: cleanPhoto.height },
+    })
+
+    return (
+      <Photo
+        photo={cleanPhoto}
+        onHeightMeasured={(height) => {
+          // Only report to masonry layout for dimension calculation, don't store locally
+          if (height > 0) {
+            console.log(
+              `📏 Photo component height measured: ${height} for photo ${item.id}`,
+            )
+
+            // Update the height refs for masonry layout dimension calculation
+            if (updatePhotoHeight) {
+              updatePhotoHeight(item.id, height)
+            }
+
+            // Legacy callback support (keeping for backward compatibility)
+            if (onUpdateDimensions && isExpanded) {
+              onUpdateDimensions(item.id, height)
+            }
           }
-        }
-      }}
-    />
-  )
+        }}
+      />
+    )
+  }
 
   return (
     <View
@@ -132,6 +193,8 @@ const ExpandableThumb = ({
         // When expanded, take full container width and ignore masonry positioning
         alignSelf: isExpanded ? 'center' : 'auto',
         zIndex: isExpanded ? 1000 : 1,
+        // For expanded photos, use flex layout to grow to content
+        ...(isExpanded && { flex: 1, height: undefined }),
       }}
     >
       <TouchableOpacity
@@ -197,6 +260,7 @@ ExpandableThumb.propTypes = {
   onToggleExpand: PropTypes.func.isRequired,
   expandedPhotoId: PropTypes.string,
   onUpdateDimensions: PropTypes.func,
+  updatePhotoHeight: PropTypes.func,
 }
 
 ExpandableThumb.displayName = 'ExpandableThumb'
