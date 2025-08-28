@@ -10,6 +10,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native'
+import CachedImage from 'expo-cached-image'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import Photo from '../Photo'
@@ -96,8 +97,9 @@ const ExpandableThumb = ({
   }
 
   const renderCollapsedThumb = () => (
-    <Image
+    <CachedImage
       source={{ uri: item.thumbUrl }}
+      cacheKey={`${item.id}-thumb`}
       style={{
         width: thumbWidth,
         height: thumbHeight,
