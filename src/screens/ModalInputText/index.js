@@ -101,14 +101,16 @@ const ModalInputText = ({ route }) => {
   const calculatePhotoDimensions = () => {
     const targetHeight = 200
     if (photo?.width && photo?.height) {
-      const aspectRatio = photo.width / photo.height
+      const aspectRatio = photo.height / photo.width
       const scaledWidth = targetHeight * aspectRatio
       return {
         width: scaledWidth,
         height: targetHeight,
       }
     }
+
     // Fallback to square if dimensions not available
+    console.log('ModalInputText: No photo dimensions available, using fallback')
     return {
       width: targetHeight,
       height: targetHeight,
@@ -165,6 +167,7 @@ const ModalInputText = ({ route }) => {
         <CachedImage
           source={{ uri: `${photo.thumbUrl}` }}
           cacheKey={`${photo.id}-thumb`}
+          resizeMode="contain"
           style={[
             styles.photoContainer,
             {
