@@ -17,17 +17,6 @@ import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
 const styles = StyleSheet.create({
-  container: {
-    borderRadius: 20,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 16,
-    transform: [{ scale: 1 }],
-  },
   thumbnail: {
     position: 'absolute',
     top: 0,
@@ -135,8 +124,16 @@ const ThumbWithComments = ({
   const containerStyles = {
     width: thumbWidth || thumbDimension,
     height: thumbHeight || thumbDimension,
-    shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.8)',
+    borderRadius: 20,
     backgroundColor: theme.CARD_BACKGROUND,
+    shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.8 : 0.3,
+    shadowRadius: isDark ? 10 : 8,
+    elevation: isDark ? 12 : 8,
+    borderWidth: isDark ? 1.5 : 0,
+    borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+    transform: [{ scale: 1 }],
   }
 
   // Render comment overlay on top of the photo
@@ -187,11 +184,7 @@ const ThumbWithComments = ({
 
   return (
     <Animated.View
-      style={[
-        styles.container,
-        containerStyles,
-        { transform: [{ scale: scaleValue }] },
-      ]}
+      style={[containerStyles, { transform: [{ scale: scaleValue }] }]}
     >
       <TouchableOpacity
         onPress={() => onThumbPress(item)}

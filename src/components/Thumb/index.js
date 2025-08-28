@@ -23,13 +23,6 @@ import { getTheme } from '../../theme/sharedStyles'
 const styles = StyleSheet.create({
   container: {
     borderRadius: 20,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-    elevation: 16,
     transform: [{ scale: 1 }],
   },
   thumbnail: {
@@ -68,7 +61,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000',
+    shadowColor: 'rgba(0, 0, 0, 0.2)',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -198,8 +191,14 @@ const Thumb = ({
   }
 
   const dynamicContainerStyle = {
-    shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.8)',
+    shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.8 : 0.3,
+    shadowRadius: isDark ? 10 : 8,
+    elevation: isDark ? 12 : 8,
     backgroundColor: theme.CARD_BACKGROUND,
+    borderWidth: isDark ? 1.5 : 0,
+    borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
   }
 
   return (

@@ -25,7 +25,7 @@ export const LIGHT_THEME = {
   // Card and container styles
   CARD_BACKGROUND: 'rgba(255, 255, 255, 0.95)',
   CARD_BORDER: 'rgba(0, 0, 0, 0.06)',
-  CARD_SHADOW: 'rgba(0, 0, 0, 0.08)',
+  CARD_SHADOW: 'rgba(0, 0, 0, 0.25)',
   SURFACE: 'rgba(255, 255, 255, 0.98)',
   BORDER_LIGHT: 'rgba(0, 0, 0, 0.08)',
 
@@ -82,7 +82,7 @@ export const DARK_THEME = {
   // Card and container styles
   CARD_BACKGROUND: '#1E1E1E',
   CARD_BORDER: 'rgba(255, 255, 255, 0.12)',
-  CARD_SHADOW: 'rgba(0, 0, 0, 0.4)',
+  CARD_SHADOW: 'rgba(255, 255, 255, 0.1)',
   SURFACE: '#1A1A1A',
   BORDER_LIGHT: 'rgba(255, 255, 255, 0.12)',
 

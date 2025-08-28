@@ -1735,7 +1735,7 @@ const PhotosList = ({ searchFromUrl }) => {
           paddingBottom: FOOTER_HEIGHT + 20, // Add padding to ensure content is visible above footer
         }}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={true}
+        removeClippedSubviews={false}
       />
     )
   }

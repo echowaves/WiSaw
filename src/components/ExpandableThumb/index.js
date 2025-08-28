@@ -206,18 +206,21 @@ const ExpandableThumb = ({
         style={{ flex: 1 }}
       >
         <Animated.View
-          style={{
-            flex: 1,
-            borderRadius: 12,
-            backgroundColor: theme.CARD_BACKGROUND,
-            shadowColor: theme.CARD_SHADOW,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: isExpanded ? 0.3 : 0.1,
-            shadowRadius: isExpanded ? 8 : 4,
-            elevation: isExpanded ? 8 : 2,
-            overflow: 'hidden',
-            transform: [{ scale: scaleValue }],
-          }}
+          style={[
+            {
+              flex: 1,
+              borderRadius: 12,
+              backgroundColor: theme.CARD_BACKGROUND,
+              shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : '#000000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: isDark ? 0.8 : 0.3,
+              shadowRadius: isDark ? 10 : 8,
+              elevation: isDark ? 12 : 8,
+              borderWidth: isDark ? 1.5 : 0,
+              borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              transform: [{ scale: scaleValue }],
+            },
+          ]}
         >
           {isExpanded ? renderExpandedPhoto() : renderCollapsedThumb()}
 
