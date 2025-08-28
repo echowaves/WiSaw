@@ -1,16 +1,15 @@
 import { Ionicons } from '@expo/vector-icons'
+import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Animated,
-  Image,
   TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native'
-import CachedImage from 'expo-cached-image'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import Photo from '../Photo'
