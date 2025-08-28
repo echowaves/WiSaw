@@ -165,9 +165,7 @@ const ExpandableThumb = ({
         onHeightMeasured={(height) => {
           // Only report to masonry layout for dimension calculation, don't store locally
           if (height > 0) {
-            console.log(
-              `📏 Photo component height measured: ${height} for photo ${item.id}`,
-            )
+            // Removed debug logging to reduce console noise
 
             // Update the height refs for masonry layout dimension calculation
             if (updatePhotoHeight) {

@@ -527,12 +527,7 @@ const PhotosList = ({ searchFromUrl }) => {
   // Helper function to get calculated dimensions for a photo
   const getCalculatedDimensions = React.useCallback(
     (photo) => {
-      // Simple debug for problem photo
-      if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-        console.log(
-          `🔍 PROBLEM PHOTO getCalculatedDimensions CALLED for ${photo.id}`,
-        )
-      }
+      // Removed debug logging to reduce console noise
 
       const screenWidth = width - 20 // Account for padding
       const isExpanded = isPhotoExpanded(photo.id)
@@ -546,14 +541,7 @@ const PhotosList = ({ searchFromUrl }) => {
             height: currentHeight,
           }
 
-          // Debug logging for problem photo
-          if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-            console.log(
-              `🔍 PROBLEM PHOTO getCalculatedDimensions result (using measured):`,
-              result,
-              `currentHeight=${currentHeight}`,
-            )
-          }
+          // Removed debug logging to reduce console noise
 
           return result
         }
@@ -618,12 +606,7 @@ const PhotosList = ({ searchFromUrl }) => {
   // Render function for individual masonry items
   const renderMasonryItem = React.useCallback(
     ({ item, index, dimensions }) => {
-      // Debug logging for problem photo
-      if (__DEV__ && item.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-        console.log(
-          `🔍 PROBLEM PHOTO renderMasonryItem called: id=${item.id}, dimensions=${item.width}x${item.height}, calculated=${dimensions.width}x${dimensions.height}`,
-        )
-      }
+      // Removed debug logging to reduce console noise
 
       // DEFENSIVE FIX: ExpoMasonryLayout sometimes bypasses getItemDimensions and provides corrupted dimensions
       // If the calculated dimensions don't match the aspect ratio, recalculate them properly
@@ -1635,19 +1618,7 @@ const PhotosList = ({ searchFromUrl }) => {
           if (__DEV__) {
             validateFrozenPhotosList(photosList, 'before masonry render')
 
-            // Check if problem photo exists in the data being passed to masonry
-            const problemPhoto = photosList?.find(
-              (p) => p.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2',
-            )
-            if (problemPhoto) {
-              console.log(
-                `🔍 PROBLEM PHOTO found in photosList data: id=${problemPhoto.id}, dimensions=${problemPhoto.width}x${problemPhoto.height}`,
-              )
-            } else {
-              console.log(
-                `🔍 PROBLEM PHOTO NOT FOUND in photosList data (length: ${photosList?.length || 0})`,
-              )
-            }
+            // Removed debug logging to reduce console noise
           }
           return photosList
         })()}
@@ -1666,27 +1637,13 @@ const PhotosList = ({ searchFromUrl }) => {
           if (__DEV__) {
             const currentHeight = photoHeightRefs.current.get(item.id)
 
-            // Special detailed logging for the problem photo
-            if (item.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-              console.log(
-                `🔍 PROBLEM PHOTO getItemDimensions: id=${item.id}, item.width=${item.width}, item.height=${item.height}, isExpanded=${isExpanded}, currentHeight=${currentHeight}, calculatedDimensions=`,
-                calculatedDimensions,
-              )
-            }
-
-            console.log(
-              `📐 getItemDimensions called for photo ${item.id}: original=${item.width}x${item.height}, expanded=${isExpanded}, currentHeight=${currentHeight}`,
-            )
+            // Removed debug logging to reduce console noise
           }
 
           // Use our unified dimension calculation
           const dynamicDimensions = getCalculatedDimensions(item)
 
-          if (__DEV__ && item.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-            console.log(
-              `🔍 PROBLEM PHOTO final dimensions: ${dynamicDimensions.width}x${dynamicDimensions.height}`,
-            )
-          }
+          // Removed debug logging to reduce console noise
 
           return {
             width: dynamicDimensions.width,

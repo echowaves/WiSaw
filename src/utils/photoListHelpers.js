@@ -16,13 +16,7 @@ export const createFrozenPhoto = (photo) => {
     const originalHeight = photo.height
     const originalWidth = photo.width
 
-    // Special detailed logging for the problem photo
-    if (photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-      console.log(
-        `🔍 PROBLEM PHOTO createFrozenPhoto input: id=${photo.id}, width=${photo.width}, height=${photo.height}`,
-      )
-      console.trace('createFrozenPhoto call stack for problem photo:')
-    }
+    // Removed debug logging to reduce console noise
 
     // Create a deep copy to ensure no shared references
     const photoClone = {
@@ -55,12 +49,7 @@ export const createFrozenPhoto = (photo) => {
         return false // Reject the definition
       },
       get(target, property) {
-        // Log dimension access for debugging
-        if ((property === 'width' || property === 'height') && target.id) {
-          console.log(
-            `📏 Photo ${target.id} ${String(property)} accessed: ${target[property]}`,
-          )
-        }
+        // Removed dimension access logging to reduce console noise
         return target[property]
       },
     })
@@ -94,14 +83,7 @@ export const calculatePhotoDimensions = (
   maxItemsPerRow = 4,
   spacing = 5,
 ) => {
-  if (__DEV__) {
-    console.log(`📐 Calculating dimensions for photo ${photo.id}:`, {
-      original: { width: photo.width, height: photo.height },
-      isExpanded,
-      screenWidth,
-      maxItemsPerRow,
-    })
-  }
+  // Removed debug logging to reduce console noise
 
   if (!isExpanded) {
     // For collapsed state, calculate width based on desired columns to fit more items per row
@@ -125,12 +107,7 @@ export const calculatePhotoDimensions = (
   const expandedWidth = screenWidth
   const imageHeight = expandedWidth / aspectRatio
 
-  if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-    console.log(`🔧 Height calculation for problem photo (flex layout):`, {
-      imageHeight,
-      finalHeight: 'auto (flex)',
-    })
-  }
+  // Removed debug logging to reduce console noise
 
   return {
     width: expandedWidth,

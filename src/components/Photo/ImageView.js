@@ -19,23 +19,14 @@ const ImageView = ({ photo }) => {
   const theme = getTheme(isDark)
   const { width: screenWidth } = useWindowDimensions()
 
-  // STATELESS: Always calculate dimensions fresh from photo object
-  // Never store or cache any dimensions to prevent accumulation
+  // Calculate image dimensions to maintain aspect ratio
   const imageWidth = screenWidth
   const imageHeight =
     photo && photo.width && photo.height
       ? (photo.height * screenWidth) / photo.width
       : 0
 
-  // Debug: Log the calculated dimensions
-  console.log(`ImageView calculated dimensions:`, {
-    photoId: photo?.id,
-    photo: { width: photo.width, height: photo.height },
-    screen: { width: screenWidth },
-    calculated: { imageWidth, imageHeight },
-    aspectRatio:
-      photo && photo.width && photo.height ? photo.width / photo.height : 0,
-  })
+  // Removed debug logging to reduce console noise
 
   const onPinchEvent = (event) => {
     router.push({
