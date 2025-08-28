@@ -488,66 +488,6 @@ const PhotosList = ({ searchFromUrl }) => {
       // Update the expandedPhotoId for backwards compatibility
       setExpandedPhotoId((prevId) => (prevId === photoId ? null : photoId))
 
-      // Scroll to the expanded photo if it's being expanded (not collapsed)
-      if (!isCurrentlyExpanded && photoIndex !== -1) {
-        // Scroll DOWN to position the expanded photo properly on screen
-        setTimeout(() => {
-          if (masonryRef.current && masonryRef.current._scrollRef) {
-            try {
-              // Calculate the full expanded photo height using same logic as above
-              const expandedPhoto = photosList[photoIndex]
-              const screenWidth = width - 20
-              const aspectRatio =
-                expandedPhoto.width && expandedPhoto.height
-                  ? expandedPhoto.width / expandedPhoto.height
-                  : 1
-              const expandedPhotoImageHeight = screenWidth / aspectRatio
-              // For scrolling purposes, we need a reasonable estimate since we can't wait for measurement
-              // Use a more conservative estimate: image height + reasonable content padding
-              const estimatedTotalHeight = Math.max(
-                expandedPhotoImageHeight +
-                  Math.min(expandedPhotoImageHeight * 0.8, 400), // Scale content with image size, cap at 400px
-                400, // Minimum reasonable height
-              )
-
-              // Scroll DOWN by the estimated expanded height to bring it into view
-              const scrollDownDistance = estimatedTotalHeight
-
-              // Use the internal scroll ref and get current position
-              const scrollRef = masonryRef.current._scrollRef
-
-              // Try to get current scroll position
-              if (scrollRef && scrollRef.scrollTo) {
-                // Get current scroll metrics
-                const scrollMetrics = masonryRef.current._getScrollMetrics
-                  ? masonryRef.current._getScrollMetrics()
-                  : null
-
-                let currentY = 0
-                if (scrollMetrics && scrollMetrics.offset !== undefined) {
-                  currentY = scrollMetrics.offset
-                } else if (masonryRef.current._scrollMetrics) {
-                  currentY = masonryRef.current._scrollMetrics.offset || 0
-                } else {
-                  // Fallback: estimate current position
-                  currentY = photoIndex * 80
-                }
-
-                // Calculate new position: current position PLUS scroll down distance
-                const targetY = currentY + scrollDownDistance
-
-                scrollRef.scrollTo({
-                  y: targetY,
-                  animated: true,
-                })
-              }
-            } catch (error) {
-              // Silently handle scroll errors
-            }
-          }
-        }, 300)
-      }
-
       // Reset expanding state after animation
       setTimeout(() => setIsPhotoExpanding(false), 500)
     },
