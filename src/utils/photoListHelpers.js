@@ -79,29 +79,39 @@ export const createFrozenPhoto = (photo) => {
 }
 
 /**
- * Calculates dynamic dimensions for a photo based on expansion state and screen constraints
- *
- * @param {Object} photo - Original photo object with width/height
+ * Calculate responsive dimensions for photos based on expansion state
+ * @param {Object} photo - Photo object with width, height properties
  * @param {boolean} isExpanded - Whether the photo is in expanded state
  * @param {number} screenWidth - Available screen width for expanded photos
+ * @param {number} maxItemsPerRow - Maximum items per row for responsive sizing
+ * @param {number} spacing - Spacing between items
  * @returns {Object} - Calculated dimensions { width, height }
  */
-export const calculatePhotoDimensions = (photo, isExpanded, screenWidth) => {
+export const calculatePhotoDimensions = (
+  photo,
+  isExpanded,
+  screenWidth,
+  maxItemsPerRow = 4,
+  spacing = 5,
+) => {
   if (__DEV__) {
     console.log(`📐 Calculating dimensions for photo ${photo.id}:`, {
       original: { width: photo.width, height: photo.height },
       isExpanded,
       screenWidth,
+      maxItemsPerRow,
     })
   }
 
   if (!isExpanded) {
-    // For collapsed state, return dimensions that preserve the aspect ratio but are scaled down.
-    // The masonry layout uses this aspect ratio to size the item in its columns.
-    // Using the original large dimensions can cause the layout to only show one column.
+    // For collapsed state, calculate width based on desired columns to fit more items per row
+    const totalSpacing = spacing * (maxItemsPerRow - 1)
+    const availableWidth = screenWidth - totalSpacing
+    const collapsedWidth = availableWidth / maxItemsPerRow
+
     const aspectRatio =
       photo.width && photo.height ? photo.width / photo.height : 1
-    const collapsedWidth = 200 // A sensible default width for aspect ratio calculation.
+
     return {
       width: collapsedWidth,
       height: collapsedWidth / aspectRatio,

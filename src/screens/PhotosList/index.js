@@ -457,6 +457,65 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }, [scrollToIndex])
 
+  // Configuration for different segments - responsive to device size
+  const segmentConfig = React.useMemo(() => {
+    // Determine columns based on screen width for better responsiveness
+    const getResponsiveColumns = (baseColumns, largeColumns) => {
+      // iPhone Pro Max, iPad Mini and up: increase columns (increased by 35% total: 20% + 10% + 5%)
+      if (width >= 768) return Math.max(1, largeColumns * 1.2) // iPad and larger: large columns + 35%
+      if (width >= 428) return Math.max(1, largeColumns / 1.5) // iPhone Pro Max: half of large + 35%
+      if (width >= 390) return Math.max(1, baseColumns * 4) // iPhone 14 Pro: 0.75x + 35%
+      return Math.max(1, baseColumns / 6) // Standard phones: half of base + 35%
+    }
+
+    switch (activeSegment) {
+      case 0: // Near You - compact masonry layout
+        return {
+          spacing: 5,
+          maxItemsPerRow: getResponsiveColumns(4, 6),
+          baseHeight: 100,
+          aspectRatioFallbacks: [
+            0.56, // 9:16 (portrait)
+            0.67, // 2:3 (portrait)
+            0.75, // 3:4 (portrait)
+            1.0, // 1:1 (square)
+            1.33, // 4:3 (landscape)
+            1.5, // 3:2 (landscape)
+            1.78, // 16:9 (landscape)
+          ],
+        }
+      case 1: // Watched - larger items with comments
+        return {
+          spacing: 8,
+          maxItemsPerRow: getResponsiveColumns(2, 4),
+          baseHeight: 200,
+          aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
+        }
+      case 2: // Search - same layout as starred to accommodate comments
+        return {
+          spacing: 8,
+          maxItemsPerRow: getResponsiveColumns(2, 4),
+          baseHeight: 200,
+          aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
+        }
+      default:
+        return {
+          spacing: 5,
+          maxItemsPerRow: getResponsiveColumns(4, 6),
+          baseHeight: 100,
+          aspectRatioFallbacks: [
+            0.56, // 9:16 (portrait)
+            0.67, // 2:3 (portrait)
+            0.75, // 3:4 (portrait)
+            1.0, // 1:1 (square)
+            1.33, // 4:3 (landscape)
+            1.5, // 3:2 (landscape)
+            1.78, // 16:9 (landscape)
+          ],
+        }
+    }
+  }, [activeSegment, width])
+
   // Helper function to check if a photo is expanded
   const isPhotoExpanded = React.useCallback(
     (photoId) => {
@@ -501,20 +560,26 @@ const PhotosList = ({ searchFromUrl }) => {
       }
 
       // Fallback to purely dynamic calculation (for collapsed or unmeasured expanded)
-      const result = calculatePhotoDimensions(photo, isExpanded, screenWidth)
+      const result = calculatePhotoDimensions(
+        photo,
+        isExpanded,
+        screenWidth,
+        segmentConfig.maxItemsPerRow,
+        segmentConfig.spacing,
+      )
 
       // Debug logging for problem photo
       if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
         console.log(
           `🔍 PROBLEM PHOTO getCalculatedDimensions result (calculated):`,
           result,
-          `input params: isExpanded=${isExpanded}, screenWidth=${screenWidth}`,
+          `input params: isExpanded=${isExpanded}, screenWidth=${screenWidth}, maxItemsPerRow=${segmentConfig.maxItemsPerRow}`,
         )
       }
 
       return result
     },
-    [isPhotoExpanded, width],
+    [isPhotoExpanded, width, segmentConfig],
   )
 
   // Function to handle photo expansion toggle
@@ -1491,57 +1556,7 @@ const PhotosList = ({ searchFromUrl }) => {
   }, [triggerSearch])
 
   const renderThumbs = () => {
-    // Different configurations for each segment
-    const getSegmentConfig = () => {
-      switch (activeSegment) {
-        case 0: // Near You - compact masonry layout
-          return {
-            spacing: 5,
-            maxItemsPerRow: 4,
-            baseHeight: 100,
-            aspectRatioFallbacks: [
-              0.56, // 9:16 (portrait)
-              0.67, // 2:3 (portrait)
-              0.75, // 3:4 (portrait)
-              1.0, // 1:1 (square)
-              1.33, // 4:3 (landscape)
-              1.5, // 3:2 (landscape)
-              1.78, // 16:9 (landscape)
-            ],
-          }
-        case 1: // Watched - larger items with comments
-          return {
-            spacing: 8,
-            maxItemsPerRow: 2,
-            baseHeight: 200,
-            aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
-          }
-        case 2: // Search - same layout as starred to accommodate comments
-          return {
-            spacing: 8,
-            maxItemsPerRow: 2,
-            baseHeight: 200,
-            aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
-          }
-        default:
-          return {
-            spacing: 5,
-            maxItemsPerRow: 4,
-            baseHeight: 100,
-            aspectRatioFallbacks: [
-              0.56, // 9:16 (portrait)
-              0.67, // 2:3 (portrait)
-              0.75, // 3:4 (portrait)
-              1.0, // 1:1 (square)
-              1.33, // 4:3 (landscape)
-              1.5, // 3:2 (landscape)
-              1.78, // 16:9 (landscape)
-            ],
-          }
-      }
-    }
-
-    const config = getSegmentConfig()
+    const config = segmentConfig
 
     // Handle scroll events to show/hide footer
     const handleScroll = (event) => {
