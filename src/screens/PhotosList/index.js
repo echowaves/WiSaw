@@ -459,27 +459,18 @@ const PhotosList = ({ searchFromUrl }) => {
               photo.width && photo.height ? photo.width / photo.height : 1
             const expandedImageHeight = screenWidth / aspectRatio
 
-            // Calculate total height to match ExpandableThumb logic:
-            // - Photo image height (based on aspect ratio)
-            // - Action card (~100px)
-            // - Comments section (estimate ~300px for multiple comments)
-            // - Recognition section (~150px)
-            // - Padding and margins (~100px)
-            const totalExpandedHeight = newExpandedState
-              ? Math.max(
-                  expandedImageHeight + 650, // Image height + estimated content height
-                  Math.max(screenWidth * 1.8, 800), // Fallback: larger multiple of screen width
-                )
-              : expandedImageHeight + 120
+            // Don't pre-calculate total height - let Photo component determine its natural height
+            // Only use image height as initial estimate
+            const initialHeight = newExpandedState
+              ? expandedImageHeight
+              : undefined
 
             return {
               ...photo,
               isExpanded: newExpandedState,
               // Override dimensions when expanded
               overrideWidth: newExpandedState ? screenWidth : undefined,
-              overrideHeight: newExpandedState
-                ? totalExpandedHeight
-                : undefined,
+              overrideHeight: initialHeight, // Use minimal initial height, let Photo component measure naturally
             }
           } else if (photo.isExpanded) {
             // Collapse any other expanded photos
@@ -511,13 +502,16 @@ const PhotosList = ({ searchFromUrl }) => {
                   ? expandedPhoto.width / expandedPhoto.height
                   : 1
               const expandedPhotoImageHeight = screenWidth / aspectRatio
-              const totalExpandedHeight = Math.max(
-                expandedPhotoImageHeight + 650, // Image height + estimated content height
-                Math.max(screenWidth * 1.8, 800), // Fallback: larger multiple of screen width
+              // For scrolling purposes, we need a reasonable estimate since we can't wait for measurement
+              // Use a more conservative estimate: image height + reasonable content padding
+              const estimatedTotalHeight = Math.max(
+                expandedPhotoImageHeight +
+                  Math.min(expandedPhotoImageHeight * 0.8, 400), // Scale content with image size, cap at 400px
+                400, // Minimum reasonable height
               )
 
-              // Scroll DOWN by the full expanded height to bring it into view
-              const scrollDownDistance = totalExpandedHeight
+              // Scroll DOWN by the estimated expanded height to bring it into view
+              const scrollDownDistance = estimatedTotalHeight
 
               // Use the internal scroll ref and get current position
               const scrollRef = masonryRef.current._scrollRef
@@ -695,7 +689,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
         // Add photos to list
         setPhotosList((currentList) =>
-          [...currentList, ...photos]
+          [...currentList, ...photos.map((photo) => Object.freeze(photo))]
             .sort((a, b) => a.row_number - b.row_number)
             .filter(
               (obj, pos, arr) =>

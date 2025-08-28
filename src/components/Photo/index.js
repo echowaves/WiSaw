@@ -38,8 +38,8 @@ const createStyles = (theme) =>
   StyleSheet.create({
     container: {
       backgroundColor: theme.BACKGROUND,
-      paddingTop: 16,
-      paddingBottom: 40,
+      paddingTop: 0,
+      paddingBottom: 0,
     },
     // Enhanced card container for all content sections
     cardContainer: {
@@ -1019,40 +1019,26 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
   )
 
   const renderPhotoRow = () => {
-    // Stabilize dimensions to prevent render cycles
-    const imageWidth = width
-    // Calculate height but constrain it to reasonable bounds
-    const calculatedHeight = (photo.height * width) / photo.width
-    const maxHeight = height * 0.8 // Max 80% of screen height
-    const imageHeight = Math.round(Math.min(calculatedHeight, maxHeight))
-
-    console.log('Photo dimensions:', {
-      photoWidth: photo.width,
-      photoHeight: photo.height,
-      screenWidth: width,
-      screenHeight: height,
-      calculatedHeight,
-      constrainedHeight: imageHeight,
-    })
-
     if (!photo.video) {
       return (
         <View
           style={{
             width: '100%',
             alignItems: 'center',
-            marginVertical: 8,
-            backgroundColor: 'rgba(255,0,0,0.2)', // Debug: red background
-            minHeight: 100, // Ensure some minimum height
           }}
         >
-          <ImageView width={imageWidth} height={imageHeight} photo={photo} />
+          <ImageView photo={photo} />
         </View>
       )
     }
 
-    // Calculate video dimensions with same constraints
-    const videoHeight = imageHeight
+    // For videos, calculate dimensions similar to ImageView
+    const videoWidth = width
+    let videoHeight = (photo.height * width) / photo.width
+    const maxReasonableHeight = Math.min(height * 0.6, 500)
+    if (videoHeight > maxReasonableHeight) {
+      videoHeight = maxReasonableHeight
+    }
 
     return (
       <View

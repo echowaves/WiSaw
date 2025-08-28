@@ -41,20 +41,17 @@ const ExpandableThumb = ({
   // Calculate expanded dimensions
   const expandedWidth = screenWidth - 20 // Account for padding
   const aspectRatio = item.width && item.height ? item.width / item.height : 1
-  const expandedHeight = expandedWidth / aspectRatio
-
-  // For expanded Photo component, use calculated height from Photo component when available
-  // Otherwise use minimum height, and for collapsed state use calculated thumbnail height
-  const collapsedHeight = expandedHeight + 120
-  const expandedMinHeight = expandedHeight + 400 // Minimum height for expanded state
+  const expandedImageHeight = expandedWidth / aspectRatio
 
   // Use override dimensions if available (from photosList item),
-  // otherwise use calculated height from Photo component for expanded, or calculated height for collapsed
+  // otherwise for expanded state use natural height from Photo component, for collapsed use thumbnail size
   const finalWidth =
     item.overrideWidth || (isExpanded ? expandedWidth : thumbWidth)
   const finalHeight =
     item.overrideHeight ||
-    (isExpanded ? calculatedHeight || expandedMinHeight : collapsedHeight)
+    (isExpanded
+      ? calculatedHeight || expandedImageHeight // Use just image height as initial estimate
+      : thumbHeight)
 
   useEffect(() => {
     if (isExpanded && !isAnimating) {

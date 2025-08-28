@@ -3,7 +3,7 @@ import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 import React, { useRef } from 'react'
-import { ActivityIndicator, Animated } from 'react-native'
+import { ActivityIndicator, Animated, useWindowDimensions } from 'react-native'
 
 import CachedImage from 'expo-cached-image'
 import { State, TapGestureHandler } from 'react-native-gesture-handler'
@@ -12,11 +12,45 @@ import * as CONST from '../../consts'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
-const ImageView = ({ width, height, photo }) => {
+const ImageView = ({ photo }) => {
   const scale = useRef(new Animated.Value(1)).current
   const navigation = useNavigation()
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
+  const { width: screenWidth } = useWindowDimensions()
+
+  // Capture original dimensions once and never let them change
+  // This prevents any external mutations from affecting our calculations
+  const originalDimensions = useRef(null)
+  const photoId = useRef(null)
+
+  // Initialize or reset dimensions if this is a new photo
+  if (photo && (photoId.current !== photo.id || !originalDimensions.current)) {
+    photoId.current = photo.id
+    originalDimensions.current = {
+      width: photo.width,
+      height: photo.height,
+    }
+  }
+
+  // Calculate dimensions based on original photo aspect ratio - always scale to full screen width
+  const imageWidth = screenWidth
+  const imageHeight = originalDimensions.current
+    ? (originalDimensions.current.height * screenWidth) /
+      originalDimensions.current.width
+    : 0
+
+  // Debug: Log the calculated dimensions
+  console.log(`ImageView calculated dimensions:`, {
+    photoId: photo?.id,
+    photo: { width: photo.width, height: photo.height },
+    original: originalDimensions.current,
+    screen: { width: screenWidth },
+    calculated: { imageWidth, imageHeight },
+    aspectRatio: originalDimensions.current
+      ? originalDimensions.current.width / originalDimensions.current.height
+      : 0,
+  })
 
   const onPinchEvent = (event) => {
     router.push({
@@ -36,14 +70,14 @@ const ImageView = ({ width, height, photo }) => {
 
   // Use inline styles to prevent recreation on each render
   const photoContainerStyle = {
-    width,
-    height,
+    width: imageWidth,
+    height: imageHeight,
     backgroundColor: 'transparent',
   }
 
   const imageContainerStyle = {
-    width,
-    height,
+    width: imageWidth,
+    height: imageHeight,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
@@ -101,8 +135,6 @@ const ImageView = ({ width, height, photo }) => {
 
 ImageView.propTypes = {
   photo: PropTypes.object.isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
 }
 
 export default ImageView
