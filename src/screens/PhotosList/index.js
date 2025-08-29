@@ -923,6 +923,11 @@ const PhotosList = ({ searchFromUrl }) => {
       // Haptics might not be available on all devices - fail silently
     }
 
+    // Always collapse any expanded photos when any segment is clicked (including current one)
+    if (expandedPhotoIds.size > 0) {
+      setExpandedPhotoIds(new Set())
+    }
+
     // Only clear photos and reset if actually switching segments
     if (activeSegment !== index) {
       setPhotosList([])
@@ -930,11 +935,6 @@ const PhotosList = ({ searchFromUrl }) => {
       setConsecutiveEmptyResponses(0)
       setPageNumber(null)
       setActiveSegment(index)
-
-      // Collapse any expanded photos when switching segments
-      if (expandedPhotoIds.size > 0) {
-        setExpandedPhotoIds(new Set())
-      }
 
       // Note: We no longer clear search term when switching segments
       // This allows the search term to persist in the atom
@@ -1674,6 +1674,8 @@ const PhotosList = ({ searchFromUrl }) => {
         }}
         refreshing={false}
         onRefresh={() => {
+          // Collapse all expanded photos before refreshing
+          setExpandedPhotoIds(new Set())
           reload()
         }}
         scrollEventThrottle={16}
