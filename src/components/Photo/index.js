@@ -140,29 +140,31 @@ const createStyles = (theme) =>
       ...SHARED_STYLES.text.caption,
     },
     addCommentCard: {
-      backgroundColor: `${theme.STATUS_SUCCESS}05`,
-      borderRadius: 20,
       marginVertical: 8,
       marginHorizontal: 16,
-      padding: 20,
-      borderWidth: 2,
-      borderColor: `${theme.STATUS_SUCCESS}20`,
-      borderStyle: 'dashed',
+      alignItems: 'center',
+    },
+    addCommentButton: {
+      backgroundColor: `${theme.STATUS_SUCCESS}15`,
+      borderRadius: 25,
+      paddingHorizontal: 8,
+      paddingVertical: 6,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1.5,
+      borderColor: `${theme.STATUS_SUCCESS}40`,
       shadowColor: theme.STATUS_SUCCESS,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 3,
       },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 4,
-    },
-    addCommentButton: {
-      backgroundColor: 'transparent',
-      borderRadius: 0,
-      margin: 0,
-      padding: 0,
-      borderWidth: 0,
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      elevation: 6,
+      minWidth: 120,
+      height: 36,
+      gap: 6,
     },
     addCommentContent: {
       flexDirection: 'row',
@@ -171,9 +173,10 @@ const createStyles = (theme) =>
     },
     addCommentText: {
       color: theme.STATUS_SUCCESS,
-      fontSize: 16,
+      fontSize: 13,
       fontWeight: '600',
-      marginLeft: 8,
+      textAlign: 'center',
+      letterSpacing: 0.3,
     },
     // Enhanced AI recognition cards
     aiRecognitionContainer: {
@@ -710,12 +713,12 @@ const Photo = ({
               },
             })
           }
-          activeOpacity={0.8}
+          activeOpacity={0.7}
         >
-          <View style={styles.addCommentContent}>
-            <Ionicons name="add-circle" size={28} color="#4FC3F7" />
-            <ThemedText style={styles.addCommentText}>Add Comment</ThemedText>
-          </View>
+          <Ionicons name="add-circle" size={18} color={theme.STATUS_SUCCESS} />
+          <ThemedText numberOfLines={1} style={styles.addCommentText}>
+            Add Comment
+          </ThemedText>
         </TouchableOpacity>
       </View>
     )
