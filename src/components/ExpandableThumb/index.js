@@ -215,16 +215,15 @@ const ExpandableThumb = ({
           style={[
             {
               flex: 1,
-              borderRadius: 12,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              borderBottomLeftRadius: 20,
+              borderBottomRightRadius: 20,
               backgroundColor: theme.CARD_BACKGROUND,
-              shadowColor: isDark ? 'rgba(255, 255, 255, 0.3)' : '#000000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: isDark ? 0.8 : 0.3,
-              shadowRadius: isDark ? 10 : 8,
-              elevation: isDark ? 12 : 8,
-              borderWidth: isDark ? 1.5 : 0,
-              borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              borderWidth: 0,
+              borderColor: 'transparent',
               transform: [{ scale: scaleValue }],
+              overflow: 'hidden',
             },
           ]}
         >

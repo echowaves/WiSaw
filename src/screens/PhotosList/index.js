@@ -142,7 +142,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.BACKGROUND,
+      backgroundColor: theme.INTERACTIVE_BACKGROUND, // Much darker background for high contrast with ExpandableThumb
     },
     thumbContainer: {
       // height: thumbDimension,
@@ -298,8 +298,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [unreadCount, setUnreadCount] = useState(0)
 
-  // State for inline photo expansion
-  const [expandedPhotoId, setExpandedPhotoId] = useState(null)
+  // State for inline photo expansion - now supports multiple expanded photos
+  const [expandedPhotoIds, setExpandedPhotoIds] = useState(new Set())
   const [isPhotoExpanding, setIsPhotoExpanding] = useState(false)
   const [scrollToIndex, setScrollToIndex] = useState(null)
   const [measuredHeights, setMeasuredHeights] = useState(new Map())
@@ -520,9 +520,9 @@ const PhotosList = ({ searchFromUrl }) => {
   // Helper function to check if a photo is expanded
   const isPhotoExpanded = React.useCallback(
     (photoId) => {
-      return expandedPhotoId === photoId
+      return expandedPhotoIds.has(photoId)
     },
-    [expandedPhotoId],
+    [expandedPhotoIds],
   )
 
   // Helper function to get calculated dimensions for a photo
@@ -562,7 +562,7 @@ const PhotosList = ({ searchFromUrl }) => {
     [isPhotoExpanded, width, segmentConfig],
   )
 
-  // Function to handle photo expansion toggle
+  // Function to handle photo expansion toggle - now supports multiple expanded photos
   const handlePhotoToggle = React.useCallback(
     (photoId) => {
       if (isPhotoExpanding) return // Prevent multiple rapid toggles
@@ -572,21 +572,26 @@ const PhotosList = ({ searchFromUrl }) => {
       // Find the index of the photo being toggled
       const photoIndex = photosList.findIndex((photo) => photo.id === photoId)
 
-      // Simply toggle the expanded photo ID - no need to modify photo objects
-      setExpandedPhotoId((prevId) => {
-        const newId = prevId === photoId ? null : photoId
+      // Toggle the photo ID in the expanded set
+      setExpandedPhotoIds((prevIds) => {
+        const newIds = new Set(prevIds)
 
-        // When a photo is collapsed, remove its measured height from the map.
-        // This ensures that if it's expanded again, it will get a fresh measurement.
-        if (newId === null) {
+        if (newIds.has(photoId)) {
+          // Photo is currently expanded, collapse it
+          newIds.delete(photoId)
+
+          // Remove its measured height from the map
           setMeasuredHeights((current) => {
             const updated = new Map(current)
             updated.delete(photoId)
             return updated
           })
+        } else {
+          // Photo is currently collapsed, expand it
+          newIds.add(photoId)
         }
 
-        return newId
+        return newIds
       })
 
       // Reset expanding state after animation
@@ -653,7 +658,7 @@ const PhotosList = ({ searchFromUrl }) => {
           uuid={uuid}
           isExpanded={isPhotoExpanded(item.id)}
           onToggleExpand={handlePhotoToggle}
-          expandedPhotoId={expandedPhotoId}
+          expandedPhotoIds={expandedPhotoIds}
           updatePhotoHeight={updatePhotoHeight}
         />
       )
@@ -664,7 +669,7 @@ const PhotosList = ({ searchFromUrl }) => {
       activeSegment,
       topOffset,
       uuid,
-      expandedPhotoId,
+      expandedPhotoIds,
       handlePhotoToggle,
       isPhotoExpanded,
       updatePhotoHeight,
@@ -926,9 +931,9 @@ const PhotosList = ({ searchFromUrl }) => {
       setPageNumber(null)
       setActiveSegment(index)
 
-      // Collapse any expanded photo when switching segments
-      if (expandedPhotoId) {
-        setExpandedPhotoId(null)
+      // Collapse any expanded photos when switching segments
+      if (expandedPhotoIds.size > 0) {
+        setExpandedPhotoIds(new Set())
       }
 
       // Note: We no longer clear search term when switching segments
