@@ -101,12 +101,18 @@ const ExpandableThumb = ({
   // Cleanup effect for global callback
   useEffect(() => {
     return () => {
-      // Clean up the global callback when component unmounts
-      if (global.expandableThumbMinimize) {
-        delete global.expandableThumbMinimize
+      // Clean up this photo's callback from the registry
+      if (global.expandableThumbCallbacks) {
+        global.expandableThumbCallbacks.delete(item.id)
+
+        // If no more callbacks exist, clean up the global objects
+        if (global.expandableThumbCallbacks.size === 0) {
+          delete global.expandableThumbCallbacks
+          delete global.expandableThumbMinimize
+        }
       }
     }
-  }, [])
+  }, [item.id])
 
   const handlePressIn = () => {
     Animated.spring(scaleValue, {
@@ -160,9 +166,21 @@ const ExpandableThumb = ({
     }
 
     // Register minimize callback for close button
+    // Instead of overwriting, create a callback registry that handles multiple photos
+    if (!global.expandableThumbCallbacks) {
+      global.expandableThumbCallbacks = new Map()
+    }
+
+    // Store this photo's callback in the registry
+    global.expandableThumbCallbacks.set(item.id, () => {
+      onToggleExpand(item.id)
+    })
+
+    // Create or update the main minimize function to use the registry
     global.expandableThumbMinimize = (photoId) => {
-      if (photoId === item.id) {
-        onToggleExpand(item.id) // This will minimize the thumb
+      const callback = global.expandableThumbCallbacks?.get(photoId)
+      if (callback) {
+        callback()
       }
     }
 
