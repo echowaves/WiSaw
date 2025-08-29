@@ -302,6 +302,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const [expandedPhotoId, setExpandedPhotoId] = useState(null)
   const [isPhotoExpanding, setIsPhotoExpanding] = useState(false)
   const [scrollToIndex, setScrollToIndex] = useState(null)
+  const [measuredHeights, setMeasuredHeights] = useState(new Map())
 
   // Real-time height tracking using refs (no state storage)
   const photoHeightRefs = useRef(new Map())

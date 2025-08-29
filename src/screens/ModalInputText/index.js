@@ -130,13 +130,49 @@ const ModalInputText = ({ route }) => {
   const photoDimensions = calculatePhotoDimensions()
 
   const handleSubmit = async () => {
-    await reducer.submitComment({
-      inputText: inputText.trim(),
-      uuid,
-      photo,
-      topOffset,
-    })
-    router.back()
+    try {
+      const commentText = inputText.trim()
+
+      // Create optimistic comment immediately
+      const optimisticComment = {
+        comment: commentText,
+        uuid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(), // Add updatedAt for consistent date rendering
+        // No id to distinguish from real comments
+      }
+
+      // Show optimistic comment immediately
+      if (global.photoOptimisticCallbacks?.has(photo?.id)) {
+        global.photoOptimisticCallbacks.get(photo?.id)(optimisticComment)
+      }
+
+      // Navigate back immediately for better UX
+      router.back()
+
+      // Submit comment to backend
+      await reducer.submitComment({
+        inputText: commentText,
+        uuid,
+        photo,
+        topOffset,
+      })
+
+      // Trigger refresh after a shorter delay to reduce flickering
+      setTimeout(() => {
+        if (global.photoRefreshCallbacks?.has(photo?.id)) {
+          global.photoRefreshCallbacks.get(photo?.id)()
+        } else {
+          global.lastCommentSubmission = Date.now()
+        }
+      }, 300) // Reduced from 800ms to 300ms
+    } catch (error) {
+      console.error('❌ ModalInputText: Error submitting comment:', error)
+      // Clear optimistic comment on error
+      if (global.photoOptimisticCallbacks?.has(photo?.id)) {
+        global.photoOptimisticCallbacks.get(photo?.id)(null)
+      }
+    }
   }
 
   // Remove navigation.setOptions as it's not compatible with Expo Router

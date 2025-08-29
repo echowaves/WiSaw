@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
@@ -378,43 +378,101 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
 
   const [bans, setBans] = useState([])
 
-  // const [status, setStatus] = useState({})
+  // State for photo details and refresh triggers
   const [photoDetails, setPhotoDetails] = useState(null)
-
-  // Removed navigation as it's not used in this component
+  const [internalRefreshKey, setInternalRefreshKey] = useState(0)
+  const [optimisticComment, setOptimisticComment] = useState(null)
 
   const { width, height } = useWindowDimensions()
 
-  // Calculate optimal photo/video dimensions - always use full screen width
+  // Main data loading effect
+  useEffect(() => {
+    componentIsMounted.current = true
 
-  // Height calculation is handled by onLayout callback; using flex layout allows cards to flow naturally
-  // No need for complex pre-calculation since we measure actual rendered height
+    const task = InteractionManager.runAfterInteractions(async () => {
+      if (componentIsMounted.current) {
+        // If this is a refresh after comment submission, add delay for backend consistency
+        const isRefreshAfterComment = internalRefreshKey > 0
+        if (isRefreshAfterComment) {
+          await new Promise((resolve) => setTimeout(resolve, 1500))
+        }
 
-  useEffect(
-    // use this to make the navigation to a detailed screen faster
-    () => {
-      const task = InteractionManager.runAfterInteractions(async () => {
-        if (componentIsMounted) {
-          const loadedPhotoDetails = await reducer.getPhotoDetails({
-            photoId: photo?.id,
-            uuid,
-          })
-          setPhotoDetails({
+        setPhotoDetails(null)
+
+        const loadedPhotoDetails = await reducer.getPhotoDetails({
+          photoId: photo?.id,
+          uuid,
+        })
+
+        if (componentIsMounted.current) {
+          const newPhotoDetails = {
             ...loadedPhotoDetails,
             watchersCount: photo.watchersCount,
-          })
+            lastUpdated: Date.now(),
+          }
+
+          // Check if optimistic comment should be cleared after data loads
+          setTimeout(() => {
+            if (
+              optimisticComment &&
+              loadedPhotoDetails?.comments?.some(
+                (c) => c.comment === optimisticComment.comment,
+              )
+            ) {
+              console.log(
+                '🧹 Photo: Clearing optimistic comment - found in backend data',
+              )
+              setOptimisticComment(null)
+            }
+          }, 100) // Small delay to prevent flicker
+
+          setPhotoDetails(newPhotoDetails)
         }
-      })
-
-      return () => {
-        componentIsMounted.current = false
-        task.cancel()
       }
-    },
-    [photo?.id, uuid, refreshKey],
-  ) // Added refreshKey dependency to refresh comments when returning from add comment
+    })
 
-  // Reset component state when photo content changes (no height tracking)
+    return () => {
+      componentIsMounted.current = false
+      task.cancel()
+    }
+  }, [photo?.id, uuid, refreshKey, internalRefreshKey]) // Remove optimisticComment from deps
+
+  // Global refresh trigger polling
+  useEffect(() => {
+    const checkForRefresh = () => {
+      if (
+        global.lastCommentSubmission &&
+        global.lastCommentSubmission > (global.lastPhotoRefresh || 0)
+      ) {
+        global.lastPhotoRefresh = global.lastCommentSubmission
+        setInternalRefreshKey((prev) => prev + 1)
+      }
+    }
+
+    checkForRefresh()
+    const interval = setInterval(checkForRefresh, 1000)
+    return () => clearInterval(interval)
+  }, [photo?.id])
+
+  // Register refresh callback for direct triggering
+  useEffect(() => {
+    const refreshCallback = () => setInternalRefreshKey((prev) => prev + 1)
+
+    if (!global.photoRefreshCallbacks) {
+      global.photoRefreshCallbacks = new Map()
+    }
+    global.photoRefreshCallbacks.set(photo?.id, refreshCallback)
+
+    // Also register optimistic comment callback
+    global.photoOptimisticCallbacks =
+      global.photoOptimisticCallbacks || new Map()
+    global.photoOptimisticCallbacks.set(photo?.id, setOptimisticComment)
+
+    return () => {
+      global.photoRefreshCallbacks?.delete(photo?.id)
+      global.photoOptimisticCallbacks?.delete(photo?.id)
+    }
+  }, [photo?.id]) // Reset component state when photo content changes (no height tracking)
   useEffect(() => {
     // Component setup that doesn't involve height measurements
   }, [photo?.id, refreshKey])
@@ -428,11 +486,22 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
   // }, [videoRef])// eslint-disable-line react-hooks/exhaustive-deps
 
   const renderDateTime = (dateString) => {
-    const dateTime = moment(
-      new Date(dateString),
-      'YYYY-MM-DD-HH-mm-ss-SSS',
-    ).format('LLL')
-    return dateTime
+    if (!dateString) {
+      return 'Just now' // Fallback for missing dates
+    }
+    try {
+      const dateTime = moment(
+        new Date(dateString),
+        'YYYY-MM-DD-HH-mm-ss-SSS',
+      ).format('LLL')
+      return dateTime
+    } catch (error) {
+      console.log(
+        '📅 Photo: Invalid date format, showing fallback:',
+        dateString,
+      )
+      return 'Just now'
+    }
   }
 
   const renderCommentsStats = () => {
@@ -542,25 +611,47 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
     return null
   }
 
-  const renderCommentsRows = () => {
-    if (photoDetails?.comments && photoDetails.comments.length > 0) {
+  const renderCommentsRows = useMemo(() => {
+    console.log(
+      '🎨 Photo: renderCommentsRows called - photoDetails:',
+      !!photoDetails,
+      'comments count:',
+      photoDetails?.comments?.length || 0,
+    )
+    const realComments = photoDetails?.comments || []
+    const allComments = optimisticComment
+      ? [...realComments, optimisticComment]
+      : realComments
+
+    if (allComments.length > 0) {
       return (
         <View style={styles.commentsCard}>
           <View style={styles.commentsSection}>
-            {photoDetails?.comments.map((comment, i) => (
+            {allComments.map((comment, i) => (
               <TouchableOpacity
-                key={comment.id}
+                key={comment.id || `optimistic-${comment.comment}-${i}`} // More stable key
                 onPress={() => {
-                  setPhotoDetails(
-                    reducer.toggleCommentButtons({
-                      photoDetails,
-                      commentId: comment.id,
-                    }),
-                  )
+                  if (comment.id) {
+                    // Only allow interaction with real comments
+                    setPhotoDetails(
+                      reducer.toggleCommentButtons({
+                        photoDetails,
+                        commentId: comment.id,
+                      }),
+                    )
+                  }
                 }}
-                activeOpacity={0.8}
+                activeOpacity={comment.id ? 0.8 : 1} // No press feedback for optimistic comments
               >
-                <View style={styles.commentCard}>
+                <View
+                  style={[
+                    styles.commentCard,
+                    !comment.id && { opacity: 0.7 },
+                    comment.id
+                      ? {}
+                      : { backgroundColor: theme.CARD_BACKGROUND + '80' }, // Subtle visual difference for optimistic
+                  ]}
+                >
                   <ThemedText style={styles.commentText}>
                     {comment.comment}
                   </ThemedText>
@@ -588,7 +679,14 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
       )
     }
     return <View />
-  }
+  }, [
+    photoDetails?.comments,
+    optimisticComment,
+    uuid,
+    friendsList,
+    theme.CARD_BACKGROUND,
+    photoDetails,
+  ]) // Added photoDetails to prevent issues with toggleCommentButtons
 
   const renderAddCommentsRow = () => {
     if (!photoDetails?.comments) {
@@ -1185,7 +1283,7 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
       )}
       {renderPhotoRow()}
       {renderCommentsStats()}
-      {renderCommentsRows()}
+      {renderCommentsRows}
       {renderAddCommentsRow()}
       {renderRecognitions()}
     </View>
