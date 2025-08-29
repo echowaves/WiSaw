@@ -12,7 +12,7 @@ import * as CONST from '../../consts'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
-const ImageView = ({ photo }) => {
+const ImageView = ({ photo, containerWidth, embedded = true }) => {
   const scale = useRef(new Animated.Value(1)).current
   const navigation = useNavigation()
   const [isDark] = useAtom(isDarkMode)
@@ -20,10 +20,15 @@ const ImageView = ({ photo }) => {
   const { width: screenWidth } = useWindowDimensions()
 
   // Calculate image dimensions to maintain aspect ratio
-  const imageWidth = screenWidth
+  // Use containerWidth if provided, otherwise fall back to screenWidth
+  // In embedded mode, we might want to constrain the image size differently
+  const baseWidth = containerWidth || screenWidth
+  const imageWidth = embedded
+    ? Math.min(baseWidth, screenWidth - 40)
+    : baseWidth // Extra constraint in embedded mode
   const imageHeight =
     photo && photo.width && photo.height
-      ? (photo.height * screenWidth) / photo.width
+      ? (photo.height * imageWidth) / photo.width
       : 0
 
   // Removed debug logging to reduce console noise
@@ -46,27 +51,19 @@ const ImageView = ({ photo }) => {
 
   // Use inline styles to prevent recreation on each render
   const photoContainerStyle = {
-    width: imageWidth,
-    height: imageHeight,
+    flex: 1,
+    width: '100%',
     backgroundColor: 'transparent',
+    // maxWidth: containerWidth || screenWidth, // Ensure it doesn't exceed container width
   }
 
   const imageContainerStyle = {
-    width: imageWidth,
+    width: '100%',
     height: imageHeight,
-    justifyContent: 'center',
-    alignItems: 'center',
     borderRadius: 20,
     overflow: 'hidden',
-    backgroundColor: theme.CARD_BACKGROUND,
-    shadowColor: theme.CARD_SHADOW,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    backgroundColor: 'transparent', // Let parent card handle background
+    // Remove shadows and styling since parent card handles it
   }
 
   return (
@@ -78,7 +75,7 @@ const ImageView = ({ photo }) => {
             // expiresIn: 5, // seconds. This field is optional
           }}
           cacheKey={`${photo.id}`}
-          resizeMode="contain"
+          resizeMode="cover"
           style={photoContainerStyle}
           placeholderContent={
             <CachedImage
@@ -99,7 +96,7 @@ const ImageView = ({ photo }) => {
                   }}
                 />
               }
-              resizeMode="contain"
+              resizeMode="cover"
               style={photoContainerStyle}
             />
           }
@@ -111,6 +108,8 @@ const ImageView = ({ photo }) => {
 
 ImageView.propTypes = {
   photo: PropTypes.object.isRequired,
+  containerWidth: PropTypes.number,
+  embedded: PropTypes.bool,
 }
 
 export default ImageView

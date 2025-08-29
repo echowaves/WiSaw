@@ -45,6 +45,11 @@ const createStyles = (theme) =>
     cardContainer: {
       ...SHARED_STYLES.containers.card,
     },
+    // Image card container without padding
+    imageCardContainer: {
+      ...SHARED_STYLES.containers.card,
+      padding: 0, // Remove padding so image fills entire card
+    },
     // Photo info card
     photoInfoCard: {
       ...SHARED_STYLES.containers.infoCard,
@@ -1121,14 +1126,17 @@ const Photo = ({
 
   const renderPhotoRow = () => {
     if (!photo.video) {
+      // Calculate available width after horizontal margins only (no card padding)
+      // Card has marginHorizontal: 16, so total reduction is 32px
+      const containerWidth = embedded ? screenWidth - 32 : screenWidth - 32
+
       return (
-        <View
-          style={{
-            width: '100%',
-            alignItems: 'center',
-          }}
-        >
-          <ImageView photo={photo} />
+        <View style={styles.imageCardContainer}>
+          <ImageView
+            photo={photo}
+            containerWidth={containerWidth}
+            embedded={embedded}
+          />
         </View>
       )
     }
@@ -1144,17 +1152,17 @@ const Photo = ({
     return (
       <View
         style={{
-          width: width,
           backgroundColor: theme.CARD_BACKGROUND,
           marginTop: 8,
           marginBottom: 8,
+          marginHorizontal: 16,
           flexDirection: 'column',
         }}
       >
         {/* Video container */}
         <View
           style={{
-            width: width,
+            width: '100%',
             height: videoHeight,
             justifyContent: 'center',
             alignItems: 'center',
@@ -1163,7 +1171,7 @@ const Photo = ({
           <VideoView
             player={videoPlayer}
             style={{
-              width: width,
+              width: '100%',
               height: videoHeight,
             }}
             nativeControls={false}
