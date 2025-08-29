@@ -263,28 +263,33 @@ const createStyles = (theme) =>
     },
     actionButtonsContainer: {
       flexDirection: 'row',
-      gap: 8,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 10,
       paddingHorizontal: 4,
     },
     actionButton: {
-      flex: 1,
-      backgroundColor: theme.CARD_BACKGROUND,
-      borderRadius: 12,
-      paddingVertical: 8,
+      backgroundColor: `${theme.STATUS_SUCCESS}15`,
+      borderRadius: 25,
       paddingHorizontal: 8,
+      paddingVertical: 6,
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: theme.CARD_BORDER,
-      shadowColor: theme.CARD_SHADOW,
+      borderWidth: 1.5,
+      borderColor: `${theme.STATUS_SUCCESS}40`,
+      shadowColor: theme.STATUS_SUCCESS,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 3,
       },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
-      minHeight: 48,
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      elevation: 6,
+      minWidth: 80,
+      height: 36,
+      gap: 6,
     },
     actionButtonDisabled: {
       backgroundColor: theme.BACKGROUND,
@@ -294,13 +299,11 @@ const createStyles = (theme) =>
       elevation: 1,
     },
     actionButtonText: {
-      ...SHARED_STYLES.text.caption,
-      fontSize: 11,
-      marginTop: 4,
+      color: theme.STATUS_SUCCESS,
+      fontSize: 13,
       fontWeight: '600',
       textAlign: 'center',
       letterSpacing: 0.3,
-      color: theme.TEXT_PRIMARY,
     },
     loadingProgress: {
       marginHorizontal: 16,
@@ -933,7 +936,7 @@ const Photo = ({
         styles.actionCard,
         {
           // Add top margin when close button is visible (embedded mode)
-          marginTop: 60,
+          marginTop: embedded ? insets.top + 5 : 60,
         },
       ]}
     >
@@ -959,7 +962,7 @@ const Photo = ({
               handleBan()
             }
           }}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
           delayPressIn={0}
           delayPressOut={0}
         >
@@ -975,6 +978,7 @@ const Photo = ({
             size={18}
           />
           <ThemedText
+            numberOfLines={1}
             style={[
               styles.actionButtonText,
               {
@@ -1011,7 +1015,7 @@ const Photo = ({
               handleDelete()
             }
           }}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
           delayPressIn={0}
           delayPressOut={0}
         >
@@ -1026,6 +1030,7 @@ const Photo = ({
             size={18}
           />
           <ThemedText
+            numberOfLines={1}
             style={[
               styles.actionButtonText,
               {
@@ -1049,7 +1054,7 @@ const Photo = ({
               styles.actionButtonDisabled,
           ]}
           onPress={() => handleFlipWatch()}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
           delayPressIn={0}
           delayPressOut={0}
           disabled={photoDetails?.isPhotoWatched === undefined}
@@ -1066,6 +1071,7 @@ const Photo = ({
             size={18}
           />
           <ThemedText
+            numberOfLines={1}
             style={[
               styles.actionButtonText,
               {
@@ -1092,7 +1098,7 @@ const Photo = ({
           onPress={() => {
             sharingHelper.sharePhoto(photo, photoDetails, topOffset)
           }}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
           delayPressIn={0}
           delayPressOut={0}
           disabled={photoDetails?.isPhotoWatched === undefined}
@@ -1107,6 +1113,7 @@ const Photo = ({
             size={18}
           />
           <ThemedText
+            numberOfLines={1}
             style={[
               styles.actionButtonText,
               {
@@ -1274,7 +1281,7 @@ const Photo = ({
       <TouchableOpacity
         style={{
           position: 'absolute',
-          top: insets.top,
+          top: 10,
           right: 20,
           width: 40,
           height: 40,
