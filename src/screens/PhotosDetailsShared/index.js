@@ -143,7 +143,12 @@ const PhotosDetailsShared = ({ route }) => {
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <Photo photo={item} key={item.id} refreshKey={refreshKey} />
+          <Photo
+            photo={item}
+            key={item.id}
+            refreshKey={refreshKey}
+            embedded={false}
+          />
         </ScrollView>
       </View>
     )

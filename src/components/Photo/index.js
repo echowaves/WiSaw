@@ -305,7 +305,12 @@ const createStyles = (theme) =>
     },
   })
 
-const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
+const Photo = ({
+  photo,
+  refreshKey = 0,
+  onHeightMeasured,
+  embedded = true,
+}) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
@@ -323,8 +328,8 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
   const screenWidth = dimensions.width
   const screenHeight = dimensions.height || 800 // Fallback to reasonable height
 
-  // Since Photo is always embedded, no header offset needed
-  const headerOffset = 0
+  // Header offset: add space for header when embedded, no offset when not embedded (standalone)
+  const headerOffset = embedded === false ? 100 : 0
 
   const componentIsMounted = useRef(true)
 
@@ -918,7 +923,15 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
   }
 
   const renderActionCard = () => (
-    <View style={styles.actionCard}>
+    <View
+      style={[
+        styles.actionCard,
+        {
+          // Add top margin when close button is visible (embedded mode)
+          marginTop: 60,
+        },
+      ]}
+    >
       <View style={styles.actionButtonsContainer}>
         {/* Report/Ban button */}
         <TouchableOpacity
@@ -1235,9 +1248,68 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
     )
   }
 
+  // Render close button for embedded mode
+  const renderCloseButton = () => {
+    if (!embedded) return null
+
+    return (
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          top: insets.top,
+          right: 20,
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.3,
+          shadowRadius: 4,
+          elevation: 5,
+        }}
+        onPress={() => {
+          // Check if this is an expandable thumb context and minimize it
+          if (global.expandableThumbMinimize) {
+            global.expandableThumbMinimize(photo?.id)
+          } else {
+            // Fallback to router back navigation
+            router.back()
+          }
+        }}
+        activeOpacity={0.7}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons
+          name="close"
+          size={24}
+          color="rgba(255, 255, 255, 0.95)"
+          style={{
+            textShadowColor: 'rgba(0, 0, 0, 0.8)',
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 2,
+          }}
+        />
+      </TouchableOpacity>
+    )
+  }
+
   return (
     <View
-      style={styles.container}
+      style={[
+        styles.container,
+        {
+          paddingTop: !embedded ? headerOffset : 0,
+        },
+      ]}
       onLayout={(event) => {
         // Optional: Report height for debugging or external needs without storing it
         if (onHeightMeasured) {
@@ -1249,6 +1321,7 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
         }
       }}
     >
+      {renderCloseButton()}
       {renderActionCard()}
       {photoDetails?.isPhotoWatched === undefined && (
         <LinearProgress
@@ -1285,6 +1358,7 @@ Photo.propTypes = {
   photo: PropTypes.object.isRequired,
   refreshKey: PropTypes.number,
   onHeightMeasured: PropTypes.func,
+  embedded: PropTypes.bool,
 }
 
 export default Photo

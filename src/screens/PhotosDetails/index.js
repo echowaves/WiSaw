@@ -213,6 +213,7 @@ const PhotosDetails = ({ route }) => {
               swiper={swiper}
               photosList={photosList}
               refreshKey={refreshKey}
+              embedded={false}
             />
           </ScrollView>
         ))}

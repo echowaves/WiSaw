@@ -98,6 +98,16 @@ const ExpandableThumb = ({
     }
   }, [isExpanded, expandValue, isAnimating])
 
+  // Cleanup effect for global callback
+  useEffect(() => {
+    return () => {
+      // Clean up the global callback when component unmounts
+      if (global.expandableThumbMinimize) {
+        delete global.expandableThumbMinimize
+      }
+    }
+  }, [])
+
   const handlePressIn = () => {
     Animated.spring(scaleValue, {
       toValue: 0.95,
@@ -149,9 +159,17 @@ const ExpandableThumb = ({
       height: originalDimensions.current.height,
     }
 
+    // Register minimize callback for close button
+    global.expandableThumbMinimize = (photoId) => {
+      if (photoId === item.id) {
+        onToggleExpand(item.id) // This will minimize the thumb
+      }
+    }
+
     return (
       <Photo
         photo={cleanPhoto}
+        embedded={true} // Show close button when expanded
         onHeightMeasured={(height) => {
           // Only report to masonry layout for dimension calculation, don't store locally
           if (height > 0) {
