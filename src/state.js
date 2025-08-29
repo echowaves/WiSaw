@@ -30,12 +30,6 @@ export const photosList = atom(
       return Object.freeze({ ...photo })
     })
 
-    if (__DEV__ && frozenPhotos.length > 0) {
-      console.log(
-        `✅ Atom getter returning ${frozenPhotos.length} frozen photos`,
-      )
-    }
-
     return frozenPhotos
   },
   (get, set, update) => {
@@ -65,10 +59,6 @@ export const photosList = atom(
       }
       return Object.freeze({ ...photo })
     })
-
-    if (__DEV__ && frozenPhotos.length > 0) {
-      console.log(`✅ Atom setter storing ${frozenPhotos.length} frozen photos`)
-    }
 
     set(photosListAtom, frozenPhotos)
   },

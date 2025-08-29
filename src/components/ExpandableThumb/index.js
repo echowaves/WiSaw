@@ -50,10 +50,6 @@ const ExpandableThumb = ({
         width: Number(originalPhoto.width),
         height: Number(originalPhoto.height),
       }
-      console.log(
-        `🔒 ExpandableThumb: Stored original dimensions for photo ${item.id}:`,
-        originalDimensions.current,
-      )
     } else {
       // Fallback to item dimensions if original not found
       originalDimensions.current = {

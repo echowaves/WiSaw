@@ -556,15 +556,6 @@ const PhotosList = ({ searchFromUrl }) => {
         segmentConfig.spacing,
       )
 
-      // Debug logging for problem photo
-      if (__DEV__ && photo.id === '2ab25df5-e84c-4b43-a863-3bb55bfc14b2') {
-        console.log(
-          `🔍 PROBLEM PHOTO getCalculatedDimensions result (calculated):`,
-          result,
-          `input params: isExpanded=${isExpanded}, screenWidth=${screenWidth}, maxItemsPerRow=${segmentConfig.maxItemsPerRow}`,
-        )
-      }
-
       return result
     },
     [isPhotoExpanded, width, segmentConfig],
