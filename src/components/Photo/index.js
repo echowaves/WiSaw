@@ -275,8 +275,8 @@ const createStyles = (theme) =>
     actionButton: {
       backgroundColor: `${theme.STATUS_SUCCESS}15`,
       borderRadius: 25,
-      paddingHorizontal: 8,
-      paddingVertical: 6,
+      paddingHorizontal: 3,
+      paddingVertical: 2,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
