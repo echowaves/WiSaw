@@ -46,16 +46,16 @@ const ModalInputText = ({ route }) => {
         alignSelf: 'center',
         marginBottom: 20,
         borderRadius: 16,
-        overflow: 'hidden', // Ensure rounded corners clip the image content
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
+        shadowColor: theme.CARD_SHADOW,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.7,
+        shadowRadius: 16,
+        elevation: 16,
       },
       photoImage: {
         width: '100%',
         height: '100%',
+        borderRadius: 16,
       },
       inputContainer: {
         marginHorizontal: 20,
