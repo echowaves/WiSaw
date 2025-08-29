@@ -149,12 +149,6 @@ const ExpandableThumb = ({
       height: originalDimensions.current.height,
     }
 
-    console.log(`🔧 ExpandableThumb: Creating clean photo for ${item.id}:`, {
-      original: originalDimensions.current,
-      itemDimensions: { width: item.width, height: item.height },
-      cleanDimensions: { width: cleanPhoto.width, height: cleanPhoto.height },
-    })
-
     return (
       <Photo
         photo={cleanPhoto}
