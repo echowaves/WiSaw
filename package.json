@@ -16,7 +16,7 @@
     "publish:prod": "source .env && eas update --branch production"
   },
   "dependencies": {
-    "@apollo/client": "^3.11.8",
+    "@apollo/client": "^4.0.2",
     "@expo/config-plugins": "~10.1.1",
     "@expo/metro-config": "^0.20.14",
     "@expo/prebuild-config": "~9.0.0",
