@@ -1141,41 +1141,51 @@ const Photo = ({
       )
     }
 
-    // For videos, calculate dimensions similar to ImageView
-    const videoWidth = width
-    let videoHeight = (photo.height * width) / photo.width
-    const maxReasonableHeight = Math.min(height * 0.6, 500)
-    if (videoHeight > maxReasonableHeight) {
-      videoHeight = maxReasonableHeight
+    // For videos, calculate dimensions with height constraint and width by aspect ratio
+    const maxVideoHeight = height * 0.8
+    const aspectRatio = photo.width / photo.height
+    let videoHeight = maxVideoHeight
+    let videoWidth = videoHeight * aspectRatio
+
+    // If calculated width exceeds container width, scale down
+    const containerWidth = embedded ? screenWidth - 32 : screenWidth - 32
+    if (videoWidth > containerWidth) {
+      videoWidth = containerWidth
+      videoHeight = videoWidth / aspectRatio
     }
+
+    // Add extra height for video controls
+    const controlsHeight = 60 // Space for video control buttons
+    const cardHeight = videoHeight + controlsHeight
 
     return (
       <View
-        style={{
-          backgroundColor: theme.CARD_BACKGROUND,
-          marginTop: 8,
-          marginBottom: 8,
-          marginHorizontal: 16,
-          flexDirection: 'column',
-        }}
+        style={[
+          styles.imageCardContainer,
+          {
+            width: videoWidth,
+            height: cardHeight,
+            alignSelf: 'center',
+          },
+        ]}
       >
         {/* Video container */}
         <View
           style={{
             width: '100%',
             height: videoHeight,
-            justifyContent: 'center',
-            alignItems: 'center',
+            borderRadius: 20,
+            overflow: 'hidden',
           }}
         >
           <VideoView
             player={videoPlayer}
             style={{
               width: '100%',
-              height: videoHeight,
+              height: '100%',
             }}
             nativeControls={false}
-            contentFit="contain"
+            contentFit="cover"
             allowsFullscreen
             allowsPictureInPicture
           />
