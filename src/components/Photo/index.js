@@ -419,9 +419,6 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
                 (c) => c.comment === optimisticComment.comment,
               )
             ) {
-              console.log(
-                '🧹 Photo: Clearing optimistic comment - found in backend data',
-              )
               setOptimisticComment(null)
             }
           }, 100) // Small delay to prevent flicker
@@ -612,12 +609,6 @@ const Photo = ({ photo, refreshKey = 0, onHeightMeasured }) => {
   }
 
   const renderCommentsRows = useMemo(() => {
-    console.log(
-      '🎨 Photo: renderCommentsRows called - photoDetails:',
-      !!photoDetails,
-      'comments count:',
-      photoDetails?.comments?.length || 0,
-    )
     const realComments = photoDetails?.comments || []
     const allComments = optimisticComment
       ? [...realComments, optimisticComment]
