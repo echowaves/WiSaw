@@ -463,9 +463,9 @@ const PhotosList = ({ searchFromUrl }) => {
     // Determine columns based on screen width for better responsiveness
     const getResponsiveColumns = (baseColumns, largeColumns) => {
       // iPhone Pro Max, iPad Mini and up: increase columns (increased by 35% total: 20% + 10% + 5%)
-      if (width >= 768) return Math.max(1, largeColumns * 1.2) // iPad and larger: large columns + 35%
-      if (width >= 428) return Math.max(1, largeColumns / 1.5) // iPhone Pro Max: half of large + 35%
-      if (width >= 390) return Math.max(1, baseColumns * 4) // iPhone 14 Pro: 0.75x + 35%
+      if (width >= 768) return Math.max(1, largeColumns * 1.3) // iPad and larger: large columns + 35%
+      if (width >= 428) return Math.max(1, largeColumns / 1.3) // iPhone Pro Max: half of large + 35%
+      if (width >= 390) return Math.max(1, baseColumns / 1.3) // iPhone 14 Pro: 0.75x + 35%
       return Math.max(1, baseColumns / 6) // Standard phones: half of base + 35%
     }
 
