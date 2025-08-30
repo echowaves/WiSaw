@@ -14,16 +14,6 @@ export default function TabsLayout() {
         }}
       />
       <Stack.Screen
-        name="photos/[id]"
-        options={{
-          title: 'Photo',
-          headerBackTitle: '',
-          headerTintColor: CONST.MAIN_COLOR,
-          gestureEnabled: false,
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
         name="pinch"
         options={{
           headerTintColor: CONST.MAIN_COLOR,

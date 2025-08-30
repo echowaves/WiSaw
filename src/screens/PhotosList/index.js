@@ -71,7 +71,6 @@ import {
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import ExpandableThumb from '../../components/ExpandableThumb'
-import ThumbWithComments from '../../components/ThumbWithComments'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -627,23 +626,9 @@ const PhotosList = ({ searchFromUrl }) => {
         }
       }
 
-      // Use ThumbWithComments for starred (segment 1) and search (segment 2)
-      // Use simple Thumb for global photos (segment 0)
-      if (activeSegment === 1 || activeSegment === 2) {
-        return (
-          <ThumbWithComments
-            item={item}
-            index={index}
-            thumbWidth={correctedDimensions.width}
-            thumbHeight={correctedDimensions.height}
-            photosList={photosList}
-            searchTerm={searchTerm}
-            activeSegment={activeSegment}
-            topOffset={topOffset}
-            uuid={uuid}
-          />
-        )
-      }
+      // Use ExpandableThumb for all segments
+      // Show comments overlay for starred (segment 1) and search (segment 2)
+      const shouldShowComments = activeSegment === 1 || activeSegment === 2
 
       return (
         <ExpandableThumb
@@ -660,6 +645,7 @@ const PhotosList = ({ searchFromUrl }) => {
           onToggleExpand={handlePhotoToggle}
           expandedPhotoIds={expandedPhotoIds}
           updatePhotoHeight={updatePhotoHeight}
+          showComments={shouldShowComments}
         />
       )
     },

@@ -634,17 +634,6 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            headerStyle: {
-              backgroundColor: CONST.HEADER_GRADIENT_END,
-            },
-            headerTintColor: CONST.MAIN_COLOR,
-          }}
-        />
       </Stack>
       <Toast />
     </ThemeProvider>

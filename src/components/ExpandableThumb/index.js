@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
+import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
@@ -6,6 +6,8 @@ import PropTypes from 'prop-types'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Animated,
+  StyleSheet,
+  Text,
   TouchableOpacity,
   View,
   useWindowDimensions,
@@ -13,6 +15,43 @@ import {
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import Photo from '../Photo'
+
+// Comment overlay styles
+const commentStyles = StyleSheet.create({
+  commentOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    padding: 8,
+  },
+  commentText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '400',
+    lineHeight: 16,
+    marginBottom: 4,
+  },
+  commentStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  commentStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  commentStatText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+})
 
 const ExpandableThumb = ({
   thumbWidth = null,
@@ -29,6 +68,7 @@ const ExpandableThumb = ({
   expandedPhotoId,
   onUpdateDimensions,
   updatePhotoHeight,
+  showComments = false, // New prop to enable comment overlay
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -136,17 +176,72 @@ const ExpandableThumb = ({
     onToggleExpand(item.id)
   }
 
+  // Render comment overlay on top of the photo (only for collapsed state when showComments is true)
+  const renderCommentOverlay = () => {
+    if (!showComments || isExpanded) return null
+
+    const commentsCount = item.commentsCount || 0
+    const watchersCount = item.watchersCount || 0
+    const hasLastComment =
+      item.lastComment && item.lastComment.trim().length > 0
+
+    // Only show comment overlay if there are actual comments, watchers, or last comment
+    if (!hasLastComment && commentsCount === 0 && watchersCount === 0) {
+      return null
+    }
+
+    return (
+      <View style={commentStyles.commentOverlay}>
+        {hasLastComment && (
+          <Text
+            style={commentStyles.commentText}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {item.lastComment}
+          </Text>
+        )}
+        <View style={commentStyles.commentStats}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {commentsCount > 0 && (
+              <View style={commentStyles.commentStatItem}>
+                <FontAwesome name="comment" size={12} color="#4FC3F7" />
+                <Text style={commentStyles.commentStatText}>
+                  {commentsCount}
+                </Text>
+              </View>
+            )}
+            {watchersCount > 0 && commentsCount > 0 && (
+              <View style={{ width: 12 }} />
+            )}
+            {watchersCount > 0 && (
+              <View style={commentStyles.commentStatItem}>
+                <AntDesign name="star" size={12} color="#FFD700" />
+                <Text style={commentStyles.commentStatText}>
+                  {watchersCount}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+    )
+  }
+
   const renderCollapsedThumb = () => (
-    <CachedImage
-      source={{ uri: item.thumbUrl }}
-      cacheKey={`${item.id}-thumb`}
-      style={{
-        width: thumbWidth,
-        height: thumbHeight,
-        borderRadius: 8,
-      }}
-      resizeMode="cover"
-    />
+    <View style={{ position: 'relative' }}>
+      <CachedImage
+        source={{ uri: item.thumbUrl }}
+        cacheKey={`${item.id}-thumb`}
+        style={{
+          width: thumbWidth,
+          height: thumbHeight,
+          borderRadius: 8,
+        }}
+        resizeMode="cover"
+      />
+      {renderCommentOverlay()}
+    </View>
   )
 
   const renderExpandedPhoto = () => {
