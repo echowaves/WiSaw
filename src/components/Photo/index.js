@@ -188,6 +188,17 @@ const createStyles = (theme) =>
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
     },
+    aiRecognitionHeader: {
+      ...SHARED_STYLES.layout.row,
+      ...SHARED_STYLES.layout.separator,
+    },
+    aiRecognitionHeaderTitle: {
+      ...SHARED_STYLES.text.heading,
+      marginLeft: 8,
+      textAlign: 'left',
+      flex: 1,
+      marginBottom: 0,
+    },
     aiRecognitionTitle: {
       ...SHARED_STYLES.text.heading,
       textAlign: 'center',
@@ -321,6 +332,7 @@ const Photo = ({
   refreshKey = 0,
   onHeightMeasured,
   embedded = true,
+  onRequestEnsureVisible,
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -398,8 +410,48 @@ const Photo = ({
   const [photoDetails, setPhotoDetails] = useState(null)
   const [internalRefreshKey, setInternalRefreshKey] = useState(0)
   const [optimisticComment, setOptimisticComment] = useState(null)
+  // Collapsible state for AI sections (default collapsed when embedded/expanded)
+  const [aiTagsCollapsed, setAiTagsCollapsed] = useState(embedded)
+  const [aiTextCollapsed, setAiTextCollapsed] = useState(embedded)
+  const [aiModerationCollapsed, setAiModerationCollapsed] = useState(embedded)
+
+  // Reset collapse state when a different photo is shown or embedding mode changes
+  useEffect(() => {
+    setAiTagsCollapsed(embedded)
+    setAiTextCollapsed(embedded)
+    setAiModerationCollapsed(embedded)
+  }, [photo?.id, embedded])
 
   const { width, height } = useWindowDimensions()
+
+  // Root container ref for measuring height on-demand
+  const containerRef = useRef(null)
+  // Refs for recognition section headers to target scrolling to them
+  const aiTagsHeaderRef = useRef(null)
+  const aiTextHeaderRef = useRef(null)
+  const aiModerationHeaderRef = useRef(null)
+
+  // Schedule a measurement of the container and report via onHeightMeasured
+  const scheduleHeightRecalc = () => {
+    // Allow layout to settle
+    setTimeout(() => {
+      try {
+        const view = containerRef.current
+        if (!view || !onHeightMeasured) return
+        if (view.measure) {
+          view.measure((x, y, w, h) => {
+            if (h > 0) onHeightMeasured(h)
+          })
+        } else if (view.measureInWindow) {
+          view.measureInWindow((x, y, w, h) => {
+            if (h > 0) onHeightMeasured(h)
+          })
+        }
+      } catch (e) {
+        // best-effort; onLayout will still catch changes
+      }
+    }, 40)
+  }
 
   // Main data loading effect
   useEffect(() => {
@@ -745,91 +797,223 @@ const Photo = ({
       <View style={styles.aiRecognitionContainer}>
         {labels?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <ThemedText style={styles.aiRecognitionTitle}>
-              AI Recognized Tags (tap to search)
-            </ThemedText>
-            <View style={styles.aiTagsContainer}>
-              {labels.map((label) => (
-                <TouchableOpacity
-                  key={label.Name}
-                  style={[
-                    styles.aiTag,
-                    { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
-                  ]}
-                  onPress={() => {
-                    // Trigger search using global state
-                    setTriggerSearch(label.Name)
-                    // Navigate back to main screen
-                    router.back()
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <ThemedText style={styles.aiTagText}>
-                    {label.Name} {Math.round(label.Confidence)}%
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <TouchableOpacity
+              ref={aiTagsHeaderRef}
+              style={styles.aiRecognitionHeader}
+              onPress={() => {
+                // Suppress auto-scroll for a short window to cover multiple height reports
+                const now = Date.now()
+                global.suppressEnsureVisibleUntil =
+                  global.suppressEnsureVisibleUntil || new Map()
+                global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
+                setAiTagsCollapsed((v) => !v)
+                scheduleHeightRecalc()
+                // After layout update, scroll to the header only
+                setTimeout(() => {
+                  try {
+                    if (typeof onRequestEnsureVisible === 'function') {
+                      const view = aiTagsHeaderRef.current
+                      if (view && view.measureInWindow) {
+                        view.measureInWindow((x, y, w, h) => {
+                          if (h > 0) {
+                            onRequestEnsureVisible({
+                              id: photo?.id,
+                              y,
+                              height: h,
+                              alignTop: true,
+                              topPadding: h,
+                            })
+                          }
+                        })
+                      }
+                    }
+                  } catch (e) {
+                    // ignore
+                  }
+                }, 80)
+              }}
+              activeOpacity={0.7}
+            >
+              <ThemedText style={styles.aiRecognitionHeaderTitle}>
+                AI Recognized Tags
+              </ThemedText>
+              <Ionicons
+                name={aiTagsCollapsed ? 'chevron-forward' : 'chevron-down'}
+                size={18}
+                color={theme.TEXT_SECONDARY}
+              />
+            </TouchableOpacity>
+            {!aiTagsCollapsed && (
+              <View style={styles.aiTagsContainer}>
+                {labels.map((label) => (
+                  <TouchableOpacity
+                    key={label.Name}
+                    style={[
+                      styles.aiTag,
+                      { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
+                    ]}
+                    onPress={() => {
+                      setTriggerSearch(label.Name)
+                      router.back()
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <ThemedText style={styles.aiTagText}>
+                      {label.Name} {Math.round(label.Confidence)}%
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
         {textDetections?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <ThemedText style={styles.aiRecognitionTitle}>
-              AI Recognized Text (tap to search)
-            </ThemedText>
-            <View style={styles.aiTagsContainer}>
-              {textDetections.map((text) => (
-                <TouchableOpacity
-                  key={text.Id}
-                  style={[
-                    styles.aiTag,
-                    { opacity: Math.min(text.Confidence / 100 + 0.3, 1) },
-                  ]}
-                  onPress={() => {
-                    // Trigger search using global state
-                    setTriggerSearch(text.DetectedText)
-                    // Navigate back to main screen
-                    router.back()
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <ThemedText style={styles.aiTagText}>
-                    {text.DetectedText} {Math.round(text.Confidence)}%
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <TouchableOpacity
+              ref={aiTextHeaderRef}
+              style={styles.aiRecognitionHeader}
+              onPress={() => {
+                const now = Date.now()
+                global.suppressEnsureVisibleUntil =
+                  global.suppressEnsureVisibleUntil || new Map()
+                global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
+                setAiTextCollapsed((v) => !v)
+                scheduleHeightRecalc()
+                setTimeout(() => {
+                  try {
+                    if (typeof onRequestEnsureVisible === 'function') {
+                      const view = aiTextHeaderRef.current
+                      if (view && view.measureInWindow) {
+                        view.measureInWindow((x, y, w, h) => {
+                          if (h > 0) {
+                            onRequestEnsureVisible({
+                              id: photo?.id,
+                              y,
+                              height: h,
+                              alignTop: true,
+                              topPadding: h,
+                            })
+                          }
+                        })
+                      }
+                    }
+                  } catch (e) {
+                    // ignore
+                  }
+                }, 80)
+              }}
+              activeOpacity={0.7}
+            >
+              <ThemedText style={styles.aiRecognitionHeaderTitle}>
+                AI Recognized Text
+              </ThemedText>
+              <Ionicons
+                name={aiTextCollapsed ? 'chevron-forward' : 'chevron-down'}
+                size={18}
+                color={theme.TEXT_SECONDARY}
+              />
+            </TouchableOpacity>
+            {!aiTextCollapsed && (
+              <View style={styles.aiTagsContainer}>
+                {textDetections.map((text) => (
+                  <TouchableOpacity
+                    key={text.Id}
+                    style={[
+                      styles.aiTag,
+                      { opacity: Math.min(text.Confidence / 100 + 0.3, 1) },
+                    ]}
+                    onPress={() => {
+                      setTriggerSearch(text.DetectedText)
+                      router.back()
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <ThemedText style={styles.aiTagText}>
+                      {text.DetectedText} {Math.round(text.Confidence)}%
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
         {moderationLabels?.length > 0 && (
           <View style={styles.aiRecognitionCard}>
-            <ThemedText style={styles.aiRecognitionModerationTitle}>
-              AI Moderation Tags
-            </ThemedText>
-            <View style={styles.aiTagsContainer}>
-              {moderationLabels.map((label) => (
-                <TouchableOpacity
-                  key={label.Name}
-                  style={[
-                    styles.aiModerationTag,
-                    { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
-                  ]}
-                  onPress={() => {
-                    // Trigger search using global state
-                    setTriggerSearch(label.Name)
-                    // Navigate back to main screen
-                    router.back()
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <ThemedText style={styles.aiModerationTagText}>
-                    {label.Name} {Math.round(label.Confidence)}%
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <TouchableOpacity
+              ref={aiModerationHeaderRef}
+              style={styles.aiRecognitionHeader}
+              onPress={() => {
+                const now = Date.now()
+                global.suppressEnsureVisibleUntil =
+                  global.suppressEnsureVisibleUntil || new Map()
+                global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
+                setAiModerationCollapsed((v) => !v)
+                scheduleHeightRecalc()
+                setTimeout(() => {
+                  try {
+                    if (typeof onRequestEnsureVisible === 'function') {
+                      const view = aiModerationHeaderRef.current
+                      if (view && view.measureInWindow) {
+                        view.measureInWindow((x, y, w, h) => {
+                          if (h > 0) {
+                            onRequestEnsureVisible({
+                              id: photo?.id,
+                              y,
+                              height: h,
+                              alignTop: true,
+                              topPadding: h,
+                            })
+                          }
+                        })
+                      }
+                    }
+                  } catch (e) {
+                    // ignore
+                  }
+                }, 80)
+              }}
+              activeOpacity={0.7}
+            >
+              <ThemedText
+                style={[
+                  styles.aiRecognitionHeaderTitle,
+                  { color: theme.STATUS_ERROR },
+                ]}
+              >
+                AI Moderation Tags
+              </ThemedText>
+              <Ionicons
+                name={
+                  aiModerationCollapsed ? 'chevron-forward' : 'chevron-down'
+                }
+                size={18}
+                color={theme.TEXT_SECONDARY}
+              />
+            </TouchableOpacity>
+            {!aiModerationCollapsed && (
+              <View style={styles.aiTagsContainer}>
+                {moderationLabels.map((label) => (
+                  <TouchableOpacity
+                    key={label.Name}
+                    style={[
+                      styles.aiModerationTag,
+                      { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
+                    ]}
+                    onPress={() => {
+                      setTriggerSearch(label.Name)
+                      router.back()
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <ThemedText style={styles.aiModerationTagText}>
+                      {label.Name} {Math.round(label.Confidence)}%
+                    </ThemedText>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -1332,6 +1516,7 @@ const Photo = ({
 
   return (
     <View
+      ref={containerRef}
       style={[
         styles.container,
         {
@@ -1387,6 +1572,7 @@ Photo.propTypes = {
   refreshKey: PropTypes.number,
   onHeightMeasured: PropTypes.func,
   embedded: PropTypes.bool,
+  onRequestEnsureVisible: PropTypes.func,
 }
 
 export default Photo

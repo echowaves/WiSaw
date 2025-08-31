@@ -316,6 +316,7 @@ const ExpandableThumb = ({
       <Photo
         photo={cleanPhoto}
         embedded={true} // Show close button when expanded
+        onRequestEnsureVisible={onRequestEnsureVisible}
         onHeightMeasured={(height) => {
           // Only report to masonry layout for dimension calculation, don't store locally
           if (height > 0) {
@@ -336,6 +337,11 @@ const ExpandableThumb = ({
               typeof onRequestEnsureVisible === 'function' &&
               containerRef.current
             ) {
+              // If suppression window is active for this photo (e.g., recognition toggle), skip scrolling
+              const until = global.suppressEnsureVisibleUntil?.get?.(item.id)
+              if (typeof until === 'number' && Date.now() < until) {
+                return
+              }
               setTimeout(() => {
                 try {
                   containerRef.current.measureInWindow((x, y, w, h) => {

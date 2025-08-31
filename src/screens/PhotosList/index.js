@@ -62,7 +62,7 @@ import * as reducer from './reducer'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
-import { getTheme } from '../../theme/sharedStyles'
+import { getTheme, HEADER_HEIGHTS } from '../../theme/sharedStyles'
 import {
   calculatePhotoDimensions,
   createFrozenPhoto,
@@ -332,14 +332,14 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Ensure the expanded photo is fully visible within the viewport
   const ensureItemVisible = React.useCallback(
-    ({ id, y, height: itemHeight }) => {
+    ({ id, y, height: itemHeight, alignTop = false, topPadding = 0 }) => {
       try {
         // y and height are in window coordinates; we want to ensure the full ImageView fits
         // Reserve safe margins for header and footer animations
-        const headerReserve = 70 // approx header height when visible
+        const headerReserve = HEADER_HEIGHTS.TOTAL_HEIGHT // exact app header height
         const footerReserve = FOOTER_HEIGHT + 10
 
-        const topSafe = headerReserve + 8
+        const topSafe = headerReserve
         const viewportHeight = height // from useWindowDimensions hook in this component
         const bottomBoundary = viewportHeight - footerReserve - 8
 
@@ -348,7 +348,11 @@ const PhotosList = ({ searchFromUrl }) => {
         const itemBottom = y + itemHeight
 
         let scrollDelta = 0
-        if (itemTop < topSafe) {
+        if (alignTop) {
+          // Snap the item's top to the top safe area plus requested padding
+          const desiredTop = topSafe + topPadding
+          scrollDelta = itemTop - desiredTop
+        } else if (itemTop < topSafe) {
           scrollDelta = itemTop - topSafe
         } else if (itemBottom > bottomBoundary) {
           scrollDelta = itemBottom - bottomBoundary
