@@ -29,8 +29,8 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  View,
   useWindowDimensions,
+  View,
 } from 'react-native'
 
 import {
@@ -329,6 +329,52 @@ const PhotosList = ({ searchFromUrl }) => {
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
   const masonryRef = React.useRef(null)
+
+  // Ensure the expanded photo is fully visible within the viewport
+  const ensureItemVisible = React.useCallback(
+    ({ id, y, height: itemHeight }) => {
+      try {
+        // y and height are in window coordinates; we want to ensure the full ImageView fits
+        // Reserve safe margins for header and footer animations
+        const headerReserve = 70 // approx header height when visible
+        const footerReserve = FOOTER_HEIGHT + 10
+
+        const topSafe = headerReserve + 8
+        const viewportHeight = height // from useWindowDimensions hook in this component
+        const bottomBoundary = viewportHeight - footerReserve - 8
+
+        // If top is above safe area or bottom is below safe area, compute scroll delta
+        const itemTop = y
+        const itemBottom = y + itemHeight
+
+        let scrollDelta = 0
+        if (itemTop < topSafe) {
+          scrollDelta = itemTop - topSafe
+        } else if (itemBottom > bottomBoundary) {
+          scrollDelta = itemBottom - bottomBoundary
+        }
+
+        if (scrollDelta !== 0 && masonryRef.current) {
+          const targetOffset = Math.max(
+            0,
+            (lastScrollY.current || 0) + scrollDelta,
+          )
+          // Try FlatList-like API first
+          if (typeof masonryRef.current.scrollToOffset === 'function') {
+            masonryRef.current.scrollToOffset({
+              offset: targetOffset,
+              animated: true,
+            })
+          } else if (typeof masonryRef.current.scrollTo === 'function') {
+            masonryRef.current.scrollTo({ y: targetOffset, animated: true })
+          }
+        }
+      } catch (e) {
+        // best-effort; ignore errors
+      }
+    },
+    [height],
+  )
 
   // Simplified scroll detection - only use viewable items to determine state
   const setHeaderState = (shouldBeCompact) => {
@@ -645,6 +691,7 @@ const PhotosList = ({ searchFromUrl }) => {
           onToggleExpand={handlePhotoToggle}
           expandedPhotoIds={expandedPhotoIds}
           updatePhotoHeight={updatePhotoHeight}
+          onRequestEnsureVisible={ensureItemVisible}
           showComments={shouldShowComments}
         />
       )

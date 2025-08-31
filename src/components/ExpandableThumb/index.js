@@ -68,6 +68,7 @@ const ExpandableThumb = ({
   expandedPhotoId,
   onUpdateDimensions,
   updatePhotoHeight,
+  onRequestEnsureVisible,
   showComments = false, // New prop to enable comment overlay
 }) => {
   const [isDark] = useAtom(isDarkMode)
@@ -77,6 +78,7 @@ const ExpandableThumb = ({
   const scaleValue = useRef(new Animated.Value(1)).current
   const expandValue = useRef(new Animated.Value(0)).current
   const [isAnimating, setIsAnimating] = useState(false)
+  const containerRef = useRef(null)
 
   // CRITICAL: Always use original dimensions to prevent mutation issues
   // Store original dimensions on first render and never update them
@@ -127,6 +129,26 @@ const ExpandableThumb = ({
         tension: 100,
         friction: 8,
       }).start(() => setIsAnimating(false))
+
+      // After animation starts, request to ensure visibility
+      // Give layout a tick to settle so measurements are accurate
+      setTimeout(() => {
+        try {
+          if (
+            containerRef.current &&
+            typeof onRequestEnsureVisible === 'function'
+          ) {
+            // Measure the container's position on screen
+            containerRef.current.measureInWindow((x, y, width, height) => {
+              if (height > 0) {
+                onRequestEnsureVisible({ id: item.id, y, height })
+              }
+            })
+          }
+        } catch (e) {
+          // noop – measurement best effort
+        }
+      }, 60)
     } else if (!isExpanded && !isAnimating) {
       setIsAnimating(true)
       Animated.spring(expandValue, {
@@ -308,6 +330,24 @@ const ExpandableThumb = ({
             if (onUpdateDimensions && isExpanded) {
               onUpdateDimensions(item.id, height)
             }
+
+            // After height is known, ensure the full ImageView is visible
+            if (
+              typeof onRequestEnsureVisible === 'function' &&
+              containerRef.current
+            ) {
+              setTimeout(() => {
+                try {
+                  containerRef.current.measureInWindow((x, y, w, h) => {
+                    if (h > 0) {
+                      onRequestEnsureVisible({ id: item.id, y, height: h })
+                    }
+                  })
+                } catch (e) {
+                  // best-effort
+                }
+              }, 30)
+            }
           }
         }}
       />
@@ -316,6 +356,7 @@ const ExpandableThumb = ({
 
   return (
     <View
+      ref={containerRef}
       style={{
         width: finalWidth,
         height: finalHeight,
@@ -393,6 +434,7 @@ ExpandableThumb.propTypes = {
   expandedPhotoId: PropTypes.string,
   onUpdateDimensions: PropTypes.func,
   updatePhotoHeight: PropTypes.func,
+  onRequestEnsureVisible: PropTypes.func,
 }
 
 ExpandableThumb.displayName = 'ExpandableThumb'
