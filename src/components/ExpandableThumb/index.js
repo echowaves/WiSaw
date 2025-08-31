@@ -155,6 +155,9 @@ const ExpandableThumb = ({
   }, [item.id])
 
   const handlePressIn = () => {
+    // Only provide visual feedback when collapsed
+    if (isExpanded) return
+
     Animated.spring(scaleValue, {
       toValue: 0.95,
       useNativeDriver: true,
@@ -162,6 +165,9 @@ const ExpandableThumb = ({
   }
 
   const handlePressOut = () => {
+    // Only provide visual feedback when collapsed
+    if (isExpanded) return
+
     Animated.spring(scaleValue, {
       toValue: 1,
       useNativeDriver: true,
@@ -169,10 +175,15 @@ const ExpandableThumb = ({
   }
 
   const onThumbPress = () => {
+    // Only allow expansion when collapsed, not collapse when expanded
+    if (isExpanded) {
+      return // Do nothing when expanded - only X button should collapse
+    }
+
     // Provide immediate haptic feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 
-    // Call the toggle function
+    // Call the toggle function to expand
     onToggleExpand(item.id)
   }
 
@@ -320,8 +331,8 @@ const ExpandableThumb = ({
         onPress={onThumbPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        activeOpacity={0.9}
-        disabled={isAnimating}
+        activeOpacity={isExpanded ? 1 : 0.9} // No opacity change when expanded
+        disabled={isAnimating || isExpanded} // Disable interaction when expanded
         style={{ flex: 1 }}
       >
         <Animated.View
