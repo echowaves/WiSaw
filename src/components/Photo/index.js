@@ -303,7 +303,7 @@ const createStyles = (theme) =>
       elevation: 6,
       minWidth: 80,
       height: 36,
-      gap: 6,
+      gap: 2,
     },
     actionButtonDisabled: {
       backgroundColor: theme.BACKGROUND,
