@@ -312,6 +312,12 @@ const PhotosList = ({ searchFromUrl }) => {
   // Callback to update height refs when Photo components measure themselves
   const updatePhotoHeight = useCallback((photoId, height) => {
     photoHeightRefs.current.set(photoId, height)
+    // Force a re-render by updating the measured heights state
+    setMeasuredHeights((current) => {
+      const updated = new Map(current)
+      updated.set(photoId, height)
+      return updated
+    })
   }, [])
 
   // Keep only a simple scroll position ref to support ensureItemVisible without driving UI state
@@ -524,7 +530,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
       // For expanded photos, try to use real-time measured height
       if (isExpanded) {
-        const currentHeight = photoHeightRefs.current.get(photo.id)
+        const currentHeight =
+          measuredHeights.get(photo.id) || photoHeightRefs.current.get(photo.id)
         if (currentHeight) {
           const result = {
             width: screenWidth,
@@ -548,7 +555,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
       return result
     },
-    [isPhotoExpanded, width, segmentConfig],
+    [isPhotoExpanded, width, segmentConfig, measuredHeights],
   )
 
   // Function to handle photo expansion toggle - now supports multiple expanded photos
