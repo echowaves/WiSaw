@@ -305,15 +305,17 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Real-time height tracking using refs (no state storage)
   const photoHeightRefs = useRef(new Map())
+  // Anchor scrolling: track the last expanded photo id and prevent competing scrolls
+  const lastExpandedIdRef = useRef(null)
+  const scrollingInProgressRef = useRef(false)
 
   // Callback to update height refs when Photo components measure themselves
   const updatePhotoHeight = useCallback((photoId, height) => {
     photoHeightRefs.current.set(photoId, height)
   }, [])
 
-  const [textVisible, setTextVisible] = useState(true)
-  const textAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
-  const headerHeightAnimation = React.useRef(new Animated.Value(1)).current // Start full: 1 = full height, 0 = compact height
+  // Keep only a simple scroll position ref to support ensureItemVisible without driving UI state
+  const headerScrollYRef = React.useRef(0)
   const searchBarRef = React.useRef(null)
 
   // Animation states for pending photos
@@ -321,10 +323,8 @@ const PhotosList = ({ searchFromUrl }) => {
   const uploadIconAnimation = React.useRef(new Animated.Value(1)).current // For pulsing upload icon
   const [previousPendingCount, setPreviousPendingCount] = useState(0)
 
-  // Footer animation states
-  const footerAnimation = React.useRef(new Animated.Value(1)).current // 1 = visible, 0 = hidden
-  const lastScrollY = React.useRef(0) // Track scroll position
-  const scrollDirection = React.useRef('up') // Track scroll direction
+  // Track scroll position for inline ensureItemVisible calculations
+  const lastScrollY = React.useRef(0)
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
 
@@ -334,34 +334,27 @@ const PhotosList = ({ searchFromUrl }) => {
   const ensureItemVisible = React.useCallback(
     ({ id, y, height: itemHeight, alignTop = false, topPadding = 0 }) => {
       try {
-        // y and height are in window coordinates; we want to ensure the full ImageView fits
-        // Reserve safe margins for header and footer animations
-        const headerReserve = HEADER_HEIGHTS.TOTAL_HEIGHT // exact app header height
-        const footerReserve = FOOTER_HEIGHT + 10
-
-        const topSafe = headerReserve
-        const viewportHeight = height // from useWindowDimensions hook in this component
-        const bottomBoundary = viewportHeight - footerReserve - 8
-
-        // If top is above safe area or bottom is below safe area, compute scroll delta
-        const itemTop = y
-        const itemBottom = y + itemHeight
-
-        let scrollDelta = 0
-        if (alignTop) {
-          // Snap the item's top to the top safe area plus requested padding
-          const desiredTop = topSafe + topPadding
-          scrollDelta = itemTop - desiredTop
-        } else if (itemTop < topSafe) {
-          scrollDelta = itemTop - topSafe
-        } else if (itemBottom > bottomBoundary) {
-          scrollDelta = itemBottom - bottomBoundary
+        // Only auto-scroll when this callback is for the last expanded photo
+        if (lastExpandedIdRef.current !== id) {
+          return
         }
 
-        if (scrollDelta !== 0 && masonryRef.current) {
+        // Prevent competing scrolls
+        if (scrollingInProgressRef.current) {
+          return
+        }
+
+        // Prefer a simple anchor scroll for the last expanded item: align its top under the header
+        const headerReserve = HEADER_HEIGHTS.TOTAL_HEIGHT
+        const snapPadding = topPadding || 8
+
+        if (masonryRef.current) {
+          scrollingInProgressRef.current = true
+
+          // y is window-relative; convert to absolute content offset by adding current scrollY
           const targetOffset = Math.max(
             0,
-            (lastScrollY.current || 0) + scrollDelta,
+            (lastScrollY.current || 0) + y - headerReserve - snapPadding,
           )
           // Try FlatList-like API first
           if (typeof masonryRef.current.scrollToOffset === 'function') {
@@ -372,81 +365,28 @@ const PhotosList = ({ searchFromUrl }) => {
           } else if (typeof masonryRef.current.scrollTo === 'function') {
             masonryRef.current.scrollTo({ y: targetOffset, animated: true })
           }
+
+          // Clear anchor target and scrolling flag after a delay to allow scroll to complete
+          setTimeout(() => {
+            lastExpandedIdRef.current = null
+            scrollingInProgressRef.current = false
+          }, 500)
         }
       } catch (e) {
         // best-effort; ignore errors
+        scrollingInProgressRef.current = false
       }
     },
     [height],
   )
 
-  // Simplified scroll detection - only use viewable items to determine state
-  const setHeaderState = (shouldBeCompact) => {
-    const targetValue = shouldBeCompact ? 0 : 1
-
-    // Only animate if the state is actually changing
-    if (headerHeightAnimation._value !== targetValue) {
-      setTextVisible(!shouldBeCompact)
-
-      Animated.timing(textAnimation, {
-        toValue: shouldBeCompact ? 0 : 1,
-        duration: 250,
-        useNativeDriver: true,
-      }).start()
-
-      Animated.timing(headerHeightAnimation, {
-        toValue: targetValue,
-        duration: 250,
-        useNativeDriver: false,
-      }).start()
-    }
-  }
-
-  const onViewRef = React.useRef((viewableItems) => {
-    const currentViewableItems =
-      viewableItems.viewableItems ||
-      viewableItems.changed?.filter((item) => item.isViewable) ||
-      []
-
-    if (currentViewableItems.length > 0) {
-      // Check if the first item (index 0) is visible
-      const firstItemVisible = currentViewableItems.some(
-        (item) => item.index === 0,
-      )
-
-      // Simple two-state logic: compact if first item not visible, full if first item visible
-      setHeaderState(!firstItemVisible)
-
-      // Keep the original functionality for tracking last viewable row
-      const lastVisibleItem = currentViewableItems.reduce((max, current) => {
-        return current.index > max.index ? current : max
-      })
-      if (lastVisibleItem && lastVisibleItem.index !== undefined) {
-        setLastViewableRow(lastVisibleItem.index)
-      }
-    }
-  })
+  // Remove viewability-driven header/footer toggling to reduce jank
 
   useEffect(() => {
     setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
   }, [unreadCountList])
 
-  // Monitor photosList and ensure header is in correct state
-  useEffect(() => {
-    // If there are no photos or very few photos, keep header in full mode
-    if (!photosList || photosList.length === 0) {
-      setHeaderState(false) // false = full header
-
-      // Also ensure the footer is visible when list is empty/reset
-      if (footerAnimation._value !== 1) {
-        Animated.timing(footerAnimation, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }).start()
-      }
-    }
-  }, [photosList])
+  // No header/footer state changes based on photosList size
 
   // Animation effect for pending photos
   useEffect(() => {
@@ -635,9 +575,14 @@ const PhotosList = ({ searchFromUrl }) => {
             updated.delete(photoId)
             return updated
           })
+          if (lastExpandedIdRef.current === photoId) {
+            lastExpandedIdRef.current = null
+          }
         } else {
           // Photo is currently collapsed, expand it
           newIds.add(photoId)
+          // Mark this id as the anchor target for the next ensureItemVisible call
+          lastExpandedIdRef.current = photoId
         }
 
         return newIds
@@ -713,25 +658,7 @@ const PhotosList = ({ searchFromUrl }) => {
     ],
   )
 
-  const wantToLoadMore = () => {
-    if (stopLoading) {
-      return false
-    }
-    if (photosList.length === 0) {
-      return true
-    }
-
-    // Conservative check for preemptive loading
-    // This is used for background preloading, not for onEndReached
-    const screenColumns = width / thumbDimension
-    const screenRows = height / thumbDimension
-    const totalNumRows = photosList.length / screenColumns
-
-    // Only preload when we're within 2 screens of the end
-    const shouldLoad = lastViewableRow + screenRows * 2 >= totalNumRows
-
-    return shouldLoad
-  }
+  // Preloading disabled for consistency; rely on onEndReached
 
   const load = async (segmentOverride = null, searchTermOverride = null) => {
     setLoading(true)
@@ -920,15 +847,6 @@ const PhotosList = ({ searchFromUrl }) => {
     setPageNumber(null)
     setPhotosList([])
 
-    // Show footer when photosList is reloaded/reset
-    if (footerAnimation._value !== 1) {
-      Animated.timing(footerAnimation, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start()
-    }
-
     // setPageNumber(null)
     // setStopLoading(false)
     setPageNumber(0)
@@ -988,32 +906,8 @@ const PhotosList = ({ searchFromUrl }) => {
   const renderCustomHeader = () => {
     const segmentTitles = ['Global', 'Starred', 'Search']
 
-    // Calculate dynamic header height: compact when scrolled, appropriately sized at top
-    const animatedHeaderHeight = headerHeightAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: [50, 70], // Compact: 50px, Full: 70px (reduced from 90px)
-    })
-
-    // Calculate dynamic segment button padding: smaller when scrolled, just enough for icon+text at top
-    const animatedButtonPaddingVertical = headerHeightAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: [8, 8], // Keep vertical padding consistent - text goes below icon
-    })
-
-    const animatedButtonPaddingHorizontal = headerHeightAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: [20, 20], // Keep horizontal padding consistent for width
-    })
-
-    const animatedButtonWidth = headerHeightAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: [90, 90], // Further increased width to prevent text wrapping - exactly the same for both states
-    })
-
-    const animatedControlPadding = headerHeightAnimation.interpolate({
-      inputRange: [0, 1],
-      outputRange: [4, 4], // Keep control padding consistent
-    })
+    // Static dimensions to avoid extra work during scroll
+    const headerHeight = 60
 
     return (
       <SafeAreaView
@@ -1032,9 +926,9 @@ const PhotosList = ({ searchFromUrl }) => {
           paddingTop: 0,
         }}
       >
-        <Animated.View
+        <View
           style={{
-            height: animatedHeaderHeight,
+            height: headerHeight,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1053,22 +947,15 @@ const PhotosList = ({ searchFromUrl }) => {
 
           {/* Center: Three segment control */}
           <View style={styles.headerContainer}>
-            <Animated.View
-              style={[
-                styles.customSegmentedControl,
-                {
-                  padding: animatedControlPadding,
-                },
-              ]}
-            >
-              <Animated.View
+            <View style={[styles.customSegmentedControl, { padding: 4 }]}>
+              <View
                 style={[
                   styles.segmentButton,
                   activeSegment === 0 && styles.activeSegmentButton,
                   {
-                    paddingVertical: animatedButtonPaddingVertical,
-                    paddingHorizontal: animatedButtonPaddingHorizontal,
-                    width: animatedButtonWidth,
+                    paddingVertical: 8,
+                    paddingHorizontal: 20,
+                    width: 90,
                   },
                 ]}
               >
@@ -1090,41 +977,30 @@ const PhotosList = ({ searchFromUrl }) => {
                         : theme.TEXT_SECONDARY
                     }
                   />
-                  {textVisible && (
-                    <Animated.Text
-                      style={[
-                        styles.segmentText,
-                        {
-                          color:
-                            activeSegment === 0
-                              ? theme.TEXT_PRIMARY
-                              : theme.TEXT_SECONDARY,
-                          opacity: textAnimation,
-                          transform: [
-                            {
-                              translateY: textAnimation.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [10, 0],
-                              }),
-                            },
-                          ],
-                        },
-                      ]}
-                    >
-                      {segmentTitles[0]}
-                    </Animated.Text>
-                  )}
+                  <Text
+                    style={[
+                      styles.segmentText,
+                      {
+                        color:
+                          activeSegment === 0
+                            ? theme.TEXT_PRIMARY
+                            : theme.TEXT_SECONDARY,
+                      },
+                    ]}
+                  >
+                    {segmentTitles[0]}
+                  </Text>
                 </TouchableOpacity>
-              </Animated.View>
+              </View>
 
-              <Animated.View
+              <View
                 style={[
                   styles.segmentButton,
                   activeSegment === 1 && styles.activeSegmentButton,
                   {
-                    paddingVertical: animatedButtonPaddingVertical,
-                    paddingHorizontal: animatedButtonPaddingHorizontal,
-                    width: animatedButtonWidth,
+                    paddingVertical: 8,
+                    paddingHorizontal: 20,
+                    width: 90,
                   },
                 ]}
               >
@@ -1146,41 +1022,30 @@ const PhotosList = ({ searchFromUrl }) => {
                         : theme.TEXT_SECONDARY
                     }
                   />
-                  {textVisible && (
-                    <Animated.Text
-                      style={[
-                        styles.segmentText,
-                        {
-                          color:
-                            activeSegment === 1
-                              ? theme.TEXT_PRIMARY
-                              : theme.TEXT_SECONDARY,
-                          opacity: textAnimation,
-                          transform: [
-                            {
-                              translateY: textAnimation.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [10, 0],
-                              }),
-                            },
-                          ],
-                        },
-                      ]}
-                    >
-                      {segmentTitles[1]}
-                    </Animated.Text>
-                  )}
+                  <Text
+                    style={[
+                      styles.segmentText,
+                      {
+                        color:
+                          activeSegment === 1
+                            ? theme.TEXT_PRIMARY
+                            : theme.TEXT_SECONDARY,
+                      },
+                    ]}
+                  >
+                    {segmentTitles[1]}
+                  </Text>
                 </TouchableOpacity>
-              </Animated.View>
+              </View>
 
-              <Animated.View
+              <View
                 style={[
                   styles.segmentButton,
                   activeSegment === 2 && styles.activeSegmentButton,
                   {
-                    paddingVertical: animatedButtonPaddingVertical,
-                    paddingHorizontal: animatedButtonPaddingHorizontal,
-                    width: animatedButtonWidth,
+                    paddingVertical: 8,
+                    paddingHorizontal: 20,
+                    width: 90,
                   },
                 ]}
               >
@@ -1202,35 +1067,24 @@ const PhotosList = ({ searchFromUrl }) => {
                         : theme.TEXT_SECONDARY
                     }
                   />
-                  {textVisible && (
-                    <Animated.Text
-                      style={[
-                        styles.segmentText,
-                        {
-                          color:
-                            activeSegment === 2
-                              ? theme.TEXT_PRIMARY
-                              : theme.TEXT_SECONDARY,
-                          opacity: textAnimation,
-                          transform: [
-                            {
-                              translateY: textAnimation.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [10, 0],
-                              }),
-                            },
-                          ],
-                        },
-                      ]}
-                    >
-                      {segmentTitles[2]}
-                    </Animated.Text>
-                  )}
+                  <Text
+                    style={[
+                      styles.segmentText,
+                      {
+                        color:
+                          activeSegment === 2
+                            ? theme.TEXT_PRIMARY
+                            : theme.TEXT_SECONDARY,
+                      },
+                    ]}
+                  >
+                    {segmentTitles[2]}
+                  </Text>
                 </TouchableOpacity>
-              </Animated.View>
-            </Animated.View>
+              </View>
+            </View>
           </View>
-        </Animated.View>
+        </View>
         {loading && (
           <View
             style={{
@@ -1481,10 +1335,7 @@ const PhotosList = ({ searchFromUrl }) => {
     // updateNavBar() // No longer needed with custom header
   }, [activeSegment])
 
-  // Update navigation bar when text visibility changes
-  useEffect(() => {
-    // updateNavBar() // No longer needed with custom header
-  }, [textVisible])
+  // Removed: no header text visibility effect
 
   useEffect(() => {
     if (pageNumber !== null) {
@@ -1575,73 +1426,9 @@ const PhotosList = ({ searchFromUrl }) => {
   const renderThumbs = () => {
     const config = segmentConfig
 
-    // Handle scroll events to show/hide footer
+    // Lightweight onScroll: keep lastScrollY for ensureItemVisible; avoid UI work during scroll
     const handleScroll = (event) => {
-      const currentScrollY = event.nativeEvent.contentOffset.y
-      const contentHeight = event.nativeEvent.contentSize.height
-      const scrollViewHeight = event.nativeEvent.layoutMeasurement.height
-      const threshold = 5 // Reduced threshold for more responsive hiding
-
-      // Calculate if we're near the bottom (within 50px of the bottom)
-      const isNearBottom =
-        currentScrollY + scrollViewHeight >= contentHeight - 50
-
-      // HIGHEST PRIORITY: Always show footer when at the very top (0-10px)
-      if (currentScrollY <= 10) {
-        if (footerAnimation._value !== 1) {
-          Animated.timing(footerAnimation, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-          }).start()
-        }
-        lastScrollY.current = currentScrollY
-        return
-      }
-
-      // SECOND PRIORITY: Always hide footer when at the bottom
-      if (isNearBottom) {
-        if (footerAnimation._value !== 0) {
-          Animated.timing(footerAnimation, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }).start()
-        }
-        lastScrollY.current = currentScrollY
-        return
-      }
-
-      // Skip if scroll distance is too small
-      if (Math.abs(currentScrollY - lastScrollY.current) < threshold) {
-        return
-      }
-
-      const scrollingDown = currentScrollY > lastScrollY.current
-      const currentDirection = scrollingDown ? 'down' : 'up'
-
-      // Always hide immediately when scrolling down (no position restrictions)
-      if (scrollingDown) {
-        if (footerAnimation._value !== 0) {
-          Animated.timing(footerAnimation, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }).start()
-        }
-      } else {
-        // Show footer when scrolling up (unless at bottom)
-        if (footerAnimation._value !== 1) {
-          Animated.timing(footerAnimation, {
-            toValue: 1,
-            duration: 200,
-            useNativeDriver: true,
-          }).start()
-        }
-      }
-
-      scrollDirection.current = currentDirection
-      lastScrollY.current = currentScrollY
+      lastScrollY.current = event?.nativeEvent?.contentOffset?.y || 0
     }
 
     return (
@@ -1695,11 +1482,7 @@ const PhotosList = ({ searchFromUrl }) => {
           }
         }}
         onEndReachedThreshold={0.2}
-        onViewableItemsChanged={onViewRef.current}
-        viewabilityConfig={{
-          itemVisiblePercentThreshold: 5, // More sensitive - triggers when only 5% visible
-          minimumViewTime: 50, // Shorter time to register changes
-        }}
+        // Remove viewability-driven state updates to reduce re-renders
         // Add validation callback to detect mutations after masonry operations
         onLayout={() => {
           if (__DEV__) {
@@ -1717,9 +1500,9 @@ const PhotosList = ({ searchFromUrl }) => {
         }}
         scrollEventThrottle={16}
         initialNumToRender={8}
-        maxToRenderPerBatch={10}
-        windowSize={15}
-        updateCellsBatchingPeriod={50}
+        maxToRenderPerBatch={8}
+        windowSize={9}
+        updateCellsBatchingPeriod={32}
         style={{
           ...styles.container,
           flex: 1, // Allow the scroll area to take full available height
@@ -1728,7 +1511,7 @@ const PhotosList = ({ searchFromUrl }) => {
           paddingBottom: FOOTER_HEIGHT + 20, // Add padding to ensure content is visible above footer
         }}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={false}
+        removeClippedSubviews
       />
     )
   }
@@ -1738,7 +1521,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
     return (
       location && (
-        <Animated.View
+        <View
           style={{
             backgroundColor: theme.CARD_BACKGROUND,
             width,
@@ -1752,14 +1535,6 @@ const PhotosList = ({ searchFromUrl }) => {
             shadowRadius: 8,
             elevation: 14,
             zIndex: 14,
-            transform: [
-              {
-                translateY: footerAnimation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [FOOTER_HEIGHT, 0], // Slide down completely to hide footer entirely
-                }),
-              },
-            ],
           }}
         >
           <SafeAreaView
@@ -1887,7 +1662,7 @@ const PhotosList = ({ searchFromUrl }) => {
               </TouchableOpacity>
             </View>
           </SafeAreaView>
-        </Animated.View>
+        </View>
       )
     )
   }
