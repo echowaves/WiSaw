@@ -262,7 +262,14 @@ const ExpandableThumb = ({
   }
 
   const renderCollapsedThumb = () => (
-    <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, flex: 1 }}>
+    <View
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 20,
+        flex: 1,
+      }}
+    >
       <CachedImage
         source={{ uri: item.thumbUrl }}
         cacheKey={`${item.id}-thumb`}
@@ -319,45 +326,45 @@ const ExpandableThumb = ({
           embedded={true} // Show close button when expanded
           onRequestEnsureVisible={onRequestEnsureVisible}
           onHeightMeasured={(height) => {
-          // Only report to masonry layout for dimension calculation, don't store locally
-          if (height > 0) {
-            // Removed debug logging to reduce console noise
+            // Only report to masonry layout for dimension calculation, don't store locally
+            if (height > 0) {
+              // Removed debug logging to reduce console noise
 
-            // Update the height refs for masonry layout dimension calculation
-            if (updatePhotoHeight) {
-              updatePhotoHeight(item.id, height)
-            }
-
-            // Legacy callback support (keeping for backward compatibility)
-            if (onUpdateDimensions && isExpanded) {
-              onUpdateDimensions(item.id, height)
-            }
-
-            // After height is known, ensure the full ImageView is visible
-            if (
-              typeof onRequestEnsureVisible === 'function' &&
-              containerRef.current
-            ) {
-              // If suppression window is active for this photo (e.g., recognition toggle), skip scrolling
-              const until = global.suppressEnsureVisibleUntil?.get?.(item.id)
-              if (typeof until === 'number' && Date.now() < until) {
-                return
+              // Update the height refs for masonry layout dimension calculation
+              if (updatePhotoHeight) {
+                updatePhotoHeight(item.id, height)
               }
-              setTimeout(() => {
-                try {
-                  containerRef.current.measureInWindow((x, y, w, h) => {
-                    if (h > 0) {
-                      onRequestEnsureVisible({ id: item.id, y, height: h })
-                    }
-                  })
-                } catch (e) {
-                  // best-effort
+
+              // Legacy callback support (keeping for backward compatibility)
+              if (onUpdateDimensions && isExpanded) {
+                onUpdateDimensions(item.id, height)
+              }
+
+              // After height is known, ensure the full ImageView is visible
+              if (
+                typeof onRequestEnsureVisible === 'function' &&
+                containerRef.current
+              ) {
+                // If suppression window is active for this photo (e.g., recognition toggle), skip scrolling
+                const until = global.suppressEnsureVisibleUntil?.get?.(item.id)
+                if (typeof until === 'number' && Date.now() < until) {
+                  return
                 }
-              }, 30)
+                setTimeout(() => {
+                  try {
+                    containerRef.current.measureInWindow((x, y, w, h) => {
+                      if (h > 0) {
+                        onRequestEnsureVisible({ id: item.id, y, height: h })
+                      }
+                    })
+                  } catch (e) {
+                    // best-effort
+                  }
+                }, 30)
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
       </View>
     )
   }
