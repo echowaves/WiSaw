@@ -25,13 +25,25 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   const baseWidth = containerWidth || screenWidth
   const imageWidth = embedded
     ? Math.min(baseWidth, screenWidth - 40)
-    : baseWidth // Extra constraint in embedded mode
+    : baseWidth // In non-embedded mode, use the full container width (already accounts for margins)
   const imageHeight =
     photo && photo.width && photo.height
       ? (photo.height * imageWidth) / photo.width
-      : 0
+      : 300 // Fallback height if dimensions not available
 
-  // Removed debug logging to reduce console noise
+  // Debug logging for shared photo details
+  if (!embedded) {
+    console.log('🖼️ ImageView rendering with:', {
+      photoId: photo?.id,
+      imgUrl: photo?.imgUrl,
+      thumbUrl: photo?.thumbUrl,
+      photoWidth: photo?.width,
+      photoHeight: photo?.height,
+      imageWidth,
+      imageHeight,
+      embedded,
+    })
+  }
 
   const onPinchEvent = (event) => {
     router.push({

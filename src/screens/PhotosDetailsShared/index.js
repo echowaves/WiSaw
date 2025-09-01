@@ -69,6 +69,7 @@ const PhotosDetailsShared = ({ route }) => {
               getPhotoAllCurr(photoId: $photoId) {
                 photo {
                   id
+                  uuid
                   imgUrl
                   thumbUrl
                   videoUrl
@@ -76,6 +77,8 @@ const PhotosDetailsShared = ({ route }) => {
                   commentsCount
                   watchersCount
                   createdAt
+                  width
+                  height
                 }
               }
             }
@@ -86,6 +89,13 @@ const PhotosDetailsShared = ({ route }) => {
         })
       ).data.getPhotoAllCurr
       const { photo } = response
+      console.log('📸 SharedPhotoDetails loaded photo:', {
+        id: photo?.id,
+        imgUrl: photo?.imgUrl,
+        thumbUrl: photo?.thumbUrl,
+        width: photo?.width,
+        height: photo?.height,
+      })
       setItem(photo)
     } catch (err4) {
       // eslint-disable-next-line no-console
