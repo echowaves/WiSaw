@@ -262,14 +262,14 @@ const ExpandableThumb = ({
   }
 
   const renderCollapsedThumb = () => (
-    <View style={{ position: 'relative' }}>
+    <View style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, flex: 1 }}>
       <CachedImage
         source={{ uri: item.thumbUrl }}
         cacheKey={`${item.id}-thumb`}
         style={{
           width: thumbWidth,
           height: thumbHeight,
-          borderRadius: 8,
+          borderRadius: 20,
         }}
         resizeMode="cover"
       />
@@ -313,11 +313,12 @@ const ExpandableThumb = ({
     }
 
     return (
-      <Photo
-        photo={cleanPhoto}
-        embedded={true} // Show close button when expanded
-        onRequestEnsureVisible={onRequestEnsureVisible}
-        onHeightMeasured={(height) => {
+      <View style={{ overflow: 'hidden', borderRadius: 20, flex: 1 }}>
+        <Photo
+          photo={cleanPhoto}
+          embedded={true} // Show close button when expanded
+          onRequestEnsureVisible={onRequestEnsureVisible}
+          onHeightMeasured={(height) => {
           // Only report to masonry layout for dimension calculation, don't store locally
           if (height > 0) {
             // Removed debug logging to reduce console noise
@@ -357,6 +358,7 @@ const ExpandableThumb = ({
           }
         }}
       />
+      </View>
     )
   }
 
@@ -394,7 +396,16 @@ const ExpandableThumb = ({
               borderWidth: 0,
               borderColor: 'transparent',
               transform: [{ scale: scaleValue }],
-              overflow: 'hidden',
+              // Shadow properties for iOS
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 4,
+              },
+              shadowOpacity: 0.4,
+              shadowRadius: 6,
+              // Shadow property for Android
+              elevation: 8,
             },
           ]}
         >
