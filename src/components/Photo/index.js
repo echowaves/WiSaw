@@ -47,8 +47,12 @@ const createStyles = (theme) =>
     },
     // Image card container without padding
     imageCardContainer: {
-      ...SHARED_STYLES.containers.card,
-      padding: 0, // Remove padding so image fills entire card
+      // Full-bleed container to maximize image area
+      marginHorizontal: 0,
+      padding: 0,
+      backgroundColor: 'transparent',
+      borderRadius: 0,
+      overflow: 'hidden',
     },
     // Photo info card
     photoInfoCard: {
@@ -95,6 +99,9 @@ const createStyles = (theme) =>
       ...SHARED_STYLES.containers.card,
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
+      marginVertical: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
     },
     commentsHeader: {
       ...SHARED_STYLES.layout.row,
@@ -112,23 +119,24 @@ const createStyles = (theme) =>
     },
     commentCard: {
       backgroundColor: theme.CARD_BACKGROUND,
-      borderRadius: 16,
-      marginVertical: 8,
-      padding: 18,
+      borderRadius: 12,
+      marginVertical: 6,
+      paddingVertical: 6,
+      paddingHorizontal: 8,
       borderWidth: 1,
       borderColor: theme.CARD_BORDER,
-      borderLeftWidth: 4,
+      borderLeftWidth: 3,
       borderLeftColor: theme.STATUS_SUCCESS,
     },
     commentText: {
       ...SHARED_STYLES.text.primary,
-      lineHeight: 24,
-      marginBottom: 12,
+      lineHeight: 20,
+      marginBottom: 6,
     },
     commentMeta: {
       ...SHARED_STYLES.layout.spaceBetween,
-      marginTop: 12,
-      paddingTop: 12,
+      marginTop: 6,
+      paddingTop: 6,
       borderTopWidth: 1,
       borderTopColor: theme.CARD_BORDER,
     },
@@ -140,8 +148,8 @@ const createStyles = (theme) =>
       ...SHARED_STYLES.text.caption,
     },
     addCommentCard: {
-      marginVertical: 8,
-      marginHorizontal: 16,
+      marginVertical: 6,
+      marginHorizontal: 12,
       alignItems: 'center',
     },
     addCommentButton: {
@@ -180,24 +188,38 @@ const createStyles = (theme) =>
     },
     // Enhanced AI recognition cards
     aiRecognitionContainer: {
-      marginVertical: 8,
-      marginHorizontal: 16,
+      marginVertical: 6,
+      marginHorizontal: 12,
     },
     aiRecognitionCard: {
       ...SHARED_STYLES.containers.card,
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
+      marginVertical: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
     },
     aiRecognitionHeader: {
       ...SHARED_STYLES.layout.row,
       ...SHARED_STYLES.layout.separator,
+      // Minimize top/bottom spacing for header area
+      marginVertical: 6,
+      paddingBottom: 6,
+    },
+    // Compact separator variant to remove space below the line when collapsed
+    aiHeaderTight: {
+      marginBottom: 0,
+      paddingBottom: 0,
     },
     aiRecognitionHeaderTitle: {
       ...SHARED_STYLES.text.heading,
       marginLeft: 8,
       textAlign: 'left',
       flex: 1,
+      marginTop: 0,
       marginBottom: 0,
+      // Keep header text compact vertically
+      lineHeight: 20,
     },
     aiRecognitionTitle: {
       ...SHARED_STYLES.text.heading,
@@ -262,10 +284,10 @@ const createStyles = (theme) =>
     // Action card styles
     actionCard: {
       ...SHARED_STYLES.containers.card,
-      backgroundColor: theme.SURFACE, // Use darker surface color for action card
+      backgroundColor: theme.SURFACE,
       marginVertical: 4,
-      marginTop: 24, // Increase space from header significantly
-      padding: 8,
+      marginTop: 8,
+      padding: 6,
     },
     actionHeader: {
       ...SHARED_STYLES.layout.row,
@@ -280,29 +302,29 @@ const createStyles = (theme) =>
       flexWrap: 'wrap',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 10,
-      paddingHorizontal: 4,
+      gap: 8,
+      paddingHorizontal: 2,
     },
     actionButton: {
       backgroundColor: `${theme.STATUS_SUCCESS}15`,
-      borderRadius: 25,
+      borderRadius: 20,
       paddingHorizontal: 3,
       paddingVertical: 2,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 1.5,
+      borderWidth: 1,
       borderColor: `${theme.STATUS_SUCCESS}40`,
       shadowColor: theme.STATUS_SUCCESS,
       shadowOffset: {
         width: 0,
         height: 3,
       },
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
-      elevation: 6,
-      minWidth: 80,
-      height: 36,
+      shadowOpacity: 0.2,
+      shadowRadius: 3,
+      elevation: 3,
+      minWidth: 72,
+      height: 32,
       gap: 2,
     },
     actionButtonDisabled: {
@@ -320,8 +342,8 @@ const createStyles = (theme) =>
       letterSpacing: 0.3,
     },
     loadingProgress: {
-      marginHorizontal: 16,
-      marginVertical: 8,
+      marginHorizontal: 12,
+      marginVertical: 6,
       height: 4,
       borderRadius: 2,
     },
@@ -351,8 +373,8 @@ const Photo = ({
   const screenWidth = dimensions.width
   const screenHeight = dimensions.height || 800 // Fallback to reasonable height
 
-  // Header offset: add space for header when embedded, no offset when not embedded (standalone)
-  const headerOffset = embedded === false ? 100 : 0
+  // Header offset: use safe area when not embedded
+  const headerOffset = embedded === false ? Math.max(insets.top, 8) : 0
 
   const componentIsMounted = useRef(true)
 
@@ -724,12 +746,16 @@ const Photo = ({
                           friendsList,
                         })}
                       </ThemedText>
-                      <ThemedText style={styles.commentDate}>
-                        {renderDateTime(comment.updatedAt)}
-                      </ThemedText>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <ThemedText style={styles.commentDate}>
+                          {renderDateTime(comment.updatedAt)}
+                        </ThemedText>
+                        {renderCommentButtons({ comment })}
+                      </View>
                     </View>
                   )}
-                  {renderCommentButtons({ comment })}
                 </View>
               </TouchableOpacity>
             ))}
@@ -799,7 +825,10 @@ const Photo = ({
           <View style={styles.aiRecognitionCard}>
             <TouchableOpacity
               ref={aiTagsHeaderRef}
-              style={styles.aiRecognitionHeader}
+              style={[
+                styles.aiRecognitionHeader,
+                aiTagsCollapsed && styles.aiHeaderTight,
+              ]}
               onPress={() => {
                 // Suppress auto-scroll for a short window to cover multiple height reports
                 const now = Date.now()
@@ -872,7 +901,10 @@ const Photo = ({
           <View style={styles.aiRecognitionCard}>
             <TouchableOpacity
               ref={aiTextHeaderRef}
-              style={styles.aiRecognitionHeader}
+              style={[
+                styles.aiRecognitionHeader,
+                aiTextCollapsed && styles.aiHeaderTight,
+              ]}
               onPress={() => {
                 const now = Date.now()
                 global.suppressEnsureVisibleUntil =
@@ -943,7 +975,10 @@ const Photo = ({
           <View style={styles.aiRecognitionCard}>
             <TouchableOpacity
               ref={aiModerationHeaderRef}
-              style={styles.aiRecognitionHeader}
+              style={[
+                styles.aiRecognitionHeader,
+                aiModerationCollapsed && styles.aiHeaderTight,
+              ]}
               onPress={() => {
                 const now = Date.now()
                 global.suppressEnsureVisibleUntil =
@@ -1123,7 +1158,9 @@ const Photo = ({
         styles.actionCard,
         {
           // Add top margin when close button is visible (embedded mode)
-          marginTop: embedded ? insets.top + 5 : 60,
+          marginTop: embedded
+            ? Math.max(insets.top * 0.5, 8)
+            : Math.max(insets.top, 8),
         },
       ]}
     >
@@ -1322,7 +1359,7 @@ const Photo = ({
     if (!photo.video) {
       // Calculate available width after horizontal margins only (no card padding)
       // Card has marginHorizontal: 16, so total reduction is 32px
-      const containerWidth = embedded ? screenWidth - 32 : screenWidth - 32
+      const containerWidth = screenWidth
 
       return (
         <View style={styles.imageCardContainer}>
@@ -1342,7 +1379,7 @@ const Photo = ({
     let videoWidth = videoHeight * aspectRatio
 
     // If calculated width exceeds container width, scale down
-    const containerWidth = embedded ? screenWidth - 32 : screenWidth - 32
+    const containerWidth = screenWidth
     if (videoWidth > containerWidth) {
       videoWidth = containerWidth
       videoHeight = videoWidth / aspectRatio
@@ -1542,7 +1579,7 @@ const Photo = ({
           style={[
             styles.loadingProgress,
             {
-              marginHorizontal: 16,
+              marginHorizontal: 12,
               marginVertical: 0,
               height: 4,
               borderRadius: 2,

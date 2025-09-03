@@ -23,9 +23,8 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   // Use containerWidth if provided, otherwise fall back to screenWidth
   // In embedded mode, we might want to constrain the image size differently
   const baseWidth = containerWidth || screenWidth
-  const imageWidth = embedded
-    ? Math.min(baseWidth, screenWidth - 40)
-    : baseWidth // In non-embedded mode, use the full container width (already accounts for margins)
+  // Use the provided containerWidth without extra shrink to avoid whitespace
+  const imageWidth = baseWidth
   const imageHeight =
     photo && photo.width && photo.height
       ? (photo.height * imageWidth) / photo.width
@@ -72,10 +71,9 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   const imageContainerStyle = {
     width: '100%',
     height: imageHeight,
-    borderRadius: 20,
+    borderRadius: 0,
     overflow: 'hidden',
-    backgroundColor: 'transparent', // Let parent card handle background
-    // Remove shadows and styling since parent card handles it
+    backgroundColor: 'transparent',
   }
 
   return (
