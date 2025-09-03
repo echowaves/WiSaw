@@ -59,6 +59,10 @@ const createStyles = (theme) =>
       ...SHARED_STYLES.containers.infoCard,
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
+      // Match recognition card spacing
+      marginVertical: 6,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
     },
     headerInfo: {
       backgroundColor: 'transparent',
@@ -70,6 +74,9 @@ const createStyles = (theme) =>
     authorRow: {
       ...SHARED_STYLES.layout.spaceBetween,
       ...SHARED_STYLES.layout.separator,
+      // Tighten separator spacing to match recognition headers
+      marginVertical: 6,
+      paddingBottom: 6,
     },
     authorName: {
       ...SHARED_STYLES.text.heading,
@@ -85,8 +92,8 @@ const createStyles = (theme) =>
     statsRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 8,
-      paddingTop: 8,
+      marginTop: 6,
+      paddingTop: 6,
     },
     statItem: {
       ...SHARED_STYLES.interactive.statItem,
@@ -304,6 +311,7 @@ const createStyles = (theme) =>
       alignItems: 'center',
       gap: 8,
       paddingHorizontal: 2,
+  marginTop: 10,
     },
     actionButton: {
       backgroundColor: `${theme.STATUS_SUCCESS}15`,
