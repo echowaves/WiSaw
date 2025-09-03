@@ -311,7 +311,7 @@ const createStyles = (theme) =>
       alignItems: 'center',
       gap: 8,
       paddingHorizontal: 2,
-  marginTop: 10,
+      marginTop: 18,
     },
     actionButton: {
       backgroundColor: `${theme.STATUS_SUCCESS}15`,
