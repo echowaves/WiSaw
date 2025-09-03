@@ -336,6 +336,40 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const masonryRef = React.useRef(null)
 
+  // Reset anchor/scroll-related state to avoid stale offsets when switching segments
+  const resetAnchorState = React.useCallback(() => {
+    try {
+      // Clear anchor targets and scrolling flags
+      lastExpandedIdRef.current = null
+      scrollingInProgressRef.current = false
+
+      // Reset scroll refs used in calculations
+      lastScrollY.current = 0
+      headerScrollYRef.current = 0
+
+      // Clear any measured height caches so layout recalculates cleanly
+      setMeasuredHeights(new Map())
+      photoHeightRefs.current = new Map()
+
+      // Collapse any expanded photos
+      setExpandedPhotoIds(new Set())
+
+      // Clear pending scroll target
+      if (scrollToIndex !== null) setScrollToIndex(null)
+
+      // Scroll list to top synchronously to normalize offsets
+      if (masonryRef.current) {
+        if (typeof masonryRef.current.scrollToOffset === 'function') {
+          masonryRef.current.scrollToOffset({ offset: 0, animated: false })
+        } else if (typeof masonryRef.current.scrollTo === 'function') {
+          masonryRef.current.scrollTo({ y: 0, animated: false })
+        }
+      }
+    } catch (e) {
+      // best-effort reset
+    }
+  }, [scrollToIndex])
+
   // Ensure the expanded photo is fully visible within the viewport
   const ensureItemVisible = React.useCallback(
     ({ id, y, height: itemHeight, alignTop = false, topPadding = 0 }) => {
@@ -892,6 +926,9 @@ const PhotosList = ({ searchFromUrl }) => {
 
     // Only clear photos and reset if actually switching segments
     if (activeSegment !== index) {
+      // Reset scroll/anchor caches so new segment starts clean
+      resetAnchorState()
+
       setPhotosList([])
       setStopLoading(false)
       setConsecutiveEmptyResponses(0)
@@ -1337,10 +1374,11 @@ const PhotosList = ({ searchFromUrl }) => {
   //   updateNavBar()
   // }, [loading])
 
-  // Update navigation bar when activeSegment changes
+  // Update navigation bar when activeSegment changes and clear anchor state
   useEffect(() => {
+    resetAnchorState()
     // updateNavBar() // No longer needed with custom header
-  }, [activeSegment])
+  }, [activeSegment, resetAnchorState])
 
   // Removed: no header text visibility effect
 
@@ -1440,6 +1478,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
     return (
       <ExpoMasonryLayout
+        // Force remount per segment to clear internal layout/scroll caches
+        key={`segment-${activeSegment}`}
         ref={masonryRef}
         data={(() => {
           // Validate photos before passing to masonry layout
