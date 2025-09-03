@@ -73,10 +73,9 @@ const createStyles = (theme) =>
     },
     authorRow: {
       ...SHARED_STYLES.layout.spaceBetween,
-      ...SHARED_STYLES.layout.separator,
       // Tighten separator spacing to match recognition headers
-      marginVertical: 6,
-      paddingBottom: 6,
+      marginVertical: 2,
+      paddingBottom: 2,
     },
     authorName: {
       ...SHARED_STYLES.text.heading,
@@ -92,14 +91,19 @@ const createStyles = (theme) =>
     statsRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 6,
-      paddingTop: 6,
+      marginTop: 2,
+      paddingTop: 2,
     },
     statItem: {
       ...SHARED_STYLES.interactive.statItem,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      marginRight: 12,
     },
     statsText: {
       ...SHARED_STYLES.interactive.statText,
+      fontSize: 12,
+      marginLeft: 4,
     },
     // Enhanced comments section
     commentsCard: {
@@ -196,22 +200,21 @@ const createStyles = (theme) =>
     // Enhanced AI recognition cards
     aiRecognitionContainer: {
       marginVertical: 6,
-      marginHorizontal: 12,
+      marginHorizontal: 0,
     },
     aiRecognitionCard: {
       ...SHARED_STYLES.containers.card,
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
-      marginVertical: 6,
-      paddingVertical: 8,
+      marginVertical: 4,
+      paddingVertical: 6,
       paddingHorizontal: 10,
     },
     aiRecognitionHeader: {
       ...SHARED_STYLES.layout.row,
-      ...SHARED_STYLES.layout.separator,
       // Minimize top/bottom spacing for header area
-      marginVertical: 6,
-      paddingBottom: 6,
+      marginVertical: 4,
+      paddingBottom: 4,
     },
     // Compact separator variant to remove space below the line when collapsed
     aiHeaderTight: {
@@ -244,13 +247,13 @@ const createStyles = (theme) =>
       flexWrap: 'wrap',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 10,
+      gap: 6,
     },
     aiTag: {
       backgroundColor: `${theme.STATUS_SUCCESS}15`,
       borderRadius: 20,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
       borderWidth: 1,
       borderColor: `${theme.STATUS_SUCCESS}30`,
       shadowColor: theme.STATUS_SUCCESS,
@@ -264,14 +267,14 @@ const createStyles = (theme) =>
     },
     aiTagText: {
       color: theme.STATUS_SUCCESS,
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: '600',
     },
     aiModerationTag: {
       backgroundColor: `${theme.STATUS_ERROR}15`,
       borderRadius: 20,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
       borderWidth: 1,
       borderColor: `${theme.STATUS_ERROR}30`,
       shadowColor: theme.STATUS_ERROR,
@@ -285,7 +288,7 @@ const createStyles = (theme) =>
     },
     aiModerationTagText: {
       color: theme.STATUS_ERROR,
-      fontSize: 13,
+      fontSize: 12,
       fontWeight: '600',
     },
     // Action card styles
