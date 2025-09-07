@@ -201,20 +201,31 @@ const createStyles = (theme) =>
     aiRecognitionContainer: {
       marginVertical: 6,
       marginHorizontal: 0,
+      // Flow cards horizontally and wrap onto new lines
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'flex-start',
+      justifyContent: 'flex-start',
+      gap: 8,
     },
     aiRecognitionCard: {
       ...SHARED_STYLES.containers.card,
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
-      marginVertical: 4,
+      // Remove inherited wide margins; spacing is handled by container gap
+      marginVertical: 0,
+      marginHorizontal: 0,
       paddingVertical: 6,
       paddingHorizontal: 10,
+      alignSelf: 'flex-start',
     },
     aiRecognitionHeader: {
       ...SHARED_STYLES.layout.row,
       // Minimize top/bottom spacing for header area
       marginVertical: 4,
       paddingBottom: 4,
+      // Make header row size to its content width (like tags), not stretch full width
+      alignSelf: 'flex-start',
     },
     // Compact separator variant to remove space below the line when collapsed
     aiHeaderTight: {
@@ -223,9 +234,9 @@ const createStyles = (theme) =>
     },
     aiRecognitionHeaderTitle: {
       ...SHARED_STYLES.text.heading,
+      fontWeight: '400',
       marginLeft: 8,
       textAlign: 'left',
-      flex: 1,
       marginTop: 0,
       marginBottom: 0,
       // Keep header text compact vertically
@@ -875,7 +886,7 @@ const Photo = ({
               activeOpacity={0.7}
             >
               <ThemedText style={styles.aiRecognitionHeaderTitle}>
-                AI Recognized Tags
+                AI Tags
               </ThemedText>
               <Ionicons
                 name={aiTagsCollapsed ? 'chevron-forward' : 'chevron-down'}
@@ -949,7 +960,7 @@ const Photo = ({
               activeOpacity={0.7}
             >
               <ThemedText style={styles.aiRecognitionHeaderTitle}>
-                AI Recognized Text
+                AI Text
               </ThemedText>
               <Ionicons
                 name={aiTextCollapsed ? 'chevron-forward' : 'chevron-down'}
@@ -1028,7 +1039,7 @@ const Photo = ({
                   { color: theme.STATUS_ERROR },
                 ]}
               >
-                AI Moderation Tags
+                Moderation
               </ThemedText>
               <Ionicons
                 name={

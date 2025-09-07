@@ -2294,28 +2294,30 @@ const PhotosList = ({ searchFromUrl }) => {
       {renderPendingPhotos()}
       <View style={styles.container}>
         {activeSegment === 2 && renderSearchBar(false)}
-        {activeSegment === 2 && (
-          <EmptyStateCard
-            icon="search"
-            title="Ready to Search"
-            subtitle="Enter a search term above to find photos from your area and beyond."
-            actionText="Start Exploring"
-            onActionPress={() => {
-              if (searchBarRef.current) {
-                searchBarRef.current.focus()
-              }
-            }}
-          />
-        )}
-        {activeSegment === 1 && (
-          <EmptyStateCard
-            icon="star"
-            title="No Starred Content Yet"
-            subtitle="Start building your collection! Take photos, comment on others' posts, or star content you love."
-            actionText="Discover Content"
-            onActionPress={() => updateIndex(0)}
-          />
-        )}
+        {activeSegment === 2 &&
+          (loading || (
+            <EmptyStateCard
+              icon="search"
+              title="Ready to Search"
+              subtitle="Enter a search term above to find photos from your area and beyond."
+              actionText="Start Exploring"
+              onActionPress={() => {
+                if (searchBarRef.current) {
+                  searchBarRef.current.focus()
+                }
+              }}
+            />
+          ))}
+        {activeSegment === 1 &&
+          (loading || (
+            <EmptyStateCard
+              icon="star"
+              title="No Starred Content Yet"
+              subtitle="Start building your collection! Take photos, comment on others' posts, or star content you love."
+              actionText="Discover Content"
+              onActionPress={() => updateIndex(0)}
+            />
+          ))}
         {renderFooter({ unreadCount })}
       </View>
     </View>
