@@ -110,7 +110,7 @@ const createStyles = (theme) =>
       ...SHARED_STYLES.containers.card,
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
-      marginVertical: 6,
+      marginVertical: 8,
       paddingVertical: 8,
       paddingHorizontal: 10,
     },
@@ -199,24 +199,24 @@ const createStyles = (theme) =>
     },
     // Enhanced AI recognition cards
     aiRecognitionContainer: {
-      marginVertical: 6,
+      marginVertical: 0,
       marginHorizontal: 0,
       // Flow cards horizontally and wrap onto new lines
       flexDirection: 'row',
       flexWrap: 'wrap',
       alignItems: 'flex-start',
       justifyContent: 'flex-start',
-      gap: 8,
+      gap: 0,
     },
     aiRecognitionCard: {
       ...SHARED_STYLES.containers.card,
       backgroundColor: theme.CARD_BACKGROUND,
       borderColor: theme.CARD_BORDER,
-      // Remove inherited wide margins; spacing is handled by container gap
-      marginVertical: 0,
-      marginHorizontal: 0,
+      // Use same margins as other cards for consistency
+      marginVertical: 2,
+      marginHorizontal: 16,
       paddingVertical: 6,
-      paddingHorizontal: 10,
+      paddingHorizontal: 0,
       alignSelf: 'flex-start',
     },
     aiRecognitionHeader: {
