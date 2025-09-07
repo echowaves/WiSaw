@@ -1199,7 +1199,7 @@ const PhotosList = ({ searchFromUrl }) => {
     if (cameraType === 'camera') {
       // launch photo capturing
       cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         // allowsEditing: true,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
         exif: true,
@@ -1207,7 +1207,7 @@ const PhotosList = ({ searchFromUrl }) => {
     } else {
       // launch video capturing
       cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaType.Videos,
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         // allowsEditing: true,
         videoMaxDuration: 5,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
