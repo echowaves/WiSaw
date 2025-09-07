@@ -1202,7 +1202,7 @@ const PhotosList = ({ searchFromUrl }) => {
         mediaTypes: ImagePicker.MediaType.Images,
         // allowsEditing: true,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
-        // exif: false,
+        exif: true,
       })
     } else {
       // launch video capturing
@@ -1211,7 +1211,7 @@ const PhotosList = ({ searchFromUrl }) => {
         // allowsEditing: true,
         videoMaxDuration: 5,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
-        // exif: false,
+        exif: true,
       })
     }
 

@@ -718,7 +718,7 @@ const Chat = ({ route }) => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       // allowsEditing: true,
       quality: 1.0,
-      // exif: false,
+      exif: true,
     })
 
     if (cameraReturn.canceled === true) {
