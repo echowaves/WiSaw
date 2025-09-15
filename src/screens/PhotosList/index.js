@@ -24,6 +24,7 @@ import {
   Alert,
   Animated,
   Keyboard,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -32,6 +33,8 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native'
+
+import Constants from 'expo-constants'
 
 import {
   AntDesign,
@@ -98,10 +101,35 @@ TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
 // 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background task should behave
 // Note: This does NOT need to be in the global scope and CAN be used in your React components!
 async function registerBackgroundFetchAsync() {
-  // console.log('registering background task...')
-  return BackgroundTask.registerTaskAsync(BACKGROUND_TASK_NAME, {
-    minimumInterval: 15, // 15 minutes (minimum allowed)
-  })
+  try {
+    // Only register when BackgroundTask is available (not Expo Go / simulator on iOS)
+    const status = await BackgroundTask.getStatusAsync()
+
+    // In Expo Go, appOwnership === 'expo'. Background tasks require a dev/prod build on iOS.
+    const isExpoGo = Constants?.appOwnership === 'expo'
+
+    if (
+      Platform.OS === 'ios' &&
+      (isExpoGo || status !== BackgroundTask.BackgroundTaskStatus.Available)
+    ) {
+      // Skip registration on iOS when running in Expo Go or when unavailable (e.g., simulator)
+      return
+    }
+
+    // Avoid duplicate registration
+    const alreadyRegistered =
+      await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_NAME)
+    if (alreadyRegistered) return
+
+    await BackgroundTask.registerTaskAsync(BACKGROUND_TASK_NAME, {
+      minimumInterval: 15, // 15 minutes (minimum allowed)
+    })
+  } catch (e) {
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.warn('Skipping background task registration:', e?.message || e)
+    }
+  }
 }
 
 // 3. (Optional) Unregister tasks by specifying the task name
@@ -1199,7 +1227,7 @@ const PhotosList = ({ searchFromUrl }) => {
     if (cameraType === 'camera') {
       // launch photo capturing
       cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         // allowsEditing: true,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
         exif: true,
@@ -1207,7 +1235,7 @@ const PhotosList = ({ searchFromUrl }) => {
     } else {
       // launch video capturing
       cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        mediaTypes: ['videos'],
         // allowsEditing: true,
         videoMaxDuration: 5,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance

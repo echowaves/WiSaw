@@ -1,6 +1,7 @@
 // import { Platform } from 'react-native'
 
 import * as FileSystem from 'expo-file-system'
+import { File as FSFile } from 'expo-file-system'
 
 import * as ImageManipulator from 'expo-image-manipulator'
 
@@ -104,7 +105,9 @@ export const clearChatQueue = async () => {
     for (const item of currentQueue) {
       try {
         if (item.localImgUrl) {
-          await FileSystem.deleteAsync(item.localImgUrl, { idempotent: true })
+          try {
+            new FSFile(item.localImgUrl).delete()
+          } catch {}
         }
         // Chat uploads might also have thumbnail files based on cache management
         if (item.chatPhotoHash) {
@@ -113,9 +116,9 @@ export const clearChatQueue = async () => {
           CacheManager.getCachedImageURI(thumbCacheKey)
             .then((cachedUri) => {
               if (cachedUri) {
-                FileSystem.deleteAsync(cachedUri, { idempotent: true }).catch(
-                  () => {},
-                )
+                try {
+                  new FSFile(cachedUri).delete()
+                } catch {}
               }
             })
             .catch(() => {})
@@ -139,13 +142,23 @@ export const clearChatQueue = async () => {
 // returns an array that has everything needed for rendering
 const getQueue = async () => {
   // here will have to make sure we do not have any discrepancies between files in storage and files in the queue
-  await CONST.makeSureDirectoryExists({
-    directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
-  })
+  try {
+    if (!CONST.PENDING_UPLOADS_FOLDER_CHAT.exists) {
+      CONST.PENDING_UPLOADS_FOLDER_CHAT.create({ intermediates: true })
+    }
+  } catch (e) {
+    // ignore directory creation errors
+  }
 
-  const filesInStorage = await FileSystem.readDirectoryAsync(
-    CONST.PENDING_UPLOADS_FOLDER_CHAT,
-  )
+  const filesInStorage = (() => {
+    try {
+      const dir = CONST.PENDING_UPLOADS_FOLDER_CHAT
+      if (!dir.exists) return []
+      return dir.list().map((entry) => entry.name)
+    } catch {
+      return []
+    }
+  })()
   let imagesInQueue = JSON.parse(
     await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }),
   )
@@ -175,9 +188,9 @@ const getQueue = async () => {
   // remove image from storage if corresponding recorsd does not exist in the queue
   filesInStorage.forEach((file) => {
     if (!imagesInQueue.some((i) => i.chatPhotoHash === file)) {
-      FileSystem.deleteAsync(`${CONST.PENDING_UPLOADS_FOLDER_CHAT}${file}`, {
-        idempotent: true,
-      })
+      try {
+        new FSFile(CONST.PENDING_UPLOADS_FOLDER_CHAT, file).delete()
+      } catch {}
     }
   })
 
@@ -187,15 +200,22 @@ const getQueue = async () => {
 export const queueFileForUpload =
   ({ assetUrl, chatPhotoHash, messageUuid }) =>
   async (dispatch, getState) => {
-    const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER_CHAT}${chatPhotoHash}`
+    const localImgUrl = new FSFile(
+      CONST.PENDING_UPLOADS_FOLDER_CHAT,
+      chatPhotoHash,
+    ).uri
 
     // console.log({ assetUrl, chatPhotoHash, localImgUrl })
     // console.log({ localImgUrl })
     // copy file to cacheDir
 
-    await CONST.makeSureDirectoryExists({
-      directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
-    })
+    try {
+      if (!CONST.PENDING_UPLOADS_FOLDER_CHAT.exists) {
+        CONST.PENDING_UPLOADS_FOLDER_CHAT.create({ intermediates: true })
+      }
+    } catch (e) {
+      // ignore directory creation errors
+    }
 
     await FileSystem.copyAsync({
       from: assetUrl,

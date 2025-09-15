@@ -1305,8 +1305,8 @@ const Photo = ({
           delayPressOut={0}
           disabled={photoDetails?.isPhotoWatched === undefined}
         >
-          <AntDesign
-            name={photoDetails?.isPhotoWatched ? 'star' : 'staro'}
+          <Ionicons
+            name={photoDetails?.isPhotoWatched ? 'star' : 'star-outline'}
             color={
               photoDetails?.isPhotoWatched === undefined
                 ? theme.TEXT_DISABLED

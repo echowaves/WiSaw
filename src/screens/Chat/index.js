@@ -715,7 +715,7 @@ const Chat = ({ route }) => {
     }
 
     const cameraReturn = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       // allowsEditing: true,
       quality: 1.0,
       exif: true,

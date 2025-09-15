@@ -13,6 +13,10 @@ module.exports = {
       // Branch removed - using native deep linking instead
       'expo-secure-store',
       'expo-router',
+      'expo-audio',
+      'expo-background-task',
+      'expo-font',
+      'expo-video',
       [
         'expo-build-properties',
         {

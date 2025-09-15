@@ -1,4 +1,10 @@
-import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import {
+  AntDesign,
+  FontAwesome,
+  FontAwesome5,
+  Ionicons,
+  MaterialIcons,
+} from '@expo/vector-icons'
 import { createTheme, ThemeProvider } from '@rneui/themed'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
@@ -73,6 +79,8 @@ export default function RootLayout() {
     ...FontAwesome.font,
     ...FontAwesome5.font,
     ...MaterialIcons.font,
+    ...Ionicons.font,
+    ...AntDesign.font,
   })
 
   // Add font loading timeout
@@ -92,7 +100,7 @@ export default function RootLayout() {
           visibilityTime: 3000,
         })
       }
-    }, 3000) // 3 second timeout for fonts
+    }, 2000) // 2 second timeout for fonts to avoid startup hang
 
     if (fontsLoaded) {
       clearTimeout(fontTimeout)

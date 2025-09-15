@@ -1,6 +1,7 @@
 // import { Platform } from 'react-native'
 
 import * as FileSystem from 'expo-file-system'
+import { File as FSFile } from 'expo-file-system'
 import * as SecureStore from 'expo-secure-store'
 import * as VideoThumbnails from 'expo-video-thumbnails'
 
@@ -10,6 +11,7 @@ import moment from 'moment'
 
 import { CacheManager } from 'expo-cached-image'
 import { Storage } from 'expo-storage'
+import { fetch } from 'expo/fetch'
 
 import Toast from 'react-native-toast-message'
 
@@ -363,13 +365,19 @@ export const clearQueue = async () => {
     for (const item of currentQueue) {
       try {
         if (item.localImgUrl) {
-          await FileSystem.deleteAsync(item.localImgUrl, { idempotent: true })
+          try {
+            new FSFile(item.localImgUrl).delete()
+          } catch {}
         }
         if (item.localThumbUrl) {
-          await FileSystem.deleteAsync(item.localThumbUrl, { idempotent: true })
+          try {
+            new FSFile(item.localThumbUrl).delete()
+          } catch {}
         }
         if (item.localVideoUrl) {
-          await FileSystem.deleteAsync(item.localVideoUrl, { idempotent: true })
+          try {
+            new FSFile(item.localVideoUrl).delete()
+          } catch {}
         }
       } catch (fileDeleteError) {
         // Continue cleaning up other files even if one fails
@@ -477,13 +485,8 @@ export const processQueuedFile = async (queuedItem) => {
   try {
     // Ensure pending uploads folder exists
     try {
-      const dirInfo = await FileSystem.getInfoAsync(
-        CONST.PENDING_UPLOADS_FOLDER,
-      )
-      if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(CONST.PENDING_UPLOADS_FOLDER, {
-          intermediates: true,
-        })
+      if (!CONST.PENDING_UPLOADS_FOLDER.exists) {
+        CONST.PENDING_UPLOADS_FOLDER.create({ intermediates: true })
       }
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -491,7 +494,10 @@ export const processQueuedFile = async (queuedItem) => {
     }
 
     // Generate local file path in pending uploads folder
-    const localImgUrl = `${CONST.PENDING_UPLOADS_FOLDER}${queuedItem.localImageName}`
+    const localImgUrl = new FSFile(
+      CONST.PENDING_UPLOADS_FOLDER,
+      queuedItem.localImageName,
+    ).uri
 
     // For images, compress the main image before storing to reduce file size
     if (queuedItem.type === 'image') {
@@ -502,17 +508,36 @@ export const processQueuedFile = async (queuedItem) => {
         { compress: 0.9, format: ImageManipulator.SaveFormat.WEBP },
       )
 
-      // Move the compressed file to cache directory
-      await FileSystem.moveAsync({
-        from: compressedResult.uri,
-        to: localImgUrl,
-      })
+      // Move the compressed file to pending directory
+      try {
+        const src = new FSFile(compressedResult.uri)
+        const dest = new FSFile(
+          CONST.PENDING_UPLOADS_FOLDER,
+          queuedItem.localImageName,
+        )
+        src.move(dest)
+      } catch (e) {
+        // fallback using legacy move if needed
+        await FileSystem.moveAsync({
+          from: compressedResult.uri,
+          to: localImgUrl,
+        })
+      }
     } else {
       // For videos, just move the file as-is
-      await FileSystem.moveAsync({
-        from: queuedItem.originalCameraUrl,
-        to: localImgUrl,
-      })
+      try {
+        const src = new FSFile(queuedItem.originalCameraUrl)
+        const dest = new FSFile(
+          CONST.PENDING_UPLOADS_FOLDER,
+          queuedItem.localImageName,
+        )
+        src.move(dest)
+      } catch (e) {
+        await FileSystem.moveAsync({
+          from: queuedItem.originalCameraUrl,
+          to: localImgUrl,
+        })
+      }
     }
 
     // Create processed image object
@@ -590,8 +615,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
     if (!item.localImgUrl) {
       // Validate original camera file exists before processing
       try {
-        const info = await FileSystem.getInfoAsync(item.originalCameraUrl)
-        if (!info.exists) {
+        if (!new FSFile(item.originalCameraUrl).exists) {
           Toast.show({
             text1: 'Upload skipped',
             text2: 'Original file is missing on device.',
@@ -800,8 +824,7 @@ const withTimeout = (promise, ms, label = 'operation') =>
 // Utility: verify local file exists before uploading/processing
 const ensureFileExists = async (uri) => {
   try {
-    const info = await FileSystem.getInfoAsync(uri)
-    return !!info?.exists
+    return new FSFile(uri).exists
   } catch (e) {
     return false
   }
@@ -839,13 +862,12 @@ const uploadFile = async ({
       ).data.generateUploadUrl
 
       const responseData = await withTimeout(
-        FileSystem.uploadAsync(uploadUrl, assetUri, {
-          httpMethod: 'PUT',
+        fetch(uploadUrl, {
+          method: 'PUT',
           headers: {
             'Content-Type': contentType,
           },
-          uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-          sessionType: FileSystem.FileSystemSessionType.BACKGROUND, // Enable background uploads
+          body: new FSFile(assetUri),
         }),
         timeoutMs,
         `Upload ${assetKey}`,
@@ -907,8 +929,7 @@ export const initPendingUploads = async () => {
         const item = pendingImages[i]
         if (item.originalCameraUrl) {
           try {
-            const info = await FileSystem.getInfoAsync(item.originalCameraUrl)
-            if (!info.exists) {
+            if (!new FSFile(item.originalCameraUrl).exists) {
               console.warn(
                 `Pending upload has missing original file: ${item.localImageName}`,
               )
