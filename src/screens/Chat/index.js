@@ -13,7 +13,7 @@ import {
   Send,
   Time,
 } from 'react-native-gifted-chat'
-import { v4 as uuidv4 } from 'uuid'
+// import { v4 as uuidv4 } from 'uuid' // Replace with Expo Crypto
 
 import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
@@ -28,6 +28,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   // ScrollView,
   View,
 } from 'react-native'
@@ -73,6 +74,13 @@ const Chat = ({ route }) => {
   const navigation = useNavigation()
 
   const [messages, setMessages] = useState([])
+  const [text, setText] = useState('')
+
+  // Handle text input changes
+  const handleTextChange = useCallback((newText) => {
+    console.log('handleTextChange called with:', newText)
+    setText(newText)
+  }, [])
   // .format("YYYY-MM-DD HH:mm:ss.SSS")
   // const [lastRead, setLastRead] = useState(moment())
 
@@ -344,7 +352,11 @@ const Chat = ({ route }) => {
       next(data) {
         // console.log('observableObject:: ', { data })
         // eslint-disable-next-line no-unsafe-optional-chaining
-        const { onSendMessage } = data?.data
+        if (!data?.data?.onSendMessage) {
+          console.warn('Invalid subscription data received:', data)
+          return
+        }
+        const { onSendMessage } = data.data
         // console.log({ onSendMessage })
         setMessages((previousMessages) => {
           const updatedMessages = previousMessages.map((message) => {
@@ -454,13 +466,13 @@ const Chat = ({ route }) => {
       messages.forEach((message) => {
         ;(async () => {
           try {
-            const { _id, text } = message
-            const messageUuid = _id
+            const { text } = message
+            const messageUuid = Crypto.randomUUID()
 
             setMessages((previousMessages) =>
               GiftedChat.append(previousMessages, [
                 {
-                  _id,
+                  _id: messageUuid,
                   text,
                   pending: true,
                   createdAt: moment(),
@@ -500,6 +512,9 @@ const Chat = ({ route }) => {
           }
         })()
       })
+      // Clear input after sending
+      setText('')
+      console.log('Message sent and input cleared')
     },
     [chatUuid, uuid, friendsList, topOffset],
   )
@@ -556,6 +571,32 @@ const Chat = ({ route }) => {
     </Send>
   )
 
+  const renderComposer = (props) => (
+    <TextInput
+      style={{
+        color: theme.TEXT_PRIMARY,
+        backgroundColor: theme.CARD_BACKGROUND,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: theme.CARD_BORDER,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        fontSize: 16,
+        minHeight: 44,
+        maxHeight: 100,
+        flex: 1,
+        marginHorizontal: 8,
+        marginVertical: 8,
+      }}
+      placeholder="Type a message..."
+      placeholderTextColor={theme.TEXT_MUTED}
+      value={text}
+      onChangeText={handleTextChange}
+      multiline
+      textAlignVertical="center"
+    />
+  )
+
   const renderLoading = () => (
     <View
       style={{
@@ -571,9 +612,21 @@ const Chat = ({ route }) => {
   const onLoadEarlier = async () => {
     // console.log('onLoadEarlier')
     // setMessages([...messages, await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })])
+
+    if (!messages || messages.length === 0) {
+      console.warn('No messages available for pagination')
+      return
+    }
+
+    const lastMessage = messages[messages.length - 1]
+    if (!lastMessage || !lastMessage.createdAt) {
+      console.error('Last message missing createdAt property')
+      return
+    }
+
     const earlierMessages = await loadMessages({
       chatUuid,
-      lastLoaded: messages[messages.length - 1].createdAt,
+      lastLoaded: lastMessage.createdAt,
     })
     setMessages((previousMessages) =>
       GiftedChat.prepend(previousMessages, earlierMessages),
@@ -631,7 +684,7 @@ const Chat = ({ route }) => {
     )
     console.log('photoHash: ', chatPhotoHash)
 
-    const messageUuid = uuidv4()
+    const messageUuid = Crypto.randomUUID()
 
     reducer.queueFileForUpload({ assetUrl: uri, chatPhotoHash, messageUuid })
 
@@ -762,6 +815,9 @@ const Chat = ({ route }) => {
               user={{
                 _id: uuid,
               }}
+              text={text}
+              onInputTextChanged={handleTextChange}
+              renderComposer={renderComposer}
               // alwaysShowSend
               renderSend={renderSend}
               renderLoading={renderLoading}
@@ -785,6 +841,7 @@ const Chat = ({ route }) => {
                 marginHorizontal: 0,
                 marginVertical: 4,
                 flex: 1,
+                minHeight: 40,
               }}
               inputToolbarStyle={{
                 backgroundColor: theme.BACKGROUND,
@@ -795,20 +852,11 @@ const Chat = ({ route }) => {
                 minHeight: 60,
               }}
               textInputProps={{
-                style: {
-                  color: theme.TEXT_PRIMARY,
-                  backgroundColor: theme.CARD_BACKGROUND,
-                  borderRadius: 20,
-                  borderWidth: 1,
-                  borderColor: theme.CARD_BORDER,
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                  marginHorizontal: 0,
-                  marginVertical: 4,
-                  minHeight: 40,
-                  flex: 1,
-                },
                 placeholderTextColor: theme.TEXT_SECONDARY,
+                autoFocus: false,
+                blurOnSubmit: false,
+                multiline: true,
+                numberOfLines: 4,
               }}
               inputToolbarProps={{
                 containerStyle: {
@@ -818,31 +866,6 @@ const Chat = ({ route }) => {
                   paddingVertical: 8,
                   paddingHorizontal: 12,
                 },
-              }}
-              composerStyle={{
-                backgroundColor: theme.CARD_BACKGROUND,
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: theme.CARD_BORDER,
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                marginHorizontal: 0,
-                marginVertical: 4,
-                minHeight: 40,
-                flex: 1,
-              }}
-              multilineStyle={{
-                backgroundColor: theme.CARD_BACKGROUND,
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: theme.CARD_BORDER,
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-                marginHorizontal: 0,
-                marginVertical: 4,
-                color: theme.TEXT_PRIMARY,
-                minHeight: 40,
-                flex: 1,
               }}
               placeholderTextColor={theme.TEXT_SECONDARY}
               // Message bubble styling for dark mode
