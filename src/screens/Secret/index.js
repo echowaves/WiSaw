@@ -7,7 +7,6 @@ import {
   Animated,
   Keyboard,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
@@ -15,6 +14,7 @@ import {
 
 import { Button, Input, Text } from '@rneui/themed'
 import * as Haptics from 'expo-haptics'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
@@ -283,6 +283,7 @@ const SecretScreen = () => {
     contentContainer: {
       padding: 20,
       paddingTop: 30,
+      paddingBottom: 100,
     },
     headerCard: {
       backgroundColor: theme.CARD_BACKGROUND,
@@ -424,6 +425,31 @@ const SecretScreen = () => {
       height: '100%',
       borderRadius: 4,
     },
+    submitButton: {
+      backgroundColor: CONST.MAIN_COLOR,
+      borderRadius: 16,
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      marginVertical: 20,
+      shadowColor: CONST.MAIN_COLOR,
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    submitButtonDisabled: {
+      backgroundColor: theme.BACKGROUND_DISABLED,
+      shadowOpacity: 0,
+      elevation: 0,
+    },
+    submitButtonTitle: {
+      color: 'white',
+      fontSize: 18,
+      fontWeight: '600',
+    },
   })
 
   const handleReset = async () => {
@@ -439,11 +465,14 @@ const SecretScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
+        <KeyboardAwareScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          contentInsetAdjustmentBehavior="automatic"
+          enableOnAndroid={true}
+          extraScrollHeight={20}
         >
           <Animated.View
             style={{
@@ -670,6 +699,45 @@ const SecretScreen = () => {
               </View>
             </View>
 
+            {/* Submit Button */}
+            <Button
+              title={
+                isSubmitting
+                  ? nickNameEntered
+                    ? 'Updating...'
+                    : 'Creating...'
+                  : nickNameEntered
+                    ? 'Update Identity'
+                    : 'Create Identity'
+              }
+              icon={
+                isSubmitting ? (
+                  <FontAwesome5
+                    name="hourglass"
+                    size={18}
+                    color="white"
+                    style={{ marginRight: 8 }}
+                  />
+                ) : (
+                  <FontAwesome5
+                    name={nickNameEntered ? 'edit' : 'user-shield'}
+                    size={18}
+                    color="white"
+                    style={{ marginRight: 8 }}
+                  />
+                )
+              }
+              size="lg"
+              buttonStyle={[
+                styles.submitButton,
+                !canSubmit && styles.submitButtonDisabled,
+              ]}
+              titleStyle={styles.submitButtonTitle}
+              onPress={handleSubmit}
+              disabled={!canSubmit || isSubmitting}
+              loading={isSubmitting}
+            />
+
             {/* Security Warning */}
             <View style={styles.warningCard}>
               <View style={styles.warningTitle}>
@@ -738,7 +806,7 @@ const SecretScreen = () => {
               </View>
             )}
           </Animated.View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
   )

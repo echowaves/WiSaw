@@ -6,7 +6,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import {
   Animated,
   Keyboard,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,6 +15,7 @@ import {
 } from 'react-native'
 
 import { gql } from '@apollo/client'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
@@ -229,7 +229,7 @@ const FeedbackScreen = () => {
     },
     contentContainer: {
       backgroundColor: theme.BACKGROUND,
-      paddingBottom: 40,
+      paddingBottom: 100,
       padding: 20,
       paddingTop: 30,
     },
@@ -395,11 +395,14 @@ const FeedbackScreen = () => {
       <AppHeader title="Feedback" onBack={() => router.back()} />
       <View style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
+          <KeyboardAwareScrollView
             style={styles.scrollContainer}
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            contentInsetAdjustmentBehavior="automatic"
+            enableOnAndroid={true}
+            extraScrollHeight={20}
           >
             <Animated.View
               style={{
@@ -518,7 +521,7 @@ const FeedbackScreen = () => {
                 </View>
               </View>
             </Animated.View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </TouchableWithoutFeedback>
       </View>
     </>
