@@ -48,6 +48,7 @@ export const LIGHT_THEME = {
 
   // Status indicators
   STATUS_SUCCESS: '#4FC3F7',
+  STATUS_EDIT: '#34C759',
   STATUS_WARNING: '#FFD700',
   STATUS_ERROR: '#FF4757',
   STATUS_CAUTION: '#FF9500',
@@ -105,6 +106,7 @@ export const DARK_THEME = {
 
   // Status indicators (slightly brighter for dark backgrounds)
   STATUS_SUCCESS: '#5DD3FD',
+  STATUS_EDIT: '#30D158',
   STATUS_WARNING: '#FFE066',
   STATUS_ERROR: '#FF6B7D',
   STATUS_CAUTION: '#FFB84D',

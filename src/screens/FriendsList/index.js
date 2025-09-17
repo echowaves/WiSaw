@@ -9,7 +9,6 @@ import {
   Alert,
   Animated,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -42,15 +41,24 @@ const FriendsList = () => {
 
   const theme = getTheme(isDarkMode)
 
-  const createStyles = (theme) =>
+  const createStyles = (theme, isDark) =>
     StyleSheet.create({
       container: {
-        ...SHARED_STYLES.containers.main,
-        backgroundColor: theme.BACKGROUND,
+        flex: 1,
+        backgroundColor: theme.INTERACTIVE_BACKGROUND,
+      },
+      flatList: {
+        flex: 1,
       },
       friendItem: {
         backgroundColor: theme.CARD_BACKGROUND,
         flex: 1,
+        position: 'relative',
+        zIndex: 1,
+        borderRadius: 20,
+        overflow: 'hidden', // clip inner content to rounded card
+        // Rely on container for shadow to match thumbs
+        elevation: 0,
       },
       friendContent: {
         paddingVertical: 16,
@@ -142,8 +150,8 @@ const FriendsList = () => {
         bottom: 0,
         left: 0,
         flexDirection: 'row',
-        borderTopLeftRadius: 12,
-        borderBottomLeftRadius: 12,
+        borderTopLeftRadius: 20,
+        borderBottomLeftRadius: 20,
         width: 240,
       },
       rightSwipeAction: {
@@ -152,9 +160,10 @@ const FriendsList = () => {
         bottom: 0,
         left: 0,
         flexDirection: 'row',
-        borderTopLeftRadius: 12,
-        borderBottomLeftRadius: 12,
+        borderTopLeftRadius: 20,
+        borderBottomLeftRadius: 20,
         width: 160,
+        zIndex: 0,
       },
       leftSwipeAction: {
         position: 'absolute',
@@ -162,9 +171,36 @@ const FriendsList = () => {
         bottom: 0,
         right: 0,
         flexDirection: 'row',
-        borderTopRightRadius: 12,
-        borderBottomRightRadius: 12,
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20,
         width: 80,
+        zIndex: 0,
+      },
+      stripeOverlayLeft: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        flexDirection: 'row',
+        borderTopLeftRadius: 20,
+        borderBottomLeftRadius: 20,
+        overflow: 'hidden',
+        // Two segments (share/edit), full width to scale properly
+        width: 160,
+        zIndex: 2,
+      },
+      stripeOverlayRight: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        right: 0,
+        backgroundColor: theme.STATUS_ERROR,
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20,
+        overflow: 'hidden',
+        // Single segment (delete), full width to scale properly
+        width: 80,
+        zIndex: 2,
       },
       swipeActionButton: {
         flex: 1,
@@ -175,12 +211,18 @@ const FriendsList = () => {
       },
       shareAction: {
         backgroundColor: theme.STATUS_SUCCESS,
+        borderTopLeftRadius: 20,
+        borderBottomLeftRadius: 20,
       },
       editAction: {
-        backgroundColor: theme.STATUS_WARNING,
+        backgroundColor: theme.STATUS_EDIT,
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20,
       },
       deleteAction: {
         backgroundColor: theme.STATUS_ERROR,
+        borderTopRightRadius: 20,
+        borderBottomRightRadius: 20,
       },
       swipeActionText: {
         color: 'white',
@@ -190,17 +232,26 @@ const FriendsList = () => {
         textAlign: 'center',
       },
       friendItemContainer: {
-        ...SHARED_STYLES.containers.card,
+        // Exact thumb-like card container
+        backgroundColor: theme.CARD_BACKGROUND,
         marginHorizontal: 16,
-        marginVertical: 4,
-        overflow: 'hidden',
-        borderRadius: 12,
+        marginVertical: 8,
+        borderRadius: 20,
+        overflow: 'visible', // allow shadow to render outside
         padding: 0,
-        elevation: 2,
+        // Shadows (match ExpandableThumb exactly)
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 6,
+        elevation: 8,
+        // Subtle border in dark mode for crisp edges
+        borderWidth: isDark ? 1.5 : 0,
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
       },
     })
 
-  const styles = createStyles(theme)
+  const styles = createStyles(theme, isDarkMode)
 
   const headerText =
     'Choose a friendly name to help you remember this person when chatting or sharing content.'
@@ -418,6 +469,8 @@ const FriendsList = () => {
 
   const FriendItem = memo(({ friend }) => {
     const translateX = useRef(new Animated.Value(0)).current
+    const currentTranslateXRef = useRef(0)
+    const gestureStartOffsetRef = useRef(0)
     const [isSwipeOpen, setIsSwipeOpen] = useState(false)
     const [swipeDirection, setSwipeDirection] = useState(null) // 'left' or 'right'
 
@@ -425,39 +478,52 @@ const FriendsList = () => {
     const isPending = friend.uuid2 === null
     const hasUnread = friend.unreadCount > 0
 
+    // Keep current value in a ref to compute offsets across gestures
+    useEffect(() => {
+      const id = translateX.addListener(({ value }) => {
+        currentTranslateXRef.current = value
+      })
+      return () => {
+        translateX.removeListener(id)
+      }
+    }, [translateX])
+
+    const clamp = (num, min, max) => Math.min(Math.max(num, min), max)
+
     const handleSwipeGesture = (event) => {
       if (isPending) return // Don't allow swipe for pending friends
 
       const { translationX, state } = event.nativeEvent
 
-      if (state === State.ACTIVE) {
-        // Allow swipe in both directions
-        if (translationX > 0) {
-          // Swipe right - show share and edit actions
-          const clampedTranslation = Math.min(translationX, 160) // 2 actions = 160px
-          translateX.setValue(clampedTranslation)
-        } else if (translationX < 0) {
-          // Swipe left - show delete action
-          const clampedTranslation = Math.max(translationX, -80) // 1 action = 80px
-          translateX.setValue(clampedTranslation)
-        }
+      // When a new gesture begins, capture current offset so we continue from it
+      if (state === State.BEGAN) {
+        gestureStartOffsetRef.current = currentTranslateXRef.current || 0
+        return
+      }
+
+      // Update position continuously while swiping (onGestureEvent has no state)
+      if (state === undefined || state === State.ACTIVE) {
+        // Desired position is prior offset + live translation
+        const desired = gestureStartOffsetRef.current + translationX
+        translateX.setValue(clamp(desired, -80, 160))
       } else if (state === State.END || state === State.CANCELLED) {
         // Determine if swipe should be open or closed
-        if (translationX > 80) {
+        const final = gestureStartOffsetRef.current + translationX
+        if (final > 80) {
           // Open right swipe action (share/edit)
           Animated.spring(translateX, {
             toValue: 160,
-            useNativeDriver: true,
+            useNativeDriver: false,
             tension: 100,
             friction: 8,
           }).start()
           setIsSwipeOpen(true)
           setSwipeDirection('right')
-        } else if (translationX < -40) {
+        } else if (final < -40) {
           // Open left swipe action (delete)
           Animated.spring(translateX, {
             toValue: -80,
-            useNativeDriver: true,
+            useNativeDriver: false,
             tension: 100,
             friction: 8,
           }).start()
@@ -467,7 +533,7 @@ const FriendsList = () => {
           // Close the swipe action
           Animated.spring(translateX, {
             toValue: 0,
-            useNativeDriver: true,
+            useNativeDriver: false,
             tension: 100,
             friction: 8,
           }).start()
@@ -477,13 +543,80 @@ const FriendsList = () => {
       }
     }
 
+    // Animated stripes (RIGHT SWIPE): sequential expansion
+    // Blue (share) grows first from 8px to 80px as you swipe 0->72px,
+    // Yellow (edit) stays visible at 8px and starts growing only after blue is full.
+    const shareStripeWidth = translateX.interpolate({
+      inputRange: [0, 80, 160],
+      outputRange: [8, 80, 80],
+      extrapolate: 'clamp',
+    })
+    const editStripeWidth = translateX.interpolate({
+      inputRange: [0, 80, 160],
+      outputRange: [8, 8, 80],
+      extrapolate: 'clamp',
+    })
+
+    // Fade in content (icon + text) when there's enough space
+    const shareContentOpacity = translateX.interpolate({
+      inputRange: [0, 24, 40],
+      outputRange: [0, 0, 1],
+      extrapolate: 'clamp',
+    })
+    const editContentOpacity = translateX.interpolate({
+      inputRange: [0, 96, 112, 128],
+      outputRange: [0, 0, 0, 1],
+      extrapolate: 'clamp',
+    })
+    // Increase left padding when actions are minimized (at rest)
+    const contentPaddingLeft = translateX.interpolate({
+      inputRange: [-80, 0, 160],
+      outputRange: [16, 28, 16],
+      extrapolate: 'clamp',
+    })
+    // Show left overlay stripes only for right-swipe (hide on left-swipe)
+    const leftOverlayOpacity = translateX.interpolate({
+      inputRange: [-1, 0, 160],
+      outputRange: [0, 1, 1],
+      extrapolate: 'clamp',
+    })
+
+    // RIGHT SWIPE LEFT: Expand delete stripe width from 8 -> 80 while content stays put
+    const deleteStripeWidth = translateX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [80, 8],
+      extrapolate: 'clamp',
+    })
+    const deleteContentOpacity = translateX.interpolate({
+      inputRange: [-80, -56, -40, 0],
+      outputRange: [1, 1, 0, 0],
+      extrapolate: 'clamp',
+    })
+
+    // Show action backgrounds only when swiping starts to avoid showing through when minimized
+    const rightActionsOpacity = translateX.interpolate({
+      inputRange: [-80, 0, 10, 160],
+      outputRange: [0, 0, 1, 1],
+      extrapolate: 'clamp',
+    })
+    const leftActionsOpacity = translateX.interpolate({
+      inputRange: [-80, -10, 0, 160],
+      outputRange: [1, 1, 0, 0],
+      extrapolate: 'clamp',
+    })
+
+    // Note: No opacity applied to the friend item card or stripes to avoid visual fading
+
     const closeSwipe = () => {
       Animated.spring(translateX, {
         toValue: 0,
-        useNativeDriver: true,
+        useNativeDriver: false,
         tension: 100,
         friction: 8,
-      }).start()
+      }).start(() => {
+        currentTranslateXRef.current = 0
+        gestureStartOffsetRef.current = 0
+      })
       setIsSwipeOpen(false)
       setSwipeDirection(null)
     }
@@ -522,9 +655,12 @@ const FriendsList = () => {
 
     return (
       <View style={styles.friendItemContainer}>
-        {/* Right Swipe Action Background - Share and Edit */}
-        {!isPending && swipeDirection === 'right' && (
-          <View style={styles.rightSwipeAction}>
+        {/* Right Swipe Action Background - Share and Edit (always present behind) */}
+        {!isPending && (
+          <Animated.View
+            style={[styles.rightSwipeAction, { opacity: rightActionsOpacity }]}
+            pointerEvents="box-none"
+          >
             <TouchableOpacity
               style={[styles.swipeActionButton, styles.shareAction]}
               onPress={handleShareName}
@@ -542,12 +678,15 @@ const FriendsList = () => {
               <FontAwesome5 name="edit" size={18} color="white" />
               <Text style={styles.swipeActionText}>Edit{'\n'}Name</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         )}
 
-        {/* Left Swipe Action Background - Delete */}
-        {!isPending && swipeDirection === 'left' && (
-          <View style={styles.leftSwipeAction}>
+        {/* Left Swipe Action Background - Delete (always present behind) */}
+        {!isPending && (
+          <Animated.View
+            style={[styles.leftSwipeAction, { opacity: leftActionsOpacity }]}
+            pointerEvents="box-none"
+          >
             <TouchableOpacity
               style={[styles.swipeActionButton, styles.deleteAction]}
               onPress={handleDeleteFriend}
@@ -556,11 +695,12 @@ const FriendsList = () => {
               <FontAwesome5 name="trash" size={18} color="white" />
               <Text style={styles.swipeActionText}>Delete{'\n'}Friend</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         )}
 
         {/* Main Friend Item */}
         <PanGestureHandler
+          onGestureEvent={handleSwipeGesture}
           onHandlerStateChange={handleSwipeGesture}
           enabled={!isPending}
           activeOffsetX={[-20, 20]}
@@ -571,12 +711,20 @@ const FriendsList = () => {
             style={[
               styles.friendItem,
               {
-                transform: [{ translateX }],
+                // Keep content fixed when swiping left (no negative translate visually)
+                transform: [
+                  {
+                    translateX: translateX.interpolate({
+                      inputRange: [-80, 0, 160],
+                      outputRange: [0, 0, 160],
+                      extrapolate: 'clamp',
+                    }),
+                  },
+                ],
               },
             ]}
           >
             <TouchableOpacity
-              style={styles.friendContent}
               onPress={() => {
                 if (isSwipeOpen) {
                   closeSwipe()
@@ -613,105 +761,219 @@ const FriendsList = () => {
               disabled={isPending}
               activeOpacity={isPending ? 1 : 0.7}
             >
-              <View style={styles.friendHeader}>
-                <View style={styles.friendInfo}>
-                  <Text
-                    style={styles.friendName}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {displayName}
-                  </Text>
-                  {isPending ? (
-                    <>
-                      <View
-                        style={{ flexDirection: 'row', alignItems: 'center' }}
+              {/* Animated padding wrapper to increase left padding when actions minimized */}
+              {isPending ? (
+                <View style={styles.friendContent}>
+                  <View style={styles.friendHeader}>
+                    <View style={styles.friendInfo}>
+                      <Text
+                        style={styles.friendName}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
                       >
-                        <FontAwesome5
-                          name="clock"
-                          size={12}
-                          color={theme.TEXT_PRIMARY}
-                          style={{ marginRight: 6 }}
-                        />
-                        <Text style={styles.pendingStatus}>
-                          Waiting for confirmation
-                        </Text>
-                      </View>
-                      {/* Share and Delete buttons container */}
-                      <View style={styles.shareButtonContainer}>
-                        <TouchableOpacity
-                          style={[styles.pendingShareButton]}
-                          onPress={() =>
-                            handleShareFriend({
-                              friendshipUuid: friend.friendshipUuid,
-                              contactName: displayName,
-                              isPending: true,
-                            })
-                          }
-                          activeOpacity={0.5}
-                          delayPressIn={0}
-                          delayPressOut={0}
-                          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                          pressRetentionOffset={{
-                            top: 20,
-                            bottom: 20,
-                            left: 20,
-                            right: 20,
-                          }}
-                          importantForAccessibility="yes"
-                        >
-                          <FontAwesome5
-                            name="share-alt"
-                            size={12}
-                            color="white"
-                          />
-                          <Text style={styles.pendingShareButtonText}>
-                            Share
-                          </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.pendingDeleteButton]}
-                          onPress={() =>
-                            handleDeletePendingFriend({
-                              friendshipUuid: friend.friendshipUuid,
-                              contactName: displayName,
-                            })
-                          }
-                          activeOpacity={0.5}
-                          delayPressIn={0}
-                          delayPressOut={0}
-                          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-                          pressRetentionOffset={{
-                            top: 20,
-                            bottom: 20,
-                            left: 20,
-                            right: 20,
-                          }}
-                          importantForAccessibility="yes"
-                        >
-                          <FontAwesome5
-                            name="trash"
-                            size={12}
-                            color={theme.STATUS_ERROR}
-                          />
-                          <Text style={styles.pendingDeleteButtonText}>
-                            Delete
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <Text style={styles.friendStatus}>
-                        {hasUnread ? `${friend.unreadCount} new messages` : ''}
+                        {displayName}
                       </Text>
-                    </>
-                  )}
+                      <>
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center' }}
+                        >
+                          <FontAwesome5
+                            name="clock"
+                            size={12}
+                            color={theme.TEXT_PRIMARY}
+                            style={{ marginRight: 6 }}
+                          />
+                          <Text style={styles.pendingStatus}>
+                            Waiting for confirmation
+                          </Text>
+                        </View>
+                        {/* Share and Delete buttons container */}
+                        <View style={styles.shareButtonContainer}>
+                          <TouchableOpacity
+                            style={[styles.pendingShareButton]}
+                            onPress={() =>
+                              handleShareFriend({
+                                friendshipUuid: friend.friendshipUuid,
+                                contactName: displayName,
+                                isPending: true,
+                              })
+                            }
+                            activeOpacity={0.5}
+                            delayPressIn={0}
+                            delayPressOut={0}
+                            hitSlop={{
+                              top: 15,
+                              bottom: 15,
+                              left: 15,
+                              right: 15,
+                            }}
+                            pressRetentionOffset={{
+                              top: 20,
+                              bottom: 20,
+                              left: 20,
+                              right: 20,
+                            }}
+                            importantForAccessibility="yes"
+                          >
+                            <FontAwesome5
+                              name="share-alt"
+                              size={12}
+                              color="white"
+                            />
+                            <Text style={styles.pendingShareButtonText}>
+                              Share
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.pendingDeleteButton]}
+                            onPress={() =>
+                              handleDeletePendingFriend({
+                                friendshipUuid: friend.friendshipUuid,
+                                contactName: displayName,
+                              })
+                            }
+                            activeOpacity={0.5}
+                            delayPressIn={0}
+                            delayPressOut={0}
+                            hitSlop={{
+                              top: 15,
+                              bottom: 15,
+                              left: 15,
+                              right: 15,
+                            }}
+                            pressRetentionOffset={{
+                              top: 20,
+                              bottom: 20,
+                              left: 20,
+                              right: 20,
+                            }}
+                            importantForAccessibility="yes"
+                          >
+                            <FontAwesome5
+                              name="trash"
+                              size={12}
+                              color={theme.STATUS_ERROR}
+                            />
+                            <Text style={styles.pendingDeleteButtonText}>
+                              Delete
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    </View>
+                    {/* Right-side spacer removed; fixed padding handles consistency */}
+                  </View>
                 </View>
-              </View>
+              ) : (
+                <Animated.View
+                  style={[
+                    styles.friendContent,
+                    { paddingLeft: contentPaddingLeft },
+                  ]}
+                >
+                  <View style={styles.friendHeader}>
+                    <View style={styles.friendInfo}>
+                      <Text
+                        style={styles.friendName}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {displayName}
+                      </Text>
+                      <>
+                        <Text style={styles.friendStatus}>
+                          {hasUnread
+                            ? `${friend.unreadCount} new messages`
+                            : ''}
+                        </Text>
+                      </>
+                    </View>
+                    {/* Right-side spacer removed; fixed padding handles consistency */}
+                  </View>
+                </Animated.View>
+              )}
             </TouchableOpacity>
           </Animated.View>
         </PanGestureHandler>
+
+        {/* Overlay stripes that hint at swipe actions and expand with swipe */}
+        {!isPending && (
+          <>
+            {/* Left edge (for right swipe -> share/edit). Two segments; blue grows first, yellow follows */}
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.stripeOverlayLeft,
+                { opacity: leftOverlayOpacity },
+              ]}
+            >
+              <View style={{ flexDirection: 'row', height: '100%' }}>
+                <Animated.View
+                  style={[
+                    styles.shareAction,
+                    { width: shareStripeWidth, height: '100%' },
+                  ]}
+                >
+                  <Animated.View
+                    style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: shareContentOpacity,
+                    }}
+                  >
+                    <FontAwesome5 name="share-alt" size={18} color="white" />
+                    <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
+                  </Animated.View>
+                </Animated.View>
+                <Animated.View
+                  style={[
+                    styles.editAction,
+                    { width: editStripeWidth, height: '100%' },
+                  ]}
+                >
+                  <Animated.View
+                    style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: editContentOpacity,
+                    }}
+                  >
+                    <FontAwesome5 name="edit" size={18} color="white" />
+                    <Text style={styles.swipeActionText}>Edit{'\n'}Name</Text>
+                  </Animated.View>
+                </Animated.View>
+              </View>
+            </Animated.View>
+
+            {/* Right edge (for left swipe -> delete). Expand width while content stays put */}
+            <Animated.View
+              pointerEvents="auto"
+              style={[styles.stripeOverlayRight, { width: deleteStripeWidth }]}
+            >
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={handleDeleteFriend}
+                activeOpacity={0.7}
+              >
+                <Animated.View
+                  style={{
+                    alignItems: 'center',
+                    opacity: deleteContentOpacity,
+                  }}
+                >
+                  <FontAwesome5 name="trash" size={18} color="white" />
+                  <Text style={styles.swipeActionText}>Delete{'\n'}Friend</Text>
+                </Animated.View>
+              </TouchableOpacity>
+            </Animated.View>
+          </>
+        )}
       </View>
     )
   })
@@ -722,7 +984,7 @@ const FriendsList = () => {
 
   if (!friendsList || friendsList.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <NamePicker
           show={showNamePicker}
           setShow={setShowNamePicker}
@@ -753,55 +1015,60 @@ const FriendsList = () => {
           onActionPress={handleAddFriend}
           iconColor={theme.TEXT_PRIMARY}
         />
-      </SafeAreaView>
+      </View>
     )
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <NamePicker
-        show={showNamePicker}
-        setShow={setShowNamePicker}
-        setContactName={setContactName}
-        headerText={headerText}
-        friendshipUuid={selectedFriendshipUuid}
-      />
-      <ShareOptionsModal
-        visible={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        friendshipUuid={shareModalData?.friendshipUuid}
-        friendName={shareModalData?.friendName}
-        uuid={uuid}
-        topOffset={60}
-      />
-      <ShareFriendNameModal
-        visible={showShareNameModal}
-        onClose={() => setShowShareNameModal(false)}
-        friendshipUuid={shareNameModalData?.friendshipUuid}
-        friendName={shareNameModalData?.friendName}
-        topOffset={60}
-      />
-      <FlatList
-        data={friendsList}
-        renderItem={renderFriend}
-        keyExtractor={(item) => item.friendshipUuid}
-        style={styles.container}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-        refreshing={isRefreshing}
-        onRefresh={handleRefresh}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={15}
-        updateCellsBatchingPeriod={50}
-        removeClippedSubviews={true}
-        getItemLayout={(data, index) => ({
-          length: 80, // Approximate height of each friend item
-          offset: 80 * index,
-          index,
-        })}
-      />
-    </SafeAreaView>
+    <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
+      <View style={styles.container}>
+        <NamePicker
+          show={showNamePicker}
+          setShow={setShowNamePicker}
+          setContactName={setContactName}
+          headerText={headerText}
+          friendshipUuid={selectedFriendshipUuid}
+        />
+        <ShareOptionsModal
+          visible={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          friendshipUuid={shareModalData?.friendshipUuid}
+          friendName={shareModalData?.friendName}
+          uuid={uuid}
+          topOffset={60}
+        />
+        <ShareFriendNameModal
+          visible={showShareNameModal}
+          onClose={() => setShowShareNameModal(false)}
+          friendshipUuid={shareNameModalData?.friendshipUuid}
+          friendName={shareNameModalData?.friendName}
+          topOffset={60}
+        />
+        <FlatList
+          data={friendsList}
+          renderItem={renderFriend}
+          keyExtractor={(item) => item.friendshipUuid}
+          style={styles.flatList}
+          contentContainerStyle={{
+            paddingBottom: 20,
+            flexGrow: 1,
+          }}
+          showsVerticalScrollIndicator={false}
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={15}
+          updateCellsBatchingPeriod={50}
+          removeClippedSubviews={true}
+          getItemLayout={(data, index) => ({
+            length: 80, // Approximate height of each friend item
+            offset: 80 * index,
+            index,
+          })}
+        />
+      </View>
+    </View>
   )
 }
 
