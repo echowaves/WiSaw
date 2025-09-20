@@ -48,6 +48,8 @@ import NetInfo from '@react-native-community/netinfo'
 
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 
+import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
+
 import {
   Badge,
   Button,
@@ -164,6 +166,9 @@ const PhotosList = ({ searchFromUrl }) => {
   }
 
   const theme = getTheme(isDarkMode)
+
+  // Get safe area view style for proper status bar handling on Android
+  const safeAreaViewStyle = useSafeAreaViewStyle()
 
   // Dynamic styles based on current theme
   const styles = StyleSheet.create({
@@ -983,20 +988,22 @@ const PhotosList = ({ searchFromUrl }) => {
 
     return (
       <SafeAreaView
-        style={{
-          backgroundColor: theme.HEADER_BACKGROUND,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.HEADER_BORDER,
-          shadowColor: theme.HEADER_SHADOW,
-          shadowOffset: {
-            width: 0,
-            height: 2,
+        style={[
+          {
+            backgroundColor: theme.HEADER_BACKGROUND,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.HEADER_BORDER,
+            shadowColor: theme.HEADER_SHADOW,
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 1,
+            shadowRadius: 4,
+            elevation: 3,
           },
-          shadowOpacity: 1,
-          shadowRadius: 4,
-          elevation: 3,
-          paddingTop: 0,
-        }}
+          safeAreaViewStyle,
+        ]}
       >
         <View
           style={{

@@ -15,6 +15,7 @@ import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
 import * as CONST from '../src/consts'
@@ -637,15 +638,17 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-      </Stack>
-      <Toast />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider theme={theme}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+        </Stack>
+        <Toast />
+      </ThemeProvider>
+    </SafeAreaProvider>
   )
 }

@@ -25,6 +25,8 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
+import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
+
 import * as reducer from './reducer'
 
 const maxNickNameLength = 100 // will also use this parameter for the secret length
@@ -41,6 +43,9 @@ const SecretScreen = () => {
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const theme = getTheme(isDarkMode)
+
+  // Get safe area view style for proper status bar handling on Android
+  const safeAreaViewStyle = useSafeAreaViewStyle()
 
   const [nickNameEntered, setNickNameEntered] = useState(false)
   const [nickNameText, setNickNameText] = useState('')
@@ -463,7 +468,7 @@ const SecretScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAwareScrollView
           style={styles.scrollView}

@@ -15,6 +15,7 @@ import * as STATE from '../../state'
 
 import * as reducer from './reducer'
 
+import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import { SHARED_STYLES } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
@@ -28,6 +29,9 @@ const ConfirmFriendship = ({ route }) => {
   const navigation = useNavigation()
 
   const [showNamePicker, setShowNamePicker] = useState(true)
+
+  // Get safe area view style for proper status bar handling on Android
+  const safeAreaViewStyle = useSafeAreaViewStyle()
 
   // Header styling is now controlled by the route configuration in app/(drawer)/(tabs)/_layout.tsx
   // No need for custom renderHeaderLeft or renderHeaderRight functions
@@ -93,7 +97,7 @@ const ConfirmFriendship = ({ route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
       <NamePicker
         show={showNamePicker}
         setShow={setShowNamePicker}

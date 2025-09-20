@@ -39,6 +39,8 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
+import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
+
 import {
   FontAwesome,
   // Ionicons,
@@ -68,6 +70,9 @@ const Chat = ({ route }) => {
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const theme = getTheme(isDarkMode)
+
+  // Get safe area view style for proper status bar handling on Android
+  const safeAreaViewStyle = useSafeAreaViewStyle()
 
   const { chatUuid, contact, friendshipUuid } = route.params
 
@@ -785,7 +790,7 @@ const Chat = ({ route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
