@@ -1,3 +1,5 @@
+import 'react-native-get-random-values' // Must be imported before uuid
+
 import {
   AntDesign,
   FontAwesome,
