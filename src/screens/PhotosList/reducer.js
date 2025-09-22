@@ -504,7 +504,7 @@ export const processQueuedFile = async (queuedItem) => {
       // Compress the main image to reduce upload size while maintaining good quality
       const compressedResult = await ImageManipulator.manipulateAsync(
         queuedItem.originalCameraUrl,
-        [], // No resize, just compress
+        [{ resize: { height: 3000 } }],
         { compress: 0.9, format: ImageManipulator.SaveFormat.WEBP },
       )
 
