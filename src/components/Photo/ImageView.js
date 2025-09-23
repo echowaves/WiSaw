@@ -62,8 +62,11 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
 
   // Use inline styles to prevent recreation on each render
   const photoContainerStyle = {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
     width: '100%',
+    height: '100%',
     backgroundColor: 'transparent',
     // maxWidth: containerWidth || screenWidth, // Ensure it doesn't exceed container width
   }
@@ -86,30 +89,28 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
           }}
           cacheKey={`${photo.id}`}
           resizeMode="cover"
-          style={photoContainerStyle}
+          style={[photoContainerStyle, { zIndex: 2 }]}
+        />
+        <CachedImage
+          source={{
+            uri: `${photo.thumbUrl}`,
+            // next field is optional, if not set -- will never expire and will be managed by the OS
+            // expiresIn: 2_628_288, // 1 month in seconds
+          }}
+          cacheKey={`${photo.id}-thumb`}
           placeholderContent={
-            <CachedImage
-              source={{
-                uri: `${photo.thumbUrl}`,
-                // next field is optional, if not set -- will never expire and will be managed by the OS
-                // expiresIn: 2_628_288, // 1 month in seconds
+            // optional
+            <ActivityIndicator
+              color={CONST.MAIN_COLOR}
+              size="small"
+              style={{
+                flex: 1,
+                justifyContent: 'center',
               }}
-              cacheKey={`${photo.id}-thumb`}
-              placeholderContent={
-                // optional
-                <ActivityIndicator
-                  color={CONST.MAIN_COLOR}
-                  size="small"
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                  }}
-                />
-              }
-              resizeMode="cover"
-              style={photoContainerStyle}
             />
           }
+          resizeMode="cover"
+          style={[photoContainerStyle, { zIndex: 1 }]}
         />
       </Animated.View>
     </TapGestureHandler>
