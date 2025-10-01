@@ -1,6 +1,5 @@
 // import { Platform } from 'react-native'
 
-import * as FileSystem from 'expo-file-system'
 import { File as FSFile } from 'expo-file-system'
 import * as SecureStore from 'expo-secure-store'
 import * as VideoThumbnails from 'expo-video-thumbnails'
@@ -259,7 +258,7 @@ export async function getPhotos({
   location,
   netAvailable,
   searchTerm,
-  topOffset,
+  topOffset = 100,
   activeSegment,
   batch,
   pageNumber,
@@ -481,7 +480,7 @@ const genLocalThumbs = async (image) => {
   }
 }
 
-export const processQueuedFile = async (queuedItem) => {
+export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
   try {
     // Ensure pending uploads folder exists
     try {
@@ -515,13 +514,34 @@ export const processQueuedFile = async (queuedItem) => {
           CONST.PENDING_UPLOADS_FOLDER,
           queuedItem.localImageName,
         )
-        src.move(dest)
+
+        // Check if destination file already exists
+        if (dest.exists) {
+          console.log(
+            `File ${queuedItem.localImageName} already exists, skipping move`,
+          )
+          // File already exists, just delete the temp compressed result
+          try {
+            src.delete()
+          } catch (deleteErr) {
+            console.warn('Could not delete temp compressed file:', deleteErr)
+          }
+        } else {
+          src.move(dest)
+        }
       } catch (e) {
-        // fallback using legacy move if needed
-        await FileSystem.moveAsync({
-          from: compressedResult.uri,
-          to: localImgUrl,
+        Toast.show({
+          text1: 'Error processing image',
+          text2: e.message || `${e}`,
+          type: 'error',
+          visibilityTime: 4000,
+          topOffset,
         })
+
+        // fallback using File API
+        const fallbackSrc = new FSFile(compressedResult.uri)
+        const fallbackDest = new FSFile(localImgUrl)
+        fallbackSrc.move(fallbackDest)
       }
     } else {
       // For videos, just move the file as-is
@@ -531,12 +551,28 @@ export const processQueuedFile = async (queuedItem) => {
           CONST.PENDING_UPLOADS_FOLDER,
           queuedItem.localImageName,
         )
-        src.move(dest)
+
+        // Check if destination file already exists
+        if (dest.exists) {
+          console.log(
+            `Video file ${queuedItem.localImageName} already exists, skipping move`,
+          )
+          // File already exists, no need to move again
+        } else {
+          src.move(dest)
+        }
       } catch (e) {
-        await FileSystem.moveAsync({
-          from: queuedItem.originalCameraUrl,
-          to: localImgUrl,
+        Toast.show({
+          text1: 'Error processing video',
+          text2: e.message || `${e}`,
+          type: 'error',
+          visibilityTime: 4000,
+          topOffset,
         })
+
+        const fallbackSrc = new FSFile(queuedItem.originalCameraUrl)
+        const fallbackDest = new FSFile(localImgUrl)
+        fallbackSrc.move(fallbackDest)
       }
     }
 
@@ -550,10 +586,17 @@ export const processQueuedFile = async (queuedItem) => {
     const thumbEnhancedImage = await genLocalThumbs(processedImage)
 
     // Add thumbnail to cache
-    await CacheManager.addToCache({
-      file: thumbEnhancedImage.localThumbUrl,
-      key: thumbEnhancedImage.localCacheKey,
-    })
+    try {
+      await CacheManager.addToCache({
+        file: thumbEnhancedImage.localThumbUrl,
+        key: thumbEnhancedImage.localCacheKey,
+      })
+    } catch (cacheError) {
+      // Ignore cache errors if item already exists
+      if (!`${cacheError}`.toLowerCase().includes('already exists')) {
+        console.warn('Cache error for thumbnail:', cacheError)
+      }
+    }
 
     return thumbEnhancedImage
   } catch (error) {
@@ -608,10 +651,14 @@ export const updateQueueItem = async (originalItem, updatedItem) => {
   }
 }
 
-export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
+export const processCompleteUpload = async ({
+  item,
+  uuid,
+  topOffset = 100,
+}) => {
   try {
     // Step 1: Process the file if it hasn't been processed yet
-    let processedItem = item
+    let processedItem = item // Start with the original item
     if (!item.localImgUrl) {
       // Validate original camera file exists before processing
       try {
@@ -632,35 +679,77 @@ export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
         return null
       }
 
-      processedItem = await processQueuedFile(item)
+      processedItem = await processQueuedFile({ queuedItem: item, topOffset })
+    }
+
+    // Safety check: ensure processedItem is valid
+    if (!processedItem) {
+      console.error('processedItem is null after processing')
+      return null
     }
 
     // Step 2: Generate photo record on backend if not already done
     let photo = processedItem.photo
     if (!photo) {
+      // Validate UUID before generating photo
+      if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {
+        console.error('Invalid UUID provided for photo generation:', uuid)
+        Toast.show({
+          text1: 'Upload Error',
+          text2: 'Invalid user ID. Please try again.',
+          type: 'error',
+          topOffset,
+        })
+        return null
+      }
+
       try {
         photo = await generatePhoto({
-          uuid,
+          uuid: uuid.trim(),
           lat: processedItem.location.coords.latitude,
           lon: processedItem.location.coords.longitude,
           video: processedItem?.type === 'video',
         })
 
         // Add processed files to cache with the photo ID
-        CacheManager.addToCache({
-          file: processedItem.localThumbUrl,
-          key: `${photo.id}-thumb`,
-        })
-        CacheManager.addToCache({
-          file: processedItem.localImgUrl,
-          key: `${photo.id}`,
-        })
+        try {
+          CacheManager.addToCache({
+            file: processedItem.localThumbUrl,
+            key: `${photo.id}-thumb`,
+          })
+        } catch (cacheError1) {
+          // Ignore cache errors if item already exists
+          if (!`${cacheError1}`.toLowerCase().includes('already exists')) {
+            console.warn('Cache error for photo thumbnail:', cacheError1)
+          }
+        }
+
+        try {
+          CacheManager.addToCache({
+            file: processedItem.localImgUrl,
+            key: `${photo.id}`,
+          })
+        } catch (cacheError2) {
+          // Ignore cache errors if item already exists
+          if (!`${cacheError2}`.toLowerCase().includes('already exists')) {
+            console.warn('Cache error for photo image:', cacheError2)
+          }
+        }
 
         processedItem = { ...processedItem, photo }
 
         // Update the queue with the photo info to prevent re-generation
         await updateQueueItem(item, processedItem)
       } catch (photoGenError) {
+        Toast.show({
+          text1: 'Error photoGenError',
+          text2: photoGenError.message || `${photoGenError}`,
+          type: 'error',
+          visibilityTime: 4000,
+          topOffset,
+          onPress: () =>
+            alert(`error: ${photoGenError.message || `${photoGenError}`}`),
+        })
         console.error('Photo generation failed:', photoGenError)
 
         // If photo generation fails, it's likely a network or server issue
@@ -697,6 +786,14 @@ export const processCompleteUpload = async ({ item, uuid, topOffset }) => {
     }
   } catch (error) {
     console.error('Complete upload process error:', error)
+    Toast.show({
+      text1: 'Complete upload process error',
+      text2: error.message || `${error}`,
+      type: 'error',
+      topOffset,
+      onPress: () => alert(`error: ${error.message || `${error}`}`),
+    })
+
     // If file missing or unrecoverable, remove from queue to avoid infinite loop
     const errStr = `${error}`.toLowerCase()
     if (errStr.includes('not found') || errStr.includes('missing')) {
@@ -742,6 +839,11 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
 
 export const generatePhoto = async ({ uuid, lat, lon, video }) => {
   try {
+    // Validate UUID parameter
+    if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {
+      throw new Error(`Invalid UUID provided: "${uuid}". UUID cannot be empty.`)
+    }
+
     // Add timeout wrapper for Android compatibility
     const timeoutMs = 30000 // 30 seconds timeout for photo generation
 

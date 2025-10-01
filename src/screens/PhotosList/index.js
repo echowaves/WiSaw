@@ -812,6 +812,28 @@ const PhotosList = ({ searchFromUrl }) => {
     setUploadingPhoto(true)
 
     try {
+      // Ensure we have a valid UUID - get from SecureStore if atom state is empty
+      let currentUuid = uuid
+      if (!currentUuid || currentUuid.trim() === '') {
+        console.log('UUID from state is empty, retrieving from SecureStore...')
+        currentUuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
+        if (currentUuid) {
+          setUuid(currentUuid) // Update the atom state
+        }
+      }
+
+      // If we still don't have a UUID, we can't upload
+      if (!currentUuid || currentUuid.trim() === '') {
+        console.error('No UUID available for upload')
+        Toast.show({
+          text1: 'Upload Error',
+          text2: 'User authentication required. Please restart the app.',
+          type: 'error',
+          topOffset,
+        })
+        return
+      }
+
       // Get all pending items once
       const pendingQueue = await reducer.getQueue()
 
@@ -834,7 +856,7 @@ const PhotosList = ({ searchFromUrl }) => {
           // eslint-disable-next-line no-await-in-loop
           const uploadedPhoto = await reducer.processCompleteUpload({
             item: originalItem,
-            uuid,
+            uuid: currentUuid,
             topOffset,
           })
 
