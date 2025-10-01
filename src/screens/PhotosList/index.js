@@ -160,6 +160,9 @@ const PhotosList = ({ searchFromUrl }) => {
   const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
 
+  // State to prevent double-clicking camera buttons
+  const [isCameraOpening, setIsCameraOpening] = useState(false)
+
   // Development-only: Add guards to detect unauthorized mutations to photo dimensions
   if (__DEV__) {
     validateFrozenPhotosList(photosList, 'in PhotosList render')
@@ -1294,23 +1297,38 @@ const PhotosList = ({ searchFromUrl }) => {
   }
 
   const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
-    const cameraPermission = await checkPermission({
-      permissionFunction: ImagePicker.requestCameraPermissionsAsync,
-      alertHeader: 'Do you want to take photo with wisaw?',
-      alertBody: "Why don't you enable photo permission?",
-    })
+    // Prevent double-clicking by checking if camera is already opening
+    if (isCameraOpening) {
+      console.log('Camera already opening, ignoring duplicate request')
+      return
+    }
 
-    if (cameraPermission === 'granted') {
-      const photoAlbomPermission = await checkPermission({
-        permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
-        alertHeader: 'Do you want to save photo on your device?',
-        alertBody: "Why don't you enable the permission?",
-        permissionFunctionArgument: true,
+    setIsCameraOpening(true)
+
+    try {
+      const cameraPermission = await checkPermission({
+        permissionFunction: ImagePicker.requestCameraPermissionsAsync,
+        alertHeader: 'Do you want to take photo with wisaw?',
+        alertBody: "Why don't you enable photo permission?",
       })
 
-      if (photoAlbomPermission === 'granted') {
-        await takePhoto({ cameraType })
+      if (cameraPermission === 'granted') {
+        const photoAlbomPermission = await checkPermission({
+          permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
+          alertHeader: 'Do you want to save photo on your device?',
+          alertBody: "Why don't you enable the permission?",
+          permissionFunctionArgument: true,
+        })
+
+        if (photoAlbomPermission === 'granted') {
+          await takePhoto({ cameraType })
+        }
       }
+    } catch (error) {
+      console.error('Error in checkPermissionsForPhotoTaking:', error)
+    } finally {
+      // Always reset the flag, regardless of success or failure
+      setIsCameraOpening(false)
     }
   }
 
@@ -1689,10 +1707,14 @@ const PhotosList = ({ searchFromUrl }) => {
 
               {/* Video Recording Button */}
               <TouchableOpacity
-                style={styles.videoRecordButton}
+                style={[
+                  styles.videoRecordButton,
+                  isCameraOpening && { opacity: 0.5 },
+                ]}
                 onPress={() => {
                   checkPermissionsForPhotoTaking({ cameraType: 'video' })
                 }}
+                disabled={isCameraOpening}
               >
                 <FontAwesome5 name="video" color="white" size={24} />
               </TouchableOpacity>
@@ -1717,10 +1739,12 @@ const PhotosList = ({ searchFromUrl }) => {
                   zIndex: 15,
                   borderWidth: 3,
                   borderColor: theme.BACKGROUND,
+                  opacity: isCameraOpening ? 0.5 : 1,
                 }}
                 onPress={() => {
                   checkPermissionsForPhotoTaking({ cameraType: 'camera' })
                 }}
+                disabled={isCameraOpening}
               >
                 <FontAwesome5 name="camera" color="white" size={28} />
               </TouchableOpacity>
