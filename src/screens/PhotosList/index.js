@@ -64,6 +64,7 @@ import {
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as reducer from './reducer'
+import usePhotoUploader from './upload/usePhotoUploader'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -316,14 +317,10 @@ const PhotosList = ({ searchFromUrl }) => {
     coords: { latitude: 0, longitude: 0 },
   })
 
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
-
   // const [isLastPage, setIsLastPage] = useState(false)
 
   const [pageNumber, setPageNumber] = useState(0)
   const [consecutiveEmptyResponses, setConsecutiveEmptyResponses] = useState(0)
-
-  const [pendingPhotos, setPendingPhotos] = useState([])
 
   const [activeSegment, setActiveSegment] = useState(0)
 
@@ -332,6 +329,38 @@ const PhotosList = ({ searchFromUrl }) => {
   const [unreadCountList, setUnreadCountList] = useState([])
 
   const [unreadCount, setUnreadCount] = useState(0)
+
+  const handleUploadSuccess = useCallback(
+    (uploadedPhoto) => {
+      setPhotosList((currentList) => {
+        const updatedList = [createFrozenPhoto(uploadedPhoto), ...currentList]
+        const seen = new Set()
+        return updatedList.filter((photo) => {
+          if (seen.has(photo.id)) {
+            return false
+          }
+          seen.add(photo.id)
+          return true
+        })
+      })
+    },
+    [setPhotosList],
+  )
+
+  const {
+    pendingPhotos,
+    isUploading,
+    enqueueCapture,
+    clearPendingQueue,
+    refreshPendingQueue,
+    processQueue: processPendingQueue,
+  } = usePhotoUploader({
+    uuid,
+    setUuid,
+    topOffset,
+    netAvailable,
+    onPhotoUploaded: handleUploadSuccess,
+  })
 
   // State for inline photo expansion - now supports multiple expanded photos
   const [expandedPhotoIds, setExpandedPhotoIds] = useState(new Set())
@@ -801,143 +830,6 @@ const PhotosList = ({ searchFromUrl }) => {
     setLoading(false)
   }
 
-  async function uploadPendingPhotos() {
-    // return Promise.resolve()
-    if (netAvailable === false) {
-      return Promise.resolve()
-    }
-
-    if (uploadingPhoto) {
-      // console.log({ uploadingPhoto })
-      // already uploading photos, just exit here
-      return Promise.resolve()
-    }
-    setUploadingPhoto(true)
-
-    try {
-      // Ensure we have a valid UUID - get from SecureStore if atom state is empty
-      let currentUuid = uuid
-      if (!currentUuid || currentUuid.trim() === '') {
-        console.log('UUID from state is empty, retrieving from SecureStore...')
-        currentUuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
-        if (currentUuid) {
-          setUuid(currentUuid) // Update the atom state
-        }
-      }
-
-      // If we still don't have a UUID, we can't upload
-      if (!currentUuid || currentUuid.trim() === '') {
-        console.error('No UUID available for upload')
-        Toast.show({
-          text1: 'Upload Error',
-          text2: 'User authentication required. Please restart the app.',
-          type: 'error',
-          topOffset,
-        })
-        return
-      }
-
-      // Get all pending items once
-      const pendingQueue = await reducer.getQueue()
-
-      // Process each item completely from start to finish
-      for (let i = 0; i < pendingQueue.length; i += 1) {
-        const originalItem = pendingQueue[i]
-
-        try {
-          // Double-check network before each upload
-          const currentNetState = await NetInfo.fetch()
-          if (
-            !currentNetState.isConnected ||
-            currentNetState.isInternetReachable === false
-          ) {
-            console.log('Network lost during upload, stopping')
-            break
-          }
-
-          // Complete upload sequence for this item
-          // eslint-disable-next-line no-await-in-loop
-          const uploadedPhoto = await reducer.processCompleteUpload({
-            item: originalItem,
-            uuid: currentUuid,
-            topOffset,
-          })
-
-          if (uploadedPhoto) {
-            // Successfully uploaded - remove from queue and update UI
-            // eslint-disable-next-line no-await-in-loop
-            await reducer.removeFromQueue(originalItem)
-
-            // Add to photos list - photos will be frozen by the atom
-            setPhotosList((currentList) => {
-              const newList = [createFrozenPhoto(uploadedPhoto), ...currentList]
-              const deduplicatedList = newList.filter(
-                (obj, pos, arr) =>
-                  arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
-              )
-
-              return deduplicatedList
-            })
-
-            // Update pending photos count
-            // eslint-disable-next-line no-await-in-loop
-            setPendingPhotos(await reducer.getQueue())
-          }
-        } catch (err123) {
-          // eslint-disable-next-line no-console
-          console.error('Upload error for item:', err123)
-
-          // Handle network/timeout errors
-          const errorMsg = `${err123}`.toLowerCase()
-          if (errorMsg.includes('network') || errorMsg.includes('timeout')) {
-            Toast.show({
-              text1: 'Network Issue',
-              text2: 'Upload will resume when connection is stable',
-              type: 'info',
-              topOffset,
-            })
-            break // Stop processing more items if network issues
-          }
-
-          Toast.show({
-            text1: 'Error Uploading',
-            text2: `${err123}`,
-            type: 'error',
-            topOffset,
-          })
-
-          // If banned, remove the item from queue
-          if (`${err123}`.includes('banned')) {
-            // eslint-disable-next-line no-await-in-loop
-            await reducer.removeFromQueue(originalItem)
-            // eslint-disable-next-line no-await-in-loop
-            setPendingPhotos(await reducer.getQueue())
-          }
-        }
-      }
-    } catch (err2) {
-      // eslint-disable-next-line no-console
-      Toast.show({
-        text1: 'Upload is slow...',
-        text2: 'Still trying to upload.',
-        visibilityTime: 500,
-        topOffset,
-      })
-      console.error('Upload process error:', err2)
-    }
-
-    setUploadingPhoto(false)
-
-    // Use 750ms delay for retry to balance responsiveness and system load
-    // eslint-disable-next-line no-promise-executor-return
-    await new Promise((resolve) => setTimeout(resolve, 750))
-
-    if ((await reducer.getQueue()).length > 0) {
-      uploadPendingPhotos()
-    }
-    return Promise.resolve()
-  }
-
   const reload = async (segmentOverride = null, searchTermOverride = null) => {
     currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
@@ -950,9 +842,8 @@ const PhotosList = ({ searchFromUrl }) => {
     // setStopLoading(false)
     setPageNumber(0)
 
-    setPendingPhotos(await reducer.getQueue())
-
-    uploadPendingPhotos()
+    await refreshPendingQueue()
+    await processPendingQueue()
     if (uuid.length > 0) {
       setFriendsList(
         await friendsHelper.getEnhancedListOfFriendships({
@@ -965,7 +856,6 @@ const PhotosList = ({ searchFromUrl }) => {
 
     // Load new content after state is reset, using the specific segment if provided
     await load(segmentOverride, searchTermOverride)
-    // setPendingPhotos(await reducer.getQueue())
     // load()
   }
 
@@ -1279,19 +1169,10 @@ const PhotosList = ({ searchFromUrl }) => {
     if (cameraReturn.canceled === false) {
       await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
       // have to wait, otherwise the upload will not start
-      await reducer.queueFileForUpload({
+      await enqueueCapture({
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
         location,
-      })
-
-      setPendingPhotos(await reducer.getQueue())
-
-      uploadPendingPhotos({
-        uuid,
-        topOffset,
-        netAvailable,
-        uploadingPhoto: true,
       })
     }
   }
@@ -1367,8 +1248,6 @@ const PhotosList = ({ searchFromUrl }) => {
   }
 
   useEffect(() => {
-    reducer.initPendingUploads()
-
     // add network availability listener with improved reliability
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (state) {
@@ -1968,6 +1847,11 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const renderPendingPhotos = () => {
     if (pendingPhotos.length > 0) {
+      let uploadStatusLabel = 'waiting to upload'
+      if (netAvailable) {
+        uploadStatusLabel = isUploading ? 'uploading' : 'ready to upload'
+      }
+
       return (
         <TouchableOpacity
           activeOpacity={0.8}
@@ -1982,8 +1866,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   text: 'Clear All',
                   style: 'destructive',
                   onPress: async () => {
-                    await reducer.clearQueue()
-                    setPendingPhotos(await reducer.getQueue())
+                    await clearPendingQueue()
                     Toast.show({
                       text1: 'Upload queue cleared',
                       text2: 'All pending uploads have been cancelled',
@@ -2060,7 +1943,7 @@ const PhotosList = ({ searchFromUrl }) => {
               >
                 {pendingPhotos.length}{' '}
                 {pendingPhotos.length === 1 ? 'photo' : 'photos'}{' '}
-                {netAvailable ? 'uploading' : 'waiting to upload'}
+                {uploadStatusLabel}
               </Animated.Text>
             </View>
             {netAvailable && (
