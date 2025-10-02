@@ -76,3 +76,6 @@ dist/
 /ios/
 
 # @end expo-cli
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
