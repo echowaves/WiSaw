@@ -10,7 +10,7 @@ import {
 import { createTheme, ThemeProvider } from '@rneui/themed'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
-import { router, Stack } from 'expo-router'
+import { router, Stack, useRootNavigationState } from 'expo-router'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
 import { useAtom } from 'jotai'
@@ -42,8 +42,16 @@ export default function RootLayout() {
   )
   const [isAppReady, setIsAppReady] = useState(false)
   const [initStarted, setInitStarted] = useState(false)
+  const rootNavigationState = useRootNavigationState()
+  const isNavigationReady = !!rootNavigationState?.key
   const pendingDeepLinkRef = useRef(null)
   const lastHandledDeepLinkRef = useRef({ url: null, timestamp: 0 })
+
+  useEffect(() => {
+    if (isNavigationReady) {
+      console.log('🧭 Root navigation is now ready')
+    }
+  }, [isNavigationReady])
 
   // Create dynamic theme based on dark mode state
   const currentTheme = getTheme(isDarkMode)
@@ -222,18 +230,23 @@ export default function RootLayout() {
         console.log('Parsed link data:', linkData)
 
         if (linkData) {
-          const isReadyNow =
+          const isLaunchReady =
             (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
+          const isFullyReady = isLaunchReady && isNavigationReady
 
-          if (isReadyNow) {
-            console.log('App ready, processing deep link immediately')
+          if (isFullyReady) {
+            console.log('App and navigation ready, processing deep link now')
             processDeepLink(linkData)
             lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
             pendingDeepLinkRef.current = null
           } else if (allowQueue) {
             if (pendingDeepLinkRef.current?.url !== url) {
               console.log(
-                'App not ready, queueing deep link for later processing',
+                'App navigation not ready yet, queueing deep link for later processing',
+                {
+                  isLaunchReady,
+                  isNavigationReady,
+                },
               )
             } else {
               console.log('Deep link already queued, waiting for readiness...')
@@ -241,7 +254,11 @@ export default function RootLayout() {
             pendingDeepLinkRef.current = { url, linkData }
           } else {
             console.log(
-              'App not fully ready and queuing disabled, queueing as fallback',
+              'Queuing deep link as fallback while waiting for readiness',
+              {
+                isLaunchReady,
+                isNavigationReady,
+              },
             )
             pendingDeepLinkRef.current = { url, linkData }
           }
@@ -261,14 +278,25 @@ export default function RootLayout() {
         })
       }
     },
-    [fontsLoaded, shouldProceedWithoutFonts, isAppReady, processDeepLink],
+    [
+      fontsLoaded,
+      shouldProceedWithoutFonts,
+      isAppReady,
+      isNavigationReady,
+      processDeepLink,
+    ],
   )
 
   useEffect(() => {
-    const isReadyNow = (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
-    if (isReadyNow && pendingDeepLinkRef.current) {
+    const isLaunchReady =
+      (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
+    const isFullyReady = isLaunchReady && isNavigationReady
+    if (isFullyReady && pendingDeepLinkRef.current) {
       const { url, linkData } = pendingDeepLinkRef.current
-      console.log('Processing queued deep link now that app is ready:', url)
+      console.log(
+        'Processing queued deep link now that app and navigation are ready:',
+        url,
+      )
       try {
         processDeepLink(linkData)
         lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
@@ -277,8 +305,18 @@ export default function RootLayout() {
       } finally {
         pendingDeepLinkRef.current = null
       }
+    } else if (pendingDeepLinkRef.current && !isNavigationReady) {
+      console.log(
+        'Waiting for navigation to become ready before processing deep link',
+      )
     }
-  }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady, processDeepLink])
+  }, [
+    fontsLoaded,
+    shouldProceedWithoutFonts,
+    isAppReady,
+    isNavigationReady,
+    processDeepLink,
+  ])
 
   useEffect(() => {
     // Handle initial URL when app is opened via deep link
@@ -322,10 +360,13 @@ export default function RootLayout() {
           return
         }
 
-        const isReadyNow =
+        const isLaunchReady =
           (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
-        if (isReadyNow) {
-          console.log('App already running, navigating immediately')
+        const isFullyReady = isLaunchReady && isNavigationReady
+        if (isFullyReady) {
+          console.log(
+            'App already running, navigation ready — handling deep link now',
+          )
           processDeepLink(linkData)
           lastHandledDeepLinkRef.current = {
             url: event.url,
@@ -334,6 +375,10 @@ export default function RootLayout() {
         } else {
           console.log(
             'Runtime deep link received before readiness, queueing for later',
+            {
+              isLaunchReady,
+              isNavigationReady,
+            },
           )
           pendingDeepLinkRef.current = { url: event.url, linkData }
         }
@@ -369,6 +414,7 @@ export default function RootLayout() {
     fontsLoaded,
     shouldProceedWithoutFonts,
     isAppReady,
+    isNavigationReady,
     processDeepLink,
   ])
 
@@ -595,9 +641,30 @@ export default function RootLayout() {
   }, [followSystemTheme, setIsDarkMode])
 
   useEffect(() => {
-    if ((fontsLoaded || shouldProceedWithoutFonts) && isAppReady) {
+    const isLaunchReady =
+      (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
+    let fallbackTimer
+
+    if (isLaunchReady && !isNavigationReady) {
+      console.log(
+        'App data ready but waiting for navigation to initialize before hiding splash',
+      )
+      fallbackTimer = setTimeout(async () => {
+        console.warn(
+          'Navigation still initializing, forcing splash hide fallback',
+        )
+        try {
+          await SplashScreen.hideAsync()
+          console.log('✅ Splash screen hidden via fallback')
+        } catch (error) {
+          console.error('❌ Error hiding splash screen via fallback:', error)
+        }
+      }, 2000)
+    }
+
+    if (isLaunchReady && isNavigationReady) {
       // Hide splash screen only when everything is ready
-      console.log('🎉 App ready, hiding splash screen...')
+      console.log('🎉 App and navigation ready, hiding splash screen...')
       setTimeout(async () => {
         try {
           await SplashScreen.hideAsync()
@@ -616,7 +683,13 @@ export default function RootLayout() {
         }
       }, 100)
     }
-  }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady])
+
+    return () => {
+      if (fallbackTimer) {
+        clearTimeout(fallbackTimer)
+      }
+    }
+  }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady, isNavigationReady])
 
   if (!fontsLoaded && !shouldProceedWithoutFonts) {
     // Only block rendering if fonts are still loading and we haven't timed out
