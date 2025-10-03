@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as Linking from 'expo-linking'
 import base64 from 'react-native-base64'
 
@@ -68,14 +69,14 @@ const parseFriendshipData = (encodedData) => {
         friendName: friendshipData.friendName,
         timestamp: friendshipData.timestamp,
       }
-    } else {
-      console.log('Invalid friendship data structure:', {
-        hasAction: !!friendshipData.action,
-        actionValue: friendshipData.action,
-        hasUuid: !!friendshipData.friendshipUuid,
-        hasName: !!friendshipData.friendName,
-      })
     }
+
+    console.log('Invalid friendship data structure:', {
+      hasAction: !!friendshipData.action,
+      actionValue: friendshipData.action,
+      hasUuid: !!friendshipData.friendshipUuid,
+      hasName: !!friendshipData.friendName,
+    })
   } catch (error) {
     console.log('Error parsing friendship data:', error)
     console.log('Error details:', {
@@ -83,6 +84,65 @@ const parseFriendshipData = (encodedData) => {
       message: error.message,
       encodedData,
     })
+  }
+
+  return null
+}
+
+const trimSlashes = (value = '') => value.replace(/^\/+|\/+$/g, '')
+
+const resolveDeepLinkTarget = (rawPath, queryParams) => {
+  const sanitizedPath = rawPath
+    ? rawPath
+        .replace(/[#?].*$/, '')
+        .split('/')
+        .filter(Boolean)
+    : []
+
+  if (sanitizedPath.length) {
+    const [primarySegment, secondarySegment] = sanitizedPath
+    const isPhotoRoute =
+      primarySegment === 'photos' || primarySegment === 'shared'
+    const isFriendRoute =
+      primarySegment === 'friends' || primarySegment === 'confirm-friendship'
+
+    if (isPhotoRoute && secondarySegment) {
+      return {
+        type: 'photo',
+        photoId: secondarySegment.trim(),
+      }
+    }
+
+    if (isFriendRoute && secondarySegment) {
+      return {
+        type: 'friend',
+        friendshipUuid: secondarySegment.trim(),
+      }
+    }
+
+    if (
+      primarySegment === 'friendship' ||
+      (primarySegment === 'friendships' && sanitizedPath[1] === 'name')
+    ) {
+      const encodedData = queryParams?.data
+      if (encodedData) {
+        return parseFriendshipData(encodedData)
+      }
+    }
+  }
+
+  if (queryParams?.photoId) {
+    return {
+      type: 'photo',
+      photoId: queryParams.photoId,
+    }
+  }
+
+  if (queryParams?.friendshipUuid) {
+    return {
+      type: 'friend',
+      friendshipUuid: queryParams.friendshipUuid,
+    }
   }
 
   return null
@@ -99,27 +159,49 @@ export const parseDeepLink = (url) => {
     if (url.startsWith('wisaw://')) {
       // Parse custom scheme manually
       const urlObj = new URL(url)
-      const cleanPath = urlObj.pathname.replace(/^\/+|\/+$/g, '')
-      const queryParams = Object.fromEntries(urlObj.searchParams.entries())
+      const host = urlObj.host?.toLowerCase?.() ?? ''
+      const normalizedPath = trimSlashes(urlObj.pathname)
+      const pathSegments = []
+
+      if (host) {
+        pathSegments.push(
+          ...host
+            .split('/')
+            .map((segment) => segment.trim())
+            .filter(Boolean),
+        )
+      }
+
+      if (normalizedPath) {
+        pathSegments.push(
+          ...normalizedPath
+            .split('/')
+            .map((segment) => segment.trim())
+            .filter(Boolean),
+        )
+      }
+
+      const combinedPath = pathSegments.join('/')
+      const params = Object.fromEntries(urlObj.searchParams.entries())
 
       console.log('Parsing custom scheme deep link:', {
         url,
-        cleanPath,
-        queryParams,
+        host,
+        pathname: normalizedPath,
+        combinedPath,
+        queryParams: params,
       })
 
       // Handle friendship links - new format with type parameter
-      if (queryParams.type === 'friendship' && queryParams.data) {
-        const encodedData = queryParams.data
+      if (params.type === 'friendship' && params.data) {
+        const encodedData = params.data
         console.log('Encoded data from QR:', encodedData)
         return parseFriendshipData(encodedData)
       }
 
-      // Handle legacy friendship links (old format)
-      if (cleanPath === 'friendship' || cleanPath === 'friendships/name') {
-        const encodedData = queryParams.data
-        console.log('Encoded data from QR (legacy):', encodedData)
-        return parseFriendshipData(encodedData)
+      const resolvedTarget = resolveDeepLinkTarget(combinedPath, params)
+      if (resolvedTarget) {
+        return resolvedTarget
       }
 
       return null
@@ -128,72 +210,15 @@ export const parseDeepLink = (url) => {
     // Handle standard URLs (https://, etc.)
     const { hostname, path, queryParams } = Linking.parse(url)
 
-    // eslint-disable-next-line no-console
     console.log('Parsing deep link:', { url, hostname, path, queryParams })
 
     // Clean the path
-    const cleanPath = path ? path.replace(/^\/+|\/+$/g, '') : ''
+    const cleanPath = trimSlashes(path)
 
-    // eslint-disable-next-line no-console
     console.log('Clean path:', cleanPath)
 
-    // Handle different URL patterns
-
-    // Pattern 1: /photos/[id] or /shared/[id]
-    if (cleanPath.includes('photos/') || cleanPath.includes('shared/')) {
-      const photoId = cleanPath
-        .split(/(?:photos|shared)\//)[1]
-        ?.split('?')[0]
-        ?.split('#')[0]
-      if (photoId) {
-        return {
-          type: 'photo',
-          photoId: photoId.trim(),
-        }
-      }
-    }
-
-    // Pattern 2: /friends/[uuid] or /confirm-friendship/[uuid]
-    if (
-      cleanPath.includes('friends/') ||
-      cleanPath.includes('confirm-friendship/')
-    ) {
-      const friendshipUuid = cleanPath
-        .split(/(?:friends|confirm-friendship)\//)[1]
-        ?.split('?')[0]
-        ?.split('#')[0]
-      if (friendshipUuid) {
-        return {
-          type: 'friend',
-          friendshipUuid: friendshipUuid.trim(),
-        }
-      }
-    }
-
-    // Pattern 3: /friendships/name (for QR code friendship name sharing)
-    if (cleanPath.includes('friendships/name')) {
-      const encodedData = queryParams?.data
-      return parseFriendshipData(encodedData)
-    }
-
-    // Handle legacy query parameters
-    if (queryParams?.photoId) {
-      return {
-        type: 'photo',
-        photoId: queryParams.photoId,
-      }
-    }
-
-    if (queryParams?.friendshipUuid) {
-      return {
-        type: 'friend',
-        friendshipUuid: queryParams.friendshipUuid,
-      }
-    }
-
-    return null
+    return resolveDeepLinkTarget(cleanPath, queryParams)
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.log('Deep link parsing error:', error)
     return null
   }
@@ -203,12 +228,10 @@ export const parseDeepLink = (url) => {
  * Handle deep link navigation
  */
 export const handleDeepLink = (url, navigation) => {
-  // eslint-disable-next-line no-console
   console.log('handleDeepLink called with:', url)
 
   const linkData = parseDeepLink(url)
 
-  // eslint-disable-next-line no-console
   console.log('Parsed link data:', linkData)
 
   if (!linkData || !navigation) return
@@ -216,7 +239,6 @@ export const handleDeepLink = (url, navigation) => {
   try {
     // Navigate to the appropriate screen
     if (linkData.type === 'photo') {
-      // eslint-disable-next-line no-console
       console.log(
         'Navigating to PhotosDetailsShared with photoId:',
         linkData.photoId,
@@ -227,7 +249,6 @@ export const handleDeepLink = (url, navigation) => {
         params: { photoId: linkData.photoId },
       })
     } else if (linkData.type === 'friend') {
-      // eslint-disable-next-line no-console
       console.log(
         'Navigating to ConfirmFriendship with friendshipUuid:',
         linkData.friendshipUuid,
@@ -239,7 +260,6 @@ export const handleDeepLink = (url, navigation) => {
       })
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.log('Navigation error:', error)
   }
 }
@@ -251,7 +271,6 @@ export const getInitialURL = async () => {
   try {
     return await Linking.getInitialURL()
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.log('Error getting initial URL:', error)
     return null
   }
