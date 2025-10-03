@@ -17,23 +17,6 @@ export const useStatusBarHeight = () => {
 }
 
 /**
- * Custom hook to get header styles with proper status bar handling
- * @param {Object} baseStyle - Base header style object
- * @returns {Object} Header style with platform-specific adjustments
- */
-export const useHeaderStyle = (baseStyle = {}) => {
-  const statusBarHeight = useStatusBarHeight()
-
-  return {
-    ...baseStyle,
-    ...(Platform.OS === 'android' && {
-      paddingTop: statusBarHeight,
-      height: (baseStyle.height || 56) + statusBarHeight,
-    }),
-  }
-}
-
-/**
  * Custom hook for SafeAreaView styles with status bar padding
  * @param {Object} baseStyle - Base SafeAreaView style object
  * @returns {Object} SafeAreaView style with platform-specific padding
