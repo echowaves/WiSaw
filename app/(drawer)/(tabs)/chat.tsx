@@ -12,7 +12,6 @@ export default function ChatScreen() {
 
   // Global state
   const [uuid] = useAtom(STATE.uuid)
-  const [topOffset] = useAtom(STATE.topOffset)
 
   // Parse the contact back from JSON string if it exists
   // The contact is a JSON stringified string, so we just parse it directly
