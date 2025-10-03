@@ -1,8 +1,8 @@
 {
   "name": "wisaw",
   "version": "7.4.5",
-  "buildNumber": "462",
-  "versionCode": 462,
+  "buildNumber": "463",
+  "versionCode": 463,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",
@@ -84,6 +84,7 @@
     "@babel/core": "^7.24.0",
     "@babel/eslint-parser": "^7.23.3",
     "@babel/runtime": "^7.24.0",
+    "@eslint/eslintrc": "^3.3.1",
     "@react-native-community/eslint-config": "^3.2.0",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",

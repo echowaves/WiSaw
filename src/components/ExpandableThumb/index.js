@@ -61,7 +61,6 @@ const ExpandableThumb = ({
   photosList,
   searchTerm,
   activeSegment,
-  topOffset,
   uuid,
   isExpanded = false,
   onToggleExpand,
@@ -70,6 +69,7 @@ const ExpandableThumb = ({
   updatePhotoHeight,
   onRequestEnsureVisible,
   showComments = false, // New prop to enable comment overlay
+  onTriggerSearch,
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -325,6 +325,7 @@ const ExpandableThumb = ({
           photo={cleanPhoto}
           embedded={true} // Show close button when expanded
           onRequestEnsureVisible={onRequestEnsureVisible}
+          onTriggerSearch={onTriggerSearch}
           onHeightMeasured={(height) => {
             // Only report to masonry layout for dimension calculation, don't store locally
             if (height > 0) {
@@ -451,7 +452,6 @@ ExpandableThumb.propTypes = {
   photosList: PropTypes.array.isRequired,
   searchTerm: PropTypes.string,
   activeSegment: PropTypes.number,
-  topOffset: PropTypes.number,
   uuid: PropTypes.string,
   isExpanded: PropTypes.bool,
   onToggleExpand: PropTypes.func.isRequired,
@@ -459,6 +459,7 @@ ExpandableThumb.propTypes = {
   onUpdateDimensions: PropTypes.func,
   updatePhotoHeight: PropTypes.func,
   onRequestEnsureVisible: PropTypes.func,
+  onTriggerSearch: PropTypes.func,
 }
 
 ExpandableThumb.displayName = 'ExpandableThumb'

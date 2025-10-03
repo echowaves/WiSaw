@@ -2,69 +2,107 @@
  * Utility functions for safely handling photosList items to prevent unauthorized mutations
  */
 
+const READONLY_PHOTO_FLAG = Symbol.for('wisaw.photo.readonly')
+
+const coerceNumber = (value, fallback = 0) => {
+  const coerced = Number(value)
+  return Number.isFinite(coerced) ? coerced : fallback
+}
+
+const withDevMutationGuards = (target) =>
+  new Proxy(target, {
+    set(proxyTarget, property, value) {
+      console.error(
+        `🚨 MUTATION DETECTED: Attempted to set ${String(property)} = ${value} on protected photo ${proxyTarget.id}`,
+      )
+      console.error(
+        `🚨 Current photo state: width=${proxyTarget.width}, height=${proxyTarget.height}`,
+      )
+      console.trace('Mutation call stack:')
+      return false
+    },
+    defineProperty(proxyTarget, property) {
+      console.error(
+        `🚨 PROPERTY DEFINITION DETECTED: Attempted to define ${String(property)} on protected photo ${proxyTarget.id}`,
+      )
+      console.trace('Property definition call stack:')
+      return false
+    },
+    deleteProperty(proxyTarget, property) {
+      console.error(
+        `🚨 DELETE PROPERTY DETECTED: Attempted to delete ${String(property)} on protected photo ${proxyTarget.id}`,
+      )
+      console.trace('Delete call stack:')
+      return false
+    },
+  })
+
+const createReadOnlyShape = (photo) => {
+  if (!photo || typeof photo !== 'object') {
+    return photo
+  }
+
+  if (photo[READONLY_PHOTO_FLAG]) {
+    return photo
+  }
+
+  const sanitized = {
+    ...photo,
+    width: coerceNumber(photo.width),
+    height: coerceNumber(photo.height),
+  }
+
+  Object.defineProperties(sanitized, {
+    width: {
+      value: sanitized.width,
+      writable: false,
+      configurable: false,
+      enumerable: true,
+    },
+    height: {
+      value: sanitized.height,
+      writable: false,
+      configurable: false,
+      enumerable: true,
+    },
+    [READONLY_PHOTO_FLAG]: {
+      value: true,
+      enumerable: false,
+    },
+  })
+
+  return sanitized
+}
+
 /**
- * Creates a frozen photo object to prevent external mutations.
- * This is especially important to prevent third-party libraries (like masonry layout)
- * from mutating width/height properties of photo objects.
+ * Creates a protected photo object that keeps critical dimensions immutable while
+ * avoiding the heavy cost of fully freezing large lists in production. In
+ * development, mutation attempts still throw noisy warnings via Proxy guards.
  *
- * @param {Object} photo - The photo object to freeze
- * @returns {Object} - Frozen photo object
+ * @param {Object} photo - The photo object to protect
+ * @returns {Object} - Read-only photo object
  */
 export const createFrozenPhoto = (photo) => {
+  if (!photo || typeof photo !== 'object') {
+    return photo
+  }
+
+  const originalHeight = photo.height
+  const originalWidth = photo.width
+
+  const readOnlyPhoto = Object.seal(createReadOnlyShape(photo))
+
   if (__DEV__) {
-    // First, let's check if this photo is already being mutated
-    const originalHeight = photo.height
-    const originalWidth = photo.width
-
-    // Removed debug logging to reduce console noise
-
-    // Create a deep copy to ensure no shared references
-    const photoClone = {
-      ...photo,
-      // Ensure width/height are numbers to prevent mutations
-      width: Number(photo.width),
-      height: Number(photo.height),
-    }
-
-    // Add a property to track mutations
-    const frozenPhoto = Object.freeze(photoClone)
-
-    // Add mutation detection via Proxy in development
-    const proxiedPhoto = new Proxy(frozenPhoto, {
-      set(target, property, value) {
-        console.error(
-          `🚨 MUTATION DETECTED: Attempted to set ${String(property)} = ${value} on frozen photo ${target.id}`,
-        )
-        console.error(
-          `🚨 Current photo state: width=${target.width}, height=${target.height}`,
-        )
-        console.trace('Mutation call stack:')
-        return false // Reject the mutation
-      },
-      defineProperty(target, property, descriptor) {
-        console.error(
-          `🚨 PROPERTY DEFINITION DETECTED: Attempted to define ${String(property)} on frozen photo ${target.id}`,
-        )
-        console.trace('Property definition call stack:')
-        return false // Reject the definition
-      },
-      get(target, property) {
-        // Removed dimension access logging to reduce console noise
-        return target[property]
-      },
-    })
-
-    // Log if the input photo had different dimensions than expected
     if (photo.height !== originalHeight || photo.width !== originalWidth) {
       console.warn(
         `🔍 Photo ${photo.id} dimensions changed during createFrozenPhoto: ${originalWidth}x${originalHeight} → ${photo.width}x${photo.height}`,
       )
     }
 
-    return proxiedPhoto
+    return withDevMutationGuards(readOnlyPhoto)
   }
 
-  return Object.freeze({ ...photo })
+  return readOnlyPhoto
 }
 
 /**
@@ -128,8 +166,10 @@ export const validateFrozenPhotosList = (photosList, context = '') => {
   photosList.forEach((photo, index) => {
     // In development mode, we use Proxy objects for mutation detection
     // Object.isFrozen() returns false for Proxy objects even if target is frozen
-    // So we skip the frozen check in dev mode and trust our createFrozenPhoto function
-    const isProtected = __DEV__ ? true : Object.isFrozen(photo)
+    // So we rely on the internal marker and extensibility checks instead
+    const isProtected =
+      Boolean(photo?.[READONLY_PHOTO_FLAG]) &&
+      Object.isExtensible(photo) === false
 
     if (!isProtected) {
       console.warn(

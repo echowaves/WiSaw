@@ -48,7 +48,12 @@ import NetInfo from '@react-native-community/netinfo'
 
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 
+import {
+  emitPhotoSearch,
+  subscribeToPhotoSearch,
+} from '../../events/photoSearchBus'
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
+import useToastTopOffset from '../../hooks/useToastTopOffset'
 
 import {
   Badge,
@@ -155,14 +160,42 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
-  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
-  const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [pendingTriggerSearch, setPendingTriggerSearch] = useState(null)
+
+  const toastTopOffset = useToastTopOffset()
 
   // State to prevent double-clicking camera buttons
   const [isCameraOpening, setIsCameraOpening] = useState(false)
+
+  const handleIncomingSearch = useCallback(
+    (term) => {
+      if (typeof term !== 'string') {
+        return
+      }
+
+      const trimmed = term.trim()
+      if (!trimmed.length) {
+        return
+      }
+
+      setPendingTriggerSearch(trimmed)
+    },
+    [setPendingTriggerSearch],
+  )
+
+  useEffect(() => {
+    const unsubscribe = subscribeToPhotoSearch(handleIncomingSearch)
+    return unsubscribe
+  }, [handleIncomingSearch])
+
+  const triggerSearch = useCallback((term) => {
+    emitPhotoSearch(term)
+  }, [])
 
   // Development-only: Add guards to detect unauthorized mutations to photo dimensions
   if (__DEV__) {
@@ -312,7 +345,6 @@ const PhotosList = ({ searchFromUrl }) => {
   const [zeroMoment, setZeroMoment] = useState(0)
 
   const [netAvailable, setNetAvailable] = useState(true)
-  const [searchTerm, setSearchTerm] = useAtom(STATE.searchTerm)
   const [location, setLocation] = useState({
     coords: { latitude: 0, longitude: 0 },
   })
@@ -357,7 +389,7 @@ const PhotosList = ({ searchFromUrl }) => {
   } = usePhotoUploader({
     uuid,
     setUuid,
-    topOffset,
+    topOffset: toastTopOffset,
     netAvailable,
     onPhotoUploaded: handleUploadSuccess,
   })
@@ -740,7 +772,6 @@ const PhotosList = ({ searchFromUrl }) => {
           photosList={photosList}
           searchTerm={searchTerm}
           activeSegment={activeSegment}
-          topOffset={topOffset}
           uuid={uuid}
           isExpanded={isPhotoExpanded(item.id)}
           onToggleExpand={handlePhotoToggle}
@@ -748,6 +779,7 @@ const PhotosList = ({ searchFromUrl }) => {
           updatePhotoHeight={updatePhotoHeight}
           onRequestEnsureVisible={ensureItemVisible}
           showComments={shouldShowComments}
+          onTriggerSearch={triggerSearch}
         />
       )
     },
@@ -755,12 +787,12 @@ const PhotosList = ({ searchFromUrl }) => {
       photosList?.length,
       searchTerm,
       activeSegment,
-      topOffset,
       uuid,
       expandedPhotoIds,
       handlePhotoToggle,
       isPhotoExpanded,
       updatePhotoHeight,
+      triggerSearch,
     ],
   )
 
@@ -786,7 +818,7 @@ const PhotosList = ({ searchFromUrl }) => {
       location,
       netAvailable,
       searchTerm: effectiveSearchTerm,
-      topOffset,
+      topOffset: toastTopOffset,
       activeSegment: effectiveSegment,
       batch: currentBatch, // clone
       pageNumber,
@@ -1240,7 +1272,7 @@ const PhotosList = ({ searchFromUrl }) => {
         Toast.show({
           text1: 'Unable to get location',
           type: 'error',
-          topOffset,
+          topOffset: toastTopOffset,
         })
       }
     }
@@ -1383,44 +1415,41 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Handle search triggered from AI tag clicks
   useEffect(() => {
-    if (triggerSearch && triggerSearch.trim().length > 0) {
-      const searchTermToUse = triggerSearch.trim()
-
-      // Dismiss keyboard immediately since search is automatic
-      Keyboard.dismiss()
-
-      // Set the search term
-      setSearchTerm(searchTermToUse)
-
-      // Switch to search segment
-      setActiveSegment(2)
-
-      // Immediately clear photos list
-      setPhotosList([])
-
-      // Reset pagination and loading state
-      setPageNumber(0)
-      setStopLoading(false)
-      setConsecutiveEmptyResponses(0)
-      currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
-
-      // Don't focus the search bar for automatic searches triggered by AI labels
-      // The search is already performed and keyboard is not needed
-
-      // Trigger search immediately with the search term directly passed
-      const performSearch = async () => {
-        try {
-          await reload(2, searchTermToUse)
-        } catch (error) {
-          // Search failed, but don't break the app
-        }
-      }
-      performSearch()
-
-      // Clear the trigger
-      setTriggerSearch(null)
+    if (!pendingTriggerSearch) {
+      return
     }
-  }, [triggerSearch])
+
+    const searchTermToUse = pendingTriggerSearch
+    setPendingTriggerSearch(null)
+
+    // Dismiss keyboard immediately since search is automatic
+    Keyboard.dismiss()
+
+    // Set the search term
+    setSearchTerm(searchTermToUse)
+
+    // Switch to search segment
+    setActiveSegment(2)
+
+    // Immediately clear photos list
+    setPhotosList([])
+
+    // Reset pagination and loading state
+    setPageNumber(0)
+    setStopLoading(false)
+    setConsecutiveEmptyResponses(0)
+    currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
+
+    // Trigger search immediately with the search term directly passed
+    const performSearch = async () => {
+      try {
+        await reload(2, searchTermToUse)
+      } catch (error) {
+        // Search failed, but don't break the app
+      }
+    }
+    performSearch()
+  }, [pendingTriggerSearch, reload])
 
   const renderThumbs = () => {
     const config = segmentConfig
@@ -1717,7 +1746,7 @@ const PhotosList = ({ searchFromUrl }) => {
       Toast.show({
         text1: 'Search for more than 3 characters',
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
     }
   }
@@ -1871,7 +1900,7 @@ const PhotosList = ({ searchFromUrl }) => {
                       text1: 'Upload queue cleared',
                       text2: 'All pending uploads have been cancelled',
                       type: 'success',
-                      topOffset,
+                      topOffset: toastTopOffset,
                     })
                   },
                 },

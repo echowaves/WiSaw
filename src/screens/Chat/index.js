@@ -61,13 +61,15 @@ import subscriptionClient from '../../subscriptionClientWs'
 import { getTheme } from '../../theme/sharedStyles'
 
 import ModernHeaderButton from '../../components/ModernHeaderButton'
+import useToastTopOffset from '../../hooks/useToastTopOffset'
 import ChatPhoto from './ChatPhoto'
 
 const Chat = ({ route }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+
+  const toastTopOffset = useToastTopOffset()
 
   const theme = getTheme(isDarkMode)
 
@@ -177,7 +179,7 @@ const Chat = ({ route }) => {
                   text2: 'All messages have been deleted',
                   visibilityTime: 2000,
                   autoHide: true,
-                  topOffset: topOffset || 60,
+                  topOffset: toastTopOffset,
                 })
 
                 // Navigate back to friends list
@@ -190,7 +192,7 @@ const Chat = ({ route }) => {
                   text2: 'Please try again',
                   visibilityTime: 3000,
                   autoHide: true,
-                  topOffset: topOffset || 60,
+                  topOffset: toastTopOffset,
                 })
               }
             } catch (error) {
@@ -201,7 +203,7 @@ const Chat = ({ route }) => {
                 text2: 'Please try again',
                 visibilityTime: 3000,
                 autoHide: true,
-                topOffset: topOffset || 60,
+                topOffset: toastTopOffset,
               })
             }
           },
@@ -275,7 +277,7 @@ const Chat = ({ route }) => {
         text1: `Failed to load messages:`,
         text2: `${e}`,
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
       // console.log({ e })
       return []
@@ -436,7 +438,7 @@ const Chat = ({ route }) => {
           // text2: 'You may want to leave this screen and come back to it again, to make it work.',
           text2: JSON.stringify({ error }),
           type: 'error',
-          topOffset,
+          topOffset: toastTopOffset,
         })
         console.log(
           '------------------------- this is the whole new begining --------------------------------------',
@@ -512,7 +514,7 @@ const Chat = ({ route }) => {
               text1: `Failed to send message:`,
               text2: `${e}`,
               type: 'error',
-              topOffset,
+              topOffset: toastTopOffset,
             })
           }
         })()
@@ -521,7 +523,7 @@ const Chat = ({ route }) => {
       setText('')
       console.log('Message sent and input cleared')
     },
-    [chatUuid, uuid, friendsList, topOffset],
+    [chatUuid, uuid, friendsList, toastTopOffset],
   )
 
   const createStyles = (theme) =>
@@ -724,7 +726,7 @@ const Chat = ({ route }) => {
       chatPhotoHash,
     })
 
-    reducer.uploadPendingPhotos({ chatUuid, uuid, topOffset })
+    reducer.uploadPendingPhotos({ chatUuid, uuid, topOffset: toastTopOffset })
   }
 
   const pickAsset = async () => {

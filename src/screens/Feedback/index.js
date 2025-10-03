@@ -23,6 +23,7 @@ import * as Haptics from 'expo-haptics'
 
 import AppHeader from '../../components/AppHeader'
 import * as CONST from '../../consts'
+import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
@@ -32,7 +33,7 @@ const FeedbackScreen = () => {
   const navigation = useNavigation()
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
+  const toastTopOffset = useToastTopOffset()
 
   const theme = getTheme(isDarkMode)
 
@@ -119,7 +120,7 @@ const FeedbackScreen = () => {
       Toast.show({
         text1: 'Thank you! 🎉',
         text2: 'Your feedback has been submitted successfully.',
-        topOffset,
+        topOffset: toastTopOffset,
         type: 'success',
       })
     } catch (err) {
@@ -128,7 +129,7 @@ const FeedbackScreen = () => {
         text1: 'Oops! Something went wrong',
         text2: err.toString(),
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
     } finally {
       setIsSubmitting(false)
@@ -141,7 +142,7 @@ const FeedbackScreen = () => {
         text1: 'More details needed',
         text2: 'Please provide at least 10 characters of feedback.',
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
       return
     }

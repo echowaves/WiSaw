@@ -10,67 +10,29 @@ export const uuid = atom('')
 
 export const nickName = atom('')
 
-export const topOffset = atom(40)
-
-// Create a custom photosList atom that automatically freezes photos
+// Create a custom photosList atom that automatically hardens photo objects
 const photosListAtom = atom([])
 
-// Custom getter that ensures all photos are frozen when accessed
+const protectPhotos = (photos) => {
+  if (!Array.isArray(photos)) {
+    return []
+  }
+
+  return photos.map((photo) => createFrozenPhoto(photo))
+}
+
 export const photosList = atom(
-  (get) => {
-    const photos = get(photosListAtom)
-    // Always return frozen photos from the atom
-    const frozenPhotos = photos.map((photo) => {
-      if (__DEV__) {
-        const frozen = createFrozenPhoto(photo)
-        // Note: In dev mode, createFrozenPhoto returns a Proxy object
-        // Object.isFrozen() returns false for Proxy objects, but they are protected
-        return frozen
-      }
-      return Object.freeze({ ...photo })
-    })
+  (get) => get(photosListAtom),
+  (get, set, updater) => {
+    const currentPhotos = get(photosListAtom)
+    const nextPhotos =
+      typeof updater === 'function' ? updater(currentPhotos) : updater
 
-    return frozenPhotos
-  },
-  (get, set, update) => {
-    // Handle both direct arrays and function updates
-    let newPhotos
-    if (typeof update === 'function') {
-      // If update is a function, call it with current frozen photos
-      const currentPhotos = get(photosListAtom).map((photo) => {
-        if (__DEV__) {
-          return createFrozenPhoto(photo)
-        }
-        return Object.freeze({ ...photo })
-      })
-      newPhotos = update(currentPhotos)
-    } else {
-      // Direct array update
-      newPhotos = update
-    }
-
-    // Ensure all photos in the result are frozen
-    const frozenPhotos = newPhotos.map((photo) => {
-      if (__DEV__) {
-        const frozen = createFrozenPhoto(photo)
-        // Note: In dev mode, createFrozenPhoto returns a Proxy object
-        // Object.isFrozen() returns false for Proxy objects, but they are protected
-        return frozen
-      }
-      return Object.freeze({ ...photo })
-    })
-
-    set(photosListAtom, frozenPhotos)
+    set(photosListAtom, protectPhotos(nextPhotos))
   },
 )
 
 export const friendsList = atom([])
-
-export const triggerAddFriend = atom(false)
-
-export const triggerSearch = atom(null)
-
-export const searchTerm = atom('')
 
 export const isDarkMode = atom(false)
 

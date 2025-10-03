@@ -23,7 +23,6 @@ const ConfirmFriendship = ({ route }) => {
   const { friendshipUuid } = route.params
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const navigation = useNavigation()

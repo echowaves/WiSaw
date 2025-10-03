@@ -26,6 +26,7 @@ import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
+import useToastTopOffset from '../../hooks/useToastTopOffset'
 
 import * as reducer from './reducer'
 
@@ -38,9 +39,10 @@ const SecretScreen = () => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+
+  const toastTopOffset = useToastTopOffset()
 
   const theme = getTheme(isDarkMode)
 
@@ -123,12 +125,12 @@ const SecretScreen = () => {
           oldSecret,
           secret,
           uuid,
-          topOffset,
+          topOffset: toastTopOffset,
         })
       } else {
         await reducer.registerSecret({
           secret,
-          topOffset,
+          topOffset: toastTopOffset,
           nickName: nickNameText,
           uuid,
         })
@@ -139,7 +141,7 @@ const SecretScreen = () => {
       Toast.show({
         text1: 'Success! 🎉',
         text2: 'Your identity has been secured.',
-        topOffset,
+        topOffset: toastTopOffset,
         type: 'success',
       })
 
@@ -187,7 +189,7 @@ const SecretScreen = () => {
         text1: errorTitle,
         text2: errorMessage,
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
     } finally {
       setIsSubmitting(false)

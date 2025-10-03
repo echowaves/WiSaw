@@ -23,6 +23,7 @@ import { gql } from '@apollo/client'
 
 import AppHeader from '../../components/AppHeader'
 import Photo from '../../components/Photo'
+import { emitPhotoSearch } from '../../events/photoSearchBus'
 
 import * as CONST from '../../consts'
 import { isDarkMode } from '../../state'
@@ -158,6 +159,7 @@ const PhotosDetailsShared = ({ route }) => {
             key={item.id}
             refreshKey={refreshKey}
             embedded={false}
+            onTriggerSearch={emitPhotoSearch}
           />
         </ScrollView>
       </View>

@@ -24,6 +24,7 @@ import { useVideoPlayer, VideoView } from 'expo-video'
 
 import * as reducer from './reducer'
 
+import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 import * as sharingHelper from '../../utils/simpleSharingHelper'
 
@@ -377,6 +378,7 @@ const Photo = ({
   onHeightMeasured,
   embedded = true,
   onRequestEnsureVisible,
+  onTriggerSearch,
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -384,10 +386,10 @@ const Photo = ({
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
-  const [topOffset, setTopOffset] = useAtom(STATE.topOffset)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
-  const [triggerSearch, setTriggerSearch] = useAtom(STATE.triggerSearch)
+
+  const toastTopOffset = useToastTopOffset()
 
   // Get dynamic safe area and window dimensions
   const insets = useSafeAreaInsets()
@@ -443,7 +445,7 @@ const Photo = ({
         text1: 'Video Error',
         text2: 'Unable to play video. Please try again.',
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
     }
   }
@@ -688,7 +690,7 @@ const Photo = ({
                       photo,
                       comment,
                       uuid,
-                      topOffset,
+                      topOffset: toastTopOffset,
                     })
                     // bruit force reload comments to re-render in the photo details screen
                     const updatedPhotoDetails = await reducer.getPhotoDetails({
@@ -752,7 +754,7 @@ const Photo = ({
                     !comment.id && { opacity: 0.7 },
                     comment.id
                       ? {}
-                      : { backgroundColor: theme.CARD_BACKGROUND + '80' }, // Subtle visual difference for optimistic
+                      : { backgroundColor: `${theme.CARD_BACKGROUND}80` }, // Subtle visual difference for optimistic
                   ]}
                 >
                   <ThemedText style={styles.commentText}>
@@ -809,7 +811,7 @@ const Photo = ({
               params: {
                 photo: JSON.stringify(photo),
                 uuid,
-                topOffset,
+                topOffset: toastTopOffset,
               },
             })
           }
@@ -904,7 +906,9 @@ const Photo = ({
                       { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
                     ]}
                     onPress={() => {
-                      setTriggerSearch(label.Name)
+                      if (typeof onTriggerSearch === 'function') {
+                        onTriggerSearch(label.Name)
+                      }
                       router.back()
                     }}
                     activeOpacity={0.7}
@@ -978,7 +982,9 @@ const Photo = ({
                       { opacity: Math.min(text.Confidence / 100 + 0.3, 1) },
                     ]}
                     onPress={() => {
-                      setTriggerSearch(text.DetectedText)
+                      if (typeof onTriggerSearch === 'function') {
+                        onTriggerSearch(text.DetectedText)
+                      }
                       router.back()
                     }}
                     activeOpacity={0.7}
@@ -1059,7 +1065,9 @@ const Photo = ({
                       { opacity: Math.min(label.Confidence / 100 + 0.3, 1) },
                     ]}
                     onPress={() => {
-                      setTriggerSearch(label.Name)
+                      if (typeof onTriggerSearch === 'function') {
+                        onTriggerSearch(label.Name)
+                      }
                       router.back()
                     }}
                     activeOpacity={0.7}
@@ -1085,7 +1093,7 @@ const Photo = ({
         text1: 'Unable to delete Starred photo',
         text2: 'Un-Star photo first',
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
       return
     }
@@ -1100,7 +1108,7 @@ const Photo = ({
             const deleted = await reducer.deletePhoto({
               photo,
               uuid,
-              topOffset,
+              topOffset: toastTopOffset,
             })
 
             if (deleted) {
@@ -1122,7 +1130,7 @@ const Photo = ({
         text1: 'Unable to Report Starred photo',
         text2: 'Un-Star photo first',
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
       return
     }
@@ -1131,7 +1139,7 @@ const Photo = ({
         text1: 'Looks like you already Reported this Photo',
         text2: 'You can only Report same Photo once',
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
     } else {
       Alert.alert(
@@ -1141,7 +1149,8 @@ const Photo = ({
           { text: 'No', onPress: () => null, style: 'cancel' },
           {
             text: 'Yes',
-            onPress: () => reducer.banPhoto({ photo, uuid, topOffset }),
+            onPress: () =>
+              reducer.banPhoto({ photo, uuid, topOffset: toastTopOffset }),
           },
         ],
         { cancelable: true },
@@ -1154,13 +1163,21 @@ const Photo = ({
       if (photoDetails?.isPhotoWatched) {
         setPhotoDetails({
           ...photoDetails,
-          watchersCount: await reducer.unwatchPhoto({ photo, uuid, topOffset }),
+          watchersCount: await reducer.unwatchPhoto({
+            photo,
+            uuid,
+            topOffset: toastTopOffset,
+          }),
           isPhotoWatched: !photoDetails?.isPhotoWatched,
         })
       } else {
         setPhotoDetails({
           ...photoDetails,
-          watchersCount: await reducer.watchPhoto({ photo, uuid, topOffset }),
+          watchersCount: await reducer.watchPhoto({
+            photo,
+            uuid,
+            topOffset: toastTopOffset,
+          }),
           isPhotoWatched: !photoDetails?.isPhotoWatched,
         })
       }
@@ -1169,7 +1186,7 @@ const Photo = ({
         text1: 'Unable to complete',
         text2: 'Network issue? Try again later',
         type: 'error',
-        topOffset,
+        topOffset: toastTopOffset,
       })
     }
   }
@@ -1202,7 +1219,7 @@ const Photo = ({
                 text1: 'Unable to Report Starred photo',
                 text2: 'Un-Star photo first',
                 type: 'error',
-                topOffset,
+                topOffset: toastTopOffset,
               })
             } else {
               handleBan()
@@ -1255,7 +1272,7 @@ const Photo = ({
                 text1: 'Unable to delete Starred photo',
                 text2: 'Un-Star photo first',
                 type: 'error',
-                topOffset,
+                topOffset: toastTopOffset,
               })
             } else {
               handleDelete()
@@ -1342,7 +1359,7 @@ const Photo = ({
               styles.actionButtonDisabled,
           ]}
           onPress={() => {
-            sharingHelper.sharePhoto(photo, photoDetails, topOffset)
+            sharingHelper.sharePhoto(photo, photoDetails, toastTopOffset)
           }}
           activeOpacity={0.7}
           delayPressIn={0}
@@ -1632,6 +1649,7 @@ Photo.propTypes = {
   onHeightMeasured: PropTypes.func,
   embedded: PropTypes.bool,
   onRequestEnsureVisible: PropTypes.func,
+  onTriggerSearch: PropTypes.func,
 }
 
 export default Photo

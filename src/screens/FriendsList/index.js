@@ -26,6 +26,7 @@ import EmptyStateCard from '../../components/EmptyStateCard'
 import NamePicker from '../../components/NamePicker'
 import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
+import { subscribeToAddFriend } from '../../events/friendAddBus'
 import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
@@ -35,9 +36,6 @@ const FriendsList = () => {
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
-  const [triggerAddFriend, setTriggerAddFriend] = useAtom(
-    STATE.triggerAddFriend,
-  )
 
   const theme = getTheme(isDarkMode)
 
@@ -264,18 +262,18 @@ const FriendsList = () => {
   const [shareNameModalData, setShareNameModalData] = useState(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const handleAddFriend = async () => {
+  const handleAddFriend = useCallback(() => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
     setShowNamePicker(true)
-  }
+  }, [])
 
-  // Handle external trigger for adding friends from header
   useEffect(() => {
-    if (triggerAddFriend) {
+    const unsubscribe = subscribeToAddFriend(() => {
       handleAddFriend()
-      setTriggerAddFriend(false)
-    }
-  }, [triggerAddFriend, setTriggerAddFriend])
+    })
+
+    return unsubscribe
+  }, [handleAddFriend])
 
   const handleShareFriend = async ({
     friendshipUuid,
