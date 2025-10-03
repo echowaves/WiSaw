@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { useAtom } from 'jotai'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
+import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library'
 import { router, useNavigation } from 'expo-router'
 // import * as FileSystem from 'expo-file-system'
@@ -26,7 +27,6 @@ import {
   Keyboard,
   Platform,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -46,6 +46,7 @@ import {
 
 import NetInfo from '@react-native-community/netinfo'
 
+import { Badge, LinearProgress, Text } from '@rneui/themed'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 
 import {
@@ -54,17 +55,6 @@ import {
 } from '../../events/photoSearchBus'
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
-
-import {
-  Badge,
-  Button,
-  Card,
-  Divider,
-  LinearProgress,
-  ListItem,
-  Overlay,
-  Text,
-} from '@rneui/themed'
 
 import * as friendsHelper from '../FriendsList/friends_helper'
 
@@ -330,6 +320,8 @@ const PhotosList = ({ searchFromUrl }) => {
   })
 
   const navigation = useNavigation()
+  const isFocused = useIsFocused()
+  const hasOpenedTandcRef = useRef(false)
 
   const { width, height } = useWindowDimensions()
 
@@ -566,9 +558,8 @@ const PhotosList = ({ searchFromUrl }) => {
         pulseAnimation.stop()
         uploadIconAnimation.setValue(1)
       }
-    } else {
-      uploadIconAnimation.setValue(1)
     }
+    uploadIconAnimation.setValue(1)
 
     setPreviousPendingCount(pendingPhotos.length)
   }, [pendingPhotos.length, netAvailable, previousPendingCount])
@@ -645,9 +636,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Helper function to check if a photo is expanded
   const isPhotoExpanded = React.useCallback(
-    (photoId) => {
-      return expandedPhotoIds.has(photoId)
-    },
+    (photoId) => expandedPhotoIds.has(photoId),
     [expandedPhotoIds],
   )
 
@@ -1310,6 +1299,34 @@ const PhotosList = ({ searchFromUrl }) => {
     }
     // updateNavBar()
   }, [netAvailable])
+
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true
+
+      const checkAcceptance = async () => {
+        const accepted = await reducer.getTancAccepted()
+        if (isMounted) {
+          setIsTandcAccepted(accepted)
+        }
+      }
+
+      checkAcceptance()
+
+      return () => {
+        isMounted = false
+      }
+    }, []),
+  )
+
+  useEffect(() => {
+    if (isFocused && !isTandcAccepted && !hasOpenedTandcRef.current) {
+      hasOpenedTandcRef.current = true
+      router.push('/tandc-modal')
+    } else if (isTandcAccepted) {
+      hasOpenedTandcRef.current = false
+    }
+  }, [isFocused, isTandcAccepted, router])
 
   useEffect(() => {
     // TODO: delete next line -- debuggin
@@ -2053,140 +2070,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
   if (!isTandcAccepted) {
     return (
-      <View style={styles.container}>
-        <Overlay isVisible>
-          <ScrollView>
-            <Card
-              containerStyle={{
-                padding: 0,
-                backgroundColor: theme.CARD_BACKGROUND,
-              }}
-            >
-              <ListItem
-                style={{
-                  borderRadius: 10,
-                  backgroundColor: theme.CARD_BACKGROUND,
-                }}
-              >
-                <Text
-                  style={{
-                    color: theme.TEXT_PRIMARY,
-                    fontSize: 16,
-                    lineHeight: 22,
-                  }}
-                >
-                  When you take a photo with WiSaw app, it will be added to a
-                  Photo Album on your phone, as well as posted to global feed in
-                  the cloud.
-                </Text>
-              </ListItem>
-              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
-              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
-                <Text
-                  style={{
-                    color: theme.TEXT_PRIMARY,
-                    fontSize: 16,
-                    lineHeight: 22,
-                  }}
-                >
-                  Everyone close-by can see your photos.
-                </Text>
-              </ListItem>
-              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
-              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
-                <Text
-                  style={{
-                    color: theme.TEXT_PRIMARY,
-                    fontSize: 16,
-                    lineHeight: 22,
-                  }}
-                >
-                  You can see other&#39;s photos too.
-                </Text>
-              </ListItem>
-              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
-              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
-                <Text
-                  style={{
-                    color: theme.TEXT_PRIMARY,
-                    fontSize: 16,
-                    lineHeight: 22,
-                  }}
-                >
-                  If you find any photo abusive or inappropriate, you can delete
-                  it -- it will be deleted from the cloud so that no one will
-                  ever see it again.
-                </Text>
-              </ListItem>
-              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
-              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
-                <Text
-                  style={{
-                    color: theme.TEXT_PRIMARY,
-                    fontSize: 16,
-                    lineHeight: 22,
-                  }}
-                >
-                  No one will tolerate objectionable content or abusive users.
-                </Text>
-              </ListItem>
-              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
-              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
-                <Text
-                  style={{
-                    color: theme.TEXT_PRIMARY,
-                    fontSize: 16,
-                    lineHeight: 22,
-                  }}
-                >
-                  The abusive users will be banned from WiSaw by other users.
-                </Text>
-              </ListItem>
-              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
-              <ListItem style={{ backgroundColor: theme.CARD_BACKGROUND }}>
-                <Text
-                  style={{
-                    color: theme.TEXT_PRIMARY,
-                    fontSize: 16,
-                    lineHeight: 22,
-                    fontWeight: '600',
-                  }}
-                >
-                  By using WiSaw I agree to Terms and Conditions.
-                </Text>
-              </ListItem>
-              <Divider style={{ backgroundColor: theme.BORDER_LIGHT }} />
-
-              <ListItem
-                style={{
-                  alignItems: 'center',
-                  backgroundColor: theme.CARD_BACKGROUND,
-                  paddingVertical: 20,
-                }}
-              >
-                <Button
-                  title="I Agree"
-                  type="outline"
-                  buttonStyle={{
-                    borderColor: theme.INTERACTIVE_PRIMARY,
-                    borderWidth: 2,
-                    paddingHorizontal: 30,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                  }}
-                  titleStyle={{
-                    color: theme.INTERACTIVE_PRIMARY,
-                    fontSize: 18,
-                    fontWeight: '600',
-                  }}
-                  onPress={() => {
-                    setIsTandcAccepted(reducer.acceptTandC())
-                  }}
-                />
-              </ListItem>
-            </Card>
-          </ScrollView>
-        </Overlay>
+      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
+        {renderCustomHeader()}
       </View>
     )
   }
