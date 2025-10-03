@@ -14,7 +14,7 @@ import { router, Stack } from 'expo-router'
 import * as ScreenOrientation from 'expo-screen-orientation'
 import * as SplashScreen from 'expo-splash-screen'
 import { useAtom } from 'jotai'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
@@ -42,6 +42,8 @@ export default function RootLayout() {
   )
   const [isAppReady, setIsAppReady] = useState(false)
   const [initStarted, setInitStarted] = useState(false)
+  const pendingDeepLinkRef = useRef(null)
+  const lastHandledDeepLinkRef = useRef({ url: null, timestamp: 0 })
 
   // Create dynamic theme based on dark mode state
   const currentTheme = getTheme(isDarkMode)
@@ -117,8 +119,102 @@ export default function RootLayout() {
   const shouldProceedWithoutFonts = fontLoadingTimedOut || fontError
 
   // Handle deep linking
+  const processDeepLink = useCallback((linkData) => {
+    try {
+      router.dismissAll()
+
+      switch (linkData.type) {
+        case 'photo':
+          console.log('Navigating to shared photo:', linkData.photoId)
+          router.replace('/')
+          setTimeout(() => {
+            router.push(`/shared/${linkData.photoId}`)
+          }, 50)
+          break
+        case 'friend':
+          console.log(
+            'Navigating to friend confirmation:',
+            linkData.friendshipUuid,
+          )
+          router.replace('/')
+          setTimeout(() => {
+            router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
+          }, 50)
+          break
+        case 'friendshipName':
+          console.log(
+            'Processing friendship name update:',
+            linkData.friendshipUuid,
+            linkData.friendName,
+          )
+          router.replace('/friends')
+          setTimeout(async () => {
+            try {
+              const secretReducer = await import(
+                '../src/screens/Secret/reducer'
+              )
+              const currentUuid = await secretReducer.getUUID()
+
+              const friendsHelper = await import(
+                '../src/screens/FriendsList/friends_helper'
+              )
+              await friendsHelper.setContactName({
+                uuid: currentUuid,
+                friendshipUuid: linkData.friendshipUuid,
+                contactName: linkData.friendName,
+              })
+
+              const Toast = (await import('react-native-toast-message')).default
+              Toast.show({
+                text1: 'Friend name updated!',
+                text2: `Updated to "${linkData.friendName}"`,
+                type: 'success',
+                topOffset: 100,
+              })
+            } catch (error) {
+              console.error('Error updating friend name:', error)
+              const Toast = (await import('react-native-toast-message')).default
+              Toast.show({
+                text1: 'Update failed',
+                text2: 'Could not update friend name',
+                type: 'error',
+                topOffset: 100,
+              })
+            }
+          }, 100)
+          break
+        default:
+          console.log('Unknown link type, navigating to home')
+          router.replace('/')
+      }
+    } catch (navError) {
+      console.error('Error during navigation:', navError)
+      router.replace('/')
+      Toast.show({
+        text1: 'Navigation Error',
+        text2: 'Unable to navigate to requested content',
+        type: 'error',
+        position: 'top',
+        topOffset: 60,
+        visibilityTime: 4000,
+      })
+    }
+  }, [])
+
   const handleDeepLink = useCallback(
-    (url: string) => {
+    (url: string, options: { allowQueue?: boolean } = {}) => {
+      const { allowQueue = true } = options
+      if (!url) {
+        return
+      }
+
+      const now = Date.now()
+      const { url: lastUrl, timestamp } = lastHandledDeepLinkRef.current
+      if (lastUrl === url && now - timestamp < 1000) {
+        console.log('Skipping duplicate deep link within debounce window:', url)
+        return
+      }
+
       try {
         console.log('Deep link received:', url)
 
@@ -126,116 +222,32 @@ export default function RootLayout() {
         console.log('Parsed link data:', linkData)
 
         if (linkData) {
-          // Navigate immediately if app is ready, otherwise wait briefly
-          const navigateToLink = () => {
-            try {
-              // Reset navigation stack to ensure clean state
-              router.dismissAll()
+          const isReadyNow =
+            (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
 
-              switch (linkData.type) {
-                case 'photo':
-                  console.log('Navigating to shared photo:', linkData.photoId)
-                  // Navigate to home first to establish a proper navigation stack
-                  router.replace('/')
-                  // Then navigate to the photo, creating a proper back navigation
-                  setTimeout(() => {
-                    router.push(`/shared/${linkData.photoId}`)
-                  }, 50)
-                  break
-                case 'friend':
-                  console.log(
-                    'Navigating to friend confirmation:',
-                    linkData.friendshipUuid,
-                  )
-                  // Navigate to home first to establish a proper navigation stack
-                  router.replace('/')
-                  // Then navigate to friend confirmation
-                  setTimeout(() => {
-                    router.push(
-                      `/confirm-friendship/${linkData.friendshipUuid}`,
-                    )
-                  }, 50)
-                  break
-                case 'friendshipName':
-                  console.log(
-                    'Processing friendship name update:',
-                    linkData.friendshipUuid,
-                    linkData.friendName,
-                  )
-                  // Navigate to friends list and trigger name update
-                  router.replace('/friends')
-                  // Trigger friendship name update after navigation
-                  setTimeout(async () => {
-                    try {
-                      // Get current user UUID
-                      const secretReducer = await import(
-                        '../src/screens/Secret/reducer'
-                      )
-                      const currentUuid = await secretReducer.getUUID()
-
-                      const friendsHelper = await import(
-                        '../src/screens/FriendsList/friends_helper'
-                      )
-                      await friendsHelper.setContactName({
-                        uuid: currentUuid,
-                        friendshipUuid: linkData.friendshipUuid,
-                        contactName: linkData.friendName,
-                      })
-
-                      // Show success message
-                      const Toast = (await import('react-native-toast-message'))
-                        .default
-                      Toast.show({
-                        text1: 'Friend name updated!',
-                        text2: `Updated to "${linkData.friendName}"`,
-                        type: 'success',
-                        topOffset: 100,
-                      })
-                    } catch (error) {
-                      console.error('Error updating friend name:', error)
-                      const Toast = (await import('react-native-toast-message'))
-                        .default
-                      Toast.show({
-                        text1: 'Update failed',
-                        text2: 'Could not update friend name',
-                        type: 'error',
-                        topOffset: 100,
-                      })
-                    }
-                  }, 100)
-                  break
-                default:
-                  console.log('Unknown link type, navigating to home')
-                  router.replace('/')
-              }
-            } catch (navError) {
-              console.error('Error during navigation:', navError)
-              // Fallback to home page
-              router.replace('/')
-              Toast.show({
-                text1: 'Navigation Error',
-                text2: 'Unable to navigate to requested content',
-                type: 'error',
-                position: 'top',
-                topOffset: 60,
-                visibilityTime: 4000,
-              })
+          if (isReadyNow) {
+            console.log('App ready, processing deep link immediately')
+            processDeepLink(linkData)
+            lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
+            pendingDeepLinkRef.current = null
+          } else if (allowQueue) {
+            if (pendingDeepLinkRef.current?.url !== url) {
+              console.log(
+                'App not ready, queueing deep link for later processing',
+              )
+            } else {
+              console.log('Deep link already queued, waiting for readiness...')
             }
-          }
-
-          if ((fontsLoaded || shouldProceedWithoutFonts) && isAppReady) {
-            // If app is fully ready, navigate immediately
-            console.log('App ready, navigating immediately')
-            navigateToLink()
+            pendingDeepLinkRef.current = { url, linkData }
           } else {
-            // If app not ready yet, wait briefly
-            console.log('App not ready, waiting briefly...')
-            setTimeout(navigateToLink, 200)
+            console.log(
+              'App not fully ready and queuing disabled, queueing as fallback',
+            )
+            pendingDeepLinkRef.current = { url, linkData }
           }
         }
       } catch (error) {
         console.error('Error handling deep link:', error)
-        // Fallback to home page if deep linking completely fails
         if ((fontsLoaded || shouldProceedWithoutFonts) && isAppReady) {
           router.replace('/')
         }
@@ -249,8 +261,24 @@ export default function RootLayout() {
         })
       }
     },
-    [fontsLoaded || shouldProceedWithoutFonts, isAppReady],
+    [fontsLoaded, shouldProceedWithoutFonts, isAppReady, processDeepLink],
   )
+
+  useEffect(() => {
+    const isReadyNow = (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
+    if (isReadyNow && pendingDeepLinkRef.current) {
+      const { url, linkData } = pendingDeepLinkRef.current
+      console.log('Processing queued deep link now that app is ready:', url)
+      try {
+        processDeepLink(linkData)
+        lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
+      } catch (error) {
+        console.error('Error processing queued deep link:', error)
+      } finally {
+        pendingDeepLinkRef.current = null
+      }
+    }
+  }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady, processDeepLink])
 
   useEffect(() => {
     // Handle initial URL when app is opened via deep link
@@ -281,84 +309,36 @@ export default function RootLayout() {
     const subscription = Linking.addEventListener('url', (event) => {
       try {
         console.log('URL event received while app running:', event.url)
-        // When app is already running, navigate immediately
+
+        if (pendingDeepLinkRef.current?.url === event.url) {
+          console.log(
+            'Deep link matches queued startup link, waiting for initialization to finish',
+          )
+          return
+        }
+
         const linkData = parseDeepLink(event.url)
-        if (linkData) {
-          console.log('App already running, resetting nav stack and navigating')
+        if (!linkData) {
+          return
+        }
 
-          // Reset navigation stack first
-          router.dismissAll()
-
-          switch (linkData.type) {
-            case 'photo':
-              // Navigate to home first to establish proper navigation stack
-              router.replace('/')
-              setTimeout(() => {
-                router.push(`/shared/${linkData.photoId}`)
-              }, 50)
-              break
-            case 'friend':
-              // Navigate to home first to establish proper navigation stack
-              router.replace('/')
-              setTimeout(() => {
-                router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
-              }, 50)
-              break
-            case 'friendshipName':
-              console.log(
-                'Processing friendship name update while app running:',
-                linkData.friendshipUuid,
-                linkData.friendName,
-              )
-              // Navigate to friends list and trigger name update
-              router.replace('/friends')
-              // Trigger friendship name update after navigation
-              setTimeout(async () => {
-                try {
-                  // Get current user UUID
-                  const secretReducer = await import(
-                    '../src/screens/Secret/reducer'
-                  )
-                  const currentUuid = await secretReducer.getUUID()
-
-                  const friendsHelper = await import(
-                    '../src/screens/FriendsList/friends_helper'
-                  )
-                  await friendsHelper.setContactName({
-                    uuid: currentUuid,
-                    friendshipUuid: linkData.friendshipUuid,
-                    contactName: linkData.friendName,
-                  })
-
-                  // Show success message
-                  const Toast = (await import('react-native-toast-message'))
-                    .default
-                  Toast.show({
-                    text1: 'Friend name updated!',
-                    text2: `Updated to "${linkData.friendName}"`,
-                    type: 'success',
-                    topOffset: 100,
-                  })
-                } catch (error) {
-                  console.error('Error updating friend name:', error)
-                  const Toast = (await import('react-native-toast-message'))
-                    .default
-                  Toast.show({
-                    text1: 'Update failed',
-                    text2: 'Could not update friend name',
-                    type: 'error',
-                    topOffset: 100,
-                  })
-                }
-              }, 100)
-              break
-            default:
-              router.replace('/')
+        const isReadyNow =
+          (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
+        if (isReadyNow) {
+          console.log('App already running, navigating immediately')
+          processDeepLink(linkData)
+          lastHandledDeepLinkRef.current = {
+            url: event.url,
+            timestamp: Date.now(),
           }
+        } else {
+          console.log(
+            'Runtime deep link received before readiness, queueing for later',
+          )
+          pendingDeepLinkRef.current = { url: event.url, linkData }
         }
       } catch (error) {
         console.error('Error handling deep link:', error)
-        // Fallback to home page if deep linking fails
         router.replace('/')
         Toast.show({
           text1: 'Link Processing Error',
@@ -384,7 +364,13 @@ export default function RootLayout() {
     }
 
     return () => subscription?.remove()
-  }, [handleDeepLink, fontsLoaded, shouldProceedWithoutFonts])
+  }, [
+    handleDeepLink,
+    fontsLoaded,
+    shouldProceedWithoutFonts,
+    isAppReady,
+    processDeepLink,
+  ])
 
   useEffect(() => {
     // Only run initialization once
