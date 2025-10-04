@@ -535,7 +535,11 @@ export default function RootLayout() {
     const canHideSplash = isAppReady && fontsLoaded
 
     if (!canHideSplash) {
-      console.log('⏳ Waiting to hide splash:', { isAppReady, fontsLoaded, fontError: !!fontError })
+      console.log('⏳ Waiting to hide splash:', {
+        isAppReady,
+        fontsLoaded,
+        fontError: !!fontError,
+      })
       return
     }
     if (isSplashHidden) return // Already hidden
