@@ -1401,6 +1401,9 @@ const PhotosList = ({ searchFromUrl }) => {
     // Dismiss keyboard immediately since search is automatic
     Keyboard.dismiss()
 
+    // Close any expanded photos
+    setExpandedPhotoIds(new Set())
+
     // Set the search term
     setSearchTerm(searchTermToUse)
 

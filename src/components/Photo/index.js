@@ -877,7 +877,6 @@ const Photo = ({
                       if (typeof onTriggerSearch === 'function') {
                         onTriggerSearch(label.Name)
                       }
-                      router.back()
                     }}
                     activeOpacity={0.7}
                   >
@@ -944,7 +943,6 @@ const Photo = ({
                       if (typeof onTriggerSearch === 'function') {
                         onTriggerSearch(text.DetectedText)
                       }
-                      router.back()
                     }}
                     activeOpacity={0.7}
                   >
@@ -1016,7 +1014,6 @@ const Photo = ({
                       if (typeof onTriggerSearch === 'function') {
                         onTriggerSearch(label.Name)
                       }
-                      router.back()
                     }}
                     activeOpacity={0.7}
                   >
