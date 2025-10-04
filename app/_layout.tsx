@@ -40,7 +40,9 @@ export default function RootLayout() {
     STATE.followSystemTheme,
   )
   const [isAppReady, setIsAppReady] = useState(false)
+  const [isSplashHidden, setIsSplashHidden] = useState(false)
   const hasMarkedReadyRef = useRef(false)
+  const hasProcessedInitialUrlRef = useRef(false)
 
   const markAppReady = useCallback(() => {
     setIsAppReady(() => {
@@ -219,14 +221,35 @@ export default function RootLayout() {
             }
           }
 
-          if ((fontsLoaded || !!fontError) && isAppReady) {
-            // If app is fully ready, navigate immediately
-            console.log('App ready, navigating immediately')
+          const isFullyReady =
+            (fontsLoaded || !!fontError) && isAppReady && isSplashHidden
+
+          if (isFullyReady) {
+            // If app is fully ready and splash is hidden, navigate immediately
+            console.log(
+              'App fully ready (splash hidden), navigating immediately',
+            )
             navigateToLink()
           } else {
-            // If app not ready yet, wait briefly
-            console.log('App not ready, waiting briefly...')
-            setTimeout(navigateToLink, 200)
+            // If app not ready yet, wait for splash to hide
+            console.log('App not fully ready, waiting for splash to hide...')
+            const checkInterval = setInterval(() => {
+              const nowReady =
+                (fontsLoaded || !!fontError) && isAppReady && isSplashHidden
+              if (nowReady) {
+                console.log('App now ready, navigating')
+                clearInterval(checkInterval)
+                navigateToLink()
+              }
+            }, 100)
+            // Safety timeout after 5 seconds
+            setTimeout(() => {
+              clearInterval(checkInterval)
+              console.warn(
+                'Timeout waiting for app ready, navigating anyway...',
+              )
+              navigateToLink()
+            }, 5000)
           }
         }
       } catch (error) {
@@ -245,7 +268,7 @@ export default function RootLayout() {
         })
       }
     },
-    [fontsLoaded, fontError, isAppReady],
+    [fontsLoaded, fontError, isAppReady, isSplashHidden],
   )
 
   useEffect(() => {
@@ -366,15 +389,20 @@ export default function RootLayout() {
       }
     })
 
-    // Get initial URL after app is ready
-    if ((fontsLoaded || !!fontError) && isAppReady) {
+    // Get initial URL only once after app is fully ready (including splash hidden)
+    const isFullyReady =
+      (fontsLoaded || !!fontError) && isAppReady && isSplashHidden
+
+    if (isFullyReady && !hasProcessedInitialUrlRef.current) {
+      console.log('🔗 App fully ready, checking for initial deep link')
+      hasProcessedInitialUrlRef.current = true
       getInitialURL()
     }
 
     return () => {
       subscription?.remove()
     }
-  }, [fontsLoaded, fontError, isAppReady, handleDeepLink])
+  }, [fontsLoaded, fontError, isAppReady, isSplashHidden, handleDeepLink])
 
   useEffect(() => {
     let isCancelled = false
@@ -490,33 +518,41 @@ export default function RootLayout() {
     const canHideSplash = isAppReady && (fontsLoaded || !!fontError)
 
     if (!canHideSplash) return
+    if (isSplashHidden) return // Already hidden
 
     console.log('🎉 App initialized, hiding splash screen...')
 
     SplashScreen.hideAsync()
       .then(() => {
         console.log('✅ Splash screen hidden')
+        setIsSplashHidden(true)
       })
       .catch((error) => {
         console.error('❌ Error hiding splash screen:', error)
+        // Mark as hidden anyway to not block app
+        setIsSplashHidden(true)
       })
-  }, [isAppReady, fontsLoaded, fontError])
+  }, [isAppReady, fontsLoaded, fontError, isSplashHidden])
 
   // Emergency splash hide - MUST run only once on mount, no dependencies
   useEffect(() => {
     const emergencyTimer = setTimeout(() => {
-      console.warn('⚠️ Emergency splash hide triggered after 3 seconds')
-      SplashScreen.hideAsync()
-        .then(() => {
-          console.log('✅ Emergency splash hide succeeded')
-        })
-        .catch((error) => {
-          console.error('❌ Emergency splash hide failed:', error)
-        })
+      if (!isSplashHidden) {
+        console.warn('⚠️ Emergency splash hide triggered after 3 seconds')
+        SplashScreen.hideAsync()
+          .then(() => {
+            console.log('✅ Emergency splash hide succeeded')
+            setIsSplashHidden(true)
+          })
+          .catch((error) => {
+            console.error('❌ Emergency splash hide failed:', error)
+            setIsSplashHidden(true)
+          })
+      }
     }, 3000)
 
     return () => clearTimeout(emergencyTimer)
-  }, []) // Empty deps - run once on mount only!
+  }, [isSplashHidden])
 
   return (
     <SafeAreaProvider>
