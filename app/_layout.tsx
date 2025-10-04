@@ -39,7 +39,7 @@ export default function RootLayout() {
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme,
   )
-  
+
   // Single source of truth for app readiness
   const [isFullyReady, setIsFullyReady] = useState(false)
   const pendingDeepLinkRef = useRef<string | null>(null)
@@ -102,28 +102,37 @@ export default function RootLayout() {
             router.push(`/shared/${linkData.photoId}`)
           }, 100)
           break
-          
+
         case 'friend':
-          console.log('Navigating to friend confirmation:', linkData.friendshipUuid)
+          console.log(
+            'Navigating to friend confirmation:',
+            linkData.friendshipUuid,
+          )
           router.replace('/')
           setTimeout(() => {
             router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
           }, 100)
           break
-          
+
         case 'friendshipName':
-          console.log('Processing friendship name update:', linkData.friendshipUuid, linkData.friendName)
+          console.log(
+            'Processing friendship name update:',
+            linkData.friendshipUuid,
+            linkData.friendName,
+          )
           router.replace('/friends')
           setTimeout(async () => {
             try {
               const currentUuid = await SecretReducer.getUUID()
-              const friendsHelper = await import('../src/screens/FriendsList/friends_helper')
+              const friendsHelper = await import(
+                '../src/screens/FriendsList/friends_helper'
+              )
               await friendsHelper.setContactName({
                 uuid: currentUuid,
                 friendshipUuid: linkData.friendshipUuid,
                 contactName: linkData.friendName,
               })
-              
+
               Toast.show({
                 text1: 'Friend name updated!',
                 text2: `Updated to "${linkData.friendName}"`,
@@ -141,7 +150,7 @@ export default function RootLayout() {
             }
           }, 100)
           break
-          
+
         default:
           console.log('Unknown link type, navigating to home')
           router.replace('/')
@@ -161,25 +170,28 @@ export default function RootLayout() {
   }, [])
 
   // Handle deep link
-  const handleDeepLink = useCallback((url: string) => {
-    console.log('Deep link received:', url)
-    const linkData = parseDeepLink(url)
-    
-    if (!linkData) {
-      console.log('Invalid deep link format')
-      return
-    }
+  const handleDeepLink = useCallback(
+    (url: string) => {
+      console.log('Deep link received:', url)
+      const linkData = parseDeepLink(url)
 
-    if (isFullyReady) {
-      // App is ready, navigate immediately
-      console.log('App is ready, navigating to deep link')
-      navigateToDeepLink(linkData)
-    } else {
-      // Store link for later processing
-      console.log('App not ready, storing deep link for later')
-      pendingDeepLinkRef.current = url
-    }
-  }, [isFullyReady, navigateToDeepLink])
+      if (!linkData) {
+        console.log('Invalid deep link format')
+        return
+      }
+
+      if (isFullyReady) {
+        // App is ready, navigate immediately
+        console.log('App is ready, navigating to deep link')
+        navigateToDeepLink(linkData)
+      } else {
+        // Store link for later processing
+        console.log('App not ready, storing deep link for later')
+        pendingDeepLinkRef.current = url
+      }
+    },
+    [isFullyReady, navigateToDeepLink],
+  )
 
   // Initialize app state
   useEffect(() => {
@@ -191,23 +203,41 @@ export default function RootLayout() {
         const startTime = Date.now()
 
         // Load all preferences in parallel
-        const [uuidResult, nickNameResult, themePreferenceResult, followSystemResult] = 
-          await Promise.allSettled([
-            SecretReducer.getUUID(),
-            SecretReducer.getStoredNickName(),
-            loadThemePreference(),
-            loadFollowSystemPreference(),
-          ])
+        const [
+          uuidResult,
+          nickNameResult,
+          themePreferenceResult,
+          followSystemResult,
+        ] = await Promise.allSettled([
+          SecretReducer.getUUID(),
+          SecretReducer.getStoredNickName(),
+          loadThemePreference(),
+          loadFollowSystemPreference(),
+        ])
 
         if (isCancelled) return
 
         // Set state with resolved values
         setUuid(uuidResult.status === 'fulfilled' ? uuidResult.value || '' : '')
-        setNickName(nickNameResult.status === 'fulfilled' ? nickNameResult.value || '' : '')
-        setFollowSystemTheme(followSystemResult.status === 'fulfilled' ? !!followSystemResult.value : false)
-        
-        const followSystem = followSystemResult.status === 'fulfilled' ? !!followSystemResult.value : false
-        const themePreference = themePreferenceResult.status === 'fulfilled' ? !!themePreferenceResult.value : false
+        setNickName(
+          nickNameResult.status === 'fulfilled'
+            ? nickNameResult.value || ''
+            : '',
+        )
+        setFollowSystemTheme(
+          followSystemResult.status === 'fulfilled'
+            ? !!followSystemResult.value
+            : false,
+        )
+
+        const followSystem =
+          followSystemResult.status === 'fulfilled'
+            ? !!followSystemResult.value
+            : false
+        const themePreference =
+          themePreferenceResult.status === 'fulfilled'
+            ? !!themePreferenceResult.value
+            : false
         setIsDarkMode(followSystem ? getSystemTheme() : themePreference)
 
         console.log(`✅ App state initialized in ${Date.now() - startTime}ms`)
@@ -222,7 +252,9 @@ export default function RootLayout() {
     }
 
     initialize()
-    return () => { isCancelled = true }
+    return () => {
+      isCancelled = true
+    }
   }, [setFollowSystemTheme, setIsDarkMode, setNickName, setUuid])
 
   // Subscribe to system theme changes
@@ -239,14 +271,14 @@ export default function RootLayout() {
     // Check if all resources are ready
     const resourcesReady = fontsLoaded || !!fontError
     const stateReady = uuid !== undefined // State has been initialized (even if empty)
-    
+
     if (resourcesReady && stateReady && !isFullyReady) {
       console.log('✅ All resources loaded, app is fully ready')
       setIsFullyReady(true)
-      
+
       // Hide splash screen
       SplashScreen.hideAsync().catch(console.error)
-      
+
       // Process any pending deep link
       if (pendingDeepLinkRef.current) {
         console.log('Processing pending deep link')
@@ -264,13 +296,15 @@ export default function RootLayout() {
     // Get initial URL only once
     if (!hasProcessedInitialUrlRef.current) {
       hasProcessedInitialUrlRef.current = true
-      
-      Linking.getInitialURL().then((url) => {
-        if (url) {
-          console.log('Initial URL detected:', url)
-          handleDeepLink(url)
-        }
-      }).catch(console.error)
+
+      Linking.getInitialURL()
+        .then((url) => {
+          if (url) {
+            console.log('Initial URL detected:', url)
+            handleDeepLink(url)
+          }
+        })
+        .catch(console.error)
     }
 
     // Listen for URL changes while app is running
@@ -291,7 +325,7 @@ export default function RootLayout() {
         SplashScreen.hideAsync().catch(console.error)
       }
     }, 5000)
-    
+
     return () => clearTimeout(timeout)
   }, [isFullyReady])
 
