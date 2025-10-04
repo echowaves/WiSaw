@@ -8,11 +8,13 @@
 ## Root Cause
 
 The implementation was trying to use:
+
 - Reactive URL hook (`Linking.useURL()`)
 - Complex navigation readiness checks
 - Wrong path formats (href-style objects or absolute paths with groups)
 
 This created a **deadlock** where:
+
 - Splash waited for navigation to be ready
 - Navigation couldn't initialize properly
 - Deep links couldn't be processed
@@ -59,14 +61,15 @@ useEffect(() => {
 
 ```typescript
 // ✅ CORRECT - Simple string paths
-router.dismissAll()           // Reset navigation stack
-router.replace('/')           // Go to home
-setTimeout(() => {            // Brief delay for stack to settle
+router.dismissAll() // Reset navigation stack
+router.replace('/') // Go to home
+setTimeout(() => {
+  // Brief delay for stack to settle
   router.push(`/shared/${id}`)
 }, 50)
 
 // ❌ WRONG - These don't work
-router.push({ pathname: '/shared/[photoId]', params: { photoId: id }})
+router.push({ pathname: '/shared/[photoId]', params: { photoId: id } })
 router.push('/(drawer)/(tabs)/shared/123')
 router.push('/shared/[photoId]')
 ```
@@ -109,13 +112,13 @@ useEffect(() => {
 
 ## Key Differences from Failed Approach
 
-| Failed Approach | Working Approach |
-|-----------------|------------------|
+| Failed Approach                  | Working Approach                         |
+| -------------------------------- | ---------------------------------------- |
 | `Linking.useURL()` reactive hook | `getInitialURL()` + `addEventListener()` |
-| Wait for navigation ready state | Navigate when app ready |
-| Href-style navigation objects | Simple string paths |
-| Complex pending link queue | Direct navigation in callbacks |
-| Single path for cold/warm | Separate handlers for each |
+| Wait for navigation ready state  | Navigate when app ready                  |
+| Href-style navigation objects    | Simple string paths                      |
+| Complex pending link queue       | Direct navigation in callbacks           |
+| Single path for cold/warm        | Separate handlers for each               |
 
 ## Files Changed
 
@@ -124,17 +127,20 @@ useEffect(() => {
 ## Testing
 
 ### ✅ Cold Start with Deep Link
+
 1. Kill app completely
 2. Click shared link
 3. App opens, splash shows max 3 seconds
 4. Navigate to shared content
 
-### ✅ Warm Start with Deep Link  
+### ✅ Warm Start with Deep Link
+
 1. App running in background
 2. Click shared link
 3. Immediate navigation to content
 
 ### ✅ Normal Start
+
 1. Open app normally
 2. Splash hides when ready
 3. Home screen shows
@@ -144,5 +150,6 @@ useEffect(() => {
 ✅ Passed Codacy analysis (ESLint + Semgrep OSS) with no issues
 
 ---
+
 **Based on**: Commit db5fa1b1e7f01ab80c8f90d8914e658d6669c281  
 **Date**: October 4, 2025
