@@ -148,6 +148,13 @@ export default function RootLayout() {
   useEffect(() => {
     let isCancelled = false
 
+    const getResolvedValue = <T,>(
+      result: PromiseSettledResult<T>,
+      defaultValue: T,
+    ): T => {
+      return result.status === 'fulfilled' ? result.value ?? defaultValue : defaultValue
+    }
+
     const initialize = async () => {
       try {
         console.log('🚀 Initializing app...')
@@ -169,26 +176,13 @@ export default function RootLayout() {
         if (isCancelled) return
 
         // Set state with resolved values
-        setUuid(uuidResult.status === 'fulfilled' ? uuidResult.value || '' : '')
-        setNickName(
-          nickNameResult.status === 'fulfilled'
-            ? nickNameResult.value || ''
-            : '',
-        )
-        setFollowSystemTheme(
-          followSystemResult.status === 'fulfilled'
-            ? !!followSystemResult.value
-            : false,
-        )
+        setUuid(getResolvedValue(uuidResult, ''))
+        setNickName(getResolvedValue(nickNameResult, ''))
+        
+        const followSystem = !!getResolvedValue(followSystemResult, false)
+        setFollowSystemTheme(followSystem)
 
-        const followSystem =
-          followSystemResult.status === 'fulfilled'
-            ? !!followSystemResult.value
-            : false
-        const themePreference =
-          themePreferenceResult.status === 'fulfilled'
-            ? !!themePreferenceResult.value
-            : false
+        const themePreference = !!getResolvedValue(themePreferenceResult, false)
         setIsDarkMode(followSystem ? getSystemTheme() : themePreference)
 
         console.log(`✅ App state initialized in ${Date.now() - startTime}ms`)
