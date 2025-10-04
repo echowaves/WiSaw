@@ -221,8 +221,15 @@ export default function RootLayout() {
             }
           }
 
-          const isFullyReady =
-            (fontsLoaded || !!fontError) && isAppReady && isSplashHidden
+          const isFullyReady = fontsLoaded && isAppReady && isSplashHidden
+
+          console.log('🔍 Deep link readiness check:', {
+            fontsLoaded,
+            fontError: !!fontError,
+            isAppReady,
+            isSplashHidden,
+            isFullyReady,
+          })
 
           if (isFullyReady) {
             // If app is fully ready and splash is hidden, navigate immediately
@@ -231,13 +238,18 @@ export default function RootLayout() {
             )
             navigateToLink()
           } else {
-            // If app not ready yet, wait for splash to hide
-            console.log('App not fully ready, waiting for splash to hide...')
+            // If app not ready yet, wait for everything to be ready
+            console.log('App not fully ready, waiting for all resources...')
             const checkInterval = setInterval(() => {
-              const nowReady =
-                (fontsLoaded || !!fontError) && isAppReady && isSplashHidden
+              const nowReady = fontsLoaded && isAppReady && isSplashHidden
+              console.log('🔄 Polling readiness:', {
+                fontsLoaded,
+                isAppReady,
+                isSplashHidden,
+                nowReady,
+              })
               if (nowReady) {
-                console.log('App now ready, navigating')
+                console.log('✅ App now ready, navigating')
                 clearInterval(checkInterval)
                 navigateToLink()
               }
@@ -248,6 +260,11 @@ export default function RootLayout() {
               console.warn(
                 'Timeout waiting for app ready, navigating anyway...',
               )
+              console.warn('Final state:', {
+                fontsLoaded,
+                isAppReady,
+                isSplashHidden,
+              })
               navigateToLink()
             }, 5000)
           }
@@ -515,9 +532,12 @@ export default function RootLayout() {
 
   // Hide splash once resources and app state are ready
   useEffect(() => {
-    const canHideSplash = isAppReady && (fontsLoaded || !!fontError)
+    const canHideSplash = isAppReady && fontsLoaded
 
-    if (!canHideSplash) return
+    if (!canHideSplash) {
+      console.log('⏳ Waiting to hide splash:', { isAppReady, fontsLoaded, fontError: !!fontError })
+      return
+    }
     if (isSplashHidden) return // Already hidden
 
     console.log('🎉 App initialized, hiding splash screen...')
