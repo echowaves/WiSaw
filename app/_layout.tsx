@@ -42,8 +42,9 @@ export default function RootLayout() {
   )
   const [isAppReady, setIsAppReady] = useState(false)
   const [initStarted, setInitStarted] = useState(false)
+  const [isNavigationMounted, setIsNavigationMounted] = useState(false)
   const rootNavigationState = useRootNavigationState()
-  const isNavigationReady = !!rootNavigationState?.key
+  const isNavigationReady = !!rootNavigationState?.key || isNavigationMounted
   const pendingDeepLinkRef = useRef(null)
   const lastHandledDeepLinkRef = useRef({ url: null, timestamp: 0 })
   const splashHiddenRef = useRef(false)
@@ -52,13 +53,14 @@ export default function RootLayout() {
     console.log('📊 Navigation readiness state:', {
       isNavigationReady,
       hasKey: !!rootNavigationState?.key,
+      isNavigationMounted,
       hasPendingLink: !!pendingDeepLinkRef.current,
       pendingUrl: pendingDeepLinkRef.current?.url,
     })
     if (isNavigationReady) {
       console.log('🧭 Root navigation is now ready')
     }
-  }, [isNavigationReady, rootNavigationState])
+  }, [isNavigationReady, rootNavigationState, isNavigationMounted])
 
   // Create dynamic theme based on dark mode state
   const currentTheme = getTheme(isDarkMode)
@@ -133,25 +135,46 @@ export default function RootLayout() {
   // Determine if we should proceed without waiting for fonts
   const shouldProceedWithoutFonts = fontLoadingTimedOut || fontError
 
+  // Mark navigation as mounted after splash is hidden and app is ready
+  useEffect(() => {
+    const isLaunchReady =
+      (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
+    if (isLaunchReady && splashHiddenRef.current && !isNavigationMounted) {
+      console.log('⏱️ Marking navigation as mounted after splash hidden')
+      // Use requestAnimationFrame to ensure navigation has had a chance to mount
+      requestAnimationFrame(() => {
+        setIsNavigationMounted(true)
+      })
+    }
+  }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady, isNavigationMounted])
+
   // Handle deep linking
   const processDeepLink = useCallback((linkData) => {
     console.log('🔗 processDeepLink called with:', linkData)
     try {
-      router.dismissAll()
+      // Don't dismiss all - we want to maintain the nav stack
 
       switch (linkData.type) {
         case 'photo':
           console.log('📸 Navigating to shared photo:', linkData.photoId)
-          // Use replace to go directly to the target on cold start
-          router.replace(`/shared/${linkData.photoId}`)
+          // Navigate to home first, then push the deep link target
+          router.replace('/')
+          // Use router.push with a microtask to ensure home screen is mounted
+          queueMicrotask(() => {
+            router.push(`/shared/${linkData.photoId}`)
+          })
           break
         case 'friend':
           console.log(
             '👤 Navigating to friend confirmation:',
             linkData.friendshipUuid,
           )
-          // Use replace to go directly to the target on cold start
-          router.replace(`/confirm-friendship/${linkData.friendshipUuid}`)
+          // Navigate to home first, then push the deep link target
+          router.replace('/')
+          // Use router.push with a microtask to ensure home screen is mounted
+          queueMicrotask(() => {
+            router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
+          })
           break
         case 'friendshipName':
           console.log(
