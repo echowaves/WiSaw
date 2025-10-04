@@ -72,7 +72,7 @@ const genLocalThumbs = async (image) => {
       const manipResult = await ImageManipulator.manipulateAsync(
         image.localImgUrl,
         [{ resize: { height: 300 } }],
-        { format: ImageManipulator.SaveFormat.WEBP },
+        { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP },
       )
       return {
         ...image,
@@ -85,7 +85,7 @@ const genLocalThumbs = async (image) => {
     const manipResult = await ImageManipulator.manipulateAsync(
       uri,
       [{ resize: { height: 300 } }],
-      { format: ImageManipulator.SaveFormat.WEBP },
+      { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP },
     )
 
     return {
@@ -198,7 +198,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
       const compressedResult = await ImageManipulator.manipulateAsync(
         queuedItem.originalCameraUrl,
         [{ resize: { height: 3000 } }],
-        { format: ImageManipulator.SaveFormat.WEBP },
+        { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP },
       )
 
       try {
