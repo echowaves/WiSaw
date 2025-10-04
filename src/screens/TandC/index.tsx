@@ -1,8 +1,14 @@
 import { Ionicons } from '@expo/vector-icons'
-import { Button, Text } from '@rneui/themed'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
-import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native'
+import {
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as STATE from '../../state'
@@ -79,13 +85,20 @@ export default function TandCModal({
 
           <View style={styles.actionsSection}>
             <Text style={styles.agreementText}>{TANDC_AGREEMENT}</Text>
-            <Button
-              title={primaryActionLabel}
-              onPress={onAccept}
-              buttonStyle={styles.primaryButton}
-              titleStyle={styles.primaryButtonTitle}
-              containerStyle={styles.primaryButtonContainer}
-            />
+            <View style={styles.primaryButtonContainer}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={onAccept}
+                style={({ pressed }) => [
+                  styles.primaryButton,
+                  pressed && styles.primaryButtonPressed,
+                ]}
+              >
+                <Text style={styles.primaryButtonTitle}>
+                  {primaryActionLabel}
+                </Text>
+              </Pressable>
+            </View>
             <Text style={styles.footerNote}>{FOOTER_NOTE}</Text>
           </View>
         </View>
@@ -181,10 +194,16 @@ const createStyles = (theme: ThemeShape, insets: EdgeInsets) =>
       borderRadius: 14,
       backgroundColor: theme.INTERACTIVE_PRIMARY,
       paddingVertical: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    primaryButtonPressed: {
+      opacity: 0.85,
     },
     primaryButtonTitle: {
       fontSize: 17,
       fontWeight: '700',
+      color: '#FFFFFF',
     },
     footerNote: {
       color: theme.TEXT_SECONDARY,

@@ -8,6 +8,7 @@ import {
   Alert,
   InteractionManager,
   StyleSheet,
+  Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
@@ -15,12 +16,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
-import { LinearProgress, Text as ThemedText } from '@rneui/themed'
-
 import PropTypes from 'prop-types'
 
 import { useEvent } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
+
+import LinearProgress from '../ui/LinearProgress'
 
 import * as reducer from './reducer'
 
@@ -636,16 +637,16 @@ const Photo = ({
       <View style={styles.photoInfoCard}>
         <View style={styles.headerInfo}>
           <View style={styles.authorRow}>
-            <ThemedText
+            <Text
               style={styles.authorName}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
               {authorName}
-            </ThemedText>
-            <ThemedText style={styles.dateText}>
+            </Text>
+            <Text style={styles.dateText}>
               {renderDateTime(photo.createdAt)}
-            </ThemedText>
+            </Text>
           </View>
 
           {(commentsCount > 0 || watchersCount > 0) && (
@@ -653,18 +654,18 @@ const Photo = ({
               {commentsCount > 0 && (
                 <View style={styles.statItem}>
                   <FontAwesome name="comment" size={16} color="#4FC3F7" />
-                  <ThemedText style={styles.statsText}>
+                  <Text style={styles.statsText}>
                     {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
-                  </ThemedText>
+                  </Text>
                 </View>
               )}
 
               {watchersCount > 0 && (
                 <View style={styles.statItem}>
                   <AntDesign name="star" size={16} color="#FFD700" />
-                  <ThemedText style={styles.statsText}>
+                  <Text style={styles.statsText}>
                     {watchersCount} Star{watchersCount !== 1 ? 's' : ''}
-                  </ThemedText>
+                  </Text>
                 </View>
               )}
             </View>
@@ -764,25 +765,23 @@ const Photo = ({
                       : { backgroundColor: `${theme.CARD_BACKGROUND}80` }, // Subtle visual difference for optimistic
                   ]}
                 >
-                  <ThemedText style={styles.commentText}>
-                    {comment.comment}
-                  </ThemedText>
+                  <Text style={styles.commentText}>{comment.comment}</Text>
 
                   {!comment.hiddenButtons && (
                     <View style={styles.commentMeta}>
-                      <ThemedText style={styles.commentAuthor}>
+                      <Text style={styles.commentAuthor}>
                         {friendsHelper.getLocalContactName({
                           uuid,
                           friendUuid: comment.uuid,
                           friendsList,
                         })}
-                      </ThemedText>
+                      </Text>
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}
                       >
-                        <ThemedText style={styles.commentDate}>
+                        <Text style={styles.commentDate}>
                           {renderDateTime(comment.updatedAt)}
-                        </ThemedText>
+                        </Text>
                         {renderCommentButtons({ comment })}
                       </View>
                     </View>
@@ -806,7 +805,7 @@ const Photo = ({
 
   const renderAddCommentsRow = () => {
     if (!photoDetails?.comments) {
-      return <ThemedText />
+      return <Text />
     }
     return (
       <View style={styles.addCommentCard}>
@@ -825,9 +824,9 @@ const Photo = ({
           activeOpacity={0.7}
         >
           <Ionicons name="add-circle" size={18} color={theme.STATUS_SUCCESS} />
-          <ThemedText numberOfLines={1} style={styles.addCommentText}>
+          <Text numberOfLines={1} style={styles.addCommentText}>
             Add Comment
-          </ThemedText>
+          </Text>
         </TouchableOpacity>
       </View>
     )
@@ -894,9 +893,7 @@ const Photo = ({
               }}
               activeOpacity={0.7}
             >
-              <ThemedText style={styles.aiRecognitionHeaderTitle}>
-                AI Tags
-              </ThemedText>
+              <Text style={styles.aiRecognitionHeaderTitle}>AI Tags</Text>
               <Ionicons
                 name={aiTagsCollapsed ? 'chevron-forward' : 'chevron-down'}
                 size={18}
@@ -920,9 +917,9 @@ const Photo = ({
                     }}
                     activeOpacity={0.7}
                   >
-                    <ThemedText style={styles.aiTagText}>
+                    <Text style={styles.aiTagText}>
                       {label.Name} {Math.round(label.Confidence)}%
-                    </ThemedText>
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -970,9 +967,7 @@ const Photo = ({
               }}
               activeOpacity={0.7}
             >
-              <ThemedText style={styles.aiRecognitionHeaderTitle}>
-                AI Text
-              </ThemedText>
+              <Text style={styles.aiRecognitionHeaderTitle}>AI Text</Text>
               <Ionicons
                 name={aiTextCollapsed ? 'chevron-forward' : 'chevron-down'}
                 size={18}
@@ -996,9 +991,9 @@ const Photo = ({
                     }}
                     activeOpacity={0.7}
                   >
-                    <ThemedText style={styles.aiTagText}>
+                    <Text style={styles.aiTagText}>
                       {text.DetectedText} {Math.round(text.Confidence)}%
-                    </ThemedText>
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -1046,14 +1041,14 @@ const Photo = ({
               }}
               activeOpacity={0.7}
             >
-              <ThemedText
+              <Text
                 style={[
                   styles.aiRecognitionHeaderTitle,
                   { color: theme.STATUS_ERROR },
                 ]}
               >
                 Moderation
-              </ThemedText>
+              </Text>
               <Ionicons
                 name={
                   aiModerationCollapsed ? 'chevron-forward' : 'chevron-down'
@@ -1079,9 +1074,9 @@ const Photo = ({
                     }}
                     activeOpacity={0.7}
                   >
-                    <ThemedText style={styles.aiModerationTagText}>
+                    <Text style={styles.aiModerationTagText}>
                       {label.Name} {Math.round(label.Confidence)}%
-                    </ThemedText>
+                    </Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -1257,7 +1252,7 @@ const Photo = ({
               }
               size={18}
             />
-            <ThemedText
+            <Text
               numberOfLines={1}
               style={[
                 styles.actionButtonText,
@@ -1272,7 +1267,7 @@ const Photo = ({
               ]}
             >
               Report
-            </ThemedText>
+            </Text>
           </TouchableOpacity>
 
           {/* Delete button */}
@@ -1309,7 +1304,7 @@ const Photo = ({
               }
               size={18}
             />
-            <ThemedText
+            <Text
               numberOfLines={1}
               style={[
                 styles.actionButtonText,
@@ -1323,7 +1318,7 @@ const Photo = ({
               ]}
             >
               Delete
-            </ThemedText>
+            </Text>
           </TouchableOpacity>
 
           {/* Star button */}
@@ -1343,7 +1338,7 @@ const Photo = ({
               color={starAccentColor}
               size={18}
             />
-            <ThemedText
+            <Text
               numberOfLines={1}
               style={[
                 styles.actionButtonText,
@@ -1353,7 +1348,7 @@ const Photo = ({
               ]}
             >
               {isStarred ? 'Starred' : 'Star'}
-            </ThemedText>
+            </Text>
           </TouchableOpacity>
 
           {/* Share button */}
@@ -1380,7 +1375,7 @@ const Photo = ({
               }
               size={18}
             />
-            <ThemedText
+            <Text
               numberOfLines={1}
               style={[
                 styles.actionButtonText,
@@ -1393,7 +1388,7 @@ const Photo = ({
               ]}
             >
               Share
-            </ThemedText>
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -1513,11 +1508,9 @@ const Photo = ({
                 borderColor: 'rgba(255,255,255,0.2)',
               }}
             >
-              <ThemedText
-                style={{ color: 'white', fontSize: 12, fontWeight: '500' }}
-              >
+              <Text style={{ color: 'white', fontSize: 12, fontWeight: '500' }}>
                 Loading...
-              </ThemedText>
+              </Text>
             </View>
           )}
 
@@ -1531,10 +1524,10 @@ const Photo = ({
                 paddingVertical: 4,
               }}
             >
-              <ThemedText style={{ color: 'white', fontSize: 10 }}>
+              <Text style={{ color: 'white', fontSize: 10 }}>
                 {photo?.width || 'W?'} × {photo?.height || 'H?'} →{' '}
                 {Math.round(width)} × {Math.round(videoHeight)}
-              </ThemedText>
+              </Text>
             </View>
           )}
         </View>

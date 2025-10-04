@@ -12,15 +12,15 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
+  Text,
   useWindowDimensions,
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Text } from '@rneui/themed'
-
 import { gql } from '@apollo/client'
 
+// eslint-disable-next-line import/no-unresolved, import/extensions
 import AppHeader from '../../components/AppHeader'
 import Photo from '../../components/Photo'
 import { emitPhotoSearch } from '../../events/photoSearchBus'
@@ -90,6 +90,7 @@ const PhotosDetailsShared = ({ route }) => {
         })
       ).data.getPhotoAllCurr
       const { photo } = response
+      // eslint-disable-next-line no-console
       console.log('📸 SharedPhotoDetails loaded photo:', {
         id: photo?.id,
         imgUrl: photo?.imgUrl,

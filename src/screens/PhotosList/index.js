@@ -28,6 +28,7 @@ import {
   Platform,
   SafeAreaView,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
@@ -46,7 +47,6 @@ import {
 
 import NetInfo from '@react-native-community/netinfo'
 
-import { Badge, LinearProgress, Text } from '@rneui/themed'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 
 import {
@@ -72,6 +72,8 @@ import {
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import ExpandableThumb from '../../components/ExpandableThumb'
+import Badge from '../../components/ui/Badge'
+import LinearProgress from '../../components/ui/LinearProgress'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 

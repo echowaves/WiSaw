@@ -5,13 +5,13 @@ import {
   ActivityIndicator,
   StatusBar,
   StyleSheet,
+  Text,
   useWindowDimensions,
   View,
 } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
-import { Text } from '@rneui/themed'
 
 import CachedImage from 'expo-cached-image'
 

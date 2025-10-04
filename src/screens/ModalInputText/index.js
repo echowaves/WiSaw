@@ -1,24 +1,26 @@
 import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import React from 'react'
 
 import {
   StatusBar,
   StyleSheet,
+  Text,
   TextInput,
   useWindowDimensions,
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button, Icon, Text } from '@rneui/themed'
+import { Ionicons } from '@expo/vector-icons'
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import PropTypes from 'prop-types'
 
 import CachedImage from 'expo-cached-image'
+
+import Button from '../../components/ui/Button'
 
 import { isDarkMode as isDarkModeAtom } from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
@@ -36,17 +38,17 @@ const ModalInputText = ({ route }) => {
   const [isDarkMode] = useAtom(isDarkModeAtom)
   const theme = getTheme(isDarkMode)
 
-  const createStyles = (theme) =>
+  const createStyles = (currentTheme) =>
     StyleSheet.create({
       container: {
         flex: 1,
-        backgroundColor: theme.BACKGROUND,
+        backgroundColor: currentTheme.BACKGROUND,
       },
       photoContainer: {
         alignSelf: 'center',
         marginBottom: 20,
         borderRadius: 16,
-        shadowColor: theme.CARD_SHADOW,
+        shadowColor: currentTheme.CARD_SHADOW,
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.7,
         shadowRadius: 16,
@@ -61,12 +63,12 @@ const ModalInputText = ({ route }) => {
         marginHorizontal: 20,
         marginTop: 0,
         marginBottom: 20,
-        backgroundColor: theme.CARD_BACKGROUND,
+        backgroundColor: currentTheme.CARD_BACKGROUND,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: theme.CARD_BORDER,
+        borderColor: currentTheme.CARD_BORDER,
         overflow: 'hidden',
-        shadowColor: theme.CARD_SHADOW,
+        shadowColor: currentTheme.CARD_SHADOW,
         shadowOffset: {
           width: 0,
           height: 2,
@@ -76,7 +78,7 @@ const ModalInputText = ({ route }) => {
         elevation: 4,
       },
       textInput: {
-        color: theme.TEXT_PRIMARY,
+        color: currentTheme.TEXT_PRIMARY,
         fontSize: 16,
         padding: 20,
         textAlignVertical: 'top',
@@ -86,7 +88,7 @@ const ModalInputText = ({ route }) => {
         position: 'absolute',
         top: 12,
         right: 16,
-        color: theme.TEXT_SECONDARY,
+        color: currentTheme.TEXT_SECONDARY,
         fontSize: 12,
         fontWeight: '500',
       },
@@ -120,6 +122,7 @@ const ModalInputText = ({ route }) => {
     }
 
     // Fallback to square if dimensions not available
+    // eslint-disable-next-line no-console
     console.log('ModalInputText: No photo dimensions available, using fallback')
     return {
       width: targetHeight,
@@ -167,6 +170,7 @@ const ModalInputText = ({ route }) => {
         }
       }, 300) // Reduced from 800ms to 300ms
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('❌ ModalInputText: Error submitting comment:', error)
       // Clear optimistic comment on error
       if (global.photoOptimisticCallbacks?.has(photo?.id)) {
@@ -248,15 +252,14 @@ const ModalInputText = ({ route }) => {
         </View>
 
         <Button
-          onPress={() => handleSubmit()}
+          title="Submit Comment"
+          icon={<Ionicons name="send" color="white" size={20} />}
           size="lg"
           buttonStyle={styles.submitButton}
           titleStyle={styles.submitButtonTitle}
           disabled={!inputText.trim()}
-        >
-          Submit Comment
-          <Icon name="send" color="white" size={20} style={{ marginLeft: 8 }} />
-        </Button>
+          onPress={handleSubmit}
+        />
       </KeyboardAwareScrollView>
     </View>
   )

@@ -1,9 +1,9 @@
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons'
-import { Button } from '@rneui/themed'
 import { useAtom } from 'jotai'
 import { StyleSheet, Text, View } from 'react-native'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import Button from '../ui/Button'
 
 const createStyles = (theme) =>
   StyleSheet.create({

@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import {
   Keyboard,
   Modal,
-  Text as RNText,
   StatusBar,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -13,7 +13,6 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button, Text } from '@rneui/themed'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 import { FontAwesome5, Ionicons } from '@expo/vector-icons'
@@ -29,6 +28,7 @@ import {
   SHARED_STYLES,
 } from '../../theme/sharedStyles'
 import AppHeader from '../AppHeader'
+import Button from '../ui/Button'
 
 const NamePicker = ({
   show,
@@ -51,7 +51,7 @@ const NamePicker = ({
     _setInputText(data)
   }
 
-  const createStyles = (theme) =>
+  const createStyles = (currentTheme) =>
     StyleSheet.create({
       container: {
         ...themedStyles.containers.main,
@@ -70,11 +70,11 @@ const NamePicker = ({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: theme.INTERACTIVE_BACKGROUND,
+        backgroundColor: currentTheme.INTERACTIVE_BACKGROUND,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: theme.INTERACTIVE_BORDER,
+        borderColor: currentTheme.INTERACTIVE_BORDER,
       },
       titleText: {
         ...themedStyles.text.heading,
@@ -90,12 +90,12 @@ const NamePicker = ({
         marginBottom: 40,
       },
       inputContainer: {
-        backgroundColor: theme.CARD_BACKGROUND,
+        backgroundColor: currentTheme.CARD_BACKGROUND,
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: theme.CARD_BORDER,
+        borderColor: currentTheme.CARD_BORDER,
         marginBottom: 20,
-        shadowColor: theme.CARD_SHADOW,
+        shadowColor: currentTheme.CARD_SHADOW,
         shadowOffset: {
           width: 0,
           height: 2,
@@ -115,7 +115,7 @@ const NamePicker = ({
         position: 'absolute',
         top: 12,
         right: 16,
-        color: theme.TEXT_SECONDARY,
+        color: currentTheme.TEXT_SECONDARY,
         fontSize: 12,
         fontWeight: '400',
       },
@@ -125,7 +125,7 @@ const NamePicker = ({
       },
       saveButton: {
         ...SHARED_STYLES.interactive.primaryButton,
-        backgroundColor: theme.STATUS_SUCCESS, // Use theme color for better dark mode support
+        backgroundColor: currentTheme.STATUS_SUCCESS, // Use theme color for better dark mode support
       },
       saveButtonTitle: {
         ...SHARED_STYLES.interactive.primaryButtonTitle,
@@ -133,12 +133,12 @@ const NamePicker = ({
       },
       cancelButton: {
         ...SHARED_STYLES.interactive.secondaryButton,
-        backgroundColor: theme.INTERACTIVE_BACKGROUND,
-        borderColor: theme.INTERACTIVE_BORDER,
+        backgroundColor: currentTheme.INTERACTIVE_BACKGROUND,
+        borderColor: currentTheme.INTERACTIVE_BORDER,
       },
       cancelButtonTitle: {
         ...SHARED_STYLES.interactive.secondaryButtonTitle,
-        color: theme.TEXT_PRIMARY,
+        color: currentTheme.TEXT_PRIMARY,
       },
     })
 
@@ -212,9 +212,9 @@ const NamePicker = ({
                 color={theme.TEXT_PRIMARY}
                 style={{ marginRight: 8 }}
               />
-              <RNText style={styles.headerTitle}>
+              <Text style={styles.headerTitle}>
                 {friendshipUuid ? 'Edit Friend Name' : 'Add Friend'}
-              </RNText>
+              </Text>
             </View>
           }
           rightSlot={
@@ -295,15 +295,12 @@ const NamePicker = ({
               {/* Action Buttons */}
               <View style={styles.buttonContainer}>
                 <Button
-                  title={
-                    isSaving
-                      ? friendshipUuid
-                        ? 'Updating...'
-                        : 'Adding...'
-                      : friendshipUuid
-                        ? 'Update Friend'
-                        : 'Save Friend'
-                  }
+                  title={(() => {
+                    if (isSaving) {
+                      return friendshipUuid ? 'Updating...' : 'Adding...'
+                    }
+                    return friendshipUuid ? 'Update Friend' : 'Save Friend'
+                  })()}
                   icon={
                     <FontAwesome5
                       name={friendshipUuid ? 'edit' : 'user-plus'}

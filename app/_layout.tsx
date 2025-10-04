@@ -7,7 +7,6 @@ import {
   Ionicons,
   MaterialIcons,
 } from '@expo/vector-icons'
-import { createTheme, ThemeProvider } from '@rneui/themed'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
 import { router, Stack, useRootNavigationState } from 'expo-router'
@@ -16,10 +15,8 @@ import { useCallback, useEffect, useRef } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
-import * as CONST from '../src/consts'
 import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
-import { getTheme } from '../src/theme/sharedStyles'
 import { parseDeepLink } from '../src/utils/linkingHelper'
 import {
   getSystemTheme,
@@ -38,40 +35,6 @@ export default function RootLayout() {
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
-
-  // Create dynamic theme based on dark mode state
-  const currentTheme = getTheme(isDarkMode)
-  const theme = createTheme({
-    mode: isDarkMode ? 'dark' : 'light',
-    lightColors: {
-      primary: CONST.MAIN_COLOR,
-      secondary: currentTheme.TEXT_SECONDARY,
-      success: currentTheme.STATUS_SUCCESS,
-      warning: currentTheme.STATUS_WARNING,
-      error: currentTheme.STATUS_ERROR,
-      background: currentTheme.BACKGROUND,
-    },
-    darkColors: {
-      primary: CONST.MAIN_COLOR,
-      secondary: currentTheme.TEXT_SECONDARY,
-      success: currentTheme.STATUS_SUCCESS,
-      warning: currentTheme.STATUS_WARNING,
-      error: currentTheme.STATUS_ERROR,
-      background: currentTheme.BACKGROUND,
-    },
-    components: {
-      Button: {
-        titleStyle: {
-          color: '#FFFFFF',
-        },
-      },
-      Text: {
-        style: {
-          color: currentTheme.TEXT_PRIMARY,
-        },
-      },
-    },
-  })
 
   // Load vector icon fonts
   const [fontsLoaded, fontError] = useFonts({
@@ -292,16 +255,14 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider theme={theme}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-        </Stack>
-        <Toast />
-      </ThemeProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+      </Stack>
+      <Toast />
     </SafeAreaProvider>
   )
 }

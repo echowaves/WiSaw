@@ -8,11 +8,11 @@ import {
   Keyboard,
   SafeAreaView,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
 
-import { Button, Input, Text } from '@rneui/themed'
 import * as Haptics from 'expo-haptics'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Toast from 'react-native-toast-message'
@@ -28,6 +28,8 @@ import { getTheme } from '../../theme/sharedStyles'
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 
+import Button from '../../components/ui/Button'
+import Input from '../../components/ui/Input'
 import * as reducer from './reducer'
 
 const maxNickNameLength = 100 // will also use this parameter for the secret length
