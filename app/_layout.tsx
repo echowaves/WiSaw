@@ -1,4 +1,4 @@
-import 'react-native-get-random-values' // Must be imported before uuid
+import 'react-native-get-random-values'; // Must be imported before uuid
 
 import {
   AntDesign,
@@ -205,10 +205,22 @@ export default function RootLayout() {
   // Subscribe to system theme changes
   useEffect(() => {
     if (followSystemTheme) {
+      // Set initial theme based on system
       setIsDarkMode(getSystemTheme())
+      
+      // Subscribe to system theme changes
       const subscription = subscribeToSystemTheme(setIsDarkMode)
-      return () => subscription?.remove()
+      
+      // Clean up subscription on unmount or when followSystemTheme becomes false
+      return () => {
+        if (subscription && typeof subscription.remove === 'function') {
+          subscription.remove()
+        }
+      }
     }
+    
+    // Explicitly return undefined when not following system theme
+    return undefined
   }, [followSystemTheme, setIsDarkMode])
 
   // Handle deep linking setup - wait for navigation to be ready

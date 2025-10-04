@@ -77,9 +77,33 @@ export const loadFollowSystemPreference = async () => {
   }
 }
 
-export const getSystemTheme = () => Appearance.getColorScheme() === 'dark'
+export const getSystemTheme = () => {
+  try {
+    const colorScheme = Appearance.getColorScheme()
+    console.log('📱 System color scheme:', colorScheme)
+    return colorScheme === 'dark'
+  } catch (error) {
+    console.error('Failed to get system theme:', error)
+    return false // Default to light mode
+  }
+}
 
-export const subscribeToSystemTheme = (callback) =>
-  Appearance.addChangeListener(({ colorScheme }) => {
-    callback(colorScheme === 'dark')
-  })
+export const subscribeToSystemTheme = (callback) => {
+  try {
+    console.log('🔔 Subscribing to system theme changes')
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      console.log('📱 System theme changed to:', colorScheme)
+      callback(colorScheme === 'dark')
+    })
+    return subscription
+  } catch (error) {
+    console.error('Failed to subscribe to system theme:', error)
+    Toast.show({
+      text1: 'Theme Sync Error',
+      text2: 'Unable to sync with system theme',
+      type: 'error',
+      visibilityTime: 3000
+    })
+    return null
+  }
+}
