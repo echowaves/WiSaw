@@ -18,31 +18,42 @@ const LinearProgress = ({
 
   useEffect(() => {
     if (!isDeterminate) {
-      const loop = Animated.loop(
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 1200,
-          easing: Easing.linear,
-          useNativeDriver: false,
-        }),
-      )
+      animation.setValue(0)
+      const forward = Animated.timing(animation, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: false,
+      })
+      const backward = Animated.timing(animation, {
+        toValue: 0,
+        duration: 600,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: false,
+      })
+      const loop = Animated.loop(Animated.sequence([forward, backward]))
       loop.start()
       return () => {
         loop.stop()
         animation.stopAnimation()
       }
     }
+
+    animation.stopAnimation(() => {
+      animation.setValue(0)
+    })
+
     return undefined
   }, [animation, isDeterminate])
 
-  const translateX = animation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['-50%', '150%'],
-  })
-
   const progressWidth = isDeterminate
     ? `${Math.max(0, Math.min(1, value)) * 100}%`
-    : '40%'
+    : '50%'
+
+  const translateX = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['-25%', '125%'],
+  })
 
   return (
     <View
