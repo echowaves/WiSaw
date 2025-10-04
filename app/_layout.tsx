@@ -135,12 +135,14 @@ export default function RootLayout() {
   // Determine if we should proceed without waiting for fonts
   const shouldProceedWithoutFonts = fontLoadingTimedOut || fontError
 
-  // Mark navigation as mounted after splash is hidden and app is ready
+  // Mark navigation as mounted when app becomes ready (don't wait for splash to hide)
   useEffect(() => {
     const isLaunchReady =
       (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
-    if (isLaunchReady && splashHiddenRef.current && !isNavigationMounted) {
-      console.log('⏱️ Marking navigation as mounted after splash hidden')
+    if (isLaunchReady && !isNavigationMounted) {
+      console.log(
+        '⏱️ App ready, marking navigation as mounted to process pending deep links',
+      )
       // Use requestAnimationFrame to ensure navigation has had a chance to mount
       requestAnimationFrame(() => {
         setIsNavigationMounted(true)
@@ -641,12 +643,24 @@ export default function RootLayout() {
       console.log(
         '🎉 App ready, hiding splash screen to allow navigation to mount...',
       )
+      console.log('🔍 Current state before hiding:', {
+        hasPendingLink: !!pendingDeepLinkRef.current,
+        pendingUrl: pendingDeepLinkRef.current?.url,
+        isNavigationReady,
+        isNavigationMounted,
+      })
       splashHiddenRef.current = true
 
       // Hide splash immediately, no timeout needed
       SplashScreen.hideAsync()
         .then(() => {
           console.log('✅ Splash screen hidden successfully')
+          console.log('🔍 After splash hide:', {
+            hasPendingLink: !!pendingDeepLinkRef.current,
+            pendingUrl: pendingDeepLinkRef.current?.url,
+            isNavigationReady,
+            isNavigationMounted,
+          })
         })
         .catch((error) => {
           console.error('❌ Error hiding splash screen:', error)
