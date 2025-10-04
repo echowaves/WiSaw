@@ -33,6 +33,11 @@ import {
 // Prevent the splash screen from auto-hiding before asset loading is complete
 SplashScreen.preventAutoHideAsync()
 
+type PendingDeepLink = {
+  url: string
+  linkData: NonNullable<ReturnType<typeof parseDeepLink>>
+}
+
 export default function RootLayout() {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
@@ -42,25 +47,20 @@ export default function RootLayout() {
   )
   const [isAppReady, setIsAppReady] = useState(false)
   const [initStarted, setInitStarted] = useState(false)
-  const [isNavigationMounted, setIsNavigationMounted] = useState(false)
+  const [initialUrl, setInitialUrl] = useState<string | null>(null)
   const rootNavigationState = useRootNavigationState()
-  const isNavigationReady = !!rootNavigationState?.key || isNavigationMounted
-  const pendingDeepLinkRef = useRef(null)
+  const isNavigationReady = !!rootNavigationState?.key
+  const pendingDeepLinkRef = useRef<PendingDeepLink | null>(null)
   const lastHandledDeepLinkRef = useRef({ url: null, timestamp: 0 })
   const splashHiddenRef = useRef(false)
+  const hasLoggedNavigationReadyRef = useRef(false)
 
   useEffect(() => {
-    console.log('📊 Navigation readiness state:', {
-      isNavigationReady,
-      hasKey: !!rootNavigationState?.key,
-      isNavigationMounted,
-      hasPendingLink: !!pendingDeepLinkRef.current,
-      pendingUrl: pendingDeepLinkRef.current?.url,
-    })
-    if (isNavigationReady) {
+    if (isNavigationReady && !hasLoggedNavigationReadyRef.current) {
       console.log('🧭 Root navigation is now ready')
+      hasLoggedNavigationReadyRef.current = true
     }
-  }, [isNavigationReady, rootNavigationState, isNavigationMounted])
+  }, [isNavigationReady, rootNavigationState])
 
   // Create dynamic theme based on dark mode state
   const currentTheme = getTheme(isDarkMode)
@@ -96,7 +96,7 @@ export default function RootLayout() {
     },
   })
 
-  // Load the fonts used by vector-icons with timeout
+  // Load vector icon fonts (does not block rendering)
   const [fontsLoaded, fontError] = useFonts({
     ...FontAwesome.font,
     ...FontAwesome5.font,
@@ -104,51 +104,19 @@ export default function RootLayout() {
     ...Ionicons.font,
     ...AntDesign.font,
   })
-
-  // Add font loading timeout
-  const [fontLoadingTimedOut, setFontLoadingTimedOut] = useState(false)
-
   useEffect(() => {
-    const fontTimeout = setTimeout(() => {
-      if (!fontsLoaded) {
-        console.warn('⚠️ Font loading timeout after 3 seconds')
-        setFontLoadingTimedOut(true)
-        Toast.show({
-          text1: 'Font Loading Warning',
-          text2: 'Some icons may not display correctly',
-          type: 'error',
-          position: 'top',
-          topOffset: 60,
-          visibilityTime: 3000,
-        })
-      }
-    }, 2000) // 2 second timeout for fonts to avoid startup hang
-
-    if (fontsLoaded) {
-      clearTimeout(fontTimeout)
-      console.log('✅ Fonts loaded successfully')
-    }
-
-    return () => clearTimeout(fontTimeout)
-  }, [fontsLoaded])
-
-  // Determine if we should proceed without waiting for fonts
-  const shouldProceedWithoutFonts = fontLoadingTimedOut || fontError
-
-  // Mark navigation as mounted when app becomes ready (don't wait for splash to hide)
-  useEffect(() => {
-    const isLaunchReady =
-      (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
-    if (isLaunchReady && !isNavigationMounted) {
-      console.log(
-        '⏱️ App ready, marking navigation as mounted to process pending deep links',
-      )
-      // Use requestAnimationFrame to ensure navigation has had a chance to mount
-      requestAnimationFrame(() => {
-        setIsNavigationMounted(true)
+    if (fontError) {
+      console.error('❌ Font loading error:', fontError)
+      Toast.show({
+        text1: 'Font Loading Error',
+        text2: 'Some icons may not display correctly',
+        type: 'error',
+        position: 'top',
+        topOffset: 60,
+        visibilityTime: 3000,
       })
     }
-  }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady, isNavigationMounted])
+  }, [fontError])
 
   // Handle deep linking
   const processDeepLink = useCallback((linkData) => {
@@ -241,8 +209,7 @@ export default function RootLayout() {
   }, [])
 
   const handleDeepLink = useCallback(
-    (url: string, options: { allowQueue?: boolean } = {}) => {
-      const { allowQueue = true } = options
+    (url: string | null) => {
       if (!url) {
         return
       }
@@ -255,49 +222,28 @@ export default function RootLayout() {
       }
 
       try {
-        console.log('Deep link received:', url)
-
         const linkData = parseDeepLink(url)
-        console.log('Parsed link data:', linkData)
 
-        if (linkData) {
-          const isLaunchReady =
-            (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
+        if (!linkData) {
+          console.log('Ignoring unrecognized deep link:', url)
+          return
+        }
 
-          if (isNavigationReady) {
-            console.log('Navigation ready, processing deep link now')
-            processDeepLink(linkData)
-            lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
-            pendingDeepLinkRef.current = null
-          } else if (allowQueue || isLaunchReady) {
-            if (pendingDeepLinkRef.current?.url !== url) {
-              console.log(
-                'Navigation not ready yet, queueing deep link for when it mounts',
-                {
-                  isLaunchReady,
-                  isNavigationReady,
-                },
-              )
-            } else {
-              console.log('Deep link already queued, waiting for navigation...')
-            }
-            pendingDeepLinkRef.current = { url, linkData }
-          } else {
-            console.log(
-              'Queuing deep link as fallback while waiting for readiness',
-              {
-                isLaunchReady,
-                isNavigationReady,
-              },
-            )
-            pendingDeepLinkRef.current = { url, linkData }
-          }
+        if (isAppReady && isNavigationReady) {
+          console.log('Navigation ready, processing deep link now:', url)
+          processDeepLink(linkData)
+          lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
+          pendingDeepLinkRef.current = null
+        } else {
+          console.log('Deferring deep link until ready:', {
+            url,
+            isAppReady,
+            isNavigationReady,
+          })
+          pendingDeepLinkRef.current = { url, linkData }
         }
       } catch (error) {
         console.error('Error handling deep link:', error)
-        if ((fontsLoaded || shouldProceedWithoutFonts) && isAppReady) {
-          router.replace('/')
-        }
         Toast.show({
           text1: 'Deep Link Error',
           text2: 'Unable to process shared link',
@@ -308,13 +254,13 @@ export default function RootLayout() {
         })
       }
     },
-    [isNavigationReady, processDeepLink],
+    [isAppReady, isNavigationReady, processDeepLink],
   )
 
   useEffect(() => {
-    if (isNavigationReady && pendingDeepLinkRef.current) {
+    if (isAppReady && isNavigationReady && pendingDeepLinkRef.current) {
       const { url, linkData } = pendingDeepLinkRef.current
-      console.log('✅ Navigation mounted, processing queued deep link:', url)
+      console.log('✅ App ready, processing queued deep link:', url)
 
       try {
         processDeepLink(linkData)
@@ -325,22 +271,19 @@ export default function RootLayout() {
         pendingDeepLinkRef.current = null
       }
     }
-  }, [isNavigationReady, processDeepLink])
+  }, [isAppReady, isNavigationReady, processDeepLink])
 
   useEffect(() => {
-    // Handle initial URL when app is opened via deep link
-    const getInitialURL = async () => {
+    let isMounted = true
+
+    const fetchInitialUrl = async () => {
       try {
-        const initialUrl = await Linking.getInitialURL()
-        if (initialUrl) {
-          console.log('Initial URL detected:', initialUrl)
-          handleDeepLink(initialUrl)
-        } else {
-          console.log('No initial URL found')
+        const url = await Linking.getInitialURL()
+        if (isMounted) {
+          setInitialUrl(url)
         }
       } catch (error) {
         console.error('Error getting initial URL:', error)
-        // Don't let deep linking errors prevent app startup
         Toast.show({
           text1: 'Link Loading Error',
           text2: 'Unable to process app link on startup',
@@ -352,57 +295,27 @@ export default function RootLayout() {
       }
     }
 
-    // Handle URLs when app is already running
+    fetchInitialUrl()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (initialUrl) {
+      handleDeepLink(initialUrl)
+    }
+  }, [initialUrl, handleDeepLink])
+
+  useEffect(() => {
     const subscription = Linking.addEventListener('url', (event) => {
-      try {
-        console.log('URL event received while app running:', event.url)
-
-        if (pendingDeepLinkRef.current?.url === event.url) {
-          console.log(
-            'Deep link matches queued startup link, waiting for initialization to finish',
-          )
-          return
-        }
-
-        const linkData = parseDeepLink(event.url)
-        if (!linkData) {
-          return
-        }
-
-        if (isNavigationReady) {
-          console.log(
-            'App already running, navigation ready — handling deep link now',
-          )
-          processDeepLink(linkData)
-          lastHandledDeepLinkRef.current = {
-            url: event.url,
-            timestamp: Date.now(),
-          }
-        } else {
-          console.log(
-            'Runtime deep link received before navigation ready, queueing',
-          )
-          pendingDeepLinkRef.current = { url: event.url, linkData }
-        }
-      } catch (error) {
-        console.error('Error handling deep link:', error)
-        router.replace('/')
-        Toast.show({
-          text1: 'Link Processing Error',
-          text2: 'Unable to open shared content',
-          type: 'error',
-          position: 'top',
-          topOffset: 60,
-          visibilityTime: 4000,
-        })
-      }
+      console.log('URL event received while app running:', event.url)
+      handleDeepLink(event.url)
     })
 
-    // Always check for initial URL, but don't block on fonts
-    getInitialURL()
-
     return () => subscription?.remove()
-  }, [handleDeepLink, isNavigationReady, processDeepLink])
+  }, [handleDeepLink])
 
   useEffect(() => {
     // Only run initialization once
@@ -588,16 +501,12 @@ export default function RootLayout() {
           elapsedTime,
           'ms - forcing ready state',
         )
-        console.warn(
-          '📊 Current state: fontsLoaded:',
+        console.warn('📊 Current state snapshot:', {
           fontsLoaded,
-          'fontError:',
           fontError,
-          'fontTimedOut:',
-          fontLoadingTimedOut,
-          'isAppReady:',
           isAppReady,
-        )
+          hasPendingLink: !!pendingDeepLinkRef.current,
+        })
         setIsAppReady(true)
         // Toast notification removed per user request
       }
@@ -627,40 +536,20 @@ export default function RootLayout() {
   }, [followSystemTheme, setIsDarkMode])
 
   useEffect(() => {
-    const isLaunchReady =
-      (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
-
-    console.log('💾 Splash hide effect check:', {
-      isLaunchReady,
-      fontsLoaded,
-      shouldProceedWithoutFonts,
+    console.log('💾 Splash hide check:', {
       isAppReady,
+      isNavigationReady,
       splashHidden: splashHiddenRef.current,
+      pendingUrl: pendingDeepLinkRef.current?.url,
     })
 
-    if (isLaunchReady && !splashHiddenRef.current) {
-      // Hide splash as soon as app is ready to let navigation mount
-      console.log(
-        '🎉 App ready, hiding splash screen to allow navigation to mount...',
-      )
-      console.log('🔍 Current state before hiding:', {
-        hasPendingLink: !!pendingDeepLinkRef.current,
-        pendingUrl: pendingDeepLinkRef.current?.url,
-        isNavigationReady,
-        isNavigationMounted,
-      })
+    if (isAppReady && isNavigationReady && !splashHiddenRef.current) {
+      console.log('🎉 App ready, hiding splash screen to allow navigation...')
       splashHiddenRef.current = true
 
-      // Hide splash immediately, no timeout needed
       SplashScreen.hideAsync()
         .then(() => {
           console.log('✅ Splash screen hidden successfully')
-          console.log('🔍 After splash hide:', {
-            hasPendingLink: !!pendingDeepLinkRef.current,
-            pendingUrl: pendingDeepLinkRef.current?.url,
-            isNavigationReady,
-            isNavigationMounted,
-          })
         })
         .catch((error) => {
           console.error('❌ Error hiding splash screen:', error)
@@ -674,12 +563,7 @@ export default function RootLayout() {
           })
         })
     }
-  }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady])
-
-  if (!fontsLoaded && !shouldProceedWithoutFonts) {
-    // Only block rendering if fonts are still loading and we haven't timed out
-    return null
-  }
+  }, [isAppReady, isNavigationReady])
 
   return (
     <SafeAreaProvider>
