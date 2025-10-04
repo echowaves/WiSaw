@@ -91,6 +91,13 @@ export default function RootLayout() {
     ...Ionicons.font,
     ...AntDesign.font,
   })
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      console.log('✅ Fonts loaded successfully')
+    }
+  }, [fontsLoaded])
+
   useEffect(() => {
     if (fontError) {
       console.error('❌ Font loading error:', fontError)
@@ -382,7 +389,9 @@ export default function RootLayout() {
 
     const initialize = async () => {
       try {
-        console.log('� Initializing app preferences...')
+        console.log('🚀 Initializing app preferences...')
+        const startTime = Date.now()
+
         const [
           uuidResult,
           nickNameResult,
@@ -394,6 +403,8 @@ export default function RootLayout() {
           loadThemePreference(),
           loadFollowSystemPreference(),
         ])
+
+        console.log(`⏱️ Preferences loaded in ${Date.now() - startTime}ms`)
 
         if (isCancelled) return
 
@@ -420,6 +431,8 @@ export default function RootLayout() {
         setIsDarkMode(
           resolvedFollowSystem ? getSystemTheme() : resolvedThemePreference,
         )
+
+        console.log('✅ App state set, marking app as ready')
       } catch (error) {
         if (isCancelled) return
 
@@ -440,11 +453,13 @@ export default function RootLayout() {
       } finally {
         clearTimeout(safetyTimeout)
         if (!isCancelled) {
+          console.log('📱 Marking app as ready')
           markAppReady()
         }
       }
     }
 
+    console.log('🎬 Starting initialization...')
     initialize()
 
     return () => {
@@ -470,10 +485,10 @@ export default function RootLayout() {
     }
   }, [followSystemTheme, setIsDarkMode])
 
-  const canHideSplash = isAppReady && (fontsLoaded || !!fontError)
-
   // Hide splash once resources and app state are ready
   useEffect(() => {
+    const canHideSplash = isAppReady && (fontsLoaded || !!fontError)
+
     if (!canHideSplash) return
 
     console.log('🎉 App initialized, hiding splash screen...')
@@ -485,25 +500,23 @@ export default function RootLayout() {
       .catch((error) => {
         console.error('❌ Error hiding splash screen:', error)
       })
-  }, [canHideSplash])
+  }, [isAppReady, fontsLoaded, fontError])
 
-  // Emergency splash hide - if splash is still visible after 3 seconds, force hide
+  // Emergency splash hide - MUST run only once on mount, no dependencies
   useEffect(() => {
     const emergencyTimer = setTimeout(() => {
       console.warn('⚠️ Emergency splash hide triggered after 3 seconds')
-      console.warn('Current state:', {
-        isAppReady,
-        fontsLoaded,
-        fontError: !!fontError,
-        canHideSplash,
-      })
-      SplashScreen.hideAsync().catch((error) => {
-        console.error('❌ Emergency splash hide failed:', error)
-      })
+      SplashScreen.hideAsync()
+        .then(() => {
+          console.log('✅ Emergency splash hide succeeded')
+        })
+        .catch((error) => {
+          console.error('❌ Emergency splash hide failed:', error)
+        })
     }, 3000)
 
     return () => clearTimeout(emergencyTimer)
-  }, [isAppReady, fontsLoaded, fontError, canHideSplash])
+  }, []) // Empty deps - run once on mount only!
 
   return (
     <SafeAreaProvider>
