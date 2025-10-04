@@ -46,21 +46,9 @@ export default function RootLayout() {
     STATE.followSystemTheme,
   )
   const [isAppReady, setIsAppReady] = useState(false)
-  const [initStarted, setInitStarted] = useState(false)
-  const [initialUrl, setInitialUrl] = useState<string | null>(null)
   const rootNavigationState = useRootNavigationState()
   const isNavigationReady = !!rootNavigationState?.key
   const pendingDeepLinkRef = useRef<PendingDeepLink | null>(null)
-  const lastHandledDeepLinkRef = useRef({ url: null, timestamp: 0 })
-  const splashHiddenRef = useRef(false)
-  const hasLoggedNavigationReadyRef = useRef(false)
-
-  useEffect(() => {
-    if (isNavigationReady && !hasLoggedNavigationReadyRef.current) {
-      console.log('🧭 Root navigation is now ready')
-      hasLoggedNavigationReadyRef.current = true
-    }
-  }, [isNavigationReady, rootNavigationState])
 
   // Create dynamic theme based on dark mode state
   const currentTheme = getTheme(isDarkMode)
@@ -208,125 +196,96 @@ export default function RootLayout() {
     }
   }, [])
 
-  const handleDeepLink = useCallback(
-    (url: string | null) => {
-      if (!url) {
-        return
-      }
-
-      const now = Date.now()
-      const { url: lastUrl, timestamp } = lastHandledDeepLinkRef.current
-      if (lastUrl === url && now - timestamp < 1000) {
-        console.log('Skipping duplicate deep link within debounce window:', url)
-        return
-      }
-
-      try {
-        const linkData = parseDeepLink(url)
-
-        if (!linkData) {
-          console.log('Ignoring unrecognized deep link:', url)
-          return
-        }
-
-        if (isAppReady && isNavigationReady) {
-          console.log('Navigation ready, processing deep link now:', url)
-          processDeepLink(linkData)
-          lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
-          pendingDeepLinkRef.current = null
-        } else {
-          console.log('Deferring deep link until ready:', {
-            url,
-            isAppReady,
-            isNavigationReady,
-          })
-          pendingDeepLinkRef.current = { url, linkData }
-        }
-      } catch (error) {
-        console.error('Error handling deep link:', error)
-        Toast.show({
-          text1: 'Deep Link Error',
-          text2: 'Unable to process shared link',
-          type: 'error',
-          position: 'top',
-          topOffset: 60,
-          visibilityTime: 4000,
-        })
-      }
-    },
-    [isAppReady, isNavigationReady, processDeepLink],
-  )
-
-  useEffect(() => {
-    if (isAppReady && isNavigationReady && pendingDeepLinkRef.current) {
-      const { url, linkData } = pendingDeepLinkRef.current
-      console.log('✅ App ready, processing queued deep link:', url)
-
-      try {
-        processDeepLink(linkData)
-        lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
-      } catch (error) {
-        console.error('Error processing queued deep link:', error)
-      } finally {
-        pendingDeepLinkRef.current = null
-      }
-    }
-  }, [isAppReady, isNavigationReady, processDeepLink])
-
+  // Capture initial URL on mount (once)
   useEffect(() => {
     let isMounted = true
 
-    const fetchInitialUrl = async () => {
-      try {
-        const url = await Linking.getInitialURL()
-        if (isMounted) {
-          setInitialUrl(url)
-        }
-      } catch (error) {
-        console.error('Error getting initial URL:', error)
-        Toast.show({
-          text1: 'Link Loading Error',
-          text2: 'Unable to process app link on startup',
-          type: 'error',
-          position: 'top',
-          topOffset: 60,
-          visibilityTime: 3000,
-        })
-      }
-    }
+    Linking.getInitialURL()
+      .then((url) => {
+        if (!isMounted || !url) return
 
-    fetchInitialUrl()
+        console.log('📎 Initial URL detected:', url)
+        const linkData = parseDeepLink(url)
+
+        if (linkData) {
+          console.log('Queuing initial deep link')
+          pendingDeepLinkRef.current = { url, linkData }
+        }
+      })
+      .catch((error) => {
+        console.error('Error getting initial URL:', error)
+      })
 
     return () => {
       isMounted = false
     }
   }, [])
 
-  useEffect(() => {
-    if (initialUrl) {
-      handleDeepLink(initialUrl)
-    }
-  }, [initialUrl, handleDeepLink])
-
+  // Handle runtime deep links (app already open)
   useEffect(() => {
     const subscription = Linking.addEventListener('url', (event) => {
-      console.log('URL event received while app running:', event.url)
-      handleDeepLink(event.url)
+      console.log('� Runtime URL event:', event.url)
+      const linkData = parseDeepLink(event.url)
+
+      if (linkData) {
+        // App is already running, navigation should be ready
+        console.log('Processing runtime link immediately')
+        try {
+          processDeepLink(linkData)
+        } catch (error) {
+          console.error('Error processing runtime link:', error)
+        }
+      }
     })
 
     return () => subscription?.remove()
-  }, [handleDeepLink])
+  }, [processDeepLink])
 
+  // Process queued deep link with aggressive fallback
   useEffect(() => {
-    // Only run initialization once
-    if (initStarted) {
-      console.log('🚫 Init already started, skipping...')
+    if (!pendingDeepLinkRef.current) return
+
+    const { linkData } = pendingDeepLinkRef.current
+    console.log('🔄 Checking if can process queued link:', {
+      isNavigationReady,
+      isAppReady,
+    })
+
+    if (isNavigationReady) {
+      console.log('✅ Navigation ready, processing queued deep link now')
+      try {
+        processDeepLink(linkData)
+        pendingDeepLinkRef.current = null
+      } catch (error) {
+        console.error('Error processing queued deep link:', error)
+        pendingDeepLinkRef.current = null
+      }
       return
     }
 
-    setInitStarted(true)
+    // Fallback: If navigation isn't ready after app init completes,
+    // force process after a short delay
+    if (isAppReady) {
+      const fallbackTimer = setTimeout(() => {
+        if (pendingDeepLinkRef.current) {
+          console.log('⏰ Fallback: forcing deep link navigation after delay')
+          try {
+            processDeepLink(linkData)
+          } catch (error) {
+            console.error('Error in fallback deep link processing:', error)
+          } finally {
+            pendingDeepLinkRef.current = null
+          }
+        }
+      }, 500) // Give navigation 500ms to become ready after app init
+
+      return () => clearTimeout(fallbackTimer)
+    }
+  }, [isNavigationReady, isAppReady, processDeepLink])
+
+  useEffect(() => {
     const initStartTime = Date.now()
-    console.log('🎯 useEffect init called at:', new Date().toISOString())
+    console.log('🎯 App initialization starting:', new Date().toISOString())
 
     const runInit = async () => {
       const startTime = Date.now()
@@ -535,35 +494,20 @@ export default function RootLayout() {
     }
   }, [followSystemTheme, setIsDarkMode])
 
+  // Hide splash as soon as app initialization completes
   useEffect(() => {
-    console.log('💾 Splash hide check:', {
-      isAppReady,
-      isNavigationReady,
-      splashHidden: splashHiddenRef.current,
-      pendingUrl: pendingDeepLinkRef.current?.url,
-    })
-
-    if (isAppReady && isNavigationReady && !splashHiddenRef.current) {
-      console.log('🎉 App ready, hiding splash screen to allow navigation...')
-      splashHiddenRef.current = true
+    if (isAppReady) {
+      console.log('🎉 App initialized, hiding splash screen...')
 
       SplashScreen.hideAsync()
         .then(() => {
-          console.log('✅ Splash screen hidden successfully')
+          console.log('✅ Splash screen hidden')
         })
         .catch((error) => {
           console.error('❌ Error hiding splash screen:', error)
-          Toast.show({
-            text1: 'Display Warning',
-            text2: 'Splash screen may still be visible',
-            type: 'error',
-            position: 'top',
-            topOffset: 60,
-            visibilityTime: 3000,
-          })
         })
     }
-  }, [isAppReady, isNavigationReady])
+  }, [isAppReady])
 
   return (
     <SafeAreaProvider>
