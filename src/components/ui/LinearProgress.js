@@ -2,15 +2,8 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Animated, Easing, StyleSheet, View } from 'react-native'
 
 const styles = StyleSheet.create({
-  track: {
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  bar: {
-    height: '100%',
-    borderRadius: 2,
-  },
+  track: { height: 4, borderRadius: 2, overflow: 'hidden' },
+  bar: { height: '100%', borderRadius: 2 },
 })
 
 const LinearProgress = ({
@@ -30,7 +23,7 @@ const LinearProgress = ({
           toValue: 1,
           duration: 1200,
           easing: Easing.linear,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       )
       loop.start()
