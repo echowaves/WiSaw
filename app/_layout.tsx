@@ -10,10 +10,9 @@ import {
 import { createTheme, ThemeProvider } from '@rneui/themed'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
-import { router, Stack } from 'expo-router'
-import * as SplashScreen from 'expo-splash-screen'
+import { router, Stack, useRootNavigationState } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
@@ -29,9 +28,6 @@ import {
   subscribeToSystemTheme,
 } from '../src/utils/themeStorage'
 
-// Prevent the splash screen from auto-hiding before asset loading is complete
-SplashScreen.preventAutoHideAsync()
-
 export default function RootLayout() {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
@@ -40,10 +36,8 @@ export default function RootLayout() {
     STATE.followSystemTheme,
   )
 
-  // Single source of truth for app readiness
-  const [isFullyReady, setIsFullyReady] = useState(false)
-  const pendingDeepLinkRef = useRef<string | null>(null)
   const hasProcessedInitialUrlRef = useRef(false)
+  const rootNavigationState = useRootNavigationState()
 
   // Create dynamic theme based on dark mode state
   const currentTheme = getTheme(isDarkMode)
@@ -169,7 +163,7 @@ export default function RootLayout() {
     }
   }, [])
 
-  // Handle deep link
+  // Handle deep link - simplified to always navigate immediately
   const handleDeepLink = useCallback(
     (url: string) => {
       console.log('Deep link received:', url)
@@ -180,17 +174,11 @@ export default function RootLayout() {
         return
       }
 
-      if (isFullyReady) {
-        // App is ready, navigate immediately
-        console.log('App is ready, navigating to deep link')
-        navigateToDeepLink(linkData)
-      } else {
-        // Store link for later processing
-        console.log('App not ready, storing deep link for later')
-        pendingDeepLinkRef.current = url
-      }
+      // Always navigate immediately - both cold and warm starts are handled the same
+      console.log('Navigating to deep link:', linkData.type)
+      navigateToDeepLink(linkData)
     },
-    [isFullyReady, navigateToDeepLink],
+    [navigateToDeepLink],
   )
 
   // Initialize app state
@@ -266,68 +254,41 @@ export default function RootLayout() {
     }
   }, [followSystemTheme, setIsDarkMode])
 
-  // Mark app as fully ready when all resources are loaded
+  // Handle deep linking setup - wait for navigation to be ready
   useEffect(() => {
-    // Check if all resources are ready
-    const resourcesReady = fontsLoaded || !!fontError
-    const stateReady = uuid !== undefined // State has been initialized (even if empty)
-
-    if (resourcesReady && stateReady && !isFullyReady) {
-      console.log('✅ All resources loaded, app is fully ready')
-      setIsFullyReady(true)
-
-      // Hide splash screen
-      SplashScreen.hideAsync().catch(console.error)
-
-      // Process any pending deep link
-      if (pendingDeepLinkRef.current) {
-        console.log('Processing pending deep link')
-        const url = pendingDeepLinkRef.current
-        pendingDeepLinkRef.current = null
-        setTimeout(() => handleDeepLink(url), 100)
-      }
+    // Only proceed if navigation is ready
+    if (!rootNavigationState?.key) {
+      console.log('Navigation not ready yet, waiting...')
+      return
     }
-  }, [fontsLoaded, fontError, uuid, isFullyReady, handleDeepLink])
 
-  // Handle deep linking setup
-  useEffect(() => {
-    if (!isFullyReady) return
+    console.log('Navigation is ready')
 
-    // Get initial URL only once
+    // Get initial URL only once (cold start)
     if (!hasProcessedInitialUrlRef.current) {
       hasProcessedInitialUrlRef.current = true
 
       Linking.getInitialURL()
         .then((url) => {
           if (url) {
-            console.log('Initial URL detected:', url)
-            handleDeepLink(url)
+            console.log('Initial URL detected (cold start):', url)
+            // Small delay to ensure router is fully ready
+            setTimeout(() => {
+              handleDeepLink(url)
+            }, 100)
           }
         })
         .catch(console.error)
     }
 
-    // Listen for URL changes while app is running
+    // Listen for URL changes while app is running (warm start)
     const subscription = Linking.addEventListener('url', (event) => {
-      console.log('URL event received:', event.url)
+      console.log('URL event received (warm start):', event.url)
       handleDeepLink(event.url)
     })
 
     return () => subscription?.remove()
-  }, [isFullyReady, handleDeepLink])
-
-  // Emergency timeout to prevent app from being stuck
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!isFullyReady) {
-        console.warn('⚠️ Emergency ready state after 5 seconds')
-        setIsFullyReady(true)
-        SplashScreen.hideAsync().catch(console.error)
-      }
-    }, 5000)
-
-    return () => clearTimeout(timeout)
-  }, [isFullyReady])
+  }, [handleDeepLink, rootNavigationState?.key])
 
   return (
     <SafeAreaProvider>

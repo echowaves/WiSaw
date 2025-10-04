@@ -196,6 +196,7 @@ module.exports = {
       image: './assets/splash.png',
       resizeMode: 'contain',
       backgroundColor: '#ffffff',
+      hideAsync: true, // Let Expo handle splash screen hiding automatically
     },
     orientation: 'portrait',
     platforms: ['ios', 'android', 'web'],
