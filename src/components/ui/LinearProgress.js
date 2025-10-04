@@ -21,13 +21,13 @@ const LinearProgress = ({
       animation.setValue(0)
       const forward = Animated.timing(animation, {
         toValue: 1,
-        duration: 600,
+        duration: 2400,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: false
       })
       const backward = Animated.timing(animation, {
         toValue: 0,
-        duration: 600,
+        duration: 2400,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: false
       })
