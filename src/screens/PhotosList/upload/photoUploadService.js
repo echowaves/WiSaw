@@ -72,7 +72,7 @@ const genLocalThumbs = async (image) => {
       const manipResult = await ImageManipulator.manipulateAsync(
         image.localImgUrl,
         [{ resize: { height: 300 } }],
-        { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP },
+        { format: ImageManipulator.SaveFormat.WEBP },
       )
       return {
         ...image,
@@ -85,7 +85,7 @@ const genLocalThumbs = async (image) => {
     const manipResult = await ImageManipulator.manipulateAsync(
       uri,
       [{ resize: { height: 300 } }],
-      { compress: 0.8, format: ImageManipulator.SaveFormat.WEBP },
+      { format: ImageManipulator.SaveFormat.WEBP },
     )
 
     return {
@@ -198,7 +198,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
       const compressedResult = await ImageManipulator.manipulateAsync(
         queuedItem.originalCameraUrl,
         [{ resize: { height: 3000 } }],
-        { compress: 0.9, format: ImageManipulator.SaveFormat.WEBP },
+        { format: ImageManipulator.SaveFormat.WEBP },
       )
 
       try {
@@ -502,7 +502,7 @@ export const processCompleteUpload = async ({
       return null
     }
 
-    let photo = processedItem.photo
+    let { photo } = processedItem
     if (!photo) {
       if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {
         console.error('Invalid UUID provided for photo generation:', uuid)
