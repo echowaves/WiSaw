@@ -4,7 +4,7 @@ const { FlatCompat } = require('@eslint/eslintrc')
 /* global require, module, __dirname */
 
 const compat = new FlatCompat({
-  baseDirectory: __dirname,
+  baseDirectory: __dirname
 })
 
 module.exports = [
