@@ -49,10 +49,16 @@ export default function RootLayout() {
   const splashHiddenRef = useRef(false)
 
   useEffect(() => {
+    console.log('📊 Navigation readiness state:', {
+      isNavigationReady,
+      hasKey: !!rootNavigationState?.key,
+      hasPendingLink: !!pendingDeepLinkRef.current,
+      pendingUrl: pendingDeepLinkRef.current?.url,
+    })
     if (isNavigationReady) {
       console.log('🧭 Root navigation is now ready')
     }
-  }, [isNavigationReady])
+  }, [isNavigationReady, rootNavigationState])
 
   // Create dynamic theme based on dark mode state
   const currentTheme = getTheme(isDarkMode)
@@ -129,35 +135,34 @@ export default function RootLayout() {
 
   // Handle deep linking
   const processDeepLink = useCallback((linkData) => {
+    console.log('🔗 processDeepLink called with:', linkData)
     try {
       router.dismissAll()
 
       switch (linkData.type) {
         case 'photo':
-          console.log('Navigating to shared photo:', linkData.photoId)
-          router.replace('/')
-          setTimeout(() => {
-            router.push(`/shared/${linkData.photoId}`)
-          }, 50)
+          console.log('📸 Navigating to shared photo:', linkData.photoId)
+          // Use replace to go directly to the target on cold start
+          router.replace(`/shared/${linkData.photoId}`)
           break
         case 'friend':
           console.log(
-            'Navigating to friend confirmation:',
+            '👤 Navigating to friend confirmation:',
             linkData.friendshipUuid,
           )
-          router.replace('/')
-          setTimeout(() => {
-            router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
-          }, 50)
+          // Use replace to go directly to the target on cold start
+          router.replace(`/confirm-friendship/${linkData.friendshipUuid}`)
           break
         case 'friendshipName':
           console.log(
-            'Processing friendship name update:',
+            '✏️ Processing friendship name update:',
             linkData.friendshipUuid,
             linkData.friendName,
           )
           router.replace('/friends')
-          setTimeout(async () => {
+
+          // Process the name update asynchronously without blocking
+          ;(async () => {
             try {
               const secretReducer = await import(
                 '../src/screens/Secret/reducer'
@@ -190,7 +195,7 @@ export default function RootLayout() {
                 topOffset: 100,
               })
             }
-          }, 100)
+          })()
           break
         default:
           console.log('Unknown link type, navigating to home')
@@ -284,7 +289,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (isNavigationReady && pendingDeepLinkRef.current) {
       const { url, linkData } = pendingDeepLinkRef.current
-      console.log('Navigation mounted, processing queued deep link:', url)
+      console.log('✅ Navigation mounted, processing queued deep link:', url)
+
       try {
         processDeepLink(linkData)
         lastHandledDeepLinkRef.current = { url, timestamp: Date.now() }
@@ -367,26 +373,11 @@ export default function RootLayout() {
       }
     })
 
-    // Check for initial URL immediately if fonts are loaded or we're proceeding without them
-    if (fontsLoaded || shouldProceedWithoutFonts) {
-      getInitialURL()
-    } else {
-      // If fonts not loaded, wait very briefly
-      const timer = setTimeout(getInitialURL, 100)
-      return () => {
-        subscription?.remove()
-        clearTimeout(timer)
-      }
-    }
+    // Always check for initial URL, but don't block on fonts
+    getInitialURL()
 
     return () => subscription?.remove()
-  }, [
-    handleDeepLink,
-    fontsLoaded,
-    shouldProceedWithoutFonts,
-    isNavigationReady,
-    processDeepLink,
-  ])
+  }, [handleDeepLink, isNavigationReady, processDeepLink])
 
   useEffect(() => {
     // Only run initialization once
@@ -614,17 +605,27 @@ export default function RootLayout() {
     const isLaunchReady =
       (fontsLoaded || shouldProceedWithoutFonts) && isAppReady
 
+    console.log('💾 Splash hide effect check:', {
+      isLaunchReady,
+      fontsLoaded,
+      shouldProceedWithoutFonts,
+      isAppReady,
+      splashHidden: splashHiddenRef.current,
+    })
+
     if (isLaunchReady && !splashHiddenRef.current) {
       // Hide splash as soon as app is ready to let navigation mount
       console.log(
         '🎉 App ready, hiding splash screen to allow navigation to mount...',
       )
       splashHiddenRef.current = true
-      setTimeout(async () => {
-        try {
-          await SplashScreen.hideAsync()
-          console.log('✅ Splash screen hidden')
-        } catch (error) {
+
+      // Hide splash immediately, no timeout needed
+      SplashScreen.hideAsync()
+        .then(() => {
+          console.log('✅ Splash screen hidden successfully')
+        })
+        .catch((error) => {
           console.error('❌ Error hiding splash screen:', error)
           Toast.show({
             text1: 'Display Warning',
@@ -634,8 +635,7 @@ export default function RootLayout() {
             topOffset: 60,
             visibilityTime: 3000,
           })
-        }
-      }, 100)
+        })
     }
   }, [fontsLoaded, shouldProceedWithoutFonts, isAppReady])
 
