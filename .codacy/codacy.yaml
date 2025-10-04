@@ -1,3 +1,5 @@
+exclude_paths:
+    - src/zxcvbn.js
 runtimes:
     - java@17.0.10
     - node@22.2.0
