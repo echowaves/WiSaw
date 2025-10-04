@@ -3,7 +3,7 @@ import { Animated, Easing, StyleSheet, View } from 'react-native'
 
 const styles = StyleSheet.create({
   track: { height: 4, borderRadius: 2, overflow: 'hidden' },
-  bar: { height: '100%', borderRadius: 2 },
+  bar: { height: '100%', borderRadius: 2 }
 })
 
 const LinearProgress = ({
@@ -11,7 +11,7 @@ const LinearProgress = ({
   color = '#2D9CDB',
   trackColor = 'rgba(0,0,0,0.1)',
   style,
-  trackStyle,
+  trackStyle
 }) => {
   const animation = useRef(new Animated.Value(0)).current
   const isDeterminate = useMemo(() => typeof value === 'number', [value])
@@ -23,13 +23,13 @@ const LinearProgress = ({
         toValue: 1,
         duration: 600,
         easing: Easing.inOut(Easing.ease),
-        useNativeDriver: false,
+        useNativeDriver: false
       })
       const backward = Animated.timing(animation, {
         toValue: 0,
         duration: 600,
         easing: Easing.inOut(Easing.ease),
-        useNativeDriver: false,
+        useNativeDriver: false
       })
       const loop = Animated.loop(Animated.sequence([forward, backward]))
       loop.start()
@@ -46,27 +46,23 @@ const LinearProgress = ({
     return undefined
   }, [animation, isDeterminate])
 
-  const progressWidth = isDeterminate
-    ? `${Math.max(0, Math.min(1, value)) * 100}%`
-    : '50%'
+  const progressWidth = isDeterminate ? `${Math.max(0, Math.min(1, value)) * 100}%` : '50%'
 
   const translateX = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: ['-25%', '125%'],
+    outputRange: ['-25%', '125%']
   })
 
   return (
-    <View
-      style={[styles.track, { backgroundColor: trackColor }, trackStyle, style]}
-    >
+    <View style={[styles.track, { backgroundColor: trackColor }, trackStyle, style]}>
       <Animated.View
         style={[
           styles.bar,
           {
             backgroundColor: color,
             width: progressWidth,
-            transform: isDeterminate ? undefined : [{ translateX }],
-          },
+            transform: isDeterminate ? undefined : [{ translateX }]
+          }
         ]}
       />
     </View>

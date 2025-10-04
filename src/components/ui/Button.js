@@ -1,10 +1,4 @@
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 
 const styles = StyleSheet.create({
   button: {
@@ -14,44 +8,44 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   large: {
     paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 24
   },
   contentWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   iconWrapper: {
     marginRight: 8,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   title: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
   titleLarge: {
-    fontSize: 18,
+    fontSize: 18
   },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: '#2D9CDB',
+    borderColor: '#2D9CDB'
   },
   outlineTitle: {
-    color: '#2D9CDB',
+    color: '#2D9CDB'
   },
   disabled: {
-    opacity: 0.6,
+    opacity: 0.6
   },
   pressed: {
-    opacity: 0.85,
-  },
+    opacity: 0.85
+  }
 })
 
 const flatten = (stylesParam) => {
@@ -72,7 +66,7 @@ const Button = ({
   loadingProps,
   accessibilityLabel,
   type = 'solid',
-  size = 'md',
+  size = 'md'
 }) => {
   const renderContent = () => {
     if (loading) {
@@ -80,13 +74,7 @@ const Button = ({
         (titleStyle && StyleSheet.flatten(titleStyle)?.color) ||
         (type === 'outline' ? '#333' : '#FFFFFF')
 
-      return (
-        <ActivityIndicator
-          color={indicatorColor}
-          size="small"
-          {...loadingProps}
-        />
-      )
+      return <ActivityIndicator color={indicatorColor} size="small" {...loadingProps} />
     }
 
     const content = children ?? (
@@ -95,7 +83,7 @@ const Button = ({
           styles.title,
           type === 'outline' && styles.outlineTitle,
           size === 'lg' && styles.titleLarge,
-          titleStyle,
+          titleStyle
         ]}
       >
         {title}
@@ -127,7 +115,7 @@ const Button = ({
           size === 'lg' && styles.large,
           ...flatten(buttonStyle),
           disabled && styles.disabled,
-          pressed && !disabled && !loading && styles.pressed,
+          pressed && !disabled && !loading && styles.pressed
         ]}
       >
         {renderContent()}

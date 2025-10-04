@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Text,
   useWindowDimensions,
-  View,
+  View
 } from 'react-native'
 
 import { Ionicons } from '@expo/vector-icons'
@@ -24,7 +24,7 @@ const createStyles = (theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.BACKGROUND,
+      backgroundColor: theme.BACKGROUND
     },
     headerButton: {
       padding: 12,
@@ -36,16 +36,16 @@ const createStyles = (theme) =>
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.3,
       shadowRadius: 4,
-      elevation: 5,
+      elevation: 5
     },
     headerIcon: {
       textShadowColor: 'rgba(0, 0, 0, 0.8)',
       textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
+      textShadowRadius: 2
     },
     headerTitle: {
       color: 'rgba(255, 255, 255, 0.95)',
@@ -53,7 +53,7 @@ const createStyles = (theme) =>
       fontWeight: '600',
       textShadowColor: 'rgba(0, 0, 0, 0.8)',
       textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
+      textShadowRadius: 2
     },
     photoContainer: {
       width: '100%',
@@ -63,8 +63,8 @@ const createStyles = (theme) =>
       top: 0,
       bottom: 0,
       right: 0,
-      left: 0,
-    },
+      left: 0
+    }
   })
 
 const PinchableView = ({ route, navigation }) => {
@@ -107,7 +107,7 @@ const PinchableView = ({ route, navigation }) => {
         left: 0,
         right: 0,
         zIndex: 1000,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
     >
       <View
@@ -116,7 +116,7 @@ const PinchableView = ({ route, navigation }) => {
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 16,
-          paddingVertical: 8,
+          paddingVertical: 8
         }}
       >
         {renderHeaderLeft()}
@@ -145,11 +145,7 @@ const PinchableView = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       {renderCustomHeader()}
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <ReactNativeZoomableView
         maxZoom={10}
         minZoom={0.8}
@@ -158,13 +154,13 @@ const PinchableView = ({ route, navigation }) => {
         bindToBorders={true}
         style={{
           width,
-          height,
+          height
         }}
         resizeMode="contain"
       >
         <CachedImage
           source={{
-            uri: `${photo.thumbUrl}`,
+            uri: `${photo.thumbUrl}`
           }}
           cacheKey={`${photo.id}-thumb`}
           resizeMode="contain"
@@ -172,7 +168,7 @@ const PinchableView = ({ route, navigation }) => {
         />
         <CachedImage
           source={{
-            uri: `${photo.imgUrl}`,
+            uri: `${photo.imgUrl}`
           }}
           cacheKey={`${photo.id}`}
           placeholderContent={
@@ -181,7 +177,7 @@ const PinchableView = ({ route, navigation }) => {
               size="small"
               style={{
                 flex: 1,
-                justifyContent: 'center',
+                justifyContent: 'center'
               }}
             />
           }

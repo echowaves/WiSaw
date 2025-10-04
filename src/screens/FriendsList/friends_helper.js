@@ -50,14 +50,14 @@ export const addFriendshipLocally = async ({ friendshipUuid, contactName }) => {
     if (verification !== contactName) {
       // eslint-disable-next-line no-console
       console.error(
-        `Storage verification failed: expected "${contactName}", got "${verification}". Retrying...`,
+        `Storage verification failed: expected "${contactName}", got "${verification}". Retrying...`
       )
       // Retry once
       await Storage.setItem({ key, value: contactName })
       const retryVerification = await Storage.getItem({ key })
       if (retryVerification !== contactName) {
         throw new Error(
-          `Storage verification failed after retry: expected "${contactName}", got "${retryVerification}"`,
+          `Storage verification failed after retry: expected "${contactName}", got "${retryVerification}"`
         )
       }
     }
@@ -81,8 +81,8 @@ export const deleteFriendship = async ({ friendshipUuid }) => {
         }
       `,
       variables: {
-        friendshipUuid,
-      },
+        friendshipUuid
+      }
     })
   ).data
 
@@ -98,8 +98,7 @@ export const getLocalContactName = ({ uuid, friendUuid, friendsList }) => {
     return 'me'
   }
   const enhancedFriend = friendsList.find(
-    (friendship) =>
-      friendship.uuid1 === friendUuid || friendship.uuid2 === friendUuid,
+    (friendship) => friendship.uuid1 === friendUuid || friendship.uuid2 === friendUuid
   )
   if (!enhancedFriend) {
     return 'anonym'
@@ -112,14 +111,8 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
   try {
     const result = await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation acceptFriendshipRequest(
-          $friendshipUuid: String!
-          $uuid: String!
-        ) {
-          acceptFriendshipRequest(
-            friendshipUuid: $friendshipUuid
-            uuid: $uuid
-          ) {
+        mutation acceptFriendshipRequest($friendshipUuid: String!, $uuid: String!) {
+          acceptFriendshipRequest(friendshipUuid: $friendshipUuid, uuid: $uuid) {
             chat {
               chatUuid
               createdAt
@@ -143,8 +136,8 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
       `,
       variables: {
         friendshipUuid,
-        uuid,
-      },
+        uuid
+      }
     })
 
     const { friendship, chat, chatUser } = result.data.acceptFriendshipRequest
@@ -158,7 +151,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
       message: error.message,
       graphQLErrors: error.graphQLErrors,
       networkError: error.networkError,
-      extraInfo: error.extraInfo,
+      extraInfo: error.extraInfo
     })
     // Re-throw with more context
     throw new Error(`Failed to accept friendship request: ${error.message}`)
@@ -194,7 +187,7 @@ const getLocalContact = async ({ friendshipUuid }) => {
     if (error.message && error.message.includes('not readable')) {
       // eslint-disable-next-line no-console
       console.warn(
-        `Storage entry for friendship ${friendshipUuid} is corrupted, will show as 'Unnamed Friend'`,
+        `Storage entry for friendship ${friendshipUuid} is corrupted, will show as 'Unnamed Friend'`
       )
     } else {
       // eslint-disable-next-line no-console
@@ -219,9 +212,9 @@ export const getUnreadCountsList = async ({ uuid }) => {
           }
         `,
         variables: {
-          uuid,
+          uuid
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'network-only'
       })
     ).data.getUnreadCountsList
     return unreadCountsList
@@ -248,9 +241,9 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
           }
         `,
         variables: {
-          uuid,
+          uuid
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'network-only'
       })
     ).data.getFriendshipsList
     return friendsList
@@ -264,7 +257,7 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
 export const getEnhancedListOfFriendships = async ({ uuid }) => {
   const [remoteFriendships, unreadCountsList] = await Promise.all([
     getRemoteListOfFriendships({ uuid }),
-    getUnreadCountsList({ uuid }),
+    getUnreadCountsList({ uuid })
   ])
 
   const enhancedFriendships = await Promise.all(
@@ -274,7 +267,7 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
         const { friendshipUuid } = friendship
         const contact = await getLocalContact({ friendshipUuid })
         const unread = unreadCountsList.find(
-          (unreadChat) => unreadChat.chatUuid === friendship.chatUuid,
+          (unreadChat) => unreadChat.chatUuid === friendship.chatUuid
         )
 
         const localContact = {
@@ -282,15 +275,12 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
           contact,
           ...friendship,
           unreadCount: unread?.unread || 0,
-          updatedAt: unread?.updatedAt || Date.now(),
+          updatedAt: unread?.updatedAt || Date.now()
         }
         return localContact
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(
-          `Error processing friendship ${friendship.friendshipUuid}:`,
-          error,
-        )
+        console.error(`Error processing friendship ${friendship.friendshipUuid}:`, error)
 
         // Return a basic friendship object even if there's an error
         return {
@@ -298,14 +288,14 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
           contact: null, // Will show as 'Unnamed Friend'
           ...friendship,
           unreadCount: 0,
-          updatedAt: Date.now(),
+          updatedAt: Date.now()
         }
       }
-    }),
+    })
   )
   // Sort by most recent updates first (descending order)
   return enhancedFriendships.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   )
 }
 
@@ -318,8 +308,8 @@ export const resetUnreadCount = async ({ chatUuid, uuid }) => {
     `,
     variables: {
       chatUuid,
-      uuid,
-    },
+      uuid
+    }
   })
   // console.log({ lastReadAt })
   return lastReadAt
@@ -338,20 +328,13 @@ export const removeFriend = async ({ uuid, friendshipUuid }) => {
 }
 
 // Function to share a friendship using the simplified sharing system
-export const shareFriendship = async ({
-  uuid,
-  friendshipUuid,
-  contactName,
-}) => {
+export const shareFriendship = async ({ uuid, friendshipUuid, contactName }) => {
   try {
     // Import the simplified sharing helper
     const sharingHelper = await import('../../utils/simpleSharingHelper')
 
     // Use the simplified sharing functionality
-    const result = await sharingHelper.shareFriendship(
-      friendshipUuid,
-      contactName,
-    )
+    const result = await sharingHelper.shareFriendship(friendshipUuid, contactName)
 
     if (result?.success) {
       return true
@@ -388,9 +371,7 @@ export const setContactName = async ({ uuid, friendshipUuid, contactName }) => {
   await addFriendshipLocally({ friendshipUuid, contactName })
 
   // eslint-disable-next-line no-console
-  console.log(
-    `Successfully saved contact name "${contactName}" for friendship ${friendshipUuid}`,
-  )
+  console.log(`Successfully saved contact name "${contactName}" for friendship ${friendshipUuid}`)
 
   return true
 }

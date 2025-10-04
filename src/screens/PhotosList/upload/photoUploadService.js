@@ -51,9 +51,7 @@ const ensurePendingUploadsFolder = async () => {
 }
 
 const readQueue = async () => {
-  let imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }),
-  )
+  let imagesInQueue = JSON.parse(await Storage.getItem({ key: CONST.PENDING_UPLOADS_KEY }))
 
   if (!imagesInQueue) {
     imagesInQueue = []
@@ -72,27 +70,26 @@ const genLocalThumbs = async (image) => {
       const manipResult = await ImageManipulator.manipulateAsync(
         image.localImgUrl,
         [{ resize: { height: 300 } }],
-        { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP },
+        { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP }
       )
       return {
         ...image,
-        localThumbUrl: manipResult.uri,
+        localThumbUrl: manipResult.uri
       }
     }
 
     const { uri } = await VideoThumbnails.getThumbnailAsync(image.localImgUrl)
 
-    const manipResult = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { height: 300 } }],
-      { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP },
-    )
+    const manipResult = await ImageManipulator.manipulateAsync(uri, [{ resize: { height: 300 } }], {
+      compress: 1.0,
+      format: ImageManipulator.SaveFormat.WEBP
+    })
 
     return {
       ...image,
       localVideoUrl: image.localImgUrl,
       localThumbUrl: manipResult.uri,
-      localImgUrl: uri,
+      localImgUrl: uri
     }
   } catch (error) {
     console.error('Thumbnail generation failed', error)
@@ -102,7 +99,7 @@ const genLocalThumbs = async (image) => {
     image: null,
     localVideoUrl: '',
     localThumbUrl: '',
-    localImgUrl: '',
+    localImgUrl: ''
   }
 }
 
@@ -110,8 +107,7 @@ export const removeFromQueue = async (imageToRemove) => {
   try {
     const pendingImagesBefore = await readQueue()
     const pendingImagesAfter = pendingImagesBefore.filter(
-      (imageInTheQueue) =>
-        JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
+      (imageInTheQueue) => JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove)
     )
 
     await writeQueue(pendingImagesAfter)
@@ -174,9 +170,7 @@ export const updateQueueItem = async (originalItem, updatedItem) => {
   try {
     const pendingImages = await readQueue()
     const updatedQueue = pendingImages.map((item) =>
-      JSON.stringify(item) === JSON.stringify(originalItem)
-        ? updatedItem
-        : item,
+      JSON.stringify(item) === JSON.stringify(originalItem) ? updatedItem : item
     )
 
     await writeQueue(updatedQueue)
@@ -189,24 +183,18 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
   try {
     await ensurePendingUploadsFolder()
 
-    const localImgUrl = new FSFile(
-      CONST.PENDING_UPLOADS_FOLDER,
-      queuedItem.localImageName,
-    ).uri
+    const localImgUrl = new FSFile(CONST.PENDING_UPLOADS_FOLDER, queuedItem.localImageName).uri
 
     if (queuedItem.type === 'image') {
       const compressedResult = await ImageManipulator.manipulateAsync(
         queuedItem.originalCameraUrl,
         [{ resize: { height: 3000 } }],
-        { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP },
+        { compress: 1.0, format: ImageManipulator.SaveFormat.WEBP }
       )
 
       try {
         const src = new FSFile(compressedResult.uri)
-        const dest = new FSFile(
-          CONST.PENDING_UPLOADS_FOLDER,
-          queuedItem.localImageName,
-        )
+        const dest = new FSFile(CONST.PENDING_UPLOADS_FOLDER, queuedItem.localImageName)
 
         if (dest.exists) {
           try {
@@ -223,7 +211,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
           text2: error.message || `${error}`,
           type: 'error',
           visibilityTime: 4000,
-          topOffset,
+          topOffset
         })
 
         const fallbackSrc = new FSFile(compressedResult.uri)
@@ -233,10 +221,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
     } else {
       try {
         const src = new FSFile(queuedItem.originalCameraUrl)
-        const dest = new FSFile(
-          CONST.PENDING_UPLOADS_FOLDER,
-          queuedItem.localImageName,
-        )
+        const dest = new FSFile(CONST.PENDING_UPLOADS_FOLDER, queuedItem.localImageName)
 
         if (!dest.exists) {
           src.move(dest)
@@ -247,7 +232,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
           text2: error.message || `${error}`,
           type: 'error',
           visibilityTime: 4000,
-          topOffset,
+          topOffset
         })
 
         const fallbackSrc = new FSFile(queuedItem.originalCameraUrl)
@@ -258,7 +243,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
 
     const processedImage = {
       ...queuedItem,
-      localImgUrl,
+      localImgUrl
     }
 
     const thumbEnhancedImage = await genLocalThumbs(processedImage)
@@ -266,7 +251,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
     try {
       await CacheManager.addToCache({
         file: thumbEnhancedImage.localThumbUrl,
-        key: thumbEnhancedImage.localCacheKey,
+        key: thumbEnhancedImage.localCacheKey
       })
     } catch (cacheError) {
       if (!`${cacheError}`.toLowerCase().includes('already exists')) {
@@ -283,9 +268,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
 
 export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
   try {
-    const localImageName = cameraImgUrl.substr(
-      cameraImgUrl.lastIndexOf('/') + 1,
-    )
+    const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
     const localCacheKey = localImageName.split('.')[0]
 
     const image = {
@@ -293,7 +276,7 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
       localImageName,
       type,
       location,
-      localCacheKey,
+      localCacheKey
     }
 
     await addToQueue(image)
@@ -316,7 +299,7 @@ const uploadFile = async ({
   assetUri,
   topOffset = 100,
   retries = 3,
-  timeoutMs = 180_000,
+  timeoutMs = 180_000
 }) => {
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     try {
@@ -334,8 +317,8 @@ const uploadFile = async ({
           `,
           variables: {
             assetKey,
-            contentType,
-          },
+            contentType
+          }
         })
       ).data.generateUploadUrl
 
@@ -343,18 +326,16 @@ const uploadFile = async ({
         fetch(uploadUrl, {
           method: 'PUT',
           headers: {
-            'Content-Type': contentType,
+            'Content-Type': contentType
           },
-          body: new FSFile(assetUri),
+          body: new FSFile(assetUri)
         }),
         timeoutMs,
-        `Upload ${assetKey}`,
+        `Upload ${assetKey}`
       )
 
       if (!responseData || responseData.status !== 200) {
-        throw new Error(
-          `Upload failed with status ${responseData?.status || 'unknown'}`,
-        )
+        throw new Error(`Upload failed with status ${responseData?.status || 'unknown'}`)
       }
 
       return { responseData }
@@ -366,7 +347,7 @@ const uploadFile = async ({
           text1: 'Upload failed after retries',
           text2: `${error}`,
           type: 'error',
-          topOffset,
+          topOffset
         })
         return null
       }
@@ -384,13 +365,13 @@ export const uploadItem = async ({ item }) => {
       const videoResponse = await uploadFile({
         assetKey: `${item.photo.id}.mov`,
         contentType: 'video/mov',
-        assetUri: item.localVideoUrl,
+        assetUri: item.localVideoUrl
       })
 
       if (!videoResponse || videoResponse?.responseData?.status !== 200) {
         return {
           responseData: 'Unable to upload video asset.',
-          status: videoResponse?.responseData?.status,
+          status: videoResponse?.responseData?.status
         }
       }
     }
@@ -398,14 +379,14 @@ export const uploadItem = async ({ item }) => {
     const response = await uploadFile({
       assetKey: `${item.photo.id}.upload`,
       contentType: 'image/jpeg',
-      assetUri: item.localImgUrl,
+      assetUri: item.localImgUrl
     })
 
     return { responseData: response?.responseData }
   } catch (error) {
     console.error('Upload item failed', error)
     return {
-      responseData: `Unable to upload asset ${JSON.stringify(error)}`,
+      responseData: `Unable to upload asset ${JSON.stringify(error)}`
     }
   }
 }
@@ -422,12 +403,7 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
       await withTimeout(
         CONST.gqlClient.mutate({
           mutation: gql`
-            mutation createPhoto(
-              $lat: Float!
-              $lon: Float!
-              $uuid: String!
-              $video: Boolean
-            ) {
+            mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String!, $video: Boolean) {
               createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
                 active
                 commentsCount
@@ -447,11 +423,11 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
             uuid,
             lat,
             lon,
-            video,
-          },
+            video
+          }
         }),
         timeoutMs,
-        'Generate photo mutation',
+        'Generate photo mutation'
       )
     ).data.createPhoto
 
@@ -461,20 +437,14 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
 
     const errorMessage = `${error}`.toLowerCase()
     if (errorMessage.includes('timeout') || errorMessage.includes('network')) {
-      throw new Error(
-        'Photo creation timed out. Please check your connection and try again.',
-      )
+      throw new Error('Photo creation timed out. Please check your connection and try again.')
     }
 
     throw error
   }
 }
 
-export const processCompleteUpload = async ({
-  item,
-  uuid,
-  topOffset = 100,
-}) => {
+export const processCompleteUpload = async ({ item, uuid, topOffset = 100 }) => {
   try {
     let processedItem = item
     if (!item.localImgUrl) {
@@ -484,7 +454,7 @@ export const processCompleteUpload = async ({
             text1: 'Upload skipped',
             text2: 'Original file is missing on device.',
             type: 'error',
-            topOffset,
+            topOffset
           })
           await removeFromQueue(item)
           return null
@@ -510,7 +480,7 @@ export const processCompleteUpload = async ({
           text1: 'Upload Error',
           text2: 'Invalid user ID. Please try again.',
           type: 'error',
-          topOffset,
+          topOffset
         })
         return null
       }
@@ -520,13 +490,13 @@ export const processCompleteUpload = async ({
           uuid: uuid.trim(),
           lat: processedItem.location.coords.latitude,
           lon: processedItem.location.coords.longitude,
-          video: processedItem?.type === 'video',
+          video: processedItem?.type === 'video'
         })
 
         try {
           CacheManager.addToCache({
             file: processedItem.localThumbUrl,
-            key: `${photo.id}-thumb`,
+            key: `${photo.id}-thumb`
           })
         } catch (cacheError1) {
           if (!`${cacheError1}`.toLowerCase().includes('already exists')) {
@@ -537,7 +507,7 @@ export const processCompleteUpload = async ({
         try {
           CacheManager.addToCache({
             file: processedItem.localImgUrl,
-            key: `${photo.id}`,
+            key: `${photo.id}`
           })
         } catch (cacheError2) {
           if (!`${cacheError2}`.toLowerCase().includes('already exists')) {
@@ -554,8 +524,7 @@ export const processCompleteUpload = async ({
           type: 'error',
           visibilityTime: 4000,
           topOffset,
-          onPress: () =>
-            alert(`error: ${photoGenError.message || `${photoGenError}`}`),
+          onPress: () => alert(`error: ${photoGenError.message || `${photoGenError}`}`)
         })
         console.error('Photo generation failed:', photoGenError)
 
@@ -565,7 +534,7 @@ export const processCompleteUpload = async ({
             text1: 'Upload delayed',
             text2: 'Connection issues. Will retry automatically.',
             type: 'info',
-            topOffset,
+            topOffset
           })
         }
         return null
@@ -582,7 +551,7 @@ export const processCompleteUpload = async ({
       text1: 'Upload is going slooooow...',
       text2: 'Still trying to upload.',
       visibilityTime: 500,
-      topOffset,
+      topOffset
     })
     return null
   } catch (error) {
@@ -592,7 +561,7 @@ export const processCompleteUpload = async ({
       text2: error.message || `${error}`,
       type: 'error',
       topOffset,
-      onPress: () => alert(`error: ${error.message || `${error}`}`),
+      onPress: () => alert(`error: ${error.message || `${error}`}`)
     })
 
     const errStr = `${error}`.toLowerCase()
@@ -606,7 +575,7 @@ export const processCompleteUpload = async ({
         text1: 'Upload removed',
         text2: 'Local file was not found on device.',
         type: 'error',
-        topOffset,
+        topOffset
       })
       return null
     }
@@ -622,13 +591,9 @@ export const initPendingUploads = async () => {
     if (pendingImages && pendingImages.length > 0) {
       console.log(`Found ${pendingImages.length} pending uploads in queue`)
 
-      const stuckItems = pendingImages.filter(
-        (item) => !item.localImgUrl && item.photo,
-      )
+      const stuckItems = pendingImages.filter((item) => !item.localImgUrl && item.photo)
       if (stuckItems.length > 0) {
-        console.warn(
-          `Found ${stuckItems.length} potentially stuck upload items`,
-        )
+        console.warn(`Found ${stuckItems.length} potentially stuck upload items`)
       }
 
       for (let i = 0; i < pendingImages.length; i += 1) {
@@ -636,15 +601,10 @@ export const initPendingUploads = async () => {
         if (item.originalCameraUrl) {
           try {
             if (!new FSFile(item.originalCameraUrl).exists) {
-              console.warn(
-                `Pending upload has missing original file: ${item.localImageName}`,
-              )
+              console.warn(`Pending upload has missing original file: ${item.localImageName}`)
             }
           } catch (error) {
-            console.warn(
-              `Cannot check file status for: ${item.localImageName}`,
-              error,
-            )
+            console.warn(`Cannot check file status for: ${item.localImageName}`, error)
           }
         }
       }

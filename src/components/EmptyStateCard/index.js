@@ -12,7 +12,7 @@ const createStyles = (theme) =>
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 40,
-      paddingVertical: 60,
+      paddingVertical: 60
     },
     card: {
       backgroundColor: theme.CARD_BACKGROUND,
@@ -22,7 +22,7 @@ const createStyles = (theme) =>
       shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 4,
+        height: 4
       },
       shadowOpacity: 1,
       shadowRadius: 12,
@@ -30,7 +30,7 @@ const createStyles = (theme) =>
       borderWidth: 1,
       borderColor: theme.BORDER_LIGHT,
       maxWidth: 320,
-      width: '100%',
+      width: '100%'
     },
     iconContainer: {
       width: 120,
@@ -39,10 +39,10 @@ const createStyles = (theme) =>
       backgroundColor: 'rgba(234, 94, 61, 0.1)',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 24,
+      marginBottom: 24
     },
     icon: {
-      opacity: 0.8,
+      opacity: 0.8
     },
     title: {
       fontSize: 24,
@@ -50,18 +50,18 @@ const createStyles = (theme) =>
       color: theme.TEXT_PRIMARY,
       textAlign: 'center',
       marginBottom: 12,
-      lineHeight: 28,
+      lineHeight: 28
     },
     subtitle: {
       fontSize: 16,
       color: theme.TEXT_SECONDARY,
       textAlign: 'center',
       lineHeight: 22,
-      marginBottom: 32,
+      marginBottom: 32
     },
     actionButtonContainer: {
       borderRadius: 20,
-      overflow: 'hidden',
+      overflow: 'hidden'
     },
     actionButton: {
       backgroundColor: theme.INTERACTIVE_PRIMARY,
@@ -71,17 +71,17 @@ const createStyles = (theme) =>
       shadowColor: theme.INTERACTIVE_PRIMARY,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.3,
       shadowRadius: 4,
-      elevation: 4,
+      elevation: 4
     },
     actionButtonText: {
       fontSize: 16,
       fontWeight: '600',
-      color: 'white',
-    },
+      color: 'white'
+    }
   })
 
 const EmptyStateCard = ({
@@ -91,14 +91,13 @@ const EmptyStateCard = ({
   subtitle,
   actionText,
   onActionPress,
-  iconColor,
+  iconColor
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
 
-  const IconComponent =
-    iconType === 'MaterialIcons' ? MaterialIcons : FontAwesome
+  const IconComponent = iconType === 'MaterialIcons' ? MaterialIcons : FontAwesome
 
   // Use theme color as default if no iconColor is provided
   const finalIconColor = iconColor || theme.TEXT_PRIMARY
@@ -107,12 +106,7 @@ const EmptyStateCard = ({
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.iconContainer}>
-          <IconComponent
-            name={icon}
-            size={64}
-            color={finalIconColor}
-            style={styles.icon}
-          />
+          <IconComponent name={icon} size={64} color={finalIconColor} style={styles.icon} />
         </View>
 
         <Text style={styles.title}>{title}</Text>

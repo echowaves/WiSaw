@@ -15,7 +15,7 @@ const ChatPhoto = (props) => {
 
   //   console.log({ props })
   const {
-    currentMessage: { image, chatPhotoHash },
+    currentMessage: { image, chatPhotoHash }
   } = props
   // console.log({ image, chatPhotoHash })
   //   console.log({ image })
@@ -32,7 +32,7 @@ const ChatPhoto = (props) => {
           height: 200,
           // borderRadius: 10,
           // flex: 1,
-          alignSelf: 'stretch',
+          alignSelf: 'stretch'
         }}
       >
         <CachedImage
@@ -41,7 +41,7 @@ const ChatPhoto = (props) => {
           resizeMode="contain"
           style={{
             width: '100%',
-            height: '100%',
+            height: '100%'
             // borderRadius: 10,
           }}
         />
@@ -59,13 +59,13 @@ const ChatPhoto = (props) => {
         height,
         // borderRadius: 10,
         // flex: 1,
-        alignSelf: 'stretch',
+        alignSelf: 'stretch'
       }}
     >
       <View
         style={{
           flex: 1,
-          height,
+          height
         }}
       >
         <CachedImage
@@ -80,7 +80,7 @@ const ChatPhoto = (props) => {
             bottom: 0,
             right: 0,
             left: 0,
-            backgroundColor: 'transparent',
+            backgroundColor: 'transparent'
             //   borderRadius: 10,
           }}
         />
@@ -96,7 +96,7 @@ const ChatPhoto = (props) => {
             bottom: 0,
             right: 0,
             left: 0,
-            backgroundColor: 'transparent',
+            backgroundColor: 'transparent'
 
             //   borderRadius: 10,
           }}

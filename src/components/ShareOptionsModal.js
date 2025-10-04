@@ -1,14 +1,7 @@
 import { FontAwesome5 } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import React, { useEffect, useState } from 'react'
-import {
-  Dimensions,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Toast from 'react-native-toast-message'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
@@ -22,7 +15,7 @@ const ShareOptionsModal = ({
   friendshipUuid,
   friendName,
   uuid,
-  topOffset = 100,
+  topOffset = 100
 }) => {
   const [shareUrl, setShareUrl] = useState('')
 
@@ -33,7 +26,7 @@ const ShareOptionsModal = ({
       setShareUrl(url)
 
       console.log('Friendship invitation URL generated:', {
-        shareUrl: url,
+        shareUrl: url
       })
     }
   }, [visible, friendshipUuid, friendName])
@@ -45,7 +38,7 @@ const ShareOptionsModal = ({
       const result = await friendsHelper.shareFriendship({
         uuid,
         friendshipUuid,
-        contactName: friendName,
+        contactName: friendName
       })
 
       if (result) {
@@ -56,7 +49,7 @@ const ShareOptionsModal = ({
           text2: `Shared ${friendName}'s friendship invitation`,
           visibilityTime: 2000,
           autoHide: true,
-          topOffset,
+          topOffset
         })
         onClose()
       }
@@ -69,18 +62,13 @@ const ShareOptionsModal = ({
         text2: 'Unable to share friendship request',
         visibilityTime: 3000,
         autoHide: true,
-        topOffset,
+        topOffset
       })
     }
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Header */}
@@ -98,17 +86,9 @@ const ShareOptionsModal = ({
           <View style={styles.contentContainer}>
             {/* Friend Info */}
             <View style={styles.friendInfo}>
-              <FontAwesome5
-                name="user-circle"
-                size={32}
-                color={CONST.MAIN_COLOR}
-              />
-              <Text style={styles.friendName}>
-                {friendName || 'Unknown Friend'}
-              </Text>
-              <Text style={styles.description}>
-                Share this friendship invitation
-              </Text>
+              <FontAwesome5 name="user-circle" size={32} color={CONST.MAIN_COLOR} />
+              <Text style={styles.friendName}>{friendName || 'Unknown Friend'}</Text>
+              <Text style={styles.description}>Share this friendship invitation</Text>
             </View>
 
             {/* QR Code Section */}
@@ -127,9 +107,7 @@ const ShareOptionsModal = ({
                   ) : (
                     <View style={styles.qrPlaceholder}>
                       <FontAwesome5 name="qrcode" size={40} color="#ccc" />
-                      <Text style={styles.placeholderText}>
-                        Generating QR Code...
-                      </Text>
+                      <Text style={styles.placeholderText}>Generating QR Code...</Text>
                     </View>
                   )}
                 </View>
@@ -148,9 +126,7 @@ const ShareOptionsModal = ({
                 onPress={handleTextShare}
                 activeOpacity={0.7}
               >
-                <View
-                  style={[styles.optionIcon, { backgroundColor: '#ff6b35' }]}
-                >
+                <View style={[styles.optionIcon, { backgroundColor: '#ff6b35' }]}>
                   <FontAwesome5 name="share-alt" size={18} color="white" />
                 </View>
                 <View style={styles.optionContent}>
@@ -166,9 +142,9 @@ const ShareOptionsModal = ({
             {/* Instructions */}
             <View style={styles.instructions}>
               <Text style={styles.instructionText}>
-                • Scan the QR code above with another device's camera{'\n'}• Or
-                tap "Share Invitation" to send via text/message{'\n'}• Recipient
-                can accept the friendship request
+                • Scan the QR code above with another device's camera{'\n'}• Or tap "Share
+                Invitation" to send via text/message{'\n'}• Recipient can accept the friendship
+                request
               </Text>
             </View>
           </View>
@@ -182,7 +158,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-end'
   },
   modalContainer: {
     backgroundColor: 'white',
@@ -190,7 +166,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingBottom: 34, // Safe area padding
     minHeight: 500,
-    maxHeight: '85%',
+    maxHeight: '85%'
   },
   header: {
     flexDirection: 'row',
@@ -199,54 +175,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#f0f0f0'
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
     flex: 1,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   closeButton: {
-    padding: 4,
+    padding: 4
   },
   contentContainer: {
-    paddingVertical: 10,
+    paddingVertical: 10
   },
   scrollContainer: {
     flex: 1,
-    minHeight: 400,
+    minHeight: 400
   },
   friendInfo: {
     alignItems: 'center',
     paddingVertical: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 20
   },
   friendName: {
     fontSize: 20,
     fontWeight: '600',
     color: '#333',
     marginTop: 12,
-    marginBottom: 4,
+    marginBottom: 4
   },
   description: {
     fontSize: 14,
     color: '#666',
-    textAlign: 'center',
+    textAlign: 'center'
   },
   qrSection: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 20
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 16,
+    marginBottom: 16
   },
   qrContainer: {
-    alignItems: 'center',
+    alignItems: 'center'
   },
   qrCodeWrapper: {
     padding: 20,
@@ -257,7 +233,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-    marginBottom: 12,
+    marginBottom: 12
   },
   qrPlaceholder: {
     width: 160,
@@ -265,23 +241,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f8f9fa',
-    borderRadius: 8,
+    borderRadius: 8
   },
   placeholderText: {
     marginTop: 12,
     fontSize: 14,
     color: '#999',
-    textAlign: 'center',
+    textAlign: 'center'
   },
   qrDescription: {
     fontSize: 13,
     color: '#666',
     textAlign: 'center',
-    maxWidth: 280,
+    maxWidth: 280
   },
   optionsContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 20
   },
   optionButton: {
     flexDirection: 'row',
@@ -290,7 +266,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: '#f8f9fa',
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 12
   },
   optionIcon: {
     width: 40,
@@ -298,32 +274,32 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 16
   },
   optionContent: {
-    flex: 1,
+    flex: 1
   },
   optionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 2,
+    marginBottom: 2
   },
   optionDescription: {
     fontSize: 13,
     color: '#666',
-    lineHeight: 16,
+    lineHeight: 16
   },
   instructions: {
     paddingHorizontal: 20,
-    paddingBottom: 10,
+    paddingBottom: 10
   },
   instructionText: {
     fontSize: 12,
     color: '#666',
     textAlign: 'center',
-    lineHeight: 16,
-  },
+    lineHeight: 16
+  }
 })
 
 export default ShareOptionsModal

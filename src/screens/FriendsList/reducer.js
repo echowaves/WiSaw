@@ -6,7 +6,7 @@ import * as CONST from '../../consts'
 
 export const initialState = {
   friendsList: [],
-  unreadCountsList: [],
+  unreadCountsList: []
 }
 
 // export default function reducer(state = initialState, action) {
@@ -41,12 +41,7 @@ export const initialState = {
 //   }
 // }
 
-export async function createFriendship({
-  uuid,
-  topOffset,
-  contactName,
-  autoShare = false,
-}) {
+export async function createFriendship({ uuid, topOffset, contactName, autoShare = false }) {
   try {
     const { friendship } = (
       await CONST.gqlClient.mutate({
@@ -75,8 +70,8 @@ export async function createFriendship({
           }
         `,
         variables: {
-          uuid,
-        },
+          uuid
+        }
       })
     ).data.createFriendship
 
@@ -87,7 +82,7 @@ export async function createFriendship({
         const result = await sharingHelper.shareFriendship(
           friendship?.friendshipUuid,
           contactName,
-          topOffset,
+          topOffset
         )
 
         if (result?.success) {
@@ -96,7 +91,7 @@ export async function createFriendship({
             text2: 'Shared via system share sheet',
             type: 'success',
             position: 'top',
-            topOffset: 60,
+            topOffset: 60
           })
         } else if (result && !result.success && !result.dismissed) {
           const message = result.reason || 'Sharing action was not successful.'
@@ -105,18 +100,17 @@ export async function createFriendship({
             text2: message,
             type: 'error',
             position: 'top',
-            topOffset: 60,
+            topOffset: 60
           })
         }
       } catch (shareError) {
-        const message =
-          shareError.message || 'Unable to share friendship request'
+        const message = shareError.message || 'Unable to share friendship request'
         Toast.show({
           text1: 'Sharing failed',
           text2: message,
           type: 'error',
           position: 'top',
-          topOffset: 60,
+          topOffset: 60
         })
       }
     } else {
@@ -126,7 +120,7 @@ export async function createFriendship({
         text2: 'You can now share the friendship request from the friends list',
         type: 'success',
         position: 'top',
-        topOffset: 60,
+        topOffset: 60
       })
     }
 
@@ -139,7 +133,7 @@ export async function createFriendship({
       text2: err.toString(),
       type: 'error',
       position: 'top',
-      topOffset: 60,
+      topOffset: 60
     })
     return null
   }

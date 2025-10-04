@@ -10,7 +10,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from 'react-native'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
@@ -26,31 +26,31 @@ const commentStyles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    padding: 8,
+    padding: 8
   },
   commentText: {
     color: 'white',
     fontSize: 12,
     fontWeight: '400',
     lineHeight: 16,
-    marginBottom: 4,
+    marginBottom: 4
   },
   commentStats: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between'
   },
   commentStatItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 4,
+    marginRight: 4
   },
   commentStatText: {
     color: 'white',
     fontSize: 10,
     fontWeight: '600',
-    marginLeft: 4,
-  },
+    marginLeft: 4
+  }
 })
 
 const ExpandableThumb = ({
@@ -69,7 +69,7 @@ const ExpandableThumb = ({
   updatePhotoHeight,
   onRequestEnsureVisible,
   showComments = false, // New prop to enable comment overlay
-  onTriggerSearch,
+  onTriggerSearch
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -90,17 +90,17 @@ const ExpandableThumb = ({
     if (originalPhoto) {
       originalDimensions.current = {
         width: Number(originalPhoto.width),
-        height: Number(originalPhoto.height),
+        height: Number(originalPhoto.height)
       }
     } else {
       // Fallback to item dimensions if original not found
       originalDimensions.current = {
         width: Number(item.width),
-        height: Number(item.height),
+        height: Number(item.height)
       }
       console.log(
         `⚠️ ExpandableThumb: Using item dimensions for photo ${item.id}:`,
-        originalDimensions.current,
+        originalDimensions.current
       )
     }
   }
@@ -127,17 +127,14 @@ const ExpandableThumb = ({
         toValue: 1,
         useNativeDriver: false,
         tension: 100,
-        friction: 8,
+        friction: 8
       }).start(() => setIsAnimating(false))
 
       // After animation starts, request to ensure visibility
       // Give layout a tick to settle so measurements are accurate
       setTimeout(() => {
         try {
-          if (
-            containerRef.current &&
-            typeof onRequestEnsureVisible === 'function'
-          ) {
+          if (containerRef.current && typeof onRequestEnsureVisible === 'function') {
             // Measure the container's position on screen
             containerRef.current.measureInWindow((x, y, width, height) => {
               if (height > 0) {
@@ -155,14 +152,14 @@ const ExpandableThumb = ({
         toValue: 0,
         useNativeDriver: false,
         tension: 100,
-        friction: 8,
+        friction: 8
       }).start(() => setIsAnimating(false))
     }
   }, [isExpanded, expandValue, isAnimating])
 
   // Cleanup effect for global callback
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       // Clean up this photo's callback from the registry
       if (global.expandableThumbCallbacks) {
         global.expandableThumbCallbacks.delete(item.id)
@@ -173,8 +170,9 @@ const ExpandableThumb = ({
           delete global.expandableThumbMinimize
         }
       }
-    }
-  }, [item.id])
+    },
+    [item.id]
+  )
 
   const handlePressIn = () => {
     // Only provide visual feedback when collapsed
@@ -182,7 +180,7 @@ const ExpandableThumb = ({
 
     Animated.spring(scaleValue, {
       toValue: 0.95,
-      useNativeDriver: true,
+      useNativeDriver: true
     }).start()
   }
 
@@ -192,7 +190,7 @@ const ExpandableThumb = ({
 
     Animated.spring(scaleValue, {
       toValue: 1,
-      useNativeDriver: true,
+      useNativeDriver: true
     }).start()
   }
 
@@ -215,8 +213,7 @@ const ExpandableThumb = ({
 
     const commentsCount = item.commentsCount || 0
     const watchersCount = item.watchersCount || 0
-    const hasLastComment =
-      item.lastComment && item.lastComment.trim().length > 0
+    const hasLastComment = item.lastComment && item.lastComment.trim().length > 0
 
     // Only show comment overlay if there are actual comments, watchers, or last comment
     if (!hasLastComment && commentsCount === 0 && watchersCount === 0) {
@@ -226,11 +223,7 @@ const ExpandableThumb = ({
     return (
       <View style={commentStyles.commentOverlay}>
         {hasLastComment && (
-          <Text
-            style={commentStyles.commentText}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
+          <Text style={commentStyles.commentText} numberOfLines={2} ellipsizeMode="tail">
             {item.lastComment}
           </Text>
         )}
@@ -239,20 +232,14 @@ const ExpandableThumb = ({
             {commentsCount > 0 && (
               <View style={commentStyles.commentStatItem}>
                 <FontAwesome name="comment" size={12} color="#4FC3F7" />
-                <Text style={commentStyles.commentStatText}>
-                  {commentsCount}
-                </Text>
+                <Text style={commentStyles.commentStatText}>{commentsCount}</Text>
               </View>
             )}
-            {watchersCount > 0 && commentsCount > 0 && (
-              <View style={{ width: 12 }} />
-            )}
+            {watchersCount > 0 && commentsCount > 0 && <View style={{ width: 12 }} />}
             {watchersCount > 0 && (
               <View style={commentStyles.commentStatItem}>
                 <AntDesign name="star" size={12} color="#FFD700" />
-                <Text style={commentStyles.commentStatText}>
-                  {watchersCount}
-                </Text>
+                <Text style={commentStyles.commentStatText}>{watchersCount}</Text>
               </View>
             )}
           </View>
@@ -267,7 +254,7 @@ const ExpandableThumb = ({
         position: 'relative',
         overflow: 'hidden',
         borderRadius: 20,
-        flex: 1,
+        flex: 1
       }}
     >
       <CachedImage
@@ -276,7 +263,7 @@ const ExpandableThumb = ({
         style={{
           width: thumbWidth,
           height: thumbHeight,
-          borderRadius: 20,
+          borderRadius: 20
         }}
         resizeMode="cover"
       />
@@ -287,9 +274,7 @@ const ExpandableThumb = ({
   const renderExpandedPhoto = () => {
     // CRITICAL: Only use stored original dimensions, NEVER item.width/height
     if (!originalDimensions.current) {
-      console.error(
-        `❌ ExpandableThumb: No original dimensions stored for photo ${item.id}!`,
-      )
+      console.error(`❌ ExpandableThumb: No original dimensions stored for photo ${item.id}!`)
       return null
     }
 
@@ -297,7 +282,7 @@ const ExpandableThumb = ({
     const cleanPhoto = {
       ...item,
       width: originalDimensions.current.width,
-      height: originalDimensions.current.height,
+      height: originalDimensions.current.height
     }
 
     // Register minimize callback for close button
@@ -342,10 +327,7 @@ const ExpandableThumb = ({
               }
 
               // After height is known, ensure the full ImageView is visible
-              if (
-                typeof onRequestEnsureVisible === 'function' &&
-                containerRef.current
-              ) {
+              if (typeof onRequestEnsureVisible === 'function' && containerRef.current) {
                 // If suppression window is active for this photo (e.g., recognition toggle), skip scrolling
                 const until = global.suppressEnsureVisibleUntil?.get?.(item.id)
                 if (typeof until === 'number' && Date.now() < until) {
@@ -381,7 +363,7 @@ const ExpandableThumb = ({
         alignSelf: isExpanded ? 'center' : 'auto',
         zIndex: isExpanded ? 1000 : 1,
         // For expanded photos, use flex layout to grow to content
-        ...(isExpanded && { flex: 1, height: undefined }),
+        ...(isExpanded && { flex: 1, height: undefined })
       }}
     >
       <TouchableOpacity
@@ -408,13 +390,13 @@ const ExpandableThumb = ({
               shadowColor: '#000',
               shadowOffset: {
                 width: 0,
-                height: 4,
+                height: 4
               },
               shadowOpacity: 0.4,
               shadowRadius: 6,
               // Shadow property for Android
-              elevation: 8,
-            },
+              elevation: 8
+            }
           ]}
         >
           {isExpanded ? renderExpandedPhoto() : renderCollapsedThumb()}
@@ -432,7 +414,7 @@ const ExpandableThumb = ({
                 width: 30,
                 height: 30,
                 justifyContent: 'center',
-                alignItems: 'center',
+                alignItems: 'center'
               }}
             >
               <Ionicons name="play" size={16} color="white" />
@@ -459,7 +441,7 @@ ExpandableThumb.propTypes = {
   onUpdateDimensions: PropTypes.func,
   updatePhotoHeight: PropTypes.func,
   onRequestEnsureVisible: PropTypes.func,
-  onTriggerSearch: PropTypes.func,
+  onTriggerSearch: PropTypes.func
 }
 
 ExpandableThumb.displayName = 'ExpandableThumb'

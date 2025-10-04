@@ -46,14 +46,8 @@ export const TRANSPARENT_BUTTON_COLOR = 'rgba(200, 200, 200, 0.8)'
 export const TRANSPARENT_ICONS_COLOR = 'rgba(10,10,10,.5)'
 
 // Build absolute URIs using Paths.document (new FileSystem API)
-export const PENDING_UPLOADS_FOLDER = new FSDirectory(
-  Paths.document,
-  'pendingUploads',
-)
-export const PENDING_UPLOADS_FOLDER_CHAT = new FSDirectory(
-  Paths.document,
-  'pendingUploadsChat',
-)
+export const PENDING_UPLOADS_FOLDER = new FSDirectory(Paths.document, 'pendingUploads')
+export const PENDING_UPLOADS_FOLDER_CHAT = new FSDirectory(Paths.document, 'pendingUploadsChat')
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
 export const PENDING_UPLOADS_KEY = 'PENDING_UPLOADS'
 export const PENDING_CHAT_UPLOADS_KEY = 'PENDING_CHAT_UPLOADS'
@@ -65,9 +59,9 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      'X-Api-Key': token,
+      'X-Api-Key': token
       // authorization: token,
-    },
+    }
   }
 })
 // const authLinkRealTime = setContext((_, { headers }) => {
@@ -83,7 +77,7 @@ const authLink = setContext((_, { headers }) => {
 // })
 
 const httpLink = new HttpLink({
-  uri: API_URI,
+  uri: API_URI
 })
 
 // const wsLink = new WebSocketLink({
@@ -110,7 +104,7 @@ const httpLink = new HttpLink({
 export const gqlClient = new ApolloClient({
   // link,
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache()
 })
 // console.log({ API_URI }, { API_KEY })
 

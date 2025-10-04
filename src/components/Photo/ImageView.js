@@ -26,9 +26,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   // Use the provided containerWidth without extra shrink to avoid whitespace
   const imageWidth = baseWidth
   const imageHeight =
-    photo && photo.width && photo.height
-      ? (photo.height * imageWidth) / photo.width
-      : 300 // Fallback height if dimensions not available
+    photo && photo.width && photo.height ? (photo.height * imageWidth) / photo.width : 300 // Fallback height if dimensions not available
 
   // Debug logging for shared photo details
   if (!embedded) {
@@ -40,14 +38,14 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
       photoHeight: photo?.height,
       imageWidth,
       imageHeight,
-      embedded,
+      embedded
     })
   }
 
   const onPinchEvent = (event) => {
     router.push({
       pathname: '/pinch',
-      params: { photo: JSON.stringify(photo) },
+      params: { photo: JSON.stringify(photo) }
     })
   }
 
@@ -55,7 +53,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
     if (event.nativeEvent.state === State.ACTIVE) {
       router.push({
         pathname: '/pinch',
-        params: { photo: JSON.stringify(photo) },
+        params: { photo: JSON.stringify(photo) }
       })
     }
   }
@@ -67,7 +65,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
     left: 0,
     width: '100%',
     height: '100%',
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
     // maxWidth: containerWidth || screenWidth, // Ensure it doesn't exceed container width
   }
 
@@ -76,7 +74,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
     height: imageHeight,
     borderRadius: 0,
     overflow: 'hidden',
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   }
 
   return (
@@ -84,7 +82,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
       <Animated.View style={imageContainerStyle} resizeMode="contain">
         <CachedImage
           source={{
-            uri: `${photo.imgUrl}`,
+            uri: `${photo.imgUrl}`
             // expiresIn: 5, // seconds. This field is optional
           }}
           cacheKey={`${photo.id}`}
@@ -93,7 +91,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
         />
         <CachedImage
           source={{
-            uri: `${photo.thumbUrl}`,
+            uri: `${photo.thumbUrl}`
             // next field is optional, if not set -- will never expire and will be managed by the OS
             // expiresIn: 2_628_288, // 1 month in seconds
           }}
@@ -105,7 +103,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
               size="small"
               style={{
                 flex: 1,
-                justifyContent: 'center',
+                justifyContent: 'center'
               }}
             />
           }
@@ -120,7 +118,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
 ImageView.propTypes = {
   photo: PropTypes.object.isRequired,
   containerWidth: PropTypes.number,
-  embedded: PropTypes.bool,
+  embedded: PropTypes.bool
 }
 
 export default ImageView

@@ -6,13 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import * as MediaLibrary from 'expo-media-library'
 import moment from 'moment'
-import {
-  Bubble,
-  GiftedChat,
-  InputToolbar,
-  Send,
-  Time,
-} from 'react-native-gifted-chat'
+import { Bubble, GiftedChat, InputToolbar, Send, Time } from 'react-native-gifted-chat'
 // import { v4 as uuidv4 } from 'uuid' // Replace with Expo Crypto
 
 import * as Crypto from 'expo-crypto'
@@ -30,7 +24,7 @@ import {
   Text,
   TextInput,
   // ScrollView,
-  View,
+  View
 } from 'react-native'
 
 import * as Haptics from 'expo-haptics'
@@ -39,17 +33,16 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler'
 // import * as FileSystem from 'expo-file-system'
 import Toast from 'react-native-toast-message'
 
-import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
-
 import {
   FontAwesome,
   // Ionicons,
-  MaterialCommunityIcons,
+  MaterialCommunityIcons
 } from '@expo/vector-icons'
 
 import { gql } from '@apollo/client'
 
 import PropTypes from 'prop-types'
+import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 
 import * as reducer from './reducer'
 
@@ -98,8 +91,8 @@ const Chat = ({ route }) => {
   const goBack = async () => {
     setFriendsList(
       await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
-      }),
+        uuid
+      })
     )
 
     router.replace('/friends')
@@ -126,7 +119,7 @@ const Chat = ({ route }) => {
           toValue: 0,
           useNativeDriver: true,
           tension: 100,
-          friction: 8,
+          friction: 8
         }).start()
       } else {
         // Close the swipe action
@@ -134,7 +127,7 @@ const Chat = ({ route }) => {
           toValue: 0,
           useNativeDriver: true,
           tension: 100,
-          friction: 8,
+          friction: 8
         }).start()
       }
     }
@@ -161,15 +154,14 @@ const Chat = ({ route }) => {
               // Remove the friend which will also delete the chat
               const success = await friendsHelper.removeFriend({
                 uuid,
-                friendshipUuid,
+                friendshipUuid
               })
 
               if (success) {
                 // Refresh the friends list
-                const newFriendsList =
-                  await friendsHelper.getEnhancedListOfFriendships({
-                    uuid,
-                  })
+                const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
+                  uuid
+                })
                 setFriendsList(newFriendsList)
 
                 Toast.show({
@@ -179,7 +171,7 @@ const Chat = ({ route }) => {
                   text2: 'All messages have been deleted',
                   visibilityTime: 2000,
                   autoHide: true,
-                  topOffset: toastTopOffset,
+                  topOffset: toastTopOffset
                 })
 
                 // Navigate back to friends list
@@ -192,7 +184,7 @@ const Chat = ({ route }) => {
                   text2: 'Please try again',
                   visibilityTime: 3000,
                   autoHide: true,
-                  topOffset: toastTopOffset,
+                  topOffset: toastTopOffset
                 })
               }
             } catch (error) {
@@ -203,12 +195,12 @@ const Chat = ({ route }) => {
                 text2: 'Please try again',
                 visibilityTime: 3000,
                 autoHide: true,
-                topOffset: toastTopOffset,
+                topOffset: toastTopOffset
               })
             }
-          },
-        },
-      ],
+          }
+        }
+      ]
     )
   }
 
@@ -230,10 +222,7 @@ const Chat = ({ route }) => {
       const messagesList = (
         await CONST.gqlClient.query({
           query: gql`
-            query getMessagesList(
-              $chatUuid: String!
-              $lastLoaded: AWSDateTime!
-            ) {
+            query getMessagesList($chatUuid: String!, $lastLoaded: AWSDateTime!) {
               getMessagesList(chatUuid: $chatUuid, lastLoaded: $lastLoaded) {
                 uuid
                 messageUuid
@@ -247,8 +236,8 @@ const Chat = ({ route }) => {
           `,
           variables: {
             chatUuid,
-            lastLoaded,
-          },
+            lastLoaded
+          }
           // fetchPolicy: "network-only",
         })
       ).data.getMessagesList
@@ -262,14 +251,14 @@ const Chat = ({ route }) => {
           name: friendsHelper.getLocalContactName({
             uuid,
             friendUuid: message.uuid,
-            friendsList,
-          }),
+            friendsList
+          })
           // avatar: 'https://placeimg.com/140/140/any',
         },
         image: message?.chatPhotoHash
           ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
           : null,
-        chatPhotoHash: message?.chatPhotoHash,
+        chatPhotoHash: message?.chatPhotoHash
       }))
     } catch (e) {
       console.log('failed to load messages: ', { e })
@@ -277,7 +266,7 @@ const Chat = ({ route }) => {
         text1: `Failed to load messages:`,
         text2: `${e}`,
         type: 'error',
-        topOffset: toastTopOffset,
+        topOffset: toastTopOffset
       })
       // console.log({ e })
       return []
@@ -322,7 +311,7 @@ const Chat = ({ route }) => {
     })()
 
     CONST.makeSureDirectoryExists({
-      directory: CONST.PENDING_UPLOADS_FOLDER_CHAT,
+      directory: CONST.PENDING_UPLOADS_FOLDER_CHAT
     })
   }, [chatUuid, uuid]) // Added dependencies to re-run when chat changes
 
@@ -345,8 +334,8 @@ const Chat = ({ route }) => {
         }
       `,
       variables: {
-        chatUuid,
-      },
+        chatUuid
+      }
     })
     // console.log({ observableObject })
     const subscriptionParameters = {
@@ -380,14 +369,14 @@ const Chat = ({ route }) => {
                   name: friendsHelper.getLocalContactName({
                     uuid,
                     friendUuid: onSendMessage.uuid,
-                    friendsList,
-                  }),
+                    friendsList
+                  })
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
                 image: onSendMessage?.chatPhotoHash
                   ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb`
                   : '',
-                chatPhotoHash: onSendMessage?.chatPhotoHash || '',
+                chatPhotoHash: onSendMessage?.chatPhotoHash || ''
               }
             }
             return message
@@ -397,7 +386,7 @@ const Chat = ({ route }) => {
           if (
             updatedMessages.find(
               // eslint-disable-next-line no-underscore-dangle
-              (message) => message._id === onSendMessage.messageUuid,
+              (message) => message._id === onSendMessage.messageUuid
             ) === undefined
           ) {
             // console.log({ onSendMessage })
@@ -412,16 +401,16 @@ const Chat = ({ route }) => {
                   name: friendsHelper.getLocalContactName({
                     uuid,
                     friendUuid: onSendMessage.uuid,
-                    friendsList,
-                  }),
+                    friendsList
+                  })
                   // avatar: 'https://placeimg.com/140/140/any',
                 },
                 image: onSendMessage?.chatPhotoHash
                   ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb`
                   : '',
-                chatPhotoHash: onSendMessage?.chatPhotoHash || '',
+                chatPhotoHash: onSendMessage?.chatPhotoHash || ''
               },
-              ...updatedMessages,
+              ...updatedMessages
             ]
           } // if this is the new message
           // console.log({ updatedMessages })
@@ -438,10 +427,10 @@ const Chat = ({ route }) => {
           // text2: 'You may want to leave this screen and come back to it again, to make it work.',
           text2: JSON.stringify({ error }),
           type: 'error',
-          topOffset: toastTopOffset,
+          topOffset: toastTopOffset
         })
         console.log(
-          '------------------------- this is the whole new begining --------------------------------------',
+          '------------------------- this is the whole new begining --------------------------------------'
         )
         // eslint-disable-next-line no-use-before-define
         subscription.unsubscribe()
@@ -450,7 +439,7 @@ const Chat = ({ route }) => {
       },
       complete() {
         console.log('observableObject:: subs. DONE')
-      }, // never printed
+      } // never printed
     }
     // console.log({ observableObject })
     // console.log(Object.entries(observableObject))
@@ -488,16 +477,16 @@ const Chat = ({ route }) => {
                     name: friendsHelper.getLocalContactName({
                       uuid,
                       friendUuid: uuid,
-                      friendsList,
-                    }),
+                      friendsList
+                    })
                     // avatar: 'https://placeimg.com/140/140/any',
                   },
                   image: message?.chatPhotoHash
                     ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
                     : null,
-                  chatPhotoHash: message?.chatPhotoHash,
-                },
-              ]),
+                  chatPhotoHash: message?.chatPhotoHash
+                }
+              ])
             )
 
             const returnedMessage = await reducer.sendMessage({
@@ -506,7 +495,7 @@ const Chat = ({ route }) => {
               messageUuid,
               text,
               pending: false,
-              chatPhotoHash: '',
+              chatPhotoHash: ''
             })
           } catch (e) {
             console.log('failed to send message: ', { e })
@@ -514,7 +503,7 @@ const Chat = ({ route }) => {
               text1: `Failed to send message:`,
               text2: `${e}`,
               type: 'error',
-              topOffset: toastTopOffset,
+              topOffset: toastTopOffset
             })
           }
         })()
@@ -523,14 +512,14 @@ const Chat = ({ route }) => {
       setText('')
       console.log('Message sent and input cleared')
     },
-    [chatUuid, uuid, friendsList, toastTopOffset],
+    [chatUuid, uuid, friendsList, toastTopOffset]
   )
 
   const createStyles = (theme) =>
     StyleSheet.create({
       container: {
         flex: 1,
-        backgroundColor: theme.BACKGROUND,
+        backgroundColor: theme.BACKGROUND
       },
       deleteAction: {
         position: 'absolute',
@@ -541,18 +530,18 @@ const Chat = ({ route }) => {
         backgroundColor: theme.STATUS_ERROR,
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: -1,
+        zIndex: -1
       },
       deleteActionText: {
         color: 'white',
         fontSize: 14,
         fontWeight: '600',
-        marginTop: 4,
+        marginTop: 4
       },
       chatContainer: {
         flex: 1,
-        backgroundColor: theme.BACKGROUND,
-      },
+        backgroundColor: theme.BACKGROUND
+      }
     })
 
   const styles = createStyles(theme)
@@ -562,7 +551,7 @@ const Chat = ({ route }) => {
       <View
         style={{
           justifyContent: 'center',
-          alignItems: 'center',
+          alignItems: 'center'
         }}
       >
         <MaterialCommunityIcons
@@ -571,7 +560,7 @@ const Chat = ({ route }) => {
           style={{
             marginRight: 10,
             marginBottom: 10,
-            color: theme.STATUS_SUCCESS,
+            color: theme.STATUS_SUCCESS
           }}
         />
       </View>
@@ -593,7 +582,7 @@ const Chat = ({ route }) => {
         maxHeight: 100,
         flex: 1,
         marginHorizontal: 8,
-        marginVertical: 8,
+        marginVertical: 8
       }}
       placeholder="Type a message..."
       placeholderTextColor={theme.TEXT_MUTED}
@@ -609,7 +598,7 @@ const Chat = ({ route }) => {
       style={{
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
       }}
     >
       <ActivityIndicator size="large" color={theme.STATUS_SUCCESS} />
@@ -633,11 +622,9 @@ const Chat = ({ route }) => {
 
     const earlierMessages = await loadMessages({
       chatUuid,
-      lastLoaded: lastMessage.createdAt,
+      lastLoaded: lastMessage.createdAt
     })
-    setMessages((previousMessages) =>
-      GiftedChat.prepend(previousMessages, earlierMessages),
-    )
+    setMessages((previousMessages) => GiftedChat.prepend(previousMessages, earlierMessages))
     // setMessages([(await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })), ...messages])
 
     // setLastRead(earlierMessages[0].createdAt)
@@ -651,7 +638,7 @@ const Chat = ({ route }) => {
         padding: 16,
         backgroundColor: theme.CARD_BACKGROUND,
         borderTopWidth: 1,
-        borderTopColor: theme.CARD_BORDER,
+        borderTopColor: theme.CARD_BORDER
       }}
     >
       <View />
@@ -661,7 +648,7 @@ const Chat = ({ route }) => {
         style={{
           // marginRight: 10,
           // marginBottom: 10,
-          color: theme.STATUS_SUCCESS,
+          color: theme.STATUS_SUCCESS
         }}
         // eslint-disable-next-line no-use-before-define
         onPress={async () => takePhoto()}
@@ -672,7 +659,7 @@ const Chat = ({ route }) => {
         style={{
           // marginRight: 10,
           // marginBottom: 10,
-          color: theme.STATUS_SUCCESS,
+          color: theme.STATUS_SUCCESS
         }}
         // eslint-disable-next-line no-use-before-define
         onPress={async () => pickAsset()}
@@ -683,11 +670,11 @@ const Chat = ({ route }) => {
 
   const uploadAsset = async ({ uri }) => {
     const fileContents = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: FileSystem.EncodingType.Base64
     })
     const chatPhotoHash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
-      fileContents,
+      fileContents
     )
     console.log('photoHash: ', chatPhotoHash)
 
@@ -707,14 +694,14 @@ const Chat = ({ route }) => {
             name: friendsHelper.getLocalContactName({
               uuid,
               friendUuid: uuid,
-              friendsList,
-            }),
+              friendsList
+            })
             // avatar: 'https://placeimg.com/140/140/any',
           },
           image: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb`,
-          chatPhotoHash,
-        },
-      ]),
+          chatPhotoHash
+        }
+      ])
     )
 
     const returnedMessage = await reducer.sendMessage({
@@ -723,15 +710,14 @@ const Chat = ({ route }) => {
       messageUuid,
       text: '',
       pending: true,
-      chatPhotoHash,
+      chatPhotoHash
     })
 
     reducer.uploadPendingPhotos({ chatUuid, uuid, topOffset: toastTopOffset })
   }
 
   const pickAsset = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync()
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
 
     if (permissionResult.granted === false) {
       Alert.alert(
@@ -742,9 +728,9 @@ const Chat = ({ route }) => {
             text: 'Open Settings',
             onPress: () => {
               Linking.openSettings()
-            },
-          },
-        ],
+            }
+          }
+        ]
       )
       return
     }
@@ -767,9 +753,9 @@ const Chat = ({ route }) => {
             text: 'Open Settings',
             onPress: () => {
               Linking.openSettings()
-            },
-          },
-        ],
+            }
+          }
+        ]
       )
       return
     }
@@ -778,7 +764,7 @@ const Chat = ({ route }) => {
       mediaTypes: ['images'],
       // allowsEditing: true,
       quality: 1.0,
-      exif: true,
+      exif: true
     })
 
     if (cameraReturn.canceled === true) {
@@ -811,8 +797,8 @@ const Chat = ({ route }) => {
             style={[
               styles.chatContainer,
               {
-                transform: [{ translateX }],
-              },
+                transform: [{ translateX }]
+              }
             ]}
           >
             <GiftedChat
@@ -820,7 +806,7 @@ const Chat = ({ route }) => {
               // eslint-disable-next-line no-shadow
               onSend={(messages) => onSend(messages)}
               user={{
-                _id: uuid,
+                _id: uuid
               }}
               text={text}
               onInputTextChanged={handleTextChange}
@@ -848,7 +834,7 @@ const Chat = ({ route }) => {
                 marginHorizontal: 0,
                 marginVertical: 4,
                 flex: 1,
-                minHeight: 40,
+                minHeight: 40
               }}
               inputToolbarStyle={{
                 backgroundColor: theme.BACKGROUND,
@@ -856,14 +842,14 @@ const Chat = ({ route }) => {
                 borderTopWidth: 1,
                 paddingVertical: 8,
                 paddingHorizontal: 12,
-                minHeight: 60,
+                minHeight: 60
               }}
               textInputProps={{
                 placeholderTextColor: theme.TEXT_SECONDARY,
                 autoFocus: false,
                 blurOnSubmit: false,
                 multiline: true,
-                numberOfLines: 4,
+                numberOfLines: 4
               }}
               inputToolbarProps={{
                 containerStyle: {
@@ -871,8 +857,8 @@ const Chat = ({ route }) => {
                   borderTopColor: theme.BORDER,
                   borderTopWidth: 1,
                   paddingVertical: 8,
-                  paddingHorizontal: 12,
-                },
+                  paddingHorizontal: 12
+                }
               }}
               placeholderTextColor={theme.TEXT_SECONDARY}
               // Message bubble styling for dark mode
@@ -881,21 +867,21 @@ const Chat = ({ route }) => {
                   {...props}
                   wrapperStyle={{
                     right: {
-                      backgroundColor: theme.STATUS_SUCCESS, // Sent messages
+                      backgroundColor: theme.STATUS_SUCCESS // Sent messages
                     },
                     left: {
                       backgroundColor: theme.CARD_BACKGROUND, // Received messages
                       borderColor: theme.CARD_BORDER,
-                      borderWidth: 1,
-                    },
+                      borderWidth: 1
+                    }
                   }}
                   textStyle={{
                     right: {
-                      color: '#FFFFFF', // White text on colored background
+                      color: '#FFFFFF' // White text on colored background
                     },
                     left: {
-                      color: theme.TEXT_PRIMARY, // Themed text color
-                    },
+                      color: theme.TEXT_PRIMARY // Themed text color
+                    }
                   }}
                 />
               )}
@@ -909,11 +895,11 @@ const Chat = ({ route }) => {
                     borderTopWidth: 1,
                     paddingVertical: 8,
                     paddingHorizontal: 12,
-                    minHeight: 60,
+                    minHeight: 60
                   }}
                   primaryStyle={{
                     alignItems: 'center',
-                    flex: 1,
+                    flex: 1
                   }}
                 />
               )}
@@ -923,11 +909,11 @@ const Chat = ({ route }) => {
                   {...props}
                   timeTextStyle={{
                     right: {
-                      color: 'rgba(255, 255, 255, 0.7)', // Light text on sent messages
+                      color: 'rgba(255, 255, 255, 0.7)' // Light text on sent messages
                     },
                     left: {
-                      color: theme.TEXT_SECONDARY, // Themed text for received messages
-                    },
+                      color: theme.TEXT_SECONDARY // Themed text for received messages
+                    }
                   }}
                 />
               )}
@@ -937,7 +923,7 @@ const Chat = ({ route }) => {
                 maxToRenderPerBatch: 10,
                 windowSize: 15,
                 updateCellsBatchingPeriod: 50,
-                removeClippedSubviews: true,
+                removeClippedSubviews: true
               }}
             />
           </Animated.View>
@@ -948,7 +934,7 @@ const Chat = ({ route }) => {
 }
 
 Chat.propTypes = {
-  route: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired
 }
 
 export default Chat

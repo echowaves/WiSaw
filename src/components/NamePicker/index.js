@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   useWindowDimensions,
-  View,
+  View
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -22,21 +22,11 @@ import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
 
 import { isDarkMode as isDarkModeAtom } from '../../state'
-import {
-  getTheme,
-  getThemedStyles,
-  SHARED_STYLES,
-} from '../../theme/sharedStyles'
+import { getTheme, getThemedStyles, SHARED_STYLES } from '../../theme/sharedStyles'
 import AppHeader from '../AppHeader'
 import Button from '../ui/Button'
 
-const NamePicker = ({
-  show,
-  setShow,
-  setContactName,
-  headerText,
-  friendshipUuid,
-}) => {
+const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid }) => {
   const { height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const [isDarkMode] = useAtom(isDarkModeAtom)
@@ -54,15 +44,15 @@ const NamePicker = ({
   const createStyles = (currentTheme) =>
     StyleSheet.create({
       container: {
-        ...themedStyles.containers.main,
+        ...themedStyles.containers.main
       },
       headerTitle: {
-        ...SHARED_STYLES.header.title,
+        ...SHARED_STYLES.header.title
       },
       contentContainer: {
         flex: 1,
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 16
       },
       iconContainer: {
         alignSelf: 'center',
@@ -74,20 +64,20 @@ const NamePicker = ({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: currentTheme.INTERACTIVE_BORDER,
+        borderColor: currentTheme.INTERACTIVE_BORDER
       },
       titleText: {
         ...themedStyles.text.heading,
         fontSize: 24,
         textAlign: 'center',
-        marginBottom: 12,
+        marginBottom: 12
       },
       subtitleText: {
         ...themedStyles.text.secondary,
         fontSize: 16,
         textAlign: 'center',
         lineHeight: 24,
-        marginBottom: 40,
+        marginBottom: 40
       },
       inputContainer: {
         backgroundColor: currentTheme.CARD_BACKGROUND,
@@ -98,18 +88,18 @@ const NamePicker = ({
         shadowColor: currentTheme.CARD_SHADOW,
         shadowOffset: {
           width: 0,
-          height: 2,
+          height: 2
         },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-        elevation: 4,
+        elevation: 4
       },
       textInput: {
         ...themedStyles.text.primary,
         fontSize: 18,
         padding: 20,
         textAlign: 'center',
-        fontWeight: '500',
+        fontWeight: '500'
       },
       characterCount: {
         position: 'absolute',
@@ -117,29 +107,28 @@ const NamePicker = ({
         right: 16,
         color: currentTheme.TEXT_SECONDARY,
         fontSize: 12,
-        fontWeight: '400',
+        fontWeight: '400'
       },
       buttonContainer: {
-        ...(themedStyles.interactive.buttonContainer ||
-          SHARED_STYLES.interactive.buttonContainer),
+        ...(themedStyles.interactive.buttonContainer || SHARED_STYLES.interactive.buttonContainer)
       },
       saveButton: {
         ...SHARED_STYLES.interactive.primaryButton,
-        backgroundColor: currentTheme.STATUS_SUCCESS, // Use theme color for better dark mode support
+        backgroundColor: currentTheme.STATUS_SUCCESS // Use theme color for better dark mode support
       },
       saveButtonTitle: {
         ...SHARED_STYLES.interactive.primaryButtonTitle,
-        color: '#FFFFFF', // Ensure white text on colored background
+        color: '#FFFFFF' // Ensure white text on colored background
       },
       cancelButton: {
         ...SHARED_STYLES.interactive.secondaryButton,
         backgroundColor: currentTheme.INTERACTIVE_BACKGROUND,
-        borderColor: currentTheme.INTERACTIVE_BORDER,
+        borderColor: currentTheme.INTERACTIVE_BORDER
       },
       cancelButtonTitle: {
         ...SHARED_STYLES.interactive.secondaryButtonTitle,
-        color: currentTheme.TEXT_PRIMARY,
-      },
+        color: currentTheme.TEXT_PRIMARY
+      }
     })
 
   const styles = createStyles(theme)
@@ -154,12 +143,12 @@ const NamePicker = ({
           // Editing an existing friend
           await setContactName({
             friendshipUuid,
-            contactName: inputText.trim(),
+            contactName: inputText.trim()
           })
         } else {
           // Adding a new friend - just pass the contact name
           await setContactName({
-            contactName: inputText.trim(),
+            contactName: inputText.trim()
           })
         }
         await setShow(false)
@@ -188,12 +177,7 @@ const NamePicker = ({
   }, [show])
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={false}
-      visible={show}
-      presentationStyle="fullScreen"
-    >
+    <Modal animationType="slide" transparent={false} visible={show} presentationStyle="fullScreen">
       <View style={styles.container}>
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
@@ -223,17 +207,13 @@ const NamePicker = ({
               disabled={!inputText.trim() || isSaving}
               style={[
                 SHARED_STYLES.interactive.headerButton,
-                { opacity: inputText.trim() && !isSaving ? 1 : 0.6 },
+                { opacity: inputText.trim() && !isSaving ? 1 : 0.6 }
               ]}
             >
               <Ionicons
                 name="checkmark"
                 size={24}
-                color={
-                  inputText.trim() && !isSaving
-                    ? theme.TEXT_PRIMARY
-                    : theme.TEXT_DISABLED
-                }
+                color={inputText.trim() && !isSaving ? theme.TEXT_PRIMARY : theme.TEXT_DISABLED}
               />
             </TouchableOpacity>
           }
@@ -242,10 +222,7 @@ const NamePicker = ({
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={[
-            styles.contentContainer,
-            { paddingBottom: insets.bottom + 20 },
-          ]}
+          contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           contentInsetAdjustmentBehavior="automatic"
@@ -254,18 +231,12 @@ const NamePicker = ({
             <View style={{ flex: 1 }}>
               {/* Icon */}
               <View style={styles.iconContainer}>
-                <FontAwesome5
-                  name="users"
-                  size={32}
-                  color={theme.TEXT_PRIMARY}
-                />
+                <FontAwesome5 name="users" size={32} color={theme.TEXT_PRIMARY} />
               </View>
 
               {/* Title and Subtitle */}
               <Text style={styles.titleText}>
-                {friendshipUuid
-                  ? "Update your friend's name"
-                  : "What's your friend's name?"}
+                {friendshipUuid ? "Update your friend's name" : "What's your friend's name?"}
               </Text>
               <Text style={styles.subtitleText}>
                 {headerText ||
@@ -287,9 +258,7 @@ const NamePicker = ({
                   returnKeyType="done"
                   onSubmitEditing={handleSave}
                 />
-                <Text style={styles.characterCount}>
-                  {50 - inputText.length}
-                </Text>
+                <Text style={styles.characterCount}>{50 - inputText.length}</Text>
               </View>
 
               {/* Action Buttons */}
@@ -338,7 +307,7 @@ NamePicker.propTypes = {
   setShow: PropTypes.func.isRequired,
   setContactName: PropTypes.func.isRequired,
   headerText: PropTypes.string,
-  friendshipUuid: PropTypes.string,
+  friendshipUuid: PropTypes.string
 }
 
 export default NamePicker

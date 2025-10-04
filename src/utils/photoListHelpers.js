@@ -13,28 +13,28 @@ const withDevMutationGuards = (target) =>
   new Proxy(target, {
     set(proxyTarget, property, value) {
       console.error(
-        `🚨 MUTATION DETECTED: Attempted to set ${String(property)} = ${value} on protected photo ${proxyTarget.id}`,
+        `🚨 MUTATION DETECTED: Attempted to set ${String(property)} = ${value} on protected photo ${proxyTarget.id}`
       )
       console.error(
-        `🚨 Current photo state: width=${proxyTarget.width}, height=${proxyTarget.height}`,
+        `🚨 Current photo state: width=${proxyTarget.width}, height=${proxyTarget.height}`
       )
       console.trace('Mutation call stack:')
       return false
     },
     defineProperty(proxyTarget, property) {
       console.error(
-        `🚨 PROPERTY DEFINITION DETECTED: Attempted to define ${String(property)} on protected photo ${proxyTarget.id}`,
+        `🚨 PROPERTY DEFINITION DETECTED: Attempted to define ${String(property)} on protected photo ${proxyTarget.id}`
       )
       console.trace('Property definition call stack:')
       return false
     },
     deleteProperty(proxyTarget, property) {
       console.error(
-        `🚨 DELETE PROPERTY DETECTED: Attempted to delete ${String(property)} on protected photo ${proxyTarget.id}`,
+        `🚨 DELETE PROPERTY DETECTED: Attempted to delete ${String(property)} on protected photo ${proxyTarget.id}`
       )
       console.trace('Delete call stack:')
       return false
-    },
+    }
   })
 
 const createReadOnlyShape = (photo) => {
@@ -49,7 +49,7 @@ const createReadOnlyShape = (photo) => {
   const sanitized = {
     ...photo,
     width: coerceNumber(photo.width),
-    height: coerceNumber(photo.height),
+    height: coerceNumber(photo.height)
   }
 
   Object.defineProperties(sanitized, {
@@ -57,18 +57,18 @@ const createReadOnlyShape = (photo) => {
       value: sanitized.width,
       writable: false,
       configurable: false,
-      enumerable: true,
+      enumerable: true
     },
     height: {
       value: sanitized.height,
       writable: false,
       configurable: false,
-      enumerable: true,
+      enumerable: true
     },
     [READONLY_PHOTO_FLAG]: {
       value: true,
-      enumerable: false,
-    },
+      enumerable: false
+    }
   })
 
   return sanitized
@@ -95,7 +95,7 @@ export const createFrozenPhoto = (photo) => {
   if (__DEV__) {
     if (photo.height !== originalHeight || photo.width !== originalWidth) {
       console.warn(
-        `🔍 Photo ${photo.id} dimensions changed during createFrozenPhoto: ${originalWidth}x${originalHeight} → ${photo.width}x${photo.height}`,
+        `🔍 Photo ${photo.id} dimensions changed during createFrozenPhoto: ${originalWidth}x${originalHeight} → ${photo.width}x${photo.height}`
       )
     }
 
@@ -119,7 +119,7 @@ export const calculatePhotoDimensions = (
   isExpanded,
   screenWidth,
   maxItemsPerRow = 4,
-  spacing = 5,
+  spacing = 5
 ) => {
   // Removed debug logging to reduce console noise
 
@@ -129,19 +129,17 @@ export const calculatePhotoDimensions = (
     const availableWidth = screenWidth - totalSpacing
     const collapsedWidth = availableWidth / maxItemsPerRow
 
-    const aspectRatio =
-      photo.width && photo.height ? photo.width / photo.height : 1
+    const aspectRatio = photo.width && photo.height ? photo.width / photo.height : 1
 
     return {
       width: collapsedWidth,
-      height: collapsedWidth / aspectRatio,
+      height: collapsedWidth / aspectRatio
     }
   }
 
   // For expanded state, let flex layout handle the height dynamically
   // Return initial image dimensions and let the Photo component size itself
-  const aspectRatio =
-    photo.width && photo.height ? photo.width / photo.height : 1
+  const aspectRatio = photo.width && photo.height ? photo.width / photo.height : 1
   const expandedWidth = screenWidth
   const imageHeight = expandedWidth / aspectRatio
 
@@ -149,7 +147,7 @@ export const calculatePhotoDimensions = (
 
   return {
     width: expandedWidth,
-    height: imageHeight, // Initial height, but flex layout will adjust as needed
+    height: imageHeight // Initial height, but flex layout will adjust as needed
   }
 }
 
@@ -168,13 +166,12 @@ export const validateFrozenPhotosList = (photosList, context = '') => {
     // Object.isFrozen() returns false for Proxy objects even if target is frozen
     // So we rely on the internal marker and extensibility checks instead
     const isProtected =
-      Boolean(photo?.[READONLY_PHOTO_FLAG]) &&
-      Object.isExtensible(photo) === false
+      Boolean(photo?.[READONLY_PHOTO_FLAG]) && Object.isExtensible(photo) === false
 
     if (!isProtected) {
       console.warn(
         `🚨 Unfrozen photo detected ${context} at index ${index} (id: ${photo.id}). ` +
-          'This could lead to unauthorized mutations by third-party libraries.',
+          'This could lead to unauthorized mutations by third-party libraries.'
       )
     }
 
@@ -182,37 +179,37 @@ export const validateFrozenPhotosList = (photosList, context = '') => {
     if (typeof photo.width !== 'number' || typeof photo.height !== 'number') {
       console.warn(
         `📐 Photo at index ${index} (id: ${photo.id}) missing or invalid width/height properties`,
-        { width: photo.width, height: photo.height },
+        { width: photo.width, height: photo.height }
       )
     }
 
     // Check for NaN values
     if (isNaN(photo.width) || isNaN(photo.height)) {
-      console.warn(
-        `🔢 Photo at index ${index} (id: ${photo.id}) has NaN width/height values`,
-        { width: photo.width, height: photo.height },
-      )
+      console.warn(`🔢 Photo at index ${index} (id: ${photo.id}) has NaN width/height values`, {
+        width: photo.width,
+        height: photo.height
+      })
     }
 
     // Check for unexpected mutations (override properties should not exist on photo objects)
     if (photo.overrideWidth !== undefined) {
       console.warn(
         `⚠️ Photo at index ${index} (id: ${photo.id}) has overrideWidth property - dimensions should be calculated dynamically`,
-        { overrideWidth: photo.overrideWidth },
+        { overrideWidth: photo.overrideWidth }
       )
     }
 
     if (photo.overrideHeight !== undefined) {
       console.warn(
         `⚠️ Photo at index ${index} (id: ${photo.id}) has overrideHeight property - dimensions should be calculated dynamically`,
-        { overrideHeight: photo.overrideHeight },
+        { overrideHeight: photo.overrideHeight }
       )
     }
 
     if (photo.isExpanded !== undefined) {
       console.warn(
         `⚠️ Photo at index ${index} (id: ${photo.id}) has isExpanded property - expansion state should be stored separately`,
-        { isExpanded: photo.isExpanded },
+        { isExpanded: photo.isExpanded }
       )
     }
   })

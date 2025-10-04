@@ -44,11 +44,7 @@ export async function registerSecret({ secret, topOffset, nickName, uuid }) {
     const returnedSecret = (
       await CONST.gqlClient.mutate({
         mutation: gql`
-          mutation registerSecret(
-            $nickName: String!
-            $secret: String!
-            $uuid: String!
-          ) {
+          mutation registerSecret($nickName: String!, $secret: String!, $uuid: String!) {
             registerSecret(nickName: $nickName, secret: $secret, uuid: $uuid) {
               uuid
               nickName
@@ -58,8 +54,8 @@ export async function registerSecret({ secret, topOffset, nickName, uuid }) {
         variables: {
           nickName,
           secret,
-          uuid,
-        },
+          uuid
+        }
       })
     ).data.registerSecret
 
@@ -67,14 +63,11 @@ export async function registerSecret({ secret, topOffset, nickName, uuid }) {
     // console.log(returnedSecret.uuid)
     // console.log(returnedSecret.nickName)
 
-    await Promise.all([
-      storeUUID(returnedSecret.uuid),
-      storeNickName(returnedSecret.nickName),
-    ])
+    await Promise.all([storeUUID(returnedSecret.uuid), storeNickName(returnedSecret.nickName)])
 
     Toast.show({
       text1: 'Secret attached to this device.',
-      topOffset,
+      topOffset
     })
   } catch (err9) {
     console.log({ err9 })
@@ -82,19 +75,13 @@ export async function registerSecret({ secret, topOffset, nickName, uuid }) {
       text1: 'Unable to store Secret',
       text2: err9.toString(),
       type: 'error',
-      topOffset,
+      topOffset
     })
     throw err9
   }
 }
 
-export async function updateSecret({
-  nickName,
-  oldSecret,
-  secret,
-  uuid,
-  topOffset,
-}) {
+export async function updateSecret({ nickName, oldSecret, secret, uuid, topOffset }) {
   try {
     const updatedSecret = (
       await CONST.gqlClient.mutate({
@@ -105,12 +92,7 @@ export async function updateSecret({
             $newSecret: String!
             $uuid: String!
           ) {
-            updateSecret(
-              nickName: $nickName
-              secret: $secret
-              newSecret: $newSecret
-              uuid: $uuid
-            ) {
+            updateSecret(nickName: $nickName, secret: $secret, newSecret: $newSecret, uuid: $uuid) {
               uuid
               nickName
             }
@@ -120,19 +102,16 @@ export async function updateSecret({
           nickName,
           secret: oldSecret,
           newSecret: secret,
-          uuid,
-        },
+          uuid
+        }
       })
     ).data.updateSecret
 
-    await Promise.all([
-      storeUUID(updatedSecret.uuid),
-      storeNickName(updatedSecret.nickName),
-    ])
+    await Promise.all([storeUUID(updatedSecret.uuid), storeNickName(updatedSecret.nickName)])
 
     Toast.show({
       text1: 'Secret updated.',
-      topOffset,
+      topOffset
     })
   } catch (err10) {
     console.error({ err10 })
@@ -140,7 +119,7 @@ export async function updateSecret({
       text1: 'Unable to update Secret',
       text2: err10.toString(),
       type: 'error',
-      topOffset,
+      topOffset
     })
     throw err10
   }
@@ -151,7 +130,7 @@ export async function resetSecret({ topOffset }) {
   try {
     await Promise.all([
       SecureStore.deleteItemAsync(CONST.UUID_KEY),
-      SecureStore.deleteItemAsync(CONST.NICK_NAME_KEY),
+      SecureStore.deleteItemAsync(CONST.NICK_NAME_KEY)
     ])
     const uuid = await getUUID()
     await storeUUID(uuid)
@@ -163,7 +142,7 @@ export async function resetSecret({ topOffset }) {
       text1: 'Unable to reset Secret',
       text2: err11.toString(),
       type: 'error',
-      topOffset,
+      topOffset
     })
     throw err11
   }
@@ -178,7 +157,7 @@ const storeUUID = async (uuid) => {
     Toast.show({
       text1: 'Unable to store UUID',
       text2: err12.toString(),
-      type: 'error',
+      type: 'error'
     })
     throw err12
   }
@@ -201,7 +180,7 @@ export async function getUUID() {
       text1: 'Storage Access Issue',
       text2: 'Unable to load device ID, generating new one',
       type: 'error',
-      visibilityTime: 3000,
+      visibilityTime: 3000
     })
     uuid = null
   }
@@ -219,7 +198,7 @@ export async function getUUID() {
           text1: 'Storage Warning',
           text2: 'Device ID generated but may not persist',
           type: 'error',
-          visibilityTime: 4000,
+          visibilityTime: 4000
         })
       }
     }
@@ -236,7 +215,7 @@ const storeNickName = async (nickName) => {
     Toast.show({
       text1: 'Unable to store NickName',
       text2: err14.toString(),
-      type: 'error',
+      type: 'error'
     })
     throw err14
   }
@@ -258,7 +237,7 @@ export async function getStoredNickName() {
       text1: 'Nickname Loading Error',
       text2: 'Unable to load saved nickname',
       type: 'error',
-      visibilityTime: 3000,
+      visibilityTime: 3000
     })
   }
   return ''

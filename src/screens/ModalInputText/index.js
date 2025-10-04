@@ -2,14 +2,7 @@ import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 
-import {
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  useWindowDimensions,
-  View,
-} from 'react-native'
+import { StatusBar, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Ionicons } from '@expo/vector-icons'
@@ -42,7 +35,7 @@ const ModalInputText = ({ route }) => {
     StyleSheet.create({
       container: {
         flex: 1,
-        backgroundColor: currentTheme.BACKGROUND,
+        backgroundColor: currentTheme.BACKGROUND
       },
       photoContainer: {
         alignSelf: 'center',
@@ -52,12 +45,12 @@ const ModalInputText = ({ route }) => {
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.7,
         shadowRadius: 16,
-        elevation: 16,
+        elevation: 16
       },
       photoImage: {
         width: '100%',
         height: '100%',
-        borderRadius: 16,
+        borderRadius: 16
       },
       inputContainer: {
         marginHorizontal: 20,
@@ -71,18 +64,18 @@ const ModalInputText = ({ route }) => {
         shadowColor: currentTheme.CARD_SHADOW,
         shadowOffset: {
           width: 0,
-          height: 2,
+          height: 2
         },
         shadowOpacity: 0.2,
         shadowRadius: 4,
-        elevation: 4,
+        elevation: 4
       },
       textInput: {
         color: currentTheme.TEXT_PRIMARY,
         fontSize: 16,
         padding: 20,
         textAlignVertical: 'top',
-        minHeight: 120,
+        minHeight: 120
       },
       characterCount: {
         position: 'absolute',
@@ -90,16 +83,16 @@ const ModalInputText = ({ route }) => {
         right: 16,
         color: currentTheme.TEXT_SECONDARY,
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: '500'
       },
       submitButton: {
         ...SHARED_STYLES.interactive.primaryButton,
         margin: 20,
-        marginTop: 10,
+        marginTop: 10
       },
       submitButtonTitle: {
-        ...SHARED_STYLES.interactive.primaryButtonTitle,
-      },
+        ...SHARED_STYLES.interactive.primaryButtonTitle
+      }
     })
 
   const styles = createStyles(theme)
@@ -117,7 +110,7 @@ const ModalInputText = ({ route }) => {
 
       return {
         width: scaledWidth,
-        height: targetHeight,
+        height: targetHeight
       }
     }
 
@@ -126,7 +119,7 @@ const ModalInputText = ({ route }) => {
     console.log('ModalInputText: No photo dimensions available, using fallback')
     return {
       width: targetHeight,
-      height: targetHeight,
+      height: targetHeight
     }
   }
 
@@ -141,7 +134,7 @@ const ModalInputText = ({ route }) => {
         comment: commentText,
         uuid,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(), // Add updatedAt for consistent date rendering
+        updatedAt: new Date().toISOString() // Add updatedAt for consistent date rendering
         // No id to distinguish from real comments
       }
 
@@ -158,7 +151,7 @@ const ModalInputText = ({ route }) => {
         inputText: commentText,
         uuid,
         photo,
-        topOffset,
+        topOffset
       })
 
       // Trigger refresh after a shorter delay to reduce flickering
@@ -199,17 +192,13 @@ const ModalInputText = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="transparent"
-        translucent
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={{
           paddingTop: 16,
-          paddingBottom: insets.bottom + 20,
+          paddingBottom: insets.bottom + 20
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -219,8 +208,8 @@ const ModalInputText = ({ route }) => {
             styles.photoContainer,
             {
               width: photoDimensions.width,
-              height: photoDimensions.height,
-            },
+              height: photoDimensions.height
+            }
           ]}
         >
           <CachedImage
@@ -246,9 +235,7 @@ const ModalInputText = ({ route }) => {
             }}
             value={inputText}
           />
-          <Text style={styles.characterCount}>
-            {maxStringLength - inputText.length}
-          </Text>
+          <Text style={styles.characterCount}>{maxStringLength - inputText.length}</Text>
         </View>
 
         <Button
@@ -267,7 +254,7 @@ const ModalInputText = ({ route }) => {
 
 ModalInputText.propTypes = {
   photo: PropTypes.object,
-  route: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired
 }
 
 export default ModalInputText

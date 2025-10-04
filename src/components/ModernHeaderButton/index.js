@@ -4,7 +4,7 @@ import * as CONST from '../../consts'
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 4,
+    marginHorizontal: 4
   },
   button: {
     width: 40,
@@ -18,12 +18,12 @@ const styles = StyleSheet.create({
     shadowColor: CONST.HEADER_SHADOW_COLOR,
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 1
     },
     shadowOpacity: 1,
     shadowRadius: 2,
-    elevation: 2,
-  },
+    elevation: 2
+  }
 })
 
 const ModernHeaderButton = ({
@@ -32,7 +32,7 @@ const ModernHeaderButton = ({
   iconSize = 20,
   iconColor = CONST.MAIN_COLOR,
   style = {},
-  containerStyle = {},
+  containerStyle = {}
 }) => (
   <TouchableOpacity
     onPress={onPress}

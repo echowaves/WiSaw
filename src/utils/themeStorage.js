@@ -14,7 +14,7 @@ export const saveThemePreference = async (isDark) => {
       text1: 'Theme Save Error',
       text2: 'Unable to save theme preference',
       type: 'error',
-      visibilityTime: 3000,
+      visibilityTime: 3000
     })
   }
 }
@@ -35,7 +35,7 @@ export const loadThemePreference = async () => {
       text1: 'Theme Loading Error',
       text2: 'Using default light theme',
       type: 'error',
-      visibilityTime: 3000,
+      visibilityTime: 3000
     })
     return false // Default to light mode
   }
@@ -43,17 +43,14 @@ export const loadThemePreference = async () => {
 
 export const saveFollowSystemPreference = async (followSystem) => {
   try {
-    await SecureStore.setItemAsync(
-      FOLLOW_SYSTEM_KEY,
-      followSystem ? 'true' : 'false',
-    )
+    await SecureStore.setItemAsync(FOLLOW_SYSTEM_KEY, followSystem ? 'true' : 'false')
   } catch (error) {
     console.error('Failed to save follow system preference:', error)
     Toast.show({
       text1: 'Settings Save Error',
       text2: 'Unable to save system theme preference',
       type: 'error',
-      visibilityTime: 3000,
+      visibilityTime: 3000
     })
   }
 }
@@ -74,18 +71,15 @@ export const loadFollowSystemPreference = async () => {
       text1: 'Theme Settings Error',
       text2: 'Unable to load system theme preference',
       type: 'error',
-      visibilityTime: 3000,
+      visibilityTime: 3000
     })
     return false // Default to manual control
   }
 }
 
-export const getSystemTheme = () => {
-  return Appearance.getColorScheme() === 'dark'
-}
+export const getSystemTheme = () => Appearance.getColorScheme() === 'dark'
 
-export const subscribeToSystemTheme = (callback) => {
-  return Appearance.addChangeListener(({ colorScheme }) => {
+export const subscribeToSystemTheme = (callback) =>
+  Appearance.addChangeListener(({ colorScheme }) => {
     callback(colorScheme === 'dark')
   })
-}

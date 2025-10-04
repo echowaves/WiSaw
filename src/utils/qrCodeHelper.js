@@ -20,7 +20,7 @@ export const generateQRCodeSVG = (data, size = 200) => {
     // Create the shareable URL
     const shareUrl = createFriendshipNameDeepLink({
       ...friendshipData,
-      friendName,
+      friendName
     })
 
     // Create a simple visual that shows this is shareable content
@@ -117,7 +117,7 @@ export const createFriendshipQRData = ({ friendshipUuid, friendName }) => {
     action: 'friendshipName',
     friendshipUuid: friendshipUuid || '',
     friendName: friendName || 'Unknown Friend',
-    timestamp: Date.now(),
+    timestamp: Date.now()
   }
 
   return JSON.stringify(qrData)
@@ -130,15 +130,11 @@ export const parseFriendshipQRData = (qrDataString) => {
   try {
     const data = JSON.parse(qrDataString)
 
-    if (
-      data.action === 'friendshipName' &&
-      data.friendshipUuid &&
-      data.friendName
-    ) {
+    if (data.action === 'friendshipName' && data.friendshipUuid && data.friendName) {
       return {
         friendshipUuid: data.friendshipUuid,
         friendName: data.friendName,
-        timestamp: data.timestamp,
+        timestamp: data.timestamp
       }
     }
 
@@ -152,13 +148,10 @@ export const parseFriendshipQRData = (qrDataString) => {
 /**
  * Create a deep link URL for friendship name sharing
  */
-export const createFriendshipNameDeepLink = ({
-  friendshipUuid,
-  friendName,
-}) => {
+export const createFriendshipNameDeepLink = ({ friendshipUuid, friendName }) => {
   const qrData = createFriendshipQRData({
     friendshipUuid: friendshipUuid || '',
-    friendName: friendName || 'Unknown Friend',
+    friendName: friendName || 'Unknown Friend'
   })
   const encodedData = encodeURIComponent(base64.encode(qrData))
 
@@ -169,13 +162,10 @@ export const createFriendshipNameDeepLink = ({
 /**
  * Create a universal link for sharing (using custom scheme for consistency)
  */
-export const createFriendshipNameUniversalLink = ({
-  friendshipUuid,
-  friendName,
-}) => {
+export const createFriendshipNameUniversalLink = ({ friendshipUuid, friendName }) => {
   const qrData = createFriendshipQRData({
     friendshipUuid: friendshipUuid || '',
-    friendName: friendName || 'Unknown Friend',
+    friendName: friendName || 'Unknown Friend'
   })
   const encodedData = encodeURIComponent(base64.encode(qrData))
 

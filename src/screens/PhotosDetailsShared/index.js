@@ -8,14 +8,7 @@ import PropTypes from 'prop-types'
 
 import { AntDesign } from '@expo/vector-icons'
 
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native'
+import { ScrollView, StatusBar, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { gql } from '@apollo/client'
@@ -33,19 +26,19 @@ const createStyles = (theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.BACKGROUND,
+      backgroundColor: theme.BACKGROUND
     },
     headerIcon: {
       textShadowColor: theme.CARD_SHADOW,
       textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
+      textShadowRadius: 2
     },
     headerTitle: {
       ...SHARED_STYLES.header.title,
       textShadowColor: theme.CARD_SHADOW,
       textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 2,
-    },
+      textShadowRadius: 2
+    }
   })
 
 const PhotosDetailsShared = ({ route }) => {
@@ -85,8 +78,8 @@ const PhotosDetailsShared = ({ route }) => {
             }
           `,
           variables: {
-            photoId: photoid,
-          },
+            photoId: photoid
+          }
         })
       ).data.getPhotoAllCurr
       const { photo } = response
@@ -96,7 +89,7 @@ const PhotosDetailsShared = ({ route }) => {
         imgUrl: photo?.imgUrl,
         thumbUrl: photo?.thumbUrl,
         width: photo?.width,
-        height: photo?.height,
+        height: photo?.height
       })
       setItem(photo)
     } catch (err4) {
@@ -107,12 +100,7 @@ const PhotosDetailsShared = ({ route }) => {
 
   const renderHeaderTitle = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <AntDesign
-        name="sharealt"
-        size={20}
-        color={theme.TEXT_PRIMARY}
-        style={styles.headerIcon}
-      />
+      <AntDesign name="sharealt" size={20} color={theme.TEXT_PRIMARY} style={styles.headerIcon} />
       <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
     </View>
   )
@@ -124,14 +112,10 @@ const PhotosDetailsShared = ({ route }) => {
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 1000,
+        zIndex: 1000
       }}
     >
-      <AppHeader
-        safeTopOnly
-        onBack={() => router.back()}
-        title={renderHeaderTitle()}
-      />
+      <AppHeader safeTopOnly onBack={() => router.back()} title={renderHeaderTitle()} />
     </View>
   )
 
@@ -145,11 +129,7 @@ const PhotosDetailsShared = ({ route }) => {
     return (
       <View style={styles.container}>
         {renderCustomHeader()}
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor="transparent"
-          translucent
-        />
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -169,20 +149,14 @@ const PhotosDetailsShared = ({ route }) => {
   return (
     <View style={styles.container}>
       {renderCustomHeader()}
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="transparent"
-        translucent
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
       <Text
         style={{
           color: theme.TEXT_PRIMARY,
           textAlign: 'center',
-          marginTop:
-            SHARED_STYLES.header.getDynamicHeight(insets.top, isSmallDevice) +
-            40,
+          marginTop: SHARED_STYLES.header.getDynamicHeight(insets.top, isSmallDevice) + 40,
           fontSize: 18,
-          fontWeight: '500',
+          fontWeight: '500'
         }}
       >
         Loading...
@@ -191,7 +165,7 @@ const PhotosDetailsShared = ({ route }) => {
   )
 }
 PhotosDetailsShared.propTypes = {
-  route: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired
 }
 
 export default PhotosDetailsShared

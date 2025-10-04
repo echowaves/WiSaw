@@ -55,7 +55,7 @@ const genLocalThumb = async (localImgUrl) => {
   const manipResult = await ImageManipulator.manipulateAsync(
     localImgUrl,
     [{ resize: { height: 300 } }],
-    { compress: 1, format: ImageManipulator.SaveFormat.PNG },
+    { compress: 1, format: ImageManipulator.SaveFormat.PNG }
   )
   return manipResult.uri
 }
@@ -63,22 +63,20 @@ const genLocalThumb = async (localImgUrl) => {
 const addToQueue = async (image) => {
   // localImgUrl, chatPhotoHash, localThumbUrl
 
-  let pendingImages = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }),
-  )
+  let pendingImages = JSON.parse(await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }))
   if (!pendingImages) {
     pendingImages = []
   }
 
   await Storage.setItem({
     key: CONST.PENDING_CHAT_UPLOADS_KEY,
-    value: [...pendingImages, image],
+    value: [...pendingImages, image]
   })
 }
 
 const removeFromQueue = async (imageToRemove) => {
   let pendingImagesBefore = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }),
+    await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY })
   )
 
   if (!pendingImagesBefore) {
@@ -86,13 +84,12 @@ const removeFromQueue = async (imageToRemove) => {
   }
 
   const pendingImagesAfter = pendingImagesBefore.filter(
-    (imageInTheQueue) =>
-      JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove),
+    (imageInTheQueue) => JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove)
   )
 
   await Storage.setItem({
     key: CONST.PENDING_CHAT_UPLOADS_KEY,
-    value: pendingImagesAfter,
+    value: pendingImagesAfter
   })
 }
 
@@ -132,7 +129,7 @@ export const clearChatQueue = async () => {
     // Clear the queue in storage
     await Storage.setItem({
       key: CONST.PENDING_CHAT_UPLOADS_KEY,
-      value: [],
+      value: []
     })
   } catch (error) {
     console.error('Error clearing chat queue:', error)
@@ -159,15 +156,13 @@ const getQueue = async () => {
       return []
     }
   })()
-  let imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }),
-  )
+  let imagesInQueue = JSON.parse(await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }))
 
   if (!imagesInQueue) {
     imagesInQueue = []
     await Storage.setItem({
       key: CONST.PENDING_CHAT_UPLOADS_KEY,
-      value: [],
+      value: []
     })
   }
   // remove images from the queue if corresponding file does not exist
@@ -178,9 +173,7 @@ const getQueue = async () => {
   })
 
   // get images in queue again after filtering
-  imagesInQueue = JSON.parse(
-    await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }),
-  )
+  imagesInQueue = JSON.parse(await Storage.getItem({ key: CONST.PENDING_CHAT_UPLOADS_KEY }))
   if (!imagesInQueue) {
     imagesInQueue = []
   }
@@ -200,10 +193,7 @@ const getQueue = async () => {
 export const queueFileForUpload =
   ({ assetUrl, chatPhotoHash, messageUuid }) =>
   async (dispatch, getState) => {
-    const localImgUrl = new FSFile(
-      CONST.PENDING_UPLOADS_FOLDER_CHAT,
-      chatPhotoHash,
-    ).uri
+    const localImgUrl = new FSFile(CONST.PENDING_UPLOADS_FOLDER_CHAT, chatPhotoHash).uri
 
     // console.log({ assetUrl, chatPhotoHash, localImgUrl })
     // console.log({ localImgUrl })
@@ -219,21 +209,21 @@ export const queueFileForUpload =
 
     await FileSystem.copyAsync({
       from: assetUrl,
-      to: localImgUrl,
+      to: localImgUrl
     })
 
     const localThumbUrl = await genLocalThumb(localImgUrl)
 
     CacheManager.addToCache({
       file: localThumbUrl,
-      key: `${chatPhotoHash}-thumb`,
+      key: `${chatPhotoHash}-thumb`
     })
     CacheManager.addToCache({ file: localImgUrl, key: `${chatPhotoHash}` })
 
     const image = {
       localImgUrl,
       chatPhotoHash,
-      messageUuid,
+      messageUuid
     }
 
     await addToQueue(image)
@@ -264,28 +254,24 @@ const uploadItem = async ({ uuid, item }) => {
         variables: {
           uuid,
           photoHash: item.chatPhotoHash,
-          contentType,
+          contentType
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'network-only'
       })
     ).data.generateUploadUrlForMessage
 
     let responseData
     if (uploadUrl?.newAsset === true) {
-      responseData = await FileSystem.uploadAsync(
-        uploadUrl.uploadUrl,
-        item.localImgUrl,
-        {
-          httpMethod: 'PUT',
-          headers: {
-            'Content-Type': contentType,
-          },
-        },
-      )
+      responseData = await FileSystem.uploadAsync(uploadUrl.uploadUrl, item.localImgUrl, {
+        httpMethod: 'PUT',
+        headers: {
+          'Content-Type': contentType
+        }
+      })
       // await new Promise(resolve => setTimeout(resolve, 2000))
     } else {
       responseData = {
-        status: 100,
+        status: 100
       }
     }
     return { responseData }
@@ -293,9 +279,7 @@ const uploadItem = async ({ uuid, item }) => {
     // eslint-disable-next-line no-console
     console.log({ err3 })
     return {
-      responseData: `something bad happened, unable to upload ${JSON.stringify(
-        err3,
-      )}`,
+      responseData: `something bad happened, unable to upload ${JSON.stringify(err3)}`
     }
   }
 }
@@ -306,7 +290,7 @@ export const sendMessage = async ({
   messageUuid,
   text,
   pending,
-  chatPhotoHash,
+  chatPhotoHash
 }) => {
   const returnedMessage = (
     await CONST.gqlClient.mutate({
@@ -344,8 +328,8 @@ export const sendMessage = async ({
         messageUuidArg: messageUuid,
         textArg: text,
         pendingArg: pending,
-        chatPhotoHashArg: chatPhotoHash,
-      },
+        chatPhotoHashArg: chatPhotoHash
+      }
     })
   ).data.sendMessage
 
@@ -394,7 +378,7 @@ export async function uploadPendingPhotos({ chatUuid, uuid, topOffset }) {
           messageUuid: item.messageUuid,
           text: '',
           pending: false,
-          chatPhotoHash: item.chatPhotoHash,
+          chatPhotoHash: item.chatPhotoHash
         })
         // eslint-disable-next-line no-await-in-loop
         await removeFromQueue(item)
@@ -404,7 +388,7 @@ export async function uploadPendingPhotos({ chatUuid, uuid, topOffset }) {
           text1: 'Upload is going slooooow...',
           text2: 'Still trying to upload.',
           visibilityTime: 500,
-          topOffset,
+          topOffset
         })
       }
     } // for
@@ -415,7 +399,7 @@ export async function uploadPendingPhotos({ chatUuid, uuid, topOffset }) {
       text1: 'Upload is slow...',
       text2: 'Still trying to upload.',
       visibilityTime: 500,
-      topOffset,
+      topOffset
     })
     // console.log({ error }) // eslint-disable-line no-console
     // dispatch(uploadPendingPhotos())

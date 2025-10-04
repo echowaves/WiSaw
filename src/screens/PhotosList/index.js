@@ -32,27 +32,18 @@ import {
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from 'react-native'
 
 import Constants from 'expo-constants'
 
-import {
-  AntDesign,
-  FontAwesome,
-  FontAwesome5,
-  Ionicons,
-  MaterialIcons,
-} from '@expo/vector-icons'
+import { AntDesign, FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons'
 
 import NetInfo from '@react-native-community/netinfo'
 
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 
-import {
-  emitPhotoSearch,
-  subscribeToPhotoSearch,
-} from '../../events/photoSearchBus'
+import { emitPhotoSearch, subscribeToPhotoSearch } from '../../events/photoSearchBus'
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 
@@ -67,7 +58,7 @@ import { getTheme, HEADER_HEIGHTS } from '../../theme/sharedStyles'
 import {
   calculatePhotoDimensions,
   createFrozenPhoto,
-  validateFrozenPhotosList,
+  validateFrozenPhotosList
 } from '../../utils/photoListHelpers'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
@@ -117,12 +108,11 @@ async function registerBackgroundFetchAsync() {
     }
 
     // Avoid duplicate registration
-    const alreadyRegistered =
-      await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_NAME)
+    const alreadyRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK_NAME)
     if (alreadyRegistered) return
 
     await BackgroundTask.registerTaskAsync(BACKGROUND_TASK_NAME, {
-      minimumInterval: 15, // 15 minutes (minimum allowed)
+      minimumInterval: 15 // 15 minutes (minimum allowed)
     })
   } catch (e) {
     if (__DEV__) {
@@ -177,7 +167,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
       setPendingTriggerSearch(trimmed)
     },
-    [setPendingTriggerSearch],
+    [setPendingTriggerSearch]
   )
 
   useEffect(() => {
@@ -203,7 +193,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.INTERACTIVE_BACKGROUND, // Much darker background for high contrast with ExpandableThumb
+      backgroundColor: theme.INTERACTIVE_BACKGROUND // Much darker background for high contrast with ExpandableThumb
     },
     thumbContainer: {
       // height: thumbDimension,
@@ -213,7 +203,7 @@ const PhotosList = ({ searchFromUrl }) => {
     // Modern header styles
     headerContainer: {
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'center'
     },
     customSegmentedControl: {
       flexDirection: 'row',
@@ -224,33 +214,33 @@ const PhotosList = ({ searchFromUrl }) => {
       shadowColor: theme.HEADER_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 1,
+        height: 1
       },
       shadowOpacity: 1,
       shadowRadius: 2,
       elevation: 2,
-      padding: 4,
+      padding: 4
     },
     segmentButton: {
       borderRadius: 16,
       marginHorizontal: 2,
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'center'
       // Removed fixed padding and minWidth - now handled by animations
     },
     activeSegmentButton: {
-      backgroundColor: theme.INTERACTIVE_ACTIVE,
+      backgroundColor: theme.INTERACTIVE_ACTIVE
     },
     segmentText: {
       fontSize: 12,
       fontWeight: '600',
-      marginTop: 4,
+      marginTop: 4
     },
     activeSegmentText: {
-      color: theme.TEXT_PRIMARY,
+      color: theme.TEXT_PRIMARY
     },
     inactiveSegmentText: {
-      color: theme.TEXT_SECONDARY,
+      color: theme.TEXT_SECONDARY
     },
     buttonGroupContainer: {
       width: 220,
@@ -262,25 +252,25 @@ const PhotosList = ({ searchFromUrl }) => {
       shadowColor: theme.HEADER_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 1,
+        height: 1
       },
       shadowOpacity: 1,
       shadowRadius: 2,
-      elevation: 2,
+      elevation: 2
     },
     buttonContainer: {
       borderRadius: 18,
-      margin: 2,
+      margin: 2
     },
     buttonStyle: {
       backgroundColor: 'transparent',
       paddingVertical: 8,
       paddingHorizontal: 12,
-      borderRadius: 16,
+      borderRadius: 16
     },
     selectedButtonStyle: {
       backgroundColor: theme.INTERACTIVE_ACTIVE,
-      borderRadius: 16,
+      borderRadius: 16
     },
     footerContainer: {
       position: 'absolute',
@@ -289,7 +279,7 @@ const PhotosList = ({ searchFromUrl }) => {
       left: 0,
       borderTopWidth: 1,
       borderTopColor: theme.BORDER_LIGHT,
-      shadowColor: theme.HEADER_SHADOW,
+      shadowColor: theme.HEADER_SHADOW
     },
     videoRecordButton: {
       justifyContent: 'center',
@@ -301,12 +291,12 @@ const PhotosList = ({ searchFromUrl }) => {
       shadowColor: theme.STATUS_ERROR,
       shadowOffset: {
         width: 0,
-        height: 4,
+        height: 4
       },
       shadowOpacity: 0.3,
       shadowRadius: 8,
       elevation: 15,
-      zIndex: 15,
+      zIndex: 15
     },
     badgeStyle: {
       backgroundColor: theme.STATUS_ERROR,
@@ -314,11 +304,11 @@ const PhotosList = ({ searchFromUrl }) => {
       borderColor: theme.BACKGROUND,
       minWidth: 20,
       height: 20,
-      borderRadius: 10,
+      borderRadius: 10
     },
     cameraButton: {
-      shadowColor: theme.HEADER_SHADOW,
-    },
+      shadowColor: theme.HEADER_SHADOW
+    }
   })
 
   const navigation = useNavigation()
@@ -340,7 +330,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [netAvailable, setNetAvailable] = useState(true)
   const [location, setLocation] = useState({
-    coords: { latitude: 0, longitude: 0 },
+    coords: { latitude: 0, longitude: 0 }
   })
 
   // const [isLastPage, setIsLastPage] = useState(false)
@@ -370,7 +360,7 @@ const PhotosList = ({ searchFromUrl }) => {
         })
       })
     },
-    [setPhotosList],
+    [setPhotosList]
   )
 
   const {
@@ -379,13 +369,13 @@ const PhotosList = ({ searchFromUrl }) => {
     enqueueCapture,
     clearPendingQueue,
     refreshPendingQueue,
-    processQueue: processPendingQueue,
+    processQueue: processPendingQueue
   } = usePhotoUploader({
     uuid,
     setUuid,
     topOffset: toastTopOffset,
     netAvailable,
-    onPhotoUploaded: handleUploadSuccess,
+    onPhotoUploaded: handleUploadSuccess
   })
 
   // State for inline photo expansion - now supports multiple expanded photos
@@ -485,13 +475,13 @@ const PhotosList = ({ searchFromUrl }) => {
           // y is window-relative; convert to absolute content offset by adding current scrollY
           const targetOffset = Math.max(
             0,
-            (lastScrollY.current || 0) + y - headerReserve - snapPadding,
+            (lastScrollY.current || 0) + y - headerReserve - snapPadding
           )
           // Try FlatList-like API first
           if (typeof masonryRef.current.scrollToOffset === 'function') {
             masonryRef.current.scrollToOffset({
               offset: targetOffset,
-              animated: true,
+              animated: true
             })
           } else if (typeof masonryRef.current.scrollTo === 'function') {
             masonryRef.current.scrollTo({ y: targetOffset, animated: true })
@@ -508,7 +498,7 @@ const PhotosList = ({ searchFromUrl }) => {
         scrollingInProgressRef.current = false
       }
     },
-    [height],
+    [height]
   )
 
   // Remove viewability-driven header/footer toggling to reduce jank
@@ -527,14 +517,14 @@ const PhotosList = ({ searchFromUrl }) => {
         toValue: 1,
         useNativeDriver: true,
         tension: 80,
-        friction: 8,
+        friction: 8
       }).start()
     } else if (pendingPhotos.length === 0 && previousPendingCount > 0) {
       // Animate out when all photos are uploaded
       Animated.timing(pendingPhotosAnimation, {
         toValue: 0,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: true
       }).start()
     }
 
@@ -545,14 +535,14 @@ const PhotosList = ({ searchFromUrl }) => {
           Animated.timing(uploadIconAnimation, {
             toValue: 0.6,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: true
           }),
           Animated.timing(uploadIconAnimation, {
             toValue: 1,
             duration: 800,
-            useNativeDriver: true,
-          }),
-        ]),
+            useNativeDriver: true
+          })
+        ])
       )
       pulseAnimation.start()
 
@@ -601,22 +591,22 @@ const PhotosList = ({ searchFromUrl }) => {
             1.0, // 1:1 (square)
             1.33, // 4:3 (landscape)
             1.5, // 3:2 (landscape)
-            1.78, // 16:9 (landscape)
-          ],
+            1.78 // 16:9 (landscape)
+          ]
         }
       case 1: // Watched - larger items with comments
         return {
           spacing: 8,
           maxItemsPerRow: getResponsiveColumns(2, 4),
           baseHeight: 200,
-          aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
+          aspectRatioFallbacks: [1.0] // Square thumbnails for better comment display
         }
       case 2: // Search - same layout as starred to accommodate comments
         return {
           spacing: 8,
           maxItemsPerRow: getResponsiveColumns(2, 4),
           baseHeight: 200,
-          aspectRatioFallbacks: [1.0], // Square thumbnails for better comment display
+          aspectRatioFallbacks: [1.0] // Square thumbnails for better comment display
         }
       default:
         return {
@@ -630,8 +620,8 @@ const PhotosList = ({ searchFromUrl }) => {
             1.0, // 1:1 (square)
             1.33, // 4:3 (landscape)
             1.5, // 3:2 (landscape)
-            1.78, // 16:9 (landscape)
-          ],
+            1.78 // 16:9 (landscape)
+          ]
         }
     }
   }, [activeSegment, width])
@@ -639,7 +629,7 @@ const PhotosList = ({ searchFromUrl }) => {
   // Helper function to check if a photo is expanded
   const isPhotoExpanded = React.useCallback(
     (photoId) => expandedPhotoIds.has(photoId),
-    [expandedPhotoIds],
+    [expandedPhotoIds]
   )
 
   // Helper function to get calculated dimensions for a photo
@@ -652,12 +642,11 @@ const PhotosList = ({ searchFromUrl }) => {
 
       // For expanded photos, try to use real-time measured height
       if (isExpanded) {
-        const currentHeight =
-          measuredHeights.get(photo.id) || photoHeightRefs.current.get(photo.id)
+        const currentHeight = measuredHeights.get(photo.id) || photoHeightRefs.current.get(photo.id)
         if (currentHeight) {
           const result = {
             width: screenWidth,
-            height: currentHeight,
+            height: currentHeight
           }
 
           // Removed debug logging to reduce console noise
@@ -672,12 +661,12 @@ const PhotosList = ({ searchFromUrl }) => {
         isExpanded,
         screenWidth,
         segmentConfig.maxItemsPerRow,
-        segmentConfig.spacing,
+        segmentConfig.spacing
       )
 
       return result
     },
-    [isPhotoExpanded, width, segmentConfig, measuredHeights],
+    [isPhotoExpanded, width, segmentConfig, measuredHeights]
   )
 
   // Function to handle photo expansion toggle - now supports multiple expanded photos
@@ -720,7 +709,7 @@ const PhotosList = ({ searchFromUrl }) => {
       // Reset expanding state after animation
       setTimeout(() => setIsPhotoExpanding(false), 500)
     },
-    [isPhotoExpanding, photosList],
+    [isPhotoExpanding, photosList]
   )
 
   // Render function for individual masonry items
@@ -734,16 +723,14 @@ const PhotosList = ({ searchFromUrl }) => {
       if (item.width && item.height) {
         const originalAspectRatio = item.width / item.height
         const calculatedAspectRatio = dimensions.width / dimensions.height
-        const aspectRatioDifference = Math.abs(
-          originalAspectRatio - calculatedAspectRatio,
-        )
+        const aspectRatioDifference = Math.abs(originalAspectRatio - calculatedAspectRatio)
 
         // If aspect ratios differ significantly (more than 5%), recalculate
         if (aspectRatioDifference > 0.05) {
           const recalculatedDimensions = getCalculatedDimensions(item)
           if (__DEV__) {
             console.log(
-              `🛠️ DIMENSIONS CORRECTION: Photo ${item.id} had corrupted dimensions ${dimensions.width}x${dimensions.height} (AR: ${calculatedAspectRatio.toFixed(3)}), correcting to ${recalculatedDimensions.width}x${recalculatedDimensions.height} (AR: ${(recalculatedDimensions.width / recalculatedDimensions.height).toFixed(3)})`,
+              `🛠️ DIMENSIONS CORRECTION: Photo ${item.id} had corrupted dimensions ${dimensions.width}x${dimensions.height} (AR: ${calculatedAspectRatio.toFixed(3)}), correcting to ${recalculatedDimensions.width}x${recalculatedDimensions.height} (AR: ${(recalculatedDimensions.width / recalculatedDimensions.height).toFixed(3)})`
             )
           }
           correctedDimensions = recalculatedDimensions
@@ -783,8 +770,8 @@ const PhotosList = ({ searchFromUrl }) => {
       handlePhotoToggle,
       isPhotoExpanded,
       updatePhotoHeight,
-      triggerSearch,
-    ],
+      triggerSearch
+    ]
   )
 
   // Preloading disabled for consistency; rely on onEndReached
@@ -793,14 +780,12 @@ const PhotosList = ({ searchFromUrl }) => {
     setLoading(true)
 
     // Use current values if overrides are not provided
-    const effectiveSegment =
-      segmentOverride !== null ? segmentOverride : activeSegment
+    const effectiveSegment = segmentOverride !== null ? segmentOverride : activeSegment
 
     // Only use search term for search segment (segment 2)
     let effectiveSearchTerm = ''
     if (effectiveSegment === 2) {
-      effectiveSearchTerm =
-        searchTermOverride !== null ? searchTermOverride : searchTerm
+      effectiveSearchTerm = searchTermOverride !== null ? searchTermOverride : searchTerm
     }
 
     const { photos, noMoreData, batch } = await reducer.getPhotos({
@@ -812,7 +797,7 @@ const PhotosList = ({ searchFromUrl }) => {
       topOffset: toastTopOffset,
       activeSegment: effectiveSegment,
       batch: currentBatch, // clone
-      pageNumber,
+      pageNumber
     })
 
     if (batch === currentBatch) {
@@ -837,12 +822,9 @@ const PhotosList = ({ searchFromUrl }) => {
           // Freeze incoming photos before any operations
           const frozenPhotos = photos.map((photo) => createFrozenPhoto(photo))
           const combinedList = [...currentList, ...frozenPhotos]
-          const sortedList = combinedList.sort(
-            (a, b) => a.row_number - b.row_number,
-          )
+          const sortedList = combinedList.sort((a, b) => a.row_number - b.row_number)
           const deduplicatedList = sortedList.filter(
-            (obj, pos, arr) =>
-              arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos,
+            (obj, pos, arr) => arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos
           )
 
           return deduplicatedList
@@ -870,8 +852,8 @@ const PhotosList = ({ searchFromUrl }) => {
     if (uuid.length > 0) {
       setFriendsList(
         await friendsHelper.getEnhancedListOfFriendships({
-          uuid,
-        }),
+          uuid
+        })
       )
 
       setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
@@ -934,13 +916,13 @@ const PhotosList = ({ searchFromUrl }) => {
             shadowColor: theme.HEADER_SHADOW,
             shadowOffset: {
               width: 0,
-              height: 2,
+              height: 2
             },
             shadowOpacity: 1,
             shadowRadius: 4,
-            elevation: 3,
+            elevation: 3
           },
-          safeAreaViewStyle,
+          safeAreaViewStyle
         ]}
       >
         <View
@@ -949,7 +931,7 @@ const PhotosList = ({ searchFromUrl }) => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            paddingHorizontal: 16,
+            paddingHorizontal: 16
           }}
         >
           {/* Left: Empty space */}
@@ -958,7 +940,7 @@ const PhotosList = ({ searchFromUrl }) => {
               position: 'absolute',
               left: 16,
               width: 40,
-              height: 40,
+              height: 40
             }}
           />
 
@@ -972,8 +954,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90,
-                  },
+                    width: 90
+                  }
                 ]}
               >
                 <TouchableOpacity
@@ -981,28 +963,21 @@ const PhotosList = ({ searchFromUrl }) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: '100%',
-                    height: '100%',
+                    height: '100%'
                   }}
                   onPress={() => updateIndex(0)}
                 >
                   <FontAwesome
                     name="globe"
                     size={20}
-                    color={
-                      activeSegment === 0
-                        ? theme.TEXT_PRIMARY
-                        : theme.TEXT_SECONDARY
-                    }
+                    color={activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
                     style={[
                       styles.segmentText,
                       {
-                        color:
-                          activeSegment === 0
-                            ? theme.TEXT_PRIMARY
-                            : theme.TEXT_SECONDARY,
-                      },
+                        color: activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
+                      }
                     ]}
                   >
                     {segmentTitles[0]}
@@ -1017,8 +992,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90,
-                  },
+                    width: 90
+                  }
                 ]}
               >
                 <TouchableOpacity
@@ -1026,28 +1001,21 @@ const PhotosList = ({ searchFromUrl }) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: '100%',
-                    height: '100%',
+                    height: '100%'
                   }}
                   onPress={() => updateIndex(1)}
                 >
                   <AntDesign
                     name="star"
                     size={20}
-                    color={
-                      activeSegment === 1
-                        ? theme.TEXT_PRIMARY
-                        : theme.TEXT_SECONDARY
-                    }
+                    color={activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
                     style={[
                       styles.segmentText,
                       {
-                        color:
-                          activeSegment === 1
-                            ? theme.TEXT_PRIMARY
-                            : theme.TEXT_SECONDARY,
-                      },
+                        color: activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
+                      }
                     ]}
                   >
                     {segmentTitles[1]}
@@ -1062,8 +1030,8 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90,
-                  },
+                    width: 90
+                  }
                 ]}
               >
                 <TouchableOpacity
@@ -1071,28 +1039,21 @@ const PhotosList = ({ searchFromUrl }) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: '100%',
-                    height: '100%',
+                    height: '100%'
                   }}
                   onPress={() => updateIndex(2)}
                 >
                   <FontAwesome
                     name="search"
                     size={20}
-                    color={
-                      activeSegment === 2
-                        ? theme.TEXT_PRIMARY
-                        : theme.TEXT_SECONDARY
-                    }
+                    color={activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
                     style={[
                       styles.segmentText,
                       {
-                        color:
-                          activeSegment === 2
-                            ? theme.TEXT_PRIMARY
-                            : theme.TEXT_SECONDARY,
-                      },
+                        color: activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
+                      }
                     ]}
                   >
                     {segmentTitles[2]}
@@ -1106,14 +1067,14 @@ const PhotosList = ({ searchFromUrl }) => {
           <View
             style={{
               height: 3,
-              backgroundColor: theme.HEADER_BACKGROUND,
+              backgroundColor: theme.HEADER_BACKGROUND
             }}
           >
             <LinearProgress
               color={CONST.MAIN_COLOR}
               style={{
                 flex: 1,
-                height: 3,
+                height: 3
               }}
             />
           </View>
@@ -1151,7 +1112,7 @@ const PhotosList = ({ searchFromUrl }) => {
     permissionFunction,
     alertHeader,
     alertBody,
-    permissionFunctionArgument,
+    permissionFunctionArgument
   }) {
     const { status } = await permissionFunction(permissionFunctionArgument)
     if (status !== 'granted') {
@@ -1160,8 +1121,8 @@ const PhotosList = ({ searchFromUrl }) => {
           text: 'Open Settings',
           onPress: () => {
             Linking.openSettings()
-          },
-        },
+          }
+        }
       ])
     }
     return status
@@ -1175,7 +1136,7 @@ const PhotosList = ({ searchFromUrl }) => {
         mediaTypes: ['images'],
         // allowsEditing: true,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
-        exif: true,
+        exif: true
       })
     } else {
       // launch video capturing
@@ -1184,7 +1145,7 @@ const PhotosList = ({ searchFromUrl }) => {
         // allowsEditing: true,
         videoMaxDuration: 5,
         quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
-        exif: true,
+        exif: true
       })
     }
 
@@ -1195,7 +1156,7 @@ const PhotosList = ({ searchFromUrl }) => {
       await enqueueCapture({
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
-        location,
+        location
       })
     }
   }
@@ -1213,7 +1174,7 @@ const PhotosList = ({ searchFromUrl }) => {
       const cameraPermission = await checkPermission({
         permissionFunction: ImagePicker.requestCameraPermissionsAsync,
         alertHeader: 'Do you want to take photo with wisaw?',
-        alertBody: "Why don't you enable photo permission?",
+        alertBody: "Why don't you enable photo permission?"
       })
 
       if (cameraPermission === 'granted') {
@@ -1221,7 +1182,7 @@ const PhotosList = ({ searchFromUrl }) => {
           permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
           alertHeader: 'Do you want to save photo on your device?',
           alertBody: "Why don't you enable the permission?",
-          permissionFunctionArgument: true,
+          permissionFunctionArgument: true
         })
 
         if (photoAlbomPermission === 'granted') {
@@ -1239,20 +1200,19 @@ const PhotosList = ({ searchFromUrl }) => {
   async function initLocation() {
     const locationPermission = await checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
-      alertHeader:
-        'WiSaw shows you near-by photos based on your current location.',
-      alertBody: 'You need to enable Location in Settings and Try Again.',
+      alertHeader: 'WiSaw shows you near-by photos based on your current location.',
+      alertBody: 'You need to enable Location in Settings and Try Again.'
     })
 
     if (locationPermission === 'granted') {
       try {
         // initially set the location that is last known -- works much faster this way
         let loc = await Location.getLastKnownPositionAsync({
-          accuracy: Location.Accuracy.BestForNavigation,
+          accuracy: Location.Accuracy.BestForNavigation
         })
         if (!loc) {
           loc = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.BestForNavigation,
+            accuracy: Location.Accuracy.BestForNavigation
           })
         }
         if (loc) setLocation(loc)
@@ -1263,7 +1223,7 @@ const PhotosList = ({ searchFromUrl }) => {
         Toast.show({
           text1: 'Unable to get location',
           type: 'error',
-          topOffset: toastTopOffset,
+          topOffset: toastTopOffset
         })
       }
     }
@@ -1275,8 +1235,7 @@ const PhotosList = ({ searchFromUrl }) => {
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       if (state) {
         // Check both isConnected and isInternetReachable for better reliability
-        const isNetworkAvailable =
-          state.isConnected && state.isInternetReachable !== false
+        const isNetworkAvailable = state.isConnected && state.isInternetReachable !== false
 
         setNetAvailable(isNetworkAvailable)
 
@@ -1285,7 +1244,7 @@ const PhotosList = ({ searchFromUrl }) => {
           isConnected: state.isConnected,
           isInternetReachable: state.isInternetReachable,
           type: state.type,
-          computed: isNetworkAvailable,
+          computed: isNetworkAvailable
         })
       }
     })
@@ -1318,7 +1277,7 @@ const PhotosList = ({ searchFromUrl }) => {
       return () => {
         isMounted = false
       }
-    }, []),
+    }, [])
   )
 
   useEffect(() => {
@@ -1341,8 +1300,8 @@ const PhotosList = ({ searchFromUrl }) => {
           allowAlert: true,
           allowBadge: true,
           allowSound: true,
-          allowAnnouncements: true,
-        },
+          allowAnnouncements: true
+        }
       })
     })()
     ;(async () => {
@@ -1358,9 +1317,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   useEffect(() => {
     const thumbsCount = Math.floor(width / 90)
-    setThumbDimension(
-      Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2,
-    )
+    setThumbDimension(Math.floor((width - thumbsCount * 3 * 2) / thumbsCount) + 2)
 
     // checkForUpdate(),
     // check permissions, retrieve UUID, make sure upload folder exists
@@ -1497,9 +1454,7 @@ const PhotosList = ({ searchFromUrl }) => {
         maxItemsPerRow={config.maxItemsPerRow}
         baseHeight={config.baseHeight}
         aspectRatioFallbacks={config.aspectRatioFallbacks}
-        keyExtractor={(item) =>
-          `${item.id}-${isPhotoExpanded(item.id) ? 'expanded' : 'collapsed'}`
-        }
+        keyExtractor={(item) => `${item.id}-${isPhotoExpanded(item.id) ? 'expanded' : 'collapsed'}`}
         // Calculate dimensions dynamically based on expansion state
         getItemDimensions={(item, calculatedDimensions) => {
           const isExpanded = isPhotoExpanded(item.id)
@@ -1517,7 +1472,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
           return {
             width: dynamicDimensions.width,
-            height: dynamicDimensions.height,
+            height: dynamicDimensions.height
           }
         }}
         onScroll={handleScroll}
@@ -1554,10 +1509,10 @@ const PhotosList = ({ searchFromUrl }) => {
         updateCellsBatchingPeriod={32}
         style={{
           ...styles.container,
-          flex: 1, // Allow the scroll area to take full available height
+          flex: 1 // Allow the scroll area to take full available height
         }}
         contentContainerStyle={{
-          paddingBottom: FOOTER_HEIGHT + 20, // Add padding to ensure content is visible above footer
+          paddingBottom: FOOTER_HEIGHT + 20 // Add padding to ensure content is visible above footer
         }}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews
@@ -1578,17 +1533,17 @@ const PhotosList = ({ searchFromUrl }) => {
             ...styles.footerContainer,
             shadowOffset: {
               width: 0,
-              height: -2,
+              height: -2
             },
             shadowOpacity: 0.1,
             shadowRadius: 8,
             elevation: 14,
-            zIndex: 14,
+            zIndex: 14
           }}
         >
           <SafeAreaView
             style={{
-              flex: 1,
+              flex: 1
             }}
           >
             <View
@@ -1600,7 +1555,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 paddingTop: 10,
                 height: '100%',
                 elevation: 14,
-                zIndex: 14,
+                zIndex: 14
               }}
             >
               {/* Navigation Menu Button */}
@@ -1613,7 +1568,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   borderRadius: 25,
                   backgroundColor: theme.INTERACTIVE_BACKGROUND,
                   elevation: 15,
-                  zIndex: 15,
+                  zIndex: 15
                 }}
                 onPress={() => {
                   try {
@@ -1634,10 +1589,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
               {/* Video Recording Button */}
               <TouchableOpacity
-                style={[
-                  styles.videoRecordButton,
-                  isCameraOpening && { opacity: 0.5 },
-                ]}
+                style={[styles.videoRecordButton, isCameraOpening && { opacity: 0.5 }]}
                 onPress={() => {
                   checkPermissionsForPhotoTaking({ cameraType: 'video' })
                 }}
@@ -1658,7 +1610,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   shadowColor: CONST.MAIN_COLOR,
                   shadowOffset: {
                     width: 0,
-                    height: 6,
+                    height: 6
                   },
                   shadowOpacity: 0.4,
                   shadowRadius: 12,
@@ -1666,7 +1618,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   zIndex: 15,
                   borderWidth: 3,
                   borderColor: theme.BACKGROUND,
-                  opacity: isCameraOpening ? 0.5 : 1,
+                  opacity: isCameraOpening ? 0.5 : 1
                 }}
                 onPress={() => {
                   checkPermissionsForPhotoTaking({ cameraType: 'camera' })
@@ -1687,7 +1639,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   backgroundColor: theme.INTERACTIVE_BACKGROUND,
                   position: 'relative',
                   elevation: 15,
-                  zIndex: 15,
+                  zIndex: 15
                 }}
                 onPress={() => router.push('/friends')}
                 disabled={!netAvailable}
@@ -1703,14 +1655,14 @@ const PhotosList = ({ searchFromUrl }) => {
                     badgeStyle={styles.badgeStyle}
                     textStyle={{
                       fontSize: 11,
-                      fontWeight: 'bold',
+                      fontWeight: 'bold'
                     }}
                     containerStyle={{
                       position: 'absolute',
                       top: -2,
                       right: -2,
                       elevation: 20,
-                      zIndex: 20,
+                      zIndex: 20
                     }}
                   />
                 )}
@@ -1765,7 +1717,7 @@ const PhotosList = ({ searchFromUrl }) => {
       Toast.show({
         text1: 'Search for more than 3 characters',
         type: 'error',
-        topOffset: toastTopOffset,
+        topOffset: toastTopOffset
       })
     }
   }
@@ -1782,12 +1734,12 @@ const PhotosList = ({ searchFromUrl }) => {
         shadowColor: theme.HEADER_SHADOW,
         shadowOffset: {
           width: 0,
-          height: 2,
+          height: 2
         },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 8,
-        zIndex: 8,
+        zIndex: 8
       }}
     >
       <View
@@ -1804,19 +1756,14 @@ const PhotosList = ({ searchFromUrl }) => {
           shadowColor: theme.CARD_SHADOW,
           shadowOffset: {
             width: 0,
-            height: 1,
+            height: 1
           },
           shadowOpacity: 0.2,
           shadowRadius: 2,
-          elevation: 2,
+          elevation: 2
         }}
       >
-        <Ionicons
-          name="search"
-          size={20}
-          color={theme.TEXT_SECONDARY}
-          style={{ marginRight: 8 }}
-        />
+        <Ionicons name="search" size={20} color={theme.TEXT_SECONDARY} style={{ marginRight: 8 }} />
         <TextInput
           ref={searchBarRef}
           placeholder="Search photos..."
@@ -1836,7 +1783,7 @@ const PhotosList = ({ searchFromUrl }) => {
             height: 40,
             paddingHorizontal: 0,
             marginLeft: 0,
-            paddingRight: searchTerm ? 30 : 0, // Make room for clear button
+            paddingRight: searchTerm ? 30 : 0 // Make room for clear button
           }}
         />
         {searchTerm ? (
@@ -1860,7 +1807,7 @@ const PhotosList = ({ searchFromUrl }) => {
               backgroundColor: theme.INTERACTIVE_SECONDARY,
               borderRadius: 10,
               elevation: 6,
-              zIndex: 6,
+              zIndex: 6
             }}
           >
             <Ionicons name="close" size={12} color={theme.TEXT_PRIMARY} />
@@ -1880,12 +1827,12 @@ const PhotosList = ({ searchFromUrl }) => {
           shadowColor: theme.INTERACTIVE_PRIMARY,
           shadowOffset: {
             width: 0,
-            height: 2,
+            height: 2
           },
           shadowOpacity: 0.3,
           shadowRadius: 4,
           elevation: 8,
-          zIndex: 8,
+          zIndex: 8
         }}
       >
         <Ionicons name="send" size={20} color="white" />
@@ -1919,11 +1866,11 @@ const PhotosList = ({ searchFromUrl }) => {
                       text1: 'Upload queue cleared',
                       text2: 'All pending uploads have been cancelled',
                       type: 'success',
-                      topOffset: toastTopOffset,
+                      topOffset: toastTopOffset
                     })
-                  },
-                },
-              ],
+                  }
+                }
+              ]
             )
           }}
         >
@@ -1949,33 +1896,31 @@ const PhotosList = ({ searchFromUrl }) => {
                 {
                   translateY: pendingPhotosAnimation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [-50, 0],
-                  }),
+                    outputRange: [-50, 0]
+                  })
                 },
                 {
                   scale: pendingPhotosAnimation.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  }),
-                },
-              ],
+                    outputRange: [0.8, 1]
+                  })
+                }
+              ]
             }}
           >
             <Animated.View
               style={{
                 transform: [
                   {
-                    scale: uploadIconAnimation,
-                  },
-                ],
+                    scale: uploadIconAnimation
+                  }
+                ]
               }}
             >
               <MaterialIcons
                 name="cloud-upload"
                 size={24}
-                color={
-                  netAvailable ? theme.INTERACTIVE_PRIMARY : theme.TEXT_DISABLED
-                }
+                color={netAvailable ? theme.INTERACTIVE_PRIMARY : theme.TEXT_DISABLED}
                 style={{ marginRight: 12 }}
               />
             </Animated.View>
@@ -1986,11 +1931,10 @@ const PhotosList = ({ searchFromUrl }) => {
                   fontWeight: '600',
                   color: theme.TEXT_PRIMARY,
                   marginBottom: 4,
-                  opacity: pendingPhotosAnimation,
+                  opacity: pendingPhotosAnimation
                 }}
               >
-                {pendingPhotos.length}{' '}
-                {pendingPhotos.length === 1 ? 'photo' : 'photos'}{' '}
+                {pendingPhotos.length} {pendingPhotos.length === 1 ? 'photo' : 'photos'}{' '}
                 {uploadStatusLabel}
               </Animated.Text>
             </View>
@@ -2005,7 +1949,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   borderBottomLeftRadius: 12,
                   borderBottomRightRadius: 12,
                   overflow: 'hidden',
-                  opacity: pendingPhotosAnimation,
+                  opacity: pendingPhotosAnimation
                 }}
               >
                 <LinearProgress
@@ -2014,12 +1958,12 @@ const PhotosList = ({ searchFromUrl }) => {
                     flex: 1,
                     height: 4,
                     borderBottomLeftRadius: 12,
-                    borderBottomRightRadius: 12,
+                    borderBottomRightRadius: 12
                   }}
                   trackStyle={{
                     backgroundColor: theme.BORDER_LIGHT,
                     borderBottomLeftRadius: 12,
-                    borderBottomRightRadius: 12,
+                    borderBottomRightRadius: 12
                   }}
                 />
               </Animated.View>
@@ -2111,7 +2055,7 @@ const PhotosList = ({ searchFromUrl }) => {
             onActionPress: () => {
               // TODO: Add photo taking functionality
               reload()
-            },
+            }
           }
         case 1: // Starred photos
           return {
@@ -2123,14 +2067,13 @@ const PhotosList = ({ searchFromUrl }) => {
             onActionPress: () => {
               // Switch to global view to discover content
               updateIndex(0)
-            },
+            }
           }
         case 2: // Search
           return {
             icon: 'search',
             title: 'No Results Found',
-            subtitle:
-              "Try different keywords or explore what's trending in your area.",
+            subtitle: "Try different keywords or explore what's trending in your area.",
             actionText: 'Clear Search',
             onActionPress: () => {
               // Clear search input and focus, same as the clear button inside input box
@@ -2140,7 +2083,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 searchBarRef.current.focus()
               }
               reload()
-            },
+            }
           }
         default:
           return {
@@ -2149,7 +2092,7 @@ const PhotosList = ({ searchFromUrl }) => {
             title: 'No Photos Available',
             subtitle: 'Start your journey by taking your first photo!',
             actionText: 'Get Started',
-            onActionPress: reload,
+            onActionPress: reload
           }
       }
     }
@@ -2205,11 +2148,11 @@ const PhotosList = ({ searchFromUrl }) => {
 }
 
 PhotosList.propTypes = {
-  searchFromUrl: PropTypes.string,
+  searchFromUrl: PropTypes.string
 }
 
 PhotosList.defaultProps = {
-  searchFromUrl: null,
+  searchFromUrl: null
 }
 
 export default PhotosList

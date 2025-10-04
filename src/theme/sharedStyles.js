@@ -12,7 +12,7 @@ export const HEADER_HEIGHTS = {
   TOTAL_HEIGHT: 80, // CONTENT_HEIGHT + (PADDING_VERTICAL * 2) + borders/shadows
   // For components that need to account for header overlap
   // Use larger offset for smaller devices (iPhones) due to different safe areas
-  SAFE_AREA_OFFSET: isSmallDevice ? 120 : 100,
+  SAFE_AREA_OFFSET: isSmallDevice ? 120 : 100
 }
 
 // Light theme configuration
@@ -70,7 +70,7 @@ export const LIGHT_THEME = {
   disabledBackground: CONST.SECONDARY_COLOR,
 
   // Aliases for theme consistency
-  interactiveBackground: 'rgba(234, 94, 61, 0.1)',
+  interactiveBackground: 'rgba(234, 94, 61, 0.1)'
 }
 
 // Dark theme configuration
@@ -128,7 +128,7 @@ export const DARK_THEME = {
   disabledBackground: 'rgba(255, 255, 255, 0.1)',
 
   // Aliases for theme consistency
-  interactiveBackground: 'rgba(234, 94, 61, 0.15)',
+  interactiveBackground: 'rgba(234, 94, 61, 0.15)'
 }
 
 // Function to get current theme based on mode
@@ -141,17 +141,17 @@ export const THEME = LIGHT_THEME
 export const SHARED_CONTAINERS = {
   main: {
     flex: 1,
-    backgroundColor: THEME.BACKGROUND,
+    backgroundColor: THEME.BACKGROUND
   },
 
   scrollContainer: {
     flex: 1,
-    backgroundColor: THEME.BACKGROUND,
+    backgroundColor: THEME.BACKGROUND
   },
 
   contentContainer: {
     backgroundColor: THEME.BACKGROUND,
-    paddingBottom: 40,
+    paddingBottom: 40
   },
 
   card: {
@@ -165,11 +165,11 @@ export const SHARED_CONTAINERS = {
     shadowColor: THEME.CARD_SHADOW,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 4
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 8
   },
 
   infoCard: {
@@ -183,12 +183,12 @@ export const SHARED_CONTAINERS = {
     shadowColor: THEME.CARD_SHADOW,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 4
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 8,
-  },
+    elevation: 8
+  }
 }
 
 // Shared text styles
@@ -196,32 +196,32 @@ export const SHARED_TEXT = {
   primary: {
     color: THEME.TEXT_PRIMARY,
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: '400'
   },
 
   secondary: {
     color: THEME.TEXT_SECONDARY,
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '400'
   },
 
   heading: {
     color: THEME.TEXT_PRIMARY,
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '700'
   },
 
   subheading: {
     color: THEME.TEXT_PRIMARY,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
 
   caption: {
     color: THEME.TEXT_SECONDARY,
     fontSize: 12,
-    fontWeight: '500',
-  },
+    fontWeight: '500'
+  }
 }
 
 // Shared header styles
@@ -233,23 +233,23 @@ export const SHARED_HEADER = {
     shadowColor: THEME.HEADER_SHADOW,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 3
   },
 
   title: {
     color: THEME.TEXT_PRIMARY,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600'
   },
 
   subtitle: {
     color: THEME.TEXT_SECONDARY,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500'
   },
 
   contentContainer: {
@@ -258,7 +258,7 @@ export const SHARED_HEADER = {
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: HEADER_HEIGHTS.PADDING_VERTICAL,
-    minHeight: HEADER_HEIGHTS.CONTENT_HEIGHT,
+    minHeight: HEADER_HEIGHTS.CONTENT_HEIGHT
   },
 
   // Reusable header style configurations
@@ -269,21 +269,21 @@ export const SHARED_HEADER = {
     shadowColor: THEME.HEADER_SHADOW,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 3
   },
 
   modalStyle: {
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)'
   },
 
   modalTitleStyle: {
     fontSize: 18,
     fontWeight: 600,
-    color: '#fff',
+    color: '#fff'
   },
 
   // Transparent overlay header style for photo details and similar screens
@@ -292,15 +292,15 @@ export const SHARED_HEADER = {
     height: HEADER_HEIGHTS.TOTAL_HEIGHT,
     ...Platform.select({
       android: {
-        height: HEADER_HEIGHTS.TOTAL_HEIGHT + (StatusBar.currentHeight || 0),
-      },
-    }),
+        height: HEADER_HEIGHTS.TOTAL_HEIGHT + (StatusBar.currentHeight || 0)
+      }
+    })
   },
 
   transparentTitleStyle: {
     fontSize: 16,
     fontWeight: 600,
-    color: THEME.TEXT_PRIMARY,
+    color: THEME.TEXT_PRIMARY
   },
 
   // For Expo Router headers to ensure consistent height
@@ -308,18 +308,17 @@ export const SHARED_HEADER = {
     height: HEADER_HEIGHTS.TOTAL_HEIGHT,
     ...Platform.select({
       android: {
-        height: HEADER_HEIGHTS.TOTAL_HEIGHT + (StatusBar.currentHeight || 0),
-      },
-    }),
+        height: HEADER_HEIGHTS.TOTAL_HEIGHT + (StatusBar.currentHeight || 0)
+      }
+    })
   },
 
   // Dynamic header height calculation utility
   getDynamicHeight: (safeAreaTop, isSmallDevice = false) => {
-    const headerContentHeight =
-      HEADER_HEIGHTS.CONTENT_HEIGHT + HEADER_HEIGHTS.PADDING_VERTICAL * 2
+    const headerContentHeight = HEADER_HEIGHTS.CONTENT_HEIGHT + HEADER_HEIGHTS.PADDING_VERTICAL * 2
     const buffer = isSmallDevice ? 10 : 5
     return safeAreaTop + headerContentHeight + buffer
-  },
+  }
 }
 
 // Shared interactive elements
@@ -330,13 +329,13 @@ export const SHARED_INTERACTIVE = {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: THEME.INTERACTIVE_BORDER,
+    borderColor: THEME.INTERACTIVE_BORDER
   },
 
   buttonText: {
     color: CONST.MAIN_COLOR,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600'
   },
 
   // Primary button styles for forms and actions
@@ -348,13 +347,13 @@ export const SHARED_INTERACTIVE = {
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-    paddingVertical: 16,
+    paddingVertical: 16
   },
 
   primaryButtonTitle: {
     fontSize: 16,
     fontWeight: '600',
-    paddingRight: 8,
+    paddingRight: 8
   },
 
   // Secondary button styles
@@ -364,18 +363,18 @@ export const SHARED_INTERACTIVE = {
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: THEME.BORDER_LIGHT,
-    paddingVertical: 14,
+    paddingVertical: 14
   },
 
   secondaryButtonTitle: {
     ...SHARED_TEXT.secondary,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500'
   },
 
   // Button container for consistent spacing
   buttonContainer: {
-    marginTop: 20,
+    marginTop: 20
   },
 
   statItem: {
@@ -387,7 +386,7 @@ export const SHARED_INTERACTIVE = {
     paddingVertical: 6,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: THEME.INTERACTIVE_BORDER,
+    borderColor: THEME.INTERACTIVE_BORDER
   },
 
   headerButton: {
@@ -400,45 +399,45 @@ export const SHARED_INTERACTIVE = {
     shadowColor: THEME.CARD_SHADOW,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 4,
+    elevation: 4
   },
 
   statText: {
     color: THEME.TEXT_PRIMARY,
     fontSize: 14,
     fontWeight: '600',
-    marginLeft: 6,
-  },
+    marginLeft: 6
+  }
 }
 
 // Shared layout utilities
 export const SHARED_LAYOUT = {
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'center'
   },
 
   spaceBetween: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'center'
   },
 
   centered: {
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
 
   separator: {
     borderBottomWidth: 1,
     borderBottomColor: THEME.CARD_BORDER,
     marginVertical: 12,
-    paddingBottom: 12,
-  },
+    paddingBottom: 12
+  }
 }
 
 // Combined styles object for easy importing
@@ -448,7 +447,7 @@ export const SHARED_STYLES = {
   header: SHARED_HEADER,
   interactive: SHARED_INTERACTIVE,
   layout: SHARED_LAYOUT,
-  theme: THEME,
+  theme: THEME
 }
 
 // Hook to get current theme based on dark mode state
@@ -468,15 +467,15 @@ export const getThemedStyles = (isDark) => {
     containers: {
       main: {
         flex: 1,
-        backgroundColor: currentTheme.BACKGROUND,
+        backgroundColor: currentTheme.BACKGROUND
       },
       scrollContainer: {
         flex: 1,
-        backgroundColor: currentTheme.BACKGROUND,
+        backgroundColor: currentTheme.BACKGROUND
       },
       contentContainer: {
         backgroundColor: currentTheme.BACKGROUND,
-        paddingBottom: 40,
+        paddingBottom: 40
       },
       card: {
         backgroundColor: currentTheme.CARD_BACKGROUND,
@@ -489,29 +488,29 @@ export const getThemedStyles = (isDark) => {
         shadowColor: currentTheme.CARD_SHADOW,
         shadowOffset: {
           width: 0,
-          height: 4,
+          height: 4
         },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-        elevation: 8,
-      },
+        elevation: 8
+      }
     },
     text: {
       primary: {
         color: currentTheme.TEXT_PRIMARY,
         fontSize: 16,
-        fontWeight: '400',
+        fontWeight: '400'
       },
       secondary: {
         color: currentTheme.TEXT_SECONDARY,
         fontSize: 14,
-        fontWeight: '400',
+        fontWeight: '400'
       },
       heading: {
         color: currentTheme.TEXT_PRIMARY,
         fontSize: 18,
-        fontWeight: '700',
-      },
+        fontWeight: '700'
+      }
     },
     interactive: {
       button: {
@@ -520,9 +519,9 @@ export const getThemedStyles = (isDark) => {
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderWidth: 1,
-        borderColor: currentTheme.INTERACTIVE_BORDER,
-      },
+        borderColor: currentTheme.INTERACTIVE_BORDER
+      }
     },
-    theme: currentTheme,
+    theme: currentTheme
   }
 }

@@ -27,7 +27,7 @@ export const useSafeAreaViewStyle = (baseStyle = {}) => {
   return {
     ...baseStyle,
     ...(Platform.OS === 'android' && {
-      paddingTop: statusBarHeight,
-    }),
+      paddingTop: statusBarHeight
+    })
   }
 }

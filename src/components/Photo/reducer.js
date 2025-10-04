@@ -11,7 +11,7 @@ export const initialState = {
   photo: {},
   uuids: [],
   inputText: '',
-  error: '',
+  error: ''
 }
 
 // export default function reducer(state = initialState, action) {
@@ -47,8 +47,8 @@ export async function watchPhoto({ photo, uuid, topOffset }) {
         `,
         variables: {
           photoId: photo.id,
-          uuid,
-        },
+          uuid
+        }
       })
     ).data.watchPhoto
     return watchersCount
@@ -59,7 +59,7 @@ export async function watchPhoto({ photo, uuid, topOffset }) {
       text1: 'Unable to Star photo',
       text2: 'Network Issue?',
       type: 'error',
-      topOffset,
+      topOffset
     })
   }
   return null
@@ -76,8 +76,8 @@ export async function unwatchPhoto({ photo, uuid, topOffset }) {
         `,
         variables: {
           photoId: photo.id,
-          uuid,
-        },
+          uuid
+        }
       })
     ).data.unwatchPhoto
     return watchersCount
@@ -88,7 +88,7 @@ export async function unwatchPhoto({ photo, uuid, topOffset }) {
       text1: 'Unable to un-Star photo',
       text2: 'Maybe Network Issue?',
       type: 'error',
-      topOffset,
+      topOffset
     })
   }
   return null
@@ -110,14 +110,14 @@ export async function banPhoto({ photo, uuid, topOffset }) {
       `,
       variables: {
         uuid,
-        photoId: photo.id,
-      },
+        photoId: photo.id
+      }
     })
 
     Toast.show({
       text1: `Abusive Photo reported`,
       type: 'success',
-      topOffset,
+      topOffset
     })
   } catch (err3) {
     // eslint-disable-next-line no-console
@@ -136,13 +136,13 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
       `,
       variables: {
         photoId: photo.id,
-        uuid,
-      },
+        uuid
+      }
     })
     Toast.show({
       text1: `${photo.video ? 'Video' : 'Photo'} deleted`,
       type: 'success',
-      topOffset,
+      topOffset
     })
     return true
   } catch (err3) {
@@ -152,7 +152,7 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
       text1: 'Unable to delete',
       text2: 'Network Issue?',
       type: 'error',
-      topOffset,
+      topOffset
     })
   }
   return false
@@ -169,7 +169,7 @@ export async function sharePhoto({ photo, photoDetails, topOffset }) {
       text1: 'Unable to share photo',
       text2: 'Wait a bit and try again',
       type: 'error',
-      topOffset,
+      topOffset
     })
   }
   return null
@@ -180,16 +180,8 @@ export async function submitComment({ inputText, photo, uuid, topOffset }) {
     const comment = (
       await CONST.gqlClient.mutate({
         mutation: gql`
-          mutation createComment(
-            $photoId: String!
-            $uuid: String!
-            $description: String!
-          ) {
-            createComment(
-              photoId: $photoId
-              uuid: $uuid
-              description: $description
-            ) {
+          mutation createComment($photoId: String!, $uuid: String!, $description: String!) {
+            createComment(photoId: $photoId, uuid: $uuid, description: $description) {
               id
               active
               comment
@@ -200,8 +192,8 @@ export async function submitComment({ inputText, photo, uuid, topOffset }) {
         variables: {
           photoId: photo.id,
           uuid,
-          description: inputText,
-        },
+          description: inputText
+        }
       })
     ).data.createComment
 
@@ -212,7 +204,7 @@ export async function submitComment({ inputText, photo, uuid, topOffset }) {
       text1: 'Comment added',
       type: 'success',
       topOffset,
-      visibilityTime: 500,
+      visibilityTime: 500
     })
   } catch (err5) {
     console.error({ err5 }) // eslint-disable-line
@@ -220,7 +212,7 @@ export async function submitComment({ inputText, photo, uuid, topOffset }) {
       text1: 'Unable to add comment',
       text2: `${err5}`,
       type: 'error',
-      topOffset,
+      topOffset
     })
   }
 
@@ -248,21 +240,21 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
       `,
       variables: {
         photoId,
-        uuid,
+        uuid
       },
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'network-only'
     })
 
     const { recognitions, isPhotoWatched } = response.data.getPhotoDetails
 
     const comments = response.data.getPhotoDetails.comments.map((comment) => ({
       ...comment,
-      hiddenButtons: true,
+      hiddenButtons: true
     }))
     return {
       comments,
       recognitions,
-      isPhotoWatched,
+      isPhotoWatched
     }
   } catch (err6) {
     console.error({ err6 }) // eslint-disable-line
@@ -275,27 +267,21 @@ export function toggleCommentButtons({ photoDetails, commentId }) {
     comment.id === commentId
       ? {
           ...comment,
-          hiddenButtons: !comment.hiddenButtons,
+          hiddenButtons: !comment.hiddenButtons
         }
       : {
           ...comment,
-          hiddenButtons: true,
-        },
+          hiddenButtons: true
+        }
   )
 
   return {
     ...photoDetails,
-    comments,
+    comments
   }
 }
 
-export async function deleteComment({
-  photo,
-  photoDetails,
-  comment,
-  uuid,
-  topOffset,
-}) {
+export async function deleteComment({ photo, photoDetails, comment, uuid, topOffset }) {
   try {
     const lastComment = (
       await CONST.gqlClient.mutate({
@@ -306,8 +292,8 @@ export async function deleteComment({
         `,
         variables: {
           commentId: comment.id,
-          uuid,
-        },
+          uuid
+        }
       })
     ).data.deleteComment
 
@@ -315,10 +301,10 @@ export async function deleteComment({
     Toast.show({
       text1: 'Comment deleted',
       type: 'success',
-      topOffset,
+      topOffset
     })
     return {
-      ...photoDetails,
+      ...photoDetails
     }
   } catch (err7) {
     // eslint-disable-next-line no-console
@@ -327,7 +313,7 @@ export async function deleteComment({
       text1: 'Unable to delete comment',
       text2: 'Network Issue?',
       type: 'error',
-      topOffset,
+      topOffset
     })
   }
   return null

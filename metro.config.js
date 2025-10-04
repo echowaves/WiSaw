@@ -2,26 +2,26 @@ const { getDefaultConfig } = require('@expo/metro-config')
 
 const config = getDefaultConfig(__dirname, {
   // Enable CSS support
-  isCSSEnabled: true,
+  isCSSEnabled: true
 })
 
 // Performance optimizations
 config.transformer.minifierConfig = {
   mangle: {
-    keep_fnames: true,
+    keep_fnames: true
   },
   output: {
     ascii_only: true,
     quote_style: 3,
-    wrap_iife: true,
+    wrap_iife: true
   },
   sourceMap: {
-    includeSources: false,
+    includeSources: false
   },
   toplevel: false,
   compress: {
-    reduce_funcs: false,
-  },
+    reduce_funcs: false
+  }
 }
 
 // Optimize resolver for faster lookups

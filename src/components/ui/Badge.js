@@ -8,13 +8,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     backgroundColor: '#FF3B30',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   text: {
     color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '600',
-  },
+    fontWeight: '600'
+  }
 })
 
 const flatten = (stylesParam) => {
@@ -22,21 +22,12 @@ const flatten = (stylesParam) => {
   return Array.isArray(stylesParam) ? stylesParam : [stylesParam]
 }
 
-const Badge = ({
-  value,
-  badgeStyle,
-  textStyle,
-  containerStyle,
-  accessibilityLabel,
-}) => {
-  const displayValue =
-    typeof value === 'number' && value > 99 ? '99+' : String(value ?? '')
+const Badge = ({ value, badgeStyle, textStyle, containerStyle, accessibilityLabel }) => {
+  const displayValue = typeof value === 'number' && value > 99 ? '99+' : String(value ?? '')
 
   return (
     <View
-      accessibilityLabel={
-        accessibilityLabel || `Badge count ${displayValue || '0'}`
-      }
+      accessibilityLabel={accessibilityLabel || `Badge count ${displayValue || '0'}`}
       style={flatten(containerStyle)}
     >
       <View style={[styles.badge, ...flatten(badgeStyle)]}>

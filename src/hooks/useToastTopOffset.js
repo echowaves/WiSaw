@@ -15,8 +15,7 @@ const useToastTopOffset = (extraOffset = DEFAULT_EXTRA_OFFSET) => {
   const { top } = useSafeAreaInsets()
 
   return useMemo(() => {
-    const androidStatusBar =
-      Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0
+    const androidStatusBar = Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0
 
     return Math.max(top, androidStatusBar, MIN_PADDING) + extraOffset
   }, [extraOffset, top])

@@ -37,13 +37,13 @@ const ConfirmFriendship = ({ route }) => {
 
   const styles = StyleSheet.create({
     container: {
-      ...SHARED_STYLES.containers.main,
+      ...SHARED_STYLES.containers.main
     },
     scrollView: {
       alignItems: 'center',
       marginHorizontal: 0,
-      paddingBottom: 300,
-    },
+      paddingBottom: 300
+    }
   })
 
   const setContactName = async ({ contactName }) => {
@@ -51,7 +51,7 @@ const ConfirmFriendship = ({ route }) => {
       // eslint-disable-next-line no-console
       console.log('ConfirmFriendship: setContactName called with:', {
         contactName,
-        friendshipUuid,
+        friendshipUuid
       })
 
       await friendsHelper.confirmFriendship({ friendshipUuid, uuid })
@@ -60,14 +60,12 @@ const ConfirmFriendship = ({ route }) => {
 
       await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
       // eslint-disable-next-line no-console
-      console.log(
-        'ConfirmFriendship: Contact name saved locally, reloading friends list',
-      )
+      console.log('ConfirmFriendship: Contact name saved locally, reloading friends list')
 
       setFriendsList(
         await friendsHelper.getEnhancedListOfFriendships({
-          uuid,
-        }),
+          uuid
+        })
       )
 
       reducer.reloadUnreadCountsList({ uuid })
@@ -77,7 +75,7 @@ const ConfirmFriendship = ({ route }) => {
         text2: `You are now friends with ${contactName}`,
         type: 'success',
         position: 'top',
-        topOffset: 60,
+        topOffset: 60
       })
 
       router.dismissAll()
@@ -90,7 +88,7 @@ const ConfirmFriendship = ({ route }) => {
         text2: err.message || err.toString(),
         type: 'error',
         position: 'top',
-        topOffset: 60,
+        topOffset: 60
       })
     }
   }
@@ -109,7 +107,7 @@ const ConfirmFriendship = ({ route }) => {
 }
 
 ConfirmFriendship.propTypes = {
-  route: PropTypes.object.isRequired,
+  route: PropTypes.object.isRequired
 }
 
 export default ConfirmFriendship

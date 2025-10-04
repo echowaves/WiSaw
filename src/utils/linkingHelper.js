@@ -25,16 +25,16 @@ export const linkingConfig = {
               'confirm-friendship/[friendshipUuid]': 'friends/:friendshipUuid',
               chat: 'chat',
               'modal-input': 'input',
-              pinch: 'pinch',
-            },
+              pinch: 'pinch'
+            }
           },
           identity: 'identity',
           friends: 'friendslist',
-          feedback: 'feedback',
-        },
-      },
-    },
-  },
+          feedback: 'feedback'
+        }
+      }
+    }
+  }
 }
 
 // =============================================================================
@@ -67,7 +67,7 @@ const parseFriendshipData = (encodedData) => {
         type: 'friendshipName',
         friendshipUuid: friendshipData.friendshipUuid,
         friendName: friendshipData.friendName,
-        timestamp: friendshipData.timestamp,
+        timestamp: friendshipData.timestamp
       }
     }
 
@@ -75,14 +75,14 @@ const parseFriendshipData = (encodedData) => {
       hasAction: !!friendshipData.action,
       actionValue: friendshipData.action,
       hasUuid: !!friendshipData.friendshipUuid,
-      hasName: !!friendshipData.friendName,
+      hasName: !!friendshipData.friendName
     })
   } catch (error) {
     console.log('Error parsing friendship data:', error)
     console.log('Error details:', {
       name: error.name,
       message: error.message,
-      encodedData,
+      encodedData
     })
   }
 
@@ -101,22 +101,20 @@ const resolveDeepLinkTarget = (rawPath, queryParams) => {
 
   if (sanitizedPath.length) {
     const [primarySegment, secondarySegment] = sanitizedPath
-    const isPhotoRoute =
-      primarySegment === 'photos' || primarySegment === 'shared'
-    const isFriendRoute =
-      primarySegment === 'friends' || primarySegment === 'confirm-friendship'
+    const isPhotoRoute = primarySegment === 'photos' || primarySegment === 'shared'
+    const isFriendRoute = primarySegment === 'friends' || primarySegment === 'confirm-friendship'
 
     if (isPhotoRoute && secondarySegment) {
       return {
         type: 'photo',
-        photoId: secondarySegment.trim(),
+        photoId: secondarySegment.trim()
       }
     }
 
     if (isFriendRoute && secondarySegment) {
       return {
         type: 'friend',
-        friendshipUuid: secondarySegment.trim(),
+        friendshipUuid: secondarySegment.trim()
       }
     }
 
@@ -134,14 +132,14 @@ const resolveDeepLinkTarget = (rawPath, queryParams) => {
   if (queryParams?.photoId) {
     return {
       type: 'photo',
-      photoId: queryParams.photoId,
+      photoId: queryParams.photoId
     }
   }
 
   if (queryParams?.friendshipUuid) {
     return {
       type: 'friend',
-      friendshipUuid: queryParams.friendshipUuid,
+      friendshipUuid: queryParams.friendshipUuid
     }
   }
 
@@ -168,7 +166,7 @@ export const parseDeepLink = (url) => {
           ...host
             .split('/')
             .map((segment) => segment.trim())
-            .filter(Boolean),
+            .filter(Boolean)
         )
       }
 
@@ -177,7 +175,7 @@ export const parseDeepLink = (url) => {
           ...normalizedPath
             .split('/')
             .map((segment) => segment.trim())
-            .filter(Boolean),
+            .filter(Boolean)
         )
       }
 
@@ -189,7 +187,7 @@ export const parseDeepLink = (url) => {
         host,
         pathname: normalizedPath,
         combinedPath,
-        queryParams: params,
+        queryParams: params
       })
 
       // Handle friendship links - new format with type parameter
@@ -239,24 +237,18 @@ export const handleDeepLink = (url, navigation) => {
   try {
     // Navigate to the appropriate screen
     if (linkData.type === 'photo') {
-      console.log(
-        'Navigating to PhotosDetailsShared with photoId:',
-        linkData.photoId,
-      )
+      console.log('Navigating to PhotosDetailsShared with photoId:', linkData.photoId)
       // Navigate to Home drawer screen first, then to the stack screen
       navigation.navigate('Home', {
         screen: 'PhotosDetailsShared',
-        params: { photoId: linkData.photoId },
+        params: { photoId: linkData.photoId }
       })
     } else if (linkData.type === 'friend') {
-      console.log(
-        'Navigating to ConfirmFriendship with friendshipUuid:',
-        linkData.friendshipUuid,
-      )
+      console.log('Navigating to ConfirmFriendship with friendshipUuid:', linkData.friendshipUuid)
       // Navigate to Home drawer screen first, then to the stack screen
       navigation.navigate('Home', {
         screen: 'ConfirmFriendship',
-        params: { friendshipUuid: linkData.friendshipUuid },
+        params: { friendshipUuid: linkData.friendshipUuid }
       })
     }
   } catch (error) {

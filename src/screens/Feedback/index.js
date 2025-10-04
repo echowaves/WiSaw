@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
+  View
 } from 'react-native'
 
 import { gql } from '@apollo/client'
@@ -57,14 +57,14 @@ const FeedbackScreen = () => {
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 600,
-        useNativeDriver: true,
+        useNativeDriver: true
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
         tension: 50,
         friction: 7,
-        useNativeDriver: true,
-      }),
+        useNativeDriver: true
+      })
     ]).start()
   }, [])
 
@@ -75,7 +75,7 @@ const FeedbackScreen = () => {
       setInputText('')
       setIsSubmitting(false)
       setIsFocused(false)
-    }, []),
+    }, [])
   )
 
   const submitFeedback = async ({ feedbackText }) => {
@@ -86,9 +86,7 @@ const FeedbackScreen = () => {
 
     try {
       if (feedbackText.trim().length < 10) {
-        throw Error(
-          'Please provide more detailed feedback (at least 10 characters)',
-        )
+        throw Error('Please provide more detailed feedback (at least 10 characters)')
       }
 
       await CONST.gqlClient.mutate({
@@ -104,8 +102,8 @@ const FeedbackScreen = () => {
         `,
         variables: {
           uuid,
-          description: feedbackText,
-        },
+          description: feedbackText
+        }
       })
 
       // Success haptic and navigation
@@ -121,7 +119,7 @@ const FeedbackScreen = () => {
         text1: 'Thank you! 🎉',
         text2: 'Your feedback has been submitted successfully.',
         topOffset: toastTopOffset,
-        type: 'success',
+        type: 'success'
       })
     } catch (err) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
@@ -129,7 +127,7 @@ const FeedbackScreen = () => {
         text1: 'Oops! Something went wrong',
         text2: err.toString(),
         type: 'error',
-        topOffset: toastTopOffset,
+        topOffset: toastTopOffset
       })
     } finally {
       setIsSubmitting(false)
@@ -142,7 +140,7 @@ const FeedbackScreen = () => {
         text1: 'More details needed',
         text2: 'Please provide at least 10 characters of feedback.',
         type: 'error',
-        topOffset: toastTopOffset,
+        topOffset: toastTopOffset
       })
       return
     }
@@ -168,7 +166,7 @@ const FeedbackScreen = () => {
       disabled={isSubmitting || inputText.trim().length < 10}
       style={{
         marginRight: 10,
-        opacity: isSubmitting || inputText.trim().length < 10 ? 0.5 : 1,
+        opacity: isSubmitting || inputText.trim().length < 10 ? 0.5 : 1
       }}
     >
       {isSubmitting ? (
@@ -183,7 +181,7 @@ const FeedbackScreen = () => {
       onPress={() => router.back()}
       style={{
         marginLeft: 10,
-        padding: 8,
+        padding: 8
       }}
     >
       <FontAwesome name="chevron-left" size={24} color={CONST.MAIN_COLOR} />
@@ -222,17 +220,17 @@ const FeedbackScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.BACKGROUND,
+      backgroundColor: theme.BACKGROUND
     },
     scrollContainer: {
       flex: 1,
-      backgroundColor: theme.BACKGROUND,
+      backgroundColor: theme.BACKGROUND
     },
     contentContainer: {
       backgroundColor: theme.BACKGROUND,
       paddingBottom: 100,
       padding: 20,
-      paddingTop: 30,
+      paddingTop: 30
     },
     headerCard: {
       backgroundColor: theme.CARD_BACKGROUND,
@@ -244,13 +242,13 @@ const FeedbackScreen = () => {
       shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 4,
+        height: 4
       },
       shadowOpacity: 0.3,
       shadowRadius: 8,
       elevation: 8,
       marginBottom: 20,
-      marginHorizontal: 0,
+      marginHorizontal: 0
     },
     iconContainer: {
       alignSelf: 'center',
@@ -260,21 +258,21 @@ const FeedbackScreen = () => {
       backgroundColor: theme.interactiveBackground,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 16,
+      marginBottom: 16
     },
     title: {
       color: theme.TEXT_PRIMARY,
       fontSize: 24,
       fontWeight: '700',
       textAlign: 'center',
-      marginBottom: 8,
+      marginBottom: 8
     },
     subtitle: {
       color: theme.TEXT_SECONDARY,
       fontSize: 16,
       fontWeight: '400',
       textAlign: 'center',
-      lineHeight: 22,
+      lineHeight: 22
     },
     inputCard: {
       backgroundColor: theme.CARD_BACKGROUND,
@@ -285,7 +283,7 @@ const FeedbackScreen = () => {
       shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 4,
+        height: 4
       },
       shadowOpacity: 0.3,
       shadowRadius: 8,
@@ -293,7 +291,7 @@ const FeedbackScreen = () => {
       padding: 0,
       marginBottom: 20,
       marginHorizontal: 0,
-      overflow: 'hidden',
+      overflow: 'hidden'
     },
     textInput: {
       fontSize: 16,
@@ -303,7 +301,7 @@ const FeedbackScreen = () => {
       paddingBottom: 60,
       textAlignVertical: 'top',
       minHeight: 180,
-      lineHeight: 24,
+      lineHeight: 24
     },
     inputFooter: {
       flexDirection: 'row',
@@ -313,16 +311,16 @@ const FeedbackScreen = () => {
       paddingVertical: 12,
       backgroundColor: theme.inputFooterBackground,
       borderTopWidth: 1,
-      borderTopColor: theme.BORDER_LIGHT,
+      borderTopColor: theme.BORDER_LIGHT
     },
     characterCount: {
       fontSize: 14,
       fontWeight: '500',
-      color: theme.TEXT_PRIMARY,
+      color: theme.TEXT_PRIMARY
     },
     validationText: {
       fontSize: 12,
-      color: theme.TEXT_SECONDARY,
+      color: theme.TEXT_SECONDARY
     },
     submitButton: {
       backgroundColor: CONST.MAIN_COLOR,
@@ -335,12 +333,12 @@ const FeedbackScreen = () => {
       shadowColor: CONST.MAIN_COLOR,
       shadowOffset: {
         width: 0,
-        height: 4,
+        height: 4
       },
       shadowOpacity: 0.3,
       shadowRadius: 8,
       elevation: 8,
-      marginBottom: 20,
+      marginBottom: 20
     },
     submitButtonDisabled: {
       backgroundColor: theme.disabledBackground,
@@ -351,44 +349,44 @@ const FeedbackScreen = () => {
       alignItems: 'center',
       justifyContent: 'center',
       shadowOpacity: 0.1,
-      marginBottom: 20,
+      marginBottom: 20
     },
     submitButtonText: {
       color: 'white',
       fontSize: 18,
       fontWeight: '600',
-      marginLeft: 8,
+      marginLeft: 8
     },
     helpCard: {
       backgroundColor: theme.helpCardBackground,
       borderRadius: 12,
       padding: 16,
       borderWidth: 1,
-      borderColor: theme.helpCardBorder,
+      borderColor: theme.helpCardBorder
     },
     helpTitle: {
       fontSize: 16,
       fontWeight: '600',
       color: '#4FC3F7',
-      marginBottom: 8,
+      marginBottom: 8
     },
     helpText: {
       fontSize: 14,
       color: theme.TEXT_PRIMARY,
-      lineHeight: 20,
+      lineHeight: 20
     },
     bulletPoint: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      marginBottom: 6,
+      marginBottom: 6
     },
     bulletText: {
       fontSize: 14,
       color: theme.TEXT_PRIMARY,
       lineHeight: 20,
       marginLeft: 8,
-      flex: 1,
-    },
+      flex: 1
+    }
   })
 
   return (
@@ -408,32 +406,23 @@ const FeedbackScreen = () => {
             <Animated.View
               style={{
                 opacity: fadeAnim,
-                transform: [{ scale: scaleAnim }],
+                transform: [{ scale: scaleAnim }]
               }}
             >
               {/* Header Card */}
               <View style={styles.headerCard}>
                 <View style={styles.iconContainer}>
-                  <FontAwesome5
-                    name="comments"
-                    size={32}
-                    color={CONST.MAIN_COLOR}
-                  />
+                  <FontAwesome5 name="comments" size={32} color={CONST.MAIN_COLOR} />
                 </View>
                 <Text style={styles.title}>We'd Love Your Feedback!</Text>
                 <Text style={styles.subtitle}>
-                  Help us improve WiSaw by sharing your thoughts, suggestions,
-                  or reporting any issues you've encountered.
+                  Help us improve WiSaw by sharing your thoughts, suggestions, or reporting any
+                  issues you've encountered.
                 </Text>
               </View>
 
               {/* Input Card */}
-              <View
-                style={[
-                  styles.inputCard,
-                  { borderColor: getInputBorderColor() },
-                ]}
-              >
+              <View style={[styles.inputCard, { borderColor: getInputBorderColor() }]}>
                 <TextInput
                   multiline
                   numberOfLines={8}
@@ -451,16 +440,9 @@ const FeedbackScreen = () => {
                 />
                 <View style={styles.inputFooter}>
                   <Text style={styles.validationText}>
-                    {inputText.length < 10
-                      ? 'At least 10 characters needed'
-                      : 'Looking good! 👍'}
+                    {inputText.length < 10 ? 'At least 10 characters needed' : 'Looking good! 👍'}
                   </Text>
-                  <Text
-                    style={[
-                      styles.characterCount,
-                      { color: getCharacterCountColor() },
-                    ]}
-                  >
+                  <Text style={[styles.characterCount, { color: getCharacterCountColor() }]}>
                     {maxStringLength - inputText.length}
                   </Text>
                 </View>
@@ -470,8 +452,7 @@ const FeedbackScreen = () => {
               <TouchableOpacity
                 style={[
                   styles.submitButton,
-                  (isSubmitting || inputText.trim().length < 10) &&
-                    styles.submitButtonDisabled,
+                  (isSubmitting || inputText.trim().length < 10) && styles.submitButtonDisabled
                 ]}
                 onPress={handleSubmit}
                 disabled={isSubmitting || inputText.trim().length < 10}
@@ -489,9 +470,7 @@ const FeedbackScreen = () => {
 
               {/* Help Card */}
               <View style={styles.helpCard}>
-                <Text style={styles.helpTitle}>
-                  💡 What to include in your feedback:
-                </Text>
+                <Text style={styles.helpTitle}>💡 What to include in your feedback:</Text>
 
                 <View style={styles.bulletPoint}>
                   <Text style={{ color: '#4FC3F7' }}>•</Text>
@@ -516,9 +495,7 @@ const FeedbackScreen = () => {
 
                 <View style={styles.bulletPoint}>
                   <Text style={{ color: '#4FC3F7' }}>•</Text>
-                  <Text style={styles.bulletText}>
-                    UI/UX feedback and usability improvements
-                  </Text>
+                  <Text style={styles.bulletText}>UI/UX feedback and usability improvements</Text>
                 </View>
               </View>
             </Animated.View>

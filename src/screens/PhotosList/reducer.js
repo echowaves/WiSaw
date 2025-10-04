@@ -22,7 +22,7 @@ export {
   queueFileForUpload,
   removeFromQueue,
   updateQueueItem,
-  uploadItem,
+  uploadItem
 } from './upload/photoUploadService'
 
 // import * as ACTION_TYPES from './action_types'
@@ -69,7 +69,7 @@ export async function getZeroMoment() {
           query zeroMoment {
             zeroMoment
           }
-        `,
+        `
       })
     ).data
     return zeroMoment
@@ -79,13 +79,7 @@ export async function getZeroMoment() {
   return 0
 }
 
-async function requestGeoPhotos({
-  pageNumber,
-  batch,
-  latitude,
-  longitude,
-  zeroMoment,
-}) {
+async function requestGeoPhotos({ pageNumber, batch, latitude, longitude, zeroMoment }) {
   const whenToStop = moment(zeroMoment || 0)
   try {
     const response = await CONST.gqlClient.query({
@@ -129,14 +123,14 @@ async function requestGeoPhotos({
         daysAgo: pageNumber,
         lat: latitude,
         lon: longitude,
-        whenToStop,
-      },
+        whenToStop
+      }
     })
     // console.log(2, typeof response.data.feedByDate.batch)
     return {
       photos: response.data.feedByDate.photos,
       batch: response.data.feedByDate.batch,
-      noMoreData: response.data.feedByDate.noMoreData,
+      noMoreData: response.data.feedByDate.noMoreData
     }
   } catch (err4) {
     // eslint-disable-next-line no-console
@@ -144,7 +138,7 @@ async function requestGeoPhotos({
     return {
       photos: [],
       batch,
-      noMoreData: true,
+      noMoreData: true
     }
   }
 }
@@ -153,11 +147,7 @@ async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
-        query feedForWatcher(
-          $uuid: String!
-          $pageNumber: Int!
-          $batch: String!
-        ) {
+        query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!) {
           feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch) {
             photos {
               row_number
@@ -182,14 +172,14 @@ async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
       variables: {
         uuid,
         pageNumber,
-        batch,
-      },
+        batch
+      }
     })
 
     return {
       photos: response.data.feedForWatcher.photos,
       batch: response.data.feedForWatcher.batch,
-      noMoreData: response.data.feedForWatcher.noMoreData,
+      noMoreData: response.data.feedForWatcher.noMoreData
     }
   } catch (err5) {
     // eslint-disable-next-line no-console
@@ -198,7 +188,7 @@ async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
   return {
     photos: [],
     batch,
-    noMoreData: true,
+    noMoreData: true
   }
 }
 
@@ -206,16 +196,8 @@ async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
-        query feedForTextSearch(
-          $searchTerm: String!
-          $pageNumber: Int!
-          $batch: String!
-        ) {
-          feedForTextSearch(
-            searchTerm: $searchTerm
-            pageNumber: $pageNumber
-            batch: $batch
-          ) {
+        query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: String!) {
+          feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch) {
             photos {
               row_number
               id
@@ -239,14 +221,14 @@ async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
       variables: {
         searchTerm,
         batch,
-        pageNumber,
-      },
+        pageNumber
+      }
     })
 
     return {
       photos: response.data.feedForTextSearch.photos,
       batch: response.data.feedForTextSearch.batch,
-      noMoreData: response.data.feedForTextSearch.noMoreData,
+      noMoreData: response.data.feedForTextSearch.noMoreData
     }
   } catch (err6) {
     // eslint-disable-next-line no-console
@@ -255,7 +237,7 @@ async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
   return {
     photos: [],
     batch,
-    noMoreData: true,
+    noMoreData: true
   }
 }
 
@@ -268,15 +250,11 @@ export async function getPhotos({
   topOffset = 100,
   activeSegment,
   batch,
-  pageNumber,
+  pageNumber
 }) {
   const noMoreData = false
 
-  if (
-    !location ||
-    netAvailable === false ||
-    (activeSegment === 2 && searchTerm.length < 3)
-  ) {
+  if (!location || netAvailable === false || (activeSegment === 2 && searchTerm.length < 3)) {
     // console.log('returning1', {
     //   location,
     //   netAvailable,
@@ -286,7 +264,7 @@ export async function getPhotos({
     return {
       photos: [],
       batch,
-      noMoreData: true,
+      noMoreData: true
     }
   }
   const { latitude, longitude } = location.coords
@@ -300,7 +278,7 @@ export async function getPhotos({
         batch,
         latitude,
         longitude,
-        zeroMoment,
+        zeroMoment
       })
     } else if (activeSegment === 1) {
       responseJson = await requestWatchedPhotos({ uuid, pageNumber, batch })
@@ -308,7 +286,7 @@ export async function getPhotos({
       responseJson = await requestSearchedPhotos({
         pageNumber,
         searchTerm,
-        batch,
+        batch
       })
     }
     return responseJson
@@ -318,13 +296,13 @@ export async function getPhotos({
       text1: 'Error',
       text2: `${err7}`,
       type: 'error',
-      topOffset,
+      topOffset
     })
   }
   return {
     photos: [],
     batch,
-    noMoreData: true,
+    noMoreData: true
   }
 }
 

@@ -14,20 +14,20 @@ export const getDefaultHeaderStyle = (customStyle = {}) => {
     shadowColor: CONST.HEADER_SHADOW_COLOR,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 1,
     shadowRadius: 4,
     elevation: 3,
-    ...customStyle,
+    ...customStyle
   }
 
   return {
     ...baseStyle,
     ...(Platform.OS === 'android' && {
       paddingTop: StatusBar.currentHeight,
-      height: (baseStyle.height || 56) + (StatusBar.currentHeight || 0),
-    }),
+      height: (baseStyle.height || 56) + (StatusBar.currentHeight || 0)
+    })
   }
 }
 
@@ -44,12 +44,12 @@ export const getDefaultScreenOptions = (customOptions = {}) => ({
     fontSize: 18,
     fontWeight: '600',
     color: CONST.TEXT_COLOR,
-    ...customOptions.headerTitleStyle,
+    ...customOptions.headerTitleStyle
   },
   headerTintColor: CONST.MAIN_COLOR,
   animationTypeForReplace: 'push',
   animation: 'slide_from_right',
-  ...customOptions,
+  ...customOptions
 })
 
 /**
@@ -60,14 +60,14 @@ export const getDefaultScreenOptions = (customOptions = {}) => ({
 export const getTransparentHeaderStyle = (customStyle = {}) => {
   const baseStyle = {
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    ...customStyle,
+    ...customStyle
   }
 
   return {
     ...baseStyle,
     ...(Platform.OS === 'android' && {
       paddingTop: StatusBar.currentHeight,
-      height: (baseStyle.height || 56) + (StatusBar.currentHeight || 0),
-    }),
+      height: (baseStyle.height || 56) + (StatusBar.currentHeight || 0)
+    })
   }
 }

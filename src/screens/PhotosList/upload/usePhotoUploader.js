@@ -11,7 +11,7 @@ import {
   initPendingUploads,
   processCompleteUpload,
   queueFileForUpload,
-  removeFromQueue,
+  removeFromQueue
 } from './photoUploadService'
 
 const RETRY_DELAY_MS = 750
@@ -21,13 +21,7 @@ const RETRY_DELAY_MS = 750
  * Encapsulates queue mutations, background retries, and success callbacks so the
  * `PhotosList` screen can stay declarative.
  */
-const usePhotoUploader = ({
-  uuid,
-  setUuid,
-  topOffset,
-  netAvailable,
-  onPhotoUploaded,
-}) => {
+const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable, onPhotoUploaded }) => {
   const [pendingPhotos, setPendingPhotos] = useState([])
   const [isUploading, setIsUploading] = useState(false)
 
@@ -71,7 +65,7 @@ const usePhotoUploader = ({
         text1: 'Upload Error',
         text2: 'User authentication required. Please restart the app.',
         type: 'error',
-        topOffset,
+        topOffset
       })
       return
     }
@@ -95,7 +89,7 @@ const usePhotoUploader = ({
         const uploadedPhoto = await processCompleteUpload({
           item: currentItem,
           uuid: activeUuid,
-          topOffset,
+          topOffset
         })
 
         if (uploadedPhoto) {
@@ -135,14 +129,7 @@ const usePhotoUploader = ({
       processingRef.current = false
       setIsUploading(false)
     }
-  }, [
-    cleanupRetry,
-    netAvailable,
-    onPhotoUploaded,
-    resolveUuid,
-    syncQueueFromStorage,
-    topOffset,
-  ])
+  }, [cleanupRetry, netAvailable, onPhotoUploaded, resolveUuid, syncQueueFromStorage, topOffset])
 
   const enqueueCapture = useCallback(
     async ({ cameraImgUrl, type, location }) => {
@@ -155,7 +142,7 @@ const usePhotoUploader = ({
         })
       }
     },
-    [netAvailable, processQueue, syncQueueFromStorage],
+    [netAvailable, processQueue, syncQueueFromStorage]
   )
 
   const clearPendingQueue = useCallback(async () => {
@@ -170,9 +157,7 @@ const usePhotoUploader = ({
   useEffect(() => {
     initPendingUploads()
       .then(syncQueueFromStorage)
-      .catch((error) =>
-        console.error('Failed to initialize pending uploads', error),
-      )
+      .catch((error) => console.error('Failed to initialize pending uploads', error))
 
     return cleanupRetry
   }, [cleanupRetry, syncQueueFromStorage])
@@ -195,7 +180,7 @@ const usePhotoUploader = ({
     enqueueCapture,
     clearPendingQueue,
     refreshPendingQueue,
-    processQueue,
+    processQueue
   }
 }
 

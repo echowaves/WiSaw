@@ -2,14 +2,7 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import {
-  Modal,
-  Share,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { Modal, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Toast from 'react-native-toast-message'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
@@ -22,7 +15,7 @@ const ShareFriendNameModal = ({
   onClose,
   friendshipUuid,
   friendName,
-  topOffset = 100,
+  topOffset = 100
 }) => {
   const [shareUrl, setShareUrl] = useState('')
   const [isDarkMode] = useAtom(STATE.isDarkMode)
@@ -34,12 +27,12 @@ const ShareFriendNameModal = ({
       // Use the QR-specific deep link for friend name sharing
       const universalLink = createFriendshipNameUniversalLink({
         friendshipUuid,
-        friendName,
+        friendName
       })
       setShareUrl(universalLink)
 
       console.log('Friend name share URL generated:', {
-        shareUrl: universalLink,
+        shareUrl: universalLink
       })
     }
   }, [visible, friendshipUuid, friendName])
@@ -52,7 +45,7 @@ const ShareFriendNameModal = ({
 
       const shareOptions = {
         message,
-        url: shareUrl,
+        url: shareUrl
       }
 
       const result = await Share.share(shareOptions)
@@ -62,7 +55,7 @@ const ShareFriendNameModal = ({
           text1: 'Friend name shared!',
           text2: `Shared ${friendName}'s name`,
           type: 'success',
-          topOffset,
+          topOffset
         })
         onClose()
       }
@@ -72,7 +65,7 @@ const ShareFriendNameModal = ({
         text1: 'Sharing failed',
         text2: 'Unable to share friend name',
         type: 'error',
-        topOffset,
+        topOffset
       })
     }
   }
@@ -82,7 +75,7 @@ const ShareFriendNameModal = ({
       overlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        justifyContent: 'flex-end',
+        justifyContent: 'flex-end'
       },
       modalContainer: {
         backgroundColor: theme.BACKGROUND,
@@ -90,7 +83,7 @@ const ShareFriendNameModal = ({
         borderTopRightRadius: 20,
         paddingBottom: 34, // Safe area padding
         minHeight: 500,
-        maxHeight: '85%',
+        maxHeight: '85%'
       },
       header: {
         flexDirection: 'row',
@@ -99,50 +92,50 @@ const ShareFriendNameModal = ({
         paddingHorizontal: 20,
         paddingVertical: 16,
         borderBottomWidth: 1,
-        borderBottomColor: theme.BORDER,
+        borderBottomColor: theme.BORDER
       },
       title: {
         fontSize: 18,
         fontWeight: '600',
         color: theme.TEXT_PRIMARY,
         flex: 1,
-        textAlign: 'center',
+        textAlign: 'center'
       },
       closeButton: {
-        padding: 4,
+        padding: 4
       },
       contentContainer: {
-        paddingVertical: 10,
+        paddingVertical: 10
       },
       friendInfo: {
         alignItems: 'center',
         paddingVertical: 20,
-        paddingHorizontal: 20,
+        paddingHorizontal: 20
       },
       friendName: {
         fontSize: 20,
         fontWeight: '600',
         color: theme.TEXT_PRIMARY,
         marginTop: 12,
-        marginBottom: 4,
+        marginBottom: 4
       },
       description: {
         fontSize: 14,
         color: theme.TEXT_SECONDARY,
-        textAlign: 'center',
+        textAlign: 'center'
       },
       qrSection: {
         paddingHorizontal: 20,
-        paddingBottom: 20,
+        paddingBottom: 20
       },
       sectionTitle: {
         fontSize: 16,
         fontWeight: '600',
         color: theme.TEXT_PRIMARY,
-        marginBottom: 16,
+        marginBottom: 16
       },
       qrContainer: {
-        alignItems: 'center',
+        alignItems: 'center'
       },
       qrCodeWrapper: {
         padding: 20,
@@ -153,7 +146,7 @@ const ShareFriendNameModal = ({
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 4,
-        marginBottom: 12,
+        marginBottom: 12
       },
       qrPlaceholder: {
         width: 160,
@@ -161,23 +154,23 @@ const ShareFriendNameModal = ({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: theme.SURFACE,
-        borderRadius: 8,
+        borderRadius: 8
       },
       placeholderText: {
         marginTop: 12,
         fontSize: 14,
         color: theme.TEXT_SECONDARY,
-        textAlign: 'center',
+        textAlign: 'center'
       },
       qrDescription: {
         fontSize: 13,
         color: theme.TEXT_SECONDARY,
         textAlign: 'center',
-        maxWidth: 280,
+        maxWidth: 280
       },
       optionsContainer: {
         paddingHorizontal: 20,
-        paddingBottom: 20,
+        paddingBottom: 20
       },
       optionButton: {
         flexDirection: 'row',
@@ -186,7 +179,7 @@ const ShareFriendNameModal = ({
         paddingHorizontal: 16,
         backgroundColor: theme.CARD_BACKGROUND,
         borderRadius: 12,
-        marginBottom: 12,
+        marginBottom: 12
       },
       optionIcon: {
         width: 40,
@@ -194,43 +187,38 @@ const ShareFriendNameModal = ({
         borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 16,
+        marginRight: 16
       },
       optionContent: {
-        flex: 1,
+        flex: 1
       },
       optionTitle: {
         fontSize: 16,
         fontWeight: '600',
         color: theme.TEXT_PRIMARY,
-        marginBottom: 2,
+        marginBottom: 2
       },
       optionDescription: {
         fontSize: 13,
         color: theme.TEXT_SECONDARY,
-        lineHeight: 16,
+        lineHeight: 16
       },
       instructions: {
         paddingHorizontal: 20,
-        paddingBottom: 10,
+        paddingBottom: 10
       },
       instructionText: {
         fontSize: 12,
         color: theme.TEXT_SECONDARY,
         textAlign: 'center',
-        lineHeight: 16,
-      },
+        lineHeight: 16
+      }
     })
 
   const styles = createStyles(theme)
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Header */}
@@ -241,25 +229,15 @@ const ShareFriendNameModal = ({
               onPress={onClose}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <FontAwesome5
-                name="times"
-                size={18}
-                color={theme.TEXT_SECONDARY}
-              />
+              <FontAwesome5 name="times" size={18} color={theme.TEXT_SECONDARY} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.contentContainer}>
             {/* Friend Info */}
             <View style={styles.friendInfo}>
-              <FontAwesome5
-                name="user-circle"
-                size={32}
-                color={CONST.MAIN_COLOR}
-              />
-              <Text style={styles.friendName}>
-                {friendName || 'Unknown Friend'}
-              </Text>
+              <FontAwesome5 name="user-circle" size={32} color={CONST.MAIN_COLOR} />
+              <Text style={styles.friendName}>{friendName || 'Unknown Friend'}</Text>
               <Text style={styles.description}>
                 Share this friend's name to update it on another device
               </Text>
@@ -280,14 +258,8 @@ const ShareFriendNameModal = ({
                     />
                   ) : (
                     <View style={styles.qrPlaceholder}>
-                      <FontAwesome5
-                        name="qrcode"
-                        size={40}
-                        color={theme.TEXT_SECONDARY}
-                      />
-                      <Text style={styles.placeholderText}>
-                        Generating QR Code...
-                      </Text>
+                      <FontAwesome5 name="qrcode" size={40} color={theme.TEXT_SECONDARY} />
+                      <Text style={styles.placeholderText}>Generating QR Code...</Text>
                     </View>
                   )}
                 </View>
@@ -306,31 +278,23 @@ const ShareFriendNameModal = ({
                 onPress={handleShareFriendName}
                 activeOpacity={0.7}
               >
-                <View
-                  style={[styles.optionIcon, { backgroundColor: '#28a745' }]}
-                >
+                <View style={[styles.optionIcon, { backgroundColor: '#28a745' }]}>
                   <FontAwesome5 name="user-tag" size={18} color="white" />
                 </View>
                 <View style={styles.optionContent}>
                   <Text style={styles.optionTitle}>Share Friend Name</Text>
-                  <Text style={styles.optionDescription}>
-                    Send friend's name via text/message
-                  </Text>
+                  <Text style={styles.optionDescription}>Send friend's name via text/message</Text>
                 </View>
-                <FontAwesome5
-                  name="chevron-right"
-                  size={14}
-                  color={theme.TEXT_SECONDARY}
-                />
+                <FontAwesome5 name="chevron-right" size={14} color={theme.TEXT_SECONDARY} />
               </TouchableOpacity>
             </View>
 
             {/* Instructions */}
             <View style={styles.instructions}>
               <Text style={styles.instructionText}>
-                • Scan the QR code above with another device's camera{'\n'}• Or
-                tap "Share Friend Name" to send via text/message{'\n'}• Both
-                devices must have this friendship to update the name
+                • Scan the QR code above with another device's camera{'\n'}• Or tap "Share Friend
+                Name" to send via text/message{'\n'}• Both devices must have this friendship to
+                update the name
               </Text>
             </View>
           </View>

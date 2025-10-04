@@ -18,7 +18,7 @@ const HOST = API_URI.replace('https://', '').replace('/graphql', '')
 // eslint-disable-next-line camelcase
 const api_header = {
   host: HOST,
-  'x-api-key': API_KEY,
+  'x-api-key': API_KEY
 }
 // eslint-disable-next-line camelcase
 // const header_encode = obj => Buffer.from(JSON.stringify(obj), 'utf-8').toString('base64')
@@ -27,7 +27,7 @@ const header_encode = (obj) => base64.encode(JSON.stringify(obj))
 
 // eslint-disable-next-line camelcase
 const connection_url = `${REALTIME_API_URI}?header=${header_encode(
-  api_header,
+  api_header
 )}&payload=${header_encode({})}`
 
 //------------------------------------------------------------------------------------------------
@@ -61,10 +61,8 @@ const createAppSyncGraphQLOperationAdapter = () => ({
     // eslint-disable-next-line no-param-reassign
     options.data = JSON.stringify({
       query:
-        typeof options.query === 'string'
-          ? options.query
-          : graphqlPrinter.print(options.query),
-      variables: options.variables,
+        typeof options.query === 'string' ? options.query : graphqlPrinter.print(options.query),
+      variables: options.variables
     })
 
     // AppSync only permits authorized operations
@@ -79,7 +77,7 @@ const createAppSyncGraphQLOperationAdapter = () => ({
     // Not deleting "query" property as SubscriptionClient validation requires it
 
     next()
-  },
+  }
 })
 
 // const ws = new WebSocket(connection_url)
@@ -93,16 +91,15 @@ const wsLink = new WebSocketLink(
       timeout: 5 * 60 * 1000,
       reconnect: true,
       lazy: true,
-      connectionCallback: (err) =>
-        console.log('connectionCallback', err ? 'ERR' : 'OK', err || ''),
-    },
+      connectionCallback: (err) => console.log('connectionCallback', err ? 'ERR' : 'OK', err || '')
+    }
     // WebSocket,
-  ).use([createAppSyncGraphQLOperationAdapter()]),
+  ).use([createAppSyncGraphQLOperationAdapter()])
 )
 
 const subscriptionClient = new ApolloClient({
   cache: new InMemoryCache(),
-  link: wsLink,
+  link: wsLink
 })
 
 export default subscriptionClient

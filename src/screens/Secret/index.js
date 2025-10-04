@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
-  View,
+  View
 } from 'react-native'
 
 import * as Haptics from 'expo-haptics'
@@ -79,14 +79,14 @@ const SecretScreen = () => {
     'Weak - needs improvement',
     'Fair - getting better',
     'Good - almost there',
-    'Excellent - very secure',
+    'Excellent - very secure'
   ]
   const strengthIcons = [
     'exclamation-triangle',
     'exclamation-circle',
     'shield-alt',
     'shield-alt',
-    'user-shield',
+    'user-shield'
   ]
 
   // Animate components on mount
@@ -95,14 +95,14 @@ const SecretScreen = () => {
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 600,
-        useNativeDriver: true,
+        useNativeDriver: true
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
         tension: 50,
         friction: 7,
-        useNativeDriver: true,
-      }),
+        useNativeDriver: true
+      })
     ]).start()
   }, [])
 
@@ -127,14 +127,14 @@ const SecretScreen = () => {
           oldSecret,
           secret,
           uuid,
-          topOffset: toastTopOffset,
+          topOffset: toastTopOffset
         })
       } else {
         await reducer.registerSecret({
           secret,
           topOffset: toastTopOffset,
           nickName: nickNameText,
-          uuid,
+          uuid
         })
       }
       setNickName(nickNameText)
@@ -144,7 +144,7 @@ const SecretScreen = () => {
         text1: 'Success! 🎉',
         text2: 'Your identity has been secured.',
         topOffset: toastTopOffset,
-        type: 'success',
+        type: 'success'
       })
 
       await resetFields()
@@ -156,32 +156,21 @@ const SecretScreen = () => {
       let errorMessage = 'Failed to save your identity. Please try again.'
 
       if (error.message) {
-        if (
-          error.message.includes('network') ||
-          error.message.includes('Network')
-        ) {
+        if (error.message.includes('network') || error.message.includes('Network')) {
           errorTitle = 'Connection Error'
           errorMessage = 'Please check your internet connection and try again.'
-        } else if (
-          error.message.includes('invalid') ||
-          error.message.includes('Invalid')
-        ) {
+        } else if (error.message.includes('invalid') || error.message.includes('Invalid')) {
           errorTitle = 'Invalid Data'
           errorMessage = 'Please check your information and try again.'
-        } else if (
-          error.message.includes('exists') ||
-          error.message.includes('duplicate')
-        ) {
+        } else if (error.message.includes('exists') || error.message.includes('duplicate')) {
           errorTitle = 'Name Already Taken'
-          errorMessage =
-            'This nickname is already in use. Please choose a different one.'
+          errorMessage = 'This nickname is already in use. Please choose a different one.'
         } else if (
           error.message.includes('unauthorized') ||
           error.message.includes('Unauthorized')
         ) {
           errorTitle = 'Authentication Error'
-          errorMessage =
-            'Your current secret is incorrect. Please verify and try again.'
+          errorMessage = 'Your current secret is incorrect. Please verify and try again.'
         } else {
           errorMessage = error.message
         }
@@ -191,7 +180,7 @@ const SecretScreen = () => {
         text1: errorTitle,
         text2: errorMessage,
         type: 'error',
-        topOffset: toastTopOffset,
+        topOffset: toastTopOffset
       })
     } finally {
       setIsSubmitting(false)
@@ -215,24 +204,16 @@ const SecretScreen = () => {
   const validate = () => {
     const errors = new Map()
 
-    if (
-      !/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(
-        nickNameText.toLowerCase(),
-      )
-    )
+    if (!/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickNameText.toLowerCase()))
       errors.set('nickName', 'Nickname wrong format.')
-    if (nickNameText?.length < minNickNameLength)
-      errors.set('nickName', 'Nickname too short.')
-    if (nickNameText?.length > maxNickNameLength)
-      errors.set('nickName', 'Nickname too long.')
+    if (nickNameText?.length < minNickNameLength) errors.set('nickName', 'Nickname too short.')
+    if (nickNameText?.length > maxNickNameLength) errors.set('nickName', 'Nickname too long.')
     if (secret.length === 0) {
       setErrorsMap(errors)
       return
     }
-    if (secret?.length < minNickNameLength)
-      errors.set('secret', `Secret too short.`)
-    if (secret?.length > maxNickNameLength)
-      errors.set('secret', `Secret too long.`)
+    if (secret?.length < minNickNameLength) errors.set('secret', `Secret too short.`)
+    if (secret?.length > maxNickNameLength) errors.set('secret', `Secret too long.`)
     if (secret !== secretConfirm)
       errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
     if (strength < 3) errors.set('strength', 'Secret is not secure.')
@@ -284,15 +265,15 @@ const SecretScreen = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.BACKGROUND,
+      backgroundColor: theme.BACKGROUND
     },
     scrollView: {
-      flex: 1,
+      flex: 1
     },
     contentContainer: {
       padding: 20,
       paddingTop: 30,
-      paddingBottom: 100,
+      paddingBottom: 100
     },
     headerCard: {
       backgroundColor: theme.CARD_BACKGROUND,
@@ -302,13 +283,13 @@ const SecretScreen = () => {
       shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 1,
       shadowRadius: 8,
       elevation: 4,
       borderWidth: 1,
-      borderColor: theme.BORDER_LIGHT,
+      borderColor: theme.BORDER_LIGHT
     },
     iconContainer: {
       alignSelf: 'center',
@@ -318,20 +299,20 @@ const SecretScreen = () => {
       backgroundColor: 'rgba(234, 94, 61, 0.1)',
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: 20,
+      marginBottom: 20
     },
     title: {
       fontSize: 24,
       fontWeight: '700',
       color: theme.TEXT_PRIMARY,
       textAlign: 'center',
-      marginBottom: 8,
+      marginBottom: 8
     },
     subtitle: {
       fontSize: 16,
       color: theme.TEXT_SECONDARY,
       textAlign: 'center',
-      lineHeight: 22,
+      lineHeight: 22
     },
     formCard: {
       backgroundColor: theme.CARD_BACKGROUND,
@@ -341,36 +322,36 @@ const SecretScreen = () => {
       shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 1,
       shadowRadius: 8,
       elevation: 4,
       borderWidth: 1,
-      borderColor: theme.BORDER_LIGHT,
+      borderColor: theme.BORDER_LIGHT
     },
     inputContainer: {
-      marginBottom: 16,
+      marginBottom: 16
     },
     passwordToggle: {
       position: 'absolute',
       right: 12,
       top: 12,
-      padding: 8,
+      padding: 8
     },
     strengthContainer: {
       marginTop: 8,
-      marginBottom: 16,
+      marginBottom: 16
     },
     strengthHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 8,
+      marginBottom: 8
     },
     strengthText: {
       fontSize: 14,
       fontWeight: '600',
-      marginLeft: 8,
+      marginLeft: 8
     },
     warningCard: {
       backgroundColor: 'rgba(255, 107, 107, 0.1)',
@@ -378,7 +359,7 @@ const SecretScreen = () => {
       padding: 16,
       borderWidth: 1,
       borderColor: 'rgba(255, 107, 107, 0.2)',
-      marginBottom: 20,
+      marginBottom: 20
     },
     warningTitle: {
       fontSize: 16,
@@ -386,53 +367,53 @@ const SecretScreen = () => {
       color: '#FF6B6B',
       marginBottom: 8,
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'center'
     },
     warningText: {
       fontSize: 14,
       color: theme.TEXT_SECONDARY,
-      lineHeight: 20,
+      lineHeight: 20
     },
     resetCard: {
       backgroundColor: 'rgba(255, 149, 0, 0.1)',
       borderRadius: 12,
       padding: 16,
       borderWidth: 1,
-      borderColor: 'rgba(255, 149, 0, 0.2)',
+      borderColor: 'rgba(255, 149, 0, 0.2)'
     },
     resetTitle: {
       fontSize: 16,
       fontWeight: '600',
       color: '#FF9500',
-      marginBottom: 12,
+      marginBottom: 12
     },
     resetText: {
       fontSize: 14,
       color: theme.TEXT_PRIMARY,
       lineHeight: 20,
-      marginBottom: 16,
+      marginBottom: 16
     },
     resetButton: {
       backgroundColor: 'transparent',
       borderColor: '#FF9500',
       borderWidth: 2,
       borderRadius: 12,
-      paddingVertical: 12,
+      paddingVertical: 12
     },
     resetButtonText: {
       color: '#FF9500',
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '600'
     },
     strengthBar: {
       height: 8,
       backgroundColor: theme.BACKGROUND_DISABLED,
       borderRadius: 4,
-      overflow: 'hidden',
+      overflow: 'hidden'
     },
     strengthFill: {
       height: '100%',
-      borderRadius: 4,
+      borderRadius: 4
     },
     submitButton: {
       backgroundColor: CONST.MAIN_COLOR,
@@ -443,22 +424,22 @@ const SecretScreen = () => {
       shadowColor: CONST.MAIN_COLOR,
       shadowOffset: {
         width: 0,
-        height: 4,
+        height: 4
       },
       shadowOpacity: 0.3,
       shadowRadius: 8,
-      elevation: 8,
+      elevation: 8
     },
     submitButtonDisabled: {
       backgroundColor: theme.BACKGROUND_DISABLED,
       shadowOpacity: 0,
-      elevation: 0,
+      elevation: 0
     },
     submitButtonTitle: {
       color: 'white',
       fontSize: 18,
-      fontWeight: '600',
-    },
+      fontWeight: '600'
+    }
   })
 
   const handleReset = async () => {
@@ -467,7 +448,7 @@ const SecretScreen = () => {
     Toast.show({
       text1: 'Secret reset',
       text2: 'enter new Secret',
-      topOffset,
+      topOffset
     })
   }
 
@@ -486,22 +467,16 @@ const SecretScreen = () => {
           <Animated.View
             style={{
               opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
+              transform: [{ scale: scaleAnim }]
             }}
           >
             {/* Header Card */}
             <View style={styles.headerCard}>
               <View style={styles.iconContainer}>
-                <FontAwesome5
-                  name="user-shield"
-                  size={32}
-                  color={CONST.MAIN_COLOR}
-                />
+                <FontAwesome5 name="user-shield" size={32} color={CONST.MAIN_COLOR} />
               </View>
               <Text style={styles.title}>
-                {nickNameEntered
-                  ? 'Update Your Identity'
-                  : 'Create Your Identity'}
+                {nickNameEntered ? 'Update Your Identity' : 'Create Your Identity'}
               </Text>
               <Text style={styles.subtitle}>
                 {nickNameEntered
@@ -526,9 +501,7 @@ const SecretScreen = () => {
                     <FontAwesome5
                       name="user"
                       size={20}
-                      color={
-                        nickNameEntered ? theme.TEXT_DISABLED : CONST.MAIN_COLOR
-                      }
+                      color={nickNameEntered ? theme.TEXT_DISABLED : CONST.MAIN_COLOR}
                     />
                   }
                   value={nickNameText}
@@ -537,9 +510,7 @@ const SecretScreen = () => {
                   errorMessage={errorsMap.get('nickName')}
                   inputStyle={{
                     fontSize: 16,
-                    color: nickNameEntered
-                      ? theme.TEXT_DISABLED
-                      : theme.TEXT_PRIMARY,
+                    color: nickNameEntered ? theme.TEXT_DISABLED : theme.TEXT_PRIMARY
                   }}
                   containerStyle={{ paddingHorizontal: 0 }}
                 />
@@ -558,13 +529,7 @@ const SecretScreen = () => {
                     passwordRules=""
                     keyboardType="default"
                     secureTextEntry={!showOldPassword}
-                    leftIcon={
-                      <FontAwesome5
-                        name="key"
-                        size={20}
-                        color={CONST.MAIN_COLOR}
-                      />
-                    }
+                    leftIcon={<FontAwesome5 name="key" size={20} color={CONST.MAIN_COLOR} />}
                     rightIcon={
                       <FontAwesome5
                         name={showOldPassword ? 'eye-slash' : 'eye'}
@@ -595,16 +560,10 @@ const SecretScreen = () => {
                   keyboardType="default"
                   inputProps={{
                     'data-form-type': 'other',
-                    'data-lpignore': 'true',
+                    'data-lpignore': 'true'
                   }}
                   secureTextEntry={!showPassword}
-                  leftIcon={
-                    <FontAwesome5
-                      name="shield-alt"
-                      size={20}
-                      color={CONST.MAIN_COLOR}
-                    />
-                  }
+                  leftIcon={<FontAwesome5 name="shield-alt" size={20} color={CONST.MAIN_COLOR} />}
                   rightIcon={
                     <FontAwesome5
                       name={showPassword ? 'eye-slash' : 'eye'}
@@ -629,12 +588,7 @@ const SecretScreen = () => {
                         size={16}
                         color={strengthColors[strength]}
                       />
-                      <Text
-                        style={[
-                          styles.strengthText,
-                          { color: strengthColors[strength] },
-                        ]}
-                      >
+                      <Text style={[styles.strengthText, { color: strengthColors[strength] }]}>
                         {strengthLabels[strength]}
                       </Text>
                     </View>
@@ -644,8 +598,8 @@ const SecretScreen = () => {
                           styles.strengthFill,
                           {
                             width: `${strengthValues[strength]}%`,
-                            backgroundColor: strengthColors[strength],
-                          },
+                            backgroundColor: strengthColors[strength]
+                          }
                         ]}
                       />
                     </View>
@@ -654,7 +608,7 @@ const SecretScreen = () => {
                         style={{
                           color: '#FF6B6B',
                           fontSize: 12,
-                          marginTop: 4,
+                          marginTop: 4
                         }}
                       >
                         {errorsMap.get('secret')}
@@ -677,24 +631,16 @@ const SecretScreen = () => {
                   keyboardType="default"
                   inputProps={{
                     'data-form-type': 'other',
-                    'data-lpignore': 'true',
+                    'data-lpignore': 'true'
                   }}
                   secureTextEntry={!showConfirmPassword}
-                  leftIcon={
-                    <FontAwesome5
-                      name="check-circle"
-                      size={20}
-                      color={CONST.MAIN_COLOR}
-                    />
-                  }
+                  leftIcon={<FontAwesome5 name="check-circle" size={20} color={CONST.MAIN_COLOR} />}
                   rightIcon={
                     <FontAwesome5
                       name={showConfirmPassword ? 'eye-slash' : 'eye'}
                       size={20}
                       color={theme.TEXT_SECONDARY}
-                      onPress={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
+                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                       style={styles.passwordToggle}
                     />
                   }
@@ -737,10 +683,7 @@ const SecretScreen = () => {
                 )
               }
               size="lg"
-              buttonStyle={[
-                styles.submitButton,
-                !canSubmit && styles.submitButtonDisabled,
-              ]}
+              buttonStyle={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
               titleStyle={styles.submitButtonTitle}
               onPress={handleSubmit}
               disabled={!canSubmit || isSubmitting}
@@ -750,27 +693,22 @@ const SecretScreen = () => {
             {/* Security Warning */}
             <View style={styles.warningCard}>
               <View style={styles.warningTitle}>
-                <FontAwesome5
-                  name="exclamation-triangle"
-                  size={16}
-                  color="#FF6B6B"
-                />
+                <FontAwesome5 name="exclamation-triangle" size={16} color="#FF6B6B" />
                 <Text
                   style={{
                     color: '#FF6B6B',
                     fontSize: 16,
                     fontWeight: '600',
-                    marginLeft: 8,
+                    marginLeft: 8
                   }}
                 >
                   Important Security Notice
                 </Text>
               </View>
               <Text style={styles.warningText}>
-                • Use a strong, unique secret you'll remember{'\n'}• Write it
-                down and store it securely{'\n'}• We cannot recover lost secrets
-                - no email or phone required{'\n'}• Your identity is completely
-                anonymous and secure
+                • Use a strong, unique secret you'll remember{'\n'}• Write it down and store it
+                securely{'\n'}• We cannot recover lost secrets - no email or phone required{'\n'}•
+                Your identity is completely anonymous and secure
               </Text>
             </View>
 
@@ -779,9 +717,8 @@ const SecretScreen = () => {
               <View style={styles.resetCard}>
                 <Text style={styles.resetTitle}>⚠️ Reset Identity</Text>
                 <Text style={styles.resetText}>
-                  This will disconnect your current identity from this device.
-                  Make sure to save your current secret before proceeding if you
-                  want to restore it later.
+                  This will disconnect your current identity from this device. Make sure to save
+                  your current secret before proceeding if you want to restore it later.
                 </Text>
                 <Button
                   type="outline"
@@ -805,10 +742,10 @@ const SecretScreen = () => {
                         {
                           text: 'Reset',
                           style: 'destructive',
-                          onPress: handleReset,
-                        },
+                          onPress: handleReset
+                        }
                       ],
-                      { cancelable: true },
+                      { cancelable: true }
                     )
                   }}
                 />

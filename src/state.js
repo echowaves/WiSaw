@@ -25,11 +25,10 @@ export const photosList = atom(
   (get) => get(photosListAtom),
   (get, set, updater) => {
     const currentPhotos = get(photosListAtom)
-    const nextPhotos =
-      typeof updater === 'function' ? updater(currentPhotos) : updater
+    const nextPhotos = typeof updater === 'function' ? updater(currentPhotos) : updater
 
     set(photosListAtom, protectPhotos(nextPhotos))
-  },
+  }
 )
 
 export const friendsList = atom([])

@@ -5,15 +5,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 import * as Haptics from 'expo-haptics'
 
-import {
-  Alert,
-  Animated,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { Alert, Animated, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { PanGestureHandler, State } from 'react-native-gesture-handler'
 import Toast from 'react-native-toast-message'
@@ -43,10 +35,10 @@ const FriendsList = () => {
     StyleSheet.create({
       container: {
         flex: 1,
-        backgroundColor: theme.INTERACTIVE_BACKGROUND,
+        backgroundColor: theme.INTERACTIVE_BACKGROUND
       },
       flatList: {
-        flex: 1,
+        flex: 1
       },
       friendItem: {
         backgroundColor: theme.CARD_BACKGROUND,
@@ -56,33 +48,33 @@ const FriendsList = () => {
         borderRadius: 20,
         overflow: 'hidden', // clip inner content to rounded card
         // Rely on container for shadow to match thumbs
-        elevation: 0,
+        elevation: 0
       },
       friendContent: {
         paddingVertical: 16,
         paddingHorizontal: 16,
-        flex: 1,
+        flex: 1
       },
       friendHeader: {
-        ...SHARED_STYLES.layout.spaceBetween,
+        ...SHARED_STYLES.layout.spaceBetween
       },
       friendInfo: {
         marginRight: 12,
-        flex: 1,
+        flex: 1
       },
       friendName: {
         ...SHARED_STYLES.text.subheading,
         fontSize: 16,
-        marginBottom: 4,
+        marginBottom: 4
       },
       friendStatus: {
         ...SHARED_STYLES.text.secondary,
-        fontSize: 14,
+        fontSize: 14
       },
       pendingStatus: {
         fontSize: 14,
         color: theme.TEXT_PRIMARY,
-        fontWeight: '500',
+        fontWeight: '500'
       },
       pendingShareButton: {
         paddingHorizontal: 16,
@@ -102,19 +94,19 @@ const FriendsList = () => {
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 80,
-        minHeight: 36,
+        minHeight: 36
       },
       pendingShareButtonText: {
         color: 'white',
         fontSize: 11,
         fontWeight: '600',
-        marginLeft: 4,
+        marginLeft: 4
       },
       shareButtonContainer: {
         marginTop: 8,
         alignItems: 'flex-start',
         flexDirection: 'row',
-        gap: 8,
+        gap: 8
       },
       pendingDeleteButton: {
         paddingHorizontal: 16,
@@ -134,13 +126,13 @@ const FriendsList = () => {
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 80,
-        minHeight: 36,
+        minHeight: 36
       },
       pendingDeleteButtonText: {
         color: theme.STATUS_ERROR,
         fontSize: 11,
         fontWeight: '600',
-        marginLeft: 4,
+        marginLeft: 4
       },
       swipeAction: {
         position: 'absolute',
@@ -150,7 +142,7 @@ const FriendsList = () => {
         flexDirection: 'row',
         borderTopLeftRadius: 20,
         borderBottomLeftRadius: 20,
-        width: 240,
+        width: 240
       },
       rightSwipeAction: {
         position: 'absolute',
@@ -161,7 +153,7 @@ const FriendsList = () => {
         borderTopLeftRadius: 20,
         borderBottomLeftRadius: 20,
         width: 160,
-        zIndex: 0,
+        zIndex: 0
       },
       leftSwipeAction: {
         position: 'absolute',
@@ -172,7 +164,7 @@ const FriendsList = () => {
         borderTopRightRadius: 20,
         borderBottomRightRadius: 20,
         width: 80,
-        zIndex: 0,
+        zIndex: 0
       },
       stripeOverlayLeft: {
         position: 'absolute',
@@ -185,7 +177,7 @@ const FriendsList = () => {
         overflow: 'hidden',
         // Two segments (share/edit), full width to scale properly
         width: 160,
-        zIndex: 2,
+        zIndex: 2
       },
       stripeOverlayRight: {
         position: 'absolute',
@@ -198,36 +190,36 @@ const FriendsList = () => {
         overflow: 'hidden',
         // Single segment (delete), full width to scale properly
         width: 80,
-        zIndex: 2,
+        zIndex: 2
       },
       swipeActionButton: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 16,
-        height: '100%',
+        height: '100%'
       },
       shareAction: {
         backgroundColor: theme.STATUS_SUCCESS,
         borderTopLeftRadius: 20,
-        borderBottomLeftRadius: 20,
+        borderBottomLeftRadius: 20
       },
       editAction: {
         backgroundColor: theme.STATUS_EDIT,
         borderTopRightRadius: 20,
-        borderBottomRightRadius: 20,
+        borderBottomRightRadius: 20
       },
       deleteAction: {
         backgroundColor: theme.STATUS_ERROR,
         borderTopRightRadius: 20,
-        borderBottomRightRadius: 20,
+        borderBottomRightRadius: 20
       },
       swipeActionText: {
         color: 'white',
         fontSize: 11,
         fontWeight: '600',
         marginTop: 4,
-        textAlign: 'center',
+        textAlign: 'center'
       },
       friendItemContainer: {
         // Exact thumb-like card container
@@ -245,8 +237,8 @@ const FriendsList = () => {
         elevation: 8,
         // Subtle border in dark mode for crisp edges
         borderWidth: isDark ? 1.5 : 0,
-        borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-      },
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent'
+      }
     })
 
   const styles = createStyles(theme, isDarkMode)
@@ -275,11 +267,7 @@ const FriendsList = () => {
     return unsubscribe
   }, [handleAddFriend])
 
-  const handleShareFriend = async ({
-    friendshipUuid,
-    contactName,
-    isPending = true,
-  }) => {
+  const handleShareFriend = async ({ friendshipUuid, contactName, isPending = true }) => {
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 
@@ -288,14 +276,14 @@ const FriendsList = () => {
         setShareModalData({
           friendshipUuid,
           friendName: contactName,
-          isPending,
+          isPending
         })
         setShowShareModal(true)
       } else {
         // Share friend name for confirmed friends
         setShareNameModalData({
           friendshipUuid,
-          friendName: contactName,
+          friendName: contactName
         })
         setShowShareNameModal(true)
       }
@@ -308,7 +296,7 @@ const FriendsList = () => {
         text2: 'Unable to open sharing options',
         visibilityTime: 3000,
         autoHide: true,
-        topOffset: 60,
+        topOffset: 60
       })
     }
   }
@@ -317,7 +305,7 @@ const FriendsList = () => {
     try {
       const success = await friendsHelper.removeFriend({
         uuid,
-        friendshipUuid,
+        friendshipUuid
       })
       if (success) {
         Toast.show({
@@ -326,14 +314,12 @@ const FriendsList = () => {
           text1: 'Friend removed',
           visibilityTime: 2000,
           autoHide: true,
-          topOffset: 60,
+          topOffset: 60
         })
         // need to re-load friendships from local storage
-        const newFriendsList = await friendsHelper.getEnhancedListOfFriendships(
-          {
-            uuid,
-          },
-        )
+        const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
+          uuid
+        })
         setFriendsList(newFriendsList)
       } else {
         Toast.show({
@@ -343,7 +329,7 @@ const FriendsList = () => {
           text2: 'Please try again',
           visibilityTime: 3000,
           autoHide: true,
-          topOffset: 60,
+          topOffset: 60
         })
       }
     } catch (error) {
@@ -356,7 +342,7 @@ const FriendsList = () => {
         text2: 'Please try again',
         visibilityTime: 3000,
         autoHide: true,
-        topOffset: 60,
+        topOffset: 60
       })
     }
   }
@@ -370,9 +356,9 @@ const FriendsList = () => {
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => handleRemoveFriend({ friendshipUuid }),
-        },
-      ],
+          onPress: () => handleRemoveFriend({ friendshipUuid })
+        }
+      ]
     )
   }
 
@@ -389,7 +375,7 @@ const FriendsList = () => {
           uuid,
           topOffset: 0, // We don't have access to topOffset here, use 0
           contactName,
-          autoShare: false, // Don't auto-share, user can share manually later
+          autoShare: false // Don't auto-share, user can share manually later
         })
 
         if (!friendship) {
@@ -401,19 +387,17 @@ const FriendsList = () => {
 
       // Save/update the contact name locally (for both new and existing friendships)
       // eslint-disable-next-line no-console
-      console.log(
-        `Saving contact name "${contactName}" for friendship ${actualFriendshipUuid}`,
-      )
+      console.log(`Saving contact name "${contactName}" for friendship ${actualFriendshipUuid}`)
 
       await friendsHelper.setContactName({
         uuid,
         friendshipUuid: actualFriendshipUuid,
-        contactName,
+        contactName
       })
 
       // reload friendships from server
       const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
+        uuid
       })
       setFriendsList(newFriendsList)
     } catch (error) {
@@ -426,7 +410,7 @@ const FriendsList = () => {
         text2: 'Please try again',
         visibilityTime: 3000,
         autoHide: true,
-        topOffset: 60,
+        topOffset: 60
       })
     }
   }
@@ -434,7 +418,7 @@ const FriendsList = () => {
   const reload = useCallback(async () => {
     try {
       const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
+        uuid
       })
       setFriendsList(newFriendsList)
     } catch (error) {
@@ -447,7 +431,7 @@ const FriendsList = () => {
     setIsRefreshing(true)
     try {
       const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
-        uuid,
+        uuid
       })
       setFriendsList(newFriendsList)
     } catch (error) {
@@ -513,7 +497,7 @@ const FriendsList = () => {
             toValue: 160,
             useNativeDriver: false,
             tension: 100,
-            friction: 8,
+            friction: 8
           }).start()
           setIsSwipeOpen(true)
           setSwipeDirection('right')
@@ -523,7 +507,7 @@ const FriendsList = () => {
             toValue: -80,
             useNativeDriver: false,
             tension: 100,
-            friction: 8,
+            friction: 8
           }).start()
           setIsSwipeOpen(true)
           setSwipeDirection('left')
@@ -533,7 +517,7 @@ const FriendsList = () => {
             toValue: 0,
             useNativeDriver: false,
             tension: 100,
-            friction: 8,
+            friction: 8
           }).start()
           setIsSwipeOpen(false)
           setSwipeDirection(null)
@@ -547,60 +531,60 @@ const FriendsList = () => {
     const shareStripeWidth = translateX.interpolate({
       inputRange: [0, 80, 160],
       outputRange: [8, 80, 80],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
     const editStripeWidth = translateX.interpolate({
       inputRange: [0, 80, 160],
       outputRange: [8, 8, 80],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
 
     // Fade in content (icon + text) when there's enough space
     const shareContentOpacity = translateX.interpolate({
       inputRange: [0, 24, 40],
       outputRange: [0, 0, 1],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
     const editContentOpacity = translateX.interpolate({
       inputRange: [0, 96, 112, 128],
       outputRange: [0, 0, 0, 1],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
     // Increase left padding when actions are minimized (at rest)
     const contentPaddingLeft = translateX.interpolate({
       inputRange: [-80, 0, 160],
       outputRange: [16, 28, 16],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
     // Show left overlay stripes only for right-swipe (hide on left-swipe)
     const leftOverlayOpacity = translateX.interpolate({
       inputRange: [-1, 0, 160],
       outputRange: [0, 1, 1],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
 
     // RIGHT SWIPE LEFT: Expand delete stripe width from 8 -> 80 while content stays put
     const deleteStripeWidth = translateX.interpolate({
       inputRange: [-80, 0],
       outputRange: [80, 8],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
     const deleteContentOpacity = translateX.interpolate({
       inputRange: [-80, -56, -40, 0],
       outputRange: [1, 1, 0, 0],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
 
     // Show action backgrounds only when swiping starts to avoid showing through when minimized
     const rightActionsOpacity = translateX.interpolate({
       inputRange: [-80, 0, 10, 160],
       outputRange: [0, 0, 1, 1],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
     const leftActionsOpacity = translateX.interpolate({
       inputRange: [-80, -10, 0, 160],
       outputRange: [1, 1, 0, 0],
-      extrapolate: 'clamp',
+      extrapolate: 'clamp'
     })
 
     // Note: No opacity applied to the friend item card or stripes to avoid visual fading
@@ -610,7 +594,7 @@ const FriendsList = () => {
         toValue: 0,
         useNativeDriver: false,
         tension: 100,
-        friction: 8,
+        friction: 8
       }).start(() => {
         currentTranslateXRef.current = 0
         gestureStartOffsetRef.current = 0
@@ -624,7 +608,7 @@ const FriendsList = () => {
       handleShareFriend({
         friendshipUuid: friend.friendshipUuid,
         contactName: displayName,
-        isPending: false,
+        isPending: false
       })
     }
 
@@ -636,19 +620,14 @@ const FriendsList = () => {
 
     const handleDeleteFriend = () => {
       closeSwipe()
-      Alert.alert(
-        'Remove Friend',
-        `Are you sure you want to remove ${displayName}?`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Remove',
-            style: 'destructive',
-            onPress: () =>
-              handleRemoveFriend({ friendshipUuid: friend.friendshipUuid }),
-          },
-        ],
-      )
+      Alert.alert('Remove Friend', `Are you sure you want to remove ${displayName}?`, [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
+        }
+      ])
     }
 
     return (
@@ -715,11 +694,11 @@ const FriendsList = () => {
                     translateX: translateX.interpolate({
                       inputRange: [-80, 0, 160],
                       outputRange: [0, 0, 160],
-                      extrapolate: 'clamp',
-                    }),
-                  },
-                ],
-              },
+                      extrapolate: 'clamp'
+                    })
+                  }
+                ]
+              }
             ]}
           >
             <TouchableOpacity
@@ -735,8 +714,8 @@ const FriendsList = () => {
                     params: {
                       chatUuid: friend?.chatUuid,
                       contact: JSON.stringify(friend?.contact),
-                      friendshipUuid: friend?.friendshipUuid,
-                    },
+                      friendshipUuid: friend?.friendshipUuid
+                    }
                   })
                 }
               }}
@@ -752,7 +731,7 @@ const FriendsList = () => {
                   handleShareFriend({
                     friendshipUuid: friend.friendshipUuid,
                     contactName: displayName,
-                    isPending: true,
+                    isPending: true
                   })
                 }
               }}
@@ -764,26 +743,18 @@ const FriendsList = () => {
                 <View style={styles.friendContent}>
                   <View style={styles.friendHeader}>
                     <View style={styles.friendInfo}>
-                      <Text
-                        style={styles.friendName}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
+                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode="tail">
                         {displayName}
                       </Text>
                       <>
-                        <View
-                          style={{ flexDirection: 'row', alignItems: 'center' }}
-                        >
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <FontAwesome5
                             name="clock"
                             size={12}
                             color={theme.TEXT_PRIMARY}
                             style={{ marginRight: 6 }}
                           />
-                          <Text style={styles.pendingStatus}>
-                            Waiting for confirmation
-                          </Text>
+                          <Text style={styles.pendingStatus}>Waiting for confirmation</Text>
                         </View>
                         {/* Share and Delete buttons container */}
                         <View style={styles.shareButtonContainer}>
@@ -793,7 +764,7 @@ const FriendsList = () => {
                               handleShareFriend({
                                 friendshipUuid: friend.friendshipUuid,
                                 contactName: displayName,
-                                isPending: true,
+                                isPending: true
                               })
                             }
                             activeOpacity={0.5}
@@ -803,31 +774,25 @@ const FriendsList = () => {
                               top: 15,
                               bottom: 15,
                               left: 15,
-                              right: 15,
+                              right: 15
                             }}
                             pressRetentionOffset={{
                               top: 20,
                               bottom: 20,
                               left: 20,
-                              right: 20,
+                              right: 20
                             }}
                             importantForAccessibility="yes"
                           >
-                            <FontAwesome5
-                              name="share-alt"
-                              size={12}
-                              color="white"
-                            />
-                            <Text style={styles.pendingShareButtonText}>
-                              Share
-                            </Text>
+                            <FontAwesome5 name="share-alt" size={12} color="white" />
+                            <Text style={styles.pendingShareButtonText}>Share</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             style={[styles.pendingDeleteButton]}
                             onPress={() =>
                               handleDeletePendingFriend({
                                 friendshipUuid: friend.friendshipUuid,
-                                contactName: displayName,
+                                contactName: displayName
                               })
                             }
                             activeOpacity={0.5}
@@ -837,24 +802,18 @@ const FriendsList = () => {
                               top: 15,
                               bottom: 15,
                               left: 15,
-                              right: 15,
+                              right: 15
                             }}
                             pressRetentionOffset={{
                               top: 20,
                               bottom: 20,
                               left: 20,
-                              right: 20,
+                              right: 20
                             }}
                             importantForAccessibility="yes"
                           >
-                            <FontAwesome5
-                              name="trash"
-                              size={12}
-                              color={theme.STATUS_ERROR}
-                            />
-                            <Text style={styles.pendingDeleteButtonText}>
-                              Delete
-                            </Text>
+                            <FontAwesome5 name="trash" size={12} color={theme.STATUS_ERROR} />
+                            <Text style={styles.pendingDeleteButtonText}>Delete</Text>
                           </TouchableOpacity>
                         </View>
                       </>
@@ -863,26 +822,15 @@ const FriendsList = () => {
                   </View>
                 </View>
               ) : (
-                <Animated.View
-                  style={[
-                    styles.friendContent,
-                    { paddingLeft: contentPaddingLeft },
-                  ]}
-                >
+                <Animated.View style={[styles.friendContent, { paddingLeft: contentPaddingLeft }]}>
                   <View style={styles.friendHeader}>
                     <View style={styles.friendInfo}>
-                      <Text
-                        style={styles.friendName}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
+                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode="tail">
                         {displayName}
                       </Text>
                       <>
                         <Text style={styles.friendStatus}>
-                          {hasUnread
-                            ? `${friend.unreadCount} new messages`
-                            : ''}
+                          {hasUnread ? `${friend.unreadCount} new messages` : ''}
                         </Text>
                       </>
                     </View>
@@ -900,24 +848,18 @@ const FriendsList = () => {
             {/* Left edge (for right swipe -> share/edit). Two segments; blue grows first, yellow follows */}
             <Animated.View
               pointerEvents="none"
-              style={[
-                styles.stripeOverlayLeft,
-                { opacity: leftOverlayOpacity },
-              ]}
+              style={[styles.stripeOverlayLeft, { opacity: leftOverlayOpacity }]}
             >
               <View style={{ flexDirection: 'row', height: '100%' }}>
                 <Animated.View
-                  style={[
-                    styles.shareAction,
-                    { width: shareStripeWidth, height: '100%' },
-                  ]}
+                  style={[styles.shareAction, { width: shareStripeWidth, height: '100%' }]}
                 >
                   <Animated.View
                     style={{
                       flex: 1,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      opacity: shareContentOpacity,
+                      opacity: shareContentOpacity
                     }}
                   >
                     <FontAwesome5 name="share-alt" size={18} color="white" />
@@ -925,17 +867,14 @@ const FriendsList = () => {
                   </Animated.View>
                 </Animated.View>
                 <Animated.View
-                  style={[
-                    styles.editAction,
-                    { width: editStripeWidth, height: '100%' },
-                  ]}
+                  style={[styles.editAction, { width: editStripeWidth, height: '100%' }]}
                 >
                   <Animated.View
                     style={{
                       flex: 1,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      opacity: editContentOpacity,
+                      opacity: editContentOpacity
                     }}
                   >
                     <FontAwesome5 name="edit" size={18} color="white" />
@@ -954,7 +893,7 @@ const FriendsList = () => {
                 style={{
                   flex: 1,
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  justifyContent: 'center'
                 }}
                 onPress={handleDeleteFriend}
                 activeOpacity={0.7}
@@ -962,7 +901,7 @@ const FriendsList = () => {
                 <Animated.View
                   style={{
                     alignItems: 'center',
-                    opacity: deleteContentOpacity,
+                    opacity: deleteContentOpacity
                   }}
                 >
                   <FontAwesome5 name="trash" size={18} color="white" />
@@ -976,9 +915,7 @@ const FriendsList = () => {
     )
   })
 
-  const renderFriend = ({ item: friend }) => {
-    return <FriendItem friend={friend} />
-  }
+  const renderFriend = ({ item: friend }) => <FriendItem friend={friend} />
 
   if (!friendsList || friendsList.length === 0) {
     return (
@@ -1049,7 +986,7 @@ const FriendsList = () => {
           style={styles.flatList}
           contentContainerStyle={{
             paddingBottom: 20,
-            flexGrow: 1,
+            flexGrow: 1
           }}
           showsVerticalScrollIndicator={false}
           refreshing={isRefreshing}
@@ -1062,7 +999,7 @@ const FriendsList = () => {
           getItemLayout={(data, index) => ({
             length: 80, // Approximate height of each friend item
             offset: 80 * index,
-            index,
+            index
           })}
         />
       </View>

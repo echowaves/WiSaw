@@ -8,13 +8,7 @@ import Toast from 'react-native-toast-message'
 /**
  * Create sharing content for different contexts
  */
-export const createShareContent = ({
-  type,
-  photo,
-  photoDetails,
-  friendshipUuid,
-  contactName,
-}) => {
+export const createShareContent = ({ type, photo, photoDetails, friendshipUuid, contactName }) => {
   if (type === 'photo' && photo) {
     const url = `https://link.wisaw.com/photos/${photo.id}`
     let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}\n`
@@ -28,7 +22,7 @@ export const createShareContent = ({
     }
 
     return {
-      message: `${message}\n\n${url}\n\n`,
+      message: `${message}\n\n${url}\n\n`
     }
   }
 
@@ -37,7 +31,7 @@ export const createShareContent = ({
     const message = `${contactName || 'You'}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store.`
 
     return {
-      message: `${message}\n\n${url}\n\n`,
+      message: `${message}\n\n${url}\n\n`
     }
   }
 
@@ -53,7 +47,7 @@ export const shareContent = async ({
   photoDetails,
   friendshipUuid,
   contactName,
-  topOffset = 100,
+  topOffset = 100
 }) => {
   try {
     // Create sharing content
@@ -62,7 +56,7 @@ export const shareContent = async ({
       photo,
       photoDetails,
       friendshipUuid,
-      contactName,
+      contactName
     })
 
     if (!content) {
@@ -71,7 +65,7 @@ export const shareContent = async ({
 
     // Use React Native's built-in Share API for sharing text and links
     const shareOptions = {
-      message: content.message,
+      message: content.message
     }
 
     const result = await Share.share(shareOptions)
@@ -79,12 +73,9 @@ export const shareContent = async ({
     // Show success toast
     Toast.show({
       text1: 'Shared successfully!',
-      text2:
-        result.action === Share.sharedAction
-          ? 'Content shared'
-          : 'Share dismissed',
+      text2: result.action === Share.sharedAction ? 'Content shared' : 'Share dismissed',
       type: 'success',
-      topOffset,
+      topOffset
     })
 
     return { success: true, action: result.action }
@@ -96,7 +87,7 @@ export const shareContent = async ({
       text1: 'Sharing failed',
       text2: error.message || 'Unable to share content',
       type: 'error',
-      topOffset,
+      topOffset
     })
 
     return { success: false, error: error.message }
@@ -106,30 +97,24 @@ export const shareContent = async ({
 /**
  * Share a photo with simplified interface
  */
-export const sharePhoto = async (photo, photoDetails, topOffset = 100) => {
-  return shareContent({
+export const sharePhoto = async (photo, photoDetails, topOffset = 100) =>
+  shareContent({
     type: 'photo',
     photo,
     photoDetails,
-    topOffset,
+    topOffset
   })
-}
 
 /**
  * Share a friendship request with simplified interface
  */
-export const shareFriendship = async (
-  friendshipUuid,
-  contactName,
-  topOffset = 100,
-) => {
-  return shareContent({
+export const shareFriendship = async (friendshipUuid, contactName, topOffset = 100) =>
+  shareContent({
     type: 'friend',
     friendshipUuid,
     contactName,
-    topOffset,
+    topOffset
   })
-}
 
 /**
  * Generic share function with native sheet (legacy compatibility)
@@ -140,14 +125,13 @@ export const shareWithNativeSheet = async ({
   photoDetails,
   friendshipUuid,
   contactName,
-  topOffset = 100,
-}) => {
-  return shareContent({
+  topOffset = 100
+}) =>
+  shareContent({
     type,
     photo,
     photoDetails,
     friendshipUuid,
     contactName,
-    topOffset,
+    topOffset
   })
-}
