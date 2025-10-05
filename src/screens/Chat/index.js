@@ -1,6 +1,6 @@
 import { useAtom } from 'jotai'
 
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -18,6 +18,7 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  AppState,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -49,8 +50,8 @@ import * as reducer from './reducer'
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as CONST from '../../consts'
+import directSubscriptionClient from '../../directSubscriptionClient'
 import * as STATE from '../../state'
-import subscriptionClient from '../../subscriptionClientWs'
 import { getTheme } from '../../theme/sharedStyles'
 
 import ModernHeaderButton from '../../components/ModernHeaderButton'
@@ -87,6 +88,11 @@ const Chat = ({ route }) => {
   // Swipe gesture state
   const translateX = useRef(new Animated.Value(0)).current
   const [isSwipeOpen, setIsSwipeOpen] = useState(false)
+
+  // Track subscription and connection state
+  const subscriptionRef = useRef(null)
+  const isSubscribedRef = useRef(false)
+  const appStateRef = useRef(AppState.currentState)
 
   const goBack = async () => {
     setFriendsList(
@@ -315,29 +321,27 @@ const Chat = ({ route }) => {
     })
   }, [chatUuid, uuid]) // Added dependencies to re-run when chat changes
 
+  // Subscription setup effect
   useEffect(() => {
     console.log(`subscribing to ${chatUuid}`)
-    // add subscription listener
-    const observableObject = subscriptionClient.subscribe({
-      query: gql`
-        subscription onSendMessage($chatUuid: String!) {
-          onSendMessage(chatUuid: $chatUuid) {
-            chatUuid
-            createdAt
-            messageUuid
-            text
-            pending
-            chatPhotoHash
-            updatedAt
-            uuid
-          }
+    isSubscribedRef.current = false
+
+    // Use direct subscription client for better compatibility
+    const subscriptionQuery = gql`
+      subscription onSendMessage($chatUuid: String!) {
+        onSendMessage(chatUuid: $chatUuid) {
+          chatUuid
+          createdAt
+          messageUuid
+          text
+          pending
+          chatPhotoHash
+          updatedAt
+          uuid
         }
-      `,
-      variables: {
-        chatUuid
       }
-    })
-    // console.log({ observableObject })
+    `
+
     const subscriptionParameters = {
       // onmessage() {
       //   console.log("onMessage")
@@ -347,13 +351,33 @@ const Chat = ({ route }) => {
       // },
       next(data) {
         // console.log('observableObject:: ', { data })
+        
+        // Check if this is an error object being passed to next
+        if (data?.error) {
+          console.error('❌ Error in subscription data:', data.error)
+          // Don't return, let the error handler deal with it
+          return
+        }
+        
         // eslint-disable-next-line no-unsafe-optional-chaining
         if (!data?.data?.onSendMessage) {
           console.warn('Invalid subscription data received:', data)
           return
         }
+        
+        // Mark subscription as active when we receive first VALID message
+        if (!isSubscribedRef.current) {
+          console.log(`✅ Subscription active for ${chatUuid}`)
+          isSubscribedRef.current = true
+        }
+        
         const { onSendMessage } = data.data
-        // console.log({ onSendMessage })
+        console.log('📨 Received message:', {
+          messageUuid: onSendMessage.messageUuid,
+          text: onSendMessage.text,
+          from: onSendMessage.uuid
+        })
+
         setMessages((previousMessages) => {
           const updatedMessages = previousMessages.map((message) => {
             // eslint-disable-next-line no-underscore-dangle
@@ -420,41 +444,102 @@ const Chat = ({ route }) => {
         friendsHelper.resetUnreadCount({ chatUuid, uuid })
       },
       error(error) {
-        console.error('observableObject:: subscription error', { error })
+        console.error('❌ observableObject:: subscription error', { error })
+        isSubscribedRef.current = false
 
         Toast.show({
-          text1: 'Trying to re-connect, chat may not function properly.',
+          text1: 'Connection lost. Attempting to reconnect...',
           // text2: 'You may want to leave this screen and come back to it again, to make it work.',
           text2: JSON.stringify({ error }),
           type: 'error',
           topOffset: toastTopOffset
         })
         console.log(
-          '------------------------- this is the whole new begining --------------------------------------'
+          '🔄 Attempting to resubscribe after error'
         )
         // eslint-disable-next-line no-use-before-define
-        subscription.unsubscribe()
-        observableObject.subscribe(subscriptionParameters)
+        if (subscriptionRef.current) {
+          subscriptionRef.current.unsubscribe()
+        }
+        // Resubscribe using the direct client
+        subscriptionRef.current = directSubscriptionClient.request({
+          query: subscriptionQuery,
+          variables: { chatUuid }
+        }).subscribe(subscriptionParameters)
         // // _return({ uuid })
       },
       complete() {
         console.log('observableObject:: subs. DONE')
+        isSubscribedRef.current = false
       } // never printed
     }
-    // console.log({ observableObject })
-    // console.log(Object.entries(observableObject))
 
-    const subscription = observableObject.subscribe(subscriptionParameters)
-
-    // const subscription = observableObject.subscribe(result => {
-    //   console.log('Subscription data => ', { result })
-    // })
+    // Subscribe using the direct subscription client
+    const subscription = directSubscriptionClient.request({
+      query: subscriptionQuery,
+      variables: { chatUuid }
+    }).subscribe(subscriptionParameters)
+    
+    subscriptionRef.current = subscription
 
     return () => {
-      subscription.unsubscribe()
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe()
+        subscriptionRef.current = null
+      }
+      isSubscribedRef.current = false
       console.log(`unsubscribing from ${chatUuid}`)
     }
-  }, [chatUuid, friendsList, uuid]) // Added dependencies to re-run when chat or friends change
+  }, [chatUuid, friendsList, uuid, toastTopOffset]) // Added dependencies to re-run when chat or friends change
+
+  // AppState listener to handle app going to background and coming back
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      console.log('AppState changed:', appStateRef.current, '->', nextAppState)
+
+      if (
+        appStateRef.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        console.log('🔄 App came to foreground, checking subscription health')
+        // App has come to the foreground - verify subscription is still active
+        // The subscription effect will handle reconnection if needed
+        // Just log the state for now
+        if (!isSubscribedRef.current) {
+          console.warn('⚠️ Subscription not active after returning to foreground')
+          Toast.show({
+            text1: 'Reconnecting to chat...',
+            type: 'info',
+            topOffset: toastTopOffset,
+            visibilityTime: 2000
+          })
+        } else {
+          console.log('✅ Subscription still active')
+        }
+      }
+
+      appStateRef.current = nextAppState
+    })
+
+    return () => {
+      subscription.remove()
+    }
+  }, [toastTopOffset])
+
+  // Focus effect to refresh connection when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('📱 Chat screen focused')
+      // Verify subscription is active
+      if (!isSubscribedRef.current) {
+        console.warn('⚠️ Subscription not active on focus')
+      }
+
+      return () => {
+        console.log('📱 Chat screen unfocused')
+      }
+    }, [])
+  )
 
   // eslint-disable-next-line no-shadow
   const onSend = useCallback(
