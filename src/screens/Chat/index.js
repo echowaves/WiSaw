@@ -1,62 +1,45 @@
-import { useAtom } from 'jotai'
-
-import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useAtom } from 'jotai'
+import { useCallback, useState } from 'react'
 
-import * as MediaLibrary from 'expo-media-library'
-import moment from 'moment'
-import { Bubble, GiftedChat, InputToolbar, Send, Time } from 'react-native-gifted-chat'
-// import { v4 as uuidv4 } from 'uuid' // Replace with Expo Crypto
-
-import * as Crypto from 'expo-crypto'
-import * as FileSystem from 'expo-file-system'
-import * as ImagePicker from 'expo-image-picker'
-import * as Linking from 'expo-linking'
+import { GiftedChat } from 'react-native-gifted-chat'
 
 import {
-  ActivityIndicator,
-  Alert,
   Animated,
-  AppState,
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
-  // ScrollView,
   View
 } from 'react-native'
 
-import * as Haptics from 'expo-haptics'
-import { PanGestureHandler, State } from 'react-native-gesture-handler'
-
-// import * as FileSystem from 'expo-file-system'
-import Toast from 'react-native-toast-message'
-
-import {
-  FontAwesome,
-  // Ionicons,
-  MaterialCommunityIcons
-} from '@expo/vector-icons'
-
-import { gql } from '@apollo/client'
-
+import { FontAwesome } from '@expo/vector-icons'
 import PropTypes from 'prop-types'
+import { PanGestureHandler } from 'react-native-gesture-handler'
+
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
-
-import * as reducer from './reducer'
-
-import * as friendsHelper from '../FriendsList/friends_helper'
-
-import * as CONST from '../../consts'
-import directSubscriptionClient from '../../directSubscriptionClient'
+import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
-
-import ModernHeaderButton from '../../components/ModernHeaderButton'
-import useToastTopOffset from '../../hooks/useToastTopOffset'
+import * as friendsHelper from '../FriendsList/friends_helper'
 import ChatPhoto from './ChatPhoto'
+
+// Custom hooks
+import { useChatDeletion } from './useChatDeletion'
+import { useChatSubscription } from './useChatSubscription'
+import { useMediaUpload } from './useMediaUpload'
+import { useMessages } from './useMessages'
+import { useSwipeGesture } from './useSwipeGesture'
+
+// Custom components
+import {
+  ChatBubble,
+  ChatComposer,
+  ChatInputToolbar,
+  ChatLoading,
+  ChatSend,
+  ChatTime
+} from './ChatComponents'
 
 const Chat = ({ route }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -64,35 +47,17 @@ const Chat = ({ route }) => {
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const toastTopOffset = useToastTopOffset()
-
   const theme = getTheme(isDarkMode)
-
-  // Get safe area view style for proper status bar handling on Android
   const safeAreaViewStyle = useSafeAreaViewStyle()
 
   const { chatUuid, contact, friendshipUuid } = route.params
 
-  const navigation = useNavigation()
-
-  const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
 
   // Handle text input changes
   const handleTextChange = useCallback((newText) => {
-    console.log('handleTextChange called with:', newText)
     setText(newText)
   }, [])
-  // .format("YYYY-MM-DD HH:mm:ss.SSS")
-  // const [lastRead, setLastRead] = useState(moment())
-
-  // Swipe gesture state
-  const translateX = useRef(new Animated.Value(0)).current
-  const [isSwipeOpen, setIsSwipeOpen] = useState(false)
-
-  // Track subscription and connection state
-  const subscriptionRef = useRef(null)
-  const isSubscribedRef = useRef(false)
-  const appStateRef = useRef(AppState.currentState)
 
   const goBack = async () => {
     setFriendsList(
@@ -100,511 +65,53 @@ const Chat = ({ route }) => {
         uuid
       })
     )
-
     router.replace('/friends')
   }
 
-  // Handle swipe gesture for delete chat
-  const handleSwipeGesture = (event) => {
-    const { translationX, state } = event.nativeEvent
+  // Custom hooks for chat functionality
+  const { handleDeleteChat } = useChatDeletion({
+    uuid,
+    friendshipUuid,
+    contact,
+    setFriendsList,
+    toastTopOffset
+  })
 
-    if (state === State.ACTIVE) {
-      // Only allow swipe to the left (negative translation)
-      if (translationX < 0) {
-        const clampedTranslation = Math.max(translationX, -120)
-        translateX.setValue(clampedTranslation)
-      }
-    } else if (state === State.END || state === State.CANCELLED) {
-      // Determine if swipe should trigger delete action
-      if (translationX < -60) {
-        // Trigger delete chat action
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-        handleDeleteChat()
-        // Reset swipe position
-        Animated.spring(translateX, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8
-        }).start()
-      } else {
-        // Close the swipe action
-        Animated.spring(translateX, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8
-        }).start()
-      }
-    }
-  }
+  const { translateX, handleSwipeGesture } = useSwipeGesture({
+    onDelete: handleDeleteChat
+  })
 
-  // Handle delete chat functionality
-  const handleDeleteChat = () => {
-    // Parse contact name from JSON string if needed
-    const contactName =
-      typeof contact === 'string' && contact.startsWith('"')
-        ? JSON.parse(contact)
-        : contact || 'this friend'
+  const { messages, setMessages, onSend, onLoadEarlier } = useMessages({
+    chatUuid,
+    uuid,
+    friendsList,
+    setText,
+    toastTopOffset
+  })
 
-    Alert.alert(
-      'Delete Chat',
-      `Are you sure you want to delete all messages with ${contactName}? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Remove the friend which will also delete the chat
-              const success = await friendsHelper.removeFriend({
-                uuid,
-                friendshipUuid
-              })
+  const { pickAsset, takePhoto } = useMediaUpload({
+    chatUuid,
+    uuid,
+    friendsList,
+    setMessages,
+    toastTopOffset
+  })
 
-              if (success) {
-                // Refresh the friends list
-                const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
-                  uuid
-                })
-                setFriendsList(newFriendsList)
+  // Set up subscription
+  useChatSubscription({
+    chatUuid,
+    uuid,
+    friendsList,
+    setMessages,
+    toastTopOffset
+  })
 
-                Toast.show({
-                  type: 'success',
-                  position: 'top',
-                  text1: 'Chat Deleted',
-                  text2: 'All messages have been deleted',
-                  visibilityTime: 2000,
-                  autoHide: true,
-                  topOffset: toastTopOffset
-                })
-
-                // Navigate back to friends list
-                router.replace('/friends')
-              } else {
-                Toast.show({
-                  type: 'error',
-                  position: 'top',
-                  text1: 'Failed to delete chat',
-                  text2: 'Please try again',
-                  visibilityTime: 3000,
-                  autoHide: true,
-                  topOffset: toastTopOffset
-                })
-              }
-            } catch (error) {
-              Toast.show({
-                type: 'error',
-                position: 'top',
-                text1: 'Failed to delete chat',
-                text2: 'Please try again',
-                visibilityTime: 3000,
-                autoHide: true,
-                topOffset: toastTopOffset
-              })
-            }
-          }
-        }
-      ]
-    )
-  }
-
-  const renderHeaderRight = () => {}
-
-  const renderHeaderLeft = () => (
-    <ModernHeaderButton
-      iconName="chevron-left"
-      iconSize={18}
-      onPress={() => {
-        goBack()
-      }}
-      containerStyle={{ marginLeft: 8 }}
-    />
-  )
-
-  const loadMessages = async ({ lastLoaded }) => {
-    try {
-      const messagesList = (
-        await CONST.gqlClient.query({
-          query: gql`
-            query getMessagesList($chatUuid: String!, $lastLoaded: AWSDateTime!) {
-              getMessagesList(chatUuid: $chatUuid, lastLoaded: $lastLoaded) {
-                uuid
-                messageUuid
-                text
-                pending
-                chatPhotoHash
-                createdAt
-                updatedAt
-              }
-            }
-          `,
-          variables: {
-            chatUuid,
-            lastLoaded
-          }
-          // fetchPolicy: "network-only",
-        })
-      ).data.getMessagesList
-      return messagesList.map((message) => ({
-        _id: message.messageUuid,
-        text: message.text,
-        pending: message.pending,
-        createdAt: message.createdAt,
-        user: {
-          _id: message.uuid,
-          name: friendsHelper.getLocalContactName({
-            uuid,
-            friendUuid: message.uuid,
-            friendsList
-          })
-          // avatar: 'https://placeimg.com/140/140/any',
-        },
-        image: message?.chatPhotoHash
-          ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
-          : null,
-        chatPhotoHash: message?.chatPhotoHash
-      }))
-    } catch (e) {
-      console.log('failed to load messages: ', { e })
-      Toast.show({
-        text1: `Failed to load messages:`,
-        text2: `${e}`,
-        type: 'error',
-        topOffset: toastTopOffset
-      })
-      // console.log({ e })
-      return []
-    }
-  }
-
-  useEffect(() => {
-    ;(async () => {
-      // Clear messages when switching to a different chat
-      setMessages([])
-
-      // Remove navigation.setOptions as it's not compatible with Expo Router
-      // The header is now controlled by the layout in app/(drawer)/(tabs)/chat.tsx
-      // navigation.setOptions({
-      //   headerTitle: `chat with: ${contact}`,
-      //   headerTintColor: CONST.MAIN_COLOR,
-      //   headerRight: renderHeaderRight,
-      //   headerLeft: renderHeaderLeft,
-      //   headerBackTitle: '',
-      //   headerStyle: {
-      //     backgroundColor: CONST.HEADER_GRADIENT_END,
-      //     borderBottomWidth: 1,
-      //     borderBottomColor: CONST.HEADER_BORDER_COLOR,
-      //     shadowColor: CONST.HEADER_SHADOW_COLOR,
-      //     shadowOffset: {
-      //       width: 0,
-      //       height: 2,
-      //     },
-      //     shadowOpacity: 1,
-      //     shadowRadius: 4,
-      //     elevation: 3,
-      //   },
-      //   headerTitleStyle: {
-      //     fontSize: 18,
-      //     fontWeight: '600',
-      //     color: CONST.TEXT_COLOR,
-      //   },
-      // })
-
-      setMessages(await loadMessages({ lastLoaded: moment() }))
-      friendsHelper.resetUnreadCount({ chatUuid, uuid })
-    })()
-
-    CONST.makeSureDirectoryExists({
-      directory: CONST.PENDING_UPLOADS_FOLDER_CHAT
-    })
-  }, [chatUuid, uuid]) // Added dependencies to re-run when chat changes
-
-  // Subscription setup effect
-  useEffect(() => {
-    console.log(`subscribing to ${chatUuid}`)
-    isSubscribedRef.current = false
-
-    // Use direct subscription client for better compatibility
-    const subscriptionQuery = gql`
-      subscription onSendMessage($chatUuid: String!) {
-        onSendMessage(chatUuid: $chatUuid) {
-          chatUuid
-          createdAt
-          messageUuid
-          text
-          pending
-          chatPhotoHash
-          updatedAt
-          uuid
-        }
-      }
-    `
-
-    const subscriptionParameters = {
-      // onmessage() {
-      //   console.log("onMessage")
-      // },
-      // start() {
-      //   console.log('observableObject:: Start')
-      // },
-      next(data) {
-        // console.log('observableObject:: ', { data })
-        
-        // Check if this is an error object being passed to next
-        if (data?.error) {
-          console.error('❌ Error in subscription data:', data.error)
-          // Don't return, let the error handler deal with it
-          return
-        }
-        
-        // eslint-disable-next-line no-unsafe-optional-chaining
-        if (!data?.data?.onSendMessage) {
-          console.warn('Invalid subscription data received:', data)
-          return
-        }
-        
-        // Mark subscription as active when we receive first VALID message
-        if (!isSubscribedRef.current) {
-          console.log(`✅ Subscription active for ${chatUuid}`)
-          isSubscribedRef.current = true
-        }
-        
-        const { onSendMessage } = data.data
-        console.log('📨 Received message:', {
-          messageUuid: onSendMessage.messageUuid,
-          text: onSendMessage.text,
-          from: onSendMessage.uuid
-        })
-
-        setMessages((previousMessages) => {
-          const updatedMessages = previousMessages.map((message) => {
-            // eslint-disable-next-line no-underscore-dangle
-            if (message._id === onSendMessage.messageUuid) {
-              // this is the update of the message which is already in the feed
-              return {
-                _id: onSendMessage.messageUuid,
-                text: onSendMessage.text,
-                pending: onSendMessage.pending,
-                createdAt: onSendMessage.createdAt,
-                user: {
-                  _id: onSendMessage.uuid,
-                  name: friendsHelper.getLocalContactName({
-                    uuid,
-                    friendUuid: onSendMessage.uuid,
-                    friendsList
-                  })
-                  // avatar: 'https://placeimg.com/140/140/any',
-                },
-                image: onSendMessage?.chatPhotoHash
-                  ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb`
-                  : '',
-                chatPhotoHash: onSendMessage?.chatPhotoHash || ''
-              }
-            }
-            return message
-          })
-
-          // this is a new message which was not present in the feed, let's append it to the end
-          if (
-            updatedMessages.find(
-              // eslint-disable-next-line no-underscore-dangle
-              (message) => message._id === onSendMessage.messageUuid
-            ) === undefined
-          ) {
-            // console.log({ onSendMessage })
-            return [
-              {
-                _id: onSendMessage.messageUuid,
-                text: onSendMessage.text,
-                pending: onSendMessage.pending,
-                createdAt: onSendMessage.createdAt,
-                user: {
-                  _id: onSendMessage.uuid,
-                  name: friendsHelper.getLocalContactName({
-                    uuid,
-                    friendUuid: onSendMessage.uuid,
-                    friendsList
-                  })
-                  // avatar: 'https://placeimg.com/140/140/any',
-                },
-                image: onSendMessage?.chatPhotoHash
-                  ? `${CONST.PRIVATE_IMG_HOST}${onSendMessage?.chatPhotoHash}-thumb`
-                  : '',
-                chatPhotoHash: onSendMessage?.chatPhotoHash || ''
-              },
-              ...updatedMessages
-            ]
-          } // if this is the new message
-          // console.log({ updatedMessages })
-          return updatedMessages
-        })
-        // update read counts
-        friendsHelper.resetUnreadCount({ chatUuid, uuid })
-      },
-      error(error) {
-        console.error('❌ observableObject:: subscription error', { error })
-        isSubscribedRef.current = false
-
-        Toast.show({
-          text1: 'Connection lost. Attempting to reconnect...',
-          // text2: 'You may want to leave this screen and come back to it again, to make it work.',
-          text2: JSON.stringify({ error }),
-          type: 'error',
-          topOffset: toastTopOffset
-        })
-        console.log(
-          '🔄 Attempting to resubscribe after error'
-        )
-        // eslint-disable-next-line no-use-before-define
-        if (subscriptionRef.current) {
-          subscriptionRef.current.unsubscribe()
-        }
-        // Resubscribe using the direct client
-        subscriptionRef.current = directSubscriptionClient.request({
-          query: subscriptionQuery,
-          variables: { chatUuid }
-        }).subscribe(subscriptionParameters)
-        // // _return({ uuid })
-      },
-      complete() {
-        console.log('observableObject:: subs. DONE')
-        isSubscribedRef.current = false
-      } // never printed
-    }
-
-    // Subscribe using the direct subscription client
-    const subscription = directSubscriptionClient.request({
-      query: subscriptionQuery,
-      variables: { chatUuid }
-    }).subscribe(subscriptionParameters)
-    
-    subscriptionRef.current = subscription
-
-    return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe()
-        subscriptionRef.current = null
-      }
-      isSubscribedRef.current = false
-      console.log(`unsubscribing from ${chatUuid}`)
-    }
-  }, [chatUuid, friendsList, uuid, toastTopOffset]) // Added dependencies to re-run when chat or friends change
-
-  // AppState listener to handle app going to background and coming back
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      console.log('AppState changed:', appStateRef.current, '->', nextAppState)
-
-      if (
-        appStateRef.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
-        console.log('🔄 App came to foreground, checking subscription health')
-        // App has come to the foreground - verify subscription is still active
-        // The subscription effect will handle reconnection if needed
-        // Just log the state for now
-        if (!isSubscribedRef.current) {
-          console.warn('⚠️ Subscription not active after returning to foreground')
-          Toast.show({
-            text1: 'Reconnecting to chat...',
-            type: 'info',
-            topOffset: toastTopOffset,
-            visibilityTime: 2000
-          })
-        } else {
-          console.log('✅ Subscription still active')
-        }
-      }
-
-      appStateRef.current = nextAppState
-    })
-
-    return () => {
-      subscription.remove()
-    }
-  }, [toastTopOffset])
-
-  // Focus effect to refresh connection when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      console.log('📱 Chat screen focused')
-      // Verify subscription is active
-      if (!isSubscribedRef.current) {
-        console.warn('⚠️ Subscription not active on focus')
-      }
-
-      return () => {
-        console.log('📱 Chat screen unfocused')
-      }
-    }, [])
-  )
-
-  // eslint-disable-next-line no-shadow
-  const onSend = useCallback(
-    (messages = []) => {
-      messages.forEach((message) => {
-        ;(async () => {
-          try {
-            const { text } = message
-            const messageUuid = Crypto.randomUUID()
-
-            setMessages((previousMessages) =>
-              GiftedChat.append(previousMessages, [
-                {
-                  _id: messageUuid,
-                  text,
-                  pending: true,
-                  createdAt: moment(),
-                  user: {
-                    _id: uuid,
-                    name: friendsHelper.getLocalContactName({
-                      uuid,
-                      friendUuid: uuid,
-                      friendsList
-                    })
-                    // avatar: 'https://placeimg.com/140/140/any',
-                  },
-                  image: message?.chatPhotoHash
-                    ? `${CONST.PRIVATE_IMG_HOST}${message?.chatPhotoHash}-thumb`
-                    : null,
-                  chatPhotoHash: message?.chatPhotoHash
-                }
-              ])
-            )
-
-            const returnedMessage = await reducer.sendMessage({
-              chatUuid,
-              uuid,
-              messageUuid,
-              text,
-              pending: false,
-              chatPhotoHash: ''
-            })
-          } catch (e) {
-            console.log('failed to send message: ', { e })
-            Toast.show({
-              text1: `Failed to send message:`,
-              text2: `${e}`,
-              type: 'error',
-              topOffset: toastTopOffset
-            })
-          }
-        })()
-      })
-      // Clear input after sending
-      setText('')
-      console.log('Message sent and input cleared')
-    },
-    [chatUuid, uuid, friendsList, toastTopOffset]
-  )
-
-  const createStyles = (theme) =>
+  // Styles
+  const createStyles = (currentTheme) =>
     StyleSheet.create({
       container: {
         flex: 1,
-        backgroundColor: theme.BACKGROUND
+        backgroundColor: currentTheme.BACKGROUND
       },
       deleteAction: {
         position: 'absolute',
@@ -612,7 +119,7 @@ const Chat = ({ route }) => {
         bottom: 0,
         right: 0,
         width: 120,
-        backgroundColor: theme.STATUS_ERROR,
+        backgroundColor: currentTheme.STATUS_ERROR,
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: -1
@@ -625,242 +132,11 @@ const Chat = ({ route }) => {
       },
       chatContainer: {
         flex: 1,
-        backgroundColor: theme.BACKGROUND
+        backgroundColor: currentTheme.BACKGROUND
       }
     })
 
   const styles = createStyles(theme)
-
-  const renderSend = (props) => (
-    <Send {...props}>
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}
-      >
-        <MaterialCommunityIcons
-          name="send-circle"
-          size={35}
-          style={{
-            marginRight: 10,
-            marginBottom: 10,
-            color: theme.STATUS_SUCCESS
-          }}
-        />
-      </View>
-    </Send>
-  )
-
-  const renderComposer = (props) => (
-    <TextInput
-      style={{
-        color: theme.TEXT_PRIMARY,
-        backgroundColor: theme.CARD_BACKGROUND,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: theme.CARD_BORDER,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        fontSize: 16,
-        minHeight: 44,
-        maxHeight: 100,
-        flex: 1,
-        marginHorizontal: 8,
-        marginVertical: 8
-      }}
-      placeholder="Type a message..."
-      placeholderTextColor={theme.TEXT_MUTED}
-      value={text}
-      onChangeText={handleTextChange}
-      multiline
-      textAlignVertical="center"
-    />
-  )
-
-  const renderLoading = () => (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      <ActivityIndicator size="large" color={theme.STATUS_SUCCESS} />
-    </View>
-  )
-
-  const onLoadEarlier = async () => {
-    // console.log('onLoadEarlier')
-    // setMessages([...messages, await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })])
-
-    if (!messages || messages.length === 0) {
-      console.warn('No messages available for pagination')
-      return
-    }
-
-    const lastMessage = messages[messages.length - 1]
-    if (!lastMessage || !lastMessage.createdAt) {
-      console.error('Last message missing createdAt property')
-      return
-    }
-
-    const earlierMessages = await loadMessages({
-      chatUuid,
-      lastLoaded: lastMessage.createdAt
-    })
-    setMessages((previousMessages) => GiftedChat.prepend(previousMessages, earlierMessages))
-    // setMessages([(await _loadMessages({ chatUuid, pageNumber: pageNumber + 1 })), ...messages])
-
-    // setLastRead(earlierMessages[0].createdAt)
-  }
-
-  const renderAccessory = () => (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        padding: 16,
-        backgroundColor: theme.CARD_BACKGROUND,
-        borderTopWidth: 1,
-        borderTopColor: theme.CARD_BORDER
-      }}
-    >
-      <View />
-      <FontAwesome
-        name="camera"
-        size={25}
-        style={{
-          // marginRight: 10,
-          // marginBottom: 10,
-          color: theme.STATUS_SUCCESS
-        }}
-        // eslint-disable-next-line no-use-before-define
-        onPress={async () => takePhoto()}
-      />
-      <FontAwesome
-        name="image"
-        size={25}
-        style={{
-          // marginRight: 10,
-          // marginBottom: 10,
-          color: theme.STATUS_SUCCESS
-        }}
-        // eslint-disable-next-line no-use-before-define
-        onPress={async () => pickAsset()}
-      />
-      <View />
-    </View>
-  )
-
-  const uploadAsset = async ({ uri }) => {
-    const fileContents = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64
-    })
-    const chatPhotoHash = await Crypto.digestStringAsync(
-      Crypto.CryptoDigestAlgorithm.SHA256,
-      fileContents
-    )
-    console.log('photoHash: ', chatPhotoHash)
-
-    const messageUuid = Crypto.randomUUID()
-
-    reducer.queueFileForUpload({ assetUrl: uri, chatPhotoHash, messageUuid })
-
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, [
-        {
-          _id: messageUuid,
-          text: '',
-          pending: true,
-          createdAt: moment(),
-          user: {
-            _id: uuid,
-            name: friendsHelper.getLocalContactName({
-              uuid,
-              friendUuid: uuid,
-              friendsList
-            })
-            // avatar: 'https://placeimg.com/140/140/any',
-          },
-          image: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb`,
-          chatPhotoHash
-        }
-      ])
-    )
-
-    const returnedMessage = await reducer.sendMessage({
-      chatUuid,
-      uuid,
-      messageUuid,
-      text: '',
-      pending: true,
-      chatPhotoHash
-    })
-
-    reducer.uploadPendingPhotos({ chatUuid, uuid, topOffset: toastTopOffset })
-  }
-
-  const pickAsset = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
-
-    if (permissionResult.granted === false) {
-      Alert.alert(
-        'Do you want to use photos from your albom?',
-        "Why don't you enable this permission in settings?",
-        [
-          {
-            text: 'Open Settings',
-            onPress: () => {
-              Linking.openSettings()
-            }
-          }
-        ]
-      )
-      return
-    }
-
-    const pickerResult = await ImagePicker.launchImageLibraryAsync()
-
-    const { uri } = pickerResult
-    uploadAsset({ uri })
-  }
-
-  const takePhoto = async () => {
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync()
-
-    if (permissionResult.granted === false) {
-      Alert.alert(
-        'Do you want to take photo with wisaw?',
-        "Why don't you enable this permission in settings?",
-        [
-          {
-            text: 'Open Settings',
-            onPress: () => {
-              Linking.openSettings()
-            }
-          }
-        ]
-      )
-      return
-    }
-
-    const cameraReturn = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      // allowsEditing: true,
-      quality: 1.0,
-      exif: true
-    })
-
-    if (cameraReturn.canceled === true) {
-      return
-    }
-
-    await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
-
-    const { uri } = cameraReturn.assets[0]
-    uploadAsset({ uri })
-  }
 
   return (
     <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
@@ -888,26 +164,22 @@ const Chat = ({ route }) => {
           >
             <GiftedChat
               messages={messages}
-              // eslint-disable-next-line no-shadow
-              onSend={(messages) => onSend(messages)}
+              onSend={(msgs) => onSend(msgs)}
               user={{
                 _id: uuid
               }}
               text={text}
               onInputTextChanged={handleTextChange}
-              renderComposer={renderComposer}
-              // alwaysShowSend
-              renderSend={renderSend}
-              renderLoading={renderLoading}
+              renderComposer={() => (
+                <ChatComposer theme={theme} text={text} onChangeText={handleTextChange} />
+              )}
+              renderSend={(props) => <ChatSend {...props} theme={theme} />}
+              renderLoading={() => <ChatLoading theme={theme} />}
               renderMessageImage={(props) => <ChatPhoto {...props} />}
-              // scrollToBottomComponent={scrollToBottomComponent}
               infiniteScroll
               loadEarlier
               onLoadEarlier={onLoadEarlier}
               renderUsernameOnMessage
-              // renderAccessory={renderAccessory} // disabled photo taking for now
-
-              // Dark mode styling props
               textInputStyle={{
                 color: theme.TEXT_PRIMARY,
                 backgroundColor: theme.CARD_BACKGROUND,
@@ -946,63 +218,9 @@ const Chat = ({ route }) => {
                 }
               }}
               placeholderTextColor={theme.TEXT_SECONDARY}
-              // Message bubble styling for dark mode
-              renderBubble={(props) => (
-                <Bubble
-                  {...props}
-                  wrapperStyle={{
-                    right: {
-                      backgroundColor: theme.STATUS_SUCCESS // Sent messages
-                    },
-                    left: {
-                      backgroundColor: theme.CARD_BACKGROUND, // Received messages
-                      borderColor: theme.CARD_BORDER,
-                      borderWidth: 1
-                    }
-                  }}
-                  textStyle={{
-                    right: {
-                      color: '#FFFFFF' // White text on colored background
-                    },
-                    left: {
-                      color: theme.TEXT_PRIMARY // Themed text color
-                    }
-                  }}
-                />
-              )}
-              // Custom input toolbar for better dark mode container styling
-              renderInputToolbar={(props) => (
-                <InputToolbar
-                  {...props}
-                  containerStyle={{
-                    backgroundColor: theme.BACKGROUND,
-                    borderTopColor: theme.BORDER,
-                    borderTopWidth: 1,
-                    paddingVertical: 8,
-                    paddingHorizontal: 12,
-                    minHeight: 60
-                  }}
-                  primaryStyle={{
-                    alignItems: 'center',
-                    flex: 1
-                  }}
-                />
-              )}
-              // Time styling
-              renderTime={(props) => (
-                <Time
-                  {...props}
-                  timeTextStyle={{
-                    right: {
-                      color: 'rgba(255, 255, 255, 0.7)' // Light text on sent messages
-                    },
-                    left: {
-                      color: theme.TEXT_SECONDARY // Themed text for received messages
-                    }
-                  }}
-                />
-              )}
-              // Performance optimizations
+              renderBubble={(props) => <ChatBubble {...props} theme={theme} />}
+              renderInputToolbar={(props) => <ChatInputToolbar {...props} theme={theme} />}
+              renderTime={(props) => <ChatTime {...props} theme={theme} />}
               listViewProps={{
                 initialNumToRender: 10,
                 maxToRenderPerBatch: 10,
