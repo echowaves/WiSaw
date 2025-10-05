@@ -6,16 +6,40 @@ import base64 from 'react-native-base64'
  */
 
 /**
+ * Sanitize a numeric value to prevent XSS
+ */
+const sanitizeNumeric = (value) => {
+  const num = Number(value)
+  return Number.isFinite(num) && num > 0 ? num : 200
+}
+
+/**
+ * Sanitize text for safe inclusion in SVG
+ */
+const sanitizeText = (text) => {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+/**
  * Generate a visual representation with the shareable URL
  * Instead of a QR code, shows the URL and a simple visual pattern
  */
 export const generateQRCodeSVG = (data, size = 200) => {
   try {
+    // Sanitize size parameter
+    const safeSize = sanitizeNumeric(size)
+    
     // Parse the friendship data
     const friendshipData = JSON.parse(data)
 
     // Ensure we have a valid friend name
     const friendName = friendshipData.friendName || 'Unknown Friend'
+    const safeFriendName = sanitizeText(friendName)
 
     // Create the shareable URL
     const shareUrl = createFriendshipNameDeepLink({
@@ -24,26 +48,28 @@ export const generateQRCodeSVG = (data, size = 200) => {
     })
 
     // Create a simple visual that shows this is shareable content
-    let svg = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">`
+    let svg = `<svg width="${safeSize}" height="${safeSize}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeSize} ${safeSize}">`
 
     // Background
-    svg += `<rect width="${size}" height="${size}" fill="white" stroke="#ddd" stroke-width="1"/>`
+    svg += `<rect width="${safeSize}" height="${safeSize}" fill="white" stroke="#ddd" stroke-width="1"/>`
 
     // Title
-    svg += `<text x="${size / 2}" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">Friendship Share</text>`
+    svg += `<text x="${safeSize / 2}" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">Friendship Share</text>`
 
-    // Friend name
-    svg += `<text x="${size / 2}" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">${friendName}</text>`
+    // Friend name (sanitized for display)
+    svg += `<text x="${safeSize / 2}" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666">${safeFriendName}</text>`
 
     // Instructions
-    svg += `<text x="${size / 2}" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#888">Tap Share to send link</text>`
+    svg += `<text x="${safeSize / 2}" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#888">Tap Share to send link</text>`
 
     // Simple visual pattern (decorative)
-    const centerX = size / 2
-    const centerY = size / 2 + 20
+    const centerX = safeSize / 2
+    const centerY = safeSize / 2 + 20
     const patternSize = 60
 
     // Create a simple grid pattern
+    // Use the unsanitized friendName from friendshipData for pattern generation (not displayed)
+    const rawFriendName = friendshipData.friendName || 'Unknown Friend'
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         const x = centerX - patternSize / 2 + (i * patternSize) / 8
@@ -51,8 +77,8 @@ export const generateQRCodeSVG = (data, size = 200) => {
         const cellSize = patternSize / 8
 
         // Create pattern based on friend name hash - safely handle undefined
-        const charIndex = i % friendName.length
-        const hash = friendName.charCodeAt(charIndex) || 65 // Default to 'A' if undefined
+        const charIndex = i % rawFriendName.length
+        const hash = rawFriendName.charCodeAt(charIndex) || 65 // Default to 'A' if undefined
         if ((i + j + hash) % 3 === 0) {
           svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="#4A90E2" opacity="0.7"/>`
         }
@@ -63,21 +89,24 @@ export const generateQRCodeSVG = (data, size = 200) => {
     svg += `<rect x="${centerX - patternSize / 2}" y="${centerY - patternSize / 2}" width="${patternSize}" height="${patternSize}" fill="none" stroke="#4A90E2" stroke-width="2"/>`
 
     // Footer text
-    svg += `<text x="${size / 2}" y="${size - 20}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#888">WiSaw Friendship</text>`
+    svg += `<text x="${safeSize / 2}" y="${safeSize - 20}" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#888">WiSaw Friendship</text>`
 
-    // Store the URL in a comment for the share functionality to access
-    svg += `<!-- SHARE_URL:${shareUrl} -->`
+    // Store the URL in a comment for the share functionality to access (sanitize URL)
+    const safeShareUrl = sanitizeText(shareUrl)
+    svg += `<!-- SHARE_URL:${safeShareUrl} -->`
 
+    // Close SVG
     svg += '</svg>'
 
     return svg
   } catch (error) {
     console.error('Share visual generation error:', error)
 
-    // Fallback
-    let fallbackSvg = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}">`
-    fallbackSvg += `<rect width="${size}" height="${size}" fill="white" stroke="#ddd" stroke-width="1"/>`
-    fallbackSvg += `<text x="${size / 2}" y="${size / 2}" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">Share Error</text>`
+    // Fallback with sanitized size
+    const safeSize = sanitizeNumeric(size)
+    let fallbackSvg = `<svg width="${safeSize}" height="${safeSize}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${safeSize} ${safeSize}">`
+    fallbackSvg += `<rect width="${safeSize}" height="${safeSize}" fill="white" stroke="#ddd" stroke-width="1"/>`
+    fallbackSvg += `<text x="${safeSize / 2}" y="${safeSize / 2}" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">Share Error</text>`
     fallbackSvg += '</svg>'
 
     return fallbackSvg
