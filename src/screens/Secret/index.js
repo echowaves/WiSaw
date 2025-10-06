@@ -1,14 +1,10 @@
-import { useNavigation } from '@react-navigation/native'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
 
 import {
-  Alert,
   Animated,
   Keyboard,
   SafeAreaView,
-  StyleSheet,
-  Text,
   TouchableWithoutFeedback,
   View
 } from 'react-native'
@@ -17,11 +13,10 @@ import * as Haptics from 'expo-haptics'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import Toast from 'react-native-toast-message'
 
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
+import { FontAwesome5 } from '@expo/vector-icons'
 
 import zxcvbn from '../../zxcvbn'
 
-import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
@@ -29,20 +24,24 @@ import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 
 import Button from '../../components/ui/Button'
-import Input from '../../components/ui/Input'
 import * as reducer from './reducer'
 
-const maxNickNameLength = 100 // will also use this parameter for the secret length
-const minNickNameLength = 5 // will also use this parameter for the secret length
+// Import extracted components
+import HeaderCard from './components/HeaderCard'
+import NicknameInputField from './components/NicknameInputField'
+import PasswordStrengthIndicator from './components/PasswordStrengthIndicator'
+import ResetCard from './components/ResetCard'
+import SecretInputField from './components/SecretInputField'
+import WarningCard from './components/WarningCard'
+
+// Import utilities
+import { getStyles } from './styles'
+import { validateAllFields } from './utils/validation'
 
 const SecretScreen = () => {
-  const navigation = useNavigation()
-
-  const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [nickName, setNickName] = useAtom(STATE.nickName)
+  const [uuid] = useAtom(STATE.uuid)
+  const [, setNickName] = useAtom(STATE.nickName)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [photosList, setPhotosList] = useAtom(STATE.photosList)
-  const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const toastTopOffset = useToastTopOffset()
 
@@ -70,24 +69,6 @@ const SecretScreen = () => {
   // Animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current
   const scaleAnim = React.useRef(new Animated.Value(1)).current
-
-  const strengthValues = [0, 25, 50, 75, 100]
-
-  const strengthColors = ['#FF6B6B', '#FF9500', '#FFD93D', '#4FC3F7', '#50E3C2']
-  const strengthLabels = [
-    'Too weak - easily guessed',
-    'Weak - needs improvement',
-    'Fair - getting better',
-    'Good - almost there',
-    'Excellent - very secure'
-  ]
-  const strengthIcons = [
-    'exclamation-triangle',
-    'exclamation-circle',
-    'shield-alt',
-    'shield-alt',
-    'user-shield'
-  ]
 
   // Animate components on mount
   useEffect(() => {
@@ -192,7 +173,7 @@ const SecretScreen = () => {
     resetFields()
   }, [])
 
-  // Remove duplicate resetFields call
+  // Calculate password strength
   useEffect(() => {
     try {
       setStrength(zxcvbn(secret).score) // from 0 to 4
@@ -201,27 +182,10 @@ const SecretScreen = () => {
     }
   }, [secret])
 
-  const validate = () => {
-    const errors = new Map()
-
-    if (!/^[\u00BF-\u1FFF\u2C00-\uD7FF\w_-]{5,100}$/.test(nickNameText.toLowerCase()))
-      errors.set('nickName', 'Nickname wrong format.')
-    if (nickNameText?.length < minNickNameLength) errors.set('nickName', 'Nickname too short.')
-    if (nickNameText?.length > maxNickNameLength) errors.set('nickName', 'Nickname too long.')
-    if (secret.length === 0) {
-      setErrorsMap(errors)
-      return
-    }
-    if (secret?.length < minNickNameLength) errors.set('secret', `Secret too short.`)
-    if (secret?.length > maxNickNameLength) errors.set('secret', `Secret too long.`)
-    if (secret !== secretConfirm)
-      errors.set('secretConfirm', 'Secret does not match Secret Confirm.')
-    if (strength < 3) errors.set('strength', 'Secret is not secure.')
-
-    setErrorsMap(errors)
-  }
+  // Validate all fields
   useEffect(() => {
-    validate()
+    const errors = validateAllFields(nickNameText, secret, secretConfirm, strength)
+    setErrorsMap(errors)
   }, [nickNameText, secret, secretConfirm, strength])
 
   useEffect(() => {
@@ -232,223 +196,15 @@ const SecretScreen = () => {
     }
   }, [errorsMap])
 
-  useEffect(() => {
-    // Remove navigation.setOptions as it's not compatible with Expo Router
-    // The header is now controlled by the layout in app/(drawer)/identity.tsx
-    // navigation.setOptions({
-    //   headerTitle: nickNameEntered ? 'Update Identity' : 'Create Identity',
-    //   headerTintColor: CONST.MAIN_COLOR,
-    //   headerRight: renderHeaderRight,
-    //   headerLeft: renderHeaderLeft,
-    //   headerBackTitle: '',
-    //   headerStyle: {
-    //     backgroundColor: CONST.NAV_COLOR,
-    //     borderBottomWidth: 1,
-    //     borderBottomColor: CONST.HEADER_BORDER_COLOR,
-    //     shadowColor: CONST.HEADER_SHADOW_COLOR,
-    //     shadowOffset: {
-    //       width: 0,
-    //       height: 2,
-    //     },
-    //     shadowOpacity: 1,
-    //     shadowRadius: 4,
-    //     elevation: 3,
-    //   },
-    //   headerTitleStyle: {
-    //     fontSize: 18,
-    //     fontWeight: '600',
-    //     color: CONST.TEXT_COLOR,
-    //   },
-    // })
-  }, [canSubmit, isSubmitting, nickNameEntered])
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.BACKGROUND
-    },
-    scrollView: {
-      flex: 1
-    },
-    contentContainer: {
-      padding: 20,
-      paddingTop: 30,
-      paddingBottom: 100
-    },
-    headerCard: {
-      backgroundColor: theme.CARD_BACKGROUND,
-      borderRadius: 16,
-      padding: 24,
-      marginBottom: 24,
-      shadowColor: theme.CARD_SHADOW,
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 1,
-      shadowRadius: 8,
-      elevation: 4,
-      borderWidth: 1,
-      borderColor: theme.BORDER_LIGHT
-    },
-    iconContainer: {
-      alignSelf: 'center',
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: 'rgba(234, 94, 61, 0.1)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 20
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: theme.TEXT_PRIMARY,
-      textAlign: 'center',
-      marginBottom: 8
-    },
-    subtitle: {
-      fontSize: 16,
-      color: theme.TEXT_SECONDARY,
-      textAlign: 'center',
-      lineHeight: 22
-    },
-    formCard: {
-      backgroundColor: theme.CARD_BACKGROUND,
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 20,
-      shadowColor: theme.CARD_SHADOW,
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 1,
-      shadowRadius: 8,
-      elevation: 4,
-      borderWidth: 1,
-      borderColor: theme.BORDER_LIGHT
-    },
-    inputContainer: {
-      marginBottom: 16
-    },
-    passwordToggle: {
-      position: 'absolute',
-      right: 12,
-      top: 12,
-      padding: 8
-    },
-    strengthContainer: {
-      marginTop: 8,
-      marginBottom: 16
-    },
-    strengthHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 8
-    },
-    strengthText: {
-      fontSize: 14,
-      fontWeight: '600',
-      marginLeft: 8
-    },
-    warningCard: {
-      backgroundColor: 'rgba(255, 107, 107, 0.1)',
-      borderRadius: 12,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 107, 107, 0.2)',
-      marginBottom: 20
-    },
-    warningTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#FF6B6B',
-      marginBottom: 8,
-      flexDirection: 'row',
-      alignItems: 'center'
-    },
-    warningText: {
-      fontSize: 14,
-      color: theme.TEXT_SECONDARY,
-      lineHeight: 20
-    },
-    resetCard: {
-      backgroundColor: 'rgba(255, 149, 0, 0.1)',
-      borderRadius: 12,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: 'rgba(255, 149, 0, 0.2)'
-    },
-    resetTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#FF9500',
-      marginBottom: 12
-    },
-    resetText: {
-      fontSize: 14,
-      color: theme.TEXT_PRIMARY,
-      lineHeight: 20,
-      marginBottom: 16
-    },
-    resetButton: {
-      backgroundColor: 'transparent',
-      borderColor: '#FF9500',
-      borderWidth: 2,
-      borderRadius: 12,
-      paddingVertical: 12
-    },
-    resetButtonText: {
-      color: '#FF9500',
-      fontSize: 16,
-      fontWeight: '600'
-    },
-    strengthBar: {
-      height: 8,
-      backgroundColor: theme.BACKGROUND_DISABLED,
-      borderRadius: 4,
-      overflow: 'hidden'
-    },
-    strengthFill: {
-      height: '100%',
-      borderRadius: 4
-    },
-    submitButton: {
-      backgroundColor: CONST.MAIN_COLOR,
-      borderRadius: 16,
-      paddingVertical: 16,
-      paddingHorizontal: 24,
-      marginVertical: 20,
-      shadowColor: CONST.MAIN_COLOR,
-      shadowOffset: {
-        width: 0,
-        height: 4
-      },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 8
-    },
-    submitButtonDisabled: {
-      backgroundColor: theme.BACKGROUND_DISABLED,
-      shadowOpacity: 0,
-      elevation: 0
-    },
-    submitButtonTitle: {
-      color: 'white',
-      fontSize: 18,
-      fontWeight: '600'
-    }
-  })
+  const styles = getStyles(theme)
 
   const handleReset = async () => {
-    await reducer.resetSecret({ topOffset })
+    await reducer.resetSecret({ topOffset: toastTopOffset })
     await resetFields()
     Toast.show({
       text1: 'Secret reset',
       text2: 'enter new Secret',
-      topOffset
+      topOffset: toastTopOffset
     })
   }
 
@@ -470,191 +226,58 @@ const SecretScreen = () => {
               transform: [{ scale: scaleAnim }]
             }}
           >
-            {/* Header Card */}
-            <View style={styles.headerCard}>
-              <View style={styles.iconContainer}>
-                <FontAwesome5 name="user-shield" size={32} color={CONST.MAIN_COLOR} />
-              </View>
-              <Text style={styles.title}>
-                {nickNameEntered ? 'Update Your Identity' : 'Create Your Identity'}
-              </Text>
-              <Text style={styles.subtitle}>
-                {nickNameEntered
-                  ? 'Change your secret to update your incognito identity across devices.'
-                  : 'Create a secure incognito identity that you can restore on any device.'}
-              </Text>
-            </View>
+            <HeaderCard nickNameEntered={nickNameEntered} theme={theme} />
 
-            {/* Form Card */}
             <View style={styles.formCard}>
-              {/* Nickname Input */}
-              <View style={styles.inputContainer}>
-                <Input
-                  placeholder="Choose a nickname"
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  spellCheck={false}
-                  textContentType="none"
-                  disabled={nickNameEntered}
-                  leftIcon={
-                    <FontAwesome5
-                      name="user"
-                      size={20}
-                      color={nickNameEntered ? theme.TEXT_DISABLED : CONST.MAIN_COLOR}
-                    />
-                  }
-                  value={nickNameText}
-                  onChangeText={(text) => setNickNameText(text.toLowerCase())}
-                  errorStyle={{ color: '#FF6B6B' }}
-                  errorMessage={errorsMap.get('nickName')}
-                  inputStyle={{
-                    fontSize: 16,
-                    color: nickNameEntered ? theme.TEXT_DISABLED : theme.TEXT_PRIMARY
-                  }}
-                  containerStyle={{ paddingHorizontal: 0 }}
-                />
-              </View>
+              <NicknameInputField
+                value={nickNameText}
+                onChangeText={setNickNameText}
+                disabled={nickNameEntered}
+                theme={theme}
+                errorMessage={errorsMap.get('nickName')}
+              />
 
-              {/* Current Secret (only for existing users) */}
               {nickNameEntered && (
-                <View style={styles.inputContainer}>
-                  <Input
-                    placeholder="Current secret"
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                    autoComplete="off"
-                    spellCheck={false}
-                    textContentType="none"
-                    passwordRules=""
-                    keyboardType="default"
-                    secureTextEntry={!showOldPassword}
-                    leftIcon={<FontAwesome5 name="key" size={20} color={CONST.MAIN_COLOR} />}
-                    rightIcon={
-                      <FontAwesome5
-                        name={showOldPassword ? 'eye-slash' : 'eye'}
-                        size={20}
-                        color={theme.TEXT_SECONDARY}
-                        onPress={() => setShowOldPassword(!showOldPassword)}
-                        style={styles.passwordToggle}
-                      />
-                    }
-                    value={oldSecret}
-                    onChangeText={(text) => setOldSecret(text)}
-                    inputStyle={{ fontSize: 16 }}
-                    containerStyle={{ paddingHorizontal: 0 }}
-                  />
-                </View>
+                <SecretInputField
+                  placeholder="Current secret"
+                  value={oldSecret}
+                  onChangeText={setOldSecret}
+                  showPassword={showOldPassword}
+                  setShowPassword={setShowOldPassword}
+                  theme={theme}
+                  leftIconName="key"
+                />
               )}
 
-              {/* New Secret */}
-              <View style={styles.inputContainer}>
-                <Input
-                  placeholder="New secret"
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  spellCheck={false}
-                  textContentType="none"
-                  passwordRules=""
-                  keyboardType="default"
-                  inputProps={{
-                    'data-form-type': 'other',
-                    'data-lpignore': 'true'
-                  }}
-                  secureTextEntry={!showPassword}
-                  leftIcon={<FontAwesome5 name="shield-alt" size={20} color={CONST.MAIN_COLOR} />}
-                  rightIcon={
-                    <FontAwesome5
-                      name={showPassword ? 'eye-slash' : 'eye'}
-                      size={20}
-                      color={theme.TEXT_SECONDARY}
-                      onPress={() => setShowPassword(!showPassword)}
-                      style={styles.passwordToggle}
-                    />
-                  }
-                  value={secret}
-                  onChangeText={(text) => setSecret(text)}
-                  inputStyle={{ fontSize: 16 }}
-                  containerStyle={{ paddingHorizontal: 0 }}
-                />
+              <SecretInputField
+                placeholder="New secret"
+                value={secret}
+                onChangeText={setSecret}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+                theme={theme}
+              />
 
-                {/* Password Strength Indicator */}
-                {secret.length > 0 && (
-                  <View style={styles.strengthContainer}>
-                    <View style={styles.strengthHeader}>
-                      <FontAwesome5
-                        name={strengthIcons[strength]}
-                        size={16}
-                        color={strengthColors[strength]}
-                      />
-                      <Text style={[styles.strengthText, { color: strengthColors[strength] }]}>
-                        {strengthLabels[strength]}
-                      </Text>
-                    </View>
-                    <View style={styles.strengthBar}>
-                      <View
-                        style={[
-                          styles.strengthFill,
-                          {
-                            width: `${strengthValues[strength]}%`,
-                            backgroundColor: strengthColors[strength]
-                          }
-                        ]}
-                      />
-                    </View>
-                    {errorsMap.get('secret') && (
-                      <Text
-                        style={{
-                          color: '#FF6B6B',
-                          fontSize: 12,
-                          marginTop: 4
-                        }}
-                      >
-                        {errorsMap.get('secret')}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              </View>
-
-              {/* Confirm Secret */}
-              <View style={styles.inputContainer}>
-                <Input
-                  placeholder="Confirm secret"
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  autoComplete="off"
-                  spellCheck={false}
-                  textContentType="none"
-                  passwordRules=""
-                  keyboardType="default"
-                  inputProps={{
-                    'data-form-type': 'other',
-                    'data-lpignore': 'true'
-                  }}
-                  secureTextEntry={!showConfirmPassword}
-                  leftIcon={<FontAwesome5 name="check-circle" size={20} color={CONST.MAIN_COLOR} />}
-                  rightIcon={
-                    <FontAwesome5
-                      name={showConfirmPassword ? 'eye-slash' : 'eye'}
-                      size={20}
-                      color={theme.TEXT_SECONDARY}
-                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                      style={styles.passwordToggle}
-                    />
-                  }
-                  value={secretConfirm}
-                  onChangeText={(text) => setSecretConfirm(text)}
-                  errorStyle={{ color: '#FF6B6B' }}
-                  errorMessage={errorsMap.get('secretConfirm')}
-                  inputStyle={{ fontSize: 16 }}
-                  containerStyle={{ paddingHorizontal: 0 }}
+              {secret.length > 0 && (
+                <PasswordStrengthIndicator
+                  strength={strength}
+                  theme={theme}
+                  errorMessage={errorsMap.get('secret')}
                 />
-              </View>
+              )}
+
+              <SecretInputField
+                placeholder="Confirm secret"
+                value={secretConfirm}
+                onChangeText={setSecretConfirm}
+                showPassword={showConfirmPassword}
+                setShowPassword={setShowConfirmPassword}
+                theme={theme}
+                errorMessage={errorsMap.get('secretConfirm')}
+                leftIconName="check-circle"
+              />
             </View>
 
-            {/* Submit Button */}
             <Button
               title={
                 isSubmitting
@@ -690,67 +313,9 @@ const SecretScreen = () => {
               loading={isSubmitting}
             />
 
-            {/* Security Warning */}
-            <View style={styles.warningCard}>
-              <View style={styles.warningTitle}>
-                <FontAwesome5 name="exclamation-triangle" size={16} color="#FF6B6B" />
-                <Text
-                  style={{
-                    color: '#FF6B6B',
-                    fontSize: 16,
-                    fontWeight: '600',
-                    marginLeft: 8
-                  }}
-                >
-                  Important Security Notice
-                </Text>
-              </View>
-              <Text style={styles.warningText}>
-                • Use a strong, unique secret you'll remember{'\n'}• Write it down and store it
-                securely{'\n'}• We cannot recover lost secrets - no email or phone required{'\n'}•
-                Your identity is completely anonymous and secure
-              </Text>
-            </View>
+            <WarningCard theme={theme} />
 
-            {/* Reset Section (only for existing users) */}
-            {nickNameEntered && (
-              <View style={styles.resetCard}>
-                <Text style={styles.resetTitle}>⚠️ Reset Identity</Text>
-                <Text style={styles.resetText}>
-                  This will disconnect your current identity from this device. Make sure to save
-                  your current secret before proceeding if you want to restore it later.
-                </Text>
-                <Button
-                  type="outline"
-                  buttonStyle={styles.resetButton}
-                  titleStyle={styles.resetButtonText}
-                  icon={
-                    <MaterialCommunityIcons
-                      name="refresh"
-                      size={20}
-                      color="#FF9500"
-                      style={{ marginRight: 8 }}
-                    />
-                  }
-                  title="Reset Identity"
-                  onPress={() => {
-                    Alert.alert(
-                      'Reset Your Identity?',
-                      'This will create a new identity or allow you to restore from another device. Your current identity will be disconnected from this phone.\n\nMake sure you have your current secret saved if you want to restore it later.',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        {
-                          text: 'Reset',
-                          style: 'destructive',
-                          onPress: handleReset
-                        }
-                      ],
-                      { cancelable: true }
-                    )
-                  }}
-                />
-              </View>
-            )}
+            {nickNameEntered && <ResetCard theme={theme} onReset={handleReset} />}
           </Animated.View>
         </KeyboardAwareScrollView>
       </TouchableWithoutFeedback>
