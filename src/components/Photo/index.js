@@ -1059,7 +1059,7 @@ const Photo = ({
             if (deleted) {
               setPhotosList([...photosList.filter((item) => item.id !== photo.id)])
             }
-            router.back()
+            // router.back()
           }
         }
       ],
