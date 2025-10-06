@@ -50,7 +50,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
         ...SHARED_STYLES.header.title
       },
       contentContainer: {
-        flex: 1,
+        flexGrow: 1,
         paddingHorizontal: 20,
         paddingTop: 16
       },
@@ -226,9 +226,12 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           contentInsetAdjustmentBehavior="automatic"
+          enableOnAndroid={true}
+          extraScrollHeight={20}
+          enableResetScrollToCoords={false}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={{ flex: 1 }}>
+            <View>
               {/* Icon */}
               <View style={styles.iconContainer}>
                 <FontAwesome5 name="users" size={32} color={theme.TEXT_PRIMARY} />

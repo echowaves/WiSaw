@@ -96,6 +96,11 @@ module.exports = {
         'READ_EXTERNAL_STORAGE',
         'com.google.android.gms.permission.AD_ID'
       ],
+      androidStatusBar: {
+        barStyle: 'dark-content',
+        backgroundColor: '#FFFFFF',
+        translucent: false
+      },
       config: {},
       intentFilters: [
         {

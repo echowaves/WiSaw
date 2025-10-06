@@ -12,6 +12,7 @@ import * as Linking from 'expo-linking'
 import { router, Stack, useRootNavigationState } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useRef } from 'react'
+import { StatusBar } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
@@ -261,6 +262,11 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent={false}
+      />
       <Stack
         screenOptions={{
           headerShown: false,

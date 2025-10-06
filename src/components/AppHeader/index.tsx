@@ -2,7 +2,9 @@ import { Ionicons } from '@expo/vector-icons'
 import { useAtom } from 'jotai'
 import React from 'react'
 import {
+  Platform,
   SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -91,12 +93,16 @@ export default function AppHeader({
   })
 
   const Outer = safeTopOnly ? View : (SafeAreaView as any)
+  
+  // On Android, add explicit status bar padding since SafeAreaView doesn't handle it properly
+  const androidStatusBarHeight = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0
+  
   const outerProps: any = safeTopOnly
     ? {
         style: [styles.safeArea, { paddingTop: insets.top }],
       }
     : {
-        style: styles.safeArea,
+        style: [styles.safeArea, Platform.OS === 'android' && { paddingTop: androidStatusBarHeight }],
       }
 
   return (
