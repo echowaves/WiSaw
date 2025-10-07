@@ -100,7 +100,7 @@ const PhotosDetailsShared = ({ route }) => {
 
   const renderHeaderTitle = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <AntDesign name="sharealt" size={20} color={theme.TEXT_PRIMARY} style={styles.headerIcon} />
+      <AntDesign name="share-alt" size={20} color={theme.TEXT_PRIMARY} style={styles.headerIcon} />
       <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
     </View>
   )
