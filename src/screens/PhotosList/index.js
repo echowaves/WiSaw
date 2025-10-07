@@ -43,10 +43,10 @@ import NetInfo from '@react-native-community/netinfo'
 
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { emitPhotoSearch, subscribeToPhotoSearch } from '../../events/photoSearchBus'
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as friendsHelper from '../FriendsList/friends_helper'
 
@@ -1517,7 +1517,7 @@ const PhotosList = ({ searchFromUrl }) => {
           flex: 1 // Allow the scroll area to take full available height
         }}
         contentContainerStyle={{
-          paddingBottom: FOOTER_HEIGHT + insets.bottom + 20 // Add padding to ensure content is visible above footer
+          paddingBottom: FOOTER_HEIGHT + 20 // Add padding to ensure content is visible above footer
         }}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews
@@ -1534,7 +1534,7 @@ const PhotosList = ({ searchFromUrl }) => {
           style={{
             backgroundColor: theme.CARD_BACKGROUND,
             width,
-            height: FOOTER_HEIGHT + insets.bottom,
+            height: FOOTER_HEIGHT,
             paddingBottom: insets.bottom,
             ...styles.footerContainer,
             shadowOffset: {
