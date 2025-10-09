@@ -1,9 +1,12 @@
+/* global console:readonly, setTimeout:readonly, clearTimeout:readonly, alert:readonly */
+
 import { CacheManager } from 'expo-cached-image'
 import { File as FSFile } from 'expo-file-system'
 import * as ImageManipulator from 'expo-image-manipulator'
 import { Storage } from 'expo-storage'
 import * as VideoThumbnails from 'expo-video-thumbnails'
 import { fetch } from 'expo/fetch'
+import { Image } from 'react-native'
 
 import Toast from 'react-native-toast-message'
 
@@ -63,6 +66,56 @@ const readQueue = async () => {
 
 const writeQueue = async (queue) =>
   Storage.setItem({ key: CONST.PENDING_UPLOADS_KEY, value: queue })
+
+const getImageDimensionsAsync = async (uri) => {
+  if (!uri || typeof uri !== 'string') {
+    return null
+  }
+
+  return new Promise((resolve) => {
+    Image.getSize(
+      uri,
+      (width, height) => {
+        if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+          resolve({ width, height })
+          return
+        }
+        resolve(null)
+      },
+      () => resolve(null)
+    )
+  })
+}
+
+const ensurePhotoDimensions = async (photo, processedItem) => {
+  if (photo && Number.isFinite(photo.width) && Number.isFinite(photo.height) && photo.width > 0 && photo.height > 0) {
+    return photo
+  }
+
+  const candidateUris = [processedItem?.localImgUrl, processedItem?.localThumbUrl, processedItem?.originalCameraUrl]
+
+  for (const uri of candidateUris) {
+    // eslint-disable-next-line no-await-in-loop
+    const dimensions = await getImageDimensionsAsync(uri)
+    if (dimensions) {
+      return {
+        ...photo,
+        width: dimensions.width,
+        height: dimensions.height
+      }
+    }
+  }
+
+  if (photo && (photo.width === undefined || photo.height === undefined)) {
+    return {
+      ...photo,
+      width: Number.isFinite(photo?.width) && photo.width > 0 ? photo.width : 1,
+      height: Number.isFinite(photo?.height) && photo.height > 0 ? photo.height : 1
+    }
+  }
+
+  return photo
+}
 
 const genLocalThumbs = async (image) => {
   try {
@@ -125,17 +178,23 @@ export const clearQueue = async () => {
         if (item.localImgUrl) {
           try {
             new FSFile(item.localImgUrl).delete()
-          } catch {}
+          } catch (error) {
+            // Local cleanup is best-effort; ignore filesystem errors
+          }
         }
         if (item.localThumbUrl) {
           try {
             new FSFile(item.localThumbUrl).delete()
-          } catch {}
+          } catch (error) {
+            // Local cleanup is best-effort; ignore filesystem errors
+          }
         }
         if (item.localVideoUrl) {
           try {
             new FSFile(item.localVideoUrl).delete()
-          } catch {}
+          } catch (error) {
+            // Local cleanup is best-effort; ignore filesystem errors
+          }
         }
       } catch (fileDeleteError) {
         console.error('Error deleting queued file', fileDeleteError)
@@ -544,7 +603,11 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100 }) => 
     const { responseData } = await uploadItem({ item: processedItem })
 
     if (responseData?.status === 200) {
-      return photo
+      const enrichedPhoto = await ensurePhotoDimensions(photo, processedItem)
+      if (enrichedPhoto !== photo) {
+        processedItem = { ...processedItem, photo: enrichedPhoto }
+      }
+      return enrichedPhoto
     }
 
     Toast.show({
