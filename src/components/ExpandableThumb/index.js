@@ -115,10 +115,18 @@ const ExpandableThumb = ({
   // STATELESS: Use only aspect ratio calculation, no stored height
   // For expanded state always use flex layout (let Photo component grow naturally)
   // For collapsed use thumbnail size
-  const finalWidth = isExpanded ? expandedWidth : thumbWidth
+  let adjustedThumbWidth = thumbWidth
+  let adjustedThumbHeight = thumbHeight
+
+  if (adjustedThumbWidth > 300) {
+    adjustedThumbWidth = 300
+    adjustedThumbHeight = adjustedThumbWidth / aspectRatio
+  }
+
+  const finalWidth = isExpanded ? expandedWidth : adjustedThumbWidth
   const finalHeight = isExpanded
     ? null // Let the Photo component determine its own height through flex layout
-    : thumbHeight
+    : adjustedThumbHeight
 
   useEffect(() => {
     if (isExpanded && !isAnimating) {
@@ -261,8 +269,8 @@ const ExpandableThumb = ({
         source={{ uri: item.thumbUrl }}
         cacheKey={`${item.id}-thumb`}
         style={{
-          width: thumbWidth,
-          height: thumbHeight,
+          width: adjustedThumbWidth,
+          height: adjustedThumbHeight,
           borderRadius: 20
         }}
         resizeMode="cover"
