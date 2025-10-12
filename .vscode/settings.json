@@ -1,12 +1,8 @@
 {
-  "editor.bracketPairColorization.enabled": true,
-  "editor.guides.bracketPairs": "active",
-
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "eslint.validate": ["javascript"],
-  "javascript.format.semicolons": "remove",
-  "typescript.format.semicolons": "remove",
-  "prettier.semi": false
+  "standard.engine": "ts-standard",
+  // "editor.formatOnSave": true, // Optional: Enable format on save
+  // "editor.defaultFormatter": "standard.vscode-standard", // Optional: Set as default formatter  
+  // Disable the default TypeScript formatting  
+  // "javascript.format.enable": false,
+  // "typescript.format.enable": false
 }
