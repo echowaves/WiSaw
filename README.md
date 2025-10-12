@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d108b3abc3a543e8b20fbcdb701e98a0)](https://app.codacy.com/gh/echowaves/WiSaw?utm_source=github.com&utm_medium=referral&utm_content=echowaves/WiSaw&utm_campaign=Badge_Grade)
 [![Version](https://img.shields.io/badge/version-7.2.5-blue.svg)](https://github.com/echowaves/WiSaw)
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20Web-lightgrey.svg)](https://expo.dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
