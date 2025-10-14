@@ -302,3 +302,5 @@ _Experience authentic, location-based social sharing_
 ### Navigation Menu
 
 <img alt="App navigation and features" src="https://static.wixstatic.com/media/c90e7e_7f845f0d82c84276a3006698d9c5df00~mv2.png" height="400" width="200">
+
+<a href="https://app.codacy.com/gh/echowaves/WiSaw/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img src="https://app.codacy.com/project/badge/Grade/751bc6b7868b4b209166cb14e1a8da03"/></a>
