@@ -202,6 +202,8 @@ const ModalInputText = ({ route }) => {
         }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
       >
         <View
           style={[
