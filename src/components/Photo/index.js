@@ -814,11 +814,12 @@ const Photo = ({
       return <View />
     }
 
-    const labels = JSON.parse(photoDetails?.recognitions[0].metaData).Labels
-    const textDetections = JSON.parse(
-      photoDetails?.recognitions[0].metaData
-    ).TextDetections?.filter((text) => text.Type === 'LINE')
-    const moderationLabels = JSON.parse(photoDetails?.recognitions[0].metaData).ModerationLabels
+    const parsedMetaData = JSON.parse(photoDetails?.recognitions[0].metaData)
+    const labels = parsedMetaData.Labels
+    const textDetections = Array.isArray(parsedMetaData.TextDetections)
+      ? parsedMetaData.TextDetections.filter((text) => text.Type === 'LINE')
+      : []
+    const moderationLabels = parsedMetaData.ModerationLabels
 
     return (
       <View style={styles.aiRecognitionContainer}>
