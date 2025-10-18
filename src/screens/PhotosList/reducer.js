@@ -49,7 +49,7 @@ export const initialState = {
   // currentIndex: 0,
 }
 
-export async function getTancAccepted() {
+export async function getTancAccepted () {
   try {
     return (await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY)) === 'true'
   } catch (err) {
@@ -61,7 +61,7 @@ export async function getTancAccepted() {
 
 // this function return the time of the very first photo stored in the backend,
 // so that we can tell when to stop requesting new photos while paging through the results
-export async function getZeroMoment() {
+export async function getZeroMoment () {
   try {
     const { zeroMoment } = (
       await CONST.gqlClient.query({
@@ -79,7 +79,7 @@ export async function getZeroMoment() {
   return 0
 }
 
-async function requestGeoPhotos({ pageNumber, batch, latitude, longitude, zeroMoment }) {
+async function requestGeoPhotos ({ pageNumber, batch, latitude, longitude, zeroMoment }) {
   const whenToStop = moment(zeroMoment || 0)
   try {
     const response = await CONST.gqlClient.query({
@@ -143,7 +143,7 @@ async function requestGeoPhotos({ pageNumber, batch, latitude, longitude, zeroMo
   }
 }
 
-async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
+async function requestWatchedPhotos ({ uuid, pageNumber, batch }) {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
@@ -192,7 +192,7 @@ async function requestWatchedPhotos({ uuid, pageNumber, batch }) {
   }
 }
 
-async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
+async function requestSearchedPhotos ({ pageNumber, searchTerm, batch }) {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
@@ -241,7 +241,7 @@ async function requestSearchedPhotos({ pageNumber, searchTerm, batch }) {
   }
 }
 
-export async function getPhotos({
+export async function getPhotos ({
   uuid,
   zeroMoment,
   location,
@@ -306,7 +306,7 @@ export async function getPhotos({
   }
 }
 
-export function acceptTandC() {
+export function acceptTandC () {
   try {
     SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, 'true')
     return true

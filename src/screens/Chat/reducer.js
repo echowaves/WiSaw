@@ -192,42 +192,42 @@ const getQueue = async () => {
 
 export const queueFileForUpload =
   ({ assetUrl, chatPhotoHash, messageUuid }) =>
-  async (dispatch, getState) => {
-    const localImgUrl = new FSFile(CONST.PENDING_UPLOADS_FOLDER_CHAT, chatPhotoHash).uri
+    async (dispatch, getState) => {
+      const localImgUrl = new FSFile(CONST.PENDING_UPLOADS_FOLDER_CHAT, chatPhotoHash).uri
 
-    // console.log({ assetUrl, chatPhotoHash, localImgUrl })
-    // console.log({ localImgUrl })
-    // copy file to cacheDir
+      // console.log({ assetUrl, chatPhotoHash, localImgUrl })
+      // console.log({ localImgUrl })
+      // copy file to cacheDir
 
-    try {
-      if (!CONST.PENDING_UPLOADS_FOLDER_CHAT.exists) {
-        CONST.PENDING_UPLOADS_FOLDER_CHAT.create({ intermediates: true })
-      }
-    } catch (e) {
+      try {
+        if (!CONST.PENDING_UPLOADS_FOLDER_CHAT.exists) {
+          CONST.PENDING_UPLOADS_FOLDER_CHAT.create({ intermediates: true })
+        }
+      } catch (e) {
       // ignore directory creation errors
+      }
+
+      await FileSystem.copyAsync({
+        from: assetUrl,
+        to: localImgUrl
+      })
+
+      const localThumbUrl = await genLocalThumb(localImgUrl)
+
+      CacheManager.addToCache({
+        file: localThumbUrl,
+        key: `${chatPhotoHash}-thumb`
+      })
+      CacheManager.addToCache({ file: localImgUrl, key: `${chatPhotoHash}` })
+
+      const image = {
+        localImgUrl,
+        chatPhotoHash,
+        messageUuid
+      }
+
+      await addToQueue(image)
     }
-
-    await FileSystem.copyAsync({
-      from: assetUrl,
-      to: localImgUrl
-    })
-
-    const localThumbUrl = await genLocalThumb(localImgUrl)
-
-    CacheManager.addToCache({
-      file: localThumbUrl,
-      key: `${chatPhotoHash}-thumb`
-    })
-    CacheManager.addToCache({ file: localImgUrl, key: `${chatPhotoHash}` })
-
-    const image = {
-      localImgUrl,
-      chatPhotoHash,
-      messageUuid
-    }
-
-    await addToQueue(image)
-  }
 
 const uploadItem = async ({ uuid, item }) => {
   const contentType = 'image/jpeg'
@@ -336,7 +336,7 @@ export const sendMessage = async ({
   return returnedMessage
 }
 
-export async function uploadPendingPhotos({ chatUuid, uuid, topOffset }) {
+export async function uploadPendingPhotos ({ chatUuid, uuid, topOffset }) {
   try {
     let i
     // here let's iterate over the items and upload one file at a time

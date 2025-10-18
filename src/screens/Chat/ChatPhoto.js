@@ -38,7 +38,7 @@ const ChatPhoto = (props) => {
         <CachedImage
           source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
           cacheKey={`${chatPhotoHash}-thumb`}
-          resizeMode="contain"
+          resizeMode='contain'
           style={{
             width: '100%',
             height: '100%'
@@ -71,7 +71,7 @@ const ChatPhoto = (props) => {
         <CachedImage
           source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
           cacheKey={`${chatPhotoHash}-thumb`}
-          resizeMode="contain"
+          resizeMode='contain'
           style={{
             width: '100%',
             height: '100%',
@@ -87,7 +87,7 @@ const ChatPhoto = (props) => {
         <CachedImage
           source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}` }}
           cacheKey={`${chatPhotoHash}`}
-          resizeMode="contain"
+          resizeMode='contain'
           style={{
             width: '100%',
             height: '100%',

@@ -192,17 +192,17 @@ const ModalInputText = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent />
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentInsetAdjustmentBehavior="automatic"
+        contentInsetAdjustmentBehavior='automatic'
         contentContainerStyle={{
           paddingTop: 16,
           paddingBottom: insets.bottom + 20
         }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps='handled'
         showsVerticalScrollIndicator={false}
-        enableOnAndroid={true}
+        enableOnAndroid
         extraScrollHeight={20}
       >
         <View
@@ -217,7 +217,7 @@ const ModalInputText = ({ route }) => {
           <CachedImage
             source={{ uri: `${photo.thumbUrl}` }}
             cacheKey={`${photo.id}-thumb`}
-            resizeMode="cover"
+            resizeMode='cover'
             style={styles.photoImage}
           />
         </View>
@@ -228,7 +228,7 @@ const ModalInputText = ({ route }) => {
             blurOnSubmit={false}
             multiline
             numberOfLines={6}
-            placeholder="Share your thoughts about this photo..."
+            placeholder='Share your thoughts about this photo...'
             placeholderTextColor={theme.TEXT_SECONDARY}
             maxLength={maxStringLength}
             style={[styles.textInput, { height: height < 700 ? 120 : 150 }]}
@@ -241,9 +241,9 @@ const ModalInputText = ({ route }) => {
         </View>
 
         <Button
-          title="Submit Comment"
-          icon={<Ionicons name="send" color="white" size={20} />}
-          size="lg"
+          title='Submit Comment'
+          icon={<Ionicons name='send' color='white' size={20} />}
+          size='lg'
           buttonStyle={styles.submitButton}
           titleStyle={styles.submitButtonTitle}
           disabled={!inputText.trim()}

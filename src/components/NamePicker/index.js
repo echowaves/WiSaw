@@ -177,7 +177,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
   }, [show])
 
   return (
-    <Modal animationType="slide" transparent={false} visible={show} presentationStyle="fullScreen">
+    <Modal animationType='slide' transparent={false} visible={show} presentationStyle='fullScreen'>
       <View style={styles.container}>
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
@@ -211,22 +211,22 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
               ]}
             >
               <Ionicons
-                name="checkmark"
+                name='checkmark'
                 size={24}
                 color={inputText.trim() && !isSaving ? theme.TEXT_PRIMARY : theme.TEXT_DISABLED}
               />
             </TouchableOpacity>
           }
-          safeTopOnly={true}
+          safeTopOnly
         />
 
         <KeyboardAwareScrollView
           style={{ flex: 1 }}
           contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior="automatic"
-          enableOnAndroid={true}
+          contentInsetAdjustmentBehavior='automatic'
+          enableOnAndroid
           extraScrollHeight={20}
           enableResetScrollToCoords={false}
         >
@@ -234,7 +234,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
             <View>
               {/* Icon */}
               <View style={styles.iconContainer}>
-                <FontAwesome5 name="users" size={32} color={theme.TEXT_PRIMARY} />
+                <FontAwesome5 name='users' size={32} color={theme.TEXT_PRIMARY} />
               </View>
 
               {/* Title and Subtitle */}
@@ -258,7 +258,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
                     setInputText(inputValue.slice(0, 50))
                   }}
                   value={inputText}
-                  returnKeyType="done"
+                  returnKeyType='done'
                   onSubmitEditing={handleSave}
                 />
                 <Text style={styles.characterCount}>{50 - inputText.length}</Text>
@@ -277,11 +277,11 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
                     <FontAwesome5
                       name={friendshipUuid ? 'edit' : 'user-plus'}
                       size={16}
-                      color="white"
+                      color='white'
                       style={{ marginRight: 8 }}
                     />
                   }
-                  size="lg"
+                  size='lg'
                   buttonStyle={[styles.saveButton, { marginBottom: 12 }]}
                   titleStyle={styles.saveButtonTitle}
                   onPress={handleSave}
@@ -290,8 +290,8 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
                 />
 
                 <Button
-                  title="Cancel"
-                  size="lg"
+                  title='Cancel'
+                  size='lg'
                   buttonStyle={styles.cancelButton}
                   titleStyle={styles.cancelButtonTitle}
                   onPress={handleCancel}

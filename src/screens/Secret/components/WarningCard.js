@@ -33,7 +33,7 @@ const WarningCard = ({ theme }) => {
   return (
     <View style={styles.warningCard}>
       <View style={styles.warningTitle}>
-        <FontAwesome5 name="exclamation-triangle" size={16} color="#FF6B6B" />
+        <FontAwesome5 name='exclamation-triangle' size={16} color='#FF6B6B' />
         <Text style={styles.warningTitleText}>Important Security Notice</Text>
       </View>
       <Text style={styles.warningText}>

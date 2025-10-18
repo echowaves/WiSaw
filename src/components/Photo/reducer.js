@@ -36,7 +36,7 @@ export const initialState = {
 //   }
 // }
 
-export async function watchPhoto({ photo, uuid, topOffset }) {
+export async function watchPhoto ({ photo, uuid, topOffset }) {
   try {
     const watchersCount = (
       await CONST.gqlClient.mutate({
@@ -65,7 +65,7 @@ export async function watchPhoto({ photo, uuid, topOffset }) {
   return null
 }
 
-export async function unwatchPhoto({ photo, uuid, topOffset }) {
+export async function unwatchPhoto ({ photo, uuid, topOffset }) {
   try {
     const watchersCount = (
       await CONST.gqlClient.mutate({
@@ -94,7 +94,7 @@ export async function unwatchPhoto({ photo, uuid, topOffset }) {
   return null
 }
 
-export async function banPhoto({ photo, uuid, topOffset }) {
+export async function banPhoto ({ photo, uuid, topOffset }) {
   try {
     // const abuseReport =
     await CONST.gqlClient.mutate({
@@ -115,7 +115,7 @@ export async function banPhoto({ photo, uuid, topOffset }) {
     })
 
     Toast.show({
-      text1: `Abusive Photo reported`,
+      text1: 'Abusive Photo reported',
       type: 'success',
       topOffset
     })
@@ -126,7 +126,7 @@ export async function banPhoto({ photo, uuid, topOffset }) {
   return null
 }
 
-export async function deletePhoto({ photo, uuid, topOffset }) {
+export async function deletePhoto ({ photo, uuid, topOffset }) {
   try {
     await CONST.gqlClient.mutate({
       mutation: gql`
@@ -158,7 +158,7 @@ export async function deletePhoto({ photo, uuid, topOffset }) {
   return false
 }
 
-export async function sharePhoto({ photo, photoDetails, topOffset }) {
+export async function sharePhoto ({ photo, photoDetails, topOffset }) {
   try {
     const sharingHelper = await import('../../utils/simpleSharingHelper')
     await sharingHelper.sharePhoto(photo, photoDetails, topOffset)
@@ -175,7 +175,7 @@ export async function sharePhoto({ photo, photoDetails, topOffset }) {
   return null
 }
 
-export async function submitComment({ inputText, photo, uuid, topOffset }) {
+export async function submitComment ({ inputText, photo, uuid, topOffset }) {
   try {
     const comment = (
       await CONST.gqlClient.mutate({
@@ -262,7 +262,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
   return null
 }
 
-export function toggleCommentButtons({ photoDetails, commentId }) {
+export function toggleCommentButtons ({ photoDetails, commentId }) {
   const comments = photoDetails.comments.map((comment) =>
     comment.id === commentId
       ? {
@@ -281,7 +281,7 @@ export function toggleCommentButtons({ photoDetails, commentId }) {
   }
 }
 
-export async function deleteComment({ photo, photoDetails, comment, uuid, topOffset }) {
+export async function deleteComment ({ photo, photoDetails, comment, uuid, topOffset }) {
   try {
     const lastComment = (
       await CONST.gqlClient.mutate({

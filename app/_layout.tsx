@@ -1,11 +1,11 @@
-import 'react-native-get-random-values'; // Must be imported before uuid
+import 'react-native-get-random-values' // Must be imported before uuid
 
 import {
   AntDesign,
   FontAwesome,
   FontAwesome5,
   Ionicons,
-  MaterialIcons,
+  MaterialIcons
 } from '@expo/vector-icons'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
@@ -23,15 +23,15 @@ import {
   getSystemTheme,
   loadFollowSystemPreference,
   loadThemePreference,
-  subscribeToSystemTheme,
+  subscribeToSystemTheme
 } from '../src/utils/themeStorage'
 
-export default function RootLayout() {
+export default function RootLayout () {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
   const [isDarkMode, setIsDarkMode] = useAtom(STATE.isDarkMode)
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
-    STATE.followSystemTheme,
+    STATE.followSystemTheme
   )
 
   const hasProcessedInitialUrlRef = useRef(false)
@@ -43,7 +43,7 @@ export default function RootLayout() {
     ...FontAwesome5.font,
     ...MaterialIcons.font,
     ...Ionicons.font,
-    ...AntDesign.font,
+    ...AntDesign.font
   })
 
   // Navigate to deep link target
@@ -64,7 +64,7 @@ export default function RootLayout() {
         case 'friend':
           console.log(
             'Navigating to friend confirmation:',
-            linkData.friendshipUuid,
+            linkData.friendshipUuid
           )
           router.replace('/')
           setTimeout(() => {
@@ -76,7 +76,7 @@ export default function RootLayout() {
           console.log(
             'Processing friendship name update:',
             linkData.friendshipUuid,
-            linkData.friendName,
+            linkData.friendName
           )
           router.replace('/friends')
           setTimeout(async () => {
@@ -88,14 +88,14 @@ export default function RootLayout() {
               await friendsHelper.setContactName({
                 uuid: currentUuid,
                 friendshipUuid: linkData.friendshipUuid,
-                contactName: linkData.friendName,
+                contactName: linkData.friendName
               })
 
               Toast.show({
                 text1: 'Friend name updated!',
                 text2: `Updated to "${linkData.friendName}"`,
                 type: 'success',
-                topOffset: 100,
+                topOffset: 100
               })
             } catch (error) {
               console.error('Error updating friend name:', error)
@@ -103,7 +103,7 @@ export default function RootLayout() {
                 text1: 'Update failed',
                 text2: 'Could not update friend name',
                 type: 'error',
-                topOffset: 100,
+                topOffset: 100
               })
             }
           }, 100)
@@ -122,7 +122,7 @@ export default function RootLayout() {
         type: 'error',
         position: 'top',
         topOffset: 60,
-        visibilityTime: 4000,
+        visibilityTime: 4000
       })
     }
   }, [])
@@ -142,7 +142,7 @@ export default function RootLayout() {
       console.log('Navigating to deep link:', linkData.type)
       navigateToDeepLink(linkData)
     },
-    [navigateToDeepLink],
+    [navigateToDeepLink]
   )
 
   // Initialize app state
@@ -151,7 +151,7 @@ export default function RootLayout() {
 
     const getResolvedValue = <T,>(
       result: PromiseSettledResult<T>,
-      defaultValue: T,
+      defaultValue: T
     ): T => {
       return result.status === 'fulfilled' ? result.value ?? defaultValue : defaultValue
     }
@@ -166,12 +166,12 @@ export default function RootLayout() {
           uuidResult,
           nickNameResult,
           themePreferenceResult,
-          followSystemResult,
+          followSystemResult
         ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
           loadThemePreference(),
-          loadFollowSystemPreference(),
+          loadFollowSystemPreference()
         ])
 
         if (isCancelled) return
@@ -179,7 +179,7 @@ export default function RootLayout() {
         // Set state with resolved values
         setUuid(getResolvedValue(uuidResult, ''))
         setNickName(getResolvedValue(nickNameResult, ''))
-        
+
         const followSystem = !!getResolvedValue(followSystemResult, false)
         setFollowSystemTheme(followSystem)
 
@@ -208,10 +208,10 @@ export default function RootLayout() {
     if (followSystemTheme) {
       // Set initial theme based on system
       setIsDarkMode(getSystemTheme())
-      
+
       // Subscribe to system theme changes
       const subscription = subscribeToSystemTheme(setIsDarkMode)
-      
+
       // Clean up subscription on unmount or when followSystemTheme becomes false
       return () => {
         if (subscription && typeof subscription.remove === 'function') {
@@ -219,7 +219,7 @@ export default function RootLayout() {
         }
       }
     }
-    
+
     // Explicitly return undefined when not following system theme
     return undefined
   }, [followSystemTheme, setIsDarkMode])
@@ -264,15 +264,15 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor="transparent"
+        backgroundColor='transparent'
         translucent={false}
       />
       <Stack
         screenOptions={{
-          headerShown: false,
+          headerShown: false
         }}
       >
-        <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+        <Stack.Screen name='(drawer)' options={{ headerShown: false }} />
       </Stack>
       <Toast />
     </SafeAreaProvider>

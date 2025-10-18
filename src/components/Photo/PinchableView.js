@@ -78,9 +78,9 @@ const PinchableView = ({ route, navigation }) => {
   const renderHeaderLeft = () => (
     <View style={styles.headerButton}>
       <Ionicons
-        name="chevron-back"
+        name='chevron-back'
         size={24}
-        color="rgba(255, 255, 255, 0.95)"
+        color='rgba(255, 255, 255, 0.95)'
         style={styles.headerIcon}
         onPress={() => router.back()}
       />
@@ -90,9 +90,9 @@ const PinchableView = ({ route, navigation }) => {
   const renderHeaderTitle = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <Ionicons
-        name="expand-outline"
+        name='expand-outline'
         size={20}
-        color="rgba(255, 255, 255, 0.95)"
+        color='rgba(255, 255, 255, 0.95)'
         style={styles.headerIcon}
       />
       <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Full View</Text>
@@ -145,25 +145,25 @@ const PinchableView = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       {renderCustomHeader()}
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle='light-content' backgroundColor='transparent' translucent />
       <ReactNativeZoomableView
         maxZoom={10}
         minZoom={0.8}
         zoomStep={0.5}
         initialZoom={2}
-        bindToBorders={true}
+        bindToBorders
         style={{
           width,
           height
         }}
-        resizeMode="contain"
+        resizeMode='contain'
       >
         <CachedImage
           source={{
             uri: `${photo.thumbUrl}`
           }}
           cacheKey={`${photo.id}-thumb`}
-          resizeMode="contain"
+          resizeMode='contain'
           style={styles.photoContainer}
         />
         <CachedImage
@@ -174,14 +174,14 @@ const PinchableView = ({ route, navigation }) => {
           placeholderContent={
             <ActivityIndicator
               color={CONST.MAIN_COLOR}
-              size="small"
+              size='small'
               style={{
                 flex: 1,
                 justifyContent: 'center'
               }}
             />
           }
-          resizeMode="contain"
+          resizeMode='contain'
           style={styles.photoContainer}
         />
       </ReactNativeZoomableView>

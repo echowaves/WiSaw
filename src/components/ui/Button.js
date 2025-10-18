@@ -74,7 +74,7 @@ const Button = ({
         (titleStyle && StyleSheet.flatten(titleStyle)?.color) ||
         (type === 'outline' ? '#333' : '#FFFFFF')
 
-      return <ActivityIndicator color={indicatorColor} size="small" {...loadingProps} />
+      return <ActivityIndicator color={indicatorColor} size='small' {...loadingProps} />
     }
 
     const content = children ?? (
@@ -105,7 +105,7 @@ const Button = ({
   return (
     <View style={flatten(containerStyle)}>
       <Pressable
-        accessibilityRole="button"
+        accessibilityRole='button'
         accessibilityLabel={accessibilityLabel || title}
         disabled={disabled || loading}
         onPress={disabled || loading ? undefined : onPress}

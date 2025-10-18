@@ -636,14 +636,14 @@ const FriendsList = () => {
         {!isPending && (
           <Animated.View
             style={[styles.rightSwipeAction, { opacity: rightActionsOpacity }]}
-            pointerEvents="box-none"
+            pointerEvents='box-none'
           >
             <TouchableOpacity
               style={[styles.swipeActionButton, styles.shareAction]}
               onPress={handleShareName}
               activeOpacity={0.7}
             >
-              <FontAwesome5 name="share-alt" size={18} color="white" />
+              <FontAwesome5 name='share-alt' size={18} color='white' />
               <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
             </TouchableOpacity>
 
@@ -652,7 +652,7 @@ const FriendsList = () => {
               onPress={handleEditFriend}
               activeOpacity={0.7}
             >
-              <FontAwesome5 name="edit" size={18} color="white" />
+              <FontAwesome5 name='edit' size={18} color='white' />
               <Text style={styles.swipeActionText}>Edit{'\n'}Name</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -662,14 +662,14 @@ const FriendsList = () => {
         {!isPending && (
           <Animated.View
             style={[styles.leftSwipeAction, { opacity: leftActionsOpacity }]}
-            pointerEvents="box-none"
+            pointerEvents='box-none'
           >
             <TouchableOpacity
               style={[styles.swipeActionButton, styles.deleteAction]}
               onPress={handleDeleteFriend}
               activeOpacity={0.7}
             >
-              <FontAwesome5 name="trash" size={18} color="white" />
+              <FontAwesome5 name='trash' size={18} color='white' />
               <Text style={styles.swipeActionText}>Delete{'\n'}Friend</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -682,7 +682,7 @@ const FriendsList = () => {
           enabled={!isPending}
           activeOffsetX={[-20, 20]}
           failOffsetY={[-20, 20]}
-          shouldCancelWhenOutside={true}
+          shouldCancelWhenOutside
         >
           <Animated.View
             style={[
@@ -743,13 +743,13 @@ const FriendsList = () => {
                 <View style={styles.friendContent}>
                   <View style={styles.friendHeader}>
                     <View style={styles.friendInfo}>
-                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode="tail">
+                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode='tail'>
                         {displayName}
                       </Text>
                       <>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <FontAwesome5
-                            name="clock"
+                            name='clock'
                             size={12}
                             color={theme.TEXT_PRIMARY}
                             style={{ marginRight: 6 }}
@@ -765,8 +765,7 @@ const FriendsList = () => {
                                 friendshipUuid: friend.friendshipUuid,
                                 contactName: displayName,
                                 isPending: true
-                              })
-                            }
+                              })}
                             activeOpacity={0.5}
                             delayPressIn={0}
                             delayPressOut={0}
@@ -782,9 +781,9 @@ const FriendsList = () => {
                               left: 20,
                               right: 20
                             }}
-                            importantForAccessibility="yes"
+                            importantForAccessibility='yes'
                           >
-                            <FontAwesome5 name="share-alt" size={12} color="white" />
+                            <FontAwesome5 name='share-alt' size={12} color='white' />
                             <Text style={styles.pendingShareButtonText}>Share</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
@@ -793,8 +792,7 @@ const FriendsList = () => {
                               handleDeletePendingFriend({
                                 friendshipUuid: friend.friendshipUuid,
                                 contactName: displayName
-                              })
-                            }
+                              })}
                             activeOpacity={0.5}
                             delayPressIn={0}
                             delayPressOut={0}
@@ -810,9 +808,9 @@ const FriendsList = () => {
                               left: 20,
                               right: 20
                             }}
-                            importantForAccessibility="yes"
+                            importantForAccessibility='yes'
                           >
-                            <FontAwesome5 name="trash" size={12} color={theme.STATUS_ERROR} />
+                            <FontAwesome5 name='trash' size={12} color={theme.STATUS_ERROR} />
                             <Text style={styles.pendingDeleteButtonText}>Delete</Text>
                           </TouchableOpacity>
                         </View>
@@ -825,7 +823,7 @@ const FriendsList = () => {
                 <Animated.View style={[styles.friendContent, { paddingLeft: contentPaddingLeft }]}>
                   <View style={styles.friendHeader}>
                     <View style={styles.friendInfo}>
-                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode="tail">
+                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode='tail'>
                         {displayName}
                       </Text>
                       <>
@@ -847,7 +845,7 @@ const FriendsList = () => {
           <>
             {/* Left edge (for right swipe -> share/edit). Two segments; blue grows first, yellow follows */}
             <Animated.View
-              pointerEvents="none"
+              pointerEvents='none'
               style={[styles.stripeOverlayLeft, { opacity: leftOverlayOpacity }]}
             >
               <View style={{ flexDirection: 'row', height: '100%' }}>
@@ -862,7 +860,7 @@ const FriendsList = () => {
                       opacity: shareContentOpacity
                     }}
                   >
-                    <FontAwesome5 name="share-alt" size={18} color="white" />
+                    <FontAwesome5 name='share-alt' size={18} color='white' />
                     <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
                   </Animated.View>
                 </Animated.View>
@@ -877,7 +875,7 @@ const FriendsList = () => {
                       opacity: editContentOpacity
                     }}
                   >
-                    <FontAwesome5 name="edit" size={18} color="white" />
+                    <FontAwesome5 name='edit' size={18} color='white' />
                     <Text style={styles.swipeActionText}>Edit{'\n'}Name</Text>
                   </Animated.View>
                 </Animated.View>
@@ -886,7 +884,7 @@ const FriendsList = () => {
 
             {/* Right edge (for left swipe -> delete). Expand width while content stays put */}
             <Animated.View
-              pointerEvents="auto"
+              pointerEvents='auto'
               style={[styles.stripeOverlayRight, { width: deleteStripeWidth }]}
             >
               <TouchableOpacity
@@ -904,7 +902,7 @@ const FriendsList = () => {
                     opacity: deleteContentOpacity
                   }}
                 >
-                  <FontAwesome5 name="trash" size={18} color="white" />
+                  <FontAwesome5 name='trash' size={18} color='white' />
                   <Text style={styles.swipeActionText}>Delete{'\n'}Friend</Text>
                 </Animated.View>
               </TouchableOpacity>
@@ -943,10 +941,10 @@ const FriendsList = () => {
           topOffset={60}
         />
         <EmptyStateCard
-          icon="users"
-          title="No Friends Yet"
-          subtitle="Add your first friend to start sharing photos and chatting privately. Build your network and stay connected!"
-          actionText="Add a Friend"
+          icon='users'
+          title='No Friends Yet'
+          subtitle='Add your first friend to start sharing photos and chatting privately. Build your network and stay connected!'
+          actionText='Add a Friend'
           onActionPress={handleAddFriend}
           iconColor={theme.TEXT_PRIMARY}
         />
@@ -995,7 +993,7 @@ const FriendsList = () => {
           maxToRenderPerBatch={10}
           windowSize={15}
           updateCellsBatchingPeriod={50}
-          removeClippedSubviews={true}
+          removeClippedSubviews
           getItemLayout={(data, index) => ({
             length: 80, // Approximate height of each friend item
             offset: 80 * index,

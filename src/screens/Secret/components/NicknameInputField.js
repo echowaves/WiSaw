@@ -14,16 +14,16 @@ const NicknameInputField = ({ value, onChangeText, disabled, theme, errorMessage
   return (
     <View style={styles.inputContainer}>
       <Input
-        placeholder="Choose a nickname"
+        placeholder='Choose a nickname'
         autoCorrect={false}
-        autoCapitalize="none"
-        autoComplete="off"
+        autoCapitalize='none'
+        autoComplete='off'
         spellCheck={false}
-        textContentType="none"
+        textContentType='none'
         disabled={disabled}
         leftIcon={
           <FontAwesome5
-            name="user"
+            name='user'
             size={20}
             color={disabled ? theme.TEXT_DISABLED : CONST.MAIN_COLOR}
           />

@@ -1,7 +1,7 @@
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import {
   DrawerContentScrollView,
-  DrawerItemList,
+  DrawerItemList
 } from '@react-navigation/drawer'
 import { Drawer } from 'expo-router/drawer'
 import { useAtom } from 'jotai'
@@ -15,7 +15,7 @@ import { getTheme } from '../../src/theme/sharedStyles'
 import {
   getSystemTheme,
   saveFollowSystemPreference,
-  saveThemePreference,
+  saveThemePreference
 } from '../../src/utils/themeStorage'
 
 // Get version and build number from app.config.js
@@ -33,7 +33,7 @@ const createStyles = (isDark) => {
       paddingVertical: 12,
       borderTopWidth: 1,
       borderTopColor: theme.BORDER_LIGHT,
-      backgroundColor: theme.HEADER_BACKGROUND,
+      backgroundColor: theme.HEADER_BACKGROUND
     },
     themeButton: {
       flexDirection: 'row',
@@ -44,41 +44,41 @@ const createStyles = (isDark) => {
       paddingHorizontal: 16,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: theme.INTERACTIVE_BORDER,
+      borderColor: theme.INTERACTIVE_BORDER
     },
     themeText: {
       fontSize: 14,
       fontWeight: '600',
       color: CONST.MAIN_COLOR,
-      marginLeft: 8,
+      marginLeft: 8
     },
     versionContainer: {
       padding: 20,
       borderTopWidth: 1,
       borderTopColor: theme.BORDER_LIGHT,
       backgroundColor: theme.HEADER_BACKGROUND,
-      alignItems: 'center',
+      alignItems: 'center'
     },
     versionText: {
       fontSize: 12,
       color: theme.TEXT_SECONDARY,
       fontWeight: '500',
-      textAlign: 'center',
+      textAlign: 'center'
     },
     appName: {
       fontSize: 14,
       fontWeight: '600',
       color: CONST.MAIN_COLOR,
-      marginBottom: 4,
-    },
+      marginBottom: 4
+    }
   })
 }
 
 // Custom Drawer Content with Theme Switcher and Version Information
-function CustomDrawerContent(props) {
+function CustomDrawerContent (props) {
   const [isDark, setIsDark] = useAtom(STATE.isDarkMode)
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
-    STATE.followSystemTheme,
+    STATE.followSystemTheme
   )
   const styles = createStyles(isDark)
   const theme = getTheme(isDark)
@@ -143,7 +143,7 @@ function CustomDrawerContent(props) {
         <Text
           style={[
             styles.themeText,
-            { textAlign: 'center', marginBottom: 12, marginLeft: 0 },
+            { textAlign: 'center', marginBottom: 12, marginLeft: 0 }
           ]}
         >
           Theme
@@ -152,7 +152,7 @@ function CustomDrawerContent(props) {
           {['light', 'dark', 'system'].map((mode) => (
             <TouchableOpacity
               key={mode}
-              onPress={() => handleThemeChange(mode)}
+              onPress={async () => await handleThemeChange(mode)}
               style={[
                 styles.themeButton,
                 {
@@ -161,8 +161,8 @@ function CustomDrawerContent(props) {
                   backgroundColor:
                     getCurrentThemeMode() === mode
                       ? theme.INTERACTIVE_PRIMARY
-                      : theme.INTERACTIVE_BACKGROUND,
-                },
+                      : theme.INTERACTIVE_BACKGROUND
+                }
               ]}
             >
               <FontAwesome5
@@ -181,8 +181,8 @@ function CustomDrawerContent(props) {
                     color:
                       getCurrentThemeMode() === mode
                         ? '#FFFFFF'
-                        : CONST.MAIN_COLOR,
-                  },
+                        : CONST.MAIN_COLOR
+                  }
                 ]}
               >
                 {getThemeLabel(mode).split(' ')[0]}
@@ -202,7 +202,7 @@ function CustomDrawerContent(props) {
   )
 }
 
-export default function DrawerLayout() {
+export default function DrawerLayout () {
   const [isDark] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDark)
 
@@ -213,7 +213,7 @@ export default function DrawerLayout() {
           headerShown: false,
           drawerStyle: {
             backgroundColor: theme.BACKGROUND,
-            width: 280,
+            width: 280
           },
           drawerActiveTintColor: 'white',
           drawerActiveBackgroundColor: CONST.MAIN_COLOR,
@@ -222,63 +222,63 @@ export default function DrawerLayout() {
             borderRadius: 12,
             marginVertical: 4,
             marginHorizontal: 8,
-            paddingHorizontal: 12,
+            paddingHorizontal: 12
           },
           drawerLabelStyle: {
             fontSize: 16,
             fontWeight: '600',
             marginLeft: -10,
-            textTransform: 'capitalize',
+            textTransform: 'capitalize'
           },
           // Performance optimizations
           swipeEnabled: true,
           swipeEdgeWidth: 20,
           drawerType: 'front',
-          overlayColor: 'rgba(0, 0, 0, 0.5)',
+          overlayColor: 'rgba(0, 0, 0, 0.5)'
         }}
         drawerContent={(props) => <CustomDrawerContent {...props} />}
       >
         <Drawer.Screen
-          name="(tabs)"
+          name='(tabs)'
           options={{
             drawerIcon: ({ color, size }) => (
-              <FontAwesome5 name="home" size={22} color={color} />
+              <FontAwesome5 name='home' size={22} color={color} />
             ),
             drawerLabel: 'Home',
-            title: 'Home',
+            title: 'Home'
           }}
         />
         <Drawer.Screen
-          name="identity"
+          name='identity'
           options={{
             drawerIcon: ({ color, size }) => (
-              <FontAwesome name="user-secret" size={22} color={color} />
+              <FontAwesome name='user-secret' size={22} color={color} />
             ),
             drawerLabel: 'Identity',
             title: 'Identity',
-            headerShown: false,
+            headerShown: false
           }}
         />
         <Drawer.Screen
-          name="friends"
+          name='friends'
           options={{
             drawerIcon: ({ color, size }) => (
-              <FontAwesome5 name="user-friends" size={22} color={color} />
+              <FontAwesome5 name='user-friends' size={22} color={color} />
             ),
             drawerLabel: 'Friends',
             title: 'Friends',
-            headerShown: false,
+            headerShown: false
           }}
         />
         <Drawer.Screen
-          name="feedback"
+          name='feedback'
           options={{
             drawerIcon: ({ color, size }) => (
-              <MaterialIcons name="feedback" size={22} color={color} />
+              <MaterialIcons name='feedback' size={22} color={color} />
             ),
             drawerLabel: 'Feedback',
             title: 'Feedback',
-            headerShown: false,
+            headerShown: false
           }}
         />
       </Drawer>

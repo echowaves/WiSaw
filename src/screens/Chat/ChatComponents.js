@@ -15,7 +15,7 @@ export const ChatSend = ({ theme, ...props }) => (
       }}
     >
       <MaterialCommunityIcons
-        name="send-circle"
+        name='send-circle'
         size={35}
         style={{
           marginRight: 10,
@@ -51,12 +51,12 @@ export const ChatComposer = ({ theme, text, onChangeText }) => (
       marginHorizontal: 8,
       marginVertical: 8
     }}
-    placeholder="Type a message..."
+    placeholder='Type a message...'
     placeholderTextColor={theme.TEXT_MUTED}
     value={text}
     onChangeText={onChangeText}
     multiline
-    textAlignVertical="center"
+    textAlignVertical='center'
   />
 )
 
@@ -77,7 +77,7 @@ export const ChatLoading = ({ theme }) => (
       justifyContent: 'center'
     }}
   >
-    <ActivityIndicator size="large" color={theme.STATUS_SUCCESS} />
+    <ActivityIndicator size='large' color={theme.STATUS_SUCCESS} />
   </View>
 )
 

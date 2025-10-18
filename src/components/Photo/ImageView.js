@@ -79,14 +79,14 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
 
   return (
     <TapGestureHandler onHandlerStateChange={onSingleTapEvent} numberOfTaps={1}>
-      <Animated.View style={imageContainerStyle} resizeMode="contain">
+      <Animated.View style={imageContainerStyle} resizeMode='contain'>
         <CachedImage
           source={{
             uri: `${photo.imgUrl}`
             // expiresIn: 5, // seconds. This field is optional
           }}
           cacheKey={`${photo.id}`}
-          resizeMode="cover"
+          resizeMode='cover'
           style={[photoContainerStyle, { zIndex: 2 }]}
         />
         <CachedImage
@@ -100,14 +100,14 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
             // optional
             <ActivityIndicator
               color={CONST.MAIN_COLOR}
-              size="small"
+              size='small'
               style={{
                 flex: 1,
                 justifyContent: 'center'
               }}
             />
           }
-          resizeMode="cover"
+          resizeMode='cover'
           style={[photoContainerStyle, { zIndex: 1 }]}
         />
       </Animated.View>

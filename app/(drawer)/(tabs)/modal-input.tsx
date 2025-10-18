@@ -7,7 +7,7 @@ import * as reducer from '../../../src/components/Photo/reducer'
 import ModalInputText from '../../../src/screens/ModalInputText'
 import { SHARED_STYLES } from '../../../src/theme/sharedStyles'
 
-export default function ModalInputScreen() {
+export default function ModalInputScreen () {
   const params = useLocalSearchParams()
   const router = useRouter()
   const { photo, uuid, topOffset } = params
@@ -24,7 +24,7 @@ export default function ModalInputScreen() {
     uuid,
     topOffset: Number(topOffset),
     onTextChange: setInputText,
-    inputText,
+    inputText
   }
 
   const handleSubmit = async () => {
@@ -36,7 +36,7 @@ export default function ModalInputScreen() {
         inputText: inputText.trim(),
         uuid,
         photo: parsedPhoto,
-        topOffset: Number(topOffset),
+        topOffset: Number(topOffset)
       })
       router.back()
     } catch (error) {
@@ -53,14 +53,14 @@ export default function ModalInputScreen() {
           header: () => (
             <AppHeader
               onBack={() => router.back()}
-              title="Add Comment"
+              title='Add Comment'
               rightSlot={
                 <TouchableOpacity
                   onPress={handleSubmit}
                   disabled={isSubmitting || !inputText.trim()}
                   style={[
                     SHARED_STYLES.interactive.headerButton,
-                    { opacity: isSubmitting || !inputText.trim() ? 0.6 : 1 },
+                    { opacity: isSubmitting || !inputText.trim() ? 0.6 : 1 }
                   ]}
                 >
                   <Ionicons
@@ -75,7 +75,7 @@ export default function ModalInputScreen() {
                 </TouchableOpacity>
               }
             />
-          ),
+          )
         }}
       />
       <ModalInputText route={{ params: routeParams }} />

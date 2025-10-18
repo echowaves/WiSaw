@@ -218,7 +218,7 @@ const ShareFriendNameModal = ({
   const styles = createStyles(theme)
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType='slide' onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Header */}
@@ -229,14 +229,14 @@ const ShareFriendNameModal = ({
               onPress={onClose}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <FontAwesome5 name="times" size={18} color={theme.TEXT_SECONDARY} />
+              <FontAwesome5 name='times' size={18} color={theme.TEXT_SECONDARY} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.contentContainer}>
             {/* Friend Info */}
             <View style={styles.friendInfo}>
-              <FontAwesome5 name="user-circle" size={32} color={CONST.MAIN_COLOR} />
+              <FontAwesome5 name='user-circle' size={32} color={CONST.MAIN_COLOR} />
               <Text style={styles.friendName}>{friendName || 'Unknown Friend'}</Text>
               <Text style={styles.description}>
                 Share this friend's name to update it on another device
@@ -248,20 +248,22 @@ const ShareFriendNameModal = ({
               <Text style={styles.sectionTitle}>QR Code</Text>
               <View style={styles.qrContainer}>
                 <View style={styles.qrCodeWrapper}>
-                  {shareUrl ? (
-                    <QRCode
-                      value={shareUrl}
-                      size={160}
-                      bgColor="#ffffff"
-                      fgColor="#000000"
-                      level="M"
-                    />
-                  ) : (
-                    <View style={styles.qrPlaceholder}>
-                      <FontAwesome5 name="qrcode" size={40} color={theme.TEXT_SECONDARY} />
-                      <Text style={styles.placeholderText}>Generating QR Code...</Text>
-                    </View>
-                  )}
+                  {shareUrl
+                    ? (
+                      <QRCode
+                        value={shareUrl}
+                        size={160}
+                        bgColor='#ffffff'
+                        fgColor='#000000'
+                        level='M'
+                      />
+                      )
+                    : (
+                      <View style={styles.qrPlaceholder}>
+                        <FontAwesome5 name='qrcode' size={40} color={theme.TEXT_SECONDARY} />
+                        <Text style={styles.placeholderText}>Generating QR Code...</Text>
+                      </View>
+                      )}
                 </View>
                 <Text style={styles.qrDescription}>
                   Scan this code to update the friend's name on another device
@@ -279,13 +281,13 @@ const ShareFriendNameModal = ({
                 activeOpacity={0.7}
               >
                 <View style={[styles.optionIcon, { backgroundColor: '#28a745' }]}>
-                  <FontAwesome5 name="user-tag" size={18} color="white" />
+                  <FontAwesome5 name='user-tag' size={18} color='white' />
                 </View>
                 <View style={styles.optionContent}>
                   <Text style={styles.optionTitle}>Share Friend Name</Text>
                   <Text style={styles.optionDescription}>Send friend's name via text/message</Text>
                 </View>
-                <FontAwesome5 name="chevron-right" size={14} color={theme.TEXT_SECONDARY} />
+                <FontAwesome5 name='chevron-right' size={14} color={theme.TEXT_SECONDARY} />
               </TouchableOpacity>
             </View>
 

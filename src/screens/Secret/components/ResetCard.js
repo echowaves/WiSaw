@@ -62,18 +62,18 @@ const ResetCard = ({ theme, onReset }) => {
         secret before proceeding if you want to restore it later.
       </Text>
       <Button
-        type="outline"
+        type='outline'
         buttonStyle={styles.resetButton}
         titleStyle={styles.resetButtonText}
         icon={
           <MaterialCommunityIcons
-            name="refresh"
+            name='refresh'
             size={20}
-            color="#FF9500"
+            color='#FF9500'
             style={{ marginRight: 8 }}
           />
         }
-        title="Reset Identity"
+        title='Reset Identity'
         onPress={handleResetPress}
       />
     </View>

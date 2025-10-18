@@ -92,7 +92,7 @@ TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
 
 // 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background task should behave
 // Note: This does NOT need to be in the global scope and CAN be used in your React components!
-async function registerBackgroundFetchAsync() {
+async function registerBackgroundFetchAsync () {
   try {
     // Only register when BackgroundTask is available (not Expo Go / simulator on iOS)
     const status = await BackgroundTask.getStatusAsync()
@@ -970,7 +970,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   onPress={() => updateIndex(0)}
                 >
                   <FontAwesome
-                    name="globe"
+                    name='globe'
                     size={20}
                     color={activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
@@ -1008,7 +1008,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   onPress={() => updateIndex(1)}
                 >
                   <AntDesign
-                    name="star"
+                    name='star'
                     size={20}
                     color={activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
@@ -1046,7 +1046,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   onPress={() => updateIndex(2)}
                 >
                   <FontAwesome
-                    name="search"
+                    name='search'
                     size={20}
                     color={activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
@@ -1110,7 +1110,7 @@ const PhotosList = ({ searchFromUrl }) => {
   //   })
   // }
 
-  async function checkPermission({
+  async function checkPermission ({
     permissionFunction,
     alertHeader,
     alertBody,
@@ -1199,7 +1199,7 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }
 
-  async function initLocation() {
+  async function initLocation () {
     const locationPermission = await checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
       alertHeader: 'WiSaw shows you near-by photos based on your current location.',
@@ -1587,7 +1587,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 disabled={!netAvailable}
               >
                 <FontAwesome
-                  name="navicon"
+                  name='navicon'
                   size={22}
                   color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
                 />
@@ -1601,7 +1601,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 }}
                 disabled={isCameraOpening}
               >
-                <FontAwesome5 name="video" color="white" size={24} />
+                <FontAwesome5 name='video' color='white' size={24} />
               </TouchableOpacity>
 
               {/* Photo Capture Button - Main Action */}
@@ -1631,7 +1631,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 }}
                 disabled={isCameraOpening}
               >
-                <FontAwesome5 name="camera" color="white" size={28} />
+                <FontAwesome5 name='camera' color='white' size={28} />
               </TouchableOpacity>
 
               {/* Friends List Button */}
@@ -1651,7 +1651,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 disabled={!netAvailable}
               >
                 <FontAwesome5
-                  name="user-friends"
+                  name='user-friends'
                   size={22}
                   color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
                 />
@@ -1769,10 +1769,10 @@ const PhotosList = ({ searchFromUrl }) => {
           elevation: 2
         }}
       >
-        <Ionicons name="search" size={20} color={theme.TEXT_SECONDARY} style={{ marginRight: 8 }} />
+        <Ionicons name='search' size={20} color={theme.TEXT_SECONDARY} style={{ marginRight: 8 }} />
         <TextInput
           ref={searchBarRef}
-          placeholder="Search photos..."
+          placeholder='Search photos...'
           placeholderTextColor={theme.TEXT_SECONDARY}
           onChangeText={(currentTerm) => {
             setSearchTerm(currentTerm)
@@ -1780,7 +1780,7 @@ const PhotosList = ({ searchFromUrl }) => {
           value={searchTerm}
           onSubmitEditing={() => submitSearch()}
           autoFocus={autoFocus}
-          returnKeyType="search"
+          returnKeyType='search'
           style={{
             flex: 1,
             color: theme.TEXT_PRIMARY,
@@ -1792,33 +1792,35 @@ const PhotosList = ({ searchFromUrl }) => {
             paddingRight: searchTerm ? 30 : 0 // Make room for clear button
           }}
         />
-        {searchTerm ? (
-          <TouchableOpacity
-            onPress={() => {
-              setSearchTerm('')
-              if (searchBarRef.current) {
-                searchBarRef.current.clear()
-                searchBarRef.current.focus()
-              }
-            }}
-            style={{
-              position: 'absolute',
-              right: 8,
-              top: '50%',
-              transform: [{ translateY: -10 }],
-              width: 20,
-              height: 20,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: theme.INTERACTIVE_SECONDARY,
-              borderRadius: 10,
-              elevation: 6,
-              zIndex: 6
-            }}
-          >
-            <Ionicons name="close" size={12} color={theme.TEXT_PRIMARY} />
-          </TouchableOpacity>
-        ) : null}
+        {searchTerm
+          ? (
+            <TouchableOpacity
+              onPress={() => {
+                setSearchTerm('')
+                if (searchBarRef.current) {
+                  searchBarRef.current.clear()
+                  searchBarRef.current.focus()
+                }
+              }}
+              style={{
+                position: 'absolute',
+                right: 8,
+                top: '50%',
+                transform: [{ translateY: -10 }],
+                width: 20,
+                height: 20,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: theme.INTERACTIVE_SECONDARY,
+                borderRadius: 10,
+                elevation: 6,
+                zIndex: 6
+              }}
+            >
+              <Ionicons name='close' size={12} color={theme.TEXT_PRIMARY} />
+            </TouchableOpacity>
+            )
+          : null}
       </View>
 
       <TouchableOpacity
@@ -1841,7 +1843,7 @@ const PhotosList = ({ searchFromUrl }) => {
           zIndex: 8
         }}
       >
-        <Ionicons name="send" size={20} color="white" />
+        <Ionicons name='send' size={20} color='white' />
       </TouchableOpacity>
     </View>
   )
@@ -1924,7 +1926,7 @@ const PhotosList = ({ searchFromUrl }) => {
               }}
             >
               <MaterialIcons
-                name="cloud-upload"
+                name='cloud-upload'
                 size={24}
                 color={netAvailable ? theme.INTERACTIVE_PRIMARY : theme.TEXT_DISABLED}
                 style={{ marginRight: 12 }}
@@ -1992,11 +1994,11 @@ const PhotosList = ({ searchFromUrl }) => {
         {renderPendingPhotos()}
         <View style={styles.container}>
           <EmptyStateCard
-            icon="wifi-off"
-            iconType="MaterialIcons"
-            title="No Internet Connection"
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
             subtitle="You can still take photos offline. They'll be uploaded automatically when you're back online."
-            actionText="Try Again"
+            actionText='Try Again'
             onActionPress={reload}
           />
           {renderFooter({ unreadCount })}
@@ -2035,11 +2037,11 @@ const PhotosList = ({ searchFromUrl }) => {
         {renderPendingPhotos()}
         <View style={styles.container}>
           <EmptyStateCard
-            icon="location-on"
-            iconType="MaterialIcons"
-            title="Location Access Needed"
-            subtitle="WiSaw needs location access to show you photos from your area and let others discover your content."
-            actionText="Enable Location"
+            icon='location-on'
+            iconType='MaterialIcons'
+            title='Location Access Needed'
+            subtitle='WiSaw needs location access to show you photos from your area and let others discover your content.'
+            actionText='Enable Location'
             onActionPress={reload}
           />
           {renderFooter({ renderFooter })}
@@ -2126,10 +2128,10 @@ const PhotosList = ({ searchFromUrl }) => {
         {activeSegment === 2 &&
           (loading || (
             <EmptyStateCard
-              icon="search"
-              title="Ready to Search"
-              subtitle="Enter a search term above to find photos from your area and beyond."
-              actionText="Start Exploring"
+              icon='search'
+              title='Ready to Search'
+              subtitle='Enter a search term above to find photos from your area and beyond.'
+              actionText='Start Exploring'
               onActionPress={() => {
                 if (searchBarRef.current) {
                   searchBarRef.current.focus()
@@ -2140,10 +2142,10 @@ const PhotosList = ({ searchFromUrl }) => {
         {activeSegment === 1 &&
           (loading || (
             <EmptyStateCard
-              icon="star"
-              title="No Starred Content Yet"
+              icon='star'
+              title='No Starred Content Yet'
               subtitle="Start building your collection! Take photos, comment on others' posts, or star content you love."
-              actionText="Discover Content"
+              actionText='Discover Content'
               onActionPress={() => updateIndex(0)}
             />
           ))}

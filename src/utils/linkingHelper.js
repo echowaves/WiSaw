@@ -94,9 +94,9 @@ const trimSlashes = (value = '') => value.replace(/^\/+|\/+$/g, '')
 const resolveDeepLinkTarget = (rawPath, queryParams) => {
   const sanitizedPath = rawPath
     ? rawPath
-        .replace(/[#?].*$/, '')
-        .split('/')
-        .filter(Boolean)
+      .replace(/[#?].*$/, '')
+      .split('/')
+      .filter(Boolean)
     : []
 
   if (sanitizedPath.length) {

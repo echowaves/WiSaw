@@ -231,7 +231,7 @@ const ExpandableThumb = ({
     return (
       <View style={commentStyles.commentOverlay}>
         {hasLastComment && (
-          <Text style={commentStyles.commentText} numberOfLines={2} ellipsizeMode="tail">
+          <Text style={commentStyles.commentText} numberOfLines={2} ellipsizeMode='tail'>
             {item.lastComment}
           </Text>
         )}
@@ -239,14 +239,14 @@ const ExpandableThumb = ({
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {commentsCount > 0 && (
               <View style={commentStyles.commentStatItem}>
-                <FontAwesome name="comment" size={12} color="#4FC3F7" />
+                <FontAwesome name='comment' size={12} color='#4FC3F7' />
                 <Text style={commentStyles.commentStatText}>{commentsCount}</Text>
               </View>
             )}
             {watchersCount > 0 && commentsCount > 0 && <View style={{ width: 12 }} />}
             {watchersCount > 0 && (
               <View style={commentStyles.commentStatItem}>
-                <AntDesign name="star" size={12} color="#FFD700" />
+                <AntDesign name='star' size={12} color='#FFD700' />
                 <Text style={commentStyles.commentStatText}>{watchersCount}</Text>
               </View>
             )}
@@ -273,7 +273,7 @@ const ExpandableThumb = ({
           height: adjustedThumbHeight,
           borderRadius: 20
         }}
-        resizeMode="cover"
+        resizeMode='cover'
       />
       {renderCommentOverlay()}
     </View>
@@ -316,7 +316,7 @@ const ExpandableThumb = ({
       <View style={{ overflow: 'hidden', borderRadius: 20, flex: 1 }}>
         <Photo
           photo={cleanPhoto}
-          embedded={true} // Show close button when expanded
+          embedded // Show close button when expanded
           onRequestEnsureVisible={onRequestEnsureVisible}
           onTriggerSearch={onTriggerSearch}
           onHeightMeasured={(height) => {
@@ -425,7 +425,7 @@ const ExpandableThumb = ({
                 alignItems: 'center'
               }}
             >
-              <Ionicons name="play" size={16} color="white" />
+              <Ionicons name='play' size={16} color='white' />
             </View>
           )}
         </Animated.View>

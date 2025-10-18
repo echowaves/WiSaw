@@ -37,7 +37,7 @@ import * as CONST from '../../consts'
 //   }
 // }
 
-export async function registerSecret({ secret, topOffset, nickName, uuid }) {
+export async function registerSecret ({ secret, topOffset, nickName, uuid }) {
   // console.log({ nickName })
 
   try {
@@ -81,7 +81,7 @@ export async function registerSecret({ secret, topOffset, nickName, uuid }) {
   }
 }
 
-export async function updateSecret({ nickName, oldSecret, secret, uuid, topOffset }) {
+export async function updateSecret ({ nickName, oldSecret, secret, uuid, topOffset }) {
   try {
     const updatedSecret = (
       await CONST.gqlClient.mutate({
@@ -125,7 +125,7 @@ export async function updateSecret({ nickName, oldSecret, secret, uuid, topOffse
   }
 }
 
-export async function resetSecret({ topOffset }) {
+export async function resetSecret ({ topOffset }) {
   // console.log({ nickName })
   try {
     await Promise.all([
@@ -163,7 +163,7 @@ const storeUUID = async (uuid) => {
   }
 }
 
-export async function getUUID() {
+export async function getUUID () {
   let uuid
   try {
     // Add a timeout to prevent hanging
@@ -221,7 +221,7 @@ const storeNickName = async (nickName) => {
   }
 }
 
-export async function getStoredNickName() {
+export async function getStoredNickName () {
   try {
     // Add timeout protection
     const timeoutPromise = new Promise((_, reject) => {

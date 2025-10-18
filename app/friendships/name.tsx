@@ -4,7 +4,7 @@ import { View } from 'react-native'
 
 // This component handles deep linking for friendship QR codes
 // It's not meant to be displayed, just processes the deep link and redirects
-export default function FriendshipNameHandler() {
+export default function FriendshipNameHandler () {
   const params = useLocalSearchParams()
 
   useEffect(() => {

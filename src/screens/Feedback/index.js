@@ -169,11 +169,13 @@ const FeedbackScreen = () => {
         opacity: isSubmitting || inputText.trim().length < 10 ? 0.5 : 1
       }}
     >
-      {isSubmitting ? (
-        <Ionicons name="hourglass" size={24} color={CONST.MAIN_COLOR} />
-      ) : (
-        <Ionicons name="send" size={24} color={CONST.MAIN_COLOR} />
-      )}
+      {isSubmitting
+        ? (
+          <Ionicons name='hourglass' size={24} color={CONST.MAIN_COLOR} />
+          )
+        : (
+          <Ionicons name='send' size={24} color={CONST.MAIN_COLOR} />
+          )}
     </TouchableOpacity>
   )
   const renderHeaderLeft = () => (
@@ -184,7 +186,7 @@ const FeedbackScreen = () => {
         padding: 8
       }}
     >
-      <FontAwesome name="chevron-left" size={24} color={CONST.MAIN_COLOR} />
+      <FontAwesome name='chevron-left' size={24} color={CONST.MAIN_COLOR} />
     </TouchableOpacity>
   )
 
@@ -391,16 +393,16 @@ const FeedbackScreen = () => {
 
   return (
     <>
-      <AppHeader title="Feedback" onBack={() => router.back()} />
+      <AppHeader title='Feedback' onBack={() => router.back()} />
       <View style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <KeyboardAwareScrollView
             style={styles.scrollContainer}
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentInsetAdjustmentBehavior="automatic"
-            enableOnAndroid={true}
+            keyboardShouldPersistTaps='handled'
+            contentInsetAdjustmentBehavior='automatic'
+            enableOnAndroid
             extraScrollHeight={20}
           >
             <Animated.View
@@ -412,7 +414,7 @@ const FeedbackScreen = () => {
               {/* Header Card */}
               <View style={styles.headerCard}>
                 <View style={styles.iconContainer}>
-                  <FontAwesome5 name="comments" size={32} color={CONST.MAIN_COLOR} />
+                  <FontAwesome5 name='comments' size={32} color={CONST.MAIN_COLOR} />
                 </View>
                 <Text style={styles.title}>We'd Love Your Feedback!</Text>
                 <Text style={styles.subtitle}>
@@ -458,11 +460,13 @@ const FeedbackScreen = () => {
                 disabled={isSubmitting || inputText.trim().length < 10}
                 activeOpacity={0.8}
               >
-                {isSubmitting ? (
-                  <Ionicons name="hourglass" size={20} color="white" />
-                ) : (
-                  <FontAwesome5 name="paper-plane" size={18} color="white" />
-                )}
+                {isSubmitting
+                  ? (
+                    <Ionicons name='hourglass' size={20} color='white' />
+                    )
+                  : (
+                    <FontAwesome5 name='paper-plane' size={18} color='white' />
+                    )}
                 <Text style={styles.submitButtonText}>
                   {isSubmitting ? 'Sending...' : 'Send Feedback'}
                 </Text>

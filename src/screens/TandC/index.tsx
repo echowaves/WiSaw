@@ -7,7 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from 'react-native'
 import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -26,19 +26,19 @@ export const TANDC_POINTS = [
   "You can explore what others are sharing around you as soon as it's posted.",
   'Abusive or inappropriate photos can be removed immediately and disappear for everyone.',
   'The community does not tolerate objectionable content or abusive behavior.',
-  'Repeat offenders will be removed from WiSaw by the community.',
+  'Repeat offenders will be removed from WiSaw by the community.'
 ]
 
 const FOOTER_NOTE = 'You can revisit these guidelines anytime from Settings.'
 
-export type TandCModalProps = {
+export interface TandCModalProps {
   onAccept: () => void
   primaryActionLabel?: string
 }
 
-export default function TandCModal({
+export default function TandCModal ({
   onAccept,
-  primaryActionLabel = 'I Agree',
+  primaryActionLabel = 'I Agree'
 }: TandCModalProps) {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const insets = useSafeAreaInsets()
@@ -54,7 +54,7 @@ export default function TandCModal({
         <View style={styles.card}>
           <View style={styles.heroSection}>
             <Ionicons
-              name="shield-checkmark"
+              name='shield-checkmark'
               size={48}
               color={theme.INTERACTIVE_PRIMARY}
               style={styles.heroIcon}
@@ -69,11 +69,11 @@ export default function TandCModal({
                 key={point}
                 style={[
                   styles.pointRow,
-                  index !== TANDC_POINTS.length - 1 && styles.pointRowSpacing,
+                  index !== TANDC_POINTS.length - 1 && styles.pointRowSpacing
                 ]}
               >
                 <Ionicons
-                  name="checkmark-circle"
+                  name='checkmark-circle'
                   size={20}
                   color={theme.INTERACTIVE_PRIMARY}
                   style={styles.pointIcon}
@@ -87,11 +87,11 @@ export default function TandCModal({
             <Text style={styles.agreementText}>{TANDC_AGREEMENT}</Text>
             <View style={styles.primaryButtonContainer}>
               <Pressable
-                accessibilityRole="button"
+                accessibilityRole='button'
                 onPress={onAccept}
                 style={({ pressed }) => [
                   styles.primaryButton,
-                  pressed && styles.primaryButtonPressed,
+                  pressed && styles.primaryButtonPressed
                 ]}
               >
                 <Text style={styles.primaryButtonTitle}>
@@ -113,7 +113,7 @@ const createStyles = (theme: ThemeShape, insets: EdgeInsets) =>
   StyleSheet.create({
     safeArea: {
       flex: 1,
-      backgroundColor: theme.HEADER_BACKGROUND,
+      backgroundColor: theme.HEADER_BACKGROUND
     },
     scrollContainer: {
       flexGrow: 1,
@@ -121,7 +121,7 @@ const createStyles = (theme: ThemeShape, insets: EdgeInsets) =>
       paddingVertical: Math.max(32, insets.top),
       paddingBottom: Math.max(40, insets.bottom + 24),
       justifyContent: 'center',
-      backgroundColor: theme.HEADER_BACKGROUND,
+      backgroundColor: theme.HEADER_BACKGROUND
     },
     card: {
       backgroundColor: theme.CARD_BACKGROUND,
@@ -134,50 +134,50 @@ const createStyles = (theme: ThemeShape, insets: EdgeInsets) =>
       shadowOffset: { width: 0, height: 12 },
       shadowOpacity: 0.12,
       shadowRadius: 24,
-      elevation: 12,
+      elevation: 12
     },
     heroSection: {
       alignItems: 'center',
-      marginBottom: 28,
+      marginBottom: 28
     },
     heroIcon: {
-      marginBottom: 4,
+      marginBottom: 4
     },
     title: {
       color: theme.TEXT_PRIMARY,
       fontSize: 22,
       fontWeight: '700',
-      textAlign: 'center',
+      textAlign: 'center'
     },
     subtitle: {
       color: theme.TEXT_SECONDARY,
       fontSize: 16,
       lineHeight: 24,
       textAlign: 'center',
-      marginTop: 12,
+      marginTop: 12
     },
     pointsList: {
-      marginBottom: 28,
+      marginBottom: 28
     },
     pointRow: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
+      alignItems: 'flex-start'
     },
     pointRowSpacing: {
-      marginBottom: 16,
+      marginBottom: 16
     },
     pointIcon: {
       marginRight: 12,
-      marginTop: 2,
+      marginTop: 2
     },
     pointText: {
       flex: 1,
       color: theme.TEXT_PRIMARY,
       fontSize: 16,
-      lineHeight: 24,
+      lineHeight: 24
     },
     actionsSection: {
-      alignItems: 'center',
+      alignItems: 'center'
     },
     agreementText: {
       color: theme.TEXT_PRIMARY,
@@ -185,31 +185,31 @@ const createStyles = (theme: ThemeShape, insets: EdgeInsets) =>
       lineHeight: 22,
       textAlign: 'center',
       fontWeight: '600',
-      marginBottom: 18,
+      marginBottom: 18
     },
     primaryButtonContainer: {
-      alignSelf: 'stretch',
+      alignSelf: 'stretch'
     },
     primaryButton: {
       borderRadius: 14,
       backgroundColor: theme.INTERACTIVE_PRIMARY,
       paddingVertical: 14,
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'center'
     },
     primaryButtonPressed: {
-      opacity: 0.85,
+      opacity: 0.85
     },
     primaryButtonTitle: {
       fontSize: 17,
       fontWeight: '700',
-      color: '#FFFFFF',
+      color: '#FFFFFF'
     },
     footerNote: {
       color: theme.TEXT_SECONDARY,
       fontSize: 14,
       lineHeight: 20,
       textAlign: 'center',
-      marginTop: 16,
-    },
+      marginTop: 16
+    }
   })

@@ -142,13 +142,13 @@ const Chat = ({ route }) => {
     <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor="transparent"
+        backgroundColor='transparent'
         translucent
       />
       <View style={styles.container}>
         {/* Delete Action Background */}
         <View style={styles.deleteAction}>
-          <FontAwesome name="trash" size={24} color="white" />
+          <FontAwesome name='trash' size={24} color='white' />
           <Text style={styles.deleteActionText}>Delete{'\n'}Chat</Text>
         </View>
 

@@ -2,7 +2,7 @@ import { Stack, useRouter } from 'expo-router'
 import AppHeader from '../../src/components/AppHeader'
 import IdentityScreen from '../../src/screens/Secret'
 
-export default function Identity() {
+export default function Identity () {
   const router = useRouter()
 
   return (
@@ -11,8 +11,8 @@ export default function Identity() {
         options={{
           headerShown: true,
           header: () => (
-            <AppHeader onBack={() => router.back()} title="Identity" />
-          ),
+            <AppHeader onBack={() => router.back()} title='Identity' />
+          )
         }}
       />
       <IdentityScreen />

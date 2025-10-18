@@ -49,7 +49,7 @@ const HeaderCard = ({ nickNameEntered, theme }) => {
   return (
     <View style={styles.headerCard}>
       <View style={styles.iconContainer}>
-        <FontAwesome5 name="user-shield" size={32} color={CONST.MAIN_COLOR} />
+        <FontAwesome5 name='user-shield' size={32} color={CONST.MAIN_COLOR} />
       </View>
       <Text style={styles.title}>
         {nickNameEntered ? 'Update Your Identity' : 'Create Your Identity'}

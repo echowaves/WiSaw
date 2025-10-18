@@ -30,17 +30,17 @@ const connection_url = `${REALTIME_API_URI}?header=${header_encode(
   api_header
 )}&payload=${header_encode({})}`
 
-//------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 const { SubscriptionClient } = require('subscriptions-transport-ws')
 const uuid4 = require('uuid').v4
 
 class UUIDOperationIdSubscriptionClient extends SubscriptionClient {
-  generateOperationId() {
+  generateOperationId () {
     // AppSync recommends using UUIDs for Subscription IDs but SubscriptionClient uses an incrementing number
     return uuid4()
   }
 
-  processReceivedData(receivedData) {
+  processReceivedData (receivedData) {
     try {
       const parsedMessage = JSON.parse(receivedData)
       if (parsedMessage?.type === 'start_ack') return // sent by AppSync but meaningless to us

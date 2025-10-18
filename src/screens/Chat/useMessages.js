@@ -68,7 +68,7 @@ export const useMessages = ({ chatUuid, uuid, friendsList, setText, toastTopOffs
       // eslint-disable-next-line no-console
       console.log('failed to load messages: ', { e })
       Toast.show({
-        text1: `Failed to load messages:`,
+        text1: 'Failed to load messages:',
         text2: `${e}`,
         type: 'error',
         topOffset: toastTopOffset
@@ -141,7 +141,7 @@ export const useMessages = ({ chatUuid, uuid, friendsList, setText, toastTopOffs
             // eslint-disable-next-line no-console
             console.log('failed to send message: ', { e })
             Toast.show({
-              text1: `Failed to send message:`,
+              text1: 'Failed to send message:',
               text2: `${e}`,
               type: 'error',
               topOffset: toastTopOffset

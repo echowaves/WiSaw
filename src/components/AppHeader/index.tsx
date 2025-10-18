@@ -8,24 +8,24 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
-type AppHeaderProps = {
+interface AppHeaderProps {
   title: string | React.ReactNode
   onBack?: () => void
   rightSlot?: React.ReactNode
   safeTopOnly?: boolean
 }
 
-export default function AppHeader({
+export default function AppHeader ({
   title,
   onBack,
   rightSlot,
-  safeTopOnly = false,
+  safeTopOnly = false
 }: AppHeaderProps) {
   const [isDark] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDark)
@@ -33,7 +33,7 @@ export default function AppHeader({
 
   const styles = StyleSheet.create({
     safeArea: {
-      backgroundColor: theme.HEADER_BACKGROUND,
+      backgroundColor: theme.HEADER_BACKGROUND
     },
     container: {
       backgroundColor: theme.HEADER_BACKGROUND,
@@ -43,7 +43,7 @@ export default function AppHeader({
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 1,
       shadowRadius: 4,
-      elevation: 3,
+      elevation: 3
     },
     contentContainer: {
       flexDirection: 'row',
@@ -51,28 +51,28 @@ export default function AppHeader({
       justifyContent: 'space-between',
       paddingHorizontal: 16,
       paddingVertical: 12,
-      minHeight: 56,
+      minHeight: 56
     },
     leftArea: {
       flex: 0,
       alignItems: 'flex-start',
-      minWidth: 44,
+      minWidth: 44
     },
     titleArea: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center',
+      justifyContent: 'center'
     },
     rightArea: {
       flex: 0,
       alignItems: 'flex-end',
-      minWidth: 44,
+      minWidth: 44
     },
     titleText: {
       color: theme.TEXT_PRIMARY,
       fontSize: 16,
       fontWeight: '600',
-      textAlign: 'center',
+      textAlign: 'center'
     },
     headerButton: {
       padding: 12,
@@ -84,25 +84,25 @@ export default function AppHeader({
       shadowColor: theme.CARD_SHADOW,
       shadowOffset: {
         width: 0,
-        height: 2,
+        height: 2
       },
       shadowOpacity: 0.2,
       shadowRadius: 4,
-      elevation: 4,
-    },
+      elevation: 4
+    }
   })
 
   const Outer = safeTopOnly ? View : (SafeAreaView as any)
-  
+
   // On Android, add explicit status bar padding since SafeAreaView doesn't handle it properly
   const androidStatusBarHeight = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0
-  
+
   const outerProps: any = safeTopOnly
     ? {
-        style: [styles.safeArea, { paddingTop: insets.top }],
+        style: [styles.safeArea, { paddingTop: insets.top }]
       }
     : {
-        style: [styles.safeArea, Platform.OS === 'android' && { paddingTop: androidStatusBarHeight }],
+        style: [styles.safeArea, Platform.OS === 'android' && { paddingTop: androidStatusBarHeight }]
       }
 
   return (
@@ -110,33 +110,37 @@ export default function AppHeader({
       <View style={styles.container}>
         <View style={styles.contentContainer}>
           <View style={styles.leftArea}>
-            {onBack ? (
-              <TouchableOpacity
-                onPress={onBack}
-                style={styles.headerButton}
-                accessibilityLabel="Go back"
-              >
-                <Ionicons
-                  name="chevron-back"
-                  size={24}
-                  color={theme.TEXT_PRIMARY}
-                />
-              </TouchableOpacity>
-            ) : (
-              <View style={{ width: 44 }} />
-            )}
+            {onBack
+              ? (
+                <TouchableOpacity
+                  onPress={onBack}
+                  style={styles.headerButton}
+                  accessibilityLabel='Go back'
+                >
+                  <Ionicons
+                    name='chevron-back'
+                    size={24}
+                    color={theme.TEXT_PRIMARY}
+                  />
+                </TouchableOpacity>
+                )
+              : (
+                <View style={{ width: 44 }} />
+                )}
           </View>
 
           <View style={styles.titleArea}>
-            {typeof title === 'string' ? (
-              <Text style={styles.titleText}>{title}</Text>
-            ) : (
-              title
-            )}
+            {typeof title === 'string'
+              ? (
+                <Text style={styles.titleText}>{title}</Text>
+                )
+              : (
+                  title
+                )}
           </View>
 
           <View style={styles.rightArea}>
-            {rightSlot ? rightSlot : <View style={{ width: 44 }} />}
+            {rightSlot || <View style={{ width: 44 }} />}
           </View>
         </View>
       </View>

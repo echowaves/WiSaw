@@ -41,7 +41,7 @@ export const initialState = {
 //   }
 // }
 
-export async function createFriendship({ uuid, topOffset, contactName, autoShare = false }) {
+export async function createFriendship ({ uuid, topOffset, contactName, autoShare = false }) {
   try {
     const { friendship } = (
       await CONST.gqlClient.mutate({
@@ -139,7 +139,7 @@ export async function createFriendship({ uuid, topOffset, contactName, autoShare
   }
 }
 
-export async function reloadUnreadCountsList({ uuid }) {
+export async function reloadUnreadCountsList ({ uuid }) {
   try {
     // This function would typically reload the unread counts list
     // Since the functionality is already in friends_helper, we can just return

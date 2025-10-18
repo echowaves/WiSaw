@@ -100,7 +100,7 @@ const PhotosDetailsShared = ({ route }) => {
 
   const renderHeaderTitle = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <AntDesign name="share-alt" size={20} color={theme.TEXT_PRIMARY} style={styles.headerIcon} />
+      <AntDesign name='share-alt' size={20} color={theme.TEXT_PRIMARY} style={styles.headerIcon} />
       <Text style={[styles.headerTitle, { marginLeft: 8 }]}>Shared Photo</Text>
     </View>
   )
@@ -129,7 +129,7 @@ const PhotosDetailsShared = ({ route }) => {
     return (
       <View style={styles.container}>
         {renderCustomHeader()}
-        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -149,7 +149,7 @@ const PhotosDetailsShared = ({ route }) => {
   return (
     <View style={styles.container}>
       {renderCustomHeader()}
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent />
       <Text
         style={{
           color: theme.TEXT_PRIMARY,

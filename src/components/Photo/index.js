@@ -628,7 +628,7 @@ const Photo = ({
       <View style={styles.photoInfoCard}>
         <View style={styles.headerInfo}>
           <View style={styles.authorRow}>
-            <Text style={styles.authorName} numberOfLines={1} ellipsizeMode="tail">
+            <Text style={styles.authorName} numberOfLines={1} ellipsizeMode='tail'>
               {authorName}
             </Text>
             <Text style={styles.dateText}>{renderDateTime(photo.createdAt)}</Text>
@@ -638,7 +638,7 @@ const Photo = ({
             <View style={styles.statsRow}>
               {commentsCount > 0 && (
                 <View style={styles.statItem}>
-                  <FontAwesome name="comment" size={16} color="#4FC3F7" />
+                  <FontAwesome name='comment' size={16} color='#4FC3F7' />
                   <Text style={styles.statsText}>
                     {commentsCount} Comment{commentsCount !== 1 ? 's' : ''}
                   </Text>
@@ -647,7 +647,7 @@ const Photo = ({
 
               {watchersCount > 0 && (
                 <View style={styles.statItem}>
-                  <AntDesign name="star" size={16} color="#FFD700" />
+                  <AntDesign name='star' size={16} color='#FFD700' />
                   <Text style={styles.statsText}>
                     {watchersCount} Star{watchersCount !== 1 ? 's' : ''}
                   </Text>
@@ -703,7 +703,7 @@ const Photo = ({
           activeOpacity={0.7}
         >
           <FontAwesome
-            name="trash"
+            name='trash'
             style={{
               color: CONST.MAIN_COLOR
             }}
@@ -796,11 +796,10 @@ const Photo = ({
                 uuid,
                 topOffset: toastTopOffset
               }
-            })
-          }
+            })}
           activeOpacity={0.7}
         >
-          <Ionicons name="add-circle" size={18} color={theme.STATUS_SUCCESS} />
+          <Ionicons name='add-circle' size={18} color={theme.STATUS_SUCCESS} />
           <Text numberOfLines={1} style={styles.addCommentText}>
             Add Comment
           </Text>
@@ -1181,7 +1180,7 @@ const Photo = ({
             delayPressOut={0}
           >
             <FontAwesome
-              name="ban"
+              name='ban'
               color={
                 photoDetails?.isPhotoWatched === undefined ||
                 photoDetails?.isPhotoWatched ||
@@ -1233,7 +1232,7 @@ const Photo = ({
             delayPressOut={0}
           >
             <FontAwesome
-              name="trash"
+              name='trash'
               color={
                 photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched
                   ? theme.TEXT_DISABLED
@@ -1299,7 +1298,7 @@ const Photo = ({
             disabled={photoDetails?.isPhotoWatched === undefined}
           >
             <Ionicons
-              name="share-outline"
+              name='share-outline'
               color={
                 photoDetails?.isPhotoWatched === undefined
                   ? theme.TEXT_DISABLED
@@ -1384,7 +1383,7 @@ const Photo = ({
               height: '100%'
             }}
             nativeControls={false}
-            contentFit="cover"
+            contentFit='cover'
             allowsFullscreen
             allowsPictureInPicture
           />
@@ -1419,7 +1418,7 @@ const Photo = ({
             <Ionicons
               name={isPlaying ? 'pause' : 'play'}
               size={24}
-              color="white"
+              color='white'
               style={!isPlaying ? { marginLeft: 3 } : {}}
             />
           </TouchableOpacity>
@@ -1502,9 +1501,9 @@ const Photo = ({
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Ionicons
-          name="close"
+          name='close'
           size={24}
-          color="rgba(255, 255, 255, 0.95)"
+          color='rgba(255, 255, 255, 0.95)'
           style={{
             textShadowColor: 'rgba(0, 0, 0, 0.8)',
             textShadowOffset: { width: 0, height: 1 },
@@ -1539,7 +1538,7 @@ const Photo = ({
       {renderActionCard()}
       {photoDetails?.isPhotoWatched === undefined && (
         <LinearProgress
-          color="#4FC3F7"
+          color='#4FC3F7'
           style={[
             styles.loadingProgress,
             {

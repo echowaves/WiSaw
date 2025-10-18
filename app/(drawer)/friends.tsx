@@ -6,7 +6,7 @@ import { emitAddFriend } from '../../src/events/friendAddBus'
 import FriendsList from '../../src/screens/FriendsList'
 import { SHARED_STYLES } from '../../src/theme/sharedStyles'
 
-export default function Friends() {
+export default function Friends () {
   const router = useRouter()
 
   const handleAddFriend = () => {
@@ -21,7 +21,7 @@ export default function Friends() {
           header: () => (
             <AppHeader
               onBack={() => router.replace('/')}
-              title="Friends"
+              title='Friends'
               rightSlot={
                 <TouchableOpacity
                   onPress={handleAddFriend}
@@ -31,19 +31,19 @@ export default function Friends() {
                       backgroundColor:
                         SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
                       borderWidth: 1,
-                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-                    },
+                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER
+                    }
                   ]}
                 >
                   <FontAwesome5
-                    name="plus"
+                    name='plus'
                     size={18}
                     color={SHARED_STYLES.theme.TEXT_PRIMARY}
                   />
                 </TouchableOpacity>
               }
             />
-          ),
+          )
         }}
       />
       <FriendsList />

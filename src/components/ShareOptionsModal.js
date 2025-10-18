@@ -68,7 +68,7 @@ const ShareOptionsModal = ({
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType='slide' onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Header */}
@@ -79,14 +79,14 @@ const ShareOptionsModal = ({
               onPress={onClose}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <FontAwesome5 name="times" size={18} color="#666" />
+              <FontAwesome5 name='times' size={18} color='#666' />
             </TouchableOpacity>
           </View>
 
           <View style={styles.contentContainer}>
             {/* Friend Info */}
             <View style={styles.friendInfo}>
-              <FontAwesome5 name="user-circle" size={32} color={CONST.MAIN_COLOR} />
+              <FontAwesome5 name='user-circle' size={32} color={CONST.MAIN_COLOR} />
               <Text style={styles.friendName}>{friendName || 'Unknown Friend'}</Text>
               <Text style={styles.description}>Share this friendship invitation</Text>
             </View>
@@ -96,20 +96,22 @@ const ShareOptionsModal = ({
               <Text style={styles.sectionTitle}>QR Code</Text>
               <View style={styles.qrContainer}>
                 <View style={styles.qrCodeWrapper}>
-                  {shareUrl ? (
-                    <QRCode
-                      value={shareUrl}
-                      size={160}
-                      bgColor="#ffffff"
-                      fgColor="#000000"
-                      level="M"
-                    />
-                  ) : (
-                    <View style={styles.qrPlaceholder}>
-                      <FontAwesome5 name="qrcode" size={40} color="#ccc" />
-                      <Text style={styles.placeholderText}>Generating QR Code...</Text>
-                    </View>
-                  )}
+                  {shareUrl
+                    ? (
+                      <QRCode
+                        value={shareUrl}
+                        size={160}
+                        bgColor='#ffffff'
+                        fgColor='#000000'
+                        level='M'
+                      />
+                      )
+                    : (
+                      <View style={styles.qrPlaceholder}>
+                        <FontAwesome5 name='qrcode' size={40} color='#ccc' />
+                        <Text style={styles.placeholderText}>Generating QR Code...</Text>
+                      </View>
+                      )}
                 </View>
                 <Text style={styles.qrDescription}>
                   Scan this code to accept the friendship request
@@ -127,7 +129,7 @@ const ShareOptionsModal = ({
                 activeOpacity={0.7}
               >
                 <View style={[styles.optionIcon, { backgroundColor: '#ff6b35' }]}>
-                  <FontAwesome5 name="share-alt" size={18} color="white" />
+                  <FontAwesome5 name='share-alt' size={18} color='white' />
                 </View>
                 <View style={styles.optionContent}>
                   <Text style={styles.optionTitle}>Share Invitation</Text>
@@ -135,7 +137,7 @@ const ShareOptionsModal = ({
                     Send friendship invitation via text/message
                   </Text>
                 </View>
-                <FontAwesome5 name="chevron-right" size={14} color="#ccc" />
+                <FontAwesome5 name='chevron-right' size={14} color='#ccc' />
               </TouchableOpacity>
             </View>
 

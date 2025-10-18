@@ -215,9 +215,9 @@ const SecretScreen = () => {
           style={styles.scrollView}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentInsetAdjustmentBehavior="automatic"
-          enableOnAndroid={true}
+          keyboardShouldPersistTaps='handled'
+          contentInsetAdjustmentBehavior='automatic'
+          enableOnAndroid
           extraScrollHeight={20}
         >
           <Animated.View
@@ -239,18 +239,18 @@ const SecretScreen = () => {
 
               {nickNameEntered && (
                 <SecretInputField
-                  placeholder="Current secret"
+                  placeholder='Current secret'
                   value={oldSecret}
                   onChangeText={setOldSecret}
                   showPassword={showOldPassword}
                   setShowPassword={setShowOldPassword}
                   theme={theme}
-                  leftIconName="key"
+                  leftIconName='key'
                 />
               )}
 
               <SecretInputField
-                placeholder="New secret"
+                placeholder='New secret'
                 value={secret}
                 onChangeText={setSecret}
                 showPassword={showPassword}
@@ -267,14 +267,14 @@ const SecretScreen = () => {
               )}
 
               <SecretInputField
-                placeholder="Confirm secret"
+                placeholder='Confirm secret'
                 value={secretConfirm}
                 onChangeText={setSecretConfirm}
                 showPassword={showConfirmPassword}
                 setShowPassword={setShowConfirmPassword}
                 theme={theme}
                 errorMessage={errorsMap.get('secretConfirm')}
-                leftIconName="check-circle"
+                leftIconName='check-circle'
               />
             </View>
 
@@ -289,23 +289,25 @@ const SecretScreen = () => {
                     : 'Create Identity'
               }
               icon={
-                isSubmitting ? (
-                  <FontAwesome5
-                    name="hourglass"
-                    size={18}
-                    color="white"
-                    style={{ marginRight: 8 }}
-                  />
-                ) : (
-                  <FontAwesome5
-                    name={nickNameEntered ? 'edit' : 'user-shield'}
-                    size={18}
-                    color="white"
-                    style={{ marginRight: 8 }}
-                  />
-                )
+                isSubmitting
+                  ? (
+                    <FontAwesome5
+                      name='hourglass'
+                      size={18}
+                      color='white'
+                      style={{ marginRight: 8 }}
+                    />
+                    )
+                  : (
+                    <FontAwesome5
+                      name={nickNameEntered ? 'edit' : 'user-shield'}
+                      size={18}
+                      color='white'
+                      style={{ marginRight: 8 }}
+                    />
+                    )
               }
-              size="lg"
+              size='lg'
               buttonStyle={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
               titleStyle={styles.submitButtonTitle}
               onPress={handleSubmit}

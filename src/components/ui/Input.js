@@ -76,7 +76,7 @@ const Input = forwardRef(
           ref={ref}
           style={[styles.input, ...flatten(inputStyle), style]}
           editable={!disabled}
-          placeholderTextColor="rgba(60,60,67,0.6)"
+          placeholderTextColor='rgba(60,60,67,0.6)'
           {...rest}
           {...inputProps}
         />

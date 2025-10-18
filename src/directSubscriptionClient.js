@@ -28,12 +28,12 @@ const connection_url = `${REALTIME_API_URI}?header=${header_encode(
 )}&payload=${header_encode({})}`
 
 class UUIDOperationIdSubscriptionClient extends SubscriptionClient {
-  generateOperationId() {
+  generateOperationId () {
     // AppSync recommends using UUIDs for Subscription IDs but SubscriptionClient uses an incrementing number
     return uuid4()
   }
 
-  processReceivedData(receivedData) {
+  processReceivedData (receivedData) {
     try {
       const parsedMessage = JSON.parse(receivedData)
       if (parsedMessage?.type === 'start_ack') return // sent by AppSync but meaningless to us

@@ -11,7 +11,7 @@ const coerceNumber = (value, fallback = 0) => {
 
 const withDevMutationGuards = (target) =>
   new Proxy(target, {
-    set(proxyTarget, property, value) {
+    set (proxyTarget, property, value) {
       console.error(
         `🚨 MUTATION DETECTED: Attempted to set ${String(property)} = ${value} on protected photo ${proxyTarget.id}`
       )
@@ -21,14 +21,14 @@ const withDevMutationGuards = (target) =>
       console.trace('Mutation call stack:')
       return false
     },
-    defineProperty(proxyTarget, property) {
+    defineProperty (proxyTarget, property) {
       console.error(
         `🚨 PROPERTY DEFINITION DETECTED: Attempted to define ${String(property)} on protected photo ${proxyTarget.id}`
       )
       console.trace('Property definition call stack:')
       return false
     },
-    deleteProperty(proxyTarget, property) {
+    deleteProperty (proxyTarget, property) {
       console.error(
         `🚨 DELETE PROPERTY DETECTED: Attempted to delete ${String(property)} on protected photo ${proxyTarget.id}`
       )

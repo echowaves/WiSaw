@@ -31,12 +31,12 @@ const SecretInputField = ({
       <Input
         placeholder={placeholder}
         autoCorrect={false}
-        autoCapitalize="none"
-        autoComplete="off"
+        autoCapitalize='none'
+        autoComplete='off'
         spellCheck={false}
-        textContentType="none"
-        passwordRules=""
-        keyboardType="default"
+        textContentType='none'
+        passwordRules=''
+        keyboardType='default'
         inputProps={{
           'data-form-type': 'other',
           'data-lpignore': 'true'

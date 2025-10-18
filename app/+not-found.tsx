@@ -4,7 +4,7 @@ import { View } from 'react-native'
 
 // This component catches unmatched routes (like deep link URLs that don't match file structure)
 // and redirects to home. Our deep link handler in _layout.tsx will then process the URL properly.
-export default function NotFound() {
+export default function NotFound () {
   const rootNavigationState = useRootNavigationState()
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import PinchableView from '../../../src/components/Photo/PinchableView'
 
-export default function PinchScreen() {
+export default function PinchScreen () {
   const router = useRouter()
   const params = useLocalSearchParams()
   const { photo } = params
@@ -11,7 +11,7 @@ export default function PinchScreen() {
 
   const navigation = {
     goBack: () => router.back(),
-    navigate: (routeName: string, params?: any) => router.push(routeName),
+    navigate: (routeName: string, params?: any) => router.push(routeName)
   }
 
   return (

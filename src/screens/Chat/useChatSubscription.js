@@ -45,7 +45,7 @@ export const useChatSubscription = ({ chatUuid, uuid, friendsList, setMessages, 
     `
 
     const subscriptionParameters = {
-      next(data) {
+      next (data) {
         // Check if this is an error object being passed to next
         if (data?.error) {
           // eslint-disable-next-line no-console
@@ -135,7 +135,7 @@ export const useChatSubscription = ({ chatUuid, uuid, friendsList, setMessages, 
         // update read counts
         friendsHelper.resetUnreadCount({ chatUuid, uuid })
       },
-      error(error) {
+      error (error) {
         // eslint-disable-next-line no-console
         console.error('❌ observableObject:: subscription error', { error })
         isSubscribedRef.current = false
@@ -160,7 +160,7 @@ export const useChatSubscription = ({ chatUuid, uuid, friendsList, setMessages, 
           })
           .subscribe(subscriptionParameters)
       },
-      complete() {
+      complete () {
         // eslint-disable-next-line no-console
         console.log('observableObject:: subs. DONE')
         isSubscribedRef.current = false

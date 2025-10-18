@@ -6,7 +6,7 @@ import AppHeader from '../../../src/components/AppHeader'
 import Chat from '../../../src/screens/Chat'
 import * as STATE from '../../../src/state'
 
-export default function ChatScreen() {
+export default function ChatScreen () {
   const params = useLocalSearchParams()
   const { chatUuid, contact, friendshipUuid } = params
 
@@ -19,7 +19,7 @@ export default function ChatScreen() {
 
   // Local state for the current display name (can be updated when editing)
   const [currentDisplayName, setCurrentDisplayName] = useState(
-    contactName && typeof contactName === 'string' ? contactName : 'Chat',
+    contactName && typeof contactName === 'string' ? contactName : 'Chat'
   )
 
   // Sync display name when route params change (e.g., navigating to different chat)
@@ -35,7 +35,7 @@ export default function ChatScreen() {
   const routeParams = {
     chatUuid,
     contact: currentDisplayName,
-    friendshipUuid,
+    friendshipUuid
   }
 
   return (
@@ -49,7 +49,7 @@ export default function ChatScreen() {
               title={currentDisplayName}
               rightSlot={<View style={{ width: 44, height: 44 }} />}
             />
-          ),
+          )
         }}
       />
       <Chat route={{ params: routeParams }} />

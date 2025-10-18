@@ -8,7 +8,7 @@ import useToastTopOffset from '../src/hooks/useToastTopOffset'
 import * as reducer from '../src/screens/PhotosList/reducer'
 import TandCModal from '../src/screens/TandC'
 
-export default function TandCModalScreen() {
+export default function TandCModalScreen () {
   const router = useRouter()
   const toastTopOffset = useToastTopOffset()
 
@@ -17,13 +17,13 @@ export default function TandCModalScreen() {
       const onBackPress = () => true
       const subscription = BackHandler.addEventListener(
         'hardwareBackPress',
-        onBackPress,
+        onBackPress
       )
 
       return () => {
         subscription.remove()
       }
-    }, []),
+    }, [])
   )
 
   const handleAccept = useCallback(() => {
@@ -36,7 +36,7 @@ export default function TandCModalScreen() {
         type: 'error',
         position: 'top',
         topOffset: toastTopOffset,
-        visibilityTime: 3000,
+        visibilityTime: 3000
       })
       return
     }
@@ -47,7 +47,7 @@ export default function TandCModalScreen() {
       type: 'success',
       position: 'top',
       topOffset: toastTopOffset,
-      visibilityTime: 2500,
+      visibilityTime: 2500
     })
 
     router.back()
@@ -59,7 +59,7 @@ export default function TandCModalScreen() {
         options={{
           presentation: 'modal',
           headerShown: false,
-          gestureEnabled: false,
+          gestureEnabled: false
         }}
       />
       <TandCModal onAccept={handleAccept} />
