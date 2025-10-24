@@ -27,6 +27,7 @@ import {
   Keyboard,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -92,7 +93,7 @@ TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
 
 // 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background task should behave
 // Note: This does NOT need to be in the global scope and CAN be used in your React components!
-async function registerBackgroundFetchAsync () {
+async function registerBackgroundFetchAsync() {
   try {
     // Only register when BackgroundTask is available (not Expo Go / simulator on iOS)
     const status = await BackgroundTask.getStatusAsync()
@@ -131,6 +132,8 @@ async function registerBackgroundFetchAsync () {
 // }
 
 const FOOTER_HEIGHT = 90
+const FOOTER_GAP = 4
+const KEYBOARD_GAP = 16
 
 let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
@@ -416,6 +419,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const lastScrollY = React.useRef(0)
 
   const [keyboardVisible, dismissKeyboard] = useKeyboard()
+  const [keyboardOffset, setKeyboardOffset] = useState(0)
 
   const masonryRef = React.useRef(null)
 
@@ -557,6 +561,28 @@ const PhotosList = ({ searchFromUrl }) => {
 
     setPreviousPendingCount(pendingPhotos.length)
   }, [pendingPhotos.length, netAvailable, previousPendingCount])
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
+
+    const handleKeyboardShow = (event) => {
+      const height = event?.endCoordinates?.height ?? 0
+      setKeyboardOffset(height)
+    }
+
+    const handleKeyboardHide = () => {
+      setKeyboardOffset(0)
+    }
+
+    const showListener = Keyboard.addListener(showEvent, handleKeyboardShow)
+    const hideListener = Keyboard.addListener(hideEvent, handleKeyboardHide)
+
+    return () => {
+      showListener.remove()
+      hideListener.remove()
+    }
+  }, [])
 
   // Effect to handle scrolling to expanded photo (simplified as backup)
   useEffect(() => {
@@ -1110,7 +1136,7 @@ const PhotosList = ({ searchFromUrl }) => {
   //   })
   // }
 
-  async function checkPermission ({
+  async function checkPermission({
     permissionFunction,
     alertHeader,
     alertBody,
@@ -1199,7 +1225,7 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }
 
-  async function initLocation () {
+  async function initLocation() {
     const locationPermission = await checkPermission({
       permissionFunction: Location.requestForegroundPermissionsAsync,
       alertHeader: 'WiSaw shows you near-by photos based on your current location.',
@@ -1296,7 +1322,7 @@ const PhotosList = ({ searchFromUrl }) => {
     // navigation.navigate('ConfirmFriendship', {
     //   friendshipUuid: '544e4564-1fb2-429f-917c-3495f545552b',
     // })
-    ;(async () => {
+    ; (async () => {
       await Notifications.requestPermissionsAsync({
         ios: {
           allowAlert: true,
@@ -1306,15 +1332,15 @@ const PhotosList = ({ searchFromUrl }) => {
         }
       })
     })()
-    ;(async () => {
-      await registerBackgroundFetchAsync()
-    })()
-    ;(async () => {
-      setIsTandcAccepted(await reducer.getTancAccepted())
-    })()
-    ;(async () => {
-      setZeroMoment(await reducer.getZeroMoment())
-    })()
+      ; (async () => {
+        await registerBackgroundFetchAsync()
+      })()
+      ; (async () => {
+        setIsTandcAccepted(await reducer.getTancAccepted())
+      })()
+      ; (async () => {
+        setZeroMoment(await reducer.getZeroMoment())
+      })()
   }, [])
 
   useEffect(() => {
@@ -1728,72 +1754,89 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }
 
-  const renderSearchBar = (autoFocus) => (
-    <View
-      style={{
-        flexDirection: 'row',
-        backgroundColor: theme.HEADER_BACKGROUND,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.BORDER_LIGHT,
-        shadowColor: theme.HEADER_SHADOW,
-        shadowOffset: {
-          width: 0,
-          height: 2
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 8,
-        zIndex: 8
-      }}
-    >
-      <View
+  const renderSearchBar = (autoFocus) => {
+    // When keyboard is visible, position above keyboard with gap
+    // When keyboard is hidden, position above footer
+    const bottomOffset = keyboardOffset > 0
+      ? keyboardOffset + KEYBOARD_GAP
+      : FOOTER_HEIGHT + FOOTER_GAP
+
+    return (
+      <Animated.View
         style={{
-          flex: 1,
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: bottomOffset,
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: theme.CARD_BACKGROUND,
-          borderRadius: 20,
-          paddingHorizontal: 16,
-          marginRight: 12,
+          backgroundColor: theme.HEADER_BACKGROUND,
+          borderRadius: 24,
+          paddingHorizontal: 12,
+          paddingVertical: 12,
           borderWidth: 1,
-          borderColor: theme.CARD_BORDER,
-          shadowColor: theme.CARD_SHADOW,
+          borderColor: theme.BORDER_LIGHT,
+          shadowColor: theme.HEADER_SHADOW,
           shadowOffset: {
             width: 0,
-            height: 1
+            height: 6
           },
           shadowOpacity: 0.2,
-          shadowRadius: 2,
-          elevation: 2
+          shadowRadius: 8,
+          elevation: 20,
+          zIndex: 20
         }}
       >
-        <Ionicons name='search' size={20} color={theme.TEXT_SECONDARY} style={{ marginRight: 8 }} />
-        <TextInput
-          ref={searchBarRef}
-          placeholder='Search photos...'
-          placeholderTextColor={theme.TEXT_SECONDARY}
-          onChangeText={(currentTerm) => {
-            setSearchTerm(currentTerm)
-          }}
-          value={searchTerm}
-          onSubmitEditing={() => submitSearch()}
-          autoFocus={autoFocus}
-          returnKeyType='search'
+        <View
           style={{
             flex: 1,
-            color: theme.TEXT_PRIMARY,
-            fontSize: 16,
-            fontWeight: '400',
-            height: 40,
-            paddingHorizontal: 0,
-            marginLeft: 0,
-            paddingRight: searchTerm ? 30 : 0 // Make room for clear button
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.CARD_BACKGROUND,
+            borderRadius: 20,
+            paddingHorizontal: 16,
+            marginRight: 12,
+            borderWidth: 1,
+            borderColor: theme.CARD_BORDER,
+            shadowColor: theme.CARD_SHADOW,
+            shadowOffset: {
+              width: 0,
+              height: 1
+            },
+            shadowOpacity: 0.15,
+            shadowRadius: 2,
+            elevation: 4
           }}
-        />
-        {searchTerm
-          ? (
+        >
+          <Ionicons
+            name='search'
+            size={20}
+            color={theme.TEXT_SECONDARY}
+            style={{ marginRight: 8 }}
+          />
+          <TextInput
+            ref={searchBarRef}
+            placeholder='Search photos...'
+            placeholderTextColor={theme.TEXT_SECONDARY}
+            onChangeText={(currentTerm) => {
+              setSearchTerm(currentTerm)
+            }}
+            value={searchTerm}
+            onSubmitEditing={() => submitSearch()}
+            autoFocus={autoFocus}
+            returnKeyType='search'
+            style={{
+              flex: 1,
+              color: theme.TEXT_PRIMARY,
+              fontSize: 16,
+              fontWeight: '400',
+              height: 40,
+              paddingHorizontal: 0,
+              marginLeft: 0,
+              paddingRight: searchTerm ? 30 : 0
+            }}
+          />
+          {searchTerm && (
             <TouchableOpacity
               onPress={() => {
                 setSearchTerm('')
@@ -1819,34 +1862,34 @@ const PhotosList = ({ searchFromUrl }) => {
             >
               <Ionicons name='close' size={12} color={theme.TEXT_PRIMARY} />
             </TouchableOpacity>
-            )
-          : null}
-      </View>
+          )}
+        </View>
 
-      <TouchableOpacity
-        onPress={() => submitSearch()}
-        style={{
-          backgroundColor: theme.INTERACTIVE_PRIMARY,
-          borderRadius: 20,
-          width: 44,
-          height: 44,
-          justifyContent: 'center',
-          alignItems: 'center',
-          shadowColor: theme.INTERACTIVE_PRIMARY,
-          shadowOffset: {
-            width: 0,
-            height: 2
-          },
-          shadowOpacity: 0.3,
-          shadowRadius: 4,
-          elevation: 8,
-          zIndex: 8
-        }}
-      >
-        <Ionicons name='send' size={20} color='white' />
-      </TouchableOpacity>
-    </View>
-  )
+        <TouchableOpacity
+          onPress={() => submitSearch()}
+          style={{
+            backgroundColor: theme.INTERACTIVE_PRIMARY,
+            borderRadius: 22,
+            width: 48,
+            height: 48,
+            justifyContent: 'center',
+            alignItems: 'center',
+            shadowColor: theme.INTERACTIVE_PRIMARY,
+            shadowOffset: {
+              width: 0,
+              height: 4
+            },
+            shadowOpacity: 0.35,
+            shadowRadius: 6,
+            elevation: 12,
+            zIndex: 22
+          }}
+        >
+          <Ionicons name='send' size={20} color='white' />
+        </TouchableOpacity>
+      </Animated.View>
+    )
+  }
 
   const renderPendingPhotos = () => {
     if (pendingPhotos.length > 0) {
@@ -1992,7 +2035,11 @@ const PhotosList = ({ searchFromUrl }) => {
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
         {renderPendingPhotos()}
-        <View style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 20 }}
+          showsVerticalScrollIndicator={false}
+        >
           <EmptyStateCard
             icon='wifi-off'
             iconType='MaterialIcons'
@@ -2001,8 +2048,8 @@ const PhotosList = ({ searchFromUrl }) => {
             actionText='Try Again'
             onActionPress={reload}
           />
-          {renderFooter({ unreadCount })}
-        </View>
+        </ScrollView>
+        {renderFooter({ unreadCount })}
       </View>
     )
   }
@@ -2035,7 +2082,11 @@ const PhotosList = ({ searchFromUrl }) => {
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
         {renderPendingPhotos()}
-        <View style={styles.container}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 20 }}
+          showsVerticalScrollIndicator={false}
+        >
           <EmptyStateCard
             icon='location-on'
             iconType='MaterialIcons'
@@ -2044,8 +2095,8 @@ const PhotosList = ({ searchFromUrl }) => {
             actionText='Enable Location'
             onActionPress={reload}
           />
-          {renderFooter({ renderFooter })}
-        </View>
+        </ScrollView>
+        {renderFooter({ renderFooter })}
       </View>
     )
   }
@@ -2109,11 +2160,15 @@ const PhotosList = ({ searchFromUrl }) => {
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
         {renderPendingPhotos()}
-        <View style={styles.container}>
-          {activeSegment === 2 && renderSearchBar(true)}
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 80 }}
+          showsVerticalScrollIndicator={false}
+        >
           <EmptyStateCard {...getEmptyStateProps()} />
-          {renderFooter({ unreadCount })}
-        </View>
+        </ScrollView>
+        {activeSegment === 2 && renderSearchBar(true)}
+        {renderFooter({ unreadCount })}
       </View>
     )
   }
@@ -2123,8 +2178,11 @@ const PhotosList = ({ searchFromUrl }) => {
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
       {renderCustomHeader()}
       {renderPendingPhotos()}
-      <View style={styles.container}>
-        {activeSegment === 2 && renderSearchBar(false)}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 80 }}
+        showsVerticalScrollIndicator={false}
+      >
         {activeSegment === 2 &&
           (loading || (
             <EmptyStateCard
@@ -2149,8 +2207,9 @@ const PhotosList = ({ searchFromUrl }) => {
               onActionPress={() => updateIndex(0)}
             />
           ))}
-        {renderFooter({ unreadCount })}
-      </View>
+      </ScrollView>
+      {activeSegment === 2 && renderSearchBar(false)}
+      {renderFooter({ unreadCount })}
     </View>
   )
 }
