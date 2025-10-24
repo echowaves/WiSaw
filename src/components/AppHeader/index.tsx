@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as STATE from '../../state'
@@ -21,7 +21,7 @@ interface AppHeaderProps {
   safeTopOnly?: boolean
 }
 
-export default function AppHeader ({
+export default function AppHeader({
   title,
   onBack,
   rightSlot,
@@ -99,11 +99,11 @@ export default function AppHeader ({
 
   const outerProps: any = safeTopOnly
     ? {
-        style: [styles.safeArea, { paddingTop: insets.top }]
-      }
+      style: [styles.safeArea, { paddingTop: insets.top }]
+    }
     : {
-        style: [styles.safeArea, Platform.OS === 'android' && { paddingTop: androidStatusBarHeight }]
-      }
+      style: [styles.safeArea, Platform.OS === 'android' && { paddingTop: androidStatusBarHeight }]
+    }
 
   return (
     <Outer {...outerProps}>
@@ -123,20 +123,20 @@ export default function AppHeader ({
                     color={theme.TEXT_PRIMARY}
                   />
                 </TouchableOpacity>
-                )
+              )
               : (
                 <View style={{ width: 44 }} />
-                )}
+              )}
           </View>
 
           <View style={styles.titleArea}>
             {typeof title === 'string'
               ? (
                 <Text style={styles.titleText}>{title}</Text>
-                )
+              )
               : (
-                  title
-                )}
+                title
+              )}
           </View>
 
           <View style={styles.rightArea}>
