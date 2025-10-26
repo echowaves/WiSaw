@@ -123,11 +123,33 @@ The StatusBar automatically adapts:
 
 The foundation is now in place for:
 
-1. **System Theme Detection**: Auto-detect device theme preference
+1. ~~**System Theme Detection**: Auto-detect device theme preference~~ ✅ **IMPLEMENTED**
 2. **Scheduled Theme**: Auto-switch based on time of day
 3. **Custom Themes**: Additional color schemes beyond light/dark
 4. **Theme Animations**: Smooth transitions between themes
 5. **Component Library**: Extend theming to all remaining components
+
+## 🛠️ Auto Dark Mode Fix (October 2025)
+
+### Issue
+Auto dark mode (follow system theme) was not working because the app configuration was missing the `userInterfaceStyle` setting.
+
+### Solution
+Added `userInterfaceStyle: 'automatic'` to `app.config.js`. This tells Expo/React Native to:
+- Allow the app to respond to system theme changes
+- Enable the `Appearance` API to properly detect dark/light mode
+- Support automatic theme switching when "Auto" mode is selected in the drawer
+
+### Files Modified
+- `app.config.js` - Added `userInterfaceStyle: 'automatic'`
+
+### Testing
+After this change:
+1. Set device to dark mode → App should automatically switch to dark theme when "Auto" is selected
+2. Set device to light mode → App should automatically switch to light theme when "Auto" is selected
+3. Manual theme selection (Light/Dark) should override system theme
+
+**Note**: You may need to rebuild the app for this change to take effect, as it modifies the native configuration.
 
 ## 📁 Files Modified
 

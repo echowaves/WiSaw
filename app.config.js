@@ -196,6 +196,7 @@ module.exports = {
     slug: 'WiSaw',
     scheme: 'wisaw',
     icon: './assets/icon.png',
+    userInterfaceStyle: 'automatic',
     notification: { iosDisplayInForeground: true },
     splash: {
       image: './assets/splash.png',
