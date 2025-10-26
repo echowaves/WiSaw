@@ -2036,8 +2036,12 @@ const PhotosList = ({ searchFromUrl }) => {
         {renderCustomHeader()}
         {renderPendingPhotos()}
         <ScrollView
-          style={styles.container}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 20 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            justifyContent: 'center',
+            paddingHorizontal: 20,
+            paddingBottom: FOOTER_HEIGHT + 20
+          }}
           showsVerticalScrollIndicator={false}
         >
           <EmptyStateCard
@@ -2083,8 +2087,12 @@ const PhotosList = ({ searchFromUrl }) => {
         {renderCustomHeader()}
         {renderPendingPhotos()}
         <ScrollView
-          style={styles.container}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 20 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            justifyContent: 'center',
+            paddingHorizontal: 20,
+            paddingBottom: FOOTER_HEIGHT + 20
+          }}
           showsVerticalScrollIndicator={false}
         >
           <EmptyStateCard
@@ -2161,9 +2169,13 @@ const PhotosList = ({ searchFromUrl }) => {
         {renderCustomHeader()}
         {renderPendingPhotos()}
         <ScrollView
-          style={styles.container}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 80 }}
-          showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            justifyContent: 'center',
+            paddingHorizontal: 20,
+            paddingBottom: FOOTER_HEIGHT + 80
+          }}
+          showsVerticalScrollIndicator={true}
         >
           <EmptyStateCard {...getEmptyStateProps()} />
         </ScrollView>
@@ -2179,9 +2191,13 @@ const PhotosList = ({ searchFromUrl }) => {
       {renderCustomHeader()}
       {renderPendingPhotos()}
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: FOOTER_HEIGHT + 80 }}
-        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          justifyContent: 'center',
+          paddingHorizontal: 20,
+          paddingBottom: FOOTER_HEIGHT + 80
+        }}
+        showsVerticalScrollIndicator={true}
       >
         {activeSegment === 2 &&
           (loading || (
@@ -2196,6 +2212,7 @@ const PhotosList = ({ searchFromUrl }) => {
                 }
               }}
             />
+
           ))}
         {activeSegment === 1 &&
           (loading || (
