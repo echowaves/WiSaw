@@ -117,6 +117,7 @@ async function registerBackgroundFetchAsync() {
       minimumInterval: 15 // 15 minutes (minimum allowed)
     })
   } catch (e) {
+    // eslint-disable-next-line
     if (__DEV__) {
       // eslint-disable-next-line no-console
       console.warn('Skipping background task registration:', e?.message || e)
@@ -184,6 +185,7 @@ const PhotosList = ({ searchFromUrl }) => {
   }, [])
 
   // Development-only: Add guards to detect unauthorized mutations to photo dimensions
+  // eslint-disable-next-line
   if (__DEV__) {
     validateFrozenPhotosList(photosList, 'in PhotosList render')
   }
@@ -756,6 +758,7 @@ const PhotosList = ({ searchFromUrl }) => {
         // If aspect ratios differ significantly (more than 5%), recalculate
         if (aspectRatioDifference > 0.05) {
           const recalculatedDimensions = getCalculatedDimensions(item)
+          // eslint-disable-next-line
           if (__DEV__) {
             console.log(
               `🛠️ DIMENSIONS CORRECTION: Photo ${item.id} had corrupted dimensions ${dimensions.width}x${dimensions.height} (AR: ${calculatedAspectRatio.toFixed(3)}), correcting to ${recalculatedDimensions.width}x${recalculatedDimensions.height} (AR: ${(recalculatedDimensions.width / recalculatedDimensions.height).toFixed(3)})`
