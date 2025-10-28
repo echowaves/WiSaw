@@ -1,20 +1,4 @@
 {
-    "standard.engine": "ts-standard",
-    "editor.formatOnSave": false,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
-  "files.watcherExclude": {
-    "**/.git/objects/**": true,
-    "**/.git/subtree-cache/**": true,
-    "**/node_modules/*/**": true
-  },
-  "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 1000
+  "standard.engine": "ts-standard",
+  "editor.formatOnSave": false
 }
