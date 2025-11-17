@@ -1,15 +1,13 @@
 import { useAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 
-import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 
 import PropTypes from 'prop-types'
 
 import { AntDesign } from '@expo/vector-icons'
 
-import { ScrollView, StatusBar, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 
 import { gql } from '@apollo/client'
 
@@ -46,11 +44,7 @@ const PhotosDetailsShared = ({ route }) => {
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
 
-  const navigation = useNavigation()
   const [item, setItem] = useState(null)
-  const insets = useSafeAreaInsets()
-  const { width } = useWindowDimensions()
-  const isSmallDevice = width < 768
 
   const { photoId, refreshKey } = route.params
 
@@ -106,17 +100,7 @@ const PhotosDetailsShared = ({ route }) => {
   )
 
   const renderCustomHeader = () => (
-    <View
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000
-      }}
-    >
-      <AppHeader safeTopOnly onBack={() => router.back()} title={renderHeaderTitle()} />
-    </View>
+    <AppHeader onBack={() => router.back()} title={renderHeaderTitle()} />
   )
 
   useEffect(() => {
@@ -129,7 +113,7 @@ const PhotosDetailsShared = ({ route }) => {
     return (
       <View style={styles.container}>
         {renderCustomHeader()}
-        <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent />
+        <StatusBar barStyle='dark-content' backgroundColor={theme.HEADER_BACKGROUND} />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -149,12 +133,12 @@ const PhotosDetailsShared = ({ route }) => {
   return (
     <View style={styles.container}>
       {renderCustomHeader()}
-      <StatusBar barStyle='dark-content' backgroundColor='transparent' translucent />
+      <StatusBar barStyle='dark-content' backgroundColor={theme.HEADER_BACKGROUND} />
       <Text
         style={{
           color: theme.TEXT_PRIMARY,
           textAlign: 'center',
-          marginTop: SHARED_STYLES.header.getDynamicHeight(insets.top, isSmallDevice) + 40,
+          marginTop: 40,
           fontSize: 18,
           fontWeight: '500'
         }}
