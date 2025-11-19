@@ -426,7 +426,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const masonryRef = React.useRef(null)
 
   // Reset anchor/scroll-related state to avoid stale offsets when switching segments
-  const resetAnchorState = React.useCallback(() => {
+  const resetAnchorState = React.useCallback(({ skipScrollToTop = false } = {}) => {
     try {
       // Clear anchor targets and scrolling flags
       lastExpandedIdRef.current = null
@@ -447,7 +447,7 @@ const PhotosList = ({ searchFromUrl }) => {
       if (scrollToIndex !== null) setScrollToIndex(null)
 
       // Scroll list to top synchronously to normalize offsets
-      if (masonryRef.current) {
+      if (!skipScrollToTop && masonryRef.current) {
         if (typeof masonryRef.current.scrollToOffset === 'function') {
           masonryRef.current.scrollToOffset({ offset: 0, animated: false })
         } else if (typeof masonryRef.current.scrollTo === 'function') {
@@ -903,16 +903,13 @@ const PhotosList = ({ searchFromUrl }) => {
       // Haptics might not be available on all devices - fail silently
     }
 
-    // Always collapse any expanded photos when any segment is clicked (including current one)
-    if (expandedPhotoIds.size > 0) {
-      setExpandedPhotoIds(new Set())
-    }
+    const isSwitchingSegment = activeSegment !== index
+
+    // Clear anchor-related state before reloading content to avoid stale offsets
+    resetAnchorState({ skipScrollToTop: !isSwitchingSegment })
 
     // Only clear photos and reset if actually switching segments
-    if (activeSegment !== index) {
-      // Reset scroll/anchor caches so new segment starts clean
-      resetAnchorState()
-
+    if (isSwitchingSegment) {
       setPhotosList([])
       setStopLoading(false)
       setConsecutiveEmptyResponses(0)
