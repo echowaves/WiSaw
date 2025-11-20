@@ -3,7 +3,7 @@ import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Animated,
   StyleSheet,
@@ -69,7 +69,8 @@ const ExpandableThumb = ({
   updatePhotoHeight,
   onRequestEnsureVisible,
   showComments = false, // New prop to enable comment overlay
-  onTriggerSearch
+  onTriggerSearch,
+  shouldScrollToTop = false
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -99,8 +100,8 @@ const ExpandableThumb = ({
         height: Number(item.height)
       }
       console.log(
-        `⚠️ ExpandableThumb: Using item dimensions for photo ${item.id}:`,
-        originalDimensions.current
+        '⚠️ ExpandableThumb: Using item dimensions for photo:',
+        { id: item.id, dimensions: originalDimensions.current }
       )
     }
   }
@@ -110,7 +111,7 @@ const ExpandableThumb = ({
   const aspectRatio = originalDimensions.current
     ? originalDimensions.current.width / originalDimensions.current.height
     : 1
-  const expandedImageHeight = expandedWidth / aspectRatio
+  // const expandedImageHeight = expandedWidth / aspectRatio
 
   // STATELESS: Use only aspect ratio calculation, no stored height
   // For expanded state always use flex layout (let Photo component grow naturally)
@@ -127,6 +128,25 @@ const ExpandableThumb = ({
   const finalHeight = isExpanded
     ? null // Let the Photo component determine its own height through flex layout
     : adjustedThumbHeight
+
+  useEffect(() => {
+    if (shouldScrollToTop && !isExpanded) {
+      // Give layout a tick to settle
+      setTimeout(() => {
+        try {
+          if (containerRef.current && typeof onRequestEnsureVisible === 'function') {
+            containerRef.current.measureInWindow((x, y, width, height) => {
+              if (height > 0) {
+                onRequestEnsureVisible({ id: item.id, y, height })
+              }
+            })
+          }
+        } catch (e) {
+          // noop
+        }
+      }, 60)
+    }
+  }, [shouldScrollToTop, isExpanded, item.id, onRequestEnsureVisible])
 
   useEffect(() => {
     if (isExpanded && !isAnimating) {
@@ -279,6 +299,47 @@ const ExpandableThumb = ({
     </View>
   )
 
+  const handleHeightMeasured = useCallback(
+    (height) => {
+      // Only report to masonry layout for dimension calculation, don't store locally
+      if (height <= 0) return
+
+      // Update the height refs for masonry layout dimension calculation
+      if (updatePhotoHeight) {
+        updatePhotoHeight(item.id, height)
+      }
+
+      // Legacy callback support (keeping for backward compatibility)
+      if (onUpdateDimensions && isExpanded) {
+        onUpdateDimensions(item.id, height)
+      }
+
+      // After height is known, ensure the full ImageView is visible
+      if (typeof onRequestEnsureVisible !== 'function' || !containerRef.current) {
+        return
+      }
+
+      // If suppression window is active for this photo (e.g., recognition toggle), skip scrolling
+      const until = global.suppressEnsureVisibleUntil?.get?.(item.id)
+      if (typeof until === 'number' && Date.now() < until) {
+        return
+      }
+
+      setTimeout(() => {
+        try {
+          containerRef.current.measureInWindow((x, y, w, h) => {
+            if (h > 0) {
+              onRequestEnsureVisible({ id: item.id, y, height: h })
+            }
+          })
+        } catch (e) {
+          // best-effort
+        }
+      }, 30)
+    },
+    [item.id, updatePhotoHeight, onUpdateDimensions, isExpanded, onRequestEnsureVisible]
+  )
+
   const renderExpandedPhoto = () => {
     // CRITICAL: Only use stored original dimensions, NEVER item.width/height
     if (!originalDimensions.current) {
@@ -319,42 +380,7 @@ const ExpandableThumb = ({
           embedded // Show close button when expanded
           onRequestEnsureVisible={onRequestEnsureVisible}
           onTriggerSearch={onTriggerSearch}
-          onHeightMeasured={(height) => {
-            // Only report to masonry layout for dimension calculation, don't store locally
-            if (height > 0) {
-              // Removed debug logging to reduce console noise
-
-              // Update the height refs for masonry layout dimension calculation
-              if (updatePhotoHeight) {
-                updatePhotoHeight(item.id, height)
-              }
-
-              // Legacy callback support (keeping for backward compatibility)
-              if (onUpdateDimensions && isExpanded) {
-                onUpdateDimensions(item.id, height)
-              }
-
-              // After height is known, ensure the full ImageView is visible
-              if (typeof onRequestEnsureVisible === 'function' && containerRef.current) {
-                // If suppression window is active for this photo (e.g., recognition toggle), skip scrolling
-                const until = global.suppressEnsureVisibleUntil?.get?.(item.id)
-                if (typeof until === 'number' && Date.now() < until) {
-                  return
-                }
-                setTimeout(() => {
-                  try {
-                    containerRef.current.measureInWindow((x, y, w, h) => {
-                      if (h > 0) {
-                        onRequestEnsureVisible({ id: item.id, y, height: h })
-                      }
-                    })
-                  } catch (e) {
-                    // best-effort
-                  }
-                }, 30)
-              }
-            }
-          }}
+          onHeightMeasured={handleHeightMeasured}
         />
       </View>
     )
