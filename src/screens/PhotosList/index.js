@@ -30,7 +30,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   useWindowDimensions,
   View
@@ -38,7 +37,7 @@ import {
 
 import Constants from 'expo-constants'
 
-import { AntDesign, FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { AntDesign, FontAwesome } from '@expo/vector-icons'
 
 import NetInfo from '@react-native-community/netinfo'
 
@@ -65,8 +64,10 @@ import {
 
 import EmptyStateCard from '../../components/EmptyStateCard'
 import ExpandableThumb from '../../components/ExpandableThumb'
-import Badge from '../../components/ui/Badge'
 import LinearProgress from '../../components/ui/LinearProgress'
+import PhotosListFooter from './components/PhotosListFooter'
+import PhotosListSearchBar from './components/PhotosListSearchBar'
+import PendingPhotosBanner from './components/PendingPhotosBanner'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -133,8 +134,6 @@ async function registerBackgroundFetchAsync() {
 // }
 
 const FOOTER_HEIGHT = 90
-const FOOTER_GAP = 4
-const KEYBOARD_GAP = 16
 
 let currentBatch = `${Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)}`
 
@@ -1551,160 +1550,8 @@ const PhotosList = ({ searchFromUrl }) => {
     )
   }
 
-  const renderFooter = () => {
-    Notifications.setBadgeCountAsync(unreadCount || 0)
 
-    return (
-      location && (
-        <View
-          style={{
-            backgroundColor: theme.CARD_BACKGROUND,
-            width,
-            height: FOOTER_HEIGHT,
-            paddingBottom: insets.bottom,
-            ...styles.footerContainer,
-            shadowOffset: {
-              width: 0,
-              height: -2
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 14,
-            zIndex: 14
-          }}
-        >
-          <SafeAreaView
-            style={{
-              flex: 1
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                paddingHorizontal: 20,
-                paddingTop: 10,
-                height: '100%',
-                elevation: 14,
-                zIndex: 14
-              }}
-            >
-              {/* Navigation Menu Button */}
-              <TouchableOpacity
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  backgroundColor: theme.INTERACTIVE_BACKGROUND,
-                  elevation: 15,
-                  zIndex: 15
-                }}
-                onPress={() => {
-                  try {
-                    navigation.openDrawer()
-                  } catch (error) {
-                    // Fallback if drawer navigation is not available
-                    console.log('Could not open drawer:', error)
-                  }
-                }}
-                disabled={!netAvailable}
-              >
-                <FontAwesome
-                  name='navicon'
-                  size={22}
-                  color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-                />
-              </TouchableOpacity>
 
-              {/* Video Recording Button */}
-              <TouchableOpacity
-                style={[styles.videoRecordButton, isCameraOpening && { opacity: 0.5 }]}
-                onPress={() => {
-                  checkPermissionsForPhotoTaking({ cameraType: 'video' })
-                }}
-                disabled={isCameraOpening}
-              >
-                <FontAwesome5 name='video' color='white' size={24} />
-              </TouchableOpacity>
-
-              {/* Photo Capture Button - Main Action */}
-              <TouchableOpacity
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: 70,
-                  height: 70,
-                  borderRadius: 35,
-                  backgroundColor: CONST.MAIN_COLOR,
-                  shadowColor: CONST.MAIN_COLOR,
-                  shadowOffset: {
-                    width: 0,
-                    height: 6
-                  },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 12,
-                  elevation: 15,
-                  zIndex: 15,
-                  borderWidth: 3,
-                  borderColor: theme.BACKGROUND,
-                  opacity: isCameraOpening ? 0.5 : 1
-                }}
-                onPress={() => {
-                  checkPermissionsForPhotoTaking({ cameraType: 'camera' })
-                }}
-                disabled={isCameraOpening}
-              >
-                <FontAwesome5 name='camera' color='white' size={28} />
-              </TouchableOpacity>
-
-              {/* Friends List Button */}
-              <TouchableOpacity
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  backgroundColor: theme.INTERACTIVE_BACKGROUND,
-                  position: 'relative',
-                  elevation: 15,
-                  zIndex: 15
-                }}
-                onPress={() => router.push('/friends')}
-                disabled={!netAvailable}
-              >
-                <FontAwesome5
-                  name='user-friends'
-                  size={22}
-                  color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-                />
-                {unreadCount > 0 && (
-                  <Badge
-                    value={unreadCount}
-                    badgeStyle={styles.badgeStyle}
-                    textStyle={{
-                      fontSize: 11,
-                      fontWeight: 'bold'
-                    }}
-                    containerStyle={{
-                      position: 'absolute',
-                      top: -2,
-                      right: -2,
-                      elevation: 20,
-                      zIndex: 20
-                    }}
-                  />
-                )}
-              </TouchableOpacity>
-            </View>
-          </SafeAreaView>
-        </View>
-      )
-    )
-  }
 
   // const renderHeaderLeft = () => (
   //   <FontAwesome5
@@ -1754,277 +1601,9 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }
 
-  const renderSearchBar = (autoFocus) => {
-    // When keyboard is visible, position above keyboard with gap
-    // When keyboard is hidden, position above footer
-    const bottomOffset = keyboardOffset > 0
-      ? keyboardOffset + KEYBOARD_GAP
-      : FOOTER_HEIGHT + FOOTER_GAP
 
-    return (
-      <Animated.View
-        style={{
-          position: 'absolute',
-          left: 16,
-          right: 16,
-          bottom: bottomOffset,
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.HEADER_BACKGROUND,
-          borderRadius: 24,
-          paddingHorizontal: 12,
-          paddingVertical: 12,
-          borderWidth: 1,
-          borderColor: theme.BORDER_LIGHT,
-          shadowColor: theme.HEADER_SHADOW,
-          shadowOffset: {
-            width: 0,
-            height: 6
-          },
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
-          elevation: 20,
-          zIndex: 20
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: theme.CARD_BACKGROUND,
-            borderRadius: 20,
-            paddingHorizontal: 16,
-            marginRight: 12,
-            borderWidth: 1,
-            borderColor: theme.CARD_BORDER,
-            shadowColor: theme.CARD_SHADOW,
-            shadowOffset: {
-              width: 0,
-              height: 1
-            },
-            shadowOpacity: 0.15,
-            shadowRadius: 2,
-            elevation: 4
-          }}
-        >
-          <Ionicons
-            name='search'
-            size={20}
-            color={theme.TEXT_SECONDARY}
-            style={{ marginRight: 8 }}
-          />
-          <TextInput
-            ref={searchBarRef}
-            placeholder='Search photos...'
-            placeholderTextColor={theme.TEXT_SECONDARY}
-            onChangeText={(currentTerm) => {
-              setSearchTerm(currentTerm)
-            }}
-            value={searchTerm}
-            onSubmitEditing={() => submitSearch()}
-            autoFocus={autoFocus}
-            returnKeyType='search'
-            style={{
-              flex: 1,
-              color: theme.TEXT_PRIMARY,
-              fontSize: 16,
-              fontWeight: '400',
-              height: 40,
-              paddingHorizontal: 0,
-              marginLeft: 0,
-              paddingRight: searchTerm ? 30 : 0
-            }}
-          />
-          {searchTerm && (
-            <TouchableOpacity
-              onPress={() => {
-                setSearchTerm('')
-                if (searchBarRef.current) {
-                  searchBarRef.current.clear()
-                  searchBarRef.current.focus()
-                }
-              }}
-              style={{
-                position: 'absolute',
-                right: 8,
-                top: '50%',
-                transform: [{ translateY: -10 }],
-                width: 20,
-                height: 20,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.INTERACTIVE_SECONDARY,
-                borderRadius: 10,
-                elevation: 6,
-                zIndex: 6
-              }}
-            >
-              <Ionicons name='close' size={12} color={theme.TEXT_PRIMARY} />
-            </TouchableOpacity>
-          )}
-        </View>
 
-        <TouchableOpacity
-          onPress={() => submitSearch()}
-          style={{
-            backgroundColor: theme.INTERACTIVE_PRIMARY,
-            borderRadius: 22,
-            width: 48,
-            height: 48,
-            justifyContent: 'center',
-            alignItems: 'center',
-            shadowColor: theme.INTERACTIVE_PRIMARY,
-            shadowOffset: {
-              width: 0,
-              height: 4
-            },
-            shadowOpacity: 0.35,
-            shadowRadius: 6,
-            elevation: 12,
-            zIndex: 22
-          }}
-        >
-          <Ionicons name='send' size={20} color='white' />
-        </TouchableOpacity>
-      </Animated.View>
-    )
-  }
 
-  const renderPendingPhotos = () => {
-    if (pendingPhotos.length > 0) {
-      let uploadStatusLabel = 'waiting to upload'
-      if (netAvailable) {
-        uploadStatusLabel = isUploading ? 'uploading' : 'ready to upload'
-      }
-
-      return (
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onLongPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-            Alert.alert(
-              'Clear Upload Queue',
-              `Are you sure you want to cancel all ${pendingPhotos.length} pending upload${pendingPhotos.length === 1 ? '' : 's'}? This cannot be undone.`,
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Clear All',
-                  style: 'destructive',
-                  onPress: async () => {
-                    await clearPendingQueue()
-                    Toast.show({
-                      text1: 'Upload queue cleared',
-                      text2: 'All pending uploads have been cancelled',
-                      type: 'success',
-                      topOffset: toastTopOffset
-                    })
-                  }
-                }
-              ]
-            )
-          }}
-        >
-          <Animated.View
-            style={{
-              backgroundColor: theme.CARD_BACKGROUND,
-              borderRadius: 12,
-              padding: 16,
-              marginHorizontal: 16,
-              marginVertical: 8,
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderWidth: 1,
-              borderColor: theme.CARD_BORDER,
-              shadowColor: theme.CARD_SHADOW,
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              elevation: 3,
-              position: 'relative',
-              opacity: pendingPhotosAnimation,
-              transform: [
-                {
-                  translateY: pendingPhotosAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-50, 0]
-                  })
-                },
-                {
-                  scale: pendingPhotosAnimation.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1]
-                  })
-                }
-              ]
-            }}
-          >
-            <Animated.View
-              style={{
-                transform: [
-                  {
-                    scale: uploadIconAnimation
-                  }
-                ]
-              }}
-            >
-              <MaterialIcons
-                name='cloud-upload'
-                size={24}
-                color={netAvailable ? theme.INTERACTIVE_PRIMARY : theme.TEXT_DISABLED}
-                style={{ marginRight: 12 }}
-              />
-            </Animated.View>
-            <View style={{ flex: 1 }}>
-              <Animated.Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '600',
-                  color: theme.TEXT_PRIMARY,
-                  marginBottom: 4,
-                  opacity: pendingPhotosAnimation
-                }}
-              >
-                {pendingPhotos.length} {pendingPhotos.length === 1 ? 'photo' : 'photos'}{' '}
-                {uploadStatusLabel}
-              </Animated.Text>
-            </View>
-            {netAvailable && (
-              <Animated.View
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  borderBottomLeftRadius: 12,
-                  borderBottomRightRadius: 12,
-                  overflow: 'hidden',
-                  opacity: pendingPhotosAnimation
-                }}
-              >
-                <LinearProgress
-                  color={theme.INTERACTIVE_PRIMARY}
-                  style={{
-                    flex: 1,
-                    height: 4,
-                    borderBottomLeftRadius: 12,
-                    borderBottomRightRadius: 12
-                  }}
-                  trackStyle={{
-                    backgroundColor: theme.BORDER_LIGHT,
-                    borderBottomLeftRadius: 12,
-                    borderBottomRightRadius: 12
-                  }}
-                />
-              </Animated.View>
-            )}
-          </Animated.View>
-        </TouchableOpacity>
-      )
-    }
-    return null
-  }
 
   /// //////////////////////////////////////////////////////////////////////////
   // here where the rendering starts
@@ -2034,7 +1613,16 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
-        {renderPendingPhotos()}
+        <PendingPhotosBanner
+          theme={theme}
+          pendingPhotos={pendingPhotos}
+          netAvailable={netAvailable}
+          isUploading={isUploading}
+          clearPendingQueue={clearPendingQueue}
+          toastTopOffset={toastTopOffset}
+          pendingPhotosAnimation={pendingPhotosAnimation}
+          uploadIconAnimation={uploadIconAnimation}
+        />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -2053,7 +1641,15 @@ const PhotosList = ({ searchFromUrl }) => {
             onActionPress={reload}
           />
         </ScrollView>
-        {renderFooter({ unreadCount })}
+        <PhotosListFooter
+          theme={theme}
+          navigation={navigation}
+          netAvailable={netAvailable}
+          unreadCount={unreadCount}
+          isCameraOpening={isCameraOpening}
+          onCameraPress={checkPermissionsForPhotoTaking}
+          location={location}
+        />
       </View>
     )
   }
@@ -2062,12 +1658,39 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
-        {renderPendingPhotos()}
+        <PendingPhotosBanner
+          theme={theme}
+          pendingPhotos={pendingPhotos}
+          netAvailable={netAvailable}
+          isUploading={isUploading}
+          clearPendingQueue={clearPendingQueue}
+          toastTopOffset={toastTopOffset}
+          pendingPhotosAnimation={pendingPhotosAnimation}
+          uploadIconAnimation={uploadIconAnimation}
+        />
         <View style={styles.container}>
-          {activeSegment === 2 && renderSearchBar(false)}
+          {activeSegment === 2 && (
+            <PhotosListSearchBar
+              theme={theme}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              onSubmitSearch={submitSearch}
+              keyboardVisible={keyboardVisible}
+              keyboardOffset={keyboardOffset}
+              autoFocus={false}
+            />
+          )}
           {/* photos - unified masonry layout for all segments */}
           {renderThumbs()}
-          {renderFooter({ unreadCount })}
+          <PhotosListFooter
+            theme={theme}
+            navigation={navigation}
+            netAvailable={netAvailable}
+            unreadCount={unreadCount}
+            isCameraOpening={isCameraOpening}
+            onCameraPress={checkPermissionsForPhotoTaking}
+            location={location}
+          />
         </View>
       </View>
     )
@@ -2085,7 +1708,16 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
-        {renderPendingPhotos()}
+        <PendingPhotosBanner
+          theme={theme}
+          pendingPhotos={pendingPhotos}
+          netAvailable={netAvailable}
+          isUploading={isUploading}
+          clearPendingQueue={clearPendingQueue}
+          toastTopOffset={toastTopOffset}
+          pendingPhotosAnimation={pendingPhotosAnimation}
+          uploadIconAnimation={uploadIconAnimation}
+        />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -2104,7 +1736,15 @@ const PhotosList = ({ searchFromUrl }) => {
             onActionPress={reload}
           />
         </ScrollView>
-        {renderFooter({ renderFooter })}
+        <PhotosListFooter
+          theme={theme}
+          navigation={navigation}
+          netAvailable={netAvailable}
+          unreadCount={unreadCount}
+          isCameraOpening={isCameraOpening}
+          onCameraPress={checkPermissionsForPhotoTaking}
+          location={location}
+        />
       </View>
     )
   }
@@ -2167,7 +1807,16 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
-        {renderPendingPhotos()}
+        <PendingPhotosBanner
+          theme={theme}
+          pendingPhotos={pendingPhotos}
+          netAvailable={netAvailable}
+          isUploading={isUploading}
+          clearPendingQueue={clearPendingQueue}
+          toastTopOffset={toastTopOffset}
+          pendingPhotosAnimation={pendingPhotosAnimation}
+          uploadIconAnimation={uploadIconAnimation}
+        />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -2179,8 +1828,26 @@ const PhotosList = ({ searchFromUrl }) => {
         >
           <EmptyStateCard {...getEmptyStateProps()} />
         </ScrollView>
-        {activeSegment === 2 && renderSearchBar(true)}
-        {renderFooter({ unreadCount })}
+        {activeSegment === 2 && (
+          <PhotosListSearchBar
+            theme={theme}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSubmitSearch={submitSearch}
+            keyboardVisible={keyboardVisible}
+            keyboardOffset={keyboardOffset}
+            autoFocus={true}
+          />
+        )}
+        <PhotosListFooter
+          theme={theme}
+          navigation={navigation}
+          netAvailable={netAvailable}
+          unreadCount={unreadCount}
+          isCameraOpening={isCameraOpening}
+          onCameraPress={checkPermissionsForPhotoTaking}
+          location={location}
+        />
       </View>
     )
   }
@@ -2189,7 +1856,16 @@ const PhotosList = ({ searchFromUrl }) => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
       {renderCustomHeader()}
-      {renderPendingPhotos()}
+      <PendingPhotosBanner
+        theme={theme}
+        pendingPhotos={pendingPhotos}
+        netAvailable={netAvailable}
+        isUploading={isUploading}
+        clearPendingQueue={clearPendingQueue}
+        toastTopOffset={toastTopOffset}
+        pendingPhotosAnimation={pendingPhotosAnimation}
+        uploadIconAnimation={uploadIconAnimation}
+      />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -2225,8 +1901,26 @@ const PhotosList = ({ searchFromUrl }) => {
             />
           ))}
       </ScrollView>
-      {activeSegment === 2 && renderSearchBar(false)}
-      {renderFooter({ unreadCount })}
+      {activeSegment === 2 && (
+        <PhotosListSearchBar
+          theme={theme}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSubmitSearch={submitSearch}
+          keyboardVisible={keyboardVisible}
+          keyboardOffset={keyboardOffset}
+          autoFocus={false}
+        />
+      )}
+      <PhotosListFooter
+        theme={theme}
+        navigation={navigation}
+        netAvailable={netAvailable}
+        unreadCount={unreadCount}
+        isCameraOpening={isCameraOpening}
+        onCameraPress={checkPermissionsForPhotoTaking}
+        location={location}
+      />
     </View>
   )
 }
