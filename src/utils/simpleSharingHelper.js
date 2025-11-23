@@ -1,3 +1,4 @@
+/* global console */
 import { Share } from 'react-native'
 import Toast from 'react-native-toast-message'
 
@@ -11,7 +12,7 @@ import Toast from 'react-native-toast-message'
 export const createShareContent = ({ type, photo, photoDetails, friendshipUuid, contactName }) => {
   if (type === 'photo' && photo) {
     const url = `https://link.wisaw.com/photos/${photo.id}`
-    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}\n`
+    let message = `Check out what I saw today${photo?.video ? ' (video)' : ''}:`
 
     if (photoDetails?.comments && photoDetails.comments.length > 0) {
       const comments = photoDetails.comments
@@ -22,7 +23,7 @@ export const createShareContent = ({ type, photo, photoDetails, friendshipUuid, 
     }
 
     return {
-      message: `${message}\n\n${url}\n\n`
+      message: `${message}\n\n${url}`
     }
   }
 
@@ -31,7 +32,7 @@ export const createShareContent = ({ type, photo, photoDetails, friendshipUuid, 
     const message = `${contactName || 'You'}, you've got a WiSaw friendship request. Make sure you have Wisaw App installed from the app store.`
 
     return {
-      message: `${message}\n\n${url}\n\n`
+      message: `${message}\n\n${url}`
     }
   }
 
