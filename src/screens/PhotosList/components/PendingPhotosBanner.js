@@ -9,6 +9,9 @@ import { MaterialIcons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 import Toast from 'react-native-toast-message'
 
+import LinearProgress from '../../../components/ui/LinearProgress'
+import * as CONST from '../../../consts'
+
 const PendingPhotosBanner = ({
   theme,
   pendingPhotos,
@@ -118,19 +121,26 @@ const PendingPhotosBanner = ({
           </Animated.Text>
         </View>
         {netAvailable && (
-          <Animated.View
+          <View
             style={{
               position: 'absolute',
               bottom: 0,
               left: 0,
               right: 0,
-              height: 4,
+              height: 3,
               borderBottomLeftRadius: 12,
               borderBottomRightRadius: 12,
-              backgroundColor: theme.INTERACTIVE_PRIMARY,
-              width: '100%' // Simplified progress bar for now
+              overflow: 'hidden'
             }}
-          />
+          >
+            <LinearProgress
+              color={CONST.MAIN_COLOR}
+              style={{
+                flex: 1,
+                height: 3
+              }}
+            />
+          </View>
         )}
       </Animated.View>
     </TouchableOpacity>
