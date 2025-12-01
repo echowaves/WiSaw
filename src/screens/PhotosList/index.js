@@ -60,8 +60,7 @@ import {
   createFrozenPhoto,
   validateFrozenPhotosList
 } from '../../utils/photoListHelpers'
-
-
+import { saveActiveWave } from '../../utils/waveStorage'
 
 import LinearProgress from '../../components/ui/LinearProgress'
 import PhotosListFooter from './components/PhotosListFooter'
@@ -147,7 +146,7 @@ const PhotosList = ({ searchFromUrl }) => {
   // console.log({ activeSegment, currentBatch })
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [activeWave] = useAtom(STATE.activeWave)
+  const [activeWave, setActiveWave] = useAtom(STATE.activeWave)
   // const [nickName, setNickName] = useAtom(STATE.nickName)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [, setFriendsList] = useAtom(STATE.friendsList)
@@ -787,10 +786,14 @@ const PhotosList = ({ searchFromUrl }) => {
         setConsecutiveEmptyResponses((prev) => {
           const newCount = prev + 1
 
-          // Stop loading only after 10 consecutive empty responses
-          if (newCount >= 10) {
-            setStopLoading(true)
-          }
+          // Stop loading on first empty response if photosList is empty (initial load)
+          // or after 10 consecutive empty responses (pagination exhausted)
+          setPhotosList((currentList) => {
+            if (currentList.length === 0 || newCount >= 10) {
+              setStopLoading(true)
+            }
+            return currentList
+          })
 
           return newCount
         })
@@ -1665,6 +1668,11 @@ const PhotosList = ({ searchFromUrl }) => {
         keyboardVisible={keyboardVisible}
         keyboardOffset={keyboardOffset}
         FOOTER_HEIGHT={FOOTER_HEIGHT}
+        activeWave={activeWave}
+        clearActiveWave={() => {
+          setActiveWave(null)
+          saveActiveWave(null)
+        }}
       />
     )
   }

@@ -21,9 +21,27 @@ const PhotosListEmptyState = ({
   submitSearch,
   keyboardVisible,
   keyboardOffset,
-  FOOTER_HEIGHT
+  FOOTER_HEIGHT,
+  activeWave,
+  clearActiveWave
 }) => {
   const getEmptyStateProps = () => {
+    // Check if there's an active wave filter first
+    if (activeWave) {
+      return {
+        icon: 'wave-square',
+        iconType: 'FontAwesome5',
+        title: `No Photos in "${activeWave.name}"`,
+        subtitle: 'This wave doesn\'t have any photos yet. Add photos to this wave or clear the filter to see all photos.',
+        actionText: 'Clear Wave Filter',
+        onActionPress: () => {
+          if (clearActiveWave) {
+            clearActiveWave()
+          }
+        }
+      }
+    }
+
     switch (activeSegment) {
       case 0: // Global photos
         return {
@@ -81,7 +99,7 @@ const PhotosListEmptyState = ({
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderCustomHeader()}
-        {renderPendingPhotos}
+        {renderPendingPhotos()}
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -104,7 +122,7 @@ const PhotosListEmptyState = ({
             autoFocus
           />
         )}
-        {renderFooter}
+        {renderFooter()}
       </View>
     )
   }
