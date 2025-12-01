@@ -1,4 +1,4 @@
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons'
+import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import { useAtom } from 'jotai'
 import { StyleSheet, Text, View } from 'react-native'
 import { isDarkMode } from '../../state'
@@ -97,7 +97,12 @@ const EmptyStateCard = ({
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
 
-  const IconComponent = iconType === 'MaterialIcons' ? MaterialIcons : FontAwesome
+  let IconComponent = FontAwesome
+  if (iconType === 'MaterialIcons') {
+    IconComponent = MaterialIcons
+  } else if (iconType === 'FontAwesome5') {
+    IconComponent = FontAwesome5
+  }
 
   // Use theme color as default if no iconColor is provided
   const finalIconColor = iconColor || theme.TEXT_PRIMARY

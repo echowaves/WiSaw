@@ -147,6 +147,7 @@ const PhotosList = ({ searchFromUrl }) => {
   // console.log({ activeSegment, currentBatch })
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [activeWave] = useAtom(STATE.activeWave)
   // const [nickName, setNickName] = useAtom(STATE.nickName)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [, setFriendsList] = useAtom(STATE.friendsList)
@@ -776,7 +777,8 @@ const PhotosList = ({ searchFromUrl }) => {
       topOffset: toastTopOffset,
       activeSegment: effectiveSegment,
       batch: currentBatch, // clone
-      pageNumber
+      pageNumber,
+      activeWave
     })
 
     if (batch === currentBatch) {
@@ -801,7 +803,9 @@ const PhotosList = ({ searchFromUrl }) => {
           // Freeze incoming photos before any operations
           const frozenPhotos = photos.map((photo) => createFrozenPhoto(photo))
           const combinedList = [...currentList, ...frozenPhotos]
-          const sortedList = combinedList.sort((a, b) => a.row_number - b.row_number)
+          const sortedList = combinedList.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt)
+          })
           const deduplicatedList = sortedList.filter(
             (obj, pos, arr) => arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos
           )
@@ -1132,7 +1136,8 @@ const PhotosList = ({ searchFromUrl }) => {
       await enqueueCapture({
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
-        location
+        location,
+        waveUuid: activeWave?.waveUuid
       })
     }
   }
@@ -1301,7 +1306,7 @@ const PhotosList = ({ searchFromUrl }) => {
   useEffect(() => {
     // updateNavBar()
     reload()
-  }, [location])
+  }, [location, activeWave])
 
   // useEffect(() => {}, [currentBatch])
 

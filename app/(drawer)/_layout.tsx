@@ -271,6 +271,17 @@ export default function DrawerLayout () {
           }}
         />
         <Drawer.Screen
+          name='waves'
+          options={{
+            drawerIcon: ({ color, size }) => (
+              <FontAwesome5 name='water' size={22} color={color} />
+            ),
+            drawerLabel: 'Waves',
+            title: 'Waves',
+            headerShown: false
+          }}
+        />
+        <Drawer.Screen
           name='feedback'
           options={{
             drawerIcon: ({ color, size }) => (

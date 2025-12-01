@@ -76,7 +76,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable, onPhotoUploa
     try {
       let queue = await syncQueueFromStorage()
 
-      while (queue.length > 0 && netAvailable) {
+      while (queue.length > 0) {
         const currentItem = queue[0]
 
         // eslint-disable-next-line no-await-in-loop
@@ -132,8 +132,8 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable, onPhotoUploa
   }, [cleanupRetry, netAvailable, onPhotoUploaded, resolveUuid, syncQueueFromStorage, topOffset])
 
   const enqueueCapture = useCallback(
-    async ({ cameraImgUrl, type, location }) => {
-      await queueFileForUpload({ cameraImgUrl, type, location })
+    async ({ cameraImgUrl, type, location, waveUuid }) => {
+      await queueFileForUpload({ cameraImgUrl, type, location, waveUuid })
       await syncQueueFromStorage()
       if (netAvailable) {
         // process queue in background

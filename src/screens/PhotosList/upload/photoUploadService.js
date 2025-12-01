@@ -325,7 +325,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
   }
 }
 
-export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
+export const queueFileForUpload = async ({ cameraImgUrl, type, location, waveUuid }) => {
   try {
     const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
     const localCacheKey = localImageName.split('.')[0]
@@ -335,7 +335,8 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location }) => {
       localImageName,
       type,
       location,
-      localCacheKey
+      localCacheKey,
+      waveUuid
     }
 
     await addToQueue(image)
@@ -607,6 +608,33 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100 }) => 
       if (enrichedPhoto !== photo) {
         processedItem = { ...processedItem, photo: enrichedPhoto }
       }
+
+      // Add to wave if waveUuid is present
+      if (processedItem.waveUuid) {
+        try {
+          await CONST.gqlClient.mutate({
+            mutation: gql`
+              mutation addPhotoToWave($waveUuid: String!, $photoId: String!, $uuid: String!) {
+                addPhotoToWave(waveUuid: $waveUuid, photoId: $photoId, uuid: $uuid)
+              }
+            `,
+            variables: {
+              waveUuid: processedItem.waveUuid,
+              photoId: photo.id,
+              uuid: uuid.trim()
+            }
+          })
+        } catch (waveError) {
+          console.error('Failed to add photo to wave:', waveError)
+          Toast.show({
+            text1: 'Warning',
+            text2: 'Photo uploaded but failed to add to wave.',
+            type: 'info',
+            topOffset
+          })
+        }
+      }
+
       return enrichedPhoto
     }
 

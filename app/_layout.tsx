@@ -16,6 +16,7 @@ import { StatusBar } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
+import ActiveWaveIndicator from '../src/components/ActiveWaveIndicator'
 import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
 import { parseDeepLink } from '../src/utils/linkingHelper'
@@ -267,6 +268,7 @@ export default function RootLayout () {
         backgroundColor='transparent'
         translucent={false}
       />
+      <ActiveWaveIndicator />
       <Stack
         screenOptions={{
           headerShown: false

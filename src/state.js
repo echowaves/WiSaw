@@ -1,3 +1,4 @@
+/* global __DEV__ */
 import { atom } from 'jotai'
 import { createFrozenPhoto } from './utils/photoListHelpers'
 
@@ -36,3 +37,5 @@ export const friendsList = atom([])
 export const isDarkMode = atom(false)
 
 export const followSystemTheme = atom(false)
+
+export const activeWave = atom(null)
