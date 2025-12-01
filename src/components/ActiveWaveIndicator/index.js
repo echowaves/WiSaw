@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
+import { saveActiveWave } from '../../utils/waveStorage'
 
 const ActiveWaveIndicator = () => {
   const [activeWave, setActiveWave] = useAtom(STATE.activeWave)
@@ -13,13 +14,18 @@ const ActiveWaveIndicator = () => {
 
   if (!activeWave) return null
 
+  const handleClearWave = () => {
+    setActiveWave(null)
+    saveActiveWave(null)
+  }
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.content}>
         <Text style={styles.text}>
           Active Wave: {activeWave.name}
         </Text>
-        <TouchableOpacity onPress={() => setActiveWave(null)}>
+        <TouchableOpacity onPress={handleClearWave}>
           <FontAwesome name='times-circle' size={20} color='#FFF' />
         </TouchableOpacity>
       </View>

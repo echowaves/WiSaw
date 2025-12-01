@@ -21,6 +21,7 @@ import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import { subscribeToAddWave } from '../../events/waveAddBus'
+import { saveActiveWave } from '../../utils/waveStorage'
 
 const Waves = () => {
   const [uuid] = useAtom(STATE.uuid)
@@ -154,6 +155,7 @@ const Waves = () => {
               setWaves(prev => prev.filter(w => w.waveUuid !== waveId))
               if (activeWave?.waveUuid === waveId) {
                 setActiveWave(null)
+                saveActiveWave(null)
               }
               Toast.show({
                 type: 'success',
@@ -176,8 +178,10 @@ const Waves = () => {
   const toggleActiveWave = (wave) => {
     if (activeWave?.waveUuid === wave.waveUuid) {
       setActiveWave(null)
+      saveActiveWave(null)
     } else {
       setActiveWave(wave)
+      saveActiveWave(wave)
     }
   }
 

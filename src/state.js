@@ -38,4 +38,7 @@ export const isDarkMode = atom(false)
 
 export const followSystemTheme = atom(false)
 
+/**
+ * @type {import('jotai').PrimitiveAtom<{uuid: string, name: string, createdBy: string, createdAt: string} | null>}
+ */
 export const activeWave = atom(null)
