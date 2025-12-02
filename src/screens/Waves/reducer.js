@@ -43,6 +43,7 @@ export const createWave = async ({ name, description, uuid }) => {
           createWave(name: $name, description: $description, uuid: $uuid) {
             waveUuid
             name
+            description
             createdAt
             updatedAt
             createdBy
