@@ -74,7 +74,7 @@ const Waves = () => {
       const data = await reducer.listWaves({
         pageNumber: pageNum,
         batch: currentBatch,
-        uuid: null
+        uuid
       })
       
       if (refresh) {

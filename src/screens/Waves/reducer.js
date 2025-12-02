@@ -6,7 +6,7 @@ export const listWaves = async ({ pageNumber, batch, uuid }) => {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
-        query listWaves($pageNumber: Int!, $batch: String!, $uuid: String) {
+        query listWaves($pageNumber: Int!, $batch: String!, $uuid: String!) {
           listWaves(pageNumber: $pageNumber, batch: $batch, uuid: $uuid) {
             waves {
               waveUuid
