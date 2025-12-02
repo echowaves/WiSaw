@@ -11,6 +11,7 @@ export const listWaves = async ({ pageNumber, batch, uuid }) => {
             waves {
               waveUuid
               name
+              description
               createdAt
               updatedAt
               createdBy
@@ -25,7 +26,7 @@ export const listWaves = async ({ pageNumber, batch, uuid }) => {
         batch,
         uuid
       },
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'network-only'
     })
     return response.data.listWaves
   } catch (err) {
@@ -52,9 +53,38 @@ export const createWave = async ({ name, description, uuid }) => {
         name,
         description,
         uuid
-      },
+      }
     })
     return response.data.createWave
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const updateWave = async ({ waveUuid, uuid, name, description }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation updateWave($waveUuid: String!, $uuid: String!, $name: String!, $description: String!) {
+          updateWave(waveUuid: $waveUuid, uuid: $uuid, name: $name, description: $description) {
+            waveUuid
+            name
+            description
+            createdAt
+            updatedAt
+            createdBy
+          }
+        }
+      `,
+      variables: {
+        waveUuid,
+        uuid,
+        name,
+        description
+      }
+    })
+    return response.data.updateWave
   } catch (err) {
     console.error({ err })
     throw err
@@ -72,7 +102,7 @@ export const deleteWave = async ({ waveUuid, uuid }) => {
       variables: {
         waveUuid,
         uuid
-      },
+      }
     })
     return response.data.deleteWave
   } catch (err) {

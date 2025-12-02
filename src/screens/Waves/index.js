@@ -223,16 +223,17 @@ const Waves = () => {
     }
     setUpdating(true)
     try {
-      // TODO: Implement actual update API call
-      // await reducer.updateWave({ waveUuid: editingWave.waveUuid, name: editWaveName, description: editWaveDescription, uuid })
+      const updatedWave = await reducer.updateWave({
+        waveUuid: editingWave.waveUuid,
+        uuid,
+        name: editWaveName,
+        description: editWaveDescription
+      })
       setWaves(prev => prev.map(w =>
-        w.waveUuid === editingWave.waveUuid
-          ? { ...w, name: editWaveName, description: editWaveDescription }
-          : w
+        w.waveUuid === editingWave.waveUuid ? updatedWave : w
       ))
       // Update activeWave if it's the one being edited
       if (activeWave?.waveUuid === editingWave.waveUuid) {
-        const updatedWave = { ...activeWave, name: editWaveName, description: editWaveDescription }
         setActiveWave(updatedWave)
         saveActiveWave(updatedWave)
       }
