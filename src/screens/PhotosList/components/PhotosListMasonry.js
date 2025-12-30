@@ -166,7 +166,7 @@ const PhotosListMasonry = ({
         flex: 1 // Allow the scroll area to take full available height
       }}
       contentContainerStyle={{
-        paddingTop: 10, // Match left/right margins
+        paddingTop: 5, // Match left/right margins
         paddingBottom: FOOTER_HEIGHT + 20 // Add padding to ensure content is visible above footer
       }}
       showsVerticalScrollIndicator={false}
