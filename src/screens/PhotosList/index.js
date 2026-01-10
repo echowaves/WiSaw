@@ -806,10 +806,11 @@ const PhotosList = ({ searchFromUrl }) => {
           // Freeze incoming photos before any operations
           const frozenPhotos = photos.map((photo) => createFrozenPhoto(photo))
           const combinedList = [...currentList, ...frozenPhotos]
-          const sortedList = combinedList.sort(
-            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-          )
-          const deduplicatedList = sortedList.filter(
+          // sorting should come from the backend now
+          // const sortedList = combinedList.sort(
+          //   (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+          // )
+          const deduplicatedList = combinedList.filter(
             (obj, pos, arr) => arr.map((mapObj) => mapObj.id).indexOf(obj.id) === pos
           )
 
