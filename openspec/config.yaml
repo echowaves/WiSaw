@@ -10,3 +10,8 @@ context: |
   Architecture: File-based routing (Expo Router), modular screens with reducers and custom hooks
   Language: JavaScript with gradual TypeScript adoption in router files
   Key conventions: Kebab-case file names, screen-level state with Jotai atoms, anonymous user identity via device UUID
+  Dependencies: Always use exact versions in package.json (no ^ or ~ prefixes)
+
+rules:
+  tasks:
+    - When adding or updating dependencies, always use exact versions (e.g., "1.2.3" not "^1.2.3" or "~1.2.3"). Use --save-exact with npm install.
