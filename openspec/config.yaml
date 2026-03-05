@@ -1,20 +1,12 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+context: |
+  Tech stack: React Native 0.81.5, Expo 54.0.25, Expo Router 6.0.15, React 19.1.0
+  State management: Jotai 2.15.0 (atomic state)
+  API: Apollo Client 4.0.2, GraphQL 16.8.1 with WebSocket subscriptions
+  Storage: expo-secure-store for sensitive data
+  Platforms: iOS, Android, Web
+  Domain: Location-based anonymous social photo sharing app (WiSaw)
+  Architecture: File-based routing (Expo Router), modular screens with reducers and custom hooks
+  Language: JavaScript with gradual TypeScript adoption in router files
+  Key conventions: Kebab-case file names, screen-level state with Jotai atoms, anonymous user identity via device UUID
