@@ -11,6 +11,8 @@ context: |
   Language: JavaScript with gradual TypeScript adoption in router files
   Key conventions: Kebab-case file names, screen-level state with Jotai atoms, anonymous user identity via device UUID
   Dependencies: Always use exact versions in package.json (no ^ or ~ prefixes)
+  Package manager: npm
+
 
 rules:
   tasks:
