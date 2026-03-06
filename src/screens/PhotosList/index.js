@@ -8,7 +8,7 @@ import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library'
 import { router, useNavigation } from 'expo-router'
 // import * as FileSystem from 'expo-file-system'
-import * as Notifications from 'expo-notifications'
+import * as Notifications from '../../utils/notifications'
 import * as SecureStore from 'expo-secure-store'
 
 import * as ImagePicker from 'expo-image-picker'
@@ -27,7 +27,6 @@ import {
   Animated,
   Keyboard,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -35,7 +34,7 @@ import {
   useWindowDimensions,
   View
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as Constants from 'expo-constants'
 

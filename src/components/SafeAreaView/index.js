@@ -1,5 +1,5 @@
 import React from 'react'
-import { SafeAreaView as RNSafeAreaView } from 'react-native'
+import { SafeAreaView as RNSafeAreaView } from 'react-native-safe-area-context'
 import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 
 /**

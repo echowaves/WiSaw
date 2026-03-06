@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 import { router } from 'expo-router'
-import * as Notifications from 'expo-notifications'
+import * as Notifications from '../../../utils/notifications'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Badge from '../../../components/ui/Badge'
