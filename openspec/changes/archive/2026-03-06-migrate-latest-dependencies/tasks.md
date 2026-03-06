@@ -87,8 +87,8 @@ Note: Many packages were already resolved to SDK 55-compatible versions by `npx 
 ## 12. Verification & Testing
 
 - [x] 12.1 Web export (`npx expo export --platform web`) compiles successfully
-- [ ] 12.2 Test on iOS simulator — verify all screens render and core features work
-- [ ] 12.3 Test on Android emulator — verify all screens render and core features work
+- [x] 12.2 Test on iOS simulator — verify all screens render and core features work
+- [x] 12.3 Test on Android emulator — verify all screens render and core features work
 - [x] 12.4 Lint verified — no new lint errors introduced by migration (pre-existing issues in .tsx files and zxcvbn.js unchanged)
-- [ ] 12.5 Verify photo upload, comments, chat, friendships, deep linking, and theming features work end-to-end
-- [ ] 12.6 Deploy to EAS Update test channel and verify OTA update works
+- [x] 12.5 Verify photo upload, comments, chat, friendships, deep linking, and theming features work end-to-end
+- [x] 12.6 Deploy to EAS Update test channel and verify OTA update works
