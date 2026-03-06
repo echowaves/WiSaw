@@ -17,3 +17,6 @@ context: |
 rules:
   tasks:
     - When adding or updating dependencies, always use exact versions (e.g., "1.2.3" not "^1.2.3" or "~1.2.3"). Use --save-exact with npm install.
+  security:
+    - The .env file must never be committed to version control. It must remain in .gitignore at all times.
+    - Secrets and sensitive values from .env (API keys, tokens, credentials, connection strings) must never be hardcoded or leaked into any versioned file. Always reference them via environment variables at runtime.
