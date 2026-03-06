@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
 
-import CachedImage from 'expo-cached-image'
+import CachedImage from '../../utils/CachedImage'
 
 import * as CONST from '../../consts'
 import { isDarkMode } from '../../state'

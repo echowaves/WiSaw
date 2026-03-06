@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import React, { useRef } from 'react'
 import { ActivityIndicator, Animated, useWindowDimensions } from 'react-native'
 
-import CachedImage from 'expo-cached-image'
+import CachedImage from '../../utils/CachedImage'
 import { State, TapGestureHandler } from 'react-native-gesture-handler'
 
 import * as CONST from '../../consts'

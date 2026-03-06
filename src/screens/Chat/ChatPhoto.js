@@ -4,7 +4,7 @@ import { TouchableHighlight, View, useWindowDimensions } from 'react-native'
 
 // import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
 
-import CachedImage from 'expo-cached-image'
+import CachedImage from '../../utils/CachedImage'
 
 import * as CONST from '../../consts'
 

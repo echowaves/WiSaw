@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client'
 
-import { Storage } from 'expo-storage'
+import { Storage } from '../../utils/storage'
 import * as CONST from '../../consts'
 
 export const testStorage = async () => {
