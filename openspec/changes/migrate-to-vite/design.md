@@ -85,5 +85,6 @@ Current build configuration:
 
 ## Open Questions
 
-- What is the latest stable version of `@expo/vite-plugin` compatible with Expo SDK 55.0.5? Need to check npm registry before installing.
+- ~~What is the latest stable version of `@expo/vite-plugin` compatible with Expo SDK 55.0.5?~~ **RESOLVED (2026-03-05):** Package does not exist on npm. Expo SDK 55's `ExpoConfig` type only supports `bundler: 'webpack' | 'metro'`. Vite integration is not available in SDK 55.
 - Does `expo export --platform web` with Vite produce output in `dist/` (Vite default) or `web-build/` (Metro default)? This affects deployment scripts.
+- **NEW:** Which future Expo SDK version will introduce Vite web bundler support? Monitor Expo changelog and RFC discussions.

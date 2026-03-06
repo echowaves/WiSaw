@@ -1,3 +1,5 @@
+> **BLOCKED (2026-03-05):** `@expo/vite-plugin` does not exist on npm. Expo SDK 55's `web.bundler` config only accepts `'webpack' | 'metro'` — no Vite option. Waiting for a future Expo SDK release with Vite support.
+
 ## 1. Install Dependencies
 
 - [ ] 1.1 Check npm registry for latest `@expo/vite-plugin` version compatible with Expo SDK 55
