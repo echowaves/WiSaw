@@ -1,6 +1,6 @@
 import Toast from 'react-native-toast-message'
 
-// import { CacheManager } from '../../utils/CacheManager'
+// import { CacheManager } from 'expo-cached-image'
 import { gql } from '@apollo/client'
 
 // import * as PHOTOS_LIST_ACTION_TYPES from '../../screens/PhotosList/action_types.js'

@@ -11,7 +11,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 import PropTypes from 'prop-types'
 
-import CachedImage from '../../utils/CachedImage'
+import CachedImage from 'expo-cached-image'
 
 import Button from '../../components/ui/Button'
 

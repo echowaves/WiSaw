@@ -1,9 +1,9 @@
 /* global console:readonly, setTimeout:readonly, clearTimeout:readonly, alert:readonly */
 
-import { CacheManager } from '../../../utils/CacheManager'
+import { CacheManager } from 'expo-cached-image'
 import { File as FSFile } from 'expo-file-system'
 import * as ImageManipulator from 'expo-image-manipulator'
-import { Storage } from '../../../utils/storage'
+import { Storage } from 'expo-storage'
 import * as VideoThumbnails from 'expo-video-thumbnails'
 import { fetch } from 'expo/fetch'
 import { Image } from 'react-native'

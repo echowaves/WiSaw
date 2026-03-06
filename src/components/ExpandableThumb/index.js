@@ -1,5 +1,5 @@
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
-import CachedImage from '../../utils/CachedImage'
+import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'

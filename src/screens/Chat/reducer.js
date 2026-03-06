@@ -5,8 +5,8 @@ import { File as FSFile } from 'expo-file-system'
 
 import * as ImageManipulator from 'expo-image-manipulator'
 
-import { CacheManager } from '../../utils/CacheManager'
-import { Storage } from '../../utils/storage'
+import { CacheManager } from 'expo-cached-image'
+import { Storage } from 'expo-storage'
 
 import Toast from 'react-native-toast-message'
 
