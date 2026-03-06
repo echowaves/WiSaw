@@ -36,6 +36,142 @@ import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 
 import ImageView from './ImageView'
 
+const VideoSection = ({ photo, screenWidth, screenHeight, isDevBuild, imageCardContainerStyle }) => {
+  const videoPlayer = useVideoPlayer(photo.videoUrl, (player) => {
+    player.loop = true
+  })
+
+  const { isPlaying } = useEvent(videoPlayer, 'playingChange', {
+    isPlaying: videoPlayer?.playing || false
+  })
+
+  const { status } = useEvent(videoPlayer, 'statusChange', {
+    status: videoPlayer?.status || 'idle',
+    error: null
+  })
+
+  const handleVideoToggle = () => {
+    if (videoPlayer) {
+      if (isPlaying) {
+        videoPlayer.pause()
+      } else {
+        videoPlayer.play()
+      }
+    }
+  }
+
+  const aspectRatio = photo.width / photo.height
+  const maxVideoHeight = screenHeight * 0.8
+  let videoHeight = maxVideoHeight
+  let videoWidth = videoHeight * aspectRatio
+
+  if (videoWidth > screenWidth) {
+    videoWidth = screenWidth
+    videoHeight = videoWidth / aspectRatio
+  }
+
+  const controlsHeight = 60
+  const cardHeight = videoHeight + controlsHeight
+
+  return (
+    <View
+      style={[
+        imageCardContainerStyle,
+        {
+          width: videoWidth,
+          height: cardHeight,
+          alignSelf: 'center'
+        }
+      ]}
+    >
+      <View
+        style={{
+          width: '100%',
+          height: videoHeight,
+          borderRadius: 20,
+          overflow: 'hidden'
+        }}
+      >
+        <VideoView
+          player={videoPlayer}
+          style={{
+            width: '100%',
+            height: '100%'
+          }}
+          nativeControls={false}
+          contentFit='cover'
+          allowsFullscreen
+          allowsPictureInPicture
+        />
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+          paddingVertical: 12,
+          backgroundColor: 'rgba(0,0,0,0.8)'
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: 25,
+            width: 50,
+            height: 50,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.3)'
+          }}
+          onPress={handleVideoToggle}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name={isPlaying ? 'pause' : 'play'}
+            size={24}
+            color='white'
+            style={!isPlaying ? { marginLeft: 3 } : {}}
+          />
+        </TouchableOpacity>
+
+        {status === 'loading' && (
+          <View
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: 15,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.2)'
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 12, fontWeight: '500' }}>Loading...</Text>
+          </View>
+        )}
+
+        {isDevBuild && (
+          <View
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: 8,
+              paddingHorizontal: 8,
+              paddingVertical: 4
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 10 }}>
+              {photo?.width || 'W?'} × {photo?.height || 'H?'} → {Math.round(screenWidth)} ×{' '}
+              {Math.round(videoHeight)}
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
+  )
+}
+
 const createStyles = (theme) =>
   StyleSheet.create({
     container: {
@@ -405,49 +541,6 @@ const Photo = ({
   const componentIsMounted = useRef(true)
 
   // No height measurement cycles - let flex layout handle everything
-
-  // Create video player instance
-  const videoPlayer = useVideoPlayer(photo?.video ? photo.videoUrl : null, (player) => {
-    if (player && photo?.video) {
-      // Removed screenHeight as it's no longer necessary
-      player.loop = true // eslint-disable-line no-param-reassign
-      // Don't auto-play the video - let user control playback
-    }
-  })
-
-  // Track video playing state
-  const { isPlaying } = useEvent(videoPlayer, 'playingChange', {
-    isPlaying: videoPlayer?.playing || false
-  })
-
-  // Track video status for debugging and error handling
-  const { status, error: playerError } = useEvent(videoPlayer, 'statusChange', {
-    status: videoPlayer?.status || 'idle',
-    error: null
-  })
-
-  // Handle video play/pause toggle
-  const handleVideoToggle = () => {
-    if (videoPlayer) {
-      if (isPlaying) {
-        videoPlayer.pause()
-      } else {
-        videoPlayer.play()
-      }
-    }
-  }
-
-  // Optional: Handle video errors
-  const handleVideoError = () => {
-    if (playerError) {
-      Toast.show({
-        text1: 'Video Error',
-        text2: 'Unable to play video. Please try again.',
-        type: 'error',
-        topOffset: toastTopOffset
-      })
-    }
-  }
 
   const [bans, setBans] = useState([])
 
@@ -1339,124 +1432,14 @@ const Photo = ({
       )
     }
 
-    // For videos, calculate dimensions with height constraint and width by aspect ratio
-    const maxVideoHeight = height * 0.8
-    const aspectRatio = photo.width / photo.height
-    let videoHeight = maxVideoHeight
-    let videoWidth = videoHeight * aspectRatio
-
-    // If calculated width exceeds container width, scale down
-    const containerWidth = screenWidth
-    if (videoWidth > containerWidth) {
-      videoWidth = containerWidth
-      videoHeight = videoWidth / aspectRatio
-    }
-
-    // Add extra height for video controls
-    const controlsHeight = 60 // Space for video control buttons
-    const cardHeight = videoHeight + controlsHeight
-
     return (
-      <View
-        style={[
-          styles.imageCardContainer,
-          {
-            width: videoWidth,
-            height: cardHeight,
-            alignSelf: 'center'
-          }
-        ]}
-      >
-        {/* Video container */}
-        <View
-          style={{
-            width: '100%',
-            height: videoHeight,
-            borderRadius: 20,
-            overflow: 'hidden'
-          }}
-        >
-          <VideoView
-            player={videoPlayer}
-            style={{
-              width: '100%',
-              height: '100%'
-            }}
-            nativeControls={false}
-            contentFit='cover'
-            allowsFullscreen
-            allowsPictureInPicture
-          />
-        </View>
-
-        {/* Video controls using flex layout */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            paddingVertical: 12,
-            backgroundColor: 'rgba(0,0,0,0.8)'
-          }}
-        >
-          {/* Play/Pause button */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              borderRadius: 25,
-              width: 50,
-              height: 50,
-              justifyContent: 'center',
-              alignItems: 'center',
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0.3)'
-            }}
-            onPress={handleVideoToggle}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name={isPlaying ? 'pause' : 'play'}
-              size={24}
-              color='white'
-              style={!isPlaying ? { marginLeft: 3 } : {}}
-            />
-          </TouchableOpacity>
-
-          {/* Video status indicator */}
-          {status === 'loading' && (
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderRadius: 15,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.2)'
-              }}
-            >
-              <Text style={{ color: 'white', fontSize: 12, fontWeight: '500' }}>Loading...</Text>
-            </View>
-          )}
-
-          {/* Debug info in development */}
-          {isDevBuild && (
-            <View
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderRadius: 8,
-                paddingHorizontal: 8,
-                paddingVertical: 4
-              }}
-            >
-              <Text style={{ color: 'white', fontSize: 10 }}>
-                {photo?.width || 'W?'} × {photo?.height || 'H?'} → {Math.round(width)} ×{' '}
-                {Math.round(videoHeight)}
-              </Text>
-            </View>
-          )}
-        </View>
-      </View>
+      <VideoSection
+        photo={photo}
+        screenWidth={screenWidth}
+        screenHeight={height}
+        isDevBuild={isDevBuild}
+        imageCardContainerStyle={styles.imageCardContainer}
+      />
     )
   }
 
