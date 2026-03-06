@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import isValidImageUri from '../../utils/isValidImageUri'
 import Photo from '../Photo'
 
 // Comment overlay styles
@@ -285,16 +286,18 @@ const ExpandableThumb = ({
         flex: 1
       }}
     >
-      <CachedImage
-        source={{ uri: item.thumbUrl }}
-        cacheKey={`${item.id}-thumb`}
-        style={{
-          width: adjustedThumbWidth,
-          height: adjustedThumbHeight,
-          borderRadius: 20
-        }}
-        resizeMode='cover'
-      />
+      {isValidImageUri(item.thumbUrl) && (
+        <CachedImage
+          source={{ uri: item.thumbUrl }}
+          cacheKey={`${item.id}-thumb`}
+          style={{
+            width: adjustedThumbWidth,
+            height: adjustedThumbHeight,
+            borderRadius: 20
+          }}
+          resizeMode='cover'
+        />
+      )}
       {renderCommentOverlay()}
     </View>
   )

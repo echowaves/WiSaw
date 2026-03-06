@@ -16,6 +16,7 @@ import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-vi
 import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
+import isValidImageUri from '../../utils/isValidImageUri'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import SafeAreaView from '../SafeAreaView'
@@ -158,20 +159,38 @@ const PinchableView = ({ route, navigation }) => {
         }}
         resizeMode='contain'
       >
-        <CachedImage
-          source={{
-            uri: `${photo.thumbUrl}`
-          }}
-          cacheKey={`${photo.id}-thumb`}
-          resizeMode='contain'
-          style={styles.photoContainer}
-        />
-        <CachedImage
-          source={{
-            uri: `${photo.imgUrl}`
-          }}
-          cacheKey={`${photo.id}`}
-          placeholderContent={
+        {isValidImageUri(photo.thumbUrl) && (
+          <CachedImage
+            source={{
+              uri: photo.thumbUrl
+            }}
+            cacheKey={`${photo.id}-thumb`}
+            resizeMode='contain'
+            style={styles.photoContainer}
+          />
+        )}
+        {isValidImageUri(photo.imgUrl)
+          ? (
+            <CachedImage
+              source={{
+                uri: photo.imgUrl
+              }}
+              cacheKey={`${photo.id}`}
+              placeholderContent={
+                <ActivityIndicator
+                  color={CONST.MAIN_COLOR}
+                  size='small'
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center'
+                  }}
+                />
+              }
+              resizeMode='contain'
+              style={styles.photoContainer}
+            />
+            )
+          : (
             <ActivityIndicator
               color={CONST.MAIN_COLOR}
               size='small'
@@ -180,10 +199,7 @@ const PinchableView = ({ route, navigation }) => {
                 justifyContent: 'center'
               }}
             />
-          }
-          resizeMode='contain'
-          style={styles.photoContainer}
-        />
+            )}
       </ReactNativeZoomableView>
     </View>
   )

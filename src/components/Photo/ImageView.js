@@ -9,6 +9,7 @@ import CachedImage from 'expo-cached-image'
 import { State, TapGestureHandler } from 'react-native-gesture-handler'
 
 import * as CONST from '../../consts'
+import isValidImageUri from '../../utils/isValidImageUri'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
@@ -80,24 +81,38 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   return (
     <TapGestureHandler onHandlerStateChange={onSingleTapEvent} numberOfTaps={1}>
       <Animated.View style={imageContainerStyle} resizeMode='contain'>
-        <CachedImage
-          source={{
-            uri: `${photo.imgUrl}`
-            // expiresIn: 5, // seconds. This field is optional
-          }}
-          cacheKey={`${photo.id}`}
-          resizeMode='cover'
-          style={[photoContainerStyle, { zIndex: 2 }]}
-        />
-        <CachedImage
-          source={{
-            uri: `${photo.thumbUrl}`
-            // next field is optional, if not set -- will never expire and will be managed by the OS
-            // expiresIn: 2_628_288, // 1 month in seconds
-          }}
-          cacheKey={`${photo.id}-thumb`}
-          placeholderContent={
-            // optional
+        {isValidImageUri(photo.imgUrl) && (
+          <CachedImage
+            source={{
+              uri: photo.imgUrl
+            }}
+            cacheKey={`${photo.id}`}
+            resizeMode='cover'
+            style={[photoContainerStyle, { zIndex: 2 }]}
+          />
+        )}
+        {isValidImageUri(photo.thumbUrl)
+          ? (
+            <CachedImage
+              source={{
+                uri: photo.thumbUrl
+              }}
+              cacheKey={`${photo.id}-thumb`}
+              placeholderContent={
+                <ActivityIndicator
+                  color={CONST.MAIN_COLOR}
+                  size='small'
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center'
+                  }}
+                />
+              }
+              resizeMode='cover'
+              style={[photoContainerStyle, { zIndex: 1 }]}
+            />
+            )
+          : (
             <ActivityIndicator
               color={CONST.MAIN_COLOR}
               size='small'
@@ -106,10 +121,7 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
                 justifyContent: 'center'
               }}
             />
-          }
-          resizeMode='cover'
-          style={[photoContainerStyle, { zIndex: 1 }]}
-        />
+            )}
       </Animated.View>
     </TapGestureHandler>
   )

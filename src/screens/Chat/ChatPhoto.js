@@ -7,6 +7,7 @@ import { TouchableHighlight, View, useWindowDimensions } from 'react-native'
 import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
+import isValidImageUri from '../../utils/isValidImageUri'
 
 const ChatPhoto = (props) => {
   const { width, height } = useWindowDimensions()
@@ -35,16 +36,17 @@ const ChatPhoto = (props) => {
           alignSelf: 'stretch'
         }}
       >
-        <CachedImage
-          source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
-          cacheKey={`${chatPhotoHash}-thumb`}
-          resizeMode='contain'
-          style={{
-            width: '100%',
-            height: '100%'
-            // borderRadius: 10,
-          }}
-        />
+        {isValidImageUri(`${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb`) && (
+          <CachedImage
+            source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
+            cacheKey={`${chatPhotoHash}-thumb`}
+            resizeMode='contain'
+            style={{
+              width: '100%',
+              height: '100%'
+            }}
+          />
+        )}
       </TouchableHighlight>
     )
   }
@@ -68,39 +70,40 @@ const ChatPhoto = (props) => {
           height
         }}
       >
-        <CachedImage
-          source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
-          cacheKey={`${chatPhotoHash}-thumb`}
-          resizeMode='contain'
-          style={{
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            right: 0,
-            left: 0,
-            backgroundColor: 'transparent'
-            //   borderRadius: 10,
-          }}
-        />
-        <CachedImage
-          source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}` }}
-          cacheKey={`${chatPhotoHash}`}
-          resizeMode='contain'
-          style={{
-            width: '100%',
-            height: '100%',
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            right: 0,
-            left: 0,
-            backgroundColor: 'transparent'
-
-            //   borderRadius: 10,
-          }}
-        />
+        {isValidImageUri(`${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb`) && (
+          <CachedImage
+            source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}-thumb` }}
+            cacheKey={`${chatPhotoHash}-thumb`}
+            resizeMode='contain'
+            style={{
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              right: 0,
+              left: 0,
+              backgroundColor: 'transparent'
+            }}
+          />
+        )}
+        {isValidImageUri(`${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}`) && (
+          <CachedImage
+            source={{ uri: `${CONST.PRIVATE_IMG_HOST}${chatPhotoHash}` }}
+            cacheKey={`${chatPhotoHash}`}
+            resizeMode='contain'
+            style={{
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              right: 0,
+              left: 0,
+              backgroundColor: 'transparent'
+            }}
+          />
+        )}
       </View>
     </TouchableHighlight>
   )

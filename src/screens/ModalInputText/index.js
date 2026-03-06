@@ -15,6 +15,8 @@ import CachedImage from 'expo-cached-image'
 
 import Button from '../../components/ui/Button'
 
+import isValidImageUri from '../../utils/isValidImageUri'
+
 import { isDarkMode as isDarkModeAtom } from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 
@@ -214,12 +216,14 @@ const ModalInputText = ({ route }) => {
             }
           ]}
         >
-          <CachedImage
-            source={{ uri: `${photo.thumbUrl}` }}
-            cacheKey={`${photo.id}-thumb`}
-            resizeMode='cover'
-            style={styles.photoImage}
-          />
+          {isValidImageUri(photo.thumbUrl) && (
+            <CachedImage
+              source={{ uri: photo.thumbUrl }}
+              cacheKey={`${photo.id}-thumb`}
+              resizeMode='cover'
+              style={styles.photoImage}
+            />
+          )}
         </View>
 
         <View style={styles.inputContainer}>
