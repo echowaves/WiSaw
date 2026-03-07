@@ -18,6 +18,7 @@ rules:
   tasks:
     - When adding or updating dependencies, always use exact versions (e.g., "1.2.3" not "^1.2.3" or "~1.2.3"). Use --save-exact with npm install.
   dependencies:
+    - Do not add any new dependencies to the project unless the user explicitly requests or approves it. Solve problems using existing dependencies and built-in APIs first.
     - Always use the expo-cached-image package for image caching and displaying cached images. Do not replace it with custom wrappers or alternative libraries.
     - Always use the expo-storage package for key-value storage. Do not replace it with custom wrappers or direct AsyncStorage usage.
   security:
