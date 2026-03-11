@@ -207,9 +207,24 @@ const Waves = () => {
           text: 'Auto-Group',
           onPress: async () => {
             setAutoGrouping(true)
+            let totalWavesCreated = 0
+            let totalPhotosGrouped = 0
             try {
-              const result = await reducer.autoGroupPhotos({ uuid })
-              if (result.wavesCreated === 0) {
+              // eslint-disable-next-line no-constant-condition
+              while (true) {
+                const result = await reducer.autoGroupPhotos({ uuid })
+                if (result.photosGrouped === 0) {
+                  break
+                }
+                totalWavesCreated += 1
+                totalPhotosGrouped += result.photosGrouped
+                setWaves(prev => [{
+                  waveUuid: result.waveUuid,
+                  name: result.name,
+                  createdBy: uuid
+                }, ...prev])
+              }
+              if (totalWavesCreated === 0) {
                 Toast.show({
                   type: 'info',
                   text1: 'No ungrouped photos found',
@@ -219,17 +234,26 @@ const Waves = () => {
                 Toast.show({
                   type: 'success',
                   text1: 'Photos grouped successfully',
-                  text2: `Created ${result.wavesCreated} wave${result.wavesCreated !== 1 ? 's' : ''} with ${result.photosGrouped} photo${result.photosGrouped !== 1 ? 's' : ''}`
+                  text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
                 })
+                handleRefresh()
               }
-              handleRefresh()
             } catch (error) {
               console.error(error)
-              Toast.show({
-                type: 'error',
-                text1: 'Error auto-grouping photos',
-                text2: error.message
-              })
+              if (totalWavesCreated > 0) {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Error auto-grouping photos',
+                  text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} before error: ${error.message}`
+                })
+                handleRefresh()
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Error auto-grouping photos',
+                  text2: error.message
+                })
+              }
             } finally {
               setAutoGrouping(false)
             }

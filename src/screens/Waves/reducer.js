@@ -118,7 +118,8 @@ export const autoGroupPhotos = async ({ uuid }) => {
       mutation: gql`
         mutation autoGroupPhotosIntoWaves($uuid: String!) {
           autoGroupPhotosIntoWaves(uuid: $uuid) {
-            wavesCreated
+            waveUuid
+            name
             photosGrouped
           }
         }
