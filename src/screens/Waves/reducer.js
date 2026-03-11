@@ -111,3 +111,25 @@ export const deleteWave = async ({ waveUuid, uuid }) => {
     throw err
   }
 }
+
+export const autoGroupPhotos = async ({ uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation autoGroupPhotosIntoWaves($uuid: String!) {
+          autoGroupPhotosIntoWaves(uuid: $uuid) {
+            wavesCreated
+            photosGrouped
+          }
+        }
+      `,
+      variables: {
+        uuid
+      }
+    })
+    return response.data.autoGroupPhotosIntoWaves
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}

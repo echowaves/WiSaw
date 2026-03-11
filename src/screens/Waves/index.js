@@ -43,6 +43,8 @@ const Waves = () => {
   const [newWaveDescription, setNewWaveDescription] = useState('')
   const [creating, setCreating] = useState(false)
 
+  const [autoGrouping, setAutoGrouping] = useState(false)
+
   // Edit modal state
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [editingWave, setEditingWave] = useState(null)
@@ -76,13 +78,13 @@ const Waves = () => {
         batch: currentBatch,
         uuid
       })
-      
+
       if (refresh) {
         setWaves(data.waves)
       } else {
         setWaves(prev => [...prev, ...data.waves])
       }
-      
+
       setNoMoreData(data.noMoreData)
       setBatch(data.batch)
     } catch (error) {
@@ -194,6 +196,48 @@ const Waves = () => {
       saveActiveWave(wave)
     }
   }
+
+  const handleAutoGroup = useCallback(() => {
+    Alert.alert(
+      'Auto-Group Photos',
+      'This will automatically group your ungrouped photos into waves. Continue?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Auto-Group',
+          onPress: async () => {
+            setAutoGrouping(true)
+            try {
+              const result = await reducer.autoGroupPhotos({ uuid })
+              if (result.wavesCreated === 0) {
+                Toast.show({
+                  type: 'info',
+                  text1: 'No ungrouped photos found',
+                  text2: 'All your photos are already in waves'
+                })
+              } else {
+                Toast.show({
+                  type: 'success',
+                  text1: 'Photos grouped successfully',
+                  text2: `Created ${result.wavesCreated} wave${result.wavesCreated !== 1 ? 's' : ''} with ${result.photosGrouped} photo${result.photosGrouped !== 1 ? 's' : ''}`
+                })
+              }
+              handleRefresh()
+            } catch (error) {
+              console.error(error)
+              Toast.show({
+                type: 'error',
+                text1: 'Error auto-grouping photos',
+                text2: error.message
+              })
+            } finally {
+              setAutoGrouping(false)
+            }
+          }
+        }
+      ]
+    )
+  }, [uuid])
 
   // Placeholder handler for sharing a wave
   const handleShareWave = async ({ waveUuid, waveName }) => {
@@ -625,6 +669,22 @@ const Waves = () => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={[styles.autoGroupButton, autoGrouping && styles.autoGroupButtonDisabled]}
+              onPress={handleAutoGroup}
+              disabled={autoGrouping}
+            >
+              {autoGrouping
+                ? <ActivityIndicator color='#FFF' size='small' />
+                : <FontAwesome5 name='layer-group' size={16} color='#FFF' />}
+              <Text style={styles.autoGroupButtonText}>
+                {autoGrouping ? 'Grouping...' : 'Auto-Group'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        }
         ListEmptyComponent={
           !loading && (
             <EmptyStateCard
@@ -755,6 +815,29 @@ const createStyles = (theme, insets, isDark) => StyleSheet.create({
   },
   listContent: {
     paddingVertical: 16
+  },
+  headerActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 16,
+    marginBottom: 8
+  },
+  autoGroupButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: CONST.MAIN_COLOR,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6
+  },
+  autoGroupButtonDisabled: {
+    opacity: 0.6
+  },
+  autoGroupButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600'
   },
   // Container for wave item with swipe actions (matches FriendsList)
   waveItemContainer: {
