@@ -121,6 +121,8 @@ export const autoGroupPhotos = async ({ uuid }) => {
             waveUuid
             name
             photosGrouped
+            photosRemaining
+            hasMore
           }
         }
       `,

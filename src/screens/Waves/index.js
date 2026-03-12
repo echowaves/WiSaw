@@ -210,20 +210,19 @@ const Waves = () => {
             let totalWavesCreated = 0
             let totalPhotosGrouped = 0
             try {
-              // eslint-disable-next-line no-constant-condition
-              while (true) {
-                const result = await reducer.autoGroupPhotos({ uuid })
-                if (result.photosGrouped === 0) {
-                  break
+              let result
+              do {
+                result = await reducer.autoGroupPhotos({ uuid })
+                if (result.photosGrouped > 0) {
+                  totalWavesCreated += 1
+                  totalPhotosGrouped += result.photosGrouped
+                  setWaves(prev => [{
+                    waveUuid: result.waveUuid,
+                    name: result.name,
+                    createdBy: uuid
+                  }, ...prev])
                 }
-                totalWavesCreated += 1
-                totalPhotosGrouped += result.photosGrouped
-                setWaves(prev => [{
-                  waveUuid: result.waveUuid,
-                  name: result.name,
-                  createdBy: uuid
-                }, ...prev])
-              }
+              } while (result.hasMore)
               if (totalWavesCreated === 0) {
                 Toast.show({
                   type: 'info',
