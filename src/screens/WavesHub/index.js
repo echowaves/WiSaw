@@ -337,7 +337,7 @@ const WavesHub = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
+    <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
       {/* Upload target bar */}
       <View style={[styles.uploadTargetBar, { backgroundColor: uploadTargetWave ? CONST.MAIN_COLOR : theme.CARD_BACKGROUND }]}>
         {uploadTargetWave
