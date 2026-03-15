@@ -24,6 +24,7 @@ import * as reducer from './reducer'
 import { saveUploadTargetWave, clearUploadTargetWave } from '../../utils/waveStorage'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import { subscribeToAutoGroup, emitAutoGroupDone } from '../../events/autoGroupBus'
 
 const WavesHub = () => {
   const [uuid] = useAtom(STATE.uuid)
@@ -256,12 +257,20 @@ const WavesHub = () => {
               if (totalWavesCreated > 0) handleRefresh()
             } finally {
               setAutoGrouping(false)
+              emitAutoGroupDone()
             }
           }
         }
       ]
     )
   }, [uuid])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAutoGroup(() => {
+      handleAutoGroup()
+    })
+    return unsubscribe
+  }, [handleAutoGroup])
 
   const showWaveContextMenu = (wave) => {
     const isOwner = wave.createdBy === uuid

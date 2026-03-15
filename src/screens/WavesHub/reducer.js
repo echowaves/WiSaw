@@ -9,7 +9,8 @@ export {
   deleteWave,
   autoGroupPhotos,
   addPhotoToWave,
-  removePhotoFromWave
+  removePhotoFromWave,
+  getUngroupedPhotosCount
 } from '../Waves/reducer'
 
 export const fetchWaveThumbnails = async ({ waveUuid, uuid }) => {

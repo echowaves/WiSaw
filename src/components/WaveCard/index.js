@@ -10,7 +10,7 @@ const isValidImageUri = (uri) => {
 }
 
 const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
-  const photoCount = wave.photos ? wave.photos.length : 0
+  const photoCount = wave.photosCount ?? 0
   const thumbnails = wave.thumbnails || []
 
   const renderCollage = () => {

@@ -15,7 +15,7 @@ export const listWaves = async ({ pageNumber, batch, uuid }) => {
               createdAt
               updatedAt
               createdBy
-              photos
+              photosCount
             }
             batch
             noMoreData
@@ -173,6 +173,24 @@ export const removePhotoFromWave = async ({ waveUuid, photoId }) => {
       }
     })
     return response.data.removePhotoFromWave
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const getUngroupedPhotosCount = async ({ uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query getUngroupedPhotosCount($uuid: String!) {
+          getUngroupedPhotosCount(uuid: $uuid)
+        }
+      `,
+      variables: { uuid },
+      fetchPolicy: 'network-only'
+    })
+    return response.data.getUngroupedPhotosCount
   } catch (err) {
     console.error({ err })
     throw err
