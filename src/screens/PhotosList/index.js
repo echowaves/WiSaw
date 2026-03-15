@@ -23,6 +23,7 @@ import * as TaskManager from 'expo-task-manager'
 
 import useKeyboard from '@rnhooks/keyboard'
 import {
+  ActionSheetIOS,
   Alert,
   Animated,
   Keyboard,
@@ -51,6 +52,8 @@ import * as friendsHelper from '../FriendsList/friends_helper'
 import * as reducer from './reducer'
 import usePhotoUploader from './upload/usePhotoUploader'
 
+import { addPhotoToWave, listWaves as listWavesForPicker } from '../Waves/reducer'
+
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
@@ -68,6 +71,7 @@ import PendingPhotosBanner from './components/PendingPhotosBanner'
 import PhotosListEmptyState from './components/PhotosListEmptyState'
 import PhotosListMasonry from './components/PhotosListMasonry'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import WaveHeaderIcon from '../../components/WaveHeaderIcon'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -146,6 +150,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [activeWave, setActiveWave] = useAtom(STATE.activeWave)
+  const [uploadTargetWave] = useAtom(STATE.uploadTargetWave)
   // const [nickName, setNickName] = useAtom(STATE.nickName)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [, setFriendsList] = useAtom(STATE.friendsList)
@@ -745,6 +750,100 @@ const PhotosList = ({ searchFromUrl }) => {
     [isPhotoExpanding, photosList, expandedPhotoIds]
   )
 
+  // Long-press handler for adding photos to waves
+  const handlePhotoLongPress = useCallback(async (photo) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+
+    // Fetch user's waves for the picker
+    let userWaves = []
+    try {
+      const data = await listWavesForPicker({
+        pageNumber: 0,
+        batch: String(Math.random()),
+        uuid
+      })
+      userWaves = data.waves || []
+    } catch (err) {
+      console.error('Failed to load waves for picker:', err)
+    }
+
+    const waveOptions = userWaves.map(w => w.name)
+
+    if (Platform.OS === 'ios') {
+      const options = ['Cancel', 'Start New Wave', ...waveOptions]
+
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title: 'Add to Wave',
+          options,
+          cancelButtonIndex: 0
+        },
+        async (buttonIndex) => {
+          if (buttonIndex === 0) return
+          if (buttonIndex === 1) {
+            // "Start New Wave" — navigate to waves-hub to create
+            Alert.prompt(
+              'New Wave',
+              'Enter a name for the new wave',
+              async (name) => {
+                if (!name?.trim()) return
+                try {
+                  const { createWave } = require('../Waves/reducer')
+                  const newWave = await createWave({ name: name.trim(), description: '', uuid })
+                  await addPhotoToWave({ waveUuid: newWave.waveUuid, photoId: photo.id, uuid })
+                  Toast.show({ type: 'success', text1: `Added to new wave: ${name.trim()}` })
+                } catch (error) {
+                  console.error(error)
+                  Toast.show({ type: 'error', text1: 'Error creating wave', text2: error.message })
+                }
+              },
+              'plain-text'
+            )
+          } else {
+            const selectedWave = userWaves[buttonIndex - 2]
+            try {
+              await addPhotoToWave({ waveUuid: selectedWave.waveUuid, photoId: photo.id, uuid })
+              Toast.show({ type: 'success', text1: `Added to: ${selectedWave.name}` })
+            } catch (error) {
+              console.error(error)
+              Toast.show({ type: 'error', text1: 'Error adding to wave', text2: error.message })
+            }
+          }
+        }
+      )
+    } else {
+      // Android: use Alert with buttons (limited to 3 options)
+      const buttons = [{ text: 'Cancel', style: 'cancel' }]
+      buttons.push({
+        text: 'Start New Wave',
+        onPress: () => {
+          Alert.alert('New Wave', 'Navigate to Waves Hub to create a new wave and add photos',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Go to Waves', onPress: () => router.push('/waves-hub') }
+            ]
+          )
+        }
+      })
+      if (userWaves.length > 0) {
+        // Show first wave as quick option
+        buttons.push({
+          text: `Add to "${userWaves[0].name}"`,
+          onPress: async () => {
+            try {
+              await addPhotoToWave({ waveUuid: userWaves[0].waveUuid, photoId: photo.id, uuid })
+              Toast.show({ type: 'success', text1: `Added to: ${userWaves[0].name}` })
+            } catch (error) {
+              console.error(error)
+              Toast.show({ type: 'error', text1: 'Error adding to wave', text2: error.message })
+            }
+          }
+        })
+      }
+      Alert.alert('Add to Wave', 'Choose an action', buttons)
+    }
+  }, [uuid])
+
   // Lightweight onScroll: keep lastScrollY for ensureItemVisible; avoid UI work during scroll
   const handleScroll = React.useCallback((event) => {
     lastScrollY.current = event?.nativeEvent?.contentOffset?.y || 0
@@ -922,6 +1021,18 @@ const PhotosList = ({ searchFromUrl }) => {
               height: 40
             }}
           />
+
+          {/* Right: Wave icon */}
+          <View
+            style={{
+              position: 'absolute',
+              right: 16,
+              width: 40,
+              height: 40
+            }}
+          >
+            <WaveHeaderIcon />
+          </View>
 
           {/* Center: Three segment control */}
           <View style={styles.headerContainer}>
@@ -1136,7 +1247,7 @@ const PhotosList = ({ searchFromUrl }) => {
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
         location,
-        waveUuid: activeWave?.waveUuid
+        waveUuid: uploadTargetWave?.waveUuid
       })
     }
   }
@@ -1554,6 +1665,7 @@ const PhotosList = ({ searchFromUrl }) => {
             styles={styles}
             FOOTER_HEIGHT={FOOTER_HEIGHT}
             justCollapsedId={justCollapsedId}
+            onPhotoLongPress={handlePhotoLongPress}
           />
           <PhotosListFooter
             theme={theme}

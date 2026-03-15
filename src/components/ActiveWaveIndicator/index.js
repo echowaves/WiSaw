@@ -1,3 +1,8 @@
+/**
+ * @deprecated This component is no longer used. Upload target wave functionality
+ * has been moved to WaveHeaderIcon (icon badge) and WavesHub (upload target bar).
+ * See uploadTargetWave atom in src/state.js.
+ */
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { useAtom } from 'jotai'

@@ -2,7 +2,7 @@ import { Stack, useRouter } from 'expo-router'
 import AppHeader from '../../src/components/AppHeader'
 import WavesHub from '../../src/screens/WavesHub'
 
-export default function WavesScreen() {
+export default function WavesHubScreen() {
   const router = useRouter()
 
   return (
@@ -12,7 +12,7 @@ export default function WavesScreen() {
           headerShown: true,
           header: () => (
             <AppHeader
-              onBack={() => router.replace('/')}
+              onBack={() => router.back()}
               title='Waves'
             />
           )

@@ -71,7 +71,8 @@ const ExpandableThumb = ({
   onRequestEnsureVisible,
   showComments = false, // New prop to enable comment overlay
   onTriggerSearch,
-  shouldScrollToTop = false
+  shouldScrollToTop = false,
+  onLongPress
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -405,6 +406,7 @@ const ExpandableThumb = ({
     >
       <TouchableOpacity
         onPress={onThumbPress}
+        onLongPress={onLongPress ? () => onLongPress(item) : undefined}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={isExpanded ? 1 : 0.9} // No opacity change when expanded
@@ -478,7 +480,8 @@ ExpandableThumb.propTypes = {
   onUpdateDimensions: PropTypes.func,
   updatePhotoHeight: PropTypes.func,
   onRequestEnsureVisible: PropTypes.func,
-  onTriggerSearch: PropTypes.func
+  onTriggerSearch: PropTypes.func,
+  onLongPress: PropTypes.func
 }
 
 ExpandableThumb.displayName = 'ExpandableThumb'

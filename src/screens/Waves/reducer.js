@@ -15,6 +15,7 @@ export const listWaves = async ({ pageNumber, batch, uuid }) => {
               createdAt
               updatedAt
               createdBy
+              photos
             }
             batch
             noMoreData
@@ -131,6 +132,47 @@ export const autoGroupPhotos = async ({ uuid }) => {
       }
     })
     return response.data.autoGroupPhotosIntoWaves
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const addPhotoToWave = async ({ waveUuid, photoId, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation addPhotoToWave($waveUuid: String!, $photoId: String!, $uuid: String!) {
+          addPhotoToWave(waveUuid: $waveUuid, photoId: $photoId, uuid: $uuid)
+        }
+      `,
+      variables: {
+        waveUuid,
+        photoId,
+        uuid
+      }
+    })
+    return response.data.addPhotoToWave
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const removePhotoFromWave = async ({ waveUuid, photoId }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation removePhotoFromWave($waveUuid: String!, $photoId: String!) {
+          removePhotoFromWave(waveUuid: $waveUuid, photoId: $photoId)
+        }
+      `,
+      variables: {
+        waveUuid,
+        photoId
+      }
+    })
+    return response.data.removePhotoFromWave
   } catch (err) {
     console.error({ err })
     throw err
