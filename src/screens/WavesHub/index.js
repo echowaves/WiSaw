@@ -220,10 +220,13 @@ const WavesHub = () => {
     }
   }
 
-  const handleAutoGroup = useCallback(() => {
+  const handleAutoGroup = useCallback((count) => {
+    const countText = count > 0
+      ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves. Continue?`
+      : 'This will automatically group your ungrouped photos into waves. Continue?'
     Alert.alert(
       'Auto-Group Photos',
-      'This will automatically group your ungrouped photos into waves. Continue?',
+      countText,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -266,8 +269,8 @@ const WavesHub = () => {
   }, [uuid])
 
   useEffect(() => {
-    const unsubscribe = subscribeToAutoGroup(() => {
-      handleAutoGroup()
+    const unsubscribe = subscribeToAutoGroup((count) => {
+      handleAutoGroup(count)
     })
     return unsubscribe
   }, [handleAutoGroup])
@@ -334,7 +337,7 @@ const WavesHub = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+    <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
       {/* Upload target bar */}
       <View style={[styles.uploadTargetBar, { backgroundColor: uploadTargetWave ? CONST.MAIN_COLOR : theme.CARD_BACKGROUND }]}>
         {uploadTargetWave

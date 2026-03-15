@@ -44,7 +44,7 @@ export default function WavesScreen() {
               title='Waves'
               rightSlot={
                 <TouchableOpacity
-                  onPress={emitAutoGroup}
+                  onPress={() => emitAutoGroup(ungroupedCount)}
                   style={[
                     SHARED_STYLES.interactive.headerButton,
                     {

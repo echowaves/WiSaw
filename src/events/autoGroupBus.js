@@ -12,10 +12,10 @@ export const subscribeToAutoGroup = (listener) => {
   }
 }
 
-export const emitAutoGroup = () => {
+export const emitAutoGroup = (count) => {
   autoGroupListeners.forEach((listener) => {
     try {
-      listener()
+      listener(count)
     } catch (error) {
       console.error('Error handling auto-group trigger:', error)
     }
