@@ -5,13 +5,12 @@ import {
 } from '@react-navigation/drawer'
 import { Drawer } from 'expo-router/drawer'
 import { useAtom } from 'jotai'
-import React, { useEffect, useState, useCallback } from 'react'
+import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
-import { subscribeToAutoGroupDone } from '../../src/events/autoGroupBus'
 import * as STATE from '../../src/state'
 import { getTheme } from '../../src/theme/sharedStyles'
 import {
@@ -19,7 +18,6 @@ import {
   saveFollowSystemPreference,
   saveThemePreference
 } from '../../src/utils/themeStorage'
-import { getUngroupedPhotosCount } from '../../src/screens/Waves/reducer'
 
 // Get version and build number from app.config.js
 // Version comes from package.json, build number is shared between iOS and Android
@@ -207,27 +205,8 @@ function CustomDrawerContent (props) {
 
 export default function DrawerLayout () {
   const [isDark] = useAtom(STATE.isDarkMode)
-  const [uuid] = useAtom(STATE.uuid)
+  const [uploadTargetWave] = useAtom(STATE.uploadTargetWave)
   const theme = getTheme(isDark)
-  const [ungroupedCount, setUngroupedCount] = useState(0)
-
-  const fetchUngroupedCount = useCallback(async () => {
-    if (!uuid) return
-    try {
-      const count = await getUngroupedPhotosCount({ uuid })
-      setUngroupedCount(count)
-    } catch (error) {
-      console.error('Failed to fetch ungrouped count for drawer:', error)
-    }
-  }, [uuid])
-
-  useEffect(() => {
-    fetchUngroupedCount()
-    const unsubscribe = subscribeToAutoGroupDone(() => {
-      fetchUngroupedCount()
-    })
-    return unsubscribe
-  }, [fetchUngroupedCount])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -299,16 +278,20 @@ export default function DrawerLayout () {
             drawerIcon: ({ color, size }) => (
               <View>
                 <FontAwesome5 name='water' size={22} color={color} />
-                {ungroupedCount > 0 && (
-                  <View style={drawerBadgeStyles.badge}>
-                    <Text style={drawerBadgeStyles.badgeText}>
-                      {ungroupedCount > 99 ? '99+' : ungroupedCount}
-                    </Text>
-                  </View>
+                {!!uploadTargetWave && (
+                  <View style={{
+                    position: 'absolute',
+                    top: -2,
+                    right: -6,
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: CONST.MAIN_COLOR,
+                  }} />
                 )}
               </View>
             ),
-            drawerLabel: 'Waves',
+            drawerLabel: uploadTargetWave ? `Waves — ${uploadTargetWave.name}` : 'Waves',
             title: 'Waves',
             headerShown: false
           }}
@@ -356,22 +339,3 @@ export default function DrawerLayout () {
   )
 }
 
-const drawerBadgeStyles = StyleSheet.create({
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -10,
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-})
