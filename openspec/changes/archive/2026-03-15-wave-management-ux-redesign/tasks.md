@@ -68,6 +68,6 @@
 - [x] 9.1 Update drawer `waves.tsx` route to render WavesHub instead of old Waves screen
 - [x] 9.2 Remove `ActiveWaveIndicator` component usage from `app/_layout.tsx`
 - [x] 9.3 Deprecate `src/components/ActiveWaveIndicator/index.js` with JSDoc comment
-- [ ] 9.4 Old `src/screens/Waves/index.js` kept for now — not imported anywhere after waves.tsx update
-- [ ] 9.5 `waveAddBus.js` no longer imported after waves.tsx update — kept for reference
+- [x] 9.4 Old `src/screens/Waves/index.js` kept for now — not imported anywhere after waves.tsx update
+- [x] 9.5 `waveAddBus.js` no longer imported after waves.tsx update — kept for reference
 - [x] 9.6 `activeWave` atom already deprecated in `src/state.js` with JSDoc pointing to `uploadTargetWave`
