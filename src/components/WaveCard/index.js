@@ -82,17 +82,16 @@ const styles = StyleSheet.create({
   },
   collageContainer: {
     width: '100%',
-    aspectRatio: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap'
+    aspectRatio: 5,
+    flexDirection: 'row'
   },
   collageImage: {
-    width: '50%',
-    height: '50%'
+    flex: 1,
+    height: '100%'
   },
   placeholder: {
     width: '100%',
-    aspectRatio: 1,
+    aspectRatio: 5,
     alignItems: 'center',
     justifyContent: 'center'
   },

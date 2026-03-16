@@ -10,7 +10,8 @@ import {
   Alert,
   ActivityIndicator,
   ActionSheetIOS,
-  Platform
+  Platform,
+  useWindowDimensions
 } from 'react-native'
 import { useAtom } from 'jotai'
 import { FontAwesome5 } from '@expo/vector-icons'
@@ -27,6 +28,9 @@ import EmptyStateCard from '../../components/EmptyStateCard'
 import { subscribeToAutoGroup, emitAutoGroupDone } from '../../events/autoGroupBus'
 
 const WavesHub = () => {
+  const { width } = useWindowDimensions()
+  const numColumns = width >= 768 ? 2 : 1
+
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [uploadTargetWave, setUploadTargetWave] = useAtom(STATE.uploadTargetWave)
@@ -380,7 +384,8 @@ const WavesHub = () => {
         data={filteredWaves}
         renderItem={renderItem}
         keyExtractor={item => item.waveUuid}
-        numColumns={2}
+        numColumns={numColumns}
+        key={numColumns}
         refreshing={refreshing}
         onRefresh={handleRefresh}
         onEndReached={handleLoadMore}
