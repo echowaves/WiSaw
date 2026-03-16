@@ -1064,6 +1064,7 @@ const PhotosList = ({ searchFromUrl }) => {
                     color={activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
+                    numberOfLines={1}
                     style={[
                       styles.segmentText,
                       {
@@ -1102,6 +1103,7 @@ const PhotosList = ({ searchFromUrl }) => {
                     color={activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
+                    numberOfLines={1}
                     style={[
                       styles.segmentText,
                       {
@@ -1140,6 +1142,7 @@ const PhotosList = ({ searchFromUrl }) => {
                     color={activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
+                    numberOfLines={1}
                     style={[
                       styles.segmentText,
                       {
