@@ -23,7 +23,8 @@ const PhotosListFooter = ({
   unreadCount,
   isCameraOpening,
   onCameraPress,
-  location
+  location,
+  hasUploadTarget
 }) => {
   const { width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
@@ -133,11 +134,24 @@ const PhotosListFooter = ({
             }}
             disabled={!netAvailable}
           >
-            <FontAwesome
-              name='navicon'
-              size={22}
-              color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-            />
+            <View>
+              <FontAwesome
+                name='navicon'
+                size={22}
+                color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
+              />
+              {!!hasUploadTarget && (
+                <View style={{
+                  position: 'absolute',
+                  top: -4,
+                  right: -6,
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: CONST.MAIN_COLOR,
+                }} />
+              )}
+            </View>
           </TouchableOpacity>
 
           {/* Video Recording Button */}

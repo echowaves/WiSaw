@@ -1610,6 +1610,7 @@ const PhotosList = ({ searchFromUrl }) => {
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           location={location}
+          hasUploadTarget={!!uploadTargetWave}
         />
       </View>
     )
@@ -1675,6 +1676,7 @@ const PhotosList = ({ searchFromUrl }) => {
             isCameraOpening={isCameraOpening}
             onCameraPress={checkPermissionsForPhotoTaking}
             location={location}
+            hasUploadTarget={!!uploadTargetWave}
           />
         </View>
       </View>
@@ -1729,6 +1731,7 @@ const PhotosList = ({ searchFromUrl }) => {
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           location={location}
+          hasUploadTarget={!!uploadTargetWave}
         />
       </View>
     )
@@ -1764,6 +1767,7 @@ const PhotosList = ({ searchFromUrl }) => {
             isCameraOpening={isCameraOpening}
             onCameraPress={checkPermissionsForPhotoTaking}
             location={location}
+            hasUploadTarget={!!uploadTargetWave}
           />
         )}
         unreadCount={unreadCount}
@@ -1853,6 +1857,7 @@ const PhotosList = ({ searchFromUrl }) => {
         isCameraOpening={isCameraOpening}
         onCameraPress={checkPermissionsForPhotoTaking}
         location={location}
+        hasUploadTarget={!!uploadTargetWave}
       />
     </View>
   )
