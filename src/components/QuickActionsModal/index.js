@@ -1,12 +1,12 @@
 import { useAtom } from 'jotai'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
   Image,
+  InteractionManager,
   Modal,
   StyleSheet,
-  TouchableOpacity,
-  View
+  TouchableOpacity
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 
@@ -64,20 +64,21 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted }) => {
     if (visible && photo) {
       setPhotoDetails(null)
       setLoading(true)
-      photoReducer
-        .getPhotoDetails({ photoId: String(photo.id), uuid })
-        .then((details) => {
-          if (details) {
-            setPhotoDetails(details)
-          }
-        })
-        .finally(() => setLoading(false))
+      const task = InteractionManager.runAfterInteractions(() => {
+        photoReducer
+          .getPhotoDetails({ photoId: String(photo.id), uuid })
+          .then((details) => {
+            if (details) {
+              setPhotoDetails(details)
+            }
+          })
+          .finally(() => setLoading(false))
+      })
+      return () => task.cancel()
     }
   }, [visible, photo?.id, uuid])
 
-  if (!visible || !photo) return null
-
-  const styles = createStyles(theme)
+  const styles = useMemo(() => createStyles(theme), [theme])
 
   return (
     <Modal
@@ -86,55 +87,59 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted }) => {
       animationType='fade'
       onRequestClose={onClose}
     >
-      <TouchableOpacity
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <TouchableOpacity activeOpacity={1} style={styles.content}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name='close' size={20} color={theme.TEXT_SECONDARY} />
+      {visible && photo && (
+        <TouchableOpacity
+          style={styles.overlay}
+          activeOpacity={1}
+          onPress={onClose}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.content}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Ionicons name='close' size={20} color={theme.TEXT_SECONDARY} />
+            </TouchableOpacity>
+            <Image
+              source={{ uri: photo.thumbUrl }}
+              style={styles.thumbnail}
+              resizeMode='cover'
+            />
+
+            {loading && (
+              <ActivityIndicator
+                size='small'
+                color={theme.TEXT_PRIMARY}
+                style={styles.spinner}
+              />
+            )}
+
+            {!loading && photoDetails && (
+              <PhotoActionButtons
+                photoDetails={photoDetails}
+                isOwnPhoto={isOwnPhoto}
+                isPhotoBannedByMe={isPhotoBannedByMe}
+                theme={theme}
+                toastTopOffset={toastTopOffset}
+                onBan={handleBan}
+                onDelete={handleDelete}
+                onFlipWatch={handleFlipWatch}
+                onWavePress={handleWaveButtonPress}
+                onShare={() => sharingHelper.sharePhoto(photo, photoDetails, toastTopOffset)}
+              />
+            )}
           </TouchableOpacity>
-          <Image
-            source={{ uri: photo.thumbUrl }}
-            style={styles.thumbnail}
-            resizeMode='cover'
-          />
-
-          {loading && (
-            <ActivityIndicator
-              size='small'
-              color={theme.TEXT_PRIMARY}
-              style={styles.spinner}
-            />
-          )}
-
-          {!loading && photoDetails && (
-            <PhotoActionButtons
-              photoDetails={photoDetails}
-              isOwnPhoto={isOwnPhoto}
-              isPhotoBannedByMe={isPhotoBannedByMe}
-              theme={theme}
-              toastTopOffset={toastTopOffset}
-              onBan={handleBan}
-              onDelete={handleDelete}
-              onFlipWatch={handleFlipWatch}
-              onWavePress={handleWaveButtonPress}
-              onShare={() => sharingHelper.sharePhoto(photo, photoDetails, toastTopOffset)}
-            />
-          )}
         </TouchableOpacity>
-      </TouchableOpacity>
+      )}
 
-      <WaveSelectorModal
-        visible={waveModalVisible}
-        onClose={() => setWaveModalVisible(false)}
-        onSelectWave={handleWaveSelect}
-        onRemoveFromWave={handleWaveRemove}
-        onCreateWave={handleCreateWave}
-        currentWaveUuid={photoDetails?.waveUuid}
-        uuid={uuid}
-      />
+      {visible && photo && (
+        <WaveSelectorModal
+          visible={waveModalVisible}
+          onClose={() => setWaveModalVisible(false)}
+          onSelectWave={handleWaveSelect}
+          onRemoveFromWave={handleWaveRemove}
+          onCreateWave={handleCreateWave}
+          currentWaveUuid={photoDetails?.waveUuid}
+          uuid={uuid}
+        />
+      )}
     </Modal>
   )
 }

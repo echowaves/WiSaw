@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import * as Crypto from 'expo-crypto'
 
 import { useAtom } from 'jotai'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library'
@@ -143,6 +143,28 @@ let currentBatch = Crypto.randomUUID()
 // IMPORTANT: PhotosList items are frozen to prevent unauthorized mutation of width/height properties
 // by third-party libraries (like masonry layout). When creating new items (expansion, dimension updates),
 // we must always return Object.freeze() wrapped objects to maintain immutability.
+
+// Lightweight wrapper isolating longPressPhoto state from PhotosList re-renders
+const QuickActionsModalWrapper = React.memo(
+  React.forwardRef(({ setPhotosList }, ref) => {
+    const [longPressPhoto, setLongPressPhoto] = useState(null)
+
+    useImperativeHandle(ref, () => ({
+      open: (photo) => setLongPressPhoto(photo)
+    }), [])
+
+    return (
+      <QuickActionsModal
+        visible={!!longPressPhoto}
+        photo={longPressPhoto}
+        onClose={() => setLongPressPhoto(null)}
+        onPhotoDeleted={(photoId) => {
+          setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+        }}
+      />
+    )
+  })
+)
 
 const PhotosList = ({ searchFromUrl }) => {
   // console.log({ activeSegment, currentBatch })
@@ -751,11 +773,11 @@ const PhotosList = ({ searchFromUrl }) => {
   )
 
   // Long-press handler — open quick-actions modal
-  const [longPressPhoto, setLongPressPhoto] = useState(null)
+  const quickActionsRef = useRef(null)
 
   const handlePhotoLongPress = useCallback((photo) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-    setLongPressPhoto(photo)
+    quickActionsRef.current?.open(photo)
   }, [])
 
   // Lightweight onScroll: keep lastScrollY for ensureItemVisible; avoid UI work during scroll
@@ -1596,14 +1618,7 @@ const PhotosList = ({ searchFromUrl }) => {
             hasUploadTarget={!!uploadTargetWave}
           />
         </View>
-        <QuickActionsModal
-          visible={!!longPressPhoto}
-          photo={longPressPhoto}
-          onClose={() => setLongPressPhoto(null)}
-          onPhotoDeleted={(photoId) => {
-            setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
-          }}
-        />
+        <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
       </View>
     )
   }
@@ -1784,14 +1799,7 @@ const PhotosList = ({ searchFromUrl }) => {
         location={location}
         hasUploadTarget={!!uploadTargetWave}
       />
-      <QuickActionsModal
-        visible={!!longPressPhoto}
-        photo={longPressPhoto}
-        onClose={() => setLongPressPhoto(null)}
-        onPhotoDeleted={(photoId) => {
-          setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
-        }}
-      />
+      <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
     </View>
   )
 }
