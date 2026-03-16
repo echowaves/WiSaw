@@ -494,7 +494,9 @@ const createStyles = (theme) =>
       borderColor: theme.BORDER_LIGHT,
       opacity: 0.5,
       shadowOpacity: 0.1,
-      elevation: 1
+      elevation: 1,
+      minWidth: 32,
+      borderRadius: 16
     },
     actionButtonText: {
       color: theme.STATUS_SUCCESS,
@@ -1380,22 +1382,16 @@ const Photo = ({
               }
               size={18}
             />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color:
-                    photoDetails?.isPhotoWatched === undefined ||
-                    photoDetails?.isPhotoWatched ||
-                    isPhotoBannedByMe()
-                      ? theme.TEXT_DISABLED
-                      : theme.STATUS_CAUTION
-                }
-              ]}
-            >
-              Report
-            </Text>
+            {!(photoDetails?.isPhotoWatched === undefined ||
+                photoDetails?.isPhotoWatched ||
+                isPhotoBannedByMe()) && (
+              <Text
+                numberOfLines={1}
+                style={[styles.actionButtonText, { color: theme.STATUS_CAUTION }]}
+              >
+                Report
+              </Text>
+            )}
           </TouchableOpacity>
 
           {/* Delete button */}
@@ -1430,20 +1426,14 @@ const Photo = ({
               }
               size={18}
             />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color:
-                    photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched
-                      ? theme.TEXT_DISABLED
-                      : theme.STATUS_ERROR
-                }
-              ]}
-            >
-              Delete
-            </Text>
+            {!(photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched) && (
+              <Text
+                numberOfLines={1}
+                style={[styles.actionButtonText, { color: theme.STATUS_ERROR }]}
+              >
+                Delete
+              </Text>
+            )}
           </TouchableOpacity>
 
           {/* Star button */}
@@ -1460,17 +1450,14 @@ const Photo = ({
               color={starAccentColor}
               size={18}
             />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color: starAccentColor
-                }
-              ]}
-            >
-              {isStarred ? 'Starred' : 'Star'}
-            </Text>
+            {!isStarStatusUnknown && (
+              <Text
+                numberOfLines={1}
+                style={[styles.actionButtonText, { color: starAccentColor }]}
+              >
+                {isStarred ? 'Starred' : 'Star'}
+              </Text>
+            )}
           </TouchableOpacity>
 
           {/* Wave button */}
@@ -1489,17 +1476,14 @@ const Photo = ({
               color={isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED}
               size={16}
             />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color: isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED
-                }
-              ]}
-            >
-              {photoDetails?.waveName || 'Add to Wave'}
-            </Text>
+            {isOwnPhoto && (
+              <Text
+                numberOfLines={1}
+                style={[styles.actionButtonText, { color: '#4FC3F7' }]}
+              >
+                {photoDetails?.waveName || 'Add to Wave'}
+              </Text>
+            )}
           </TouchableOpacity>
 
           {/* Share button */}
@@ -1525,20 +1509,14 @@ const Photo = ({
               }
               size={18}
             />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color:
-                    photoDetails?.isPhotoWatched === undefined
-                      ? theme.TEXT_DISABLED
-                      : theme.STATUS_SUCCESS
-                }
-              ]}
-            >
-              Share
-            </Text>
+            {photoDetails?.isPhotoWatched !== undefined && (
+              <Text
+                numberOfLines={1}
+                style={[styles.actionButtonText, { color: theme.STATUS_SUCCESS }]}
+              >
+                Share
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
