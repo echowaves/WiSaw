@@ -25,14 +25,6 @@ import {
   loadThemePreference,
   subscribeToSystemTheme
 } from '../src/utils/themeStorage'
-import { loadUploadTargetWave } from '../src/utils/waveStorage'
-
-interface Wave {
-  uuid: string
-  name: string
-  createdBy: string
-  createdAt: string
-}
 
 export default function RootLayout () {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -41,8 +33,6 @@ export default function RootLayout () {
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
   )
-  const [, setActiveWave] = useAtom(STATE.activeWave) as [Wave | null, (wave: Wave | null) => void]
-  const [, setUploadTargetWave] = useAtom(STATE.uploadTargetWave) as [Wave | null, (wave: Wave | null) => void]
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -176,14 +166,12 @@ export default function RootLayout () {
           uuidResult,
           nickNameResult,
           themePreferenceResult,
-          followSystemResult,
-          activeWaveResult
+          followSystemResult
         ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
           loadThemePreference(),
-          loadFollowSystemPreference(),
-          loadUploadTargetWave()
+          loadFollowSystemPreference()
         ])
 
         if (isCancelled) return
@@ -191,9 +179,6 @@ export default function RootLayout () {
         // Set state with resolved values
         setUuid(getResolvedValue(uuidResult, ''))
         setNickName(getResolvedValue(nickNameResult, ''))
-        const resolvedWave = getResolvedValue(activeWaveResult, null)
-        setActiveWave(resolvedWave)
-        setUploadTargetWave(resolvedWave)
 
         const followSystem = !!getResolvedValue(followSystemResult, false)
         setFollowSystemTheme(followSystem)
@@ -209,8 +194,6 @@ export default function RootLayout () {
         setNickName('')
         setIsDarkMode(false)
         setFollowSystemTheme(false)
-        setActiveWave(null)
-        setUploadTargetWave(null)
       }
     }
 
@@ -218,7 +201,7 @@ export default function RootLayout () {
     return () => {
       isCancelled = true
     }
-  }, [setActiveWave, setFollowSystemTheme, setIsDarkMode, setNickName, setUuid, setUploadTargetWave])
+  }, [setFollowSystemTheme, setIsDarkMode, setNickName, setUuid])
 
   // Subscribe to system theme changes
   useEffect(() => {

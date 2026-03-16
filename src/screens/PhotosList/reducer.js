@@ -86,44 +86,6 @@ const FEED_BY_DATE_QUERY = gql`
   }
 `
 
-const FEED_BY_DATE_WITH_WAVE_QUERY = gql`
-  query feedByDate(
-    $daysAgo: Int!
-    $lat: Float!
-    $lon: Float!
-    $batch: String!
-    $whenToStop: AWSDateTime!
-    $waveUuid: String
-  ) {
-    feedByDate(
-      daysAgo: $daysAgo
-      lat: $lat
-      lon: $lon
-      batch: $batch
-      whenToStop: $whenToStop
-      waveUuid: $waveUuid
-    ) {
-      photos {
-        row_number
-        id
-        uuid
-        imgUrl
-        thumbUrl
-        videoUrl
-        video
-        commentsCount
-        watchersCount
-        lastComment
-        createdAt
-        width
-        height
-      }
-      batch
-      noMoreData
-    }
-  }
-`
-
 const FEED_FOR_WATCHER_QUERY = gql`
   query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!) {
     feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch) {
@@ -148,57 +110,9 @@ const FEED_FOR_WATCHER_QUERY = gql`
   }
 `
 
-const FEED_FOR_WATCHER_WITH_WAVE_QUERY = gql`
-  query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!, $waveUuid: String) {
-    feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch, waveUuid: $waveUuid) {
-      photos {
-        row_number
-        id
-        uuid
-        imgUrl
-        thumbUrl
-        videoUrl
-        video
-        commentsCount
-        watchersCount
-        lastComment
-        createdAt
-        width
-        height
-      }
-      batch
-      noMoreData
-    }
-  }
-`
-
 const FEED_FOR_TEXT_SEARCH_QUERY = gql`
   query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: String!) {
     feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch) {
-      photos {
-        row_number
-        id
-        uuid
-        imgUrl
-        thumbUrl
-        videoUrl
-        video
-        commentsCount
-        watchersCount
-        lastComment
-        createdAt
-        width
-        height
-      }
-      batch
-      noMoreData
-    }
-  }
-`
-
-const FEED_FOR_TEXT_SEARCH_WITH_WAVE_QUERY = gql`
-  query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: String!, $waveUuid: String) {
-    feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch, waveUuid: $waveUuid) {
       photos {
         row_number
         id
@@ -250,11 +164,10 @@ export async function getZeroMoment () {
   return 0
 }
 
-async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, waveUuid }) {
+async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment }) {
   const { latitude, longitude } = location.coords
   const whenToStop = moment(zeroMoment || 0)
   try {
-    const query = waveUuid ? FEED_BY_DATE_WITH_WAVE_QUERY : FEED_BY_DATE_QUERY
     const variables = {
       batch,
       daysAgo: pageNumber,
@@ -262,11 +175,8 @@ async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, wave
       lon: longitude,
       whenToStop
     }
-    if (waveUuid) {
-      variables.waveUuid = waveUuid
-    }
     const response = await CONST.gqlClient.query({
-      query,
+      query: FEED_BY_DATE_QUERY,
       variables
     })
     return {
@@ -284,19 +194,15 @@ async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, wave
   }
 }
 
-async function requestWatchedPhotos ({ uuid, pageNumber, batch, waveUuid }) {
+async function requestWatchedPhotos ({ uuid, pageNumber, batch }) {
   try {
-    const query = waveUuid ? FEED_FOR_WATCHER_WITH_WAVE_QUERY : FEED_FOR_WATCHER_QUERY
     const variables = {
       uuid,
       pageNumber,
       batch
     }
-    if (waveUuid) {
-      variables.waveUuid = waveUuid
-    }
     const response = await CONST.gqlClient.query({
-      query,
+      query: FEED_FOR_WATCHER_QUERY,
       variables
     })
 
@@ -315,19 +221,15 @@ async function requestWatchedPhotos ({ uuid, pageNumber, batch, waveUuid }) {
   }
 }
 
-async function requestSearchedPhotos ({ pageNumber, searchTerm, batch, waveUuid }) {
+async function requestSearchedPhotos ({ pageNumber, searchTerm, batch }) {
   try {
-    const query = waveUuid ? FEED_FOR_TEXT_SEARCH_WITH_WAVE_QUERY : FEED_FOR_TEXT_SEARCH_QUERY
     const variables = {
       searchTerm,
       batch,
       pageNumber
     }
-    if (waveUuid) {
-      variables.waveUuid = waveUuid
-    }
     const response = await CONST.gqlClient.query({
-      query,
+      query: FEED_FOR_TEXT_SEARCH_QUERY,
       variables
     })
 
@@ -356,8 +258,7 @@ export async function getPhotos (params) {
     topOffset = 100,
     activeSegment,
     batch,
-    pageNumber,
-    activeWave
+    pageNumber
   } = params
 
   if (!location || netAvailable === false || (activeSegment === 2 && searchTerm.length < 3)) {
@@ -369,11 +270,9 @@ export async function getPhotos (params) {
   }
 
   try {
-    const waveUuid = activeWave?.waveUuid
     const requestParams = {
       pageNumber,
       batch,
-      waveUuid,
       location,
       zeroMoment,
       uuid,

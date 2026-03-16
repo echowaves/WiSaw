@@ -61,7 +61,6 @@ import {
   createFrozenPhoto,
   validateFrozenPhotosList
 } from '../../utils/photoListHelpers'
-import { saveActiveWave } from '../../utils/waveStorage'
 
 import LinearProgress from '../../components/ui/LinearProgress'
 import PhotosListFooter from './components/PhotosListFooter'
@@ -170,8 +169,6 @@ const PhotosList = ({ searchFromUrl }) => {
   // console.log({ activeSegment, currentBatch })
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [activeWave, setActiveWave] = useAtom(STATE.activeWave)
-  const [uploadTargetWave] = useAtom(STATE.uploadTargetWave)
   // const [nickName, setNickName] = useAtom(STATE.nickName)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [, setFriendsList] = useAtom(STATE.friendsList)
@@ -808,8 +805,7 @@ const PhotosList = ({ searchFromUrl }) => {
       topOffset: toastTopOffset,
       activeSegment: effectiveSegment,
       batch: currentBatch, // clone
-      pageNumber,
-      activeWave
+      pageNumber
     })
 
     if (batch === currentBatch) {
@@ -1157,7 +1153,7 @@ const PhotosList = ({ searchFromUrl }) => {
     return status
   }
 
-  const takePhoto = async ({ cameraType }) => {
+  const takePhoto = async ({ cameraType, waveUuid }) => {
     let cameraReturn
     if (cameraType === 'camera') {
       // launch photo capturing
@@ -1186,12 +1182,12 @@ const PhotosList = ({ searchFromUrl }) => {
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
         location,
-        waveUuid: uploadTargetWave?.waveUuid
+        waveUuid
       })
     }
   }
 
-  const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
+  const checkPermissionsForPhotoTaking = async ({ cameraType, waveUuid }) => {
     // Prevent double-clicking by checking if camera is already opening
     if (isCameraOpening) {
       console.log('Camera already opening, ignoring duplicate request')
@@ -1216,7 +1212,7 @@ const PhotosList = ({ searchFromUrl }) => {
         })
 
         if (photoAlbomPermission === 'granted') {
-          await takePhoto({ cameraType })
+          await takePhoto({ cameraType, waveUuid })
         }
       }
     } catch (error) {
@@ -1355,7 +1351,7 @@ const PhotosList = ({ searchFromUrl }) => {
   useEffect(() => {
     // updateNavBar()
     reload()
-  }, [location, activeWave])
+  }, [location])
 
   // useEffect(() => {}, [currentBatch])
 
@@ -1549,7 +1545,6 @@ const PhotosList = ({ searchFromUrl }) => {
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           location={location}
-          hasUploadTarget={!!uploadTargetWave}
         />
       </View>
     )
@@ -1615,7 +1610,6 @@ const PhotosList = ({ searchFromUrl }) => {
             isCameraOpening={isCameraOpening}
             onCameraPress={checkPermissionsForPhotoTaking}
             location={location}
-            hasUploadTarget={!!uploadTargetWave}
           />
         </View>
         <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
@@ -1671,7 +1665,6 @@ const PhotosList = ({ searchFromUrl }) => {
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           location={location}
-          hasUploadTarget={!!uploadTargetWave}
         />
       </View>
     )
@@ -1707,7 +1700,6 @@ const PhotosList = ({ searchFromUrl }) => {
             isCameraOpening={isCameraOpening}
             onCameraPress={checkPermissionsForPhotoTaking}
             location={location}
-            hasUploadTarget={!!uploadTargetWave}
           />
         )}
         unreadCount={unreadCount}
@@ -1720,11 +1712,6 @@ const PhotosList = ({ searchFromUrl }) => {
         keyboardVisible={keyboardVisible}
         keyboardOffset={keyboardOffset}
         FOOTER_HEIGHT={FOOTER_HEIGHT}
-        activeWave={activeWave}
-        clearActiveWave={() => {
-          setActiveWave(null)
-          saveActiveWave(null)
-        }}
       />
     )
   }
@@ -1797,7 +1784,6 @@ const PhotosList = ({ searchFromUrl }) => {
         isCameraOpening={isCameraOpening}
         onCameraPress={checkPermissionsForPhotoTaking}
         location={location}
-        hasUploadTarget={!!uploadTargetWave}
       />
       <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
     </View>

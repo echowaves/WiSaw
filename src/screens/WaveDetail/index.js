@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useImperativeHandle } from 'react'
 import {
   View,
   Text,
@@ -7,42 +7,84 @@ import {
   Alert,
   ActionSheetIOS,
   Platform,
+  Animated,
   ActivityIndicator,
   Modal,
   TextInput,
   useWindowDimensions
 } from 'react-native'
 import { useAtom } from 'jotai'
-import { FontAwesome5 } from '@expo/vector-icons'
-import { ExpoMasonryLayout } from 'expo-masonry-layout'
-import CachedImage from 'expo-cached-image'
 import Toast from 'react-native-toast-message'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams, useNavigation } from 'expo-router'
+import * as Haptics from 'expo-haptics'
+import * as ImagePicker from 'expo-image-picker'
+import * as Linking from 'expo-linking'
+import * as MediaLibrary from 'expo-media-library'
+import NetInfo from '@react-native-community/netinfo'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
-import { saveUploadTargetWave, clearUploadTargetWave } from '../../utils/waveStorage'
 import EmptyStateCard from '../../components/EmptyStateCard'
-import { createFrozenPhoto } from '../../utils/photoListHelpers'
+import QuickActionsModal from '../../components/QuickActionsModal'
+import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
+import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
+import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
+import usePhotoUploader from '../PhotosList/upload/usePhotoUploader'
+import useToastTopOffset from '../../hooks/useToastTopOffset'
+import {
+  calculatePhotoDimensions,
+  createFrozenPhoto
+} from '../../utils/photoListHelpers'
 
-const SPACING = 5
-const COLUMNS = 3
+const FOOTER_HEIGHT = 90
 
-const WaveDetail = () => {
+// Lightweight wrapper isolating longPressPhoto state from WaveDetail re-renders
+const QuickActionsModalWrapper = React.memo(
+  React.forwardRef(({ setPhotos }, ref) => {
+    const [longPressPhoto, setLongPressPhoto] = useState(null)
+
+    useImperativeHandle(ref, () => ({
+      open: (photo) => setLongPressPhoto(photo)
+    }), [])
+
+    return (
+      <QuickActionsModal
+        visible={!!longPressPhoto}
+        photo={longPressPhoto}
+        onClose={() => setLongPressPhoto(null)}
+        onPhotoDeleted={(photoId) => {
+          setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+        }}
+      />
+    )
+  })
+)
+
+const WaveDetail = React.forwardRef((_props, ref) => {
   const { waveUuid, waveName: initialWaveName } = useLocalSearchParams()
-  const [uuid] = useAtom(STATE.uuid)
+  const [uuid, setUuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [uploadTargetWave, setUploadTargetWave] = useAtom(STATE.uploadTargetWave)
+  const navigation = useNavigation()
 
   const [waveName, setWaveName] = useState(initialWaveName || '')
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
+  const [stopLoading, setStopLoading] = useState(false)
   const [pageNumber, setPageNumber] = useState(0)
   const [batch, setBatch] = useState(String(Math.random()))
   const [noMoreData, setNoMoreData] = useState(false)
+  const [netAvailable, setNetAvailable] = useState(true)
+  const [isCameraOpening, setIsCameraOpening] = useState(false)
+
+  // Expand/collapse state
+  const [expandedPhotoIds, setExpandedPhotoIds] = useState(new Set())
+  const [isPhotoExpanding, setIsPhotoExpanding] = useState(false)
+  const [measuredHeights, setMeasuredHeights] = useState(new Map())
+  const [justCollapsedId, setJustCollapsedId] = useState(null)
+  const photoHeightRefs = useRef(new Map())
+  const lastExpandedIdRef = useRef(null)
 
   // Edit modal
   const [editModalVisible, setEditModalVisible] = useState(false)
@@ -51,10 +93,177 @@ const WaveDetail = () => {
   const [saving, setSaving] = useState(false)
 
   const masonryRef = useRef(null)
-  const { width: screenWidth } = useWindowDimensions()
+  const quickActionsRef = useRef(null)
+  const { width } = useWindowDimensions()
   const theme = getTheme(isDarkMode)
+  const toastTopOffset = useToastTopOffset()
 
-  const isUploadTarget = uploadTargetWave?.waveUuid === waveUuid
+  // Pending photos animation refs
+  const pendingPhotosAnimation = useRef(new Animated.Value(0)).current
+  const uploadIconAnimation = useRef(new Animated.Value(1)).current
+
+  // Upload handler
+  const handleUploadSuccess = useCallback(
+    (uploadedPhoto) => {
+      setPhotos((currentList) => {
+        const updatedList = [createFrozenPhoto(uploadedPhoto), ...currentList]
+        const seen = new Set()
+        return updatedList.filter((photo) => {
+          if (seen.has(photo.id)) return false
+          seen.add(photo.id)
+          return true
+        })
+      })
+    },
+    []
+  )
+
+  const {
+    pendingPhotos,
+    isUploading,
+    enqueueCapture,
+    clearPendingQueue
+  } = usePhotoUploader({
+    uuid,
+    setUuid,
+    topOffset: toastTopOffset,
+    netAvailable,
+    onPhotoUploaded: handleUploadSuccess
+  })
+
+  // Starred-layout segment config
+  const segmentConfig = React.useMemo(() => {
+    const getResponsiveColumns = (baseColumns, largeColumns) => {
+      if (width >= 768) return Math.max(3, largeColumns * 1.3)
+      if (width >= 428) return Math.max(3, largeColumns / 1.3)
+      if (width >= 390) return Math.max(3, baseColumns / 1.3)
+      return Math.max(3, baseColumns / 6)
+    }
+    return {
+      spacing: 8,
+      maxItemsPerRow: getResponsiveColumns(2, 4),
+      baseHeight: 200,
+      aspectRatioFallbacks: [1.0]
+    }
+  }, [width])
+
+  // Expand/collapse helpers
+  const isPhotoExpanded = useCallback(
+    (photoId) => expandedPhotoIds.has(photoId),
+    [expandedPhotoIds]
+  )
+
+  const updatePhotoHeight = useCallback((photoId, height) => {
+    photoHeightRefs.current.set(photoId, height)
+    setMeasuredHeights((current) => {
+      const updated = new Map(current)
+      updated.set(photoId, height)
+      return updated
+    })
+  }, [])
+
+  const getCalculatedDimensions = useCallback(
+    (photo) => {
+      const screenWidth = width - 20
+      const isExpanded = isPhotoExpanded(photo.id)
+
+      if (isExpanded) {
+        const currentHeight = measuredHeights.get(photo.id) || photoHeightRefs.current.get(photo.id)
+        if (currentHeight) {
+          return { width: screenWidth, height: currentHeight }
+        }
+      }
+
+      return calculatePhotoDimensions(
+        photo,
+        isExpanded,
+        screenWidth,
+        segmentConfig.maxItemsPerRow,
+        segmentConfig.spacing
+      )
+    },
+    [isPhotoExpanded, width, segmentConfig, measuredHeights]
+  )
+
+  const handlePhotoToggle = useCallback(
+    (photoId) => {
+      if (isPhotoExpanding) return
+
+      setIsPhotoExpanding(true)
+      const isExpanded = expandedPhotoIds.has(photoId)
+
+      if (isExpanded) {
+        setJustCollapsedId(photoId)
+        lastExpandedIdRef.current = photoId
+        setMeasuredHeights((current) => {
+          const updated = new Map(current)
+          updated.delete(photoId)
+          return updated
+        })
+        setExpandedPhotoIds((prevIds) => {
+          const newIds = new Set(prevIds)
+          newIds.delete(photoId)
+          return newIds
+        })
+      } else {
+        setJustCollapsedId(null)
+        lastExpandedIdRef.current = photoId
+        setExpandedPhotoIds((prevIds) => {
+          const newIds = new Set(prevIds)
+          newIds.add(photoId)
+          return newIds
+        })
+      }
+
+      setTimeout(() => setIsPhotoExpanding(false), 500)
+    },
+    [isPhotoExpanding, expandedPhotoIds]
+  )
+
+  // Long-press handler
+  const handlePhotoLongPress = useCallback((photo) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    quickActionsRef.current?.open(photo)
+  }, [])
+
+  // Network listener
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setNetAvailable(state.isConnected && state.isInternetReachable !== false)
+    })
+    return unsubscribe
+  }, [])
+
+  // Pending photos animation
+  useEffect(() => {
+    if (pendingPhotos.length > 0) {
+      Animated.spring(pendingPhotosAnimation, {
+        toValue: 1,
+        useNativeDriver: true
+      }).start()
+    } else {
+      Animated.timing(pendingPhotosAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true
+      }).start()
+    }
+
+    if (pendingPhotos.length > 0 && netAvailable) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(uploadIconAnimation, {
+            toValue: 0.3, duration: 800, useNativeDriver: true
+          }),
+          Animated.timing(uploadIconAnimation, {
+            toValue: 1, duration: 800, useNativeDriver: true
+          })
+        ])
+      ).start()
+    } else {
+      uploadIconAnimation.setValue(1)
+    }
+  }, [pendingPhotos.length, netAvailable])
 
   const loadPhotos = useCallback(async (pageNum, currentBatch, refresh = false) => {
     if (loading) return
@@ -62,7 +271,6 @@ const WaveDetail = () => {
     try {
       const data = await reducer.fetchWavePhotos({
         waveUuid,
-        uuid,
         pageNumber: pageNum,
         batch: currentBatch
       })
@@ -77,22 +285,24 @@ const WaveDetail = () => {
 
       setNoMoreData(data.noMoreData)
       setBatch(data.batch)
+      if (data.noMoreData || frozenPhotos.length === 0) {
+        setStopLoading(true)
+      }
     } catch (error) {
       console.error(error)
       Toast.show({ type: 'error', text1: 'Error loading photos', text2: error.message })
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
-  }, [uuid, waveUuid])
+  }, [waveUuid])
 
   useEffect(() => {
     loadPhotos(0, String(Math.random()), true)
   }, [])
 
   const handleRefresh = () => {
-    setRefreshing(true)
     setPageNumber(0)
+    setStopLoading(false)
     const newBatch = String(Math.random())
     setBatch(newBatch)
     loadPhotos(0, newBatch, true)
@@ -106,63 +316,6 @@ const WaveDetail = () => {
     }
   }
 
-  const handleSetUploadTarget = () => {
-    if (isUploadTarget) {
-      setUploadTargetWave(null)
-      saveUploadTargetWave(null)
-      Toast.show({ type: 'info', text1: 'Upload target cleared' })
-    } else {
-      const wave = { waveUuid, name: waveName }
-      setUploadTargetWave(wave)
-      saveUploadTargetWave(wave)
-      Toast.show({ type: 'success', text1: `Uploading to: ${waveName}` })
-    }
-  }
-
-  const handleRemovePhoto = (photo) => {
-    Alert.alert(
-      'Remove from Wave',
-      'Remove this photo from the wave?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await reducer.removePhotoFromWave({ waveUuid, photoId: photo.id })
-              setPhotos(prev => prev.filter(p => p.id !== photo.id))
-              Toast.show({ type: 'success', text1: 'Photo removed from wave' })
-            } catch (error) {
-              console.error(error)
-              Toast.show({ type: 'error', text1: 'Error removing photo', text2: error.message })
-            }
-          }
-        }
-      ]
-    )
-  }
-
-  const showPhotoContextMenu = (photo) => {
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: ['Cancel', 'Remove from Wave'],
-          cancelButtonIndex: 0,
-          destructiveButtonIndex: 1
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 1) handleRemovePhoto(photo)
-        }
-      )
-    } else {
-      Alert.alert('Photo Options', '', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove from Wave', style: 'destructive', onPress: () => handleRemovePhoto(photo) }
-      ])
-    }
-  }
-
   const showHeaderMenu = () => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
@@ -172,12 +325,7 @@ const WaveDetail = () => {
           destructiveButtonIndex: 3
         },
         (buttonIndex) => {
-          if (buttonIndex === 1) {
-            setEditName(waveName)
-            setEditDescription('')
-            setEditModalVisible(true)
-          }
-          if (buttonIndex === 2) {
+          if (buttonIndex === 1 || buttonIndex === 2) {
             setEditName(waveName)
             setEditDescription('')
             setEditModalVisible(true)
@@ -201,6 +349,10 @@ const WaveDetail = () => {
     }
   }
 
+  React.useImperativeHandle(ref, () => ({
+    showHeaderMenu
+  }), [waveName])
+
   const handleDeleteWave = () => {
     Alert.alert(
       'Delete Wave',
@@ -213,10 +365,6 @@ const WaveDetail = () => {
           onPress: async () => {
             try {
               await reducer.deleteWave({ waveUuid, uuid })
-              if (isUploadTarget) {
-                setUploadTargetWave(null)
-                clearUploadTargetWave()
-              }
               Toast.show({ type: 'success', text1: 'Wave deleted' })
               router.back()
             } catch (error) {
@@ -243,11 +391,6 @@ const WaveDetail = () => {
         description: editDescription
       })
       setWaveName(editName)
-      if (isUploadTarget) {
-        const updated = { ...uploadTargetWave, name: editName }
-        setUploadTargetWave(updated)
-        saveUploadTargetWave(updated)
-      }
       setEditModalVisible(false)
       Toast.show({ type: 'success', text1: 'Wave updated' })
     } catch (error) {
@@ -258,74 +401,72 @@ const WaveDetail = () => {
     }
   }
 
-  const getCalculatedDimensions = useCallback((photo) => {
-    const totalSpacing = SPACING * (COLUMNS - 1)
-    const availableWidth = screenWidth - totalSpacing
-    const itemWidth = availableWidth / COLUMNS
-    const aspectRatio = photo.width && photo.height ? photo.width / photo.height : 1
-    return { width: itemWidth, height: itemWidth / aspectRatio }
-  }, [screenWidth])
+  // Camera flow
+  const checkPermissionsForPhotoTaking = async ({ cameraType, waveUuid: targetWaveUuid }) => {
+    if (isCameraOpening) return
+    setIsCameraOpening(true)
 
-  const renderMasonryItem = useCallback(({ item, index, dimensions }) => {
-    const thumbWidth = dimensions?.width || 120
-    const thumbHeight = dimensions?.height || 120
+    try {
+      const cameraStatus = await ImagePicker.requestCameraPermissionsAsync()
+      if (cameraStatus.status !== 'granted') {
+        Alert.alert('Camera Permission', 'Camera access is needed to take photos.', [
+          { text: 'Open Settings', onPress: () => Linking.openSettings() }
+        ])
+        return
+      }
 
-    return (
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onLongPress={() => showPhotoContextMenu(item)}
-        style={{ width: thumbWidth, height: thumbHeight, borderRadius: 8, overflow: 'hidden' }}
-      >
-        <CachedImage
-          source={{ uri: item.thumbUrl }}
-          cacheKey={`thumb-${item.id}`}
-          style={{ width: thumbWidth, height: thumbHeight }}
-          resizeMode='cover'
-        />
-        {item.video && (
-          <View style={styles.videoIndicator}>
-            <FontAwesome5 name='play-circle' size={20} color='#FFF' />
-          </View>
-        )}
-      </TouchableOpacity>
-    )
-  }, [photos.length])
+      const libraryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync(true)
+      if (libraryStatus.status !== 'granted') {
+        Alert.alert('Library Permission', 'Media library access is needed to save photos.', [
+          { text: 'Open Settings', onPress: () => Linking.openSettings() }
+        ])
+        return
+      }
+
+      let cameraReturn
+      if (cameraType === 'camera') {
+        cameraReturn = await ImagePicker.launchCameraAsync({
+          mediaTypes: ['images'],
+          quality: 1.0,
+          exif: true
+        })
+      } else {
+        cameraReturn = await ImagePicker.launchCameraAsync({
+          mediaTypes: ['videos'],
+          videoMaxDuration: 5,
+          quality: 1.0,
+          exif: true
+        })
+      }
+
+      if (cameraReturn.canceled === false) {
+        await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
+        await enqueueCapture({
+          cameraImgUrl: cameraReturn.assets[0].uri,
+          type: cameraReturn.assets[0].type,
+          location: null,
+          waveUuid: targetWaveUuid
+        })
+      }
+    } catch (error) {
+      console.error('Error in camera flow:', error)
+    } finally {
+      setIsCameraOpening(false)
+    }
+  }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-      {/* Action buttons row */}
-      <View style={[styles.actionRow, { backgroundColor: theme.CARD_BACKGROUND }]}>
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            {
-              backgroundColor: isUploadTarget ? CONST.MAIN_COLOR : theme.INTERACTIVE_BACKGROUND,
-              borderColor: isUploadTarget ? CONST.MAIN_COLOR : theme.INTERACTIVE_BORDER
-            }
-          ]}
-          onPress={handleSetUploadTarget}
-        >
-          <FontAwesome5 name='bullseye' size={14} color={isUploadTarget ? '#FFF' : theme.TEXT_PRIMARY} />
-          <Text style={[styles.actionButtonText, { color: isUploadTarget ? '#FFF' : theme.TEXT_PRIMARY }]}>
-            {isUploadTarget ? 'Upload Target ✓' : 'Set Upload Target'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
-          onPress={() => router.push({ pathname: '/photo-selection', params: { waveUuid, waveName } })}
-        >
-          <FontAwesome5 name='plus' size={14} color={CONST.MAIN_COLOR} />
-          <Text style={[styles.actionButtonText, { color: CONST.MAIN_COLOR }]}>Add Photos</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Photo count */}
-      <View style={styles.metaRow}>
-        <Text style={[styles.metaText, { color: theme.TEXT_SECONDARY }]}>
-          {photos.length} photo{photos.length !== 1 ? 's' : ''}
-        </Text>
-      </View>
+    <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
+      <PendingPhotosBanner
+        theme={theme}
+        pendingPhotos={pendingPhotos}
+        netAvailable={netAvailable}
+        isUploading={isUploading}
+        clearPendingQueue={clearPendingQueue}
+        toastTopOffset={toastTopOffset}
+        pendingPhotosAnimation={pendingPhotosAnimation}
+        uploadIconAnimation={uploadIconAnimation}
+      />
 
       {photos.length === 0 && !loading
         ? (
@@ -333,41 +474,58 @@ const WaveDetail = () => {
             icon='images'
             iconType='FontAwesome5'
             title='No Photos Yet'
-            subtitle='Add photos to this wave to see them here.'
+            subtitle='Add photos to this wave or take a new one.'
             actionText='Add Photos'
             onActionPress={() => router.push({ pathname: '/photo-selection', params: { waveUuid, waveName } })}
             iconColor={theme.TEXT_PRIMARY}
           />
           )
         : (
-          <ExpoMasonryLayout
-            ref={masonryRef}
-            data={photos}
-            renderItem={renderMasonryItem}
-            spacing={SPACING}
-            maxItemsPerRow={COLUMNS}
-            baseHeight={100}
-            aspectRatioFallbacks={[0.56, 0.67, 0.75, 1.0, 1.33, 1.5, 1.78]}
-            keyExtractor={(item) => item.id}
-            getItemDimensions={getCalculatedDimensions}
+          <PhotosListMasonry
+            activeSegment={1}
+            photosList={photos}
+            segmentConfig={segmentConfig}
+            masonryRef={masonryRef}
+            getCalculatedDimensions={getCalculatedDimensions}
+            isPhotoExpanded={isPhotoExpanded}
+            uuid={uuid}
+            expandedPhotoIds={expandedPhotoIds}
+            onToggleExpand={handlePhotoToggle}
+            updatePhotoHeight={updatePhotoHeight}
             onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.3}
-            scrollEventThrottle={16}
-            initialNumToRender={12}
-            maxToRenderPerBatch={8}
-            windowSize={9}
-            refreshing={refreshing}
             onRefresh={handleRefresh}
+            loading={loading}
+            stopLoading={stopLoading}
+            setPageNumber={setPageNumber}
+            setExpandedPhotoIds={setExpandedPhotoIds}
+            reload={handleRefresh}
+            styles={{}}
+            FOOTER_HEIGHT={FOOTER_HEIGHT}
+            justCollapsedId={justCollapsedId}
+            onPhotoLongPress={handlePhotoLongPress}
           />
           )}
 
-      {loading && (
+      {loading && photos.length === 0 && (
         <ActivityIndicator
           style={styles.loadingIndicator}
           size='large'
           color={CONST.MAIN_COLOR}
         />
       )}
+
+      <PhotosListFooter
+        theme={theme}
+        navigation={navigation}
+        netAvailable={netAvailable}
+        unreadCount={0}
+        isCameraOpening={isCameraOpening}
+        onCameraPress={checkPermissionsForPhotoTaking}
+        location={{}}
+        waveUuid={waveUuid}
+      />
+
+      <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
 
       {/* Edit Modal */}
       <Modal
@@ -417,49 +575,15 @@ const WaveDetail = () => {
       </Modal>
     </View>
   )
-}
+})
 
 const styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  actionRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 8
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 6
-  },
-  actionButtonText: {
-    fontWeight: '600',
-    fontSize: 13
-  },
-  metaRow: {
-    paddingHorizontal: 16,
-    paddingVertical: 6
-  },
-  metaText: {
-    fontSize: 13
-  },
-  videoIndicator: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -10,
-    marginLeft: -10
-  },
   loadingIndicator: {
     position: 'absolute',
-    bottom: 20,
+    top: '50%',
     alignSelf: 'center'
   },
   modalOverlay: {

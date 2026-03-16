@@ -22,7 +22,6 @@ import * as STATE from '../../state'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
-import { saveUploadTargetWave, clearUploadTargetWave } from '../../utils/waveStorage'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import { subscribeToAutoGroup, emitAutoGroupDone } from '../../events/autoGroupBus'
@@ -33,7 +32,6 @@ const WavesHub = () => {
 
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [uploadTargetWave, setUploadTargetWave] = useAtom(STATE.uploadTargetWave)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -75,7 +73,7 @@ const WavesHub = () => {
       // Fetch thumbnails for each wave
       const wavesWithThumbs = await Promise.all(
         newWaves.map(async (wave) => {
-          const thumbnails = await reducer.fetchWaveThumbnails({ waveUuid: wave.waveUuid, uuid })
+          const thumbnails = await reducer.fetchWaveThumbnails({ waveUuid: wave.waveUuid })
           return { ...wave, thumbnails }
         })
       )
@@ -159,10 +157,6 @@ const WavesHub = () => {
             try {
               await reducer.deleteWave({ waveUuid, uuid })
               setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
-              if (uploadTargetWave?.waveUuid === waveUuid) {
-                setUploadTargetWave(null)
-                clearUploadTargetWave()
-              }
               Toast.show({ type: 'success', text1: 'Wave deleted' })
             } catch (error) {
               console.error(error)
@@ -172,18 +166,6 @@ const WavesHub = () => {
         }
       ]
     )
-  }
-
-  const handleSetUploadTarget = (wave) => {
-    if (uploadTargetWave?.waveUuid === wave.waveUuid) {
-      setUploadTargetWave(null)
-      saveUploadTargetWave(null)
-      Toast.show({ type: 'info', text1: 'Upload target cleared' })
-    } else {
-      setUploadTargetWave(wave)
-      saveUploadTargetWave(wave)
-      Toast.show({ type: 'success', text1: `Uploading to: ${wave.name}` })
-    }
   }
 
   const handleEditWave = (wave) => {
@@ -209,10 +191,6 @@ const WavesHub = () => {
       setWaves(prev => prev.map(w =>
         w.waveUuid === editingWave.waveUuid ? { ...updatedWave, thumbnails: w.thumbnails } : w
       ))
-      if (uploadTargetWave?.waveUuid === editingWave.waveUuid) {
-        setUploadTargetWave(updatedWave)
-        saveUploadTargetWave(updatedWave)
-      }
       setEditModalVisible(false)
       setEditingWave(null)
       Toast.show({ type: 'success', text1: 'Wave updated' })
@@ -281,34 +259,28 @@ const WavesHub = () => {
 
   const showWaveContextMenu = (wave) => {
     const isOwner = wave.createdBy === uuid
-    const isTarget = uploadTargetWave?.waveUuid === wave.waveUuid
-
-    const targetLabel = isTarget ? 'Clear Upload Target' : 'Set as Upload Target'
 
     if (Platform.OS === 'ios') {
       const options = isOwner
-        ? ['Cancel', targetLabel, 'Rename', 'Edit Description', 'Delete Wave']
-        : ['Cancel', targetLabel]
-      const destructiveButtonIndex = isOwner ? 4 : undefined
+        ? ['Cancel', 'Rename', 'Edit Description', 'Delete Wave']
+        : ['Cancel']
+      const destructiveButtonIndex = isOwner ? 3 : undefined
 
       ActionSheetIOS.showActionSheetWithOptions(
         { options, cancelButtonIndex: 0, destructiveButtonIndex },
         (buttonIndex) => {
-          if (buttonIndex === 1) handleSetUploadTarget(wave)
-          if (isOwner && buttonIndex === 2) handleEditWave(wave)
-          if (isOwner && buttonIndex === 3) {
+          if (isOwner && buttonIndex === 1) handleEditWave(wave)
+          if (isOwner && buttonIndex === 2) {
             setEditingWave(wave)
             setEditWaveName(wave.name)
             setEditWaveDescription(wave.description || '')
             setEditModalVisible(true)
           }
-          if (isOwner && buttonIndex === 4) handleDeleteWave(wave.waveUuid)
+          if (isOwner && buttonIndex === 3) handleDeleteWave(wave.waveUuid)
         }
       )
     } else {
-      // Android fallback using Alert
       const buttons = [{ text: 'Cancel', style: 'cancel' }]
-      buttons.push({ text: targetLabel, onPress: () => handleSetUploadTarget(wave) })
       if (isOwner) {
         buttons.push({ text: 'Rename', onPress: () => handleEditWave(wave) })
         buttons.push({ text: 'Delete Wave', style: 'destructive', onPress: () => handleDeleteWave(wave.waveUuid) })
@@ -342,32 +314,6 @@ const WavesHub = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-      {/* Upload target bar */}
-      <View style={[styles.uploadTargetBar, { backgroundColor: uploadTargetWave ? CONST.MAIN_COLOR : theme.CARD_BACKGROUND }]}>
-        {uploadTargetWave
-          ? (
-            <View style={styles.uploadTargetContent}>
-              <Text style={styles.uploadTargetText}>
-                📌 Uploading to: {uploadTargetWave.name}
-              </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setUploadTargetWave(null)
-                  saveUploadTargetWave(null)
-                  Toast.show({ type: 'info', text1: 'Upload target cleared' })
-                }}
-              >
-                <FontAwesome5 name='times-circle' size={18} color='#FFF' />
-              </TouchableOpacity>
-            </View>
-            )
-          : (
-            <Text style={[styles.uploadTargetTextInactive, { color: theme.TEXT_SECONDARY }]}>
-              📌 No upload target set
-            </Text>
-            )}
-      </View>
-
       {/* Search bar */}
       <View style={styles.searchContainer}>
         <FontAwesome5 name='search' size={14} color={theme.TEXT_SECONDARY} style={styles.searchIcon} />
@@ -506,23 +452,6 @@ const WavesHub = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1
-  },
-  uploadTargetBar: {
-    paddingHorizontal: 16,
-    paddingVertical: 10
-  },
-  uploadTargetContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  uploadTargetText: {
-    color: '#FFF',
-    fontWeight: '600',
-    fontSize: 14
-  },
-  uploadTargetTextInactive: {
-    fontSize: 14
   },
   searchContainer: {
     flexDirection: 'row',

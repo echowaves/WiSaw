@@ -37,15 +37,3 @@ export const friendsList = atom([])
 export const isDarkMode = atom(false)
 
 export const followSystemTheme = atom(false)
-
-/**
- * @type {import('jotai').PrimitiveAtom<{uuid: string, name: string, createdBy: string, createdAt: string} | null>}
- * @deprecated Use uploadTargetWave instead. This atom conflated viewing and upload tagging.
- */
-export const activeWave = atom(null)
-
-/**
- * Controls which wave new photo uploads are tagged to. Persisted in SecureStore.
- * @type {import('jotai').PrimitiveAtom<{waveUuid: string, name: string, createdBy: string, createdAt: string} | null>}
- */
-export const uploadTargetWave = atom(null)

@@ -4,12 +4,12 @@ import * as CONST from '../../consts'
 
 export { removePhotoFromWave, updateWave, deleteWave } from '../Waves/reducer'
 
-export const fetchWavePhotos = async ({ waveUuid, uuid, pageNumber, batch }) => {
+export const fetchWavePhotos = async ({ waveUuid, pageNumber, batch }) => {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
-        query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!, $waveUuid: String) {
-          feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch, waveUuid: $waveUuid) {
+        query feedForWave($waveUuid: String!, $pageNumber: Int!, $batch: String!) {
+          feedForWave(waveUuid: $waveUuid, pageNumber: $pageNumber, batch: $batch) {
             photos {
               row_number
               id
@@ -31,7 +31,6 @@ export const fetchWavePhotos = async ({ waveUuid, uuid, pageNumber, batch }) => 
         }
       `,
       variables: {
-        uuid,
         pageNumber,
         batch,
         waveUuid
@@ -39,9 +38,9 @@ export const fetchWavePhotos = async ({ waveUuid, uuid, pageNumber, batch }) => 
       fetchPolicy: 'network-only'
     })
     return {
-      photos: response.data.feedForWatcher.photos || [],
-      batch: response.data.feedForWatcher.batch,
-      noMoreData: response.data.feedForWatcher.noMoreData
+      photos: response.data.feedForWave.photos || [],
+      batch: response.data.feedForWave.batch,
+      noMoreData: response.data.feedForWave.noMoreData
     }
   } catch (err) {
     console.error('Failed to fetch wave photos:', err)

@@ -205,7 +205,6 @@ function CustomDrawerContent (props) {
 
 export default function DrawerLayout () {
   const [isDark] = useAtom(STATE.isDarkMode)
-  const [uploadTargetWave] = useAtom(STATE.uploadTargetWave)
   const theme = getTheme(isDark)
 
   return (
@@ -276,34 +275,9 @@ export default function DrawerLayout () {
           name='waves'
           options={{
             drawerIcon: ({ color, size }) => (
-              <View>
-                <FontAwesome5 name='water' size={22} color={color} />
-                {!!uploadTargetWave && (
-                  <View style={{
-                    position: 'absolute',
-                    top: -2,
-                    right: -6,
-                    width: 10,
-                    height: 10,
-                    borderRadius: 5,
-                    backgroundColor: CONST.MAIN_COLOR,
-                  }} />
-                )}
-              </View>
+              <FontAwesome5 name='water' size={22} color={color} />
             ),
-            drawerLabel: ({ color }) => (
-              <View>
-                <Text style={{ color, fontSize: 14, fontWeight: '500' }}>Waves</Text>
-                {!!uploadTargetWave && (
-                  <Text
-                    numberOfLines={1}
-                    style={{ color, fontSize: 12, opacity: 0.7 }}
-                  >
-                    {uploadTargetWave.name}
-                  </Text>
-                )}
-              </View>
-            ),
+            drawerLabel: 'Waves',
             title: 'Waves',
             headerShown: false
           }}
