@@ -291,7 +291,19 @@ export default function DrawerLayout () {
                 )}
               </View>
             ),
-            drawerLabel: uploadTargetWave ? `Waves — ${uploadTargetWave.name}` : 'Waves',
+            drawerLabel: ({ color }) => (
+              <View>
+                <Text style={{ color, fontSize: 14, fontWeight: '500' }}>Waves</Text>
+                {!!uploadTargetWave && (
+                  <Text
+                    numberOfLines={1}
+                    style={{ color, fontSize: 12, opacity: 0.7 }}
+                  >
+                    {uploadTargetWave.name}
+                  </Text>
+                )}
+              </View>
+            ),
             title: 'Waves',
             headerShown: false
           }}
