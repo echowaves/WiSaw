@@ -68,18 +68,28 @@ The system SHALL provide visual feedback while the auto-group loop is in progres
 - **THEN** the auto-group button SHALL be disabled to prevent duplicate calls
 - **THEN** newly created waves SHALL appear incrementally in the list as each mutation returns
 
-### Requirement: Waves drawer badge shows ungrouped photo count
-The Waves item in the navigation drawer SHALL display a badge showing the number of ungrouped photos, matching the visual treatment of the auto-group header button badge.
+### Requirement: Waves drawer badge shows upload target status
+The Waves item in the navigation drawer SHALL display a colored dot badge on its icon when an upload target wave is set, using `CONST.MAIN_COLOR`.
 
-#### Scenario: Ungrouped photos exist
-- **WHEN** the drawer is opened and there are ungrouped photos
-- **THEN** the Waves drawer icon SHALL display a red badge with the ungrouped count
-- **THEN** counts above 99 SHALL display as "99+"
+#### Scenario: Upload target wave is set
+- **WHEN** the drawer is opened and an upload target wave is set
+- **THEN** the Waves drawer icon SHALL display a small filled circle badge in `CONST.MAIN_COLOR`
 
-#### Scenario: No ungrouped photos
-- **WHEN** the drawer is opened and there are no ungrouped photos
-- **THEN** the Waves drawer icon SHALL NOT display a badge
+#### Scenario: No upload target wave
+- **WHEN** the drawer is opened and no upload target wave is set
+- **THEN** the Waves drawer icon SHALL NOT display any badge
 
-#### Scenario: Badge refreshes after auto-group
-- **WHEN** the auto-group operation completes (success or partial success)
-- **THEN** the drawer badge count SHALL update to reflect the new ungrouped photo count
+#### Scenario: Badge updates reactively
+- **WHEN** the upload target wave is set or cleared while the app is running
+- **THEN** the drawer badge SHALL update immediately via the `uploadTargetWave` Jotai atom
+
+### Requirement: Waves drawer label shows upload target wave name
+The Waves drawer label SHALL include the upload target wave name when one is set.
+
+#### Scenario: Upload target wave is set
+- **WHEN** the drawer is opened and an upload target wave is set
+- **THEN** the drawer label SHALL display "Waves — {wave name}"
+
+#### Scenario: No upload target wave
+- **WHEN** the drawer is opened and no upload target wave is set
+- **THEN** the drawer label SHALL display "Waves"
