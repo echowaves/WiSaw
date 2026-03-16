@@ -328,6 +328,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const hasOpenedTandcRef = useRef(false)
 
   const { width, height } = useWindowDimensions()
+  const segmentWidth = Math.min(90, Math.floor(width * 0.22))
   const insets = useSafeAreaInsets()
 
   const [stopLoading, setStopLoading] = useState(false)
@@ -1044,7 +1045,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90
+                    width: segmentWidth
                   }
                 ]}
               >
@@ -1082,7 +1083,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90
+                    width: segmentWidth
                   }
                 ]}
               >
@@ -1120,7 +1121,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90
+                    width: segmentWidth
                   }
                 ]}
               >
