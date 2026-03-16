@@ -2,7 +2,7 @@ import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
+import { AntDesign, FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import {
   Alert,
@@ -28,6 +28,8 @@ import * as reducer from './reducer'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 import * as sharingHelper from '../../utils/simpleSharingHelper'
+import { addPhotoToWave, removePhotoFromWave, createWave } from '../../screens/Waves/reducer'
+import WaveSelectorModal from '../WaveSelectorModal'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -552,6 +554,7 @@ const Photo = ({
   const [aiTagsCollapsed, setAiTagsCollapsed] = useState(embedded)
   const [aiTextCollapsed, setAiTextCollapsed] = useState(embedded)
   const [aiModerationCollapsed, setAiModerationCollapsed] = useState(embedded)
+  const [waveModalVisible, setWaveModalVisible] = useState(false)
 
   // Reset collapse state when a different photo is shown or embedding mode changes
   useEffect(() => {
@@ -1226,6 +1229,100 @@ const Photo = ({
     }
   }
 
+  const isOwnPhoto = photo.uuid === uuid
+
+  const handleWaveButtonPress = () => {
+    if (!isOwnPhoto) {
+      Toast.show({
+        text1: 'Only your own photos can be added to waves',
+        type: 'info',
+        topOffset: toastTopOffset
+      })
+      return
+    }
+    setWaveModalVisible(true)
+  }
+
+  const handleWaveSelect = async (wave) => {
+    setWaveModalVisible(false)
+    const previousDetails = { ...photoDetails }
+    setPhotoDetails({
+      ...photoDetails,
+      waveName: wave.name,
+      waveUuid: wave.waveUuid
+    })
+    try {
+      await addPhotoToWave({ waveUuid: wave.waveUuid, photoId: photo.id, uuid })
+      Toast.show({
+        text1: `Added to: ${wave.name}`,
+        type: 'success',
+        topOffset: toastTopOffset,
+        visibilityTime: 1500
+      })
+    } catch (err) {
+      setPhotoDetails(previousDetails)
+      Toast.show({
+        text1: 'Failed to add to wave',
+        text2: 'Try again later',
+        type: 'error',
+        topOffset: toastTopOffset
+      })
+    }
+  }
+
+  const handleWaveRemove = async () => {
+    setWaveModalVisible(false)
+    const previousDetails = { ...photoDetails }
+    setPhotoDetails({
+      ...photoDetails,
+      waveName: null,
+      waveUuid: null
+    })
+    try {
+      await removePhotoFromWave({ waveUuid: previousDetails.waveUuid, photoId: photo.id })
+      Toast.show({
+        text1: 'Removed from wave',
+        type: 'success',
+        topOffset: toastTopOffset,
+        visibilityTime: 1500
+      })
+    } catch (err) {
+      setPhotoDetails(previousDetails)
+      Toast.show({
+        text1: 'Failed to remove from wave',
+        text2: 'Try again later',
+        type: 'error',
+        topOffset: toastTopOffset
+      })
+    }
+  }
+
+  const handleCreateWave = async (name) => {
+    setWaveModalVisible(false)
+    try {
+      const newWave = await createWave({ name, description: '', uuid })
+      setPhotoDetails({
+        ...photoDetails,
+        waveName: newWave.name,
+        waveUuid: newWave.waveUuid
+      })
+      await addPhotoToWave({ waveUuid: newWave.waveUuid, photoId: photo.id, uuid })
+      Toast.show({
+        text1: `Added to new wave: ${name}`,
+        type: 'success',
+        topOffset: toastTopOffset,
+        visibilityTime: 1500
+      })
+    } catch (err) {
+      Toast.show({
+        text1: 'Failed to create wave',
+        text2: 'Try again later',
+        type: 'error',
+        topOffset: toastTopOffset
+      })
+    }
+  }
+
   const renderActionCard = () => {
     const isStarStatusUnknown = photoDetails?.isPhotoWatched === undefined
     const isStarred = Boolean(photoDetails?.isPhotoWatched)
@@ -1373,6 +1470,35 @@ const Photo = ({
               ]}
             >
               {isStarred ? 'Starred' : 'Star'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Wave button */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              !isOwnPhoto && styles.actionButtonDisabled
+            ]}
+            onPress={handleWaveButtonPress}
+            activeOpacity={0.7}
+            delayPressIn={0}
+            delayPressOut={0}
+          >
+            <FontAwesome5
+              name='water'
+              color={isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED}
+              size={16}
+            />
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.actionButtonText,
+                {
+                  color: isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED
+                }
+              ]}
+            >
+              {photoDetails?.waveName || 'Add to Wave'}
             </Text>
           </TouchableOpacity>
 
@@ -1546,6 +1672,15 @@ const Photo = ({
       {renderCommentsRows}
       {renderAddCommentsRow()}
       {renderRecognitions()}
+      <WaveSelectorModal
+        visible={waveModalVisible}
+        onClose={() => setWaveModalVisible(false)}
+        onSelectWave={handleWaveSelect}
+        onRemoveFromWave={handleWaveRemove}
+        onCreateWave={handleCreateWave}
+        currentWaveUuid={photoDetails?.waveUuid}
+        uuid={uuid}
+      />
     </View>
   )
 }
