@@ -235,6 +235,8 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
               metaData
             }
             isPhotoWatched
+            waveName
+            waveUuid
           }
         }
       `,
@@ -245,7 +247,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
       fetchPolicy: 'network-only'
     })
 
-    const { recognitions, isPhotoWatched } = response.data.getPhotoDetails
+    const { recognitions, isPhotoWatched, waveName, waveUuid } = response.data.getPhotoDetails
 
     const comments = response.data.getPhotoDetails.comments.map((comment) => ({
       ...comment,
@@ -254,7 +256,9 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
     return {
       comments,
       recognitions,
-      isPhotoWatched
+      isPhotoWatched,
+      waveName: waveName || null,
+      waveUuid: waveUuid || null
     }
   } catch (err6) {
     console.error({ err6 }) // eslint-disable-line

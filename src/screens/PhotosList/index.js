@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import * as Crypto from 'expo-crypto'
 
 import { useAtom } from 'jotai'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import * as MediaLibrary from 'expo-media-library'
@@ -51,6 +51,8 @@ import * as friendsHelper from '../FriendsList/friends_helper'
 import * as reducer from './reducer'
 import usePhotoUploader from './upload/usePhotoUploader'
 
+import QuickActionsModal from '../../components/QuickActionsModal'
+
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
@@ -59,7 +61,6 @@ import {
   createFrozenPhoto,
   validateFrozenPhotosList
 } from '../../utils/photoListHelpers'
-import { saveActiveWave } from '../../utils/waveStorage'
 
 import LinearProgress from '../../components/ui/LinearProgress'
 import PhotosListFooter from './components/PhotosListFooter'
@@ -68,6 +69,7 @@ import PendingPhotosBanner from './components/PendingPhotosBanner'
 import PhotosListEmptyState from './components/PhotosListEmptyState'
 import PhotosListMasonry from './components/PhotosListMasonry'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import WaveHeaderIcon from '../../components/WaveHeaderIcon'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -141,11 +143,32 @@ let currentBatch = Crypto.randomUUID()
 // by third-party libraries (like masonry layout). When creating new items (expansion, dimension updates),
 // we must always return Object.freeze() wrapped objects to maintain immutability.
 
+// Lightweight wrapper isolating longPressPhoto state from PhotosList re-renders
+const QuickActionsModalWrapper = React.memo(
+  React.forwardRef(({ setPhotosList }, ref) => {
+    const [longPressPhoto, setLongPressPhoto] = useState(null)
+
+    useImperativeHandle(ref, () => ({
+      open: (photo) => setLongPressPhoto(photo)
+    }), [])
+
+    return (
+      <QuickActionsModal
+        visible={!!longPressPhoto}
+        photo={longPressPhoto}
+        onClose={() => setLongPressPhoto(null)}
+        onPhotoDeleted={(photoId) => {
+          setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+        }}
+      />
+    )
+  })
+)
+
 const PhotosList = ({ searchFromUrl }) => {
   // console.log({ activeSegment, currentBatch })
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [activeWave, setActiveWave] = useAtom(STATE.activeWave)
   // const [nickName, setNickName] = useAtom(STATE.nickName)
   const [photosList, setPhotosList] = useAtom(STATE.photosList)
   const [, setFriendsList] = useAtom(STATE.friendsList)
@@ -323,6 +346,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const hasOpenedTandcRef = useRef(false)
 
   const { width, height } = useWindowDimensions()
+  const segmentWidth = Math.min(90, Math.floor(width * 0.22))
   const insets = useSafeAreaInsets()
 
   const [stopLoading, setStopLoading] = useState(false)
@@ -745,6 +769,14 @@ const PhotosList = ({ searchFromUrl }) => {
     [isPhotoExpanding, photosList, expandedPhotoIds]
   )
 
+  // Long-press handler — open quick-actions modal
+  const quickActionsRef = useRef(null)
+
+  const handlePhotoLongPress = useCallback((photo) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    quickActionsRef.current?.open(photo)
+  }, [])
+
   // Lightweight onScroll: keep lastScrollY for ensureItemVisible; avoid UI work during scroll
   const handleScroll = React.useCallback((event) => {
     lastScrollY.current = event?.nativeEvent?.contentOffset?.y || 0
@@ -773,8 +805,7 @@ const PhotosList = ({ searchFromUrl }) => {
       topOffset: toastTopOffset,
       activeSegment: effectiveSegment,
       batch: currentBatch, // clone
-      pageNumber,
-      activeWave
+      pageNumber
     })
 
     if (batch === currentBatch) {
@@ -923,6 +954,18 @@ const PhotosList = ({ searchFromUrl }) => {
             }}
           />
 
+          {/* Right: Wave icon */}
+          <View
+            style={{
+              position: 'absolute',
+              right: 16,
+              width: 40,
+              height: 40
+            }}
+          >
+            <WaveHeaderIcon />
+          </View>
+
           {/* Center: Three segment control */}
           <View style={styles.headerContainer}>
             <View style={[styles.customSegmentedControl, { padding: 4 }]}>
@@ -933,7 +976,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90
+                    width: segmentWidth
                   }
                 ]}
               >
@@ -952,6 +995,7 @@ const PhotosList = ({ searchFromUrl }) => {
                     color={activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
+                    numberOfLines={1}
                     style={[
                       styles.segmentText,
                       {
@@ -971,7 +1015,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90
+                    width: segmentWidth
                   }
                 ]}
               >
@@ -990,6 +1034,7 @@ const PhotosList = ({ searchFromUrl }) => {
                     color={activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
+                    numberOfLines={1}
                     style={[
                       styles.segmentText,
                       {
@@ -1009,7 +1054,7 @@ const PhotosList = ({ searchFromUrl }) => {
                   {
                     paddingVertical: 8,
                     paddingHorizontal: 20,
-                    width: 90
+                    width: segmentWidth
                   }
                 ]}
               >
@@ -1028,6 +1073,7 @@ const PhotosList = ({ searchFromUrl }) => {
                     color={activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
                   />
                   <Text
+                    numberOfLines={1}
                     style={[
                       styles.segmentText,
                       {
@@ -1107,7 +1153,7 @@ const PhotosList = ({ searchFromUrl }) => {
     return status
   }
 
-  const takePhoto = async ({ cameraType }) => {
+  const takePhoto = async ({ cameraType, waveUuid }) => {
     let cameraReturn
     if (cameraType === 'camera') {
       // launch photo capturing
@@ -1136,12 +1182,12 @@ const PhotosList = ({ searchFromUrl }) => {
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
         location,
-        waveUuid: activeWave?.waveUuid
+        waveUuid
       })
     }
   }
 
-  const checkPermissionsForPhotoTaking = async ({ cameraType }) => {
+  const checkPermissionsForPhotoTaking = async ({ cameraType, waveUuid }) => {
     // Prevent double-clicking by checking if camera is already opening
     if (isCameraOpening) {
       console.log('Camera already opening, ignoring duplicate request')
@@ -1166,7 +1212,7 @@ const PhotosList = ({ searchFromUrl }) => {
         })
 
         if (photoAlbomPermission === 'granted') {
-          await takePhoto({ cameraType })
+          await takePhoto({ cameraType, waveUuid })
         }
       }
     } catch (error) {
@@ -1305,7 +1351,7 @@ const PhotosList = ({ searchFromUrl }) => {
   useEffect(() => {
     // updateNavBar()
     reload()
-  }, [location, activeWave])
+  }, [location])
 
   // useEffect(() => {}, [currentBatch])
 
@@ -1554,6 +1600,7 @@ const PhotosList = ({ searchFromUrl }) => {
             styles={styles}
             FOOTER_HEIGHT={FOOTER_HEIGHT}
             justCollapsedId={justCollapsedId}
+            onPhotoLongPress={handlePhotoLongPress}
           />
           <PhotosListFooter
             theme={theme}
@@ -1565,6 +1612,7 @@ const PhotosList = ({ searchFromUrl }) => {
             location={location}
           />
         </View>
+        <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
       </View>
     )
   }
@@ -1664,11 +1712,6 @@ const PhotosList = ({ searchFromUrl }) => {
         keyboardVisible={keyboardVisible}
         keyboardOffset={keyboardOffset}
         FOOTER_HEIGHT={FOOTER_HEIGHT}
-        activeWave={activeWave}
-        clearActiveWave={() => {
-          setActiveWave(null)
-          saveActiveWave(null)
-        }}
       />
     )
   }
@@ -1742,6 +1785,7 @@ const PhotosList = ({ searchFromUrl }) => {
         onCameraPress={checkPermissionsForPhotoTaking}
         location={location}
       />
+      <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
     </View>
   )
 }

@@ -16,7 +16,6 @@ import { StatusBar } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
-import ActiveWaveIndicator from '../src/components/ActiveWaveIndicator'
 import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
 import { parseDeepLink } from '../src/utils/linkingHelper'
@@ -26,14 +25,6 @@ import {
   loadThemePreference,
   subscribeToSystemTheme
 } from '../src/utils/themeStorage'
-import { loadActiveWave } from '../src/utils/waveStorage'
-
-interface Wave {
-  uuid: string
-  name: string
-  createdBy: string
-  createdAt: string
-}
 
 export default function RootLayout () {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -42,7 +33,6 @@ export default function RootLayout () {
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
   )
-  const [, setActiveWave] = useAtom(STATE.activeWave) as [Wave | null, (wave: Wave | null) => void]
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -176,14 +166,12 @@ export default function RootLayout () {
           uuidResult,
           nickNameResult,
           themePreferenceResult,
-          followSystemResult,
-          activeWaveResult
+          followSystemResult
         ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
           loadThemePreference(),
-          loadFollowSystemPreference(),
-          loadActiveWave()
+          loadFollowSystemPreference()
         ])
 
         if (isCancelled) return
@@ -191,7 +179,6 @@ export default function RootLayout () {
         // Set state with resolved values
         setUuid(getResolvedValue(uuidResult, ''))
         setNickName(getResolvedValue(nickNameResult, ''))
-        setActiveWave(getResolvedValue(activeWaveResult, null))
 
         const followSystem = !!getResolvedValue(followSystemResult, false)
         setFollowSystemTheme(followSystem)
@@ -207,7 +194,6 @@ export default function RootLayout () {
         setNickName('')
         setIsDarkMode(false)
         setFollowSystemTheme(false)
-        setActiveWave(null)
       }
     }
 
@@ -215,7 +201,7 @@ export default function RootLayout () {
     return () => {
       isCancelled = true
     }
-  }, [setActiveWave, setFollowSystemTheme, setIsDarkMode, setNickName, setUuid])
+  }, [setFollowSystemTheme, setIsDarkMode, setNickName, setUuid])
 
   // Subscribe to system theme changes
   useEffect(() => {
@@ -281,7 +267,6 @@ export default function RootLayout () {
         backgroundColor='transparent'
         translucent={false}
       />
-      <ActiveWaveIndicator />
       <Stack
         screenOptions={{
           headerShown: false

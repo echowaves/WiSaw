@@ -28,6 +28,9 @@ import * as reducer from './reducer'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 import * as sharingHelper from '../../utils/simpleSharingHelper'
+import usePhotoActions from '../../hooks/usePhotoActions'
+import PhotoActionButtons from '../PhotoActionButtons'
+import WaveSelectorModal from '../WaveSelectorModal'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -456,50 +459,8 @@ const createStyles = (theme) =>
       ...SHARED_STYLES.text.subheading,
       marginLeft: 8
     },
-    actionButtonsContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: 8,
-      paddingHorizontal: 2,
+    actionButtonsWrapper: {
       marginTop: 18
-    },
-    actionButton: {
-      backgroundColor: `${theme.STATUS_SUCCESS}15`,
-      borderRadius: 20,
-      paddingHorizontal: 3,
-      paddingVertical: 2,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: `${theme.STATUS_SUCCESS}40`,
-      shadowColor: theme.STATUS_SUCCESS,
-      shadowOffset: {
-        width: 0,
-        height: 3
-      },
-      shadowOpacity: 0.2,
-      shadowRadius: 3,
-      elevation: 3,
-      minWidth: 72,
-      height: 32,
-      gap: 2
-    },
-    actionButtonDisabled: {
-      backgroundColor: theme.BACKGROUND,
-      borderColor: theme.BORDER_LIGHT,
-      opacity: 0.5,
-      shadowOpacity: 0.1,
-      elevation: 1
-    },
-    actionButtonText: {
-      color: theme.STATUS_SUCCESS,
-      fontSize: 13,
-      fontWeight: '600',
-      textAlign: 'center',
-      letterSpacing: 0.3
     },
     loadingProgress: {
       marginHorizontal: 12,
@@ -542,8 +503,6 @@ const Photo = ({
 
   // No height measurement cycles - let flex layout handle everything
 
-  const [bans, setBans] = useState([])
-
   // State for photo details and refresh triggers
   const [photoDetails, setPhotoDetails] = useState(null)
   const [internalRefreshKey, setInternalRefreshKey] = useState(0)
@@ -552,6 +511,29 @@ const Photo = ({
   const [aiTagsCollapsed, setAiTagsCollapsed] = useState(embedded)
   const [aiTextCollapsed, setAiTextCollapsed] = useState(embedded)
   const [aiModerationCollapsed, setAiModerationCollapsed] = useState(embedded)
+
+  const {
+    handleBan,
+    handleDelete,
+    handleFlipWatch,
+    handleWaveButtonPress,
+    handleWaveSelect,
+    handleWaveRemove,
+    handleCreateWave,
+    isPhotoBannedByMe,
+    isOwnPhoto,
+    waveModalVisible,
+    setWaveModalVisible
+  } = usePhotoActions({
+    photo,
+    photoDetails,
+    setPhotoDetails,
+    uuid,
+    toastTopOffset,
+    onDeleted: (photoId) => {
+      setPhotosList([...photosList.filter((item) => item.id !== photoId)])
+    }
+  })
 
   // Reset collapse state when a different photo is shown or embedding mode changes
   useEffect(() => {
@@ -1123,119 +1105,7 @@ const Photo = ({
     )
   }
 
-  const isPhotoBannedByMe = () => bans.includes(photo?.id)
-
-  const handleDelete = () => {
-    if (photoDetails?.isPhotoWatched) {
-      Toast.show({
-        text1: 'Unable to delete Starred photo',
-        text2: 'Un-Star photo first',
-        type: 'error',
-        topOffset: toastTopOffset
-      })
-      return
-    }
-    Alert.alert(
-      'Will delete photo for everyone!',
-      "This can't be undone. Are you sure? ",
-      [
-        { text: 'No', onPress: () => null, style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            const deleted = await reducer.deletePhoto({
-              photo,
-              uuid,
-              topOffset: toastTopOffset
-            })
-
-            if (deleted) {
-              setPhotosList([...photosList.filter((item) => item.id !== photo.id)])
-            }
-            // router.back()
-          }
-        }
-      ],
-      { cancelable: true }
-    )
-  }
-
-  const handleBan = () => {
-    if (photoDetails?.isPhotoWatched) {
-      Toast.show({
-        text1: 'Unable to Report Starred photo',
-        text2: 'Un-Star photo first',
-        type: 'error',
-        topOffset: toastTopOffset
-      })
-      return
-    }
-    if (isPhotoBannedByMe()) {
-      Toast.show({
-        text1: 'Looks like you already Reported this Photo',
-        text2: 'You can only Report same Photo once',
-        type: 'error',
-        topOffset: toastTopOffset
-      })
-    } else {
-      Alert.alert(
-        'Report abusive Photo?',
-        'The user who posted this photo will be banned. Are you sure?',
-        [
-          { text: 'No', onPress: () => null, style: 'cancel' },
-          {
-            text: 'Yes',
-            onPress: () => reducer.banPhoto({ photo, uuid, topOffset: toastTopOffset })
-          }
-        ],
-        { cancelable: true }
-      )
-    }
-  }
-
-  const handleFlipWatch = async () => {
-    try {
-      if (photoDetails?.isPhotoWatched) {
-        setPhotoDetails({
-          ...photoDetails,
-          watchersCount: await reducer.unwatchPhoto({
-            photo,
-            uuid,
-            topOffset: toastTopOffset
-          }),
-          isPhotoWatched: !photoDetails?.isPhotoWatched
-        })
-      } else {
-        setPhotoDetails({
-          ...photoDetails,
-          watchersCount: await reducer.watchPhoto({
-            photo,
-            uuid,
-            topOffset: toastTopOffset
-          }),
-          isPhotoWatched: !photoDetails?.isPhotoWatched
-        })
-      }
-    } catch (err) {
-      Toast.show({
-        text1: 'Unable to complete',
-        text2: 'Network issue? Try again later',
-        type: 'error',
-        topOffset: toastTopOffset
-      })
-    }
-  }
-
   const renderActionCard = () => {
-    const isStarStatusUnknown = photoDetails?.isPhotoWatched === undefined
-    const isStarred = Boolean(photoDetails?.isPhotoWatched)
-    let starAccentColor = theme.TEXT_PRIMARY
-    if (isStarStatusUnknown) {
-      starAccentColor = theme.TEXT_DISABLED
-    } else if (isStarred) {
-      starAccentColor = '#FFD700'
-    }
-
     return (
       <View
         style={[
@@ -1246,174 +1116,19 @@ const Photo = ({
           }
         ]}
       >
-        <View style={styles.actionButtonsContainer}>
-          {/* Report/Ban button */}
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              (photoDetails?.isPhotoWatched === undefined ||
-                photoDetails?.isPhotoWatched ||
-                isPhotoBannedByMe()) &&
-                styles.actionButtonDisabled
-            ]}
-            onPress={() => {
-              if (photoDetails?.isPhotoWatched) {
-                Toast.show({
-                  text1: 'Unable to Report Starred photo',
-                  text2: 'Un-Star photo first',
-                  type: 'error',
-                  topOffset: toastTopOffset
-                })
-              } else {
-                handleBan()
-              }
-            }}
-            activeOpacity={0.7}
-            delayPressIn={0}
-            delayPressOut={0}
-          >
-            <FontAwesome
-              name='ban'
-              color={
-                photoDetails?.isPhotoWatched === undefined ||
-                photoDetails?.isPhotoWatched ||
-                isPhotoBannedByMe()
-                  ? theme.TEXT_DISABLED
-                  : theme.STATUS_CAUTION
-              }
-              size={18}
-            />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color:
-                    photoDetails?.isPhotoWatched === undefined ||
-                    photoDetails?.isPhotoWatched ||
-                    isPhotoBannedByMe()
-                      ? theme.TEXT_DISABLED
-                      : theme.STATUS_CAUTION
-                }
-              ]}
-            >
-              Report
-            </Text>
-          </TouchableOpacity>
-
-          {/* Delete button */}
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              (photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched) &&
-                styles.actionButtonDisabled
-            ]}
-            onPress={() => {
-              if (photoDetails?.isPhotoWatched) {
-                Toast.show({
-                  text1: 'Unable to delete Starred photo',
-                  text2: 'Un-Star photo first',
-                  type: 'error',
-                  topOffset: toastTopOffset
-                })
-              } else {
-                handleDelete()
-              }
-            }}
-            activeOpacity={0.7}
-            delayPressIn={0}
-            delayPressOut={0}
-          >
-            <FontAwesome
-              name='trash'
-              color={
-                photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched
-                  ? theme.TEXT_DISABLED
-                  : theme.STATUS_ERROR
-              }
-              size={18}
-            />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color:
-                    photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched
-                      ? theme.TEXT_DISABLED
-                      : theme.STATUS_ERROR
-                }
-              ]}
-            >
-              Delete
-            </Text>
-          </TouchableOpacity>
-
-          {/* Star button */}
-          <TouchableOpacity
-            style={[styles.actionButton, isStarStatusUnknown && styles.actionButtonDisabled]}
-            onPress={() => handleFlipWatch()}
-            activeOpacity={0.7}
-            delayPressIn={0}
-            delayPressOut={0}
-            disabled={isStarStatusUnknown}
-          >
-            <Ionicons
-              name={isStarred ? 'star' : 'star-outline'}
-              color={starAccentColor}
-              size={18}
-            />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color: starAccentColor
-                }
-              ]}
-            >
-              {isStarred ? 'Starred' : 'Star'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Share button */}
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              photoDetails?.isPhotoWatched === undefined && styles.actionButtonDisabled
-            ]}
-            onPress={() => {
-              sharingHelper.sharePhoto(photo, photoDetails, toastTopOffset)
-            }}
-            activeOpacity={0.7}
-            delayPressIn={0}
-            delayPressOut={0}
-            disabled={photoDetails?.isPhotoWatched === undefined}
-          >
-            <Ionicons
-              name='share-outline'
-              color={
-                photoDetails?.isPhotoWatched === undefined
-                  ? theme.TEXT_DISABLED
-                  : theme.STATUS_SUCCESS
-              }
-              size={18}
-            />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.actionButtonText,
-                {
-                  color:
-                    photoDetails?.isPhotoWatched === undefined
-                      ? theme.TEXT_DISABLED
-                      : theme.STATUS_SUCCESS
-                }
-              ]}
-            >
-              Share
-            </Text>
-          </TouchableOpacity>
+        <View style={styles.actionButtonsWrapper}>
+          <PhotoActionButtons
+            photoDetails={photoDetails}
+            isOwnPhoto={isOwnPhoto}
+            isPhotoBannedByMe={isPhotoBannedByMe}
+            theme={theme}
+            toastTopOffset={toastTopOffset}
+            onBan={handleBan}
+            onDelete={handleDelete}
+            onFlipWatch={handleFlipWatch}
+            onWavePress={handleWaveButtonPress}
+            onShare={() => sharingHelper.sharePhoto(photo, photoDetails, toastTopOffset)}
+          />
         </View>
       </View>
     )
@@ -1546,6 +1261,15 @@ const Photo = ({
       {renderCommentsRows}
       {renderAddCommentsRow()}
       {renderRecognitions()}
+      <WaveSelectorModal
+        visible={waveModalVisible}
+        onClose={() => setWaveModalVisible(false)}
+        onSelectWave={handleWaveSelect}
+        onRemoveFromWave={handleWaveRemove}
+        onCreateWave={handleCreateWave}
+        currentWaveUuid={photoDetails?.waveUuid}
+        uuid={uuid}
+      />
     </View>
   )
 }

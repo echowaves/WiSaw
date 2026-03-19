@@ -28,7 +28,8 @@ const PhotosListMasonry = ({
   reload,
   styles,
   FOOTER_HEIGHT,
-  justCollapsedId
+  justCollapsedId,
+  onPhotoLongPress
 }) => {
   // Render function for individual masonry items
   const renderMasonryItem = useCallback(
@@ -79,6 +80,7 @@ const PhotosListMasonry = ({
           showComments={shouldShowComments}
           onTriggerSearch={onTriggerSearch}
           shouldScrollToTop={shouldScrollToTop}
+          onLongPress={onPhotoLongPress}
         />
       )
     },
@@ -93,7 +95,8 @@ const PhotosListMasonry = ({
       updatePhotoHeight,
       onTriggerSearch,
       getCalculatedDimensions,
-      justCollapsedId
+      justCollapsedId,
+      onPhotoLongPress
     ]
   )
 

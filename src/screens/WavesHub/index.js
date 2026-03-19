@@ -1,0 +1,526 @@
+import React, { useEffect, useState, useCallback } from 'react'
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  Modal,
+  Alert,
+  ActivityIndicator,
+  ActionSheetIOS,
+  Platform,
+  useWindowDimensions
+} from 'react-native'
+import { useAtom } from 'jotai'
+import { FontAwesome5 } from '@expo/vector-icons'
+import Toast from 'react-native-toast-message'
+import { router } from 'expo-router'
+
+import * as STATE from '../../state'
+import * as CONST from '../../consts'
+import { getTheme } from '../../theme/sharedStyles'
+import * as reducer from './reducer'
+import WaveCard from '../../components/WaveCard'
+import EmptyStateCard from '../../components/EmptyStateCard'
+import { subscribeToAutoGroup, emitAutoGroupDone } from '../../events/autoGroupBus'
+
+const WavesHub = () => {
+  const { width } = useWindowDimensions()
+  const numColumns = width >= 768 ? 2 : 1
+
+  const [uuid] = useAtom(STATE.uuid)
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
+
+  const [waves, setWaves] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const [pageNumber, setPageNumber] = useState(0)
+  const [batch, setBatch] = useState(String(Math.random()))
+  const [noMoreData, setNoMoreData] = useState(false)
+
+  const [searchText, setSearchText] = useState('')
+
+  const [modalVisible, setModalVisible] = useState(false)
+  const [newWaveName, setNewWaveName] = useState('')
+  const [newWaveDescription, setNewWaveDescription] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  const [autoGrouping, setAutoGrouping] = useState(false)
+
+  // Edit modal state
+  const [editModalVisible, setEditModalVisible] = useState(false)
+  const [editingWave, setEditingWave] = useState(null)
+  const [editWaveName, setEditWaveName] = useState('')
+  const [editWaveDescription, setEditWaveDescription] = useState('')
+  const [updating, setUpdating] = useState(false)
+
+  const theme = getTheme(isDarkMode)
+
+  const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false) => {
+    if (loading) return
+    setLoading(true)
+    try {
+      const data = await reducer.listWaves({
+        pageNumber: pageNum,
+        batch: currentBatch,
+        uuid
+      })
+
+      const newWaves = data.waves || []
+
+      // Fetch thumbnails for each wave
+      const wavesWithThumbs = await Promise.all(
+        newWaves.map(async (wave) => {
+          const thumbnails = await reducer.fetchWaveThumbnails({ waveUuid: wave.waveUuid })
+          return { ...wave, thumbnails }
+        })
+      )
+
+      if (refresh) {
+        setWaves(wavesWithThumbs)
+      } else {
+        setWaves(prev => [...prev, ...wavesWithThumbs])
+      }
+
+      setNoMoreData(data.noMoreData)
+      setBatch(data.batch)
+    } catch (error) {
+      console.error(error)
+      Toast.show({
+        type: 'error',
+        text1: 'Error loading waves',
+        text2: error.message
+      })
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [uuid])
+
+  useEffect(() => {
+    loadWaves(0, String(Math.random()), true)
+  }, [])
+
+  const handleRefresh = () => {
+    setRefreshing(true)
+    setPageNumber(0)
+    const newBatch = String(Math.random())
+    setBatch(newBatch)
+    loadWaves(0, newBatch, true)
+  }
+
+  const handleLoadMore = () => {
+    if (!noMoreData && !loading) {
+      const nextPage = pageNumber + 1
+      setPageNumber(nextPage)
+      loadWaves(nextPage, batch)
+    }
+  }
+
+  const handleCreateWave = async () => {
+    if (!newWaveName.trim()) {
+      Alert.alert('Error', 'Wave name is required')
+      return
+    }
+    setCreating(true)
+    try {
+      const newWave = await reducer.createWave({
+        name: newWaveName,
+        description: newWaveDescription,
+        uuid
+      })
+      setWaves(prev => [{ ...newWave, thumbnails: [], photos: [] }, ...prev])
+      setModalVisible(false)
+      setNewWaveName('')
+      setNewWaveDescription('')
+      Toast.show({ type: 'success', text1: 'Wave created' })
+    } catch (error) {
+      console.error(error)
+      Toast.show({ type: 'error', text1: 'Error creating wave', text2: error.message })
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  const handleDeleteWave = (waveUuid) => {
+    Alert.alert(
+      'Delete Wave',
+      'Are you sure you want to delete this wave?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await reducer.deleteWave({ waveUuid, uuid })
+              setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
+              Toast.show({ type: 'success', text1: 'Wave deleted' })
+            } catch (error) {
+              console.error(error)
+              Toast.show({ type: 'error', text1: 'Error deleting wave', text2: error.message })
+            }
+          }
+        }
+      ]
+    )
+  }
+
+  const handleEditWave = (wave) => {
+    setEditingWave(wave)
+    setEditWaveName(wave.name)
+    setEditWaveDescription(wave.description || '')
+    setEditModalVisible(true)
+  }
+
+  const handleSaveEditWave = async () => {
+    if (!editWaveName.trim()) {
+      Alert.alert('Error', 'Wave name is required')
+      return
+    }
+    setUpdating(true)
+    try {
+      const updatedWave = await reducer.updateWave({
+        waveUuid: editingWave.waveUuid,
+        uuid,
+        name: editWaveName,
+        description: editWaveDescription
+      })
+      setWaves(prev => prev.map(w =>
+        w.waveUuid === editingWave.waveUuid ? { ...updatedWave, thumbnails: w.thumbnails } : w
+      ))
+      setEditModalVisible(false)
+      setEditingWave(null)
+      Toast.show({ type: 'success', text1: 'Wave updated' })
+    } catch (error) {
+      console.error(error)
+      Toast.show({ type: 'error', text1: 'Error updating wave', text2: error.message })
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const handleAutoGroup = useCallback((count) => {
+    const countText = count > 0
+      ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves. Continue?`
+      : 'This will automatically group your ungrouped photos into waves. Continue?'
+    Alert.alert(
+      'Auto-Group Photos',
+      countText,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Auto-Group',
+          onPress: async () => {
+            setAutoGrouping(true)
+            let totalWavesCreated = 0
+            let totalPhotosGrouped = 0
+            try {
+              let result
+              do {
+                result = await reducer.autoGroupPhotos({ uuid })
+                if (result.photosGrouped > 0) {
+                  totalWavesCreated += 1
+                  totalPhotosGrouped += result.photosGrouped
+                }
+              } while (result.hasMore)
+              if (totalWavesCreated === 0) {
+                Toast.show({ type: 'info', text1: 'No ungrouped photos found', text2: 'All your photos are already in waves' })
+              } else {
+                Toast.show({
+                  type: 'success',
+                  text1: 'Photos grouped successfully',
+                  text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
+                })
+                handleRefresh()
+              }
+            } catch (error) {
+              console.error(error)
+              Toast.show({ type: 'error', text1: 'Error auto-grouping photos', text2: error.message })
+              if (totalWavesCreated > 0) handleRefresh()
+            } finally {
+              setAutoGrouping(false)
+              emitAutoGroupDone()
+            }
+          }
+        }
+      ]
+    )
+  }, [uuid])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAutoGroup((count) => {
+      handleAutoGroup(count)
+    })
+    return unsubscribe
+  }, [handleAutoGroup])
+
+  const showWaveContextMenu = (wave) => {
+    const isOwner = wave.createdBy === uuid
+
+    if (Platform.OS === 'ios') {
+      const options = isOwner
+        ? ['Cancel', 'Rename', 'Edit Description', 'Delete Wave']
+        : ['Cancel']
+      const destructiveButtonIndex = isOwner ? 3 : undefined
+
+      ActionSheetIOS.showActionSheetWithOptions(
+        { options, cancelButtonIndex: 0, destructiveButtonIndex },
+        (buttonIndex) => {
+          if (isOwner && buttonIndex === 1) handleEditWave(wave)
+          if (isOwner && buttonIndex === 2) {
+            setEditingWave(wave)
+            setEditWaveName(wave.name)
+            setEditWaveDescription(wave.description || '')
+            setEditModalVisible(true)
+          }
+          if (isOwner && buttonIndex === 3) handleDeleteWave(wave.waveUuid)
+        }
+      )
+    } else {
+      const buttons = [{ text: 'Cancel', style: 'cancel' }]
+      if (isOwner) {
+        buttons.push({ text: 'Rename', onPress: () => handleEditWave(wave) })
+        buttons.push({ text: 'Delete Wave', style: 'destructive', onPress: () => handleDeleteWave(wave.waveUuid) })
+      }
+      Alert.alert(wave.name, 'Choose an action', buttons)
+    }
+  }
+
+  const handleWavePress = (wave) => {
+    router.push({
+      pathname: '/wave-detail',
+      params: { waveUuid: wave.waveUuid, waveName: wave.name }
+    })
+  }
+
+  const filteredWaves = searchText.trim()
+    ? waves.filter(w => w.name.toLowerCase().includes(searchText.toLowerCase()))
+    : waves
+
+  const renderItem = ({ item, index }) => {
+    // Add an empty spacer for odd-count last item to keep grid alignment
+    return (
+      <WaveCard
+        wave={item}
+        onPress={handleWavePress}
+        onLongPress={showWaveContextMenu}
+        theme={theme}
+      />
+    )
+  }
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+      {/* Search bar */}
+      <View style={styles.searchContainer}>
+        <FontAwesome5 name='search' size={14} color={theme.TEXT_SECONDARY} style={styles.searchIcon} />
+        <TextInput
+          style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
+          placeholder='Search waves...'
+          placeholderTextColor={theme.TEXT_SECONDARY}
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+      </View>
+
+      <FlatList
+        data={filteredWaves}
+        renderItem={renderItem}
+        keyExtractor={item => item.waveUuid}
+        numColumns={numColumns}
+        key={numColumns}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          !loading && (
+            <EmptyStateCard
+              icon='water'
+              iconType='FontAwesome5'
+              title='No Waves Yet'
+              subtitle='Create your first wave to start organizing photos.'
+              actionText='Create a Wave'
+              onActionPress={() => setModalVisible(true)}
+              iconColor={theme.TEXT_PRIMARY}
+            />
+          )
+        }
+      />
+
+      {/* Create Wave Modal */}
+      <Modal
+        animationType='slide'
+        transparent
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
+            <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Create New Wave</Text>
+            <TextInput
+              style={[styles.input, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
+              placeholder='Wave Name'
+              placeholderTextColor={theme.TEXT_SECONDARY}
+              value={newWaveName}
+              onChangeText={setNewWaveName}
+            />
+            <TextInput
+              style={[styles.input, styles.textArea, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
+              placeholder='Description (optional)'
+              placeholderTextColor={theme.TEXT_SECONDARY}
+              value={newWaveDescription}
+              onChangeText={setNewWaveDescription}
+              multiline
+              numberOfLines={3}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: CONST.MAIN_COLOR }]}
+                onPress={handleCreateWave}
+                disabled={creating}
+              >
+                {creating
+                  ? <ActivityIndicator color='#FFF' />
+                  : <Text style={[styles.buttonText, { color: '#FFF' }]}>Create</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Wave Modal */}
+      <Modal
+        animationType='slide'
+        transparent
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
+            <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Edit Wave</Text>
+            <TextInput
+              style={[styles.input, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
+              placeholder='Wave Name'
+              placeholderTextColor={theme.TEXT_SECONDARY}
+              value={editWaveName}
+              onChangeText={setEditWaveName}
+            />
+            <TextInput
+              style={[styles.input, styles.textArea, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
+              placeholder='Description (optional)'
+              placeholderTextColor={theme.TEXT_SECONDARY}
+              value={editWaveDescription}
+              onChangeText={setEditWaveDescription}
+              multiline
+              numberOfLines={3}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
+                onPress={() => { setEditModalVisible(false); setEditingWave(null) }}
+              >
+                <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: CONST.MAIN_COLOR }]}
+                onPress={handleSaveEditWave}
+                disabled={updating}
+              >
+                {updating
+                  ? <ActivityIndicator color='#FFF' />
+                  : <Text style={[styles.buttonText, { color: '#FFF' }]}>Save</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 28,
+    zIndex: 1
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    borderRadius: 20,
+    paddingLeft: 36,
+    paddingRight: 16,
+    borderWidth: 1,
+    fontSize: 14
+  },
+  listContent: {
+    paddingHorizontal: 8,
+    paddingBottom: 16
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+  modalContent: {
+    width: '85%',
+    borderRadius: 20,
+    padding: 24
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 16,
+    textAlign: 'center'
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    fontSize: 16
+  },
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top'
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 4,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center'
+  },
+  buttonText: {
+    fontWeight: '600',
+    fontSize: 16
+  }
+})
+
+export default WavesHub

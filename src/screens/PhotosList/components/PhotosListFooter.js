@@ -23,7 +23,8 @@ const PhotosListFooter = ({
   unreadCount,
   isCameraOpening,
   onCameraPress,
-  location
+  location,
+  waveUuid
 }) => {
   const { width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
@@ -134,17 +135,17 @@ const PhotosListFooter = ({
             disabled={!netAvailable}
           >
             <FontAwesome
-              name='navicon'
-              size={22}
-              color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-            />
+                name='navicon'
+                size={22}
+                color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
+              />
           </TouchableOpacity>
 
           {/* Video Recording Button */}
           <TouchableOpacity
             style={[styles.videoRecordButton, isCameraOpening && { opacity: 0.5 }]}
             onPress={() => {
-              onCameraPress({ cameraType: 'video' })
+              onCameraPress({ cameraType: 'video', waveUuid })
             }}
             disabled={isCameraOpening}
           >
@@ -174,7 +175,7 @@ const PhotosListFooter = ({
               opacity: isCameraOpening ? 0.5 : 1
             }}
             onPress={() => {
-              onCameraPress({ cameraType: 'camera' })
+              onCameraPress({ cameraType: 'camera', waveUuid })
             }}
             disabled={isCameraOpening}
           >
