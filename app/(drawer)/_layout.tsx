@@ -293,33 +293,7 @@ export default function DrawerLayout () {
             headerShown: false
           }}
         />
-        <Drawer.Screen
-          name='waves-hub'
-          options={{
-            drawerLabel: 'Waves Hub',
-            title: 'Waves Hub',
-            headerShown: false,
-            drawerItemStyle: { display: 'none' }
-          }}
-        />
-        <Drawer.Screen
-          name='wave-detail'
-          options={{
-            drawerLabel: 'Wave Detail',
-            title: 'Wave Detail',
-            headerShown: false,
-            drawerItemStyle: { display: 'none' }
-          }}
-        />
-        <Drawer.Screen
-          name='photo-selection'
-          options={{
-            drawerLabel: 'Photo Selection',
-            title: 'Photo Selection',
-            headerShown: false,
-            drawerItemStyle: { display: 'none' }
-          }}
-        />
+
       </Drawer>
     </GestureHandlerRootView>
   )

@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
-import AppHeader from '../../src/components/AppHeader'
-import PhotoSelectionMode from '../../src/screens/PhotoSelectionMode'
+import AppHeader from '../../../src/components/AppHeader'
+import PhotoSelectionMode from '../../../src/screens/PhotoSelectionMode'
 
 export default function PhotoSelectionScreen() {
   const router = useRouter()

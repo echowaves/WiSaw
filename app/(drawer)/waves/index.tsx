@@ -3,12 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { Stack, useRouter } from 'expo-router'
 import { useAtom } from 'jotai'
-import AppHeader from '../../src/components/AppHeader'
-import WavesHub from '../../src/screens/WavesHub'
-import { SHARED_STYLES } from '../../src/theme/sharedStyles'
-import { emitAutoGroup, subscribeToAutoGroupDone } from '../../src/events/autoGroupBus'
-import { getUngroupedPhotosCount } from '../../src/screens/Waves/reducer'
-import * as STATE from '../../src/state'
+import AppHeader from '../../../src/components/AppHeader'
+import WavesHub from '../../../src/screens/WavesHub'
+import { SHARED_STYLES } from '../../../src/theme/sharedStyles'
+import { emitAutoGroup, subscribeToAutoGroupDone } from '../../../src/events/autoGroupBus'
+import { getUngroupedPhotosCount } from '../../../src/screens/Waves/reducer'
+import * as STATE from '../../../src/state'
 
 export default function WavesScreen() {
   const router = useRouter()
@@ -40,7 +40,7 @@ export default function WavesScreen() {
           headerShown: true,
           header: () => (
             <AppHeader
-              onBack={() => router.replace('/')}
+              onBack={() => router.back()}
               title='Waves'
               rightSlot={
                 <TouchableOpacity

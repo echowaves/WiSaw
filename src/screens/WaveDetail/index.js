@@ -298,7 +298,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
 
   useEffect(() => {
     loadPhotos(0, String(Math.random()), true)
-  }, [])
+  }, [waveUuid])
 
   const handleRefresh = () => {
     setPageNumber(0)
@@ -476,7 +476,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             title='No Photos Yet'
             subtitle='Add photos to this wave or take a new one.'
             actionText='Add Photos'
-            onActionPress={() => router.push({ pathname: '/photo-selection', params: { waveUuid, waveName } })}
+            onActionPress={() => router.push({ pathname: '/waves/photo-selection', params: { waveUuid, waveName } })}
             iconColor={theme.TEXT_PRIMARY}
           />
           )

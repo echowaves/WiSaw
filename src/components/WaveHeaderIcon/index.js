@@ -12,7 +12,7 @@ const WaveHeaderIcon = () => {
   const theme = getTheme(isDarkMode)
 
   const handlePress = () => {
-    router.push('/waves-hub')
+    router.push('/waves')
   }
 
   return (

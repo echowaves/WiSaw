@@ -291,8 +291,8 @@ const WavesHub = () => {
 
   const handleWavePress = (wave) => {
     router.push({
-      pathname: '/wave-detail',
-      params: { waveUuid: wave.waveUuid, waveName: wave.name }
+      pathname: `/waves/${wave.waveUuid}`,
+      params: { waveName: wave.name }
     })
   }
 
