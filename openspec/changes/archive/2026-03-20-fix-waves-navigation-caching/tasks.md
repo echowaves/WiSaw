@@ -22,7 +22,7 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Test navigation: Drawer → Waves list → Wave A detail → back returns to Waves list
-- [ ] 5.2 Test caching: Open Wave A → back → open Wave B → verify Wave B's photos are shown
-- [ ] 5.3 Test photo selection flow: Wave detail → Add photos → back returns to Wave detail
-- [ ] 5.4 Test system gesture back (swipe) behaves the same as header back button
+- [x] 5.1 Test navigation: Drawer → Waves list → Wave A detail → back returns to Waves list
+- [x] 5.2 Test caching: Open Wave A → back → open Wave B → verify Wave B's photos are shown
+- [x] 5.3 Test photo selection flow: Wave detail → Add photos → back returns to Wave detail
+- [x] 5.4 Test system gesture back (swipe) behaves the same as header back button

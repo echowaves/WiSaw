@@ -5,7 +5,12 @@ The system SHALL display a wave's photos in a masonry grid layout using `PhotosL
 
 #### Scenario: User opens wave detail
 - **WHEN** the user taps a wave card in the Waves Hub
-- **THEN** a Wave Detail screen is pushed showing all photos in that wave in a masonry layout matching the starred photos segment style
+- **THEN** a Wave Detail screen is pushed onto the waves Stack at `/waves/<waveUuid>` showing all photos in that wave in a masonry layout matching the starred photos segment style
+
+#### Scenario: Wave detail receives waveUuid from route segment
+- **WHEN** the Wave Detail screen component mounts
+- **THEN** the `waveUuid` is obtained from the dynamic route segment `[waveUuid]` via `useLocalSearchParams()`
+- **THEN** the `waveName` is obtained from search params via `useLocalSearchParams()`
 
 #### Scenario: Wave has photos
 - **WHEN** the wave contains photos
