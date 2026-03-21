@@ -27,8 +27,8 @@
 
 ## 7. Verification
 
-- [ ] 7.1 Run the app and verify all three segments (Global, Starred, Search) load and display photos correctly
-- [ ] 7.2 Verify photo expansion/collapse works with scroll-to-visible behavior
-- [ ] 7.3 Verify camera capture flow works (permissions, photo, video)
-- [ ] 7.4 Verify offline banner, pending-photos animation, and upload resume work
-- [ ] 7.5 Confirm `index.js` NLOC is below 600 lines
+- [x] 7.1 Run the app and verify all three segments (Global, Starred, Search) load and display photos correctly
+- [x] 7.2 Verify photo expansion/collapse works with scroll-to-visible behavior
+- [x] 7.3 Verify camera capture flow works (permissions, photo, video)
+- [x] 7.4 Verify offline banner, pending-photos animation, and upload resume work
+- [x] 7.5 Confirm `index.js` NLOC is below 600 lines
