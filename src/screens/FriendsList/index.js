@@ -387,7 +387,7 @@ const FriendsList = () => {
 
       // Save/update the contact name locally (for both new and existing friendships)
       // eslint-disable-next-line no-console
-      console.log(`Saving contact name "${contactName}" for friendship ${actualFriendshipUuid}`)
+      console.log('Saving contact name "%s" for friendship %s', contactName, actualFriendshipUuid)
 
       await friendsHelper.setContactName({
         uuid,

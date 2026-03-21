@@ -347,7 +347,7 @@ const ExpandableThumb = ({
   const renderExpandedPhoto = () => {
     // CRITICAL: Only use stored original dimensions, NEVER item.width/height
     if (!originalDimensions.current) {
-      console.error(`❌ ExpandableThumb: No original dimensions stored for photo ${item.id}!`)
+      console.error('❌ ExpandableThumb: No original dimensions stored for photo %s!', item.id)
       return null
     }
 

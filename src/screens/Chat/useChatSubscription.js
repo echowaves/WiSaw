@@ -26,7 +26,7 @@ export const useChatSubscription = ({ chatUuid, uuid, friendsList, setMessages, 
   // Subscription setup effect
   useEffect(() => {
     // eslint-disable-next-line no-console
-    console.log(`subscribing to ${chatUuid}`)
+    console.log('subscribing to %s', chatUuid)
     isSubscribedRef.current = false
 
     const subscriptionQuery = gql`
@@ -63,7 +63,7 @@ export const useChatSubscription = ({ chatUuid, uuid, friendsList, setMessages, 
         // Mark subscription as active when we receive first VALID message
         if (!isSubscribedRef.current) {
           // eslint-disable-next-line no-console
-          console.log(`✅ Subscription active for ${chatUuid}`)
+          console.log('✅ Subscription active for %s', chatUuid)
           isSubscribedRef.current = true
         }
 
@@ -184,7 +184,7 @@ export const useChatSubscription = ({ chatUuid, uuid, friendsList, setMessages, 
       }
       isSubscribedRef.current = false
       // eslint-disable-next-line no-console
-      console.log(`unsubscribing from ${chatUuid}`)
+      console.log('unsubscribing from %s', chatUuid)
     }
   }, [chatUuid, friendsList, uuid, toastTopOffset, setMessages])
 

@@ -400,7 +400,7 @@ const uploadFile = async ({
 
       return { responseData }
     } catch (error) {
-      console.error(`Upload attempt ${attempt}/${retries} failed:`, { error })
+      console.error('Upload attempt %d/%d failed:', attempt, retries, { error })
 
       if (attempt === retries) {
         Toast.show({
@@ -680,11 +680,11 @@ export const initPendingUploads = async () => {
     const pendingImages = await readQueue()
 
     if (pendingImages && pendingImages.length > 0) {
-      console.log(`Found ${pendingImages.length} pending uploads in queue`)
+      console.log('Found %d pending uploads in queue', pendingImages.length)
 
       const stuckItems = pendingImages.filter((item) => !item.localImgUrl && item.photo)
       if (stuckItems.length > 0) {
-        console.warn(`Found ${stuckItems.length} potentially stuck upload items`)
+        console.warn('Found %d potentially stuck upload items', stuckItems.length)
       }
 
       for (let i = 0; i < pendingImages.length; i += 1) {
@@ -692,10 +692,10 @@ export const initPendingUploads = async () => {
         if (item.originalCameraUrl) {
           try {
             if (!new FSFile(item.originalCameraUrl).exists) {
-              console.warn(`Pending upload has missing original file: ${item.localImageName}`)
+              console.warn('Pending upload has missing original file: %s', item.localImageName)
             }
           } catch (error) {
-            console.warn(`Cannot check file status for: ${item.localImageName}`, error)
+            console.warn('Cannot check file status for: %s', item.localImageName, error)
           }
         }
       }

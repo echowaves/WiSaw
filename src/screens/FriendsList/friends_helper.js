@@ -280,7 +280,7 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
         return localContact
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Error processing friendship ${friendship.friendshipUuid}:`, error)
+        console.error('Error processing friendship %s:', friendship.friendshipUuid, error)
 
         // Return a basic friendship object even if there's an error
         return {
@@ -371,7 +371,7 @@ export const setContactName = async ({ uuid, friendshipUuid, contactName }) => {
   await addFriendshipLocally({ friendshipUuid, contactName })
 
   // eslint-disable-next-line no-console
-  console.log(`Successfully saved contact name "${contactName}" for friendship ${friendshipUuid}`)
+  console.log('Successfully saved contact name "%s" for friendship %s', contactName, friendshipUuid)
 
   return true
 }
