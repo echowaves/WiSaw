@@ -1,4 +1,7 @@
 {
   "standard.engine": "ts-standard",
-  "editor.formatOnSave": false
+  "editor.formatOnSave": false,
+  "chat.tools.terminal.autoApprove": {
+    "npm install": true
+  }
 }
