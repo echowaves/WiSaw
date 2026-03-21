@@ -136,10 +136,14 @@ const PhotosListMasonry = ({
       onEndReached={() => {
         // Load more when user reaches the end
         if (!loading && !stopLoading) {
-          setPageNumber((currentPage) => {
-            const newPage = currentPage + 1
-            return newPage
-          })
+          if (onEndReached) {
+            onEndReached()
+          } else {
+            setPageNumber((currentPage) => {
+              const newPage = currentPage + 1
+              return newPage
+            })
+          }
         }
       }}
       onEndReachedThreshold={0.2}
