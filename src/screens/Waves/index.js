@@ -22,6 +22,7 @@ import * as Crypto from 'expo-crypto'
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
+import LinearProgress from '../../components/ui/LinearProgress'
 import * as reducer from './reducer'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import { subscribeToAddWave } from '../../events/waveAddBus'
@@ -684,6 +685,22 @@ const Waves = () => {
 
   return (
     <View style={styles.container}>
+      {loading && (
+        <View
+          style={{
+            height: 3,
+            backgroundColor: theme.HEADER_BACKGROUND
+          }}
+        >
+          <LinearProgress
+            color={CONST.MAIN_COLOR}
+            style={{
+              flex: 1,
+              height: 3
+            }}
+          />
+        </View>
+      )}
       <FlatList
         data={waves}
         renderItem={renderItem}

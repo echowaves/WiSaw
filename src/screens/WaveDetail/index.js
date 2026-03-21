@@ -24,6 +24,7 @@ import NetInfo from '@react-native-community/netinfo'
 import * as Crypto from 'expo-crypto'
 
 import * as STATE from '../../state'
+import LinearProgress from '../../components/ui/LinearProgress'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
@@ -469,6 +470,23 @@ const WaveDetail = React.forwardRef((_props, ref) => {
         uploadIconAnimation={uploadIconAnimation}
       />
 
+      {loading && (
+        <View
+          style={{
+            height: 3,
+            backgroundColor: theme.HEADER_BACKGROUND
+          }}
+        >
+          <LinearProgress
+            color={CONST.MAIN_COLOR}
+            style={{
+              flex: 1,
+              height: 3
+            }}
+          />
+        </View>
+      )}
+
       {photos.length === 0 && !loading
         ? (
           <EmptyStateCard
@@ -506,14 +524,6 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             onPhotoLongPress={handlePhotoLongPress}
           />
           )}
-
-      {loading && photos.length === 0 && (
-        <ActivityIndicator
-          style={styles.loadingIndicator}
-          size='large'
-          color={CONST.MAIN_COLOR}
-        />
-      )}
 
       <PhotosListFooter
         theme={theme}
