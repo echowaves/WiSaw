@@ -30,6 +30,7 @@ export {
 
 // import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
+// this is not a password or sensitive info, so SecureStore is used for simplicity
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 export const initialState = {

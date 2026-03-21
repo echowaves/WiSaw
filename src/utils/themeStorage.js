@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store'
 import { Appearance } from 'react-native'
 import Toast from 'react-native-toast-message'
 
+// these are not a password or sensitive info, so SecureStore is used for simplicity
 const THEME_KEY = 'USER_THEME_PREFERENCE'
 const FOLLOW_SYSTEM_KEY = 'FOLLOW_SYSTEM_THEME'
 

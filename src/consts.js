@@ -15,6 +15,7 @@ export const { API_URI, API_KEY, PRIVATE_IMG_HOST } = Constants.expoConfig.extra
 // console.log({ API_URI, API_KEY })
 // const fetch = require('node-fetch')
 
+// these are not the sensitive keys, just identifiers
 export const UUID_KEY = 'wisaw_device_uuid'
 export const NICK_NAME_KEY = 'wisaw_nick_name'
 
@@ -49,6 +50,7 @@ export const TRANSPARENT_ICONS_COLOR = 'rgba(10,10,10,.5)'
 export const PENDING_UPLOADS_FOLDER = new FSDirectory(Paths.document, 'pendingUploads')
 export const PENDING_UPLOADS_FOLDER_CHAT = new FSDirectory(Paths.document, 'pendingUploadsChat')
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
+// these are not sensitive keys, just identifiers
 export const PENDING_UPLOADS_KEY = 'PENDING_UPLOADS'
 export const PENDING_CHAT_UPLOADS_KEY = 'PENDING_CHAT_UPLOADS'
 
