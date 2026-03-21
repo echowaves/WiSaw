@@ -5,42 +5,26 @@ import { useAtom } from 'jotai'
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
-import * as MediaLibrary from 'expo-media-library'
 import { router, useNavigation } from 'expo-router'
-// import * as FileSystem from 'expo-file-system'
 import * as Notifications from '../../utils/notifications'
 import * as SecureStore from 'expo-secure-store'
 
-import * as ImagePicker from 'expo-image-picker'
-import * as Linking from 'expo-linking'
-import * as Location from 'expo-location'
-// import * as Updates from 'expo-updates'
 import Toast from 'react-native-toast-message'
 
 import * as BackgroundTask from 'expo-background-task'
 import * as Haptics from 'expo-haptics'
 import * as TaskManager from 'expo-task-manager'
 
-import useKeyboard from '@rnhooks/keyboard'
 import {
-  Alert,
-  Animated,
   Keyboard,
-  Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   useWindowDimensions,
   View
 } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as Constants from 'expo-constants'
-
-import { AntDesign, FontAwesome } from '@expo/vector-icons'
-
-import NetInfo from '@react-native-community/netinfo'
 
 import { emitPhotoSearch, subscribeToPhotoSearch } from '../../events/photoSearchBus'
 
@@ -57,19 +41,24 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import {
-  calculatePhotoDimensions,
   createFrozenPhoto,
   validateFrozenPhotosList
 } from '../../utils/photoListHelpers'
 
-import LinearProgress from '../../components/ui/LinearProgress'
+import EmptyStateCard from '../../components/EmptyStateCard'
 import PhotosListFooter from './components/PhotosListFooter'
+import PhotosListHeader from './components/PhotosListHeader'
 import PhotosListSearchBar from './components/PhotosListSearchBar'
 import PendingPhotosBanner from './components/PendingPhotosBanner'
 import PhotosListEmptyState from './components/PhotosListEmptyState'
 import PhotosListMasonry from './components/PhotosListMasonry'
-import EmptyStateCard from '../../components/EmptyStateCard'
-import WaveHeaderIcon from '../../components/WaveHeaderIcon'
+
+import useCameraCapture from './hooks/useCameraCapture'
+import useKeyboardTracking from './hooks/useKeyboardTracking'
+import useLocationInit from './hooks/useLocationInit'
+import useNetworkStatus from './hooks/useNetworkStatus'
+import usePendingAnimation from './hooks/usePendingAnimation'
+import usePhotoExpansion from './hooks/usePhotoExpansion'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -179,11 +168,10 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const toastTopOffset = useToastTopOffset()
 
-  // State to prevent double-clicking camera buttons
-  const [isCameraOpening, setIsCameraOpening] = useState(false)
-
-  // State to track the ID of the photo that was just collapsed to trigger scroll
-  const [justCollapsedId, setJustCollapsedId] = useState(null)
+  // --- Extracted hooks ---
+  const { netAvailable } = useNetworkStatus()
+  const { keyboardVisible, dismissKeyboard, keyboardOffset } = useKeyboardTracking()
+  const { location, setLocation, initLocation } = useLocationInit({ toastTopOffset })
 
   const handleIncomingSearch = useCallback(
     (term) => {
@@ -354,11 +342,6 @@ const PhotosList = ({ searchFromUrl }) => {
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
   const [zeroMoment, setZeroMoment] = useState(0)
 
-  const [netAvailable, setNetAvailable] = useState(true)
-  const [location, setLocation] = useState({
-    coords: { latitude: 0, longitude: 0 }
-  })
-
   // const [isLastPage, setIsLastPage] = useState(false)
 
   const [pageNumber, setPageNumber] = useState(0)
@@ -404,224 +387,7 @@ const PhotosList = ({ searchFromUrl }) => {
     onPhotoUploaded: handleUploadSuccess
   })
 
-  // State for inline photo expansion - now supports multiple expanded photos
-  const [expandedPhotoIds, setExpandedPhotoIds] = useState(new Set())
-  const [isPhotoExpanding, setIsPhotoExpanding] = useState(false)
-  const [scrollToIndex, setScrollToIndex] = useState(null)
-  const [measuredHeights, setMeasuredHeights] = useState(new Map())
-
-  // Real-time height tracking using refs (no state storage)
-  const photoHeightRefs = useRef(new Map())
-  // Anchor scrolling: track the last expanded photo id and prevent competing scrolls
-  const lastExpandedIdRef = useRef(null)
-  const scrollingInProgressRef = useRef(false)
-
-  // Callback to update height refs when Photo components measure themselves
-  const updatePhotoHeight = useCallback((photoId, height) => {
-    photoHeightRefs.current.set(photoId, height)
-    // Force a re-render by updating the measured heights state
-    setMeasuredHeights((current) => {
-      const updated = new Map(current)
-      updated.set(photoId, height)
-      return updated
-    })
-  }, [])
-
-  // Keep only a simple scroll position ref to support ensureItemVisible without driving UI state
-  const headerScrollYRef = React.useRef(0)
   const searchBarRef = React.useRef(null)
-
-  // Animation states for pending photos
-  const pendingPhotosAnimation = React.useRef(new Animated.Value(0)).current // 0 = hidden, 1 = visible
-  const uploadIconAnimation = React.useRef(new Animated.Value(1)).current // For pulsing upload icon
-  const [previousPendingCount, setPreviousPendingCount] = useState(0)
-
-  // Track scroll position for inline ensureItemVisible calculations
-  const lastScrollY = React.useRef(0)
-
-  const [keyboardVisible, dismissKeyboard] = useKeyboard()
-  const [keyboardOffset, setKeyboardOffset] = useState(0)
-
-  const masonryRef = React.useRef(null)
-
-  // Reset anchor/scroll-related state to avoid stale offsets when switching segments
-  const resetAnchorState = React.useCallback(({ skipScrollToTop = false } = {}) => {
-    try {
-      // Clear anchor targets and scrolling flags
-      lastExpandedIdRef.current = null
-      scrollingInProgressRef.current = false
-
-      // Reset scroll refs used in calculations
-      lastScrollY.current = 0
-      headerScrollYRef.current = 0
-
-      // Clear any measured height caches so layout recalculates cleanly
-      setMeasuredHeights(new Map())
-      photoHeightRefs.current = new Map()
-
-      // Collapse any expanded photos
-      setExpandedPhotoIds(new Set())
-
-      // Clear pending scroll target
-      if (scrollToIndex !== null) setScrollToIndex(null)
-
-      // Scroll list to top synchronously to normalize offsets
-      if (!skipScrollToTop && masonryRef.current) {
-        if (typeof masonryRef.current.scrollToOffset === 'function') {
-          masonryRef.current.scrollToOffset({ offset: 0, animated: false })
-        } else if (typeof masonryRef.current.scrollTo === 'function') {
-          masonryRef.current.scrollTo({ y: 0, animated: false })
-        }
-      }
-    } catch (e) {
-      // best-effort reset
-    }
-  }, [scrollToIndex])
-
-  const performScroll = (targetOffset) => {
-    const masonry = masonryRef.current
-    if (!masonry) return
-
-    if (typeof masonry.scrollToOffset === 'function') {
-      masonry.scrollToOffset({
-        offset: targetOffset,
-        animated: true
-      })
-    } else if (typeof masonry.scrollTo === 'function') {
-      masonry.scrollTo({ y: targetOffset, animated: true })
-    } else if (typeof masonry.getScrollResponder === 'function') {
-      const scrollResponder = masonry.getScrollResponder()
-      if (scrollResponder && typeof scrollResponder.scrollTo === 'function') {
-        scrollResponder.scrollTo({ y: targetOffset, animated: true })
-      }
-    }
-  }
-
-  // Ensure the expanded photo is fully visible within the viewport
-  const ensureItemVisible = React.useCallback(
-    ({ id, y, height: itemHeight, alignTop = false, topPadding = 0 }) => {
-      try {
-        // Only auto-scroll when this callback is for the last expanded photo and no scroll is in progress
-        if (lastExpandedIdRef.current !== id || scrollingInProgressRef.current) {
-          return
-        }
-
-        // Prefer a simple anchor scroll for the last expanded item: align its top under the header
-        const headerReserve = 60 + insets.top
-        const snapPadding = topPadding || 8
-
-        if (masonryRef.current) {
-          scrollingInProgressRef.current = true
-
-          // y is window-relative; convert to absolute content offset by adding current scrollY
-          const targetOffset = Math.max(
-            0,
-            (lastScrollY.current || 0) + y - headerReserve - snapPadding
-          )
-          // Try FlatList-like API first
-          performScroll(targetOffset)
-
-          // Clear anchor target and scrolling flag after a delay to allow scroll to complete
-          setTimeout(() => {
-            lastExpandedIdRef.current = null
-            scrollingInProgressRef.current = false
-          }, 500)
-        }
-      } catch (e) {
-        // best-effort; ignore errors
-        scrollingInProgressRef.current = false
-      }
-    },
-    [height]
-  )
-
-  // Remove viewability-driven header/footer toggling to reduce jank
-
-  useEffect(() => {
-    setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
-  }, [unreadCountList])
-
-  // No header/footer state changes based on photosList size
-
-  // Animation effect for pending photos
-  useEffect(() => {
-    if (pendingPhotos.length > 0 && previousPendingCount === 0) {
-      // Animate in when photos are added
-      Animated.spring(pendingPhotosAnimation, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 80,
-        friction: 8
-      }).start()
-    } else if (pendingPhotos.length === 0 && previousPendingCount > 0) {
-      // Animate out when all photos are uploaded
-      Animated.timing(pendingPhotosAnimation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true
-      }).start()
-    }
-
-    // Start pulsing animation for upload icon when uploading
-    if (pendingPhotos.length > 0 && netAvailable) {
-      const pulseAnimation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(uploadIconAnimation, {
-            toValue: 0.6,
-            duration: 800,
-            useNativeDriver: true
-          }),
-          Animated.timing(uploadIconAnimation, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true
-          })
-        ])
-      )
-      pulseAnimation.start()
-
-      return () => {
-        pulseAnimation.stop()
-        uploadIconAnimation.setValue(1)
-      }
-    }
-    uploadIconAnimation.setValue(1)
-
-    setPreviousPendingCount(pendingPhotos.length)
-  }, [pendingPhotos.length, netAvailable, previousPendingCount])
-
-  useEffect(() => {
-    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
-    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
-
-    const handleKeyboardShow = (event) => {
-      const height = event?.endCoordinates?.height ?? 0
-      setKeyboardOffset(height)
-    }
-
-    const handleKeyboardHide = () => {
-      setKeyboardOffset(0)
-    }
-
-    const showListener = Keyboard.addListener(showEvent, handleKeyboardShow)
-    const hideListener = Keyboard.addListener(hideEvent, handleKeyboardHide)
-
-    return () => {
-      showListener.remove()
-      hideListener.remove()
-    }
-  }, [])
-
-  // Effect to handle scrolling to expanded photo (simplified as backup)
-  useEffect(() => {
-    if (scrollToIndex !== null) {
-      // Clear the scroll target after a delay (cleanup)
-      const timer = setTimeout(() => {
-        setScrollToIndex(null)
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [scrollToIndex])
 
   // Configuration for different segments - responsive to device size
   const segmentConfig = React.useMemo(() => {
@@ -682,92 +448,35 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }, [activeSegment, width])
 
-  // Helper function to check if a photo is expanded
-  const isPhotoExpanded = React.useCallback(
-    (photoId) => expandedPhotoIds.has(photoId),
-    [expandedPhotoIds]
-  )
+  // --- Extracted hooks (depend on values above) ---
+  const {
+    expandedPhotoIds,
+    setExpandedPhotoIds,
+    isPhotoExpanded,
+    handlePhotoToggle,
+    getCalculatedDimensions,
+    updatePhotoHeight,
+    ensureItemVisible,
+    handleScroll,
+    resetAnchorState,
+    masonryRef,
+    justCollapsedId,
+    measuredHeights
+  } = usePhotoExpansion({ width, height, insets, segmentConfig })
 
-  // Helper function to get calculated dimensions for a photo
-  const getCalculatedDimensions = React.useCallback(
-    (photo) => {
-      // Removed debug logging to reduce console noise
+  const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({
+    location,
+    enqueueCapture
+  })
 
-      const screenWidth = width - 20 // Account for padding
-      const isExpanded = isPhotoExpanded(photo.id)
+  const { pendingPhotosAnimation, uploadIconAnimation } = usePendingAnimation({
+    pendingPhotosCount: pendingPhotos.length,
+    netAvailable
+  })
 
-      // For expanded photos, try to use real-time measured height
-      if (isExpanded) {
-        const currentHeight = measuredHeights.get(photo.id) || photoHeightRefs.current.get(photo.id)
-        if (currentHeight) {
-          const result = {
-            width: screenWidth,
-            height: currentHeight
-          }
-
-          // Removed debug logging to reduce console noise
-
-          return result
-        }
-      }
-
-      // Fallback to purely dynamic calculation (for collapsed or unmeasured expanded)
-      const result = calculatePhotoDimensions(
-        photo,
-        isExpanded,
-        screenWidth,
-        segmentConfig.maxItemsPerRow,
-        segmentConfig.spacing
-      )
-
-      return result
-    },
-    [isPhotoExpanded, width, segmentConfig, measuredHeights]
-  )
-
-  // Function to handle photo expansion toggle - now supports multiple expanded photos
-  const handlePhotoToggle = React.useCallback(
-    (photoId) => {
-      if (isPhotoExpanding) return // Prevent multiple rapid toggles
-
-      setIsPhotoExpanding(true)
-
-      // Check if we are collapsing or expanding based on current state
-      const isExpanded = expandedPhotoIds.has(photoId)
-
-      if (isExpanded) {
-        // Collapsing
-        setJustCollapsedId(photoId)
-        lastExpandedIdRef.current = photoId
-
-        setMeasuredHeights((current) => {
-          const updated = new Map(current)
-          updated.delete(photoId)
-          return updated
-        })
-
-        setExpandedPhotoIds((prevIds) => {
-          const newIds = new Set(prevIds)
-          newIds.delete(photoId)
-          return newIds
-        })
-      } else {
-        // Expanding
-        setJustCollapsedId(null)
-        lastExpandedIdRef.current = photoId
-
-        setExpandedPhotoIds((prevIds) => {
-          const newIds = new Set(prevIds)
-          newIds.add(photoId)
-          return newIds
-        })
-      }
-
-      // Reset expanding state after animation
-      setTimeout(() => setIsPhotoExpanding(false), 500)
-    },
-    [isPhotoExpanding, photosList, expandedPhotoIds]
-  )
+  useEffect(() => {
+    setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
+  }, [unreadCountList])
 
   // Long-press handler — open quick-actions modal
   const quickActionsRef = useRef(null)
@@ -775,11 +484,6 @@ const PhotosList = ({ searchFromUrl }) => {
   const handlePhotoLongPress = useCallback((photo) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     quickActionsRef.current?.open(photo)
-  }, [])
-
-  // Lightweight onScroll: keep lastScrollY for ensureItemVisible; avoid UI work during scroll
-  const handleScroll = React.useCallback((event) => {
-    lastScrollY.current = event?.nativeEvent?.contentOffset?.y || 0
   }, [])
 
   // Preloading disabled for consistency; rely on onEndReached
@@ -911,380 +615,10 @@ const PhotosList = ({ searchFromUrl }) => {
     reload(index, searchTermToUse)
   }
 
-  // Custom header renderer for Expo Router compatibility
-  const renderCustomHeader = () => {
-    const segmentTitles = ['Global', 'Starred', 'Search']
-
-    // Static dimensions to avoid extra work during scroll
-    const headerHeight = 60
-
-    return (
-      <SafeAreaView
-        edges={['top']}
-        style={{
-          backgroundColor: theme.HEADER_BACKGROUND,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.HEADER_BORDER,
-          shadowColor: theme.HEADER_SHADOW,
-          shadowOffset: {
-            width: 0,
-            height: 2
-          },
-          shadowOpacity: 1,
-          shadowRadius: 4,
-          elevation: 3
-        }}
-      >
-        <View
-          style={{
-            height: headerHeight,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingHorizontal: 16
-          }}
-        >
-          {/* Left: Empty space */}
-          <View
-            style={{
-              position: 'absolute',
-              left: 16,
-              width: 40,
-              height: 40
-            }}
-          />
-
-          {/* Right: Wave icon */}
-          <View
-            style={{
-              position: 'absolute',
-              right: 16,
-              width: 40,
-              height: 40
-            }}
-          >
-            <WaveHeaderIcon />
-          </View>
-
-          {/* Center: Three segment control */}
-          <View style={styles.headerContainer}>
-            <View style={[styles.customSegmentedControl, { padding: 4 }]}>
-              <View
-                style={[
-                  styles.segmentButton,
-                  activeSegment === 0 && styles.activeSegmentButton,
-                  {
-                    paddingVertical: 8,
-                    paddingHorizontal: 20,
-                    width: segmentWidth
-                  }
-                ]}
-              >
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100%'
-                  }}
-                  onPress={() => updateIndex(0)}
-                >
-                  <FontAwesome
-                    name='globe'
-                    size={20}
-                    color={activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
-                  />
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      styles.segmentText,
-                      {
-                        color: activeSegment === 0 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
-                      }
-                    ]}
-                  >
-                    {segmentTitles[0]}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View
-                style={[
-                  styles.segmentButton,
-                  activeSegment === 1 && styles.activeSegmentButton,
-                  {
-                    paddingVertical: 8,
-                    paddingHorizontal: 20,
-                    width: segmentWidth
-                  }
-                ]}
-              >
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100%'
-                  }}
-                  onPress={() => updateIndex(1)}
-                >
-                  <AntDesign
-                    name='star'
-                    size={20}
-                    color={activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
-                  />
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      styles.segmentText,
-                      {
-                        color: activeSegment === 1 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
-                      }
-                    ]}
-                  >
-                    {segmentTitles[1]}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View
-                style={[
-                  styles.segmentButton,
-                  activeSegment === 2 && styles.activeSegmentButton,
-                  {
-                    paddingVertical: 8,
-                    paddingHorizontal: 20,
-                    width: segmentWidth
-                  }
-                ]}
-              >
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100%'
-                  }}
-                  onPress={() => updateIndex(2)}
-                >
-                  <FontAwesome
-                    name='search'
-                    size={20}
-                    color={activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
-                  />
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      styles.segmentText,
-                      {
-                        color: activeSegment === 2 ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
-                      }
-                    ]}
-                  >
-                    {segmentTitles[2]}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </View>
-        {loading && (
-          <View
-            style={{
-              height: 3,
-              backgroundColor: theme.HEADER_BACKGROUND
-            }}
-          >
-            <LinearProgress
-              color={CONST.MAIN_COLOR}
-              style={{
-                flex: 1,
-                height: 3
-              }}
-            />
-          </View>
-        )}
-      </SafeAreaView>
-    )
-  }
-
-  // updateNavBar function is no longer needed since we use a custom header with Expo Router
-  // const updateNavBar = async () => {
-  //   navigation.setOptions({
-  //     headerTitle: renderHeaderTitle,
-  //     headerStyle: {
-  //       backgroundColor: CONST.HEADER_GRADIENT_END,
-  //       borderBottomWidth: 1,
-  //       borderBottomColor: CONST.HEADER_BORDER_COLOR,
-  //       shadowColor: CONST.HEADER_SHADOW_COLOR,
-  //       shadowOffset: {
-  //         width: 0,
-  //         height: 2,
-  //       },
-  //       shadowOpacity: 1,
-  //       shadowRadius: 4,
-  //       elevation: 3,
-  //     },
-  //     headerTitleStyle: {
-  //       fontSize: 18,
-  //       fontWeight: '600',
-  //       color: CONST.TEXT_COLOR,
-  //     },
-  //   })
-  // }
-
-  async function checkPermission ({
-    permissionFunction,
-    alertHeader,
-    alertBody,
-    permissionFunctionArgument
-  }) {
-    const { status } = await permissionFunction(permissionFunctionArgument)
-    if (status !== 'granted') {
-      Alert.alert(alertHeader, alertBody, [
-        {
-          text: 'Open Settings',
-          onPress: () => {
-            Linking.openSettings()
-          }
-        }
-      ])
-    }
-    return status
-  }
-
-  const takePhoto = async ({ cameraType, waveUuid }) => {
-    let cameraReturn
-    if (cameraType === 'camera') {
-      // launch photo capturing
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ['images'],
-        // allowsEditing: true,
-        quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
-        exif: true
-      })
-    } else {
-      // launch video capturing
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ['videos'],
-        // allowsEditing: true,
-        videoMaxDuration: 5,
-        quality: 1.0, // Reduced from 1.0 to 0.8 for better upload performance
-        exif: true
-      })
-    }
-
-    // alert(`cameraReturn.canceled ${cameraReturn.canceled}`)
-    if (cameraReturn.canceled === false) {
-      await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
-      // have to wait, otherwise the upload will not start
-      await enqueueCapture({
-        cameraImgUrl: cameraReturn.assets[0].uri,
-        type: cameraReturn.assets[0].type,
-        location,
-        waveUuid
-      })
-    }
-  }
-
-  const checkPermissionsForPhotoTaking = async ({ cameraType, waveUuid }) => {
-    // Prevent double-clicking by checking if camera is already opening
-    if (isCameraOpening) {
-      console.log('Camera already opening, ignoring duplicate request')
-      return
-    }
-
-    setIsCameraOpening(true)
-
-    try {
-      const cameraPermission = await checkPermission({
-        permissionFunction: ImagePicker.requestCameraPermissionsAsync,
-        alertHeader: 'Do you want to take photo with wisaw?',
-        alertBody: "Why don't you enable photo permission?"
-      })
-
-      if (cameraPermission === 'granted') {
-        const photoAlbomPermission = await checkPermission({
-          permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
-          alertHeader: 'Do you want to save photo on your device?',
-          alertBody: "Why don't you enable the permission?",
-          permissionFunctionArgument: true
-        })
-
-        if (photoAlbomPermission === 'granted') {
-          await takePhoto({ cameraType, waveUuid })
-        }
-      }
-    } catch (error) {
-      console.error('Error in checkPermissionsForPhotoTaking:', error)
-    } finally {
-      // Always reset the flag, regardless of success or failure
-      setIsCameraOpening(false)
-    }
-  }
-
-  async function initLocation () {
-    const locationPermission = await checkPermission({
-      permissionFunction: Location.requestForegroundPermissionsAsync,
-      alertHeader: 'WiSaw shows you near-by photos based on your current location.',
-      alertBody: 'You need to enable Location in Settings and Try Again.'
-    })
-
-    if (locationPermission === 'granted') {
-      try {
-        // initially set the location that is last known -- works much faster this way
-        let loc = await Location.getLastKnownPositionAsync({
-          accuracy: Location.Accuracy.BestForNavigation
-        })
-        if (!loc) {
-          loc = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.BestForNavigation
-          })
-        }
-        if (loc) setLocation(loc)
-
-        return loc
-      } catch (err12) {
-        console.error({ err12 })
-        Toast.show({
-          text1: 'Unable to get location',
-          type: 'error',
-          topOffset: toastTopOffset
-        })
-      }
-    }
-    return null
-  }
-
-  useEffect(() => {
-    // add network availability listener with improved reliability
-    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-      if (state) {
-        // Check both isConnected and isInternetReachable for better reliability
-        const isNetworkAvailable = state.isConnected && state.isInternetReachable !== false
-
-        setNetAvailable(isNetworkAvailable)
-
-        // Log network state for debugging
-        console.log('Network state:', {
-          isConnected: state.isConnected,
-          isInternetReachable: state.isInternetReachable,
-          type: state.type,
-          computed: isNetworkAvailable
-        })
-      }
-    })
-
-    return () => {
-      unsubscribeNetInfo()
-    }
-  }, [])
-
   useEffect(() => {
     if (netAvailable) {
       reload()
     }
-    // updateNavBar()
   }, [netAvailable])
 
   useFocusEffect(
@@ -1453,38 +787,6 @@ const PhotosList = ({ searchFromUrl }) => {
     performSearch()
   }, [pendingTriggerSearch, reload])
 
-  // const renderHeaderLeft = () => (
-  //   <FontAwesome5
-  //     onPress={
-  //       () => {
-  //         _reload()
-  //       }
-  //     }
-  //     name="sync"
-  //     size={30}
-  //     style={
-  //       {
-  //         marginLeft: 10,
-  //         color: CONST.MAIN_COLOR,
-  //         width: 60,
-  //       }
-  //     }
-  //   />
-  // )
-
-  // const renderHeaderRight = () => (
-  //   <MaterialIcons
-  //     onPress={
-  //       () => navigation.navigate('FeedbackScreen')
-  //     }
-  //     name="feedback"
-  //     size={35}
-  //     style={{
-  //       marginRight: 20,
-  //       color: CONST.MAIN_COLOR,
-  //     }}
-  //   />
-  // )
   const submitSearch = async () => {
     if (searchTerm && searchTerm.length >= 3) {
       if (keyboardVisible) {
@@ -1505,10 +807,21 @@ const PhotosList = ({ searchFromUrl }) => {
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
 
+  const renderHeader = () => (
+    <PhotosListHeader
+      theme={theme}
+      activeSegment={activeSegment}
+      updateIndex={updateIndex}
+      loading={loading}
+      segmentWidth={segmentWidth}
+      styles={styles}
+    />
+  )
+
   if (!netAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        {renderCustomHeader()}
+        {renderHeader()}
         <PendingPhotosBanner
           theme={theme}
           pendingPhotos={pendingPhotos}
@@ -1553,7 +866,7 @@ const PhotosList = ({ searchFromUrl }) => {
   if (isTandcAccepted && location && photosList?.length > 0) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        {renderCustomHeader()}
+        {renderHeader()}
         <PendingPhotosBanner
           theme={theme}
           pendingPhotos={pendingPhotos}
@@ -1620,7 +933,7 @@ const PhotosList = ({ searchFromUrl }) => {
   if (!isTandcAccepted) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        {renderCustomHeader()}
+        {renderHeader()}
       </View>
     )
   }
@@ -1628,7 +941,7 @@ const PhotosList = ({ searchFromUrl }) => {
   if (!location) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        {renderCustomHeader()}
+        {renderHeader()}
         <PendingPhotosBanner
           theme={theme}
           pendingPhotos={pendingPhotos}
@@ -1678,7 +991,7 @@ const PhotosList = ({ searchFromUrl }) => {
         loading={loading}
         stopLoading={stopLoading}
         photosList={photosList}
-        renderCustomHeader={renderCustomHeader}
+        renderCustomHeader={renderHeader}
         renderPendingPhotos={() => (
           <PendingPhotosBanner
             theme={theme}
@@ -1719,7 +1032,7 @@ const PhotosList = ({ searchFromUrl }) => {
   // dispatch(reducer.getPhotos())
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-      {renderCustomHeader()}
+      {renderHeader()}
       <PendingPhotosBanner
         theme={theme}
         pendingPhotos={pendingPhotos}
