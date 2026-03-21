@@ -38,6 +38,7 @@ export const validateSecret = (secret, strength) => {
 }
 
 export const validateSecretConfirm = (secret, secretConfirm) => {
+  // nosemgrep: javascript.lang.security.audit.unsafe-string-comparison — client-side UX check only, both values from same user's form inputs
   if (secret !== secretConfirm) {
     return 'Secret does not match Secret Confirm.'
   }
