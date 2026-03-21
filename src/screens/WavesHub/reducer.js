@@ -1,6 +1,7 @@
 /* global console */
 import { gql } from '@apollo/client'
 import * as CONST from '../../consts'
+import * as Crypto from 'expo-crypto'
 
 export {
   listWaves,
@@ -30,7 +31,7 @@ export const fetchWaveThumbnails = async ({ waveUuid }) => {
       `,
       variables: {
         pageNumber: 0,
-        batch: String(Math.random()),
+        batch: Crypto.randomUUID(),
         waveUuid
       },
       fetchPolicy: 'network-only'

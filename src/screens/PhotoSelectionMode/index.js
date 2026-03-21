@@ -13,6 +13,7 @@ import { ExpoMasonryLayout } from 'expo-masonry-layout'
 import CachedImage from 'expo-cached-image'
 import Toast from 'react-native-toast-message'
 import { router, useLocalSearchParams } from 'expo-router'
+import * as Crypto from 'expo-crypto'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
@@ -63,7 +64,7 @@ const PhotoSelectionMode = () => {
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [loading, setLoading] = useState(false)
   const [pageNumber, setPageNumber] = useState(0)
-  const [batch, setBatch] = useState(String(Math.random()))
+  const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
   const [adding, setAdding] = useState(false)
 
@@ -100,7 +101,7 @@ const PhotoSelectionMode = () => {
   }, [uuid])
 
   useEffect(() => {
-    loadPhotos(0, String(Math.random()), true)
+    loadPhotos(0, Crypto.randomUUID(), true)
   }, [])
 
   const handleLoadMore = () => {

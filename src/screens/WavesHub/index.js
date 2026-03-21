@@ -17,6 +17,7 @@ import { useAtom } from 'jotai'
 import { FontAwesome5 } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
+import * as Crypto from 'expo-crypto'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
@@ -37,7 +38,7 @@ const WavesHub = () => {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [pageNumber, setPageNumber] = useState(0)
-  const [batch, setBatch] = useState(String(Math.random()))
+  const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
 
   const [searchText, setSearchText] = useState('')
@@ -100,13 +101,13 @@ const WavesHub = () => {
   }, [uuid])
 
   useEffect(() => {
-    loadWaves(0, String(Math.random()), true)
+    loadWaves(0, Crypto.randomUUID(), true)
   }, [])
 
   const handleRefresh = () => {
     setRefreshing(true)
     setPageNumber(0)
-    const newBatch = String(Math.random())
+    const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
     loadWaves(0, newBatch, true)
   }

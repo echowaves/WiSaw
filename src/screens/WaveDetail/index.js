@@ -21,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
 import * as MediaLibrary from 'expo-media-library'
 import NetInfo from '@react-native-community/netinfo'
+import * as Crypto from 'expo-crypto'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
@@ -73,7 +74,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const [loading, setLoading] = useState(false)
   const [stopLoading, setStopLoading] = useState(false)
   const [pageNumber, setPageNumber] = useState(0)
-  const [batch, setBatch] = useState(String(Math.random()))
+  const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
   const [netAvailable, setNetAvailable] = useState(true)
   const [isCameraOpening, setIsCameraOpening] = useState(false)
@@ -297,13 +298,13 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   }, [waveUuid])
 
   useEffect(() => {
-    loadPhotos(0, String(Math.random()), true)
+    loadPhotos(0, Crypto.randomUUID(), true)
   }, [waveUuid])
 
   const handleRefresh = () => {
     setPageNumber(0)
     setStopLoading(false)
-    const newBatch = String(Math.random())
+    const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
     loadPhotos(0, newBatch, true)
   }

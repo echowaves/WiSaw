@@ -17,6 +17,7 @@ import Toast from 'react-native-toast-message'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { PanGestureHandler, State } from 'react-native-gesture-handler'
 import * as Haptics from 'expo-haptics'
+import * as Crypto from 'expo-crypto'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
@@ -35,7 +36,7 @@ const Waves = () => {
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [pageNumber, setPageNumber] = useState(0)
-  const [batch, setBatch] = useState(String(Math.random()))
+  const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
 
   const [modalVisible, setModalVisible] = useState(false)
@@ -101,13 +102,13 @@ const Waves = () => {
   }, [])
 
   useEffect(() => {
-    loadWaves(0, String(Math.random()), true)
+    loadWaves(0, Crypto.randomUUID(), true)
   }, [])
 
   const handleRefresh = () => {
     setRefreshing(true)
     setPageNumber(0)
-    const newBatch = String(Math.random())
+    const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
     loadWaves(0, newBatch, true)
   }

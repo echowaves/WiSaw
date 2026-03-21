@@ -18,6 +18,7 @@ import { isDarkMode } from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as CONST from '../../consts'
 import { listWaves } from '../../screens/Waves/reducer'
+import * as Crypto from 'expo-crypto'
 
 const WaveSelectorModal = ({
   visible,
@@ -42,7 +43,7 @@ const WaveSelectorModal = ({
     try {
       const data = await listWaves({
         pageNumber: 0,
-        batch: String(Math.random()),
+        batch: Crypto.randomUUID(),
         uuid
       })
       setWaves(data.waves || [])
