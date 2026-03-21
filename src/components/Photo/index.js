@@ -21,6 +21,7 @@ import PropTypes from 'prop-types'
 import { useEvent } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
 
+import CloseButton from '../ui/CloseButton'
 import LinearProgress from '../ui/LinearProgress'
 
 import * as reducer from './reducer'
@@ -1163,52 +1164,16 @@ const Photo = ({
     if (!embedded) return null
 
     return (
-      <TouchableOpacity
-        style={{
-          position: 'absolute',
-          top: 10,
-          right: 20,
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000,
-          borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.2)',
-          shadowColor: '#000',
-          shadowOffset: {
-            width: 0,
-            height: 2
-          },
-          shadowOpacity: 0.3,
-          shadowRadius: 4,
-          elevation: 5
-        }}
+      <CloseButton
+        style={{ right: 20 }}
         onPress={() => {
-          // Check if this is an expandable thumb context and minimize it
           if (global.expandableThumbMinimize) {
             global.expandableThumbMinimize(photo?.id)
           } else {
-            // Fallback to router back navigation
             router.back()
           }
         }}
-        activeOpacity={0.7}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <Ionicons
-          name='close'
-          size={24}
-          color='rgba(255, 255, 255, 0.95)'
-          style={{
-            textShadowColor: 'rgba(0, 0, 0, 0.8)',
-            textShadowOffset: { width: 0, height: 1 },
-            textShadowRadius: 2
-          }}
-        />
-      </TouchableOpacity>
+      />
     )
   }
 

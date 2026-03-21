@@ -8,7 +8,6 @@ import {
   StyleSheet,
   TouchableOpacity
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
 
 import usePhotoActions from '../../hooks/usePhotoActions'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
@@ -17,6 +16,7 @@ import * as sharingHelper from '../../utils/simpleSharingHelper'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
+import CloseButton from '../ui/CloseButton'
 import PhotoActionButtons from '../PhotoActionButtons'
 import WaveSelectorModal from '../WaveSelectorModal'
 
@@ -94,9 +94,7 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted }) => {
           onPress={onClose}
         >
           <TouchableOpacity activeOpacity={1} style={styles.content}>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Ionicons name='close' size={20} color={theme.TEXT_SECONDARY} />
-            </TouchableOpacity>
+            <CloseButton onPress={onClose} />
             <Image
               source={{ uri: photo.thumbUrl }}
               style={styles.thumbnail}
@@ -168,18 +166,6 @@ const createStyles = (theme) =>
     },
     spinner: {
       marginVertical: 4
-    },
-    closeButton: {
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      zIndex: 10,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-      justifyContent: 'center',
-      alignItems: 'center'
     }
   })
 
