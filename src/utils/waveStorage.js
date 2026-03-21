@@ -2,6 +2,7 @@
 import * as SecureStore from 'expo-secure-store'
 import Toast from 'react-native-toast-message'
 
+// this is not a password or sensitive info, so SecureStore is used for simplicity
 const ACTIVE_WAVE_KEY = 'ACTIVE_WAVE'
 
 export const saveActiveWave = async (wave) => {
