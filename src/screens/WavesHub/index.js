@@ -22,6 +22,7 @@ import * as Crypto from 'expo-crypto'
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
+import LinearProgress from '../../components/ui/LinearProgress'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
@@ -326,6 +327,23 @@ const WavesHub = () => {
           onChangeText={setSearchText}
         />
       </View>
+
+      {loading && (
+        <View
+          style={{
+            height: 3,
+            backgroundColor: theme.HEADER_BACKGROUND
+          }}
+        >
+          <LinearProgress
+            color={CONST.MAIN_COLOR}
+            style={{
+              flex: 1,
+              height: 3
+            }}
+          />
+        </View>
+      )}
 
       <FlatList
         data={filteredWaves}

@@ -56,11 +56,43 @@ The system SHALL display a `PendingPhotosBanner` in the Wave Detail screen showi
 - **THEN** no pending uploads banner is shown
 
 ### Requirement: Wave Detail Pagination
-The system SHALL paginate photos in Wave Detail, loading more as the user scrolls.
+The system SHALL paginate photos in Wave Detail, loading more as the user scrolls. When the user reaches the bottom of the loaded photos, `PhotosListMasonry` SHALL delegate to the parent screen's `onEndReached` callback to fetch the next page of wave photos via the `feedForWave` GraphQL query.
 
-#### Scenario: User scrolls in Wave Detail
-- **WHEN** the user scrolls to the end of loaded photos
-- **THEN** the next page of wave photos is fetched using the `feedForWave` query
+#### Scenario: User scrolls to the end of loaded photos
+- **WHEN** the user scrolls to the end of loaded photos in the wave detail masonry grid
+- **THEN** `PhotosListMasonry` calls the `onEndReached` prop provided by WaveDetail
+- **THEN** WaveDetail's `handleLoadMore` increments the page number and calls `loadPhotos` with the next page and current batch
+- **THEN** new photos are appended to the existing list
+
+#### Scenario: All photos already loaded
+- **WHEN** the user scrolls to the bottom and `noMoreData` is true
+- **THEN** `handleLoadMore` does not fire a new fetch
+- **THEN** the loading indicator is not shown
+
+#### Scenario: Fetch is already in progress
+- **WHEN** the user scrolls to the bottom while a fetch is in progress
+- **THEN** `PhotosListMasonry` does not call `onEndReached` (guarded by `!loading && !stopLoading`)
+- **THEN** no duplicate network request is made
+
+#### Scenario: onEndReached prop not provided
+- **WHEN** a parent screen does not pass an `onEndReached` prop to `PhotosListMasonry`
+- **THEN** `PhotosListMasonry` falls back to calling `setPageNumber` directly (existing behavior for PhotosList)
+
+### Requirement: Wave Detail Loading Progress Bar
+The system SHALL display a `LinearProgress` bar at the top of the WaveDetail content area whenever photo data is loading, matching the PhotosList loading indicator pattern.
+
+#### Scenario: Photos are loading in wave detail
+- **WHEN** the `loading` state is true (initial load, pagination, or refresh)
+- **THEN** a 3px `LinearProgress` bar SHALL be displayed between the header and the masonry grid
+- **THEN** the bar SHALL use `CONST.MAIN_COLOR` as the color and `theme.HEADER_BACKGROUND` as the track background
+
+#### Scenario: Photos finish loading
+- **WHEN** the `loading` state becomes false
+- **THEN** the `LinearProgress` bar SHALL be hidden
+
+#### Scenario: User interacts while loading
+- **WHEN** the progress bar is visible
+- **THEN** the masonry grid and all other UI elements SHALL remain interactive (non-blocking)
 
 ## REMOVED Requirements
 
@@ -71,3 +103,7 @@ The system SHALL paginate photos in Wave Detail, loading more as the user scroll
 ### Requirement: Remove Photo from Wave
 **Reason**: Long-press on a photo in wave detail now opens the QuickActionsModal (matching main feed behavior) instead of showing a context menu with "Remove from Wave." Photo-to-wave management is handled through the Wave action button in the QuickActionsModal or full photo view.
 **Migration**: Users use the Wave button in the expanded photo view or QuickActionsModal to manage wave assignment.
+
+### Requirement: Wave Detail Centered Loading Spinner
+**Reason**: Replaced by the `LinearProgress` bar for consistency with PhotosList. The centered `ActivityIndicator` that showed when `loading && photos.length === 0` is no longer used.
+**Migration**: The `LinearProgress` bar at the top provides loading feedback in all cases. The `EmptyStateCard` continues to render when photos array is empty after load completes.
