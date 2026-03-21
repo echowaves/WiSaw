@@ -16,6 +16,7 @@
     "publish:prod": "source .env && eas update --branch production",
     "lint": "npx ts-standard",
     "lint:fix": "npx ts-standard --fix"
+    
   },
   "dependencies": {
     "@apollo/client": "4.1.6",
