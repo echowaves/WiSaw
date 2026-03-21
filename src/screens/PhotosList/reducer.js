@@ -280,10 +280,15 @@ export async function getPhotos (params) {
       searchTerm
     }
 
-    const requestFn = [requestGeoPhotos, requestWatchedPhotos, requestSearchedPhotos][activeSegment]
-
-    if (requestFn) {
-      return await requestFn(requestParams)
+    switch (activeSegment) {
+      case 0:
+        return await requestGeoPhotos(requestParams)
+      case 1:
+        return await requestWatchedPhotos(requestParams)
+      case 2:
+        return await requestSearchedPhotos(requestParams)
+      default:
+        break
     }
   } catch (err7) {
     console.error({ err7 })
