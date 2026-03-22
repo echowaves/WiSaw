@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { FontAwesome5 } from '@expo/vector-icons'
-import { Stack, useRouter } from 'expo-router'
+import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useAtom } from 'jotai'
 import AppHeader from '../../../src/components/AppHeader'
 import WavesHub from '../../../src/screens/WavesHub'
@@ -26,12 +26,17 @@ export default function WavesScreen() {
   }, [uuid])
 
   useEffect(() => {
-    fetchUngroupedCount()
     const unsubscribe = subscribeToAutoGroupDone(() => {
       fetchUngroupedCount()
     })
     return unsubscribe
   }, [fetchUngroupedCount])
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUngroupedCount()
+    }, [fetchUngroupedCount])
+  )
 
   return (
     <>

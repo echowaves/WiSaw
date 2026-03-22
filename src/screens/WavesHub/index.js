@@ -16,7 +16,7 @@ import {
 import { useAtom } from 'jotai'
 import { FontAwesome5 } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
-import { router } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 import * as Crypto from 'expo-crypto'
 import * as SecureStore from 'expo-secure-store'
 
@@ -110,9 +110,15 @@ const WavesHub = () => {
     }
   }, [uuid])
 
-  useEffect(() => {
-    loadWaves(0, Crypto.randomUUID(), true)
-  }, [])
+  useFocusEffect(
+    useCallback(() => {
+      setPageNumber(0)
+      setNoMoreData(false)
+      const newBatch = Crypto.randomUUID()
+      setBatch(newBatch)
+      loadWaves(0, newBatch, true)
+    }, [uuid])
+  )
 
   // One-time tooltip for context menu discoverability
   useEffect(() => {
