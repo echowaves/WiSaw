@@ -8,7 +8,8 @@ The system SHALL display an auto-group button in the upper-right navigation bar 
 #### Scenario: Auto-group button shows ungrouped photo count badge
 - **WHEN** the Waves screen loads or refreshes
 - **THEN** the system SHALL call `getUngroupedPhotosCount(uuid)` GraphQL query
-- **THEN** if the count is greater than zero, a badge SHALL display the count on the auto-group button
+- **THEN** if the count is greater than zero, a pill-shaped badge SHALL display the full numeric count on the auto-group button without any cap or abbreviation
+- **THEN** the badge SHALL expand horizontally to fit the number with adequate padding
 - **THEN** if the count is zero, no badge SHALL be shown
 
 #### Scenario: User taps auto-group button

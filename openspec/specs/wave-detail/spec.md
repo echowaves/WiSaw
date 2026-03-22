@@ -114,6 +114,14 @@ The WaveDetail header ellipsis menu SHALL include the following options for wave
 - **WHEN** a wave owner taps the header ellipsis icon on Android
 - **THEN** an Alert SHALL display buttons: Cancel, Rename, Merge Into Another Wave..., Delete Wave
 
+#### Scenario: User deletes wave from header menu
+- **WHEN** the user selects Delete Wave from the header ellipsis menu
+- **THEN** a confirmation dialog is shown
+- **THEN** upon confirmation, the `deleteWave` mutation SHALL be called
+- **THEN** the system SHALL emit `autoGroupDone` to trigger an ungrouped-photos count refresh
+- **THEN** the system SHALL navigate back via `router.back()`
+- **THEN** a success toast SHALL be shown
+
 #### Scenario: Owner renames wave
 - **WHEN** the user edits the wave name and taps Save
 - **THEN** the `updateWave` mutation SHALL be called

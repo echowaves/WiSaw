@@ -17,9 +17,10 @@ The badge is a red pill rendered with absolute positioning over the auto-group b
 **Remove the ternary cap, render `{ungroupedCount}` directly.**
 The `> 99 ? '99+' :` logic was a workaround for the tight badge. With proper padding the pill handles any reasonable count.
 
-**Bump `paddingHorizontal` from 4 to 6.**
-Gives 2px extra space on each side — enough for 3–4 digit numbers to breathe without making single-digit badges look oversized.
+**Set `minWidth: 28` and `paddingHorizontal: 6`.**
+The original `minWidth: 20` with `paddingHorizontal: 10` left zero content area (20 - 10 - 10 = 0), making text invisible. Raising `minWidth` to 28 ensures the content area is at least 16px at minimum size (28 - 6 - 6 = 16), which comfortably fits 2 digits. The View grows beyond `minWidth` automatically for wider numbers. Single-digit counts still render as a near-circle (28×20) which looks proportional on the 44px button.
 
 ## Risks / Trade-offs
 
 - [Very large counts (10 000+) produce a wide pill] → Acceptable; users benefit from knowing the real count, and the pill remains proportional to the button at realistic magnitudes.
+- [Parent clipping] → iOS defaults `overflow: 'hidden'` on Views, so the absolutely-positioned badge gets clipped when it extends beyond the button bounds. Fixed by adding `overflow: 'visible'` to the parent TouchableOpacity.

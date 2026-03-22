@@ -38,6 +38,7 @@ The system SHALL show a context menu on long-press of a wave card with managemen
 - **WHEN** the user selects Delete Wave from the context menu
 - **THEN** a confirmation dialog is shown
 - **THEN** upon confirmation, the wave is deleted and removed from the grid
+- **THEN** the system SHALL emit `autoGroupDone` to trigger an ungrouped-photos count refresh
 
 #### Scenario: Owner long-presses a wave (iOS)
 - **WHEN** a wave owner long-presses a wave card on iOS

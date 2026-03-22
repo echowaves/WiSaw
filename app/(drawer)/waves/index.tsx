@@ -56,7 +56,9 @@ export default function WavesScreen() {
                       backgroundColor:
                         SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
                       borderWidth: 1,
-                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER
+                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
+                      flexDirection: 'row',
+                      alignItems: 'center'
                     }
                   ]}
                 >
@@ -85,16 +87,13 @@ export default function WavesScreen() {
 
 const styles = StyleSheet.create({
   badge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
     backgroundColor: '#FF3B30',
     borderRadius: 10,
-    minWidth: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 6,
+    marginLeft: 4,
   },
   badgeText: {
     color: '#FFFFFF',
