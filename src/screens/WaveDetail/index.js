@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useImperativeHandle } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo, useImperativeHandle } from 'react'
 import {
   View,
   Text,
@@ -38,9 +38,10 @@ import useLocationInit from '../PhotosList/hooks/useLocationInit'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import isValidLocation from '../../utils/isValidLocation'
 import {
-  calculatePhotoDimensions,
   createFrozenPhoto
 } from '../../utils/photoListHelpers'
+import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 
 const FOOTER_HEIGHT = 90
@@ -83,14 +84,6 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const [netAvailable, setNetAvailable] = useState(true)
   const [isCameraOpening, setIsCameraOpening] = useState(false)
 
-  // Expand/collapse state
-  const [expandedPhotoIds, setExpandedPhotoIds] = useState(new Set())
-  const [isPhotoExpanding, setIsPhotoExpanding] = useState(false)
-  const [measuredHeights, setMeasuredHeights] = useState(new Map())
-  const [justCollapsedId, setJustCollapsedId] = useState(null)
-  const photoHeightRefs = useRef(new Map())
-  const lastExpandedIdRef = useRef(null)
-
   // Edit modal
   const [editModalVisible, setEditModalVisible] = useState(false)
   const [editName, setEditName] = useState('')
@@ -100,9 +93,9 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   // Merge state
   const [mergeModalVisible, setMergeModalVisible] = useState(false)
 
-  const masonryRef = useRef(null)
   const quickActionsRef = useRef(null)
-  const { width } = useWindowDimensions()
+  const { width, height } = useWindowDimensions()
+  const insets = useSafeAreaInsets()
   const theme = getTheme(isDarkMode)
   const toastTopOffset = useToastTopOffset()
 
@@ -142,7 +135,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   })
 
   // Starred-layout segment config
-  const segmentConfig = React.useMemo(() => {
+  const segmentConfig = useMemo(() => {
     const getResponsiveColumns = (baseColumns, largeColumns) => {
       if (width >= 768) return Math.max(3, largeColumns * 1.3)
       if (width >= 428) return Math.max(3, largeColumns / 1.3)
@@ -157,78 +150,19 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     }
   }, [width])
 
-  // Expand/collapse helpers
-  const isPhotoExpanded = useCallback(
-    (photoId) => expandedPhotoIds.has(photoId),
-    [expandedPhotoIds]
-  )
-
-  const updatePhotoHeight = useCallback((photoId, height) => {
-    photoHeightRefs.current.set(photoId, height)
-    setMeasuredHeights((current) => {
-      const updated = new Map(current)
-      updated.set(photoId, height)
-      return updated
-    })
-  }, [])
-
-  const getCalculatedDimensions = useCallback(
-    (photo) => {
-      const screenWidth = width - 20
-      const isExpanded = isPhotoExpanded(photo.id)
-
-      if (isExpanded) {
-        const currentHeight = measuredHeights.get(photo.id) || photoHeightRefs.current.get(photo.id)
-        if (currentHeight) {
-          return { width: screenWidth, height: currentHeight }
-        }
-      }
-
-      return calculatePhotoDimensions(
-        photo,
-        isExpanded,
-        screenWidth,
-        segmentConfig.maxItemsPerRow,
-        segmentConfig.spacing
-      )
-    },
-    [isPhotoExpanded, width, segmentConfig, measuredHeights]
-  )
-
-  const handlePhotoToggle = useCallback(
-    (photoId) => {
-      if (isPhotoExpanding) return
-
-      setIsPhotoExpanding(true)
-      const isExpanded = expandedPhotoIds.has(photoId)
-
-      if (isExpanded) {
-        setJustCollapsedId(photoId)
-        lastExpandedIdRef.current = photoId
-        setMeasuredHeights((current) => {
-          const updated = new Map(current)
-          updated.delete(photoId)
-          return updated
-        })
-        setExpandedPhotoIds((prevIds) => {
-          const newIds = new Set(prevIds)
-          newIds.delete(photoId)
-          return newIds
-        })
-      } else {
-        setJustCollapsedId(null)
-        lastExpandedIdRef.current = photoId
-        setExpandedPhotoIds((prevIds) => {
-          const newIds = new Set(prevIds)
-          newIds.add(photoId)
-          return newIds
-        })
-      }
-
-      setTimeout(() => setIsPhotoExpanding(false), 500)
-    },
-    [isPhotoExpanding, expandedPhotoIds]
-  )
+  // Shared photo expansion hook (scroll-to-visible, state, toggle)
+  const {
+    expandedPhotoIds,
+    setExpandedPhotoIds,
+    isPhotoExpanded,
+    handlePhotoToggle,
+    getCalculatedDimensions,
+    updatePhotoHeight,
+    ensureItemVisible,
+    handleScroll,
+    masonryRef,
+    justCollapsedId
+  } = usePhotoExpansion({ width, height, insets, segmentConfig })
 
   // Long-press handler
   const handlePhotoLongPress = useCallback((photo) => {
@@ -554,6 +488,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             activeSegment={1}
             photosList={photos}
             segmentConfig={segmentConfig}
+            onScroll={handleScroll}
             masonryRef={masonryRef}
             getCalculatedDimensions={getCalculatedDimensions}
             isPhotoExpanded={isPhotoExpanded}
@@ -561,6 +496,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             expandedPhotoIds={expandedPhotoIds}
             onToggleExpand={handlePhotoToggle}
             updatePhotoHeight={updatePhotoHeight}
+            onRequestEnsureVisible={ensureItemVisible}
             onEndReached={handleLoadMore}
             onRefresh={handleRefresh}
             loading={loading}

@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Wave Photo Masonry Display
-The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment.
+The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header.
 
 #### Scenario: User opens wave detail
 - **WHEN** the user taps a wave card in the Waves Hub
@@ -20,6 +20,10 @@ The system SHALL display a wave's photos in a masonry grid layout using `PhotosL
 #### Scenario: User taps a photo in wave detail
 - **WHEN** the user taps a photo tile in the wave masonry grid
 - **THEN** the photo expands inline showing the full `Photo` component with image, comments, AI tags, and action buttons
+
+#### Scenario: Expanded photo scrolls into view
+- **WHEN** a photo is expanded inline in the wave detail masonry grid
+- **THEN** the view SHALL automatically scroll so the expanded photo's top edge is visible below the header, with the same behavior as the main photo feed
 
 #### Scenario: User long-presses a photo in wave detail
 - **WHEN** the user long-presses a photo tile in the wave masonry grid
