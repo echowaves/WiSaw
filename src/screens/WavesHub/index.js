@@ -174,6 +174,7 @@ const WavesHub = () => {
             try {
               await reducer.deleteWave({ waveUuid, uuid })
               setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
+              emitAutoGroupDone()
               Toast.show({ type: 'success', text1: 'Wave deleted' })
             } catch (error) {
               console.error(error)

@@ -33,6 +33,7 @@ import QuickActionsModal from '../../components/QuickActionsModal'
 import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
 import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
+import { emitAutoGroupDone } from '../../events/autoGroupBus'
 import usePhotoUploader from '../PhotosList/upload/usePhotoUploader'
 import useLocationInit from '../PhotosList/hooks/useLocationInit'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
@@ -327,6 +328,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
           onPress: async () => {
             try {
               await reducer.deleteWave({ waveUuid, uuid })
+              emitAutoGroupDone()
               Toast.show({ type: 'success', text1: 'Wave deleted' })
               router.back()
             } catch (error) {
