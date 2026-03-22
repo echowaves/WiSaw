@@ -15,7 +15,7 @@
     "build": "source .env && eas build",
     "publish:prod": "source .env && eas update --branch production",
     "lint": "npx ts-standard",
-    "lint:fix": "npx ts-standard --fix"    
+    "lint:fix": "npx ts-standard --fix"
   },
   "dependencies": {
     "@apollo/client": "4.1.6",
@@ -29,6 +29,7 @@
     "@rnhooks/keyboard": "1.1.0",
     "@types/react": "19.2.10",
     "expo": "55.0.5",
+    "expo-asset": "55.0.10",
     "expo-audio": "55.0.9",
     "expo-background-task": "55.0.10",
     "expo-build-properties": "55.0.10",
