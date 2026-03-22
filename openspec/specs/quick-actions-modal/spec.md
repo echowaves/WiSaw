@@ -6,7 +6,7 @@ The quick-actions modal provides instant access to all 5 photo actions (Report, 
 ## Requirements
 
 ### Requirement: Quick Actions Modal Display
-The system SHALL display a modal overlay when the user long-presses a photo thumbnail in the feed, showing a progressively-loaded photo preview and all 5 action buttons. The modal SHALL appear within a single animation frame of the long-press event, without waiting for photo details to load. The photo preview SHALL load progressively — thumbnail first, then full-resolution image on top.
+The system SHALL display a modal overlay when the user long-presses a photo thumbnail OR taps the ⋮ pill on a photo thumbnail in the feed, showing a progressively-loaded photo preview and all 5 action buttons. The modal SHALL appear within a single animation frame of the long-press event, without waiting for photo details to load. The photo preview SHALL load progressively — thumbnail first, then full-resolution image on top.
 
 #### Scenario: Modal opens on long-press
 - **WHEN** the user long-presses a photo thumbnail in the feed
@@ -17,6 +17,11 @@ The system SHALL display a modal overlay when the user long-presses a photo thum
 - **THEN** a loading spinner is displayed below the preview while photo details are being fetched
 - **THEN** action buttons are NOT shown until photo details have loaded
 - **THEN** the long-press state update SHALL NOT trigger a re-render of the photo feed list
+
+#### Scenario: Modal opens on ⋮ pill tap
+- **WHEN** the user taps the ⋮ pill overlay on a photo thumbnail
+- **THEN** haptic feedback is triggered
+- **THEN** a modal overlay appears with the same behavior as long-press (progressive image loading, action buttons after detail fetch)
 
 #### Scenario: Progressive image loading layers
 - **WHEN** the modal is visible and the photo has both a valid thumbUrl and imgUrl

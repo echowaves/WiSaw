@@ -278,6 +278,13 @@ const ExpandableThumb = ({
     )
   }
 
+  const handleMenuPress = useCallback(() => {
+    if (onLongPress) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      onLongPress(item)
+    }
+  }, [onLongPress, item])
+
   const renderCollapsedThumb = () => (
     <View
       style={{
@@ -300,6 +307,25 @@ const ExpandableThumb = ({
         />
       )}
       {renderCommentOverlay()}
+      {onLongPress && (
+        <TouchableOpacity
+          onPress={handleMenuPress}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={{
+            position: 'absolute',
+            top: 6,
+            right: 6,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            borderRadius: 12,
+            width: 24,
+            height: 24,
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
+          <Ionicons name='ellipsis-vertical' size={14} color='white' />
+        </TouchableOpacity>
+      )}
     </View>
   )
 
