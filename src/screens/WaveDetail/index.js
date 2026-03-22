@@ -63,6 +63,9 @@ const QuickActionsModalWrapper = React.memo(
         onPhotoDeleted={(photoId) => {
           setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
         }}
+        onPhotoRemovedFromWave={(photoId) => {
+          setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+        }}
       />
     )
   })

@@ -1,7 +1,5 @@
-## MODIFIED Requirements
-
 ### Requirement: Wave Photo Masonry Display
-The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header.
+The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header. When a photo is removed from the wave or moved to another wave via the QuickActionsModal, the photo SHALL be immediately filtered from the wave's photo list.
 
 #### Scenario: User opens wave detail
 - **WHEN** the user taps a wave card in the Waves Hub
@@ -28,6 +26,12 @@ The system SHALL display a wave's photos in a masonry grid layout using `PhotosL
 #### Scenario: User long-presses a photo in wave detail
 - **WHEN** the user long-presses a photo tile in the wave masonry grid
 - **THEN** the `QuickActionsModal` opens with the photo preview and action buttons
+
+#### Scenario: Photo removed from wave via quick-actions modal
+- **WHEN** the user removes a photo from the wave via the QuickActionsModal (remove or move to another wave)
+- **THEN** the QuickActionsModal closes immediately
+- **THEN** the photo is filtered from the wave's local photo list
+- **THEN** the masonry grid re-renders without the removed photo
 
 #### Scenario: Wave has no photos
 - **WHEN** the wave is empty

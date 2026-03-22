@@ -5,7 +5,7 @@ import Toast from 'react-native-toast-message'
 import * as reducer from '../components/Photo/reducer'
 import { addPhotoToWave, removePhotoFromWave, createWave } from '../screens/Waves/reducer'
 
-const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopOffset, onDeleted }) => {
+const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopOffset, onDeleted, onRemovedFromWave }) => {
   const [bans, setBans] = useState([])
   const [waveModalVisible, setWaveModalVisible] = useState(false)
 
@@ -130,6 +130,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
 
   const handleWaveSelect = useCallback(async (wave) => {
     setWaveModalVisible(false)
+    if (onRemovedFromWave) {
+      onRemovedFromWave(photo.id)
+    }
     const previousDetails = { ...photoDetails }
     setPhotoDetails({
       ...photoDetails,
@@ -153,10 +156,13 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         topOffset: toastTopOffset
       })
     }
-  }, [photo, photoDetails, setPhotoDetails, uuid, toastTopOffset])
+  }, [photo, photoDetails, setPhotoDetails, uuid, toastTopOffset, onRemovedFromWave])
 
   const handleWaveRemove = useCallback(async () => {
     setWaveModalVisible(false)
+    if (onRemovedFromWave) {
+      onRemovedFromWave(photo.id)
+    }
     const previousDetails = { ...photoDetails }
     setPhotoDetails({
       ...photoDetails,
@@ -180,7 +186,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         topOffset: toastTopOffset
       })
     }
-  }, [photo, photoDetails, setPhotoDetails, toastTopOffset])
+  }, [photo, photoDetails, setPhotoDetails, toastTopOffset, onRemovedFromWave])
 
   const handleCreateWave = useCallback(async (name) => {
     setWaveModalVisible(false)

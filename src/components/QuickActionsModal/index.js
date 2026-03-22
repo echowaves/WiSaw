@@ -23,7 +23,7 @@ import CloseButton from '../ui/CloseButton'
 import PhotoActionButtons from '../PhotoActionButtons'
 import WaveSelectorModal from '../WaveSelectorModal'
 
-const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted }) => {
+const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRemovedFromWave }) => {
   const [darkMode] = useAtom(STATE.isDarkMode)
   const theme = getTheme(darkMode)
   const [uuid] = useAtom(STATE.uuid)
@@ -40,6 +40,16 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted }) => {
       }
     },
     [onClose, onPhotoDeleted]
+  )
+
+  const handleRemovedFromWave = useCallback(
+    (photoId) => {
+      onClose()
+      if (onPhotoRemovedFromWave) {
+        onPhotoRemovedFromWave(photoId)
+      }
+    },
+    [onClose, onPhotoRemovedFromWave]
   )
 
   const {
@@ -60,7 +70,8 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted }) => {
     setPhotoDetails,
     uuid,
     toastTopOffset,
-    onDeleted: handleDeleted
+    onDeleted: handleDeleted,
+    onRemovedFromWave: handleRemovedFromWave
   })
 
   useEffect(() => {
