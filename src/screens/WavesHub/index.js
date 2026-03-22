@@ -18,6 +18,7 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
 import * as Crypto from 'expo-crypto'
+import * as SecureStore from 'expo-secure-store'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
@@ -26,6 +27,7 @@ import LinearProgress from '../../components/ui/LinearProgress'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import MergeWaveModal from '../../components/MergeWaveModal'
 import { subscribeToAutoGroup, emitAutoGroupDone } from '../../events/autoGroupBus'
 
 const WavesHub = () => {
@@ -57,6 +59,13 @@ const WavesHub = () => {
   const [editWaveName, setEditWaveName] = useState('')
   const [editWaveDescription, setEditWaveDescription] = useState('')
   const [updating, setUpdating] = useState(false)
+
+  // Merge state
+  const [mergeModalVisible, setMergeModalVisible] = useState(false)
+  const [mergingWave, setMergingWave] = useState(null)
+
+  // Tooltip state
+  const [showTooltip, setShowTooltip] = useState(false)
 
   const theme = getTheme(isDarkMode)
 
@@ -103,6 +112,30 @@ const WavesHub = () => {
 
   useEffect(() => {
     loadWaves(0, Crypto.randomUUID(), true)
+  }, [])
+
+  // One-time tooltip for context menu discoverability
+  useEffect(() => {
+    const checkTooltip = async () => {
+      try {
+        const shown = await SecureStore.getItemAsync('waveContextMenuTooltipShown')
+        if (!shown) {
+          setShowTooltip(true)
+        }
+      } catch {
+        // Ignore read errors
+      }
+    }
+    checkTooltip()
+  }, [])
+
+  const dismissTooltip = useCallback(async () => {
+    setShowTooltip(false)
+    try {
+      await SecureStore.setItemAsync('waveContextMenuTooltipShown', 'true')
+    } catch {
+      // Ignore write errors
+    }
   }, [])
 
   const handleRefresh = () => {
@@ -259,14 +292,58 @@ const WavesHub = () => {
     return unsubscribe
   }, [handleAutoGroup])
 
+  const handleStartMerge = (wave) => {
+    setMergingWave(wave)
+    setMergeModalVisible(true)
+  }
+
+  const handleMergeTargetSelected = (targetWave) => {
+    setMergeModalVisible(false)
+    const sourcePhotos = mergingWave?.photosCount ?? 0
+    Alert.alert(
+      `Merge "${mergingWave?.name}" into "${targetWave.name}"?`,
+      `${sourcePhotos} photo${sourcePhotos !== 1 ? 's' : ''} will be moved. "${mergingWave?.name}" will be deleted.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Merge',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const updatedTarget = await reducer.mergeWaves({
+                targetWaveUuid: targetWave.waveUuid,
+                sourceWaveUuid: mergingWave.waveUuid,
+                uuid
+              })
+              setWaves(prev => prev
+                .filter(w => w.waveUuid !== mergingWave.waveUuid)
+                .map(w => w.waveUuid === targetWave.waveUuid
+                  ? { ...w, ...updatedTarget, thumbnails: w.thumbnails }
+                  : w
+                )
+              )
+              Toast.show({ type: 'success', text1: 'Waves merged successfully' })
+            } catch (error) {
+              console.error(error)
+              Toast.show({ type: 'error', text1: 'Error merging waves', text2: error.message })
+            } finally {
+              setMergingWave(null)
+            }
+          }
+        }
+      ]
+    )
+  }
+
   const showWaveContextMenu = (wave) => {
     const isOwner = wave.createdBy === uuid
+    if (showTooltip) dismissTooltip()
 
     if (Platform.OS === 'ios') {
       const options = isOwner
-        ? ['Cancel', 'Rename', 'Edit Description', 'Delete Wave']
+        ? ['Cancel', 'Rename', 'Edit Description', 'Merge Into Another Wave...', 'Delete Wave']
         : ['Cancel']
-      const destructiveButtonIndex = isOwner ? 3 : undefined
+      const destructiveButtonIndex = isOwner ? 4 : undefined
 
       ActionSheetIOS.showActionSheetWithOptions(
         { options, cancelButtonIndex: 0, destructiveButtonIndex },
@@ -278,13 +355,15 @@ const WavesHub = () => {
             setEditWaveDescription(wave.description || '')
             setEditModalVisible(true)
           }
-          if (isOwner && buttonIndex === 3) handleDeleteWave(wave.waveUuid)
+          if (isOwner && buttonIndex === 3) handleStartMerge(wave)
+          if (isOwner && buttonIndex === 4) handleDeleteWave(wave.waveUuid)
         }
       )
     } else {
       const buttons = [{ text: 'Cancel', style: 'cancel' }]
       if (isOwner) {
         buttons.push({ text: 'Rename', onPress: () => handleEditWave(wave) })
+        buttons.push({ text: 'Merge Into Another Wave...', onPress: () => handleStartMerge(wave) })
         buttons.push({ text: 'Delete Wave', style: 'destructive', onPress: () => handleDeleteWave(wave.waveUuid) })
       }
       Alert.alert(wave.name, 'Choose an action', buttons)
@@ -327,6 +406,18 @@ const WavesHub = () => {
           onChangeText={setSearchText}
         />
       </View>
+
+      {showTooltip && waves.length > 0 && (
+        <TouchableOpacity
+          style={[styles.tooltipContainer, { backgroundColor: theme.TEXT_PRIMARY }]}
+          onPress={dismissTooltip}
+          activeOpacity={0.9}
+        >
+          <Text style={[styles.tooltipText, { color: theme.CARD_BACKGROUND }]}>
+            Hold or tap ⋮ for options
+          </Text>
+        </TouchableOpacity>
+      )}
 
       {loading && (
         <View
@@ -464,6 +555,15 @@ const WavesHub = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Merge Wave Modal */}
+      <MergeWaveModal
+        visible={mergeModalVisible}
+        onClose={() => { setMergeModalVisible(false); setMergingWave(null) }}
+        onSelectTarget={handleMergeTargetSelected}
+        sourceWave={mergingWave}
+        uuid={uuid}
+      />
     </View>
   )
 }
@@ -495,6 +595,18 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 8,
     paddingBottom: 16
+  },
+  tooltipContainer: {
+    alignSelf: 'flex-end',
+    marginRight: 24,
+    marginBottom: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8
+  },
+  tooltipText: {
+    fontSize: 12,
+    fontWeight: '600'
   },
   modalOverlay: {
     flex: 1,

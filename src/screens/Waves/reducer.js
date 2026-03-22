@@ -179,6 +179,35 @@ export const removePhotoFromWave = async ({ waveUuid, photoId }) => {
   }
 }
 
+export const mergeWaves = async ({ targetWaveUuid, sourceWaveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation mergeWaves($targetWaveUuid: String!, $sourceWaveUuid: String!, $uuid: String!) {
+          mergeWaves(targetWaveUuid: $targetWaveUuid, sourceWaveUuid: $sourceWaveUuid, uuid: $uuid) {
+            waveUuid
+            name
+            description
+            createdAt
+            updatedAt
+            createdBy
+            photosCount
+          }
+        }
+      `,
+      variables: {
+        targetWaveUuid,
+        sourceWaveUuid,
+        uuid
+      }
+    })
+    return response.data.mergeWaves
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
 export const getUngroupedPhotosCount = async ({ uuid }) => {
   try {
     const response = await CONST.gqlClient.query({

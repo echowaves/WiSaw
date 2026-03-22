@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 import CachedImage from 'expo-cached-image'
 
 import * as CONST from '../../consts'
@@ -57,12 +57,23 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
     >
       {renderCollage()}
       <View style={styles.infoContainer}>
-        <Text style={[styles.waveName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
-          {wave.name}
-        </Text>
-        <Text style={[styles.photoCount, { color: theme.TEXT_SECONDARY }]}>
-          {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
-        </Text>
+        <View style={styles.infoRow}>
+          <View style={styles.infoTextContainer}>
+            <Text style={[styles.waveName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
+              {wave.name}
+            </Text>
+            <Text style={[styles.photoCount, { color: theme.TEXT_SECONDARY }]}>
+              {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={(e) => { e.stopPropagation(); onLongPress(wave) }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={styles.menuButton}
+          >
+            <Ionicons name='ellipsis-vertical' size={18} color={theme.TEXT_SECONDARY} />
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   )
@@ -97,6 +108,16 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     padding: 10
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  infoTextContainer: {
+    flex: 1
+  },
+  menuButton: {
+    padding: 4
   },
   waveName: {
     fontSize: 14,

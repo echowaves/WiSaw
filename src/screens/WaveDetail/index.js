@@ -41,6 +41,7 @@ import {
   calculatePhotoDimensions,
   createFrozenPhoto
 } from '../../utils/photoListHelpers'
+import MergeWaveModal from '../../components/MergeWaveModal'
 
 const FOOTER_HEIGHT = 90
 
@@ -95,6 +96,9 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const [editName, setEditName] = useState('')
   const [editDescription, setEditDescription] = useState('')
   const [saving, setSaving] = useState(false)
+
+  // Merge state
+  const [mergeModalVisible, setMergeModalVisible] = useState(false)
 
   const masonryRef = useRef(null)
   const quickActionsRef = useRef(null)
@@ -327,9 +331,9 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ['Cancel', 'Rename', 'Edit Description', 'Delete Wave'],
+          options: ['Cancel', 'Rename', 'Edit Description', 'Merge Into Another Wave...', 'Delete Wave'],
           cancelButtonIndex: 0,
-          destructiveButtonIndex: 3
+          destructiveButtonIndex: 4
         },
         (buttonIndex) => {
           if (buttonIndex === 1 || buttonIndex === 2) {
@@ -337,7 +341,8 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             setEditDescription('')
             setEditModalVisible(true)
           }
-          if (buttonIndex === 3) handleDeleteWave()
+          if (buttonIndex === 3) setMergeModalVisible(true)
+          if (buttonIndex === 4) handleDeleteWave()
         }
       )
     } else {
@@ -351,6 +356,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             setEditModalVisible(true)
           }
         },
+        { text: 'Merge Into Another Wave...', onPress: () => setMergeModalVisible(true) },
         { text: 'Delete Wave', style: 'destructive', onPress: handleDeleteWave }
       ])
     }
@@ -406,6 +412,36 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleMergeTargetSelected = (targetWave) => {
+    setMergeModalVisible(false)
+    const sourcePhotos = photos.length
+    Alert.alert(
+      `Merge "${waveName}" into "${targetWave.name}"?`,
+      `${sourcePhotos} photo${sourcePhotos !== 1 ? 's' : ''} will be moved. "${waveName}" will be deleted.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Merge',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await reducer.mergeWaves({
+                targetWaveUuid: targetWave.waveUuid,
+                sourceWaveUuid: waveUuid,
+                uuid
+              })
+              Toast.show({ type: 'success', text1: `Merged into "${targetWave.name}"` })
+              router.back()
+            } catch (error) {
+              console.error(error)
+              Toast.show({ type: 'error', text1: 'Error merging waves', text2: error.message })
+            }
+          }
+        }
+      ]
+    )
   }
 
   // Camera flow
@@ -598,6 +634,15 @@ const WaveDetail = React.forwardRef((_props, ref) => {
           </View>
         </View>
       </Modal>
+
+      {/* Merge Wave Modal */}
+      <MergeWaveModal
+        visible={mergeModalVisible}
+        onClose={() => setMergeModalVisible(false)}
+        onSelectTarget={handleMergeTargetSelected}
+        sourceWave={{ waveUuid, name: waveName }}
+        uuid={uuid}
+      />
     </View>
   )
 })

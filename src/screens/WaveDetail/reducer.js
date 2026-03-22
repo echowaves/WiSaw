@@ -2,7 +2,7 @@
 import { gql } from '@apollo/client'
 import * as CONST from '../../consts'
 
-export { removePhotoFromWave, updateWave, deleteWave } from '../Waves/reducer'
+export { removePhotoFromWave, updateWave, deleteWave, mergeWaves } from '../Waves/reducer'
 
 export const fetchWavePhotos = async ({ waveUuid, pageNumber, batch }) => {
   try {
