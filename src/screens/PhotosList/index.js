@@ -26,8 +26,8 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Ionicons } from '@expo/vector-icons'
 import * as Constants from 'expo-constants'
+import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 
 import { emitPhotoSearch, subscribeToPhotoSearch } from '../../events/photoSearchBus'
 
@@ -221,28 +221,7 @@ const PhotosList = ({ searchFromUrl }) => {
       // paddingBottom: 10,
       // marginBottom: 10,
     },
-    photoHintBanner: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      marginHorizontal: 12,
-      marginTop: 8,
-      marginBottom: 4,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderRadius: 12
-    },
-    photoHintContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1
-    },
-    photoHintText: {
-      color: 'rgba(255,255,255,0.9)',
-      fontSize: 13,
-      fontWeight: '500'
-    },
+
     // Modern header styles
     headerContainer: {
       alignItems: 'center',
@@ -503,26 +482,6 @@ const PhotosList = ({ searchFromUrl }) => {
   useEffect(() => {
     setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
   }, [unreadCountList])
-
-  // One-time hint banner for photo actions discoverability
-  const [showPhotoHint, setShowPhotoHint] = useState(false)
-
-  useEffect(() => {
-    const checkHint = async () => {
-      try {
-        const shown = await SecureStore.getItemAsync('photoActionsHintShown')
-        if (!shown) setShowPhotoHint(true)
-      } catch { /* noop */ }
-    }
-    checkHint()
-  }, [])
-
-  const dismissPhotoHint = useCallback(async () => {
-    setShowPhotoHint(false)
-    try {
-      await SecureStore.setItemAsync('photoActionsHintShown', 'true')
-    } catch { /* noop */ }
-  }, [])
 
   // Long-press handler — open quick-actions modal
   const quickActionsRef = useRef(null)
@@ -935,19 +894,7 @@ const PhotosList = ({ searchFromUrl }) => {
               autoFocus={false}
             />
           )}
-          {showPhotoHint && photosList?.length > 0 && (
-            <View style={styles.photoHintBanner}>
-              <View style={styles.photoHintContent}>
-                <Ionicons name='bulb-outline' size={16} color='#FFD700' style={{ marginRight: 8 }} />
-                <Text style={styles.photoHintText}>
-                  Long-press any photo for quick actions
-                </Text>
-              </View>
-              <TouchableOpacity onPress={dismissPhotoHint} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                <Ionicons name='close' size={18} color='rgba(255,255,255,0.8)' />
-              </TouchableOpacity>
-            </View>
-          )}
+          <InteractionHintBanner hasContent={photosList?.length > 0} />
           {/* photos - unified masonry layout for all segments */}
           <PhotosListMasonry
             activeSegment={activeSegment}

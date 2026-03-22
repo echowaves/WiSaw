@@ -114,10 +114,58 @@ The WaveDetail header ellipsis menu SHALL include the following options for wave
 - **WHEN** a wave owner taps the header ellipsis icon on Android
 - **THEN** an Alert SHALL display buttons: Cancel, Rename, Merge Into Another Wave..., Delete Wave
 
+#### Scenario: Owner renames wave
+- **WHEN** the user edits the wave name and taps Save
+- **THEN** the `updateWave` mutation SHALL be called
+- **THEN** on success, `router.setParams({ waveName: editName })` SHALL update route params
+- **THEN** the local `waveName` state SHALL be updated
+- **THEN** a success toast SHALL be shown
+
 #### Scenario: Post-merge navigation
 - **WHEN** a merge completes successfully from WaveDetail
 - **THEN** the system SHALL navigate back (via `router.back()`)
 - **THEN** a success toast SHALL be shown with the target wave name
+
+### Requirement: WaveDetail displays interaction hint banner
+The WaveDetail screen SHALL render the shared `InteractionHintBanner` component to teach users about long-press photo interactions, positioned above the photo masonry grid.
+
+#### Scenario: First visit to WaveDetail with photos
+- **WHEN** the user opens a wave detail screen that has photos and SecureStore key `interactionHintShown` is not set
+- **THEN** the `InteractionHintBanner` SHALL be displayed above the photo grid with text "Tap and hold for options or tap ⋮"
+
+#### Scenario: WaveDetail with no photos
+- **WHEN** the user opens a wave detail screen with zero photos
+- **THEN** the `InteractionHintBanner` SHALL NOT be displayed
+
+#### Scenario: Hint already dismissed
+- **WHEN** the user opens a wave detail screen and SecureStore key `interactionHintShown` is set
+- **THEN** the `InteractionHintBanner` SHALL NOT be displayed
+
+### Requirement: Wave Detail Focus Refresh
+The system SHALL re-fetch the wave's photos from the API every time the WaveDetail screen gains focus, ensuring photos removed or deleted while away are no longer displayed.
+
+#### Scenario: User returns to WaveDetail after navigating away
+- **WHEN** the WaveDetail screen regains focus (via `useFocusEffect`)
+- **THEN** the system SHALL reset pagination to page 0 with a new batch UUID
+- **THEN** the system SHALL call `loadPhotos` to fetch fresh data from the `feedForWave` query
+- **THEN** the photos list SHALL be replaced with the server response
+- **THEN** all expanded photo states SHALL be cleared
+
+#### Scenario: Photo was removed from wave while away
+- **WHEN** the user navigates away, a photo is removed from the wave (via another screen or device), and the user returns
+- **THEN** the removed photo SHALL no longer appear in the masonry grid after the focus refresh completes
+
+#### Scenario: Photo was deleted while away
+- **WHEN** the user navigates away, a photo is deleted, and the user returns
+- **THEN** the deleted photo SHALL no longer appear in the masonry grid after the focus refresh completes
+
+### Requirement: Wave Detail Header Title Sync
+The system SHALL update the header title immediately after a successful wave rename, without requiring navigation.
+
+#### Scenario: User renames wave from WaveDetail
+- **WHEN** the user renames a wave via the edit modal in WaveDetail and the `updateWave` mutation succeeds
+- **THEN** `router.setParams({ waveName: editName })` SHALL be called
+- **THEN** the header title displayed by `AppHeader` in `[waveUuid].tsx` SHALL update to the new name immediately
 
 ## REMOVED Requirements
 

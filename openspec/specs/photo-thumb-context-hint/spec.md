@@ -28,22 +28,18 @@ Each photo thumbnail in the masonry grid (collapsed mode) SHALL display a ⋮ ic
 - **THEN** both SHALL be visible without overlapping (comment overlay is bottom-positioned, ⋮ pill is top-right)
 
 ### Requirement: One-time hint banner for photo actions discoverability
-The system SHALL display a dismissible hint banner at the top of the main photo feed the first time the user visits, teaching the long-press / ⋮ tap interaction.
+The system SHALL display the shared `InteractionHintBanner` component at the top of the main photo feed to teach the long-press / ⋮ tap interaction.
 
 #### Scenario: First visit to main feed
-- **WHEN** the user opens the main photo feed for the first time (no SecureStore key `photoActionsHintShown`)
-- **THEN** the system SHALL display a banner above the photo grid with text "Long-press any photo for quick actions"
-- **THEN** the banner SHALL include a dismiss button (✕)
+- **WHEN** the user opens the main photo feed for the first time (SecureStore key `interactionHintShown` is not set)
+- **THEN** the `InteractionHintBanner` component SHALL be rendered with `hasContent` set to whether photos exist
+- **THEN** the shared banner SHALL display with unified text "Tap and hold for options or tap ⋮"
 
 #### Scenario: User dismisses the banner
 - **WHEN** the user taps the ✕ dismiss button on the hint banner
 - **THEN** the banner SHALL be removed from view
-- **THEN** the system SHALL set SecureStore key `photoActionsHintShown` to `"true"`
+- **THEN** the system SHALL set SecureStore key `interactionHintShown` to `"true"`
 
 #### Scenario: Subsequent visits to main feed
-- **WHEN** the user opens the main photo feed and SecureStore key `photoActionsHintShown` is `"true"`
+- **WHEN** the user opens the main photo feed and SecureStore key `interactionHintShown` is set
 - **THEN** the hint banner SHALL NOT be displayed
-
-#### Scenario: Banner does not appear on other screens
-- **WHEN** photo thumbnails are displayed on screens other than the main feed (e.g., wave detail)
-- **THEN** the hint banner SHALL NOT be displayed on those screens

@@ -10,17 +10,18 @@ Each WaveCard SHALL display a vertical three-dot (⋮) icon in the info row, rig
 - **THEN** the ⋮ icon SHALL be visible in the info row regardless of wave ownership
 
 ### Requirement: One-time tooltip for context menu discoverability
-The system SHALL display a tooltip near the ⋮ icon the first time the user visits WavesHub, to teach the long-press / tap interaction.
+The system SHALL display the shared `InteractionHintBanner` component at the top of WavesHub to teach the long-press / tap interaction.
 
 #### Scenario: First visit to WavesHub
-- **WHEN** the user opens WavesHub for the first time (no SecureStore key `waveContextMenuTooltipShown`)
-- **THEN** the system SHALL display a tooltip with text "Hold or tap ⋮ for options"
-- **THEN** the system SHALL set the SecureStore key `waveContextMenuTooltipShown` to `"true"`
-
-#### Scenario: Subsequent visits to WavesHub
-- **WHEN** the user opens WavesHub and SecureStore key `waveContextMenuTooltipShown` is `"true"`
-- **THEN** the system SHALL NOT display the tooltip
+- **WHEN** the user opens WavesHub for the first time (SecureStore key `interactionHintShown` is not set)
+- **THEN** the `InteractionHintBanner` component SHALL be rendered with `hasContent` set to whether waves exist
+- **THEN** the shared banner SHALL display with unified text "Tap and hold for options or tap ⋮"
 
 #### Scenario: User dismisses the tooltip
-- **WHEN** the tooltip is visible and the user taps anywhere
-- **THEN** the tooltip SHALL dismiss
+- **WHEN** the user taps the ✕ dismiss button on the hint banner
+- **THEN** the banner SHALL be removed from view
+- **THEN** the system SHALL set SecureStore key `interactionHintShown` to `"true"`
+
+#### Scenario: Subsequent visits to WavesHub
+- **WHEN** the user opens WavesHub and SecureStore key `interactionHintShown` is set
+- **THEN** the hint banner SHALL NOT be displayed

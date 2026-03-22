@@ -37,6 +37,7 @@ import usePhotoUploader from '../PhotosList/upload/usePhotoUploader'
 import useLocationInit from '../PhotosList/hooks/useLocationInit'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import isValidLocation from '../../utils/isValidLocation'
+import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import {
   createFrozenPhoto
 } from '../../utils/photoListHelpers'
@@ -499,6 +500,8 @@ const WaveDetail = React.forwardRef((_props, ref) => {
           />
           )
         : (
+          <>
+          <InteractionHintBanner hasContent={photos?.length > 0} />
           <PhotosListMasonry
             activeSegment={1}
             photosList={photos}
@@ -524,6 +527,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             justCollapsedId={justCollapsedId}
             onPhotoLongPress={handlePhotoLongPress}
           />
+          </>
           )}
 
       <PhotosListFooter

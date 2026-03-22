@@ -18,6 +18,7 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router, useFocusEffect } from 'expo-router'
 import * as Crypto from 'expo-crypto'
+import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import * as SecureStore from 'expo-secure-store'
 
 import * as STATE from '../../state'
@@ -63,9 +64,6 @@ const WavesHub = () => {
   // Merge state
   const [mergeModalVisible, setMergeModalVisible] = useState(false)
   const [mergingWave, setMergingWave] = useState(null)
-
-  // Tooltip state
-  const [showTooltip, setShowTooltip] = useState(false)
 
   const theme = getTheme(isDarkMode)
 
@@ -120,29 +118,7 @@ const WavesHub = () => {
     }, [uuid])
   )
 
-  // One-time tooltip for context menu discoverability
-  useEffect(() => {
-    const checkTooltip = async () => {
-      try {
-        const shown = await SecureStore.getItemAsync('waveContextMenuTooltipShown')
-        if (!shown) {
-          setShowTooltip(true)
-        }
-      } catch {
-        // Ignore read errors
-      }
-    }
-    checkTooltip()
-  }, [])
 
-  const dismissTooltip = useCallback(async () => {
-    setShowTooltip(false)
-    try {
-      await SecureStore.setItemAsync('waveContextMenuTooltipShown', 'true')
-    } catch {
-      // Ignore write errors
-    }
-  }, [])
 
   const handleRefresh = () => {
     setRefreshing(true)
@@ -343,7 +319,6 @@ const WavesHub = () => {
 
   const showWaveContextMenu = (wave) => {
     const isOwner = wave.createdBy === uuid
-    if (showTooltip) dismissTooltip()
 
     if (Platform.OS === 'ios') {
       const options = isOwner
@@ -413,17 +388,7 @@ const WavesHub = () => {
         />
       </View>
 
-      {showTooltip && waves.length > 0 && (
-        <TouchableOpacity
-          style={[styles.tooltipContainer, { backgroundColor: theme.TEXT_PRIMARY }]}
-          onPress={dismissTooltip}
-          activeOpacity={0.9}
-        >
-          <Text style={[styles.tooltipText, { color: theme.CARD_BACKGROUND }]}>
-            Hold or tap ⋮ for options
-          </Text>
-        </TouchableOpacity>
-      )}
+      <InteractionHintBanner hasContent={waves.length > 0} />
 
       {loading && (
         <View
@@ -602,18 +567,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingBottom: 16
   },
-  tooltipContainer: {
-    alignSelf: 'flex-end',
-    marginRight: 24,
-    marginBottom: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8
-  },
-  tooltipText: {
-    fontSize: 12,
-    fontWeight: '600'
-  },
+
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
