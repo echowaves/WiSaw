@@ -1,16 +1,19 @@
+import CachedImage from 'expo-cached-image'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
-  Image,
   InteractionManager,
   Modal,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
+  View
 } from 'react-native'
 
+import * as CONST from '../../consts'
 import usePhotoActions from '../../hooks/usePhotoActions'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
+import isValidImageUri from '../../utils/isValidImageUri'
 import * as photoReducer from '../Photo/reducer'
 import * as sharingHelper from '../../utils/simpleSharingHelper'
 import * as STATE from '../../state'
@@ -95,11 +98,39 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted }) => {
         >
           <TouchableOpacity activeOpacity={1} style={styles.content}>
             <CloseButton onPress={onClose} />
-            <Image
-              source={{ uri: photo.thumbUrl }}
-              style={styles.thumbnail}
-              resizeMode='cover'
-            />
+            <View style={styles.thumbnailContainer}>
+              {isValidImageUri(photo.imgUrl) && (
+                <CachedImage
+                  source={{ uri: photo.imgUrl }}
+                  cacheKey={`${photo.id}`}
+                  resizeMode='cover'
+                  style={[styles.imageLayer, { zIndex: 2 }]}
+                />
+              )}
+              {isValidImageUri(photo.thumbUrl)
+                ? (
+                  <CachedImage
+                    source={{ uri: photo.thumbUrl }}
+                    cacheKey={`${photo.id}-thumb`}
+                    placeholderContent={
+                      <ActivityIndicator
+                        color={CONST.MAIN_COLOR}
+                        size='small'
+                        style={{ flex: 1, justifyContent: 'center' }}
+                      />
+                    }
+                    resizeMode='cover'
+                    style={[styles.imageLayer, { zIndex: 1 }]}
+                  />
+                  )
+                : (
+                  <ActivityIndicator
+                    color={CONST.MAIN_COLOR}
+                    size='small'
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  />
+                  )}
+            </View>
 
             {loading && (
               <ActivityIndicator
@@ -159,10 +190,19 @@ const createStyles = (theme) =>
       alignItems: 'center',
       gap: 12
     },
-    thumbnail: {
+    thumbnailContainer: {
       width: '100%',
       aspectRatio: 1,
-      borderRadius: 12
+      borderRadius: 12,
+      overflow: 'hidden',
+      position: 'relative'
+    },
+    imageLayer: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%'
     },
     spinner: {
       marginVertical: 4

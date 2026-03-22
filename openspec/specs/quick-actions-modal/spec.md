@@ -1,20 +1,38 @@
 # Quick Actions Modal Specification
 
 ## Purpose
-The quick-actions modal provides instant access to all 5 photo actions (Report, Delete, Star, Wave, Share) from the feed via long-press, without needing to expand the photo. It shows a thumbnail preview and a loading state while fetching photo details.
+The quick-actions modal provides instant access to all 5 photo actions (Report, Delete, Star, Wave, Share) from the feed via long-press, without needing to expand the photo. It shows a progressively-loaded photo preview and a loading state while fetching photo details.
 
 ## Requirements
 
 ### Requirement: Quick Actions Modal Display
-The system SHALL display a modal overlay when the user long-presses a photo thumbnail in the feed, showing a photo preview and all 5 action buttons. The modal SHALL appear within a single animation frame of the long-press event, without waiting for photo details to load.
+The system SHALL display a modal overlay when the user long-presses a photo thumbnail in the feed, showing a progressively-loaded photo preview and all 5 action buttons. The modal SHALL appear within a single animation frame of the long-press event, without waiting for photo details to load. The photo preview SHALL load progressively — thumbnail first, then full-resolution image on top.
 
 #### Scenario: Modal opens on long-press
 - **WHEN** the user long-presses a photo thumbnail in the feed
 - **THEN** haptic feedback is triggered
-- **THEN** a modal overlay appears within a single animation frame with the photo's thumbnail preview
+- **THEN** a modal overlay appears within a single animation frame with a loading spinner in the preview area
+- **THEN** the photo's thumbnail loads and replaces the spinner
+- **THEN** the full-resolution image loads on top of the thumbnail when ready
 - **THEN** a loading spinner is displayed below the preview while photo details are being fetched
 - **THEN** action buttons are NOT shown until photo details have loaded
 - **THEN** the long-press state update SHALL NOT trigger a re-render of the photo feed list
+
+#### Scenario: Progressive image loading layers
+- **WHEN** the modal is visible and the photo has both a valid thumbUrl and imgUrl
+- **THEN** the system SHALL render a thumbnail CachedImage layer (zIndex: 1) with an ActivityIndicator placeholder
+- **THEN** the system SHALL render a full-resolution CachedImage layer (zIndex: 2) on top
+- **THEN** both layers SHALL use consistent cache keys: `${photo.id}-thumb` for thumbnail and `${photo.id}` for full image
+- **THEN** both layers SHALL use `resizeMode: 'cover'` within the square preview container
+
+#### Scenario: Only thumbnail URL is valid
+- **WHEN** the modal is visible and the photo has a valid thumbUrl but invalid imgUrl
+- **THEN** the system SHALL render only the thumbnail layer with an ActivityIndicator placeholder
+- **THEN** the full-resolution layer SHALL NOT be rendered
+
+#### Scenario: Neither URL is valid
+- **WHEN** the modal is visible and the photo has neither a valid thumbUrl nor a valid imgUrl
+- **THEN** the system SHALL render an ActivityIndicator spinner in the preview area
 
 #### Scenario: Photo details load successfully
 - **WHEN** the `getPhotoDetails` query completes while the modal is open
