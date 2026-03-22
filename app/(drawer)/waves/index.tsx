@@ -68,7 +68,7 @@ export default function WavesScreen() {
                   {ungroupedCount > 0 && (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>
-                        {ungroupedCount > 99 ? '99+' : ungroupedCount}
+                        {ungroupedCount}
                       </Text>
                     </View>
                   )}
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
   },
   badgeText: {
     color: '#FFFFFF',
