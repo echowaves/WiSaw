@@ -19,7 +19,7 @@ rules:
     - When adding or updating dependencies, always use exact versions (e.g., "1.2.3" not "^1.2.3" or "~1.2.3"). Use --save-exact with npm install.
     - Always write code in a modular fashion, separating concerns into different files and components.
     - Always include error handling and loading states for asynchronous operations (e.g., data fetching,
-    - For accessing back end API, always refer to the GraphQL schema at https://github.com/echowaves/WiSaw.cdk/blob/main/graphql/schema.graphql
+    - For accessing back end API, always refer to the GraphQL schema at https://github.com/echowaves/WiSaw.cdk/blob/main/graphql/schema.graphql , use github mcp server for that. 
     
   dependencies:
     - Do not add any new dependencies to the project unless the user explicitly requests or approves it. Solve problems using existing dependencies and built-in APIs first.
