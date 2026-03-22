@@ -13,6 +13,7 @@ import Toast from 'react-native-toast-message'
 import { gql } from '@apollo/client'
 
 import * as CONST from '../../../consts'
+import isValidLocation from '../../../utils/isValidLocation'
 
 /**
  * Utility: Wrap a promise with a timeout to prevent hanging uploads
@@ -529,6 +530,18 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100 }) => 
 
     if (!processedItem) {
       console.error('processedItem is null after processing')
+      return null
+    }
+
+    if (!isValidLocation(processedItem.location)) {
+      console.error('Invalid location for upload, skipping:', processedItem.location)
+      Toast.show({
+        text1: 'Upload skipped',
+        text2: 'Photo has no valid location and cannot be uploaded.',
+        type: 'error',
+        topOffset
+      })
+      await removeFromQueue(item)
       return null
     }
 

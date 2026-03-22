@@ -4,8 +4,11 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
 import * as MediaLibrary from 'expo-media-library'
 import { Alert } from 'react-native'
+import Toast from 'react-native-toast-message'
 
-export default function useCameraCapture ({ location, enqueueCapture }) {
+import isValidLocation from '../../../utils/isValidLocation'
+
+export default function useCameraCapture ({ location, enqueueCapture, toastTopOffset }) {
   const [isCameraOpening, setIsCameraOpening] = useState(false)
 
   async function checkPermission ({
@@ -46,6 +49,15 @@ export default function useCameraCapture ({ location, enqueueCapture }) {
     }
 
     if (cameraReturn.canceled === false) {
+      if (!isValidLocation(location)) {
+        Toast.show({
+          text1: 'Waiting for location...',
+          text2: 'Please wait until GPS coordinates are available.',
+          type: 'info',
+          topOffset: toastTopOffset
+        })
+        return
+      }
       await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
       await enqueueCapture({
         cameraImgUrl: cameraReturn.assets[0].uri,

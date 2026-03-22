@@ -6,9 +6,7 @@ import Toast from 'react-native-toast-message'
 import { Alert } from 'react-native'
 
 export default function useLocationInit ({ toastTopOffset }) {
-  const [location, setLocation] = useState({
-    coords: { latitude: 0, longitude: 0 }
-  })
+  const [location, setLocation] = useState(null)
 
   async function initLocation () {
     const { status } = await Location.requestForegroundPermissionsAsync()

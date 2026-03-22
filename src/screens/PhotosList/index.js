@@ -466,7 +466,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({
     location,
-    enqueueCapture
+    enqueueCapture,
+    toastTopOffset
   })
 
   const { pendingPhotosAnimation, uploadIconAnimation } = usePendingAnimation({
