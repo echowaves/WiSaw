@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Auto-Group Button in Waves Header
 The system SHALL display a kebab (three-dot vertical) menu icon in the upper-right navigation bar of the Waves screen. The button SHALL use reactive theme colors from `getTheme(isDarkMode)` (not static `SHARED_STYLES.theme`) to properly support dark mode. The icon SHALL display an inline ungrouped-count badge when the count is greater than zero. Tapping the icon SHALL open a platform-native context menu with management and sort options.
 

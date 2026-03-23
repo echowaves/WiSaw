@@ -32,7 +32,7 @@ import MergeWaveModal from '../../components/MergeWaveModal'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 
-const WavesHub = ({ ungroupedCount = 0 }) => {
+const WavesHub = ({ ungroupedCount = 0, sortBy = 'updatedAt', sortDirection = 'desc' }) => {
   const { width } = useWindowDimensions()
   const numColumns = width >= 768 ? 2 : 1
 
@@ -76,7 +76,9 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
       const data = await reducer.listWaves({
         pageNumber: pageNum,
         batch: currentBatch,
-        uuid
+        uuid,
+        sortBy,
+        sortDirection
       })
 
       const newWaves = data.waves || []
@@ -108,7 +110,15 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [uuid])
+  }, [uuid, sortBy, sortDirection])
+
+  useEffect(() => {
+    setPageNumber(0)
+    setNoMoreData(false)
+    const newBatch = Crypto.randomUUID()
+    setBatch(newBatch)
+    loadWaves(0, newBatch, true)
+  }, [sortBy, sortDirection])
 
   useFocusEffect(
     useCallback(() => {

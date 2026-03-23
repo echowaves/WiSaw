@@ -1,10 +1,10 @@
 ### Requirement: Waves List Focus Refresh
-The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, and the ungrouped badge reflect the latest server state.
+The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order.
 
 #### Scenario: User returns to Waves screen after viewing wave detail
 - **WHEN** the Waves screen (WavesHub) regains focus (via `useFocusEffect`)
-- **THEN** the system SHALL reset pagination and call `loadWaves` with page 0 and a new batch UUID in refresh mode
-- **THEN** the waves list SHALL be replaced with the fresh server response including updated names and photo counts
+- **THEN** the system SHALL reset pagination and call `loadWaves` with page 0, a new batch UUID, and the current `sortBy`/`sortDirection` values in refresh mode
+- **THEN** the waves list SHALL be replaced with the fresh server response including updated names and photo counts in the current sort order
 
 #### Scenario: Ungrouped count refreshes on focus
 - **WHEN** the Waves index screen regains focus

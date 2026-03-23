@@ -16,6 +16,8 @@ export default function WavesScreen() {
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [ungroupedCount, setUngroupedCount] = useState(0)
+  const [sortBy, setSortBy] = useState('updatedAt')
+  const [sortDirection, setSortDirection] = useState('desc')
   const theme = getTheme(isDarkMode)
 
   const fetchUngroupedCount = useCallback(async () => {
@@ -46,26 +48,55 @@ export default function WavesScreen() {
       ? `Auto Group (${ungroupedCount} ungrouped)`
       : 'Auto Group'
 
+  const sortOptions = [
+    { label: 'Sort: Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc' },
+    { label: 'Sort: Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc' },
+    { label: 'Sort: Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc' },
+    { label: 'Sort: Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc' },
+  ]
+
+  const sortLabels = sortOptions.map(opt =>
+    opt.sortBy === sortBy && opt.sortDirection === sortDirection
+      ? `✓ ${opt.label}`
+      : opt.label
+  )
+
   const showHeaderMenu = useCallback(() => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: ['Cancel', 'Create New Wave', autoGroupLabel],
+          options: ['Cancel', 'Create New Wave', autoGroupLabel, ...sortLabels],
           cancelButtonIndex: 0
         },
         (buttonIndex) => {
           if (buttonIndex === 1) emitAddWave()
           if (buttonIndex === 2) emitAutoGroup(ungroupedCount)
+          if (buttonIndex >= 3) {
+            const selected = sortOptions[buttonIndex - 3]
+            if (selected.sortBy !== sortBy || selected.sortDirection !== sortDirection) {
+              setSortBy(selected.sortBy)
+              setSortDirection(selected.sortDirection)
+            }
+          }
         }
       )
     } else {
       Alert.alert('Waves', 'Choose an action', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Create New Wave', onPress: () => emitAddWave() },
-        { text: autoGroupLabel, onPress: () => emitAutoGroup(ungroupedCount) }
+        { text: autoGroupLabel, onPress: () => emitAutoGroup(ungroupedCount) },
+        ...sortOptions.map((opt, i) => ({
+          text: sortLabels[i],
+          onPress: () => {
+            if (opt.sortBy !== sortBy || opt.sortDirection !== sortDirection) {
+              setSortBy(opt.sortBy)
+              setSortDirection(opt.sortDirection)
+            }
+          }
+        }))
       ])
     }
-  }, [ungroupedCount, autoGroupLabel])
+  }, [ungroupedCount, autoGroupLabel, sortBy, sortDirection, sortLabels])
 
   return (
     <>
@@ -109,7 +140,7 @@ export default function WavesScreen() {
           )
         }}
       />
-      <WavesHub ungroupedCount={ungroupedCount} />
+      <WavesHub ungroupedCount={ungroupedCount} sortBy={sortBy} sortDirection={sortDirection} />
     </>
   )
 }
