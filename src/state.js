@@ -38,4 +38,8 @@ export const isDarkMode = atom(false)
 
 export const followSystemTheme = atom(false)
 
+export const waveSortBy = atom('updatedAt')
+
+export const waveSortDirection = atom('desc')
+
 export const locationAtom = atom({ status: 'pending', coords: null })

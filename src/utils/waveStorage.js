@@ -4,6 +4,7 @@ import Toast from 'react-native-toast-message'
 
 // this is not a password or sensitive info, so SecureStore is used for simplicity
 const ACTIVE_WAVE_KEY = 'ACTIVE_WAVE'
+const WAVE_SORT_PREFERENCES_KEY = 'WAVE_SORT_PREFERENCES'
 
 export const saveActiveWave = async (wave) => {
   try {
@@ -54,5 +55,35 @@ export const clearActiveWave = async () => {
     await SecureStore.deleteItemAsync(ACTIVE_WAVE_KEY)
   } catch (error) {
     console.error('Failed to clear active wave:', error)
+  }
+}
+
+export const saveWaveSortPreferences = async ({ sortBy, sortDirection }) => {
+  try {
+    await SecureStore.setItemAsync(
+      WAVE_SORT_PREFERENCES_KEY,
+      JSON.stringify({ sortBy, sortDirection })
+    )
+  } catch (error) {
+    console.error('Failed to save wave sort preferences:', error)
+  }
+}
+
+export const loadWaveSortPreferences = async () => {
+  try {
+    const timeoutPromise = new Promise((_resolve, reject) => {
+      setTimeout(() => reject(new Error('Wave sort storage timeout')), 3000)
+    })
+
+    const getItemPromise = SecureStore.getItemAsync(WAVE_SORT_PREFERENCES_KEY)
+    const json = await Promise.race([getItemPromise, timeoutPromise])
+
+    if (json) {
+      return JSON.parse(json)
+    }
+    return null
+  } catch (error) {
+    console.error('Failed to load wave sort preferences:', error)
+    return null
   }
 }

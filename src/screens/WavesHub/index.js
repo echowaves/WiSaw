@@ -31,12 +31,14 @@ import ActionMenu from '../../components/ActionMenu'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 
-const WavesHub = ({ ungroupedCount = 0, sortBy = 'updatedAt', sortDirection = 'desc' }) => {
+const WavesHub = ({ ungroupedCount = 0 }) => {
   const { width } = useWindowDimensions()
   const numColumns = width >= 768 ? 2 : 1
 
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+  const [sortBy] = useAtom(STATE.waveSortBy)
+  const [sortDirection] = useAtom(STATE.waveSortDirection)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -114,14 +116,6 @@ const WavesHub = ({ ungroupedCount = 0, sortBy = 'updatedAt', sortDirection = 'd
     }
   }, [uuid, sortBy, sortDirection])
 
-  useEffect(() => {
-    setPageNumber(0)
-    setNoMoreData(false)
-    const newBatch = Crypto.randomUUID()
-    setBatch(newBatch)
-    loadWaves(0, newBatch, true)
-  }, [sortBy, sortDirection])
-
   useFocusEffect(
     useCallback(() => {
       setPageNumber(0)
@@ -129,7 +123,7 @@ const WavesHub = ({ ungroupedCount = 0, sortBy = 'updatedAt', sortDirection = 'd
       const newBatch = Crypto.randomUUID()
       setBatch(newBatch)
       loadWaves(0, newBatch, true)
-    }, [uuid])
+    }, [loadWaves])
   )
 
 

@@ -26,6 +26,7 @@ import {
   loadThemePreference,
   subscribeToSystemTheme
 } from '../src/utils/themeStorage'
+import { loadWaveSortPreferences } from '../src/utils/waveStorage'
 
 export default function RootLayout () {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -34,6 +35,8 @@ export default function RootLayout () {
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
   )
+  const [, setWaveSortBy] = useAtom(STATE.waveSortBy)
+  const [, setWaveSortDirection] = useAtom(STATE.waveSortDirection)
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -170,12 +173,14 @@ export default function RootLayout () {
           uuidResult,
           nickNameResult,
           themePreferenceResult,
-          followSystemResult
+          followSystemResult,
+          waveSortResult
         ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
           loadThemePreference(),
-          loadFollowSystemPreference()
+          loadFollowSystemPreference(),
+          loadWaveSortPreferences()
         ])
 
         if (isCancelled) return
@@ -189,6 +194,12 @@ export default function RootLayout () {
 
         const themePreference = !!getResolvedValue(themePreferenceResult, false)
         setIsDarkMode(followSystem ? getSystemTheme() : themePreference)
+
+        const waveSortPrefs = getResolvedValue(waveSortResult, null)
+        if (waveSortPrefs) {
+          setWaveSortBy(waveSortPrefs.sortBy)
+          setWaveSortDirection(waveSortPrefs.sortDirection)
+        }
 
         console.log(`✅ App state initialized in ${Date.now() - startTime}ms`)
       } catch (error) {
@@ -205,7 +216,7 @@ export default function RootLayout () {
     return () => {
       isCancelled = true
     }
-  }, [setFollowSystemTheme, setIsDarkMode, setNickName, setUuid])
+  }, [setFollowSystemTheme, setIsDarkMode, setNickName, setUuid, setWaveSortBy, setWaveSortDirection])
 
   // Subscribe to system theme changes
   useEffect(() => {

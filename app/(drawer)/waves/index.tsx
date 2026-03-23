@@ -10,6 +10,7 @@ import { SHARED_STYLES, getTheme } from '../../../src/theme/sharedStyles'
 import { emitAutoGroup, subscribeToAutoGroupDone } from '../../../src/events/autoGroupBus'
 import { emitAddWave } from '../../../src/events/waveAddBus'
 import { getUngroupedPhotosCount } from '../../../src/screens/Waves/reducer'
+import { saveWaveSortPreferences } from '../../../src/utils/waveStorage'
 import * as STATE from '../../../src/state'
 
 export default function WavesScreen() {
@@ -17,8 +18,8 @@ export default function WavesScreen() {
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [ungroupedCount, setUngroupedCount] = useState(0)
-  const [sortBy, setSortBy] = useState('updatedAt')
-  const [sortDirection, setSortDirection] = useState('desc')
+  const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
+  const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
   const [menuVisible, setMenuVisible] = useState(false)
   const theme = getTheme(isDarkMode)
 
@@ -80,6 +81,7 @@ export default function WavesScreen() {
         if (opt.sortBy !== sortBy || opt.sortDirection !== sortDirection) {
           setSortBy(opt.sortBy)
           setSortDirection(opt.sortDirection)
+          saveWaveSortPreferences({ sortBy: opt.sortBy, sortDirection: opt.sortDirection })
         }
       }
     }))
@@ -127,7 +129,7 @@ export default function WavesScreen() {
           )
         }}
       />
-      <WavesHub ungroupedCount={ungroupedCount} sortBy={sortBy} sortDirection={sortDirection} />
+      <WavesHub ungroupedCount={ungroupedCount} />
       <ActionMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}
