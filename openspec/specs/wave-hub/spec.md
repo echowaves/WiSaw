@@ -28,26 +28,22 @@ The system SHALL re-fetch the waves list and ungrouped photo count from the API 
 ## MODIFIED Requirements
 
 ### Requirement: Wave Card Context Menu
-The system SHALL show a context menu on long-press of a wave card with management options.
+The system SHALL show an `ActionMenu` modal on long-press of a wave card with icon + label management options.
 
 #### Scenario: Owner long-presses their own wave card
 - **WHEN** the wave owner long-presses a wave card
-- **THEN** a context menu appears with options: Rename, Edit Description, Share Wave, Merge Into Another Wave..., Delete Wave
+- **THEN** an `ActionMenu` modal SHALL display with items:
+  - `pencil-outline` icon: "Rename"
+  - `text-box-edit-outline` icon: "Edit Description"
+  - `call-merge` icon: "Merge Into Another Wave..."
+  - separator
+  - `trash-can-outline` icon: "Delete Wave" (destructive)
 
 #### Scenario: User deletes a wave from context menu
-- **WHEN** the user selects Delete Wave from the context menu
+- **WHEN** the user selects Delete Wave from the ActionMenu
 - **THEN** a confirmation dialog is shown
 - **THEN** upon confirmation, the wave is deleted and removed from the grid
 - **THEN** the system SHALL emit `autoGroupDone` to trigger an ungrouped-photos count refresh
-
-#### Scenario: Owner long-presses a wave (iOS)
-- **WHEN** a wave owner long-presses a wave card on iOS
-- **THEN** ActionSheetIOS SHALL display: Cancel, Rename, Edit Description, Merge Into Another Wave..., Delete Wave
-- **THEN** the destructive button index SHALL point to Delete Wave
-
-#### Scenario: Owner long-presses a wave (Android)
-- **WHEN** a wave owner long-presses a wave card on Android
-- **THEN** an Alert SHALL display buttons: Cancel, Rename, Merge Into Another Wave..., Delete Wave
 
 #### Scenario: Post-merge list update
 - **WHEN** a merge completes successfully from WavesHub

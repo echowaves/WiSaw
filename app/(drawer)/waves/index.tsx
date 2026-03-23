@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, ActionSheetIOS, Alert, Platform } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useAtom } from 'jotai'
 import AppHeader from '../../../src/components/AppHeader'
+import ActionMenu from '../../../src/components/ActionMenu'
 import WavesHub from '../../../src/screens/WavesHub'
 import { SHARED_STYLES, getTheme } from '../../../src/theme/sharedStyles'
 import { emitAutoGroup, subscribeToAutoGroupDone } from '../../../src/events/autoGroupBus'
@@ -18,6 +19,7 @@ export default function WavesScreen() {
   const [ungroupedCount, setUngroupedCount] = useState(0)
   const [sortBy, setSortBy] = useState('updatedAt')
   const [sortDirection, setSortDirection] = useState('desc')
+  const [menuVisible, setMenuVisible] = useState(false)
   const theme = getTheme(isDarkMode)
 
   const fetchUngroupedCount = useCallback(async () => {
@@ -49,54 +51,39 @@ export default function WavesScreen() {
       : 'Auto Group'
 
   const sortOptions = [
-    { label: 'Sort: Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc' },
-    { label: 'Sort: Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc' },
-    { label: 'Sort: Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc' },
-    { label: 'Sort: Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc' },
+    { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
+    { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
+    { label: 'Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc', icon: 'sort-descending' },
+    { label: 'Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc', icon: 'sort-ascending' },
   ]
 
-  const sortLabels = sortOptions.map(opt =>
-    opt.sortBy === sortBy && opt.sortDirection === sortDirection
-      ? `✓ ${opt.label}`
-      : opt.label
-  )
-
-  const showHeaderMenu = useCallback(() => {
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: ['Cancel', 'Create New Wave', autoGroupLabel, ...sortLabels],
-          cancelButtonIndex: 0
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 1) emitAddWave()
-          if (buttonIndex === 2) emitAutoGroup(ungroupedCount)
-          if (buttonIndex >= 3) {
-            const selected = sortOptions[buttonIndex - 3]
-            if (selected.sortBy !== sortBy || selected.sortDirection !== sortDirection) {
-              setSortBy(selected.sortBy)
-              setSortDirection(selected.sortDirection)
-            }
-          }
+  const menuItems = [
+    {
+      key: 'create',
+      icon: 'plus-circle-outline',
+      label: 'Create New Wave',
+      onPress: () => emitAddWave()
+    },
+    {
+      key: 'autogroup',
+      icon: 'view-grid-plus-outline',
+      label: autoGroupLabel,
+      onPress: () => emitAutoGroup(ungroupedCount)
+    },
+    'separator',
+    ...sortOptions.map((opt, i) => ({
+      key: `sort-${i}`,
+      icon: opt.icon,
+      label: opt.label,
+      checked: opt.sortBy === sortBy && opt.sortDirection === sortDirection,
+      onPress: () => {
+        if (opt.sortBy !== sortBy || opt.sortDirection !== sortDirection) {
+          setSortBy(opt.sortBy)
+          setSortDirection(opt.sortDirection)
         }
-      )
-    } else {
-      Alert.alert('Waves', 'Choose an action', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Create New Wave', onPress: () => emitAddWave() },
-        { text: autoGroupLabel, onPress: () => emitAutoGroup(ungroupedCount) },
-        ...sortOptions.map((opt, i) => ({
-          text: sortLabels[i],
-          onPress: () => {
-            if (opt.sortBy !== sortBy || opt.sortDirection !== sortDirection) {
-              setSortBy(opt.sortBy)
-              setSortDirection(opt.sortDirection)
-            }
-          }
-        }))
-      ])
-    }
-  }, [ungroupedCount, autoGroupLabel, sortBy, sortDirection, sortLabels])
+      }
+    }))
+  ]
 
   return (
     <>
@@ -109,7 +96,7 @@ export default function WavesScreen() {
               title='Waves'
               rightSlot={
                 <TouchableOpacity
-                  onPress={showHeaderMenu}
+                  onPress={() => setMenuVisible(true)}
                   style={[
                     SHARED_STYLES.interactive.headerButton,
                     {
@@ -141,6 +128,11 @@ export default function WavesScreen() {
         }}
       />
       <WavesHub ungroupedCount={ungroupedCount} sortBy={sortBy} sortDirection={sortDirection} />
+      <ActionMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        items={menuItems}
+      />
     </>
   )
 }

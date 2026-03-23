@@ -5,8 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ActionSheetIOS,
-  Platform,
   Animated,
   ActivityIndicator,
   Modal,
@@ -45,6 +43,7 @@ import {
 import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
+import ActionMenu from '../../components/ActionMenu'
 
 const FOOTER_HEIGHT = 90
 
@@ -97,6 +96,9 @@ const WaveDetail = React.forwardRef((_props, ref) => {
 
   // Merge state
   const [mergeModalVisible, setMergeModalVisible] = useState(false)
+
+  // Action menu state
+  const [menuVisible, setMenuVisible] = useState(false)
 
   const quickActionsRef = useRef(null)
   const { width, height } = useWindowDimensions()
@@ -278,39 +280,45 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   }
 
   const showHeaderMenu = () => {
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: ['Cancel', 'Rename', 'Edit Description', 'Merge Into Another Wave...', 'Delete Wave'],
-          cancelButtonIndex: 0,
-          destructiveButtonIndex: 4
-        },
-        (buttonIndex) => {
-          if (buttonIndex === 1 || buttonIndex === 2) {
-            setEditName(waveName)
-            setEditDescription('')
-            setEditModalVisible(true)
-          }
-          if (buttonIndex === 3) setMergeModalVisible(true)
-          if (buttonIndex === 4) handleDeleteWave()
-        }
-      )
-    } else {
-      Alert.alert(waveName, 'Choose an action', [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Rename',
-          onPress: () => {
-            setEditName(waveName)
-            setEditDescription('')
-            setEditModalVisible(true)
-          }
-        },
-        { text: 'Merge Into Another Wave...', onPress: () => setMergeModalVisible(true) },
-        { text: 'Delete Wave', style: 'destructive', onPress: handleDeleteWave }
-      ])
-    }
+    setMenuVisible(true)
   }
+
+  const headerMenuItems = [
+    {
+      key: 'rename',
+      icon: 'pencil-outline',
+      label: 'Rename',
+      onPress: () => {
+        setEditName(waveName)
+        setEditDescription('')
+        setEditModalVisible(true)
+      }
+    },
+    {
+      key: 'edit-description',
+      icon: 'text-box-edit-outline',
+      label: 'Edit Description',
+      onPress: () => {
+        setEditName(waveName)
+        setEditDescription('')
+        setEditModalVisible(true)
+      }
+    },
+    {
+      key: 'merge',
+      icon: 'call-merge',
+      label: 'Merge Into Another Wave...',
+      onPress: () => setMergeModalVisible(true)
+    },
+    'separator',
+    {
+      key: 'delete',
+      icon: 'trash-can-outline',
+      label: 'Delete Wave',
+      destructive: true,
+      onPress: handleDeleteWave
+    }
+  ]
 
   React.useImperativeHandle(ref, () => ({
     showHeaderMenu
@@ -599,6 +607,12 @@ const WaveDetail = React.forwardRef((_props, ref) => {
         onSelectTarget={handleMergeTargetSelected}
         sourceWave={{ waveUuid, name: waveName }}
         uuid={uuid}
+      />
+
+      <ActionMenu
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        items={headerMenuItems}
       />
     </View>
   )

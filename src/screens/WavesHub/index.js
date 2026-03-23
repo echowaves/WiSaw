@@ -9,8 +9,6 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
-  ActionSheetIOS,
-  Platform,
   useWindowDimensions
 } from 'react-native'
 import { useAtom } from 'jotai'
@@ -29,6 +27,7 @@ import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import MergeWaveModal from '../../components/MergeWaveModal'
+import ActionMenu from '../../components/ActionMenu'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 
@@ -66,6 +65,9 @@ const WavesHub = ({ ungroupedCount = 0, sortBy = 'updatedAt', sortDirection = 'd
   // Merge state
   const [mergeModalVisible, setMergeModalVisible] = useState(false)
   const [mergingWave, setMergingWave] = useState(null)
+
+  // Context menu state
+  const [contextMenuWave, setContextMenuWave] = useState(null)
 
   const theme = getTheme(isDarkMode)
 
@@ -340,38 +342,44 @@ const WavesHub = ({ ungroupedCount = 0, sortBy = 'updatedAt', sortDirection = 'd
   }
 
   const showWaveContextMenu = (wave) => {
-    const isOwner = wave.createdBy === uuid
+    setContextMenuWave(wave)
+  }
 
-    if (Platform.OS === 'ios') {
-      const options = isOwner
-        ? ['Cancel', 'Rename', 'Edit Description', 'Merge Into Another Wave...', 'Delete Wave']
-        : ['Cancel']
-      const destructiveButtonIndex = isOwner ? 4 : undefined
-
-      ActionSheetIOS.showActionSheetWithOptions(
-        { options, cancelButtonIndex: 0, destructiveButtonIndex },
-        (buttonIndex) => {
-          if (isOwner && buttonIndex === 1) handleEditWave(wave)
-          if (isOwner && buttonIndex === 2) {
-            setEditingWave(wave)
-            setEditWaveName(wave.name)
-            setEditWaveDescription(wave.description || '')
+  const contextMenuItems = contextMenuWave && contextMenuWave.createdBy === uuid
+    ? [
+        {
+          key: 'rename',
+          icon: 'pencil-outline',
+          label: 'Rename',
+          onPress: () => handleEditWave(contextMenuWave)
+        },
+        {
+          key: 'edit-description',
+          icon: 'text-box-edit-outline',
+          label: 'Edit Description',
+          onPress: () => {
+            setEditingWave(contextMenuWave)
+            setEditWaveName(contextMenuWave.name)
+            setEditWaveDescription(contextMenuWave.description || '')
             setEditModalVisible(true)
           }
-          if (isOwner && buttonIndex === 3) handleStartMerge(wave)
-          if (isOwner && buttonIndex === 4) handleDeleteWave(wave.waveUuid)
+        },
+        {
+          key: 'merge',
+          icon: 'call-merge',
+          label: 'Merge Into Another Wave...',
+          onPress: () => handleStartMerge(contextMenuWave)
+        },
+        'separator',
+        {
+          key: 'delete',
+          icon: 'trash-can-outline',
+          label: 'Delete Wave',
+          destructive: true,
+          onPress: () => handleDeleteWave(contextMenuWave.waveUuid)
         }
-      )
-    } else {
-      const buttons = [{ text: 'Cancel', style: 'cancel' }]
-      if (isOwner) {
-        buttons.push({ text: 'Rename', onPress: () => handleEditWave(wave) })
-        buttons.push({ text: 'Merge Into Another Wave...', onPress: () => handleStartMerge(wave) })
-        buttons.push({ text: 'Delete Wave', style: 'destructive', onPress: () => handleDeleteWave(wave.waveUuid) })
-      }
-      Alert.alert(wave.name, 'Choose an action', buttons)
-    }
-  }
+      ]
+    : []
 
   const handleWavePress = (wave) => {
     router.push({
@@ -585,6 +593,13 @@ const WavesHub = ({ ungroupedCount = 0, sortBy = 'updatedAt', sortDirection = 'd
         onSelectTarget={handleMergeTargetSelected}
         sourceWave={mergingWave}
         uuid={uuid}
+      />
+
+      <ActionMenu
+        visible={!!contextMenuWave}
+        onClose={() => setContextMenuWave(null)}
+        title={contextMenuWave?.name}
+        items={contextMenuItems}
       />
     </View>
   )
