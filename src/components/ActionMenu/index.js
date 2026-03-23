@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -40,9 +40,14 @@ const ActionMenu = ({ visible, onClose, title = null, items }) => {
         onPress={onClose}
       >
         <TouchableOpacity activeOpacity={1} style={styles.card}>
-          {title && (
-            <Text style={styles.title}>{title}</Text>
-          )}
+          <View style={[styles.header, !title && { justifyContent: 'flex-end' }]}>
+            {title && (
+              <Text style={styles.headerTitle}>{title}</Text>
+            )}
+            <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name='close' size={24} color={theme.TEXT_PRIMARY} />
+            </TouchableOpacity>
+          </View>
           {items.map((item, index) => {
             if (item === 'separator') {
               return <View key={`sep-${index}`} style={styles.separator} />
@@ -105,12 +110,18 @@ const createStyles = (theme) =>
       paddingVertical: 8,
       overflow: 'hidden'
     },
-    title: {
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 4
+    },
+    headerTitle: {
       fontSize: 14,
       color: theme.TEXT_SECONDARY,
-      textAlign: 'center',
-      paddingBottom: 8,
-      paddingTop: 4
+      flex: 1
     },
     separator: {
       height: 1,
