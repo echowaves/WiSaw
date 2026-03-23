@@ -460,7 +460,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
+    <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
       <PendingPhotosBanner
         theme={theme}
         pendingPhotos={pendingPhotos}

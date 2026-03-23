@@ -1,12 +1,12 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useRef } from 'react'
 import { TouchableOpacity } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useAtom } from 'jotai'
 import AppHeader from '../../../src/components/AppHeader'
 import WaveDetail from '../../../src/screens/WaveDetail'
 import * as STATE from '../../../src/state'
-import { getTheme } from '../../../src/theme/sharedStyles'
+import { getTheme, SHARED_STYLES } from '../../../src/theme/sharedStyles'
 
 export default function WaveDetailScreen() {
   const router = useRouter()
@@ -27,9 +27,16 @@ export default function WaveDetailScreen() {
               rightSlot={
                 <TouchableOpacity
                   onPress={() => waveDetailRef.current?.showHeaderMenu()}
-                  style={{ padding: 8 }}
+                  style={[
+                    SHARED_STYLES.interactive.headerButton,
+                    {
+                      backgroundColor: theme.INTERACTIVE_BACKGROUND,
+                      borderWidth: 1,
+                      borderColor: theme.INTERACTIVE_BORDER
+                    }
+                  ]}
                 >
-                  <Ionicons name='ellipsis-horizontal' size={24} color={theme.TEXT_PRIMARY} />
+                  <MaterialCommunityIcons name='dots-vertical' size={22} color={theme.TEXT_PRIMARY} />
                 </TouchableOpacity>
               }
             />
