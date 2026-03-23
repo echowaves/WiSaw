@@ -29,10 +29,10 @@ import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import MergeWaveModal from '../../components/MergeWaveModal'
-import { subscribeToAutoGroup, emitAutoGroupDone } from '../../events/autoGroupBus'
+import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 
-const WavesHub = () => {
+const WavesHub = ({ ungroupedCount = 0 }) => {
   const { width } = useWindowDimensions()
   const numColumns = width >= 768 ? 2 : 1
 
@@ -386,16 +386,18 @@ const WavesHub = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
       {/* Search bar */}
-      <View style={styles.searchContainer}>
-        <FontAwesome5 name='search' size={14} color={theme.TEXT_SECONDARY} style={styles.searchIcon} />
-        <TextInput
-          style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
-          placeholder='Search waves...'
-          placeholderTextColor={theme.TEXT_SECONDARY}
-          value={searchText}
-          onChangeText={setSearchText}
-        />
-      </View>
+      {waves.length > 0 && (
+        <View style={styles.searchContainer}>
+          <FontAwesome5 name='search' size={14} color={theme.TEXT_SECONDARY} style={styles.searchIcon} />
+          <TextInput
+            style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
+            placeholder='Search waves...'
+            placeholderTextColor={theme.TEXT_SECONDARY}
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+        </View>
+      )}
 
       <InteractionHintBanner hasContent={waves.length > 0} />
 
@@ -437,6 +439,8 @@ const WavesHub = () => {
               actionText='Create a Wave'
               onActionPress={() => setModalVisible(true)}
               iconColor={theme.TEXT_PRIMARY}
+              secondaryActionText={ungroupedCount > 0 ? `Auto Group ${ungroupedCount} photos` : undefined}
+              onSecondaryActionPress={ungroupedCount > 0 ? () => emitAutoGroup(ungroupedCount) : undefined}
             />
           )
         }

@@ -81,6 +81,24 @@ const createStyles = (theme) =>
       fontSize: 16,
       fontWeight: '600',
       color: 'white'
+    },
+    secondaryButtonContainer: {
+      borderRadius: 20,
+      overflow: 'hidden',
+      marginTop: 12
+    },
+    secondaryButton: {
+      backgroundColor: 'transparent',
+      paddingHorizontal: 32,
+      paddingVertical: 12,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.INTERACTIVE_PRIMARY
+    },
+    secondaryButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.INTERACTIVE_PRIMARY
     }
   })
 
@@ -91,7 +109,9 @@ const EmptyStateCard = ({
   subtitle,
   actionText,
   onActionPress,
-  iconColor
+  iconColor,
+  secondaryActionText,
+  onSecondaryActionPress
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -124,6 +144,16 @@ const EmptyStateCard = ({
             buttonStyle={styles.actionButton}
             titleStyle={styles.actionButtonText}
             containerStyle={styles.actionButtonContainer}
+          />
+        )}
+
+        {secondaryActionText && onSecondaryActionPress && (
+          <Button
+            title={secondaryActionText}
+            onPress={onSecondaryActionPress}
+            buttonStyle={styles.secondaryButton}
+            titleStyle={styles.secondaryButtonText}
+            containerStyle={styles.secondaryButtonContainer}
           />
         )}
       </View>

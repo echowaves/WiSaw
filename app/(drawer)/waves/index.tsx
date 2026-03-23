@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { TouchableOpacity, ActionSheetIOS, Alert, Platform } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, ActionSheetIOS, Alert, Platform } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useAtom } from 'jotai'
@@ -83,7 +83,9 @@ export default function WavesScreen() {
                       backgroundColor:
                         SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
                       borderWidth: 1,
-                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER
+                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
+                      flexDirection: 'row',
+                      alignItems: 'center'
                     }
                   ]}
                 >
@@ -92,13 +94,37 @@ export default function WavesScreen() {
                     size={22}
                     color={SHARED_STYLES.theme.TEXT_PRIMARY}
                   />
+                  {ungroupedCount > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {ungroupedCount}
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               }
             />
           )
         }}
       />
-      <WavesHub />
+      <WavesHub ungroupedCount={ungroupedCount} />
     </>
   )
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 10,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    marginLeft: 4,
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+})
