@@ -23,22 +23,17 @@ const PhotosListFooter = ({
   unreadCount,
   isCameraOpening,
   onCameraPress,
-  location,
+  locationReady = true,
   waveUuid
 }) => {
   const { width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
 
-  // Update badge count side effect - maybe this should be in the parent or a hook?
-  // Keeping it here for now to match original behavior, but it's a side effect in render.
-  // Better to move it to useEffect in parent, but let's stick to extraction first.
-  // Actually, renderFooter had this: Notifications.setBadgeCountAsync(unreadCount || 0)
-  // I will leave it out and assume the parent handles it or I'll add a useEffect here.
+  const cameraDisabled = isCameraOpening || !locationReady
+
   React.useEffect(() => {
     Notifications.setBadgeCountAsync(unreadCount || 0)
   }, [unreadCount])
-
-  if (!location) return null
 
   const styles = StyleSheet.create({
     footerContainer: {
@@ -143,11 +138,11 @@ const PhotosListFooter = ({
 
           {/* Video Recording Button */}
           <TouchableOpacity
-            style={[styles.videoRecordButton, isCameraOpening && { opacity: 0.5 }]}
+            style={[styles.videoRecordButton, cameraDisabled && { opacity: 0.4 }]}
             onPress={() => {
               onCameraPress({ cameraType: 'video', waveUuid })
             }}
-            disabled={isCameraOpening}
+            disabled={cameraDisabled}
           >
             <FontAwesome5 name='video' color='white' size={24} />
           </TouchableOpacity>
@@ -172,12 +167,12 @@ const PhotosListFooter = ({
               zIndex: 15,
               borderWidth: 3,
               borderColor: theme.BACKGROUND,
-              opacity: isCameraOpening ? 0.5 : 1
+              opacity: cameraDisabled ? 0.4 : 1
             }}
             onPress={() => {
               onCameraPress({ cameraType: 'camera', waveUuid })
             }}
-            disabled={isCameraOpening}
+            disabled={cameraDisabled}
           >
             <FontAwesome5 name='camera' color='white' size={28} />
           </TouchableOpacity>

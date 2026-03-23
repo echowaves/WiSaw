@@ -3,13 +3,15 @@ import { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
 import * as MediaLibrary from 'expo-media-library'
+import { useAtomValue } from 'jotai'
 import { Alert } from 'react-native'
 import Toast from 'react-native-toast-message'
 
-import isValidLocation from '../../../utils/isValidLocation'
+import * as STATE from '../../../state'
 
-export default function useCameraCapture ({ location, enqueueCapture, toastTopOffset }) {
+export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
   const [isCameraOpening, setIsCameraOpening] = useState(false)
+  const locationState = useAtomValue(STATE.locationAtom)
 
   async function checkPermission ({
     permissionFunction,
@@ -49,7 +51,7 @@ export default function useCameraCapture ({ location, enqueueCapture, toastTopOf
     }
 
     if (cameraReturn.canceled === false) {
-      if (!isValidLocation(location)) {
+      if (locationState.status !== 'ready') {
         Toast.show({
           text1: 'Waiting for location...',
           text2: 'Please wait until GPS coordinates are available.',
@@ -62,7 +64,7 @@ export default function useCameraCapture ({ location, enqueueCapture, toastTopOf
       await enqueueCapture({
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
-        location,
+        location: { coords: locationState.coords },
         waveUuid
       })
     }

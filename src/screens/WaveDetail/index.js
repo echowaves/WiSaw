@@ -33,9 +33,7 @@ import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 import { emitAutoGroupDone } from '../../events/autoGroupBus'
 import usePhotoUploader from '../PhotosList/upload/usePhotoUploader'
-import useLocationInit from '../PhotosList/hooks/useLocationInit'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
-import isValidLocation from '../../utils/isValidLocation'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import {
   createFrozenPhoto
@@ -106,7 +104,8 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const theme = getTheme(isDarkMode)
   const toastTopOffset = useToastTopOffset()
 
-  const { location, initLocation } = useLocationInit({ toastTopOffset })
+  const [locationState] = useAtom(STATE.locationAtom)
+  const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
 
   // Pending photos animation refs
   const pendingPhotosAnimation = useRef(new Animated.Value(0)).current
@@ -245,10 +244,6 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     } finally {
       setLoading(false)
     }
-  }, [waveUuid])
-
-  useEffect(() => {
-    initLocation()
   }, [waveUuid])
 
   useFocusEffect(
@@ -443,7 +438,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
       }
 
       if (cameraReturn.canceled === false) {
-        if (!isValidLocation(location)) {
+        if (locationState.status !== 'ready') {
           Toast.show({
             text1: 'Waiting for location...',
             text2: 'Please wait until GPS coordinates are available.',
@@ -456,7 +451,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
         await enqueueCapture({
           cameraImgUrl: cameraReturn.assets[0].uri,
           type: cameraReturn.assets[0].type,
-          location,
+          location: { coords: locationState.coords },
           waveUuid: targetWaveUuid
         })
       }
@@ -547,7 +542,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
         unreadCount={0}
         isCameraOpening={isCameraOpening}
         onCameraPress={checkPermissionsForPhotoTaking}
-        location={location}
+        locationReady={!!location}
         waveUuid={waveUuid}
       />
 

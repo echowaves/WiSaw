@@ -37,3 +37,5 @@ export const friendsList = atom([])
 export const isDarkMode = atom(false)
 
 export const followSystemTheme = atom(false)
+
+export const locationAtom = atom({ status: 'pending', coords: null })

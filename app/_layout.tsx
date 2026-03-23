@@ -16,6 +16,7 @@ import { StatusBar } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
+import useLocationProvider from '../src/hooks/useLocationProvider'
 import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
 import { parseDeepLink } from '../src/utils/linkingHelper'
@@ -36,6 +37,9 @@ export default function RootLayout () {
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
+
+  // Initialize global location provider (permission, watcher, atom)
+  useLocationProvider()
 
   // Load vector icon fonts
   const [fontsLoaded, fontError] = useFonts({

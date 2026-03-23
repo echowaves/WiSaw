@@ -24,6 +24,8 @@ import {
   useWindowDimensions,
   View
 } from 'react-native'
+
+import * as Linking from 'expo-linking'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as Constants from 'expo-constants'
@@ -58,7 +60,6 @@ import PhotosListMasonry from './components/PhotosListMasonry'
 
 import useCameraCapture from './hooks/useCameraCapture'
 import useKeyboardTracking from './hooks/useKeyboardTracking'
-import useLocationInit from './hooks/useLocationInit'
 import useNetworkStatus from './hooks/useNetworkStatus'
 import usePendingAnimation from './hooks/usePendingAnimation'
 import usePhotoExpansion from './hooks/usePhotoExpansion'
@@ -174,7 +175,9 @@ const PhotosList = ({ searchFromUrl }) => {
   // --- Extracted hooks ---
   const { netAvailable } = useNetworkStatus()
   const { keyboardVisible, dismissKeyboard, keyboardOffset } = useKeyboardTracking()
-  const { location, setLocation, initLocation } = useLocationInit({ toastTopOffset })
+
+  const [locationState] = useAtom(STATE.locationAtom)
+  const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
 
   const handleIncomingSearch = useCallback(
     (term) => {
@@ -469,7 +472,6 @@ const PhotosList = ({ searchFromUrl }) => {
   } = usePhotoExpansion({ width, height, insets, segmentConfig })
 
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({
-    location,
     enqueueCapture,
     toastTopOffset
   })
@@ -681,16 +683,11 @@ const PhotosList = ({ searchFromUrl }) => {
   }, [])
 
   useEffect(() => {
-    // checkForUpdate(),
-    // check permissions, retrieve UUID, make sure upload folder exists
-
-    initLocation()
-  }, [])
-
-  useEffect(() => {
-    // updateNavBar()
-    reload()
-  }, [location])
+    // Reload feed when location becomes available or changes
+    if (location) {
+      reload()
+    }
+  }, [locationState.coords?.latitude, locationState.coords?.longitude])
 
   // useEffect(() => {}, [currentBatch])
 
@@ -862,7 +859,7 @@ const PhotosList = ({ searchFromUrl }) => {
           unreadCount={unreadCount}
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
-          location={location}
+          locationReady={!!location}
         />
       </View>
     )
@@ -928,7 +925,7 @@ const PhotosList = ({ searchFromUrl }) => {
             unreadCount={unreadCount}
             isCameraOpening={isCameraOpening}
             onCameraPress={checkPermissionsForPhotoTaking}
-            location={location}
+            locationReady={!!location}
           />
         </View>
         <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
@@ -945,9 +942,24 @@ const PhotosList = ({ searchFromUrl }) => {
   }
 
   if (!location) {
+    const isPending = locationState.status === 'pending'
+    const isDenied = locationState.status === 'denied'
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderHeader()}
+        {isPending && (
+          <View style={{ backgroundColor: theme.CARD_BACKGROUND, paddingVertical: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: theme.BORDER_LIGHT }}>
+            <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 14, textAlign: 'center' }}>Obtaining your location...</Text>
+          </View>
+        )}
+        {isDenied && (
+          <TouchableOpacity
+            onPress={() => Linking.openSettings()}
+            style={{ backgroundColor: theme.CARD_BACKGROUND, paddingVertical: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: theme.BORDER_LIGHT }}
+          >
+            <Text style={{ color: theme.STATUS_ERROR, fontSize: 14, textAlign: 'center' }}>Location access needed — tap to open Settings</Text>
+          </TouchableOpacity>
+        )}
         <PendingPhotosBanner
           theme={theme}
           pendingPhotos={pendingPhotos}
@@ -967,14 +979,24 @@ const PhotosList = ({ searchFromUrl }) => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <EmptyStateCard
-            icon='location-on'
-            iconType='MaterialIcons'
-            title='Location Access Needed'
-            subtitle='WiSaw needs location access to show you photos from your area and let others discover your content.'
-            actionText='Enable Location'
-            onActionPress={reload}
-          />
+          {isPending && (
+            <EmptyStateCard
+              icon='location-on'
+              iconType='MaterialIcons'
+              title='Finding Your Location'
+              subtitle="We're finding your location so we can show nearby photos."
+            />
+          )}
+          {isDenied && (
+            <EmptyStateCard
+              icon='location-on'
+              iconType='MaterialIcons'
+              title='Location Access Needed'
+              subtitle='WiSaw needs location access to show you photos from your area and let others discover your content.'
+              actionText='Enable Location'
+              onActionPress={() => Linking.openSettings()}
+            />
+          )}
         </ScrollView>
         <PhotosListFooter
           theme={theme}
@@ -983,7 +1005,7 @@ const PhotosList = ({ searchFromUrl }) => {
           unreadCount={unreadCount}
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
-          location={location}
+          locationReady={false}
         />
       </View>
     )
@@ -1018,7 +1040,7 @@ const PhotosList = ({ searchFromUrl }) => {
             unreadCount={unreadCount}
             isCameraOpening={isCameraOpening}
             onCameraPress={checkPermissionsForPhotoTaking}
-            location={location}
+            locationReady={!!location}
           />
         )}
         unreadCount={unreadCount}
@@ -1102,7 +1124,7 @@ const PhotosList = ({ searchFromUrl }) => {
         unreadCount={unreadCount}
         isCameraOpening={isCameraOpening}
         onCameraPress={checkPermissionsForPhotoTaking}
-        location={location}
+        locationReady={!!location}
       />
       <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
     </View>
