@@ -5,7 +5,7 @@ import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useAtom } from 'jotai'
 import AppHeader from '../../../src/components/AppHeader'
 import WavesHub from '../../../src/screens/WavesHub'
-import { SHARED_STYLES } from '../../../src/theme/sharedStyles'
+import { SHARED_STYLES, getTheme } from '../../../src/theme/sharedStyles'
 import { emitAutoGroup, subscribeToAutoGroupDone } from '../../../src/events/autoGroupBus'
 import { emitAddWave } from '../../../src/events/waveAddBus'
 import { getUngroupedPhotosCount } from '../../../src/screens/Waves/reducer'
@@ -14,7 +14,9 @@ import * as STATE from '../../../src/state'
 export default function WavesScreen() {
   const router = useRouter()
   const [uuid] = useAtom(STATE.uuid)
+  const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [ungroupedCount, setUngroupedCount] = useState(0)
+  const theme = getTheme(isDarkMode)
 
   const fetchUngroupedCount = useCallback(async () => {
     if (!uuid) return
@@ -81,9 +83,9 @@ export default function WavesScreen() {
                     SHARED_STYLES.interactive.headerButton,
                     {
                       backgroundColor:
-                        SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
+                        theme.INTERACTIVE_BACKGROUND,
                       borderWidth: 1,
-                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
+                      borderColor: theme.INTERACTIVE_BORDER,
                       flexDirection: 'row',
                       alignItems: 'center'
                     }
@@ -92,7 +94,7 @@ export default function WavesScreen() {
                   <MaterialCommunityIcons
                     name='dots-vertical'
                     size={22}
-                    color={SHARED_STYLES.theme.TEXT_PRIMARY}
+                    color={theme.TEXT_PRIMARY}
                   />
                   {ungroupedCount > 0 && (
                     <View style={styles.badge}>
