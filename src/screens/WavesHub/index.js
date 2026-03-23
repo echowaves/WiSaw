@@ -54,6 +54,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   const [creating, setCreating] = useState(false)
 
   const [autoGrouping, setAutoGrouping] = useState(false)
+  const [autoGroupProgress, setAutoGroupProgress] = useState({ photosGrouped: 0, wavesCreated: 0 })
 
   // Edit modal state
   const [editModalVisible, setEditModalVisible] = useState(false)
@@ -233,6 +234,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         {
           text: 'Auto-Group',
           onPress: async () => {
+            setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0 })
             setAutoGrouping(true)
             let totalWavesCreated = 0
             let totalPhotosGrouped = 0
@@ -243,6 +245,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
                 if (result.photosGrouped > 0) {
                   totalWavesCreated += 1
                   totalPhotosGrouped += result.photosGrouped
+                  setAutoGroupProgress({ photosGrouped: totalPhotosGrouped, wavesCreated: totalWavesCreated })
                 }
               } while (result.hasMore)
               if (totalWavesCreated === 0) {
@@ -536,6 +539,31 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
                   : <Text style={[styles.buttonText, { color: '#FFF' }]}>Save</Text>}
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Auto-Group Progress Overlay */}
+      <Modal
+        animationType='fade'
+        transparent
+        visible={autoGrouping}
+        onRequestClose={() => {}}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND, alignItems: 'center' }]}>
+            <ActivityIndicator size='large' color={CONST.MAIN_COLOR} style={{ marginBottom: 16 }} />
+            <Text style={[styles.modalTitle, { marginBottom: 8 }]}>Auto-Grouping Photos...</Text>
+            {autoGroupProgress.photosGrouped > 0 && (
+              <>
+                <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 16, marginBottom: 4 }}>
+                  {autoGroupProgress.photosGrouped} photo{autoGroupProgress.photosGrouped !== 1 ? 's' : ''} grouped
+                </Text>
+                <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 16 }}>
+                  {autoGroupProgress.wavesCreated} wave{autoGroupProgress.wavesCreated !== 1 ? 's' : ''} created
+                </Text>
+              </>
+            )}
           </View>
         </View>
       </Modal>

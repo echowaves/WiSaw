@@ -33,12 +33,27 @@ The system SHALL display a confirmation dialog before executing the auto-group o
 - **THEN** no mutation SHALL be called and the screen SHALL remain unchanged
 
 ### Requirement: Auto-group mutation execution
-The system SHALL call the `autoGroupPhotosIntoWaves(uuid: String!)` GraphQL mutation in a loop to group ungrouped photos into waves one wave at a time. Each call returns `{ waveUuid: String, name: String, photosGrouped: Int!, photosRemaining: Int!, hasMore: Boolean! }`. The loop SHALL continue while `hasMore` is `true`.
+The system SHALL call the `autoGroupPhotosIntoWaves(uuid: String!)` GraphQL mutation in a loop to group ungrouped photos into waves one wave at a time. Each call returns `{ waveUuid: String, name: String, photosGrouped: Int!, photosRemaining: Int!, hasMore: Boolean! }`. The loop SHALL continue while `hasMore` is `true`. During execution, a progress overlay SHALL be displayed.
+
+#### Scenario: Progress overlay appears during auto-group
+- **WHEN** the user confirms the auto-group action
+- **THEN** a semi-transparent modal overlay SHALL appear with an ActivityIndicator and progress text
+- **THEN** the overlay SHALL block interaction with the underlying UI
+
+#### Scenario: Progress overlay updates after each batch
+- **WHEN** a batch completes (each `autoGroupPhotosIntoWaves` call returns)
+- **THEN** the overlay text SHALL update to show the running total of photos grouped and waves created
+- **THEN** the text format SHALL be: "N photos grouped" on one line and "M waves created" on a second line
+
+#### Scenario: Progress overlay dismisses on completion
+- **WHEN** the auto-group loop finishes (either all batches complete or an error occurs)
+- **THEN** the progress overlay SHALL be dismissed
+- **THEN** the success or error toast SHALL appear as before
 
 #### Scenario: Successful auto-group with results
 - **WHEN** the user confirms the auto-group action
 - **THEN** the system SHALL call the `autoGroupPhotosIntoWaves` mutation
-- **THEN** for each call where `hasMore` is `true`, the system SHALL prepend the new wave to the waves list and continue calling
+- **THEN** for each call where `hasMore` is `true`, the system SHALL continue calling
 - **THEN** when `hasMore` is `false`, the loop SHALL stop
 - **THEN** the system SHALL display a success toast showing the total number of waves created and total photos grouped
 - **THEN** the system SHALL refresh the waves list
@@ -60,13 +75,13 @@ The system SHALL call the `autoGroupPhotosIntoWaves(uuid: String!)` GraphQL muta
 - **THEN** the waves list SHALL remain unchanged
 
 ### Requirement: Loading state during auto-group
-The system SHALL provide visual feedback while the auto-group loop is in progress.
+The system SHALL provide visual feedback via a progress overlay while the auto-group loop is in progress.
 
-#### Scenario: Loading indicator during auto-group loop
+#### Scenario: Progress overlay during auto-group loop
 - **WHEN** the auto-group mutation loop is running
-- **THEN** the system SHALL display a loading indicator
-- **THEN** the auto-group button SHALL be disabled to prevent duplicate calls
-- **THEN** newly created waves SHALL appear incrementally in the list as each mutation returns
+- **THEN** the system SHALL display a modal progress overlay with an ActivityIndicator and running totals
+- **THEN** the overlay SHALL block all user interaction to prevent duplicate calls
+- **THEN** the overlay SHALL dismiss when the loop completes or fails
 
 ### Requirement: Waves drawer badge shows upload target status
 The Waves item in the navigation drawer SHALL display a colored dot badge on its icon when an upload target wave is set, using `CONST.MAIN_COLOR`.
