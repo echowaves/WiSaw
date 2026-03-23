@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Auto-Group Button in Waves Header
 The system SHALL display a kebab (three-dot vertical) menu icon in the upper-right navigation bar of the Waves screen. Tapping the icon SHALL open a platform-native context menu with two items: "Create New Wave" and "Auto Group".
 

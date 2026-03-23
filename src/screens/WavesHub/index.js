@@ -30,6 +30,7 @@ import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import { subscribeToAutoGroup, emitAutoGroupDone } from '../../events/autoGroupBus'
+import { subscribeToAddWave } from '../../events/waveAddBus'
 
 const WavesHub = () => {
   const { width } = useWindowDimensions()
@@ -274,6 +275,13 @@ const WavesHub = () => {
     })
     return unsubscribe
   }, [handleAutoGroup])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAddWave(() => {
+      setModalVisible(true)
+    })
+    return unsubscribe
+  }, [])
 
   const handleStartMerge = (wave) => {
     setMergingWave(wave)

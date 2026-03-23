@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons'
+import { TouchableOpacity, ActionSheetIOS, Alert, Platform } from 'react-native'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
 import { useAtom } from 'jotai'
 import AppHeader from '../../../src/components/AppHeader'
 import WavesHub from '../../../src/screens/WavesHub'
 import { SHARED_STYLES } from '../../../src/theme/sharedStyles'
 import { emitAutoGroup, subscribeToAutoGroupDone } from '../../../src/events/autoGroupBus'
+import { emitAddWave } from '../../../src/events/waveAddBus'
 import { getUngroupedPhotosCount } from '../../../src/screens/Waves/reducer'
 import * as STATE from '../../../src/state'
 
@@ -38,6 +39,32 @@ export default function WavesScreen() {
     }, [fetchUngroupedCount])
   )
 
+  const autoGroupLabel =
+    ungroupedCount > 0
+      ? `Auto Group (${ungroupedCount} ungrouped)`
+      : 'Auto Group'
+
+  const showHeaderMenu = useCallback(() => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Create New Wave', autoGroupLabel],
+          cancelButtonIndex: 0
+        },
+        (buttonIndex) => {
+          if (buttonIndex === 1) emitAddWave()
+          if (buttonIndex === 2) emitAutoGroup(ungroupedCount)
+        }
+      )
+    } else {
+      Alert.alert('Waves', 'Choose an action', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Create New Wave', onPress: () => emitAddWave() },
+        { text: autoGroupLabel, onPress: () => emitAutoGroup(ungroupedCount) }
+      ])
+    }
+  }, [ungroupedCount, autoGroupLabel])
+
   return (
     <>
       <Stack.Screen
@@ -49,31 +76,22 @@ export default function WavesScreen() {
               title='Waves'
               rightSlot={
                 <TouchableOpacity
-                  onPress={() => emitAutoGroup(ungroupedCount)}
+                  onPress={showHeaderMenu}
                   style={[
                     SHARED_STYLES.interactive.headerButton,
                     {
                       backgroundColor:
                         SHARED_STYLES.theme.INTERACTIVE_BACKGROUND,
                       borderWidth: 1,
-                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER,
-                      flexDirection: 'row',
-                      alignItems: 'center'
+                      borderColor: SHARED_STYLES.theme.INTERACTIVE_BORDER
                     }
                   ]}
                 >
-                  <FontAwesome5
-                    name='layer-group'
-                    size={18}
+                  <MaterialCommunityIcons
+                    name='dots-vertical'
+                    size={22}
                     color={SHARED_STYLES.theme.TEXT_PRIMARY}
                   />
-                  {ungroupedCount > 0 && (
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>
-                        {ungroupedCount}
-                      </Text>
-                    </View>
-                  )}
                 </TouchableOpacity>
               }
             />
@@ -84,20 +102,3 @@ export default function WavesScreen() {
     </>
   )
 }
-
-const styles = StyleSheet.create({
-  badge: {
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    marginLeft: 4,
-  },
-  badgeText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-})
