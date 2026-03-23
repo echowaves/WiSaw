@@ -17,10 +17,10 @@ The system SHALL attach a wave UUID to uploaded photos when a `waveUuid` is prov
 - **THEN** photos captured from that footer's camera SHALL be tagged with that `waveUuid`
 
 ### Requirement: Geo Coordinate Validation at Upload Time
-The system SHALL validate that queued photos have valid geo coordinates before submitting the `createPhoto` GraphQL mutation. This serves as a last line of defense against uploading photos without location data.
+The system SHALL validate that queued photos have valid geo coordinates before submitting the `createPhoto` GraphQL mutation. Coordinates SHALL originate from the global `locationAtom` at capture time.
 
 #### Scenario: Queued item has valid coordinates
-- **WHEN** a queued photo has non-zero latitude and longitude in its location data
+- **WHEN** a queued photo has non-zero latitude and longitude in its location data (sourced from `locationAtom.coords` at capture time)
 - **THEN** the upload SHALL proceed normally
 
 #### Scenario: Queued item has null or missing location
@@ -35,15 +35,28 @@ The system SHALL validate that queued photos have valid geo coordinates before s
 - **THEN** the item SHALL be removed from the upload queue
 - **THEN** the user SHALL be shown an error message indicating the photo was skipped due to missing location
 
+### Requirement: Camera Capture Location Source
+The `useCameraCapture` hook SHALL read location from the global `locationAtom` instead of receiving it as a parameter.
+
+#### Scenario: Camera capture with ready location
+- **WHEN** the user captures a photo and `locationAtom.status` is `ready`
+- **THEN** the coordinates from `locationAtom.coords` SHALL be used for the upload queue item
+
+#### Scenario: Camera capture with unavailable location
+- **WHEN** the user manages to trigger capture and `locationAtom.status` is not `ready`
+- **THEN** a "Waiting for location..." toast SHALL be shown
+- **THEN** the capture SHALL be blocked
+
 ### Requirement: Wave Detail Photo Upload Location
-The system SHALL obtain valid GPS coordinates in the Wave Detail screen before permitting photo capture, using the same location initialization as the main photo feed.
+The system SHALL obtain valid GPS coordinates from the global `locationAtom` for photo capture in the Wave Detail screen. Wave browsing (viewing wave photos, navigating, editing) SHALL work normally regardless of location state.
 
 #### Scenario: WaveDetail camera with location available
-- **WHEN** the user opens WaveDetail and location permission is granted
-- **THEN** the system SHALL obtain device coordinates
-- **THEN** photos captured from WaveDetail SHALL include valid coordinates
+- **WHEN** the user opens WaveDetail and `locationAtom.status` is `ready`
+- **THEN** camera and video buttons SHALL be enabled
+- **THEN** photos captured from WaveDetail SHALL include coordinates from `locationAtom.coords`
 
 #### Scenario: WaveDetail camera without location
-- **WHEN** the user opens WaveDetail and location is not yet available
-- **THEN** the camera button SHALL be accessible but capture SHALL be blocked until location is ready
-- **THEN** the user SHALL be shown a "Waiting for location..." message if they attempt capture
+- **WHEN** the user opens WaveDetail and `locationAtom.status` is `pending` or `denied`
+- **THEN** camera and video buttons SHALL be visible but disabled (opacity 0.4)
+- **THEN** wave browsing (photo grid, pagination, search, editing, merging) SHALL work normally
+- **THEN** the `useLocationInit` hook SHALL NOT be called — location comes from the atom

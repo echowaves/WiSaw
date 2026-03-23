@@ -1,60 +1,50 @@
 # Location Services Specification
 
 ## Purpose
-Location services provide GPS-based functionality for the WiSaw platform, including permission handling, location-based feed filtering to show nearby photos, and optional background location tracking for continuous proximity awareness.
+Location services provide GPS-based functionality for the WiSaw platform, including permission handling via a global location provider, location-based feed filtering to show nearby photos, and continuous foreground location tracking via `watchPositionAsync`.
 
 ## Requirements
 
 ### Requirement: GPS Permission Handling
-The system SHALL request and manage location permissions on both iOS and Android with clear user-facing explanations for why access is needed.
+The system SHALL request and manage location permissions at app startup via the global `useLocationProvider` hook, storing the result in the `locationAtom`. Permission is requested once from the root layout, not per-screen.
 
 #### Scenario: First-time location request
-- **WHEN** the app needs location data for the first time
-- **THEN** the system requests location permission with a clear explanation of its purpose
+- **WHEN** the app starts and `useLocationProvider` runs
+- **THEN** the system SHALL call `Location.requestForegroundPermissionsAsync()`
+- **THEN** if granted, the atom transitions from `pending` to `ready` (via fast-seed or watcher)
+- **THEN** if denied, the atom transitions from `pending` to `denied`
 
 #### Scenario: Permission previously denied
 - **WHEN** the user previously denied location permission
-- **THEN** the app continues to function with degraded location features and may prompt again at appropriate intervals
+- **THEN** the atom SHALL be set to `{ status: 'denied', coords: null }`
+- **THEN** an Alert SHALL prompt the user to open Settings
+- **THEN** the app SHALL continue to function with location-dependent features disabled
 
 ### Requirement: Location-Based Feed Filtering
-The system SHALL filter the photo feed to show content from users near the current GPS coordinates.
+The system SHALL filter the photo feed to show content from users near the current GPS coordinates, reading from the global `locationAtom`.
 
 #### Scenario: User has location enabled
-- **WHEN** location permission is granted and the feed is loaded
-- **THEN** only photos within the configured proximity radius of the user's location are displayed
+- **WHEN** the `locationAtom` status is `ready` and the feed is loaded
+- **THEN** only photos within the configured proximity radius of the user's coordinates are displayed
 
 #### Scenario: Location changes significantly
-- **WHEN** the user's location changes beyond a significant threshold
-- **THEN** the feed content updates to reflect nearby photos at the new location
-
-### Requirement: Background Location Support
-The system SHALL optionally support background location updates when the user has granted appropriate permissions.
-
-#### Scenario: Background location enabled
-- **WHEN** the user grants background location permission
-- **THEN** the app can update location data while running in the background
-
-### Requirement: Motion Detection Support
-The system SHALL optionally use device motion sensors to complement location-aware features.
-
-#### Scenario: Motion sensors available
-- **WHEN** the device supports motion sensors and permissions are granted
-- **THEN** the app can use motion data to enhance location-based functionality
+- **WHEN** the watcher updates the `locationAtom` with new coordinates (100m+ movement)
+- **THEN** the feed content SHALL automatically reload to reflect nearby photos at the new location
 
 ### Requirement: Location Validation Before Photo Capture
-The system SHALL validate that a valid GPS location is available before permitting any photo capture or upload. A valid location has non-zero latitude and longitude coordinates.
+The system SHALL validate that the `locationAtom` has `status: 'ready'` before permitting any photo capture or upload. Camera and video buttons SHALL be visible but disabled when location is not ready.
 
 #### Scenario: Location not yet available
-- **WHEN** the user attempts to capture a photo and the device location has not been obtained
-- **THEN** the camera action SHALL be blocked
-- **THEN** the user SHALL be shown a "Waiting for location..." message
+- **WHEN** the user views a screen with camera buttons and `locationAtom.status` is `pending`
+- **THEN** camera and video buttons SHALL be visible but disabled (opacity 0.4)
+- **THEN** tapping a disabled button SHALL have no effect
 
-#### Scenario: Location is invalid (0,0)
-- **WHEN** the location state contains coordinates of exactly (0, 0)
-- **THEN** the system SHALL treat this as an uninitialized/invalid location
-- **THEN** photo capture SHALL be blocked until valid coordinates are obtained
+#### Scenario: Location permission denied
+- **WHEN** `locationAtom.status` is `denied`
+- **THEN** camera and video buttons SHALL be visible but disabled (opacity 0.4)
 
 #### Scenario: Location is valid
-- **WHEN** the location state contains non-zero latitude and longitude coordinates
+- **WHEN** `locationAtom.status` is `ready`
+- **THEN** camera and video buttons SHALL be enabled
 - **THEN** photo capture SHALL be permitted
-- **THEN** the valid coordinates SHALL be attached to the queued upload item
+- **THEN** the valid coordinates from `locationAtom.coords` SHALL be attached to the queued upload item
