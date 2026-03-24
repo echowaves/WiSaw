@@ -13,6 +13,7 @@ import { router, Stack, useRootNavigationState } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useRef } from 'react'
 import { StatusBar } from 'react-native'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
@@ -282,13 +283,15 @@ export default function RootLayout () {
         backgroundColor='transparent'
         translucent={false}
       />
-      <Stack
-        screenOptions={{
-          headerShown: false
-        }}
-      >
-        <Stack.Screen name='(drawer)' options={{ headerShown: false }} />
-      </Stack>
+      <KeyboardProvider statusBarTranslucent>
+        <Stack
+          screenOptions={{
+            headerShown: false
+          }}
+        >
+          <Stack.Screen name='(drawer)' options={{ headerShown: false }} />
+        </Stack>
+      </KeyboardProvider>
       <Toast />
     </SafeAreaProvider>
   )

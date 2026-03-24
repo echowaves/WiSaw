@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
 import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
@@ -226,9 +226,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
           contentInsetAdjustmentBehavior='automatic'
-          enableOnAndroid
-          extraScrollHeight={20}
-          enableResetScrollToCoords={false}
+          bottomOffset={20}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View>

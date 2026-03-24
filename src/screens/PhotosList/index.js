@@ -59,7 +59,6 @@ import PhotosListEmptyState from './components/PhotosListEmptyState'
 import PhotosListMasonry from './components/PhotosListMasonry'
 
 import useCameraCapture from './hooks/useCameraCapture'
-import useKeyboardTracking from './hooks/useKeyboardTracking'
 import useNetworkStatus from './hooks/useNetworkStatus'
 import usePendingAnimation from './hooks/usePendingAnimation'
 import usePhotoExpansion from './hooks/usePhotoExpansion'
@@ -174,7 +173,6 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // --- Extracted hooks ---
   const { netAvailable } = useNetworkStatus()
-  const { keyboardVisible, dismissKeyboard, keyboardOffset } = useKeyboardTracking()
 
   const [locationState] = useAtom(STATE.locationAtom)
   const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
@@ -791,9 +789,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const submitSearch = async () => {
     if (searchTerm && searchTerm.length >= 3) {
-      if (keyboardVisible) {
-        dismissKeyboard()
-      }
+      Keyboard.dismiss()
       reload()
       // await load()
     } else {
@@ -886,8 +882,6 @@ const PhotosList = ({ searchFromUrl }) => {
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               onSubmitSearch={submitSearch}
-              keyboardVisible={keyboardVisible}
-              keyboardOffset={keyboardOffset}
               autoFocus={false}
             />
           )}
@@ -1050,8 +1044,6 @@ const PhotosList = ({ searchFromUrl }) => {
         setSearchTerm={setSearchTerm}
         searchBarRef={searchBarRef}
         submitSearch={submitSearch}
-        keyboardVisible={keyboardVisible}
-        keyboardOffset={keyboardOffset}
         FOOTER_HEIGHT={FOOTER_HEIGHT}
       />
     )
@@ -1112,8 +1104,6 @@ const PhotosList = ({ searchFromUrl }) => {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           onSubmitSearch={submitSearch}
-          keyboardVisible={keyboardVisible}
-          keyboardOffset={keyboardOffset}
           autoFocus={false}
         />
       )}

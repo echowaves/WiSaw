@@ -14,6 +14,7 @@ import {
   View
 } from 'react-native'
 
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import * as CONST from '../../consts'
@@ -96,16 +97,20 @@ const MergeWaveModal = ({
       animationType='slide'
       onRequestClose={onClose}
     >
-      <TouchableOpacity
+      <KeyboardAvoidingView
         style={styles.backdrop}
-        activeOpacity={1}
-        onPress={onClose}
+        behavior='padding'
       >
         <TouchableOpacity
-          style={styles.modalContainer}
+          style={styles.backdrop}
           activeOpacity={1}
-          onPress={() => {}}
+          onPress={onClose}
         >
+          <TouchableOpacity
+            style={styles.modalContainer}
+            activeOpacity={1}
+            onPress={() => {}}
+          >
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>
@@ -149,8 +154,9 @@ const MergeWaveModal = ({
                 }
               />
               )}
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   )
 }

@@ -14,6 +14,7 @@ import {
   View
 } from 'react-native'
 
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { isDarkMode } from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as CONST from '../../consts'
@@ -112,16 +113,20 @@ const WaveSelectorModal = ({
       animationType='slide'
       onRequestClose={onClose}
     >
-      <TouchableOpacity
-        style={styles.backdrop}
-        activeOpacity={1}
-        onPress={onClose}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior='padding'
       >
         <TouchableOpacity
-          style={styles.modalContainer}
+          style={styles.backdrop}
           activeOpacity={1}
-          onPress={() => {}}
+          onPress={onClose}
         >
+          <TouchableOpacity
+            style={styles.modalContainer}
+            activeOpacity={1}
+            onPress={() => {}}
+          >
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Select Wave</Text>
@@ -215,8 +220,9 @@ const WaveSelectorModal = ({
                 }
               />
               )}
+          </TouchableOpacity>
         </TouchableOpacity>
-      </TouchableOpacity>
+      </KeyboardAvoidingView>
     </Modal>
   )
 }

@@ -19,8 +19,6 @@ const PhotosListEmptyState = ({
   setSearchTerm,
   searchBarRef,
   submitSearch,
-  keyboardVisible,
-  keyboardOffset,
   FOOTER_HEIGHT
 }) => {
   const getEmptyStateProps = () => {
@@ -99,8 +97,6 @@ const PhotosListEmptyState = ({
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             onSubmitSearch={submitSearch}
-            keyboardVisible={keyboardVisible}
-            keyboardOffset={keyboardOffset}
             autoFocus
           />
         )}

@@ -26,6 +26,7 @@ import LinearProgress from '../../components/ui/LinearProgress'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
@@ -457,7 +458,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
           <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
             <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Create New Wave</Text>
             <TextInput
@@ -494,7 +495,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Edit Wave Modal */}
@@ -504,7 +505,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         visible={editModalVisible}
         onRequestClose={() => setEditModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
           <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
             <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Edit Wave</Text>
             <TextInput
@@ -541,7 +542,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Auto-Group Progress Overlay */}

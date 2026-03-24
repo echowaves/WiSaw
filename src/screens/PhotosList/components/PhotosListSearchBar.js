@@ -2,10 +2,10 @@ import React, { useRef } from 'react'
 import {
   View,
   TouchableOpacity,
-  TextInput,
-  Animated
+  TextInput
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { KeyboardStickyView } from 'react-native-keyboard-controller'
 
 const FOOTER_HEIGHT = 90
 const FOOTER_GAP = 4
@@ -16,44 +16,36 @@ const PhotosListSearchBar = ({
   searchTerm,
   setSearchTerm,
   onSubmitSearch,
-  keyboardVisible,
-  keyboardOffset,
   autoFocus
 }) => {
   const searchBarRef = useRef(null)
 
-  // When keyboard is visible, position above keyboard with gap
-  // When keyboard is hidden, position above footer
-  const bottomOffset = keyboardOffset > 0
-    ? keyboardOffset + KEYBOARD_GAP
-    : FOOTER_HEIGHT + FOOTER_GAP
-
   return (
-    <Animated.View
-      style={{
-        position: 'absolute',
-        left: 16,
-        right: 16,
-        bottom: bottomOffset,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: theme.HEADER_BACKGROUND,
-        borderRadius: 24,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        borderWidth: 1,
-        borderColor: theme.BORDER_LIGHT,
-        shadowColor: theme.HEADER_SHADOW,
-        shadowOffset: {
-          width: 0,
-          height: 6
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 20,
-        zIndex: 20
-      }}
+    <KeyboardStickyView
+      offset={{ closed: FOOTER_HEIGHT + FOOTER_GAP, opened: KEYBOARD_GAP }}
     >
+      <View
+        style={{
+          marginHorizontal: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: theme.HEADER_BACKGROUND,
+          borderRadius: 24,
+          paddingHorizontal: 12,
+          paddingVertical: 12,
+          borderWidth: 1,
+          borderColor: theme.BORDER_LIGHT,
+          shadowColor: theme.HEADER_SHADOW,
+          shadowOffset: {
+            width: 0,
+            height: 6
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 8,
+          elevation: 20,
+          zIndex: 20
+        }}
+      >
       <View
         style={{
           flex: 1,
@@ -152,7 +144,8 @@ const PhotosListSearchBar = ({
       >
         <Ionicons name='send' size={20} color='white' />
       </TouchableOpacity>
-    </Animated.View>
+      </View>
+    </KeyboardStickyView>
   )
 }
 

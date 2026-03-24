@@ -15,7 +15,7 @@ import {
 } from 'react-native'
 
 import { gql } from '@apollo/client'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
@@ -402,8 +402,7 @@ const FeedbackScreen = () => {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps='handled'
             contentInsetAdjustmentBehavior='automatic'
-            enableOnAndroid
-            extraScrollHeight={20}
+            bottomOffset={20}
           >
             <Animated.View
               style={{

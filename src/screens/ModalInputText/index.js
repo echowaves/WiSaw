@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Ionicons } from '@expo/vector-icons'
 
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
 import PropTypes from 'prop-types'
 
@@ -204,8 +204,7 @@ const ModalInputText = ({ route }) => {
         }}
         keyboardShouldPersistTaps='handled'
         showsVerticalScrollIndicator={false}
-        enableOnAndroid
-        extraScrollHeight={20}
+        bottomOffset={20}
       >
         <View
           style={[

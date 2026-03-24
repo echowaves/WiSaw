@@ -26,6 +26,7 @@ import LinearProgress from '../../components/ui/LinearProgress'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import QuickActionsModal from '../../components/QuickActionsModal'
 import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
@@ -545,7 +546,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
         visible={editModalVisible}
         onRequestClose={() => setEditModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
           <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
             <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Edit Wave</Text>
             <TextInput
@@ -582,7 +583,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Merge Wave Modal */}

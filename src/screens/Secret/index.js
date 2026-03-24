@@ -10,7 +10,7 @@ import {
 } from 'react-native'
 
 import * as Haptics from 'expo-haptics'
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import Toast from 'react-native-toast-message'
 
 import { FontAwesome5 } from '@expo/vector-icons'
@@ -217,8 +217,7 @@ const SecretScreen = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps='handled'
           contentInsetAdjustmentBehavior='automatic'
-          enableOnAndroid
-          extraScrollHeight={20}
+          bottomOffset={20}
         >
           <Animated.View
             style={{
