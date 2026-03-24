@@ -342,21 +342,10 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   const contextMenuItems = contextMenuWave && contextMenuWave.createdBy === uuid
     ? [
         {
-          key: 'rename',
+          key: 'edit-wave',
           icon: 'pencil-outline',
-          label: 'Rename',
+          label: 'Edit Wave',
           onPress: () => handleEditWave(contextMenuWave)
-        },
-        {
-          key: 'edit-description',
-          icon: 'text-box-edit-outline',
-          label: 'Edit Description',
-          onPress: () => {
-            setEditingWave(contextMenuWave)
-            setEditWaveName(contextMenuWave.name)
-            setEditWaveDescription(contextMenuWave.description || '')
-            setEditModalVisible(true)
-          }
         },
         {
           key: 'merge',

@@ -280,19 +280,9 @@ const WaveDetail = React.forwardRef((_props, ref) => {
 
   const headerMenuItems = [
     {
-      key: 'rename',
+      key: 'edit-wave',
       icon: 'pencil-outline',
-      label: 'Rename',
-      onPress: () => {
-        setEditName(waveName)
-        setEditDescription('')
-        setEditModalVisible(true)
-      }
-    },
-    {
-      key: 'edit-description',
-      icon: 'text-box-edit-outline',
-      label: 'Edit Description',
+      label: 'Edit Wave',
       onPress: () => {
         setEditName(waveName)
         setEditDescription('')
