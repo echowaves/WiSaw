@@ -69,3 +69,10 @@ The system SHALL persist friend names locally using expo-secure-store for privac
 #### Scenario: App restarts
 - **WHEN** the user closes and reopens the app
 - **THEN** all saved friend names are restored from secure local storage
+
+### Requirement: NamePicker keyboard avoidance library
+The NamePicker modal SHALL use `KeyboardAwareScrollView` from `react-native-keyboard-controller` instead of `react-native-keyboard-aware-scroll-view`.
+
+#### Scenario: Name input remains visible when keyboard opens
+- **WHEN** a user taps the name input field in the NamePicker modal
+- **THEN** the modal content SHALL scroll so the input remains visible above the keyboard

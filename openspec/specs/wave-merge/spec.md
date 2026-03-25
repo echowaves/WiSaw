@@ -28,16 +28,28 @@ The system SHALL allow the user to merge a source wave into a target wave. All p
 - **THEN** the system SHALL close the alert and return to the MergeWaveModal without making any changes
 
 ### Requirement: MergeWaveModal provides search and filtering
-The MergeWaveModal SHALL display a searchable list of target wave candidates, excluding the source wave.
+The MergeWaveModal SHALL display a searchable, paginated list of target wave candidates, excluding the source wave.
 
 #### Scenario: Modal displays waves excluding source
 - **WHEN** the MergeWaveModal opens for source wave X
-- **THEN** the list SHALL include all user waves except wave X
+- **THEN** the list SHALL include all user waves except wave X (page 0 fetched initially)
 - **THEN** each wave item SHALL display the wave name and photo count
+
+#### Scenario: User scrolls to load more waves
+- **WHEN** the user scrolls near the bottom of the wave list
+- **THEN** the system SHALL fetch the next page of waves via `listWaves` with incremented `pageNumber` and the same `batch`
+- **THEN** new waves SHALL be appended to the existing list (still excluding the source wave)
+- **THEN** a loading indicator SHALL be shown at the bottom while fetching
+
+#### Scenario: All waves loaded
+- **WHEN** the API returns `noMoreData: true`
+- **THEN** the system SHALL stop requesting additional pages on scroll
 
 #### Scenario: User searches for a target wave
 - **WHEN** the user types into the search field
-- **THEN** the list SHALL filter to show only waves whose name contains the search text (case-insensitive)
+- **THEN** after a 300ms debounce, the system SHALL call `listWaves` with the `searchTerm` parameter
+- **THEN** pagination SHALL reset to page 0 with a new batch UUID
+- **THEN** the wave list SHALL be replaced with server-filtered results (still excluding source wave)
 
 #### Scenario: No matching waves
 - **WHEN** the search returns zero results
@@ -49,3 +61,10 @@ Only the wave owner SHALL see the "Merge Into Another Wave..." option. Non-owner
 #### Scenario: Non-owner long-presses a wave
 - **WHEN** a user who is not the wave creator long-presses a wave card
 - **THEN** the context menu SHALL NOT include "Merge Into Another Wave..."
+
+### Requirement: Merge wave modal keyboard avoidance
+The MergeWaveModal SHALL use keyboard avoidance from `react-native-keyboard-controller` so the search input remains visible when the keyboard is open.
+
+#### Scenario: Searching waves to merge with keyboard open
+- **WHEN** a user taps the search input in the merge wave modal
+- **THEN** the modal content SHALL reposition so the search input and wave list remain usable above the keyboard

@@ -34,34 +34,80 @@ const MergeWaveModal = ({
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
   const [searchText, setSearchText] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [pageNumber, setPageNumber] = useState(0)
+  const [batch, setBatch] = useState(Crypto.randomUUID())
+  const [noMoreData, setNoMoreData] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
 
-  const fetchWaves = useCallback(async () => {
-    setLoading(true)
+  const fetchWaves = useCallback(async (pageNum, currentBatch, searchTerm, refresh = false) => {
+    if (refresh) {
+      setLoading(true)
+    } else {
+      setLoadingMore(true)
+    }
     try {
       const data = await listWaves({
-        pageNumber: 0,
-        batch: Crypto.randomUUID(),
-        uuid
+        pageNumber: pageNum,
+        batch: currentBatch,
+        uuid,
+        searchTerm: searchTerm || undefined
       })
-      setWaves(data.waves || [])
+      const newWaves = data.waves || []
+      if (refresh) {
+        setWaves(newWaves)
+      } else {
+        setWaves(prev => [...prev, ...newWaves])
+      }
+      setNoMoreData(data.noMoreData)
+      setBatch(data.batch)
     } catch (err) {
       console.error('Failed to load waves:', err)
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }, [uuid])
 
+  // Debounce search text (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchText.trim())
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchText])
+
+  // When debounced search changes, reset and re-fetch
+  useEffect(() => {
+    if (!visible) return
+    const newBatch = Crypto.randomUUID()
+    setPageNumber(0)
+    setNoMoreData(false)
+    setBatch(newBatch)
+    fetchWaves(0, newBatch, debouncedSearch, true)
+  }, [debouncedSearch])
+
   useEffect(() => {
     if (visible) {
-      fetchWaves()
+      const newBatch = Crypto.randomUUID()
+      setPageNumber(0)
+      setNoMoreData(false)
+      setBatch(newBatch)
+      fetchWaves(0, newBatch, '', true)
       setSearchText('')
+      setDebouncedSearch('')
     }
   }, [visible, fetchWaves])
 
-  const filteredWaves = (searchText
-    ? waves.filter(w => w.name.toLowerCase().includes(searchText.toLowerCase()))
-    : waves
-  ).filter(w => w.waveUuid !== sourceWave?.waveUuid)
+  const handleLoadMore = () => {
+    if (!noMoreData && !loading && !loadingMore) {
+      const nextPage = pageNumber + 1
+      setPageNumber(nextPage)
+      fetchWaves(nextPage, batch, debouncedSearch || undefined)
+    }
+  }
+
+  const filteredWaves = waves.filter(w => w.waveUuid !== sourceWave?.waveUuid)
 
   const styles = makeStyles(theme)
 
@@ -146,6 +192,9 @@ const MergeWaveModal = ({
                 keyExtractor={item => item.waveUuid}
                 renderItem={renderWaveItem}
                 style={styles.list}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={loadingMore ? <ActivityIndicator style={{ padding: 10 }} color={CONST.MAIN_COLOR} /> : null}
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
                     <FontAwesome5 name='water' size={32} color={theme.TEXT_SECONDARY} />

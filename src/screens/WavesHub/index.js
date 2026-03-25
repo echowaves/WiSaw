@@ -49,6 +49,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   const [noMoreData, setNoMoreData] = useState(false)
 
   const [searchText, setSearchText] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
   const [modalVisible, setModalVisible] = useState(false)
   const [newWaveName, setNewWaveName] = useState('')
@@ -74,7 +75,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
 
   const theme = getTheme(isDarkMode)
 
-  const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false) => {
+  const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false, searchTerm) => {
     if (loading) return
     setLoading(true)
     try {
@@ -83,7 +84,8 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         batch: currentBatch,
         uuid,
         sortBy,
-        sortDirection
+        sortDirection,
+        searchTerm
       })
 
       const newWaves = data.waves || []
@@ -117,14 +119,31 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
     }
   }, [uuid, sortBy, sortDirection])
 
+  // Debounce search text → debouncedSearch (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchText.trim())
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchText])
+
+  // When debounced search changes, reset pagination and re-fetch
+  useEffect(() => {
+    setPageNumber(0)
+    setNoMoreData(false)
+    const newBatch = Crypto.randomUUID()
+    setBatch(newBatch)
+    loadWaves(0, newBatch, true, debouncedSearch || undefined)
+  }, [debouncedSearch])
+
   useFocusEffect(
     useCallback(() => {
       setPageNumber(0)
       setNoMoreData(false)
       const newBatch = Crypto.randomUUID()
       setBatch(newBatch)
-      loadWaves(0, newBatch, true)
-    }, [loadWaves])
+      loadWaves(0, newBatch, true, debouncedSearch || undefined)
+    }, [loadWaves, debouncedSearch])
   )
 
 
@@ -134,14 +153,14 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
     setPageNumber(0)
     const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
-    loadWaves(0, newBatch, true)
+    loadWaves(0, newBatch, true, debouncedSearch || undefined)
   }
 
   const handleLoadMore = () => {
     if (!noMoreData && !loading) {
       const nextPage = pageNumber + 1
       setPageNumber(nextPage)
-      loadWaves(nextPage, batch)
+      loadWaves(nextPage, batch, false, debouncedSearch || undefined)
     }
   }
 
@@ -372,9 +391,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
     })
   }
 
-  const filteredWaves = searchText.trim()
-    ? waves.filter(w => w.name.toLowerCase().includes(searchText.toLowerCase()))
-    : waves
+  const filteredWaves = waves
 
   const renderItem = ({ item, index }) => {
     // Add an empty spacer for odd-count last item to keep grid alignment

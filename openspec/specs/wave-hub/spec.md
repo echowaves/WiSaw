@@ -33,8 +33,7 @@ The system SHALL show an `ActionMenu` modal on long-press of a wave card with ic
 #### Scenario: Owner long-presses their own wave card
 - **WHEN** the wave owner long-presses a wave card
 - **THEN** an `ActionMenu` modal SHALL display with items:
-  - `pencil-outline` icon: "Rename"
-  - `text-box-edit-outline` icon: "Edit Description"
+  - `pencil-alt` icon: "Edit Wave"
   - `call-merge` icon: "Merge Into Another Wave..."
   - separator
   - `trash-can-outline` icon: "Delete Wave" (destructive)
@@ -121,3 +120,36 @@ The `EmptyStateCard` component SHALL support an optional secondary action button
 #### Scenario: Secondary action not provided
 - **WHEN** `secondaryActionText` or `onSecondaryActionPress` is not provided
 - **THEN** no secondary button SHALL be rendered (backward-compatible)
+
+### Requirement: WavesHub Search Uses Server-Side Query
+The WavesHub search bar SHALL send the search term to the backend via the `listWaves` `searchTerm` parameter instead of filtering client-side.
+
+#### Scenario: User types in WavesHub search bar
+- **WHEN** the user types in the WavesHub search input
+- **THEN** after a 300ms debounce, the system SHALL call `listWaves` with the `searchTerm` parameter, `pageNumber: 0`, and a new `batch` UUID
+- **THEN** the waves list SHALL be replaced with the server-filtered results
+- **THEN** the current sort order (`sortBy`, `sortDirection`) SHALL be preserved in the query
+
+#### Scenario: User clears WavesHub search
+- **WHEN** the user clears the search input
+- **THEN** after the 300ms debounce, the system SHALL fetch all waves from page 0 with no `searchTerm`
+- **THEN** infinite scroll SHALL continue to work for the unfiltered results
+
+#### Scenario: User scrolls while search is active
+- **WHEN** a search term is active and the user scrolls to the bottom
+- **THEN** the system SHALL fetch the next page with the same `searchTerm` and `batch`
+- **THEN** results SHALL be appended to the existing filtered list
+
+### Requirement: Wave create modal keyboard avoidance
+The wave create modal SHALL use `KeyboardAwareScrollView` from `react-native-keyboard-controller` so text inputs remain visible when the keyboard is open.
+
+#### Scenario: Creating a wave with keyboard open
+- **WHEN** a user taps the description field in the create wave modal
+- **THEN** the modal content SHALL scroll so the description input and Save button remain visible above the keyboard
+
+### Requirement: Wave edit modal keyboard avoidance
+The wave edit modal SHALL use `KeyboardAwareScrollView` from `react-native-keyboard-controller` so text inputs remain visible when the keyboard is open.
+
+#### Scenario: Editing a wave with keyboard open
+- **WHEN** a user taps the description field in the edit wave modal
+- **THEN** the modal content SHALL scroll so the description input and Save button remain visible above the keyboard

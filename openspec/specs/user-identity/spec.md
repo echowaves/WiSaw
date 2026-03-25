@@ -47,3 +47,10 @@ The system SHALL store the device UUID and nickname securely using expo-secure-s
 #### Scenario: Sensitive data is stored
 - **WHEN** the UUID or nickname is persisted
 - **THEN** the data is stored in the device's secure enclave via expo-secure-store
+
+### Requirement: Secret screen keyboard avoidance library
+The Secret screen form SHALL use `KeyboardAwareScrollView` from `react-native-keyboard-controller` instead of `react-native-keyboard-aware-scroll-view`.
+
+#### Scenario: Secret input fields remain visible when keyboard opens
+- **WHEN** a user taps any input field on the Secret screen
+- **THEN** the screen content SHALL scroll so the focused input remains visible above the keyboard

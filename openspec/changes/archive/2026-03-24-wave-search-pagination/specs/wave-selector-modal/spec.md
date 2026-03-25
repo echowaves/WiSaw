@@ -1,9 +1,4 @@
-# Wave Selector Modal Specification
-
-## Purpose
-The wave selector modal provides a reusable overlay component for selecting, searching, and creating waves. It is used when assigning photos to waves from the expanded photo view and other contexts.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Wave Selector Modal Display
 The system SHALL provide a modal overlay component that displays the user's waves in a searchable, paginated scrollable list for selecting a wave to assign a photo to.
@@ -63,14 +58,3 @@ The system SHALL provide a modal overlay component that displays the user's wave
 #### Scenario: User has no waves
 - **WHEN** the user has no waves
 - **THEN** the modal shows the "Create New Wave" option and an empty state message below it
-
-### Requirement: Wave selector modal keyboard avoidance
-The WaveSelectorModal SHALL use keyboard avoidance from `react-native-keyboard-controller` so search and create inputs remain visible when the keyboard is open.
-
-#### Scenario: Searching waves with keyboard open
-- **WHEN** a user taps the search input in the wave selector modal
-- **THEN** the modal content SHALL reposition so the search input and wave list remain usable above the keyboard
-
-#### Scenario: Creating a wave inline with keyboard open
-- **WHEN** a user taps the create wave input in the wave selector modal
-- **THEN** the modal content SHALL reposition so the create input and confirm button remain visible above the keyboard
