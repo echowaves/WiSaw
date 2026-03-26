@@ -31,7 +31,7 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
               <CachedImage
                 key={`${wave.waveUuid}-${index}`}
                 source={{ uri: photoUrl }}
-                cacheKey={`wave-thumb-${wave.waveUuid}-${index}`}
+                cacheKey={`wave-thumb-${photoUrl.split('/').pop()}`}
                 style={styles.collageImage}
                 resizeMode='cover'
               />

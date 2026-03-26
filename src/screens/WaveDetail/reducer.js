@@ -35,7 +35,6 @@ export const fetchWavePhotos = async ({ waveUuid, pageNumber, batch }) => {
         batch,
         waveUuid
       },
-      fetchPolicy: 'network-only'
     })
     return {
       photos: response.data.feedForWave.photos || [],

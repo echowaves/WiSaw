@@ -214,7 +214,6 @@ export const getUnreadCountsList = async ({ uuid }) => {
         variables: {
           uuid
         },
-        fetchPolicy: 'network-only'
       })
     ).data.getUnreadCountsList
     return unreadCountsList
@@ -243,7 +242,6 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
         variables: {
           uuid
         },
-        fetchPolicy: 'network-only'
       })
     ).data.getFriendshipsList
     return friendsList

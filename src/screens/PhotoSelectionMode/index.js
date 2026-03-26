@@ -46,7 +46,6 @@ const fetchUserPhotos = async ({ uuid, pageNumber, batch }) => {
       }
     `,
     variables: { uuid, pageNumber, batch },
-    fetchPolicy: 'network-only'
   })
   return {
     photos: response.data.feedForWatcher.photos || [],

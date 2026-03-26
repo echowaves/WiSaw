@@ -106,7 +106,12 @@ const httpLink = new HttpLink({
 export const gqlClient = new ApolloClient({
   // link,
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
+  defaultOptions: {
+    query: { fetchPolicy: 'no-cache' },
+    watchQuery: { fetchPolicy: 'no-cache' },
+    mutate: { fetchPolicy: 'no-cache' }
+  }
 })
 // console.log({ API_URI }, { API_KEY })
 

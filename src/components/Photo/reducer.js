@@ -244,7 +244,6 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
         photoId,
         uuid
       },
-      fetchPolicy: 'network-only'
     })
 
     const { recognitions, isPhotoWatched, waveName, waveUuid } = response.data.getPhotoDetails

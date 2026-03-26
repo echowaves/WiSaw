@@ -256,7 +256,6 @@ const uploadItem = async ({ uuid, item }) => {
           photoHash: item.chatPhotoHash,
           contentType
         },
-        fetchPolicy: 'network-only'
       })
     ).data.generateUploadUrlForMessage
 
