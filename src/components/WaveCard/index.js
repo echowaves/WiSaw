@@ -11,10 +11,10 @@ const isValidImageUri = (uri) => {
 
 const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
   const photoCount = wave.photosCount ?? 0
-  const thumbnails = wave.thumbnails || []
+  const photos = wave.photos || []
 
   const renderCollage = () => {
-    if (thumbnails.length === 0) {
+    if (photos.length === 0) {
       return (
         <View style={[styles.placeholder, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
           <FontAwesome5 name='water' size={32} color={theme.TEXT_SECONDARY} />
@@ -25,13 +25,13 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
     return (
       <View style={styles.collageContainer}>
         {[0, 1, 2, 3].map((index) => {
-          const thumb = thumbnails[index]
-          if (thumb && isValidImageUri(thumb.thumbUrl)) {
+          const photoUrl = photos[index]
+          if (isValidImageUri(photoUrl)) {
             return (
               <CachedImage
-                key={thumb.id || index}
-                source={{ uri: thumb.thumbUrl }}
-                cacheKey={`wave-thumb-${wave.waveUuid}-${thumb.id}`}
+                key={`${wave.waveUuid}-${index}`}
+                source={{ uri: photoUrl }}
+                cacheKey={`wave-thumb-${wave.waveUuid}-${index}`}
                 style={styles.collageImage}
                 resizeMode='cover'
               />

@@ -1,10 +1,27 @@
 ### Requirement: Waves List Focus Refresh
-The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order.
+The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. Thumbnail URLs SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries.
 
 #### Scenario: User returns to Waves screen after viewing wave detail
 - **WHEN** the Waves screen (WavesHub) regains focus (via `useFocusEffect`)
 - **THEN** the system SHALL reset pagination and call `loadWaves` with page 0, a new batch UUID, and the current `sortBy`/`sortDirection` values in refresh mode
-- **THEN** the waves list SHALL be replaced with the fresh server response including updated names and photo counts in the current sort order
+- **THEN** the waves list SHALL be replaced with the fresh server response including updated names, photo counts, and thumbnail URLs in the current sort order
+
+#### Scenario: First mount triggers single fetch
+- **WHEN** the Waves screen mounts for the first time
+- **THEN** the `useFocusEffect` SHALL trigger `loadWaves` exactly once
+- **THEN** the `debouncedSearch` effect SHALL skip its initial invocation (detected via a mount ref)
+- **THEN** no concurrent duplicate fetch SHALL occur
+
+#### Scenario: Concurrent fetch prevention
+- **WHEN** `loadWaves` is called while a previous `loadWaves` call is still in progress
+- **THEN** the new call SHALL be rejected via a `useRef`-based loading guard
+- **THEN** the guard SHALL NOT rely on React state (which suffers from stale closures)
+
+#### Scenario: Thumbnails loaded inline from listWaves
+- **WHEN** `loadWaves` fetches the waves list
+- **THEN** the system SHALL use the `photos` field from each wave in the query response as thumbnail URLs
+- **THEN** the system SHALL NOT make separate `feedForWave` queries to fetch thumbnails
+- **THEN** `WaveCard` SHALL render the collage using `wave.photos` (array of URL strings)
 
 #### Scenario: Ungrouped count refreshes on focus
 - **WHEN** the Waves index screen regains focus
@@ -112,11 +129,16 @@ The system SHALL display a clear (`✕`) button inside the waves search input wh
 - **THEN** the clear button SHALL NOT be rendered
 
 ### Requirement: Waves Search Bar Bottom Position
-The system SHALL render the waves search bar at the bottom of the WavesHub screen, wrapped in `KeyboardStickyView`, instead of at the top.
+The system SHALL render the waves search bar at the bottom of the WavesHub screen, wrapped in `KeyboardStickyView`, with a negative `closed` offset calculated from `useSafeAreaInsets().bottom` plus a fixed gap, so the search bar clears the device safe area (home indicator) with a meaningful visual margin.
 
-#### Scenario: Search bar floats above bottom
+#### Scenario: Search bar floats above safe area
 - **WHEN** the Waves screen is displayed and the search bar is visible
-- **THEN** the search bar SHALL be rendered at the bottom of the screen via `KeyboardStickyView` with `offset: { closed: 4, opened: 16 }`
+- **THEN** the search bar SHALL be rendered at the bottom of the screen via `KeyboardStickyView` with `closed` offset of `-(insets.bottom + 8)` where `insets.bottom` is from `useSafeAreaInsets()`
+- **THEN** the search bar SHALL have visible clearance above the home indicator on notched devices
+
+#### Scenario: Non-notched device
+- **WHEN** the device has no home indicator (`insets.bottom === 0`)
+- **THEN** the search bar SHALL be positioned 8px above its natural bottom position
 
 #### Scenario: Keyboard opens
 - **WHEN** the user taps the search input and the keyboard appears

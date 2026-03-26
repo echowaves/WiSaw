@@ -76,10 +76,14 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   // Context menu state
   const [contextMenuWave, setContextMenuWave] = useState(null)
 
+  const loadingRef = useRef(false)
+  const hasMountedRef = useRef(false)
+
   const theme = getTheme(isDarkMode)
 
   const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false, searchTerm) => {
-    if (loading) return
+    if (loadingRef.current) return
+    loadingRef.current = true
     setLoading(true)
     try {
       const data = await reducer.listWaves({
@@ -93,18 +97,10 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
 
       const newWaves = data.waves || []
 
-      // Fetch thumbnails for each wave
-      const wavesWithThumbs = await Promise.all(
-        newWaves.map(async (wave) => {
-          const thumbnails = await reducer.fetchWaveThumbnails({ waveUuid: wave.waveUuid })
-          return { ...wave, thumbnails }
-        })
-      )
-
       if (refresh) {
-        setWaves(wavesWithThumbs)
+        setWaves(newWaves)
       } else {
-        setWaves(prev => [...prev, ...wavesWithThumbs])
+        setWaves(prev => [...prev, ...newWaves])
       }
 
       setNoMoreData(data.noMoreData)
@@ -117,6 +113,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         text2: error.message
       })
     } finally {
+      loadingRef.current = false
       setLoading(false)
       setRefreshing(false)
     }
@@ -132,6 +129,10 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
 
   // When debounced search changes, reset pagination and re-fetch
   useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true
+      return
+    }
     setPageNumber(0)
     setNoMoreData(false)
     const newBatch = Crypto.randomUUID()
