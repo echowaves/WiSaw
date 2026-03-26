@@ -25,13 +25,13 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
     return (
       <View style={styles.collageContainer}>
         {[0, 1, 2, 3].map((index) => {
-          const photoUrl = photos[index]
-          if (isValidImageUri(photoUrl)) {
+          const photo = photos[index]
+          if (photo && isValidImageUri(photo.thumbUrl)) {
             return (
               <CachedImage
-                key={`${wave.waveUuid}-${index}`}
-                source={{ uri: photoUrl }}
-                cacheKey={`wave-thumb-${photoUrl.split('/').pop()}`}
+                key={`${photo.id}`}
+                source={{ uri: photo.thumbUrl }}
+                cacheKey={`${photo.id}-thumb`}
                 style={styles.collageImage}
                 resizeMode='cover'
               />

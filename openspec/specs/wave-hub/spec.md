@@ -1,5 +1,5 @@
 ### Requirement: Waves List Focus Refresh
-The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. Thumbnail URLs SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries.
+The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. Thumbnail `Photo` objects (with `id` and `thumbUrl`) SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries. `WaveCard` thumbnail cache keys SHALL use `${photo.id}-thumb` (matching the `ImageView` pattern) and React `key` SHALL use `photo.id` so that thumbnails update immediately when photos are added or removed.
 
 #### Scenario: User returns to Waves screen after viewing wave detail
 - **WHEN** the Waves screen (WavesHub) regains focus (via `useFocusEffect`)
@@ -19,9 +19,10 @@ The system SHALL re-fetch the waves list and ungrouped photo count from the API 
 
 #### Scenario: Thumbnails loaded inline from listWaves
 - **WHEN** `loadWaves` fetches the waves list
-- **THEN** the system SHALL use the `photos` field from each wave in the query response as thumbnail URLs
+- **THEN** the `listWaves` query SHALL request `photos { id thumbUrl }` to obtain `Photo` objects from the server
 - **THEN** the system SHALL NOT make separate `feedForWave` queries to fetch thumbnails
-- **THEN** `WaveCard` SHALL render the collage using `wave.photos` (array of URL strings)
+- **THEN** `WaveCard` SHALL render the collage using `wave.photos` (array of `Photo` objects with `id` and `thumbUrl` fields)
+- **THEN** `WaveCard` SHALL set each `CachedImage` `cacheKey` to `${photo.id}-thumb` and React `key` to `photo.id`, matching the established `ImageView` pattern
 
 #### Scenario: Ungrouped count refreshes on focus
 - **WHEN** the Waves index screen regains focus

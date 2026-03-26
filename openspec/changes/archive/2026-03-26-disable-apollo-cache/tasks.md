@@ -14,3 +14,8 @@
 ## 3. Fix WaveCard Thumbnail Cache Key
 
 - [x] 3.1 In `src/components/WaveCard/index.js`, change the `CachedImage` `cacheKey` from position-based (`wave-thumb-${wave.waveUuid}-${index}`) to URL-derived (extract filename from the photo URL).
+
+## 4. Adapt Client to `Wave.photos: [Photo]` Schema
+
+- [x] 4.1 In `src/screens/Waves/reducer.js`, update the `listWaves` query to request `photos { id thumbUrl }` instead of scalar `photos`.
+- [x] 4.2 In `src/components/WaveCard/index.js`, update rendering to consume Photo objects (`photo.thumbUrl`, `cacheKey={photo.id}-thumb`, `key={photo.id}`) instead of URL strings.

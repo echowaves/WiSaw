@@ -28,14 +28,14 @@ Configure `defaultOptions` in the `ApolloClient` constructor in `src/consts.js` 
 
 With the global default set to `no-cache`, all 8 existing `fetchPolicy: 'network-only'` lines become redundant and should be removed. This reduces boilerplate and ensures new queries automatically get the correct policy.
 
-### 3. Derive `WaveCard` `cacheKey` from URL, not position index
+### 3. Derive `WaveCard` `cacheKey` from `photo.id`, matching `ImageView` pattern
 
-Currently: `cacheKey={`wave-thumb-${wave.waveUuid}-${index}`}`. When photos shift in the array, the same cacheKey maps to a different URL but `expo-cached-image` serves the old bitmap.
+With the backend schema change (`Wave.photos: [Photo]` instead of `[String]`), the `listWaves` query now requests `photos { id thumbUrl }`. `WaveCard` uses `photo.thumbUrl` as the image source, `cacheKey={\`${photo.id}-thumb\`}` (matching the established `ImageView` pattern in `ImageView.js`), and React `key={photo.id}` to force `CachedImage` remount when photos change (required because `expo-cached-image` has an empty-deps `useEffect` that never re-fires on prop changes).
 
-Fix: extract a stable identifier from the photo URL itself. S3/CloudFront URLs contain unique filenames — use the last path segment as part of the cacheKey.
+This also means `WaveCard` shares the on-disk cache with `ImageView` — if a thumbnail was already loaded in the photo feed, it won't be downloaded again in the waves list.
 
 ## Risks / Trade-offs
 
 - [Risk] A future query might intentionally want caching → Any such query can override the default with `fetchPolicy: 'cache-first'` on a per-query basis. The default is safely overridable.
 - [Trade-off] Every query now always hits the network → This is already the intended behavior; 11 queries were accidentally caching. No new network load is introduced for the 8 queries that already used `network-only`.
-- [Risk] Deriving cacheKey from URL could create long keys → Using only the filename portion keeps keys short and unique.
+- [Benefit] Using `photo.id` as cacheKey shares disk cache between `WaveCard` and `ImageView` — thumbnails loaded in one context are reused in the other with zero extra downloads.

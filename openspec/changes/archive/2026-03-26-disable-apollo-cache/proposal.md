@@ -6,7 +6,7 @@ The Apollo Client is configured with an `InMemoryCache` that no part of the app 
 
 - Set `defaultOptions` on the `ApolloClient` instance to use `fetchPolicy: 'no-cache'` for all queries, watchQueries, and mutations — bypassing `InMemoryCache` entirely
 - Remove all per-query `fetchPolicy: 'network-only'` overrides (now redundant)
-- Fix `WaveCard` `CachedImage` `cacheKey` to derive from the photo URL instead of the array index, so thumbnails update immediately when photos are added or removed
+- Adapt `WaveCard` to consume `Photo` objects from the updated `Wave.photos: [Photo]` schema, using `photo.thumbUrl` as image source, `cacheKey={${photo.id}-thumb}` (matching the `ImageView` pattern), and React `key={photo.id}` to force remount on photo changes
 
 ## Capabilities
 
@@ -16,7 +16,7 @@ _None_
 
 ### Modified Capabilities
 
-- `wave-hub`: Update the "Waves List Focus Refresh" requirement to specify that wave card thumbnail cache keys are derived from URLs, not position indices
+- `wave-hub`: Update the "Waves List Focus Refresh" requirement to specify that `listWaves` requests `photos { id thumbUrl }` and `WaveCard` uses `photo.id`-based cacheKey/key matching the `ImageView` pattern
 
 ## Impact
 
@@ -27,4 +27,5 @@ _None_
 - `src/screens/FriendsList/friends_helper.js` — remove `fetchPolicy: 'network-only'` (×2)
 - `src/screens/PhotoSelectionMode/index.js` — remove `fetchPolicy: 'network-only'` (×1)
 - `src/components/Photo/reducer.js` — remove `fetchPolicy: 'network-only'` (×1)
-- `src/components/WaveCard/index.js` — derive `cacheKey` from photo URL
+- `src/screens/Waves/reducer.js` — update `listWaves` query to request `photos { id thumbUrl }`
+- `src/components/WaveCard/index.js` — consume `Photo` objects with `photo.id`-based cacheKey and key

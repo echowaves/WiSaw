@@ -21,7 +21,10 @@ export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection
               updatedAt
               createdBy
               photosCount
-              photos
+              photos {
+                id
+                thumbUrl
+              }
             }
             batch
             noMoreData
