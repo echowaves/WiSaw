@@ -22,7 +22,7 @@ const PhotosListSearchBar = ({
 
   return (
     <KeyboardStickyView
-      offset={{ closed: FOOTER_HEIGHT + FOOTER_GAP, opened: KEYBOARD_GAP }}
+      offset={{ closed: -(FOOTER_HEIGHT + FOOTER_GAP), opened: KEYBOARD_GAP }}
     >
       <View
         style={{

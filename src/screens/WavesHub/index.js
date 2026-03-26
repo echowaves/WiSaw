@@ -27,12 +27,14 @@ import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 
 const WavesHub = ({ ungroupedCount = 0 }) => {
+  const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const numColumns = width >= 768 ? 2 : 1
 
@@ -605,7 +607,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
       {/* Search bar - bottom floating */}
       {(waves.length > 0 || searchText.length > 0) && (
         <KeyboardStickyView
-          offset={{ closed: 4, opened: 16 }}
+          offset={{ closed: -(insets.bottom + 8), opened: 16 }}
         >
           <View style={styles.searchContainer}>
             <TextInput
