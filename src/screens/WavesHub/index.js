@@ -26,7 +26,7 @@ import LinearProgress from '../../components/ui/LinearProgress'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
+import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
@@ -408,35 +408,6 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-      {/* Search bar */}
-      {(waves.length > 0 || searchText.length > 0) && (
-        <View style={styles.searchContainer}>
-          <FontAwesome5 name='search' size={14} color={theme.TEXT_SECONDARY} style={styles.searchIcon} />
-          <TextInput
-            ref={searchInputRef}
-            style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER, paddingRight: searchText ? 36 : 16 }]}
-            placeholder='Search waves...'
-            placeholderTextColor={theme.TEXT_SECONDARY}
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-          {searchText.length > 0 && (
-            <TouchableOpacity
-              onPress={() => {
-                setSearchText('')
-                if (searchInputRef.current) {
-                  searchInputRef.current.clear()
-                  searchInputRef.current.focus()
-                }
-              }}
-              style={styles.clearButton}
-            >
-              <Ionicons name='close' size={14} color={theme.TEXT_PRIMARY} />
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-
       <InteractionHintBanner hasContent={waves.length > 0} />
 
       {loading && (
@@ -630,6 +601,38 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         title={contextMenuWave?.name}
         items={contextMenuItems}
       />
+
+      {/* Search bar - bottom floating */}
+      {(waves.length > 0 || searchText.length > 0) && (
+        <KeyboardStickyView
+          offset={{ closed: 4, opened: 16 }}
+        >
+          <View style={styles.searchContainer}>
+            <TextInput
+              ref={searchInputRef}
+              style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER, paddingRight: searchText ? 36 : 16 }]}
+              placeholder='Search waves...'
+              placeholderTextColor={theme.TEXT_SECONDARY}
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+            {searchText.length > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchText('')
+                  if (searchInputRef.current) {
+                    searchInputRef.current.clear()
+                    searchInputRef.current.focus()
+                  }
+                }}
+                style={styles.clearButton}
+              >
+                <Ionicons name='close' size={14} color={theme.TEXT_PRIMARY} />
+              </TouchableOpacity>
+            )}
+          </View>
+        </KeyboardStickyView>
+      )}
     </View>
   )
 }
@@ -644,16 +647,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8
   },
-  searchIcon: {
-    position: 'absolute',
-    left: 28,
-    zIndex: 1
-  },
   searchInput: {
     flex: 1,
     height: 40,
     borderRadius: 20,
-    paddingLeft: 36,
+    paddingLeft: 16,
     paddingRight: 16,
     borderWidth: 1,
     fontSize: 14

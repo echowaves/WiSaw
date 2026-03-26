@@ -903,27 +903,25 @@ const PhotosList = ({ searchFromUrl }) => {
             justCollapsedId={justCollapsedId}
             onPhotoLongPress={handlePhotoLongPress}
           />
-          <PhotosListFooter
-            theme={theme}
-            navigation={navigation}
-            netAvailable={netAvailable}
-            unreadCount={unreadCount}
-            isCameraOpening={isCameraOpening}
-            onCameraPress={checkPermissionsForPhotoTaking}
-            locationReady={!!location}
-          />
-          {activeSegment === 2 && (
-            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-              <PhotosListSearchBar
-                theme={theme}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                onSubmitSearch={submitSearch}
-                autoFocus={false}
-              />
-            </View>
-          )}
         </View>
+        {activeSegment === 2 && (
+          <PhotosListSearchBar
+            theme={theme}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSubmitSearch={submitSearch}
+            autoFocus={false}
+          />
+        )}
+        <PhotosListFooter
+          theme={theme}
+          navigation={navigation}
+          netAvailable={netAvailable}
+          unreadCount={unreadCount}
+          isCameraOpening={isCameraOpening}
+          onCameraPress={checkPermissionsForPhotoTaking}
+          locationReady={!!location}
+        />
         <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
       </View>
     )

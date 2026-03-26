@@ -17,6 +17,21 @@ The system SHALL display a clear (`✕`) button inside the waves search input wh
 - **WHEN** `searchText` is empty
 - **THEN** the clear button SHALL NOT be rendered
 
+### Requirement: Waves Search Bar Bottom Position
+The system SHALL render the waves search bar at the bottom of the WavesHub screen, wrapped in `KeyboardStickyView`, instead of at the top.
+
+#### Scenario: Search bar floats above bottom
+- **WHEN** the Waves screen is displayed and the search bar is visible
+- **THEN** the search bar SHALL be rendered at the bottom of the screen via `KeyboardStickyView` with `offset: { closed: 4, opened: 16 }`
+
+#### Scenario: Keyboard opens
+- **WHEN** the user taps the search input and the keyboard appears
+- **THEN** the search bar SHALL follow the keyboard upward, maintaining 16px gap above the keyboard
+
+#### Scenario: No search icon
+- **WHEN** the search bar is rendered
+- **THEN** no search icon SHALL be displayed inside the input (the bar auto-submits via debounce, no visual search affordance needed)
+
 ### Requirement: Waves Search-Aware Empty State
 The system SHALL display a search-specific empty state when a search query returns zero results, distinct from the default "No Waves Yet" empty state.
 
@@ -40,7 +55,7 @@ The system SHALL hide the search bar when the waves list is empty AND no search 
 
 #### Scenario: Waves exist
 - **WHEN** the waves list has one or more items
-- **THEN** the search bar SHALL be rendered normally
+- **THEN** the search bar SHALL be rendered at the bottom of the screen
 
 #### Scenario: Search returns zero results
 - **WHEN** the waves list has zero items AND `searchText` is non-empty
