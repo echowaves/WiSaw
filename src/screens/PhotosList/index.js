@@ -876,15 +876,6 @@ const PhotosList = ({ searchFromUrl }) => {
           uploadIconAnimation={uploadIconAnimation}
         />
         <View style={styles.container}>
-          {activeSegment === 2 && (
-            <PhotosListSearchBar
-              theme={theme}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onSubmitSearch={submitSearch}
-              autoFocus={false}
-            />
-          )}
           <InteractionHintBanner hasContent={photosList?.length > 0} />
           {/* photos - unified masonry layout for all segments */}
           <PhotosListMasonry
@@ -921,6 +912,17 @@ const PhotosList = ({ searchFromUrl }) => {
             onCameraPress={checkPermissionsForPhotoTaking}
             locationReady={!!location}
           />
+          {activeSegment === 2 && (
+            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+              <PhotosListSearchBar
+                theme={theme}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                onSubmitSearch={submitSearch}
+                autoFocus={false}
+              />
+            </View>
+          )}
         </View>
         <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
       </View>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   useWindowDimensions
 } from 'react-native'
 import { useAtom } from 'jotai'
-import { FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router, useFocusEffect } from 'expo-router'
 import * as Crypto from 'expo-crypto'
@@ -50,6 +50,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
 
   const [searchText, setSearchText] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const searchInputRef = useRef(null)
 
   const [modalVisible, setModalVisible] = useState(false)
   const [newWaveName, setNewWaveName] = useState('')
@@ -408,16 +409,31 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
       {/* Search bar */}
-      {waves.length > 0 && (
+      {(waves.length > 0 || searchText.length > 0) && (
         <View style={styles.searchContainer}>
           <FontAwesome5 name='search' size={14} color={theme.TEXT_SECONDARY} style={styles.searchIcon} />
           <TextInput
-            style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
+            ref={searchInputRef}
+            style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER, paddingRight: searchText ? 36 : 16 }]}
             placeholder='Search waves...'
             placeholderTextColor={theme.TEXT_SECONDARY}
             value={searchText}
             onChangeText={setSearchText}
           />
+          {searchText.length > 0 && (
+            <TouchableOpacity
+              onPress={() => {
+                setSearchText('')
+                if (searchInputRef.current) {
+                  searchInputRef.current.clear()
+                  searchInputRef.current.focus()
+                }
+              }}
+              style={styles.clearButton}
+            >
+              <Ionicons name='close' size={14} color={theme.TEXT_PRIMARY} />
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
@@ -453,17 +469,29 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           !loading && (
-            <EmptyStateCard
-              icon='water'
-              iconType='FontAwesome5'
-              title='No Waves Yet'
-              subtitle='Create your first wave to start organizing photos.'
-              actionText='Create a Wave'
-              onActionPress={() => setModalVisible(true)}
-              iconColor={theme.TEXT_PRIMARY}
-              secondaryActionText={ungroupedCount > 0 ? `Auto Group ${ungroupedCount} photos` : undefined}
-              onSecondaryActionPress={ungroupedCount > 0 ? () => emitAutoGroup(ungroupedCount) : undefined}
-            />
+            searchText.length > 0
+              ? (
+                <EmptyStateCard
+                  icon='search'
+                  title='No Results Found'
+                  subtitle='Try different keywords.'
+                  actionText='Clear Search'
+                  onActionPress={() => setSearchText('')}
+                />
+                )
+              : (
+                <EmptyStateCard
+                  icon='water'
+                  iconType='FontAwesome5'
+                  title='No Waves Yet'
+                  subtitle='Create your first wave to start organizing photos.'
+                  actionText='Create a Wave'
+                  onActionPress={() => setModalVisible(true)}
+                  iconColor={theme.TEXT_PRIMARY}
+                  secondaryActionText={ungroupedCount > 0 ? `Auto Group ${ungroupedCount} photos` : undefined}
+                  onSecondaryActionPress={ungroupedCount > 0 ? () => emitAutoGroup(ungroupedCount) : undefined}
+                />
+                )
           )
         }
       />
@@ -629,6 +657,16 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     borderWidth: 1,
     fontSize: 14
+  },
+  clearButton: {
+    position: 'absolute',
+    right: 24,
+    width: 22,
+    height: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(128,128,128,0.2)',
+    borderRadius: 11
   },
   listContent: {
     paddingHorizontal: 8,
