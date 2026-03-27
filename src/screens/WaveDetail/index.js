@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo, useImperativeHandle } from 'react'
+import React, { useEffect, useState, useCallback, useContext, useRef, useMemo, useImperativeHandle } from 'react'
 import {
   View,
   Text,
@@ -33,7 +33,8 @@ import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
 import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 import { emitAutoGroupDone } from '../../events/autoGroupBus'
-import usePhotoUploader from '../PhotosList/upload/usePhotoUploader'
+import { subscribeToUploadComplete } from '../../events/uploadBus'
+import UploadContext from '../../contexts/UploadContext'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import {
@@ -114,33 +115,29 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const uploadIconAnimation = useRef(new Animated.Value(1)).current
 
   // Upload handler
-  const handleUploadSuccess = useCallback(
-    (uploadedPhoto) => {
-      setPhotos((currentList) => {
-        const updatedList = [createFrozenPhoto(uploadedPhoto), ...currentList]
-        const seen = new Set()
-        return updatedList.filter((photo) => {
-          if (seen.has(photo.id)) return false
-          seen.add(photo.id)
-          return true
-        })
-      })
-    },
-    []
-  )
-
   const {
     pendingPhotos,
     isUploading,
     enqueueCapture,
     clearPendingQueue
-  } = usePhotoUploader({
-    uuid,
-    setUuid,
-    topOffset: toastTopOffset,
-    netAvailable,
-    onPhotoUploaded: handleUploadSuccess
-  })
+  } = useContext(UploadContext)
+
+  // Subscribe to upload completions — only prepend photos matching this wave
+  useEffect(() => {
+    return subscribeToUploadComplete(({ photo, waveUuid: uploadWaveUuid }) => {
+      if (uploadWaveUuid === waveUuid) {
+        setPhotos((currentList) => {
+          const updatedList = [createFrozenPhoto(photo), ...currentList]
+          const seen = new Set()
+          return updatedList.filter((p) => {
+            if (seen.has(p.id)) return false
+            seen.add(p.id)
+            return true
+          })
+        })
+      }
+    })
+  }, [waveUuid])
 
   // Starred-layout segment config
   const segmentConfig = useMemo(() => {

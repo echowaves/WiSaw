@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import * as Crypto from 'expo-crypto'
 
 import { useAtom } from 'jotai'
-import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import { router, useNavigation } from 'expo-router'
@@ -38,7 +38,6 @@ import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as reducer from './reducer'
-import usePhotoUploader from './upload/usePhotoUploader'
 
 import QuickActionsModal from '../../components/QuickActionsModal'
 
@@ -58,6 +57,8 @@ import PendingPhotosBanner from './components/PendingPhotosBanner'
 import PhotosListEmptyState from './components/PhotosListEmptyState'
 import PhotosListMasonry from './components/PhotosListMasonry'
 import PhotosListContext from '../../contexts/PhotosListContext'
+import UploadContext from '../../contexts/UploadContext'
+import { subscribeToUploadComplete } from '../../events/uploadBus'
 
 import useCameraCapture from './hooks/useCameraCapture'
 import useNetworkStatus from './hooks/useNetworkStatus'
@@ -361,23 +362,6 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [unreadCount, setUnreadCount] = useState(0)
 
-  const handleUploadSuccess = useCallback(
-    (uploadedPhoto) => {
-      setPhotosList((currentList) => {
-        const updatedList = [createFrozenPhoto(uploadedPhoto), ...currentList]
-        const seen = new Set()
-        return updatedList.filter((photo) => {
-          if (seen.has(photo.id)) {
-            return false
-          }
-          seen.add(photo.id)
-          return true
-        })
-      })
-    },
-    [setPhotosList]
-  )
-
   const {
     pendingPhotos,
     isUploading,
@@ -385,13 +369,22 @@ const PhotosList = ({ searchFromUrl }) => {
     clearPendingQueue,
     refreshPendingQueue,
     processQueue: processPendingQueue
-  } = usePhotoUploader({
-    uuid,
-    setUuid,
-    topOffset: toastTopOffset,
-    netAvailable,
-    onPhotoUploaded: handleUploadSuccess
-  })
+  } = useContext(UploadContext)
+
+  // Subscribe to upload completions via event bus
+  useEffect(() => {
+    return subscribeToUploadComplete(({ photo }) => {
+      setPhotosList((currentList) => {
+        const updatedList = [createFrozenPhoto(photo), ...currentList]
+        const seen = new Set()
+        return updatedList.filter((p) => {
+          if (seen.has(p.id)) return false
+          seen.add(p.id)
+          return true
+        })
+      })
+    })
+  }, [setPhotosList])
 
   const searchBarRef = React.useRef(null)
 

@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
+import { UploadProvider } from '../../src/contexts/UploadContext'
 import * as STATE from '../../src/state'
 import { getTheme } from '../../src/theme/sharedStyles'
 import {
@@ -209,7 +210,8 @@ export default function DrawerLayout () {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer
+      <UploadProvider>
+        <Drawer
         screenOptions={{
           headerShown: false,
           drawerStyle: {
@@ -295,6 +297,7 @@ export default function DrawerLayout () {
         />
 
       </Drawer>
+      </UploadProvider>
     </GestureHandlerRootView>
   )
 }

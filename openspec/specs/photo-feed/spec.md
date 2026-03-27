@@ -55,7 +55,7 @@ The PhotosList search bar SHALL use `KeyboardStickyView` from `react-native-keyb
 - **THEN** the search bar SHALL remain visible with the same positioning as the non-empty results state
 
 ### Requirement: Photo feed state management
-The PhotosList screen SHALL store its photo array in screen-local state (`useState`) rather than a global Jotai atom. Photos SHALL be frozen via `createFrozenPhoto` at write boundaries (fetch and upload callbacks). The screen SHALL provide a `PhotosListContext` with a `removePhoto` function that filters the local state, consistent with WaveDetail's pattern.
+The PhotosList screen SHALL store its photo array in screen-local state (`useState`) rather than a global Jotai atom. Photos SHALL be frozen via `createFrozenPhoto` at write boundaries (fetch and upload callbacks). The screen SHALL provide a `PhotosListContext` with a `removePhoto` function that filters the local state, consistent with WaveDetail's pattern. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext` instead of instantiating a local `usePhotoUploader`. Upload completions SHALL be received via the upload bus subscription.
 
 #### Scenario: PhotosList initializes with empty local state
 - **WHEN** the PhotosList screen mounts
@@ -67,13 +67,18 @@ The PhotosList screen SHALL store its photo array in screen-local state (`useSta
 - **THEN** each photo SHALL be passed through `createFrozenPhoto` before being stored in local state
 
 #### Scenario: Uploaded photo is frozen at write boundary
-- **WHEN** a photo is uploaded successfully
+- **WHEN** the upload bus emits a successful upload event
 - **THEN** the uploaded photo SHALL be passed through `createFrozenPhoto` before being prepended to local state
 
 #### Scenario: Photo deleted from expanded view updates local state
 - **WHEN** a photo is deleted from within the expanded `Photo` component
 - **THEN** `removePhoto` from `PhotosListContext` SHALL filter the photo from the local `useState` array
 - **THEN** the masonry grid SHALL re-render without the deleted photo
+
+#### Scenario: Upload state consumed from context
+- **WHEN** PhotosList needs `pendingPhotos`, `isUploading`, `enqueueCapture`, or `clearPendingQueue`
+- **THEN** it SHALL consume them from `UploadContext` via `useContext`
+- **THEN** it SHALL NOT instantiate its own `usePhotoUploader`
 
 ## REMOVED Requirements
 

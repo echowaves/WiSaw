@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store'
 import Toast from 'react-native-toast-message'
 
 import * as CONST from '../../../consts'
+import { emitUploadComplete } from '../../../events/uploadBus'
 import {
   clearQueue,
   getQueue,
@@ -21,7 +22,7 @@ const RETRY_DELAY_MS = 750
  * Encapsulates queue mutations, background retries, and success callbacks so the
  * `PhotosList` screen can stay declarative.
  */
-const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable, onPhotoUploaded }) => {
+const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
   const [pendingPhotos, setPendingPhotos] = useState([])
   const [isUploading, setIsUploading] = useState(false)
 
@@ -97,9 +98,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable, onPhotoUploa
           await removeFromQueue(currentItem)
           // eslint-disable-next-line no-await-in-loop
           await syncQueueFromStorage()
-          if (onPhotoUploaded) {
-            onPhotoUploaded(uploadedPhoto)
-          }
+          emitUploadComplete({ photo: uploadedPhoto, waveUuid: currentItem.waveUuid })
         } else {
           // No upload success: refresh queue to pick up any external changes and exit loop
           // eslint-disable-next-line no-await-in-loop
@@ -129,7 +128,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable, onPhotoUploa
       processingRef.current = false
       setIsUploading(false)
     }
-  }, [cleanupRetry, netAvailable, onPhotoUploaded, resolveUuid, syncQueueFromStorage, topOffset])
+  }, [cleanupRetry, netAvailable, resolveUuid, syncQueueFromStorage, topOffset])
 
   const enqueueCapture = useCallback(
     async ({ cameraImgUrl, type, location, waveUuid }) => {
