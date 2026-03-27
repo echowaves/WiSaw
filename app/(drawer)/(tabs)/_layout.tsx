@@ -22,7 +22,6 @@ export default function TabsLayout () {
         }}
       />
       <Stack.Screen name='shared/[photoId]' />
-      <Stack.Screen name='modal-input' />
       <Stack.Screen
         name='confirm-friendship/[friendshipUuid]'
         options={{

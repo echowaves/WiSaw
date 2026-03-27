@@ -290,6 +290,7 @@ export default function RootLayout () {
           }}
         >
           <Stack.Screen name='(drawer)' options={{ headerShown: false }} />
+          <Stack.Screen name='modal-input' options={{ presentation: 'modal', headerShown: false }} />
         </Stack>
       </KeyboardProvider>
       <Toast />

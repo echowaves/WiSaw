@@ -2,10 +2,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { TouchableOpacity, useWindowDimensions } from 'react-native'
-import AppHeader from '../../../src/components/AppHeader'
-import * as reducer from '../../../src/components/Photo/reducer'
-import ModalInputText from '../../../src/screens/ModalInputText'
-import { SHARED_STYLES } from '../../../src/theme/sharedStyles'
+import AppHeader from '../src/components/AppHeader'
+import * as reducer from '../src/components/Photo/reducer'
+import ModalInputText from '../src/screens/ModalInputText'
+import { SHARED_STYLES } from '../src/theme/sharedStyles'
 
 export default function ModalInputScreen () {
   const params = useLocalSearchParams()
