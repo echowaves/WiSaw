@@ -55,7 +55,7 @@ The PhotosList search bar SHALL use `KeyboardStickyView` from `react-native-keyb
 - **THEN** the search bar SHALL remain visible with the same positioning as the non-empty results state
 
 ### Requirement: Photo feed state management
-The PhotosList screen SHALL store its photo array in screen-local state (`useState`) rather than a global Jotai atom. Photos SHALL be frozen via `createFrozenPhoto` at write boundaries (fetch and upload callbacks). The screen SHALL provide a `PhotosListContext` with a `removePhoto` function that filters the local state, consistent with WaveDetail's pattern. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext` instead of instantiating a local `usePhotoUploader`. Upload completions SHALL be received via the upload bus subscription.
+The PhotosList screen SHALL store its photo array in screen-local state (`useState`) rather than a global Jotai atom. Photos SHALL be frozen via `createFrozenPhoto` at write boundaries (fetch and upload callbacks). The screen SHALL provide a `PhotosListContext` with a `removePhoto` function that filters the local state, consistent with WaveDetail's pattern. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext` instead of instantiating a local `usePhotoUploader`. Upload completions SHALL be received via the upload bus subscription. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen.
 
 #### Scenario: PhotosList initializes with empty local state
 - **WHEN** the PhotosList screen mounts
@@ -79,6 +79,15 @@ The PhotosList screen SHALL store its photo array in screen-local state (`useSta
 - **WHEN** PhotosList needs `pendingPhotos`, `isUploading`, `enqueueCapture`, or `clearPendingQueue`
 - **THEN** it SHALL consume them from `UploadContext` via `useContext`
 - **THEN** it SHALL NOT instantiate its own `usePhotoUploader`
+
+#### Scenario: Cross-screen photo deletion received
+- **WHEN** the `photoDeletionBus` emits `{ photoId }`
+- **THEN** the PhotosList screen SHALL remove the photo with that ID from its local state
+- **THEN** the masonry grid SHALL re-render without the deleted photo
+
+#### Scenario: Deletion bus subscription cleanup
+- **WHEN** the PhotosList screen unmounts
+- **THEN** the `photoDeletionBus` subscription SHALL be cleaned up via the `useEffect` return function
 
 ## REMOVED Requirements
 
