@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 import { useAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
-import { router, useLocalSearchParams, useNavigation, useFocusEffect } from 'expo-router'
+import { router, useLocalSearchParams, useNavigation } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
@@ -253,17 +253,15 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     }
   }, [waveUuid])
 
-  useFocusEffect(
-    useCallback(() => {
-      setPageNumber(0)
-      setStopLoading(false)
-      setNoMoreData(false)
-      setExpandedPhotoIds(new Set())
-      const newBatch = Crypto.randomUUID()
-      setBatch(newBatch)
-      loadPhotos(0, newBatch, true)
-    }, [waveUuid])
-  )
+  useEffect(() => {
+    setPageNumber(0)
+    setStopLoading(false)
+    setNoMoreData(false)
+    setExpandedPhotoIds(new Set())
+    const newBatch = Crypto.randomUUID()
+    setBatch(newBatch)
+    loadPhotos(0, newBatch, true)
+  }, [waveUuid])
 
   const handleRefresh = () => {
     setPageNumber(0)

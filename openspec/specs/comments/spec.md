@@ -6,11 +6,11 @@ The comments system enables anonymous real-time engagement on photos through a c
 ## Requirements
 
 ### Requirement: Comment Posting
-The system SHALL allow users to post anonymous comments on any photo via a modal input interface with a send button.
+The system SHALL allow users to post anonymous comments on any photo via a modal input interface with a send button. After successful submission, the system SHALL emit a photo refresh signal via `photoRefreshBus` to notify all mounted Photo instances.
 
 #### Scenario: User posts a comment
 - **WHEN** the user opens the comment input modal, types a message, and taps send
-- **THEN** the comment is submitted to the server and appears in the comment thread
+- **THEN** the comment is submitted to the server, appears in the comment thread, and a `photoRefreshBus` event is emitted with the photo's ID
 
 #### Scenario: User submits empty comment
 - **WHEN** the user taps send without entering text
@@ -38,11 +38,22 @@ The system SHALL display comments on deep-linked shared photos with automatic re
 - **THEN** the photo's comments are displayed and refresh automatically when returning to the screen
 
 ### Requirement: Comment Input Modal
-The system SHALL provide an interactive comment composer modal with a send button in the header for posting comments.
+The system SHALL provide an interactive comment composer as a root-level modal route (`app/modal-input.tsx`) with `presentation: 'modal'`, accessible from any navigator stack in the app. The modal SHALL display a text field and a send button in a custom `AppHeader`. After comment submission or dismissal, `router.back()` SHALL return the user to the screen they came from, regardless of which navigator stack originated the navigation.
 
-#### Scenario: User opens comment input
-- **WHEN** the user taps the comment action on a photo
-- **THEN** a modal input interface opens with a text field and send button
+#### Scenario: User opens comment input from PhotosList
+- **WHEN** the user taps "Add Comment" on a photo expanded in PhotosList
+- **THEN** the modal input interface SHALL open as a modal overlay
+- **THEN** after submitting or dismissing, the user SHALL return to PhotosList
+
+#### Scenario: User opens comment input from WaveDetail
+- **WHEN** the user taps "Add Comment" on a photo expanded in WaveDetail
+- **THEN** the modal input interface SHALL open as a modal overlay
+- **THEN** after submitting or dismissing, the user SHALL return to WaveDetail
+
+#### Scenario: User opens comment input from shared photo
+- **WHEN** the user taps "Add Comment" on a shared photo detail screen
+- **THEN** the modal input interface SHALL open as a modal overlay
+- **THEN** after submitting or dismissing, the user SHALL return to the shared photo screen
 
 ### Requirement: Comment input keyboard avoidance library
 The comment input modal SHALL use `KeyboardAwareScrollView` from `react-native-keyboard-controller` instead of `react-native-keyboard-aware-scroll-view`.

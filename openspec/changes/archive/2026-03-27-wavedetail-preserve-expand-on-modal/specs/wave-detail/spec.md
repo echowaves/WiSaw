@@ -1,0 +1,80 @@
+## MODIFIED Requirements
+
+### Requirement: Wave Photo Masonry Display
+The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header. When a photo is deleted, removed from the wave, or moved to another wave — whether from the collapsed QuickActionsModal or from within the expanded `Photo` component — the photo SHALL be immediately filtered from the wave's local photo list and the masonry grid SHALL re-render without it. WaveDetail SHALL provide a `PhotosListContext` so the `Photo` component's deletion handler updates the correct screen-local state. Uploaded photos SHALL only be prepended to the wave's photo list when the upload bus emits an event with a `waveUuid` matching the current wave. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen. The initial data load and full state reset (pagination, expanded photos, batch) SHALL only occur when `waveUuid` changes, NOT on every focus return. Expanded photo state SHALL be preserved when returning from modal overlays such as the comment input modal.
+
+#### Scenario: User opens wave detail
+- **WHEN** the user taps a wave card in the Waves Hub
+- **THEN** a Wave Detail screen is pushed onto the waves Stack at `/waves/<waveUuid>` showing all photos in that wave in a masonry layout matching the starred photos segment style
+
+#### Scenario: Wave detail receives waveUuid from route segment
+- **WHEN** the Wave Detail screen component mounts
+- **THEN** the `waveUuid` is obtained from the dynamic route segment `[waveUuid]` via `useLocalSearchParams()`
+- **THEN** the `waveName` is obtained from search params via `useLocalSearchParams()`
+
+#### Scenario: Wave has photos
+- **WHEN** the wave contains photos
+- **THEN** photos are rendered using `ExpandableThumb` with `showComments={true}`
+- **THEN** thumbnails display comment count overlays
+
+#### Scenario: User taps a photo in wave detail
+- **WHEN** the user taps a photo tile in the wave masonry grid
+- **THEN** the photo expands inline showing the full `Photo` component with image, comments, AI tags, and action buttons
+
+#### Scenario: Expanded photo scrolls into view
+- **WHEN** a photo is expanded inline in the wave detail masonry grid
+- **THEN** the view SHALL automatically scroll so the expanded photo's top edge is visible below the header, with the same behavior as the main photo feed
+
+#### Scenario: User long-presses a photo in wave detail
+- **WHEN** the user long-presses a photo tile in the wave masonry grid
+- **THEN** the `QuickActionsModal` opens with the photo preview and action buttons
+
+#### Scenario: Photo removed from wave via quick-actions modal
+- **WHEN** the user removes a photo from the wave via the QuickActionsModal (remove or move to another wave)
+- **THEN** the QuickActionsModal closes immediately
+- **THEN** the photo is filtered from the wave's local photo list
+- **THEN** the masonry grid re-renders without the removed photo
+
+#### Scenario: Photo deleted from expanded view
+- **WHEN** the user deletes a photo from within the expanded `Photo` component
+- **THEN** the `Photo` component SHALL call `removePhoto(photoId)` from `PhotosListContext`
+- **THEN** the photo SHALL be immediately filtered from the wave's local photo list
+- **THEN** the masonry grid SHALL re-render without the deleted photo
+
+#### Scenario: Photo removed from wave in expanded view
+- **WHEN** the user removes a photo from the wave while viewing it in expanded mode
+- **THEN** the `Photo` component SHALL call `removePhoto(photoId)` from `PhotosListContext`
+- **THEN** the photo SHALL be immediately filtered from the wave's local photo list
+- **THEN** the masonry grid SHALL re-render without the removed photo
+
+#### Scenario: Wave has no photos
+- **WHEN** the wave is empty
+- **THEN** an empty state is shown with a prompt to add photos
+
+#### Scenario: Uploaded photo matches current wave
+- **WHEN** the upload bus emits `{ photo, waveUuid }` and `waveUuid` matches the current wave
+- **THEN** the photo SHALL be prepended (via `createFrozenPhoto`) to the wave's local photo list with deduplication
+
+#### Scenario: Uploaded photo does not match current wave
+- **WHEN** the upload bus emits `{ photo, waveUuid }` and `waveUuid` does NOT match the current wave (or is `undefined`)
+- **THEN** the wave's local photo list SHALL NOT be modified
+
+#### Scenario: Cross-screen photo deletion received
+- **WHEN** the `photoDeletionBus` emits `{ photoId }`
+- **THEN** the WaveDetail screen SHALL remove the photo with that ID from its local state
+- **THEN** the masonry grid SHALL re-render without the deleted photo
+
+#### Scenario: Deletion bus subscription cleanup
+- **WHEN** the WaveDetail screen unmounts
+- **THEN** the `photoDeletionBus` subscription SHALL be cleaned up via the `useEffect` return function
+
+#### Scenario: Expanded photo preserved after modal return
+- **WHEN** the user opens a modal overlay (e.g., comment input) from an expanded photo in WaveDetail
+- **THEN** upon returning from the modal, the photo SHALL remain expanded
+- **THEN** the photo list SHALL NOT reload from scratch
+
+#### Scenario: Full reset on wave change
+- **WHEN** the user navigates to a different wave (waveUuid changes)
+- **THEN** expanded photo state SHALL be reset
+- **THEN** pagination SHALL be reset to page 0
+- **THEN** photos SHALL be reloaded from the server

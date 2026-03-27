@@ -1,5 +1,5 @@
 ### Requirement: Wave Photo Masonry Display
-The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header. When a photo is deleted, removed from the wave, or moved to another wave — whether from the collapsed QuickActionsModal or from within the expanded `Photo` component — the photo SHALL be immediately filtered from the wave's local photo list and the masonry grid SHALL re-render without it. WaveDetail SHALL provide a `PhotosListContext` so the `Photo` component's deletion handler updates the correct screen-local state. Uploaded photos SHALL only be prepended to the wave's photo list when the upload bus emits an event with a `waveUuid` matching the current wave. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen.
+The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header. When a photo is deleted, removed from the wave, or moved to another wave — whether from the collapsed QuickActionsModal or from within the expanded `Photo` component — the photo SHALL be immediately filtered from the wave's local photo list and the masonry grid SHALL re-render without it. WaveDetail SHALL provide a `PhotosListContext` so the `Photo` component's deletion handler updates the correct screen-local state. Uploaded photos SHALL only be prepended to the wave's photo list when the upload bus emits an event with a `waveUuid` matching the current wave. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen. The initial data load and full state reset (pagination, expanded photos, batch) SHALL only occur when `waveUuid` changes, NOT on every focus return. Expanded photo state SHALL be preserved when returning from modal overlays such as the comment input modal.
 
 #### Scenario: User opens wave detail
 - **WHEN** the user taps a wave card in the Waves Hub
@@ -65,6 +65,17 @@ The system SHALL display a wave's photos in a masonry grid layout using `PhotosL
 #### Scenario: Deletion bus subscription cleanup
 - **WHEN** the WaveDetail screen unmounts
 - **THEN** the `photoDeletionBus` subscription SHALL be cleaned up via the `useEffect` return function
+
+#### Scenario: Expanded photo preserved after modal return
+- **WHEN** the user opens a modal overlay (e.g., comment input) from an expanded photo in WaveDetail
+- **THEN** upon returning from the modal, the photo SHALL remain expanded
+- **THEN** the photo list SHALL NOT reload from scratch
+
+#### Scenario: Full reset on wave change
+- **WHEN** the user navigates to a different wave (waveUuid changes)
+- **THEN** expanded photo state SHALL be reset
+- **THEN** pagination SHALL be reset to page 0
+- **THEN** photos SHALL be reloaded from the server
 
 ### Requirement: Wave Detail Footer with Camera
 The system SHALL display a `PhotosListFooter` at the bottom of the Wave Detail screen with camera, video, drawer, and friends buttons. Photos captured from this footer SHALL be automatically tagged to the current wave. The `enqueueCapture` function SHALL be consumed from `UploadContext`.
