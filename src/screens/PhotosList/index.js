@@ -163,7 +163,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
   // const [nickName, setNickName] = useAtom(STATE.nickName)
-  const [photosList, setPhotosList] = useAtom(STATE.photosList)
+  const [photosList, setPhotosList] = useState([])
   const [, setFriendsList] = useAtom(STATE.friendsList)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
 

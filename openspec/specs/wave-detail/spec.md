@@ -1,5 +1,5 @@
 ### Requirement: Wave Photo Masonry Display
-The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header. When a photo is removed from the wave or moved to another wave via the QuickActionsModal, the photo SHALL be immediately filtered from the wave's photo list.
+The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header. When a photo is deleted, removed from the wave, or moved to another wave — whether from the collapsed QuickActionsModal or from within the expanded `Photo` component — the photo SHALL be immediately filtered from the wave's local photo list and the masonry grid SHALL re-render without it. WaveDetail SHALL provide a `PhotosListContext` so the `Photo` component's deletion handler updates the correct screen-local state.
 
 #### Scenario: User opens wave detail
 - **WHEN** the user taps a wave card in the Waves Hub
@@ -32,6 +32,18 @@ The system SHALL display a wave's photos in a masonry grid layout using `PhotosL
 - **THEN** the QuickActionsModal closes immediately
 - **THEN** the photo is filtered from the wave's local photo list
 - **THEN** the masonry grid re-renders without the removed photo
+
+#### Scenario: Photo deleted from expanded view
+- **WHEN** the user deletes a photo from within the expanded `Photo` component
+- **THEN** the `Photo` component SHALL call `removePhoto(photoId)` from `PhotosListContext`
+- **THEN** the photo SHALL be immediately filtered from the wave's local photo list
+- **THEN** the masonry grid SHALL re-render without the deleted photo
+
+#### Scenario: Photo removed from wave in expanded view
+- **WHEN** the user removes a photo from the wave while viewing it in expanded mode
+- **THEN** the `Photo` component SHALL call `removePhoto(photoId)` from `PhotosListContext`
+- **THEN** the photo SHALL be immediately filtered from the wave's local photo list
+- **THEN** the masonry grid SHALL re-render without the removed photo
 
 #### Scenario: Wave has no photos
 - **WHEN** the wave is empty
