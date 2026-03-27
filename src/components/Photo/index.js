@@ -39,6 +39,8 @@ import * as STATE from '../../state'
 import { isDarkMode } from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 
+import { subscribeToPhotoRefresh, emitPhotoRefresh } from '../../events/photoRefreshBus'
+
 import ImageView from './ImageView'
 
 const VideoSection = ({ photo, screenWidth, screenHeight, isDevBuild, imageCardContainerStyle }) => {
@@ -627,38 +629,22 @@ const Photo = ({
     }
   }, [photo?.id, uuid, refreshKey, internalRefreshKey]) // Remove optimisticComment from deps
 
-  // Global refresh trigger polling
+  // Subscribe to photoRefreshBus for cross-screen comment refresh
   useEffect(() => {
-    const checkForRefresh = () => {
-      if (
-        global.lastCommentSubmission &&
-        global.lastCommentSubmission > (global.lastPhotoRefresh || 0)
-      ) {
-        global.lastPhotoRefresh = global.lastCommentSubmission
+    const unsubscribe = subscribeToPhotoRefresh(({ photoId }) => {
+      if (photoId === photo?.id) {
         setInternalRefreshKey((prev) => prev + 1)
       }
-    }
-
-    checkForRefresh()
-    const interval = setInterval(checkForRefresh, 1000)
-    return () => clearInterval(interval)
+    })
+    return unsubscribe
   }, [photo?.id])
 
-  // Register refresh callback for direct triggering
+  // Register optimistic comment callback
   useEffect(() => {
-    const refreshCallback = () => setInternalRefreshKey((prev) => prev + 1)
-
-    if (!global.photoRefreshCallbacks) {
-      global.photoRefreshCallbacks = new Map()
-    }
-    global.photoRefreshCallbacks.set(photo?.id, refreshCallback)
-
-    // Also register optimistic comment callback
     global.photoOptimisticCallbacks = global.photoOptimisticCallbacks || new Map()
     global.photoOptimisticCallbacks.set(photo?.id, setOptimisticComment)
 
     return () => {
-      global.photoRefreshCallbacks?.delete(photo?.id)
       global.photoOptimisticCallbacks?.delete(photo?.id)
     }
   }, [photo?.id]) // Reset component state when photo content changes (no height tracking)
@@ -765,7 +751,7 @@ const Photo = ({
                       uuid,
                       topOffset: toastTopOffset
                     })
-                    // bruit force reload comments to re-render in the photo details screen
+                    // reload comments to re-render in the photo details screen
                     const updatedPhotoDetails = await reducer.getPhotoDetails({
                       photoId: photo.id,
                       uuid
@@ -774,6 +760,8 @@ const Photo = ({
                       ...photoDetails,
                       ...updatedPhotoDetails
                     })
+                    // Notify other mounted Photo instances via bus
+                    emitPhotoRefresh({ photoId: photo.id })
                   }
                 }
               ],

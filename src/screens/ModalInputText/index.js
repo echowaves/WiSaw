@@ -22,6 +22,8 @@ import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 
 import * as reducer from '../../components/Photo/reducer'
 
+import { emitPhotoRefresh } from '../../events/photoRefreshBus'
+
 const maxStringLength = 140
 
 const ModalInputText = ({ route }) => {
@@ -158,12 +160,8 @@ const ModalInputText = ({ route }) => {
 
       // Trigger refresh after a shorter delay to reduce flickering
       setTimeout(() => {
-        if (global.photoRefreshCallbacks?.has(photo?.id)) {
-          global.photoRefreshCallbacks.get(photo?.id)()
-        } else {
-          global.lastCommentSubmission = Date.now()
-        }
-      }, 300) // Reduced from 800ms to 300ms
+        emitPhotoRefresh({ photoId: photo?.id })
+      }, 300)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('❌ ModalInputText: Error submitting comment:', error)
