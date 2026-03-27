@@ -43,6 +43,7 @@ import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
+import PhotosListContext from '../../contexts/PhotosListContext'
 
 const FOOTER_HEIGHT = 90
 
@@ -453,154 +454,162 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     }
   }
 
+  const removePhoto = useCallback((photoId) => {
+    setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+  }, [])
+
+  const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-      <PendingPhotosBanner
-        theme={theme}
-        pendingPhotos={pendingPhotos}
-        netAvailable={netAvailable}
-        isUploading={isUploading}
-        clearPendingQueue={clearPendingQueue}
-        toastTopOffset={toastTopOffset}
-        pendingPhotosAnimation={pendingPhotosAnimation}
-        uploadIconAnimation={uploadIconAnimation}
-      />
+    <PhotosListContext.Provider value={photosListContextValue}>
+      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+        <PendingPhotosBanner
+          theme={theme}
+          pendingPhotos={pendingPhotos}
+          netAvailable={netAvailable}
+          isUploading={isUploading}
+          clearPendingQueue={clearPendingQueue}
+          toastTopOffset={toastTopOffset}
+          pendingPhotosAnimation={pendingPhotosAnimation}
+          uploadIconAnimation={uploadIconAnimation}
+        />
 
-      {loading && (
-        <View
-          style={{
-            height: 3,
-            backgroundColor: theme.HEADER_BACKGROUND
-          }}
-        >
-          <LinearProgress
-            color={CONST.MAIN_COLOR}
+        {loading && (
+          <View
             style={{
-              flex: 1,
-              height: 3
+              height: 3,
+              backgroundColor: theme.HEADER_BACKGROUND
             }}
-          />
-        </View>
-      )}
-
-      {photos.length === 0 && !loading
-        ? (
-          <EmptyStateCard
-            icon='images'
-            iconType='FontAwesome5'
-            title='No Photos Yet'
-            subtitle='Add photos to this wave or take a new one.'
-            actionText='Add Photos'
-            onActionPress={() => router.push({ pathname: '/waves/photo-selection', params: { waveUuid, waveName } })}
-            iconColor={theme.TEXT_PRIMARY}
-          />
-          )
-        : (
-          <>
-          <InteractionHintBanner hasContent={photos?.length > 0} />
-          <PhotosListMasonry
-            activeSegment={1}
-            photosList={photos}
-            segmentConfig={segmentConfig}
-            onScroll={handleScroll}
-            masonryRef={masonryRef}
-            getCalculatedDimensions={getCalculatedDimensions}
-            isPhotoExpanded={isPhotoExpanded}
-            uuid={uuid}
-            expandedPhotoIds={expandedPhotoIds}
-            onToggleExpand={handlePhotoToggle}
-            updatePhotoHeight={updatePhotoHeight}
-            onRequestEnsureVisible={ensureItemVisible}
-            onEndReached={handleLoadMore}
-            onRefresh={handleRefresh}
-            loading={loading}
-            stopLoading={stopLoading}
-            setPageNumber={setPageNumber}
-            setExpandedPhotoIds={setExpandedPhotoIds}
-            reload={handleRefresh}
-            styles={{}}
-            FOOTER_HEIGHT={FOOTER_HEIGHT}
-            justCollapsedId={justCollapsedId}
-            onPhotoLongPress={handlePhotoLongPress}
-          />
-          </>
-          )}
-
-      <PhotosListFooter
-        theme={theme}
-        navigation={navigation}
-        netAvailable={netAvailable}
-        unreadCount={0}
-        isCameraOpening={isCameraOpening}
-        onCameraPress={checkPermissionsForPhotoTaking}
-        locationReady={!!location}
-        waveUuid={waveUuid}
-      />
-
-      <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
-
-      {/* Edit Modal */}
-      <Modal
-        animationType='slide'
-        transparent
-        visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
-          <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
-            <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Edit Wave</Text>
-            <TextInput
-              style={[styles.input, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-              placeholder='Wave Name'
-              placeholderTextColor={theme.TEXT_SECONDARY}
-              value={editName}
-              onChangeText={setEditName}
+          >
+            <LinearProgress
+              color={CONST.MAIN_COLOR}
+              style={{
+                flex: 1,
+                height: 3
+              }}
             />
-            <TextInput
-              style={[styles.input, styles.textArea, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-              placeholder='Description (optional)'
-              placeholderTextColor={theme.TEXT_SECONDARY}
-              value={editDescription}
-              onChangeText={setEditDescription}
-              multiline
-              numberOfLines={3}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
-                onPress={() => setEditModalVisible(false)}
-              >
-                <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY }]}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: CONST.MAIN_COLOR }]}
-                onPress={handleSaveEdit}
-                disabled={saving}
-              >
-                {saving
-                  ? <ActivityIndicator color='#FFF' />
-                  : <Text style={[styles.buttonText, { color: '#FFF' }]}>Save</Text>}
-              </TouchableOpacity>
-            </View>
           </View>
-        </KeyboardAvoidingView>
-      </Modal>
+        )}
 
-      {/* Merge Wave Modal */}
-      <MergeWaveModal
-        visible={mergeModalVisible}
-        onClose={() => setMergeModalVisible(false)}
-        onSelectTarget={handleMergeTargetSelected}
-        sourceWave={{ waveUuid, name: waveName }}
-        uuid={uuid}
-      />
+        {photos.length === 0 && !loading
+          ? (
+            <EmptyStateCard
+              icon='images'
+              iconType='FontAwesome5'
+              title='No Photos Yet'
+              subtitle='Add photos to this wave or take a new one.'
+              actionText='Add Photos'
+              onActionPress={() => router.push({ pathname: '/waves/photo-selection', params: { waveUuid, waveName } })}
+              iconColor={theme.TEXT_PRIMARY}
+            />
+            )
+          : (
+            <>
+              <InteractionHintBanner hasContent={photos?.length > 0} />
+              <PhotosListMasonry
+                activeSegment={1}
+                photosList={photos}
+                segmentConfig={segmentConfig}
+                onScroll={handleScroll}
+                masonryRef={masonryRef}
+                getCalculatedDimensions={getCalculatedDimensions}
+                isPhotoExpanded={isPhotoExpanded}
+                uuid={uuid}
+                expandedPhotoIds={expandedPhotoIds}
+                onToggleExpand={handlePhotoToggle}
+                updatePhotoHeight={updatePhotoHeight}
+                onRequestEnsureVisible={ensureItemVisible}
+                onEndReached={handleLoadMore}
+                onRefresh={handleRefresh}
+                loading={loading}
+                stopLoading={stopLoading}
+                setPageNumber={setPageNumber}
+                setExpandedPhotoIds={setExpandedPhotoIds}
+                reload={handleRefresh}
+                styles={{}}
+                FOOTER_HEIGHT={FOOTER_HEIGHT}
+                justCollapsedId={justCollapsedId}
+                onPhotoLongPress={handlePhotoLongPress}
+              />
+            </>
+            )}
 
-      <ActionMenu
-        visible={menuVisible}
-        onClose={() => setMenuVisible(false)}
-        items={headerMenuItems}
-      />
-    </View>
+        <PhotosListFooter
+          theme={theme}
+          navigation={navigation}
+          netAvailable={netAvailable}
+          unreadCount={0}
+          isCameraOpening={isCameraOpening}
+          onCameraPress={checkPermissionsForPhotoTaking}
+          locationReady={!!location}
+          waveUuid={waveUuid}
+        />
+
+        <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
+
+        {/* Edit Modal */}
+        <Modal
+          animationType='slide'
+          transparent
+          visible={editModalVisible}
+          onRequestClose={() => setEditModalVisible(false)}
+        >
+          <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
+            <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
+              <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Edit Wave</Text>
+              <TextInput
+                style={[styles.input, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
+                placeholder='Wave Name'
+                placeholderTextColor={theme.TEXT_SECONDARY}
+                value={editName}
+                onChangeText={setEditName}
+              />
+              <TextInput
+                style={[styles.input, styles.textArea, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
+                placeholder='Description (optional)'
+                placeholderTextColor={theme.TEXT_SECONDARY}
+                value={editDescription}
+                onChangeText={setEditDescription}
+                multiline
+                numberOfLines={3}
+              />
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
+                  onPress={() => setEditModalVisible(false)}
+                >
+                  <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY }]}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: CONST.MAIN_COLOR }]}
+                  onPress={handleSaveEdit}
+                  disabled={saving}
+                >
+                  {saving
+                    ? <ActivityIndicator color='#FFF' />
+                    : <Text style={[styles.buttonText, { color: '#FFF' }]}>Save</Text>}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+
+        {/* Merge Wave Modal */}
+        <MergeWaveModal
+          visible={mergeModalVisible}
+          onClose={() => setMergeModalVisible(false)}
+          onSelectTarget={handleMergeTargetSelected}
+          sourceWave={{ waveUuid, name: waveName }}
+          uuid={uuid}
+        />
+
+        <ActionMenu
+          visible={menuVisible}
+          onClose={() => setMenuVisible(false)}
+          items={headerMenuItems}
+        />
+      </View>
+    </PhotosListContext.Provider>
   )
 })
 

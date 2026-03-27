@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import * as Crypto from 'expo-crypto'
 
 import { useAtom } from 'jotai'
-import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import { router, useNavigation } from 'expo-router'
@@ -57,6 +57,7 @@ import PhotosListSearchBar from './components/PhotosListSearchBar'
 import PendingPhotosBanner from './components/PendingPhotosBanner'
 import PhotosListEmptyState from './components/PhotosListEmptyState'
 import PhotosListMasonry from './components/PhotosListMasonry'
+import PhotosListContext from '../../contexts/PhotosListContext'
 
 import useCameraCapture from './hooks/useCameraCapture'
 import useNetworkStatus from './hooks/useNetworkStatus'
@@ -861,69 +862,77 @@ const PhotosList = ({ searchFromUrl }) => {
     )
   }
 
+  const removePhoto = useCallback((photoId) => {
+    setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+  }, [setPhotosList])
+
+  const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
+
   if (isTandcAccepted && location && photosList?.length > 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        {renderHeader()}
-        <PendingPhotosBanner
-          theme={theme}
-          pendingPhotos={pendingPhotos}
-          netAvailable={netAvailable}
-          isUploading={isUploading}
-          clearPendingQueue={clearPendingQueue}
-          toastTopOffset={toastTopOffset}
-          pendingPhotosAnimation={pendingPhotosAnimation}
-          uploadIconAnimation={uploadIconAnimation}
-        />
-        <View style={styles.container}>
-          <InteractionHintBanner hasContent={photosList?.length > 0} />
-          {/* photos - unified masonry layout for all segments */}
-          <PhotosListMasonry
-            activeSegment={activeSegment}
-            photosList={photosList}
-            segmentConfig={segmentConfig}
-            onScroll={handleScroll}
-            masonryRef={masonryRef}
-            getCalculatedDimensions={getCalculatedDimensions}
-            isPhotoExpanded={isPhotoExpanded}
-            searchTerm={searchTerm}
-            uuid={uuid}
-            expandedPhotoIds={expandedPhotoIds}
-            onToggleExpand={handlePhotoToggle}
-            updatePhotoHeight={updatePhotoHeight}
-            onRequestEnsureVisible={ensureItemVisible}
-            onTriggerSearch={triggerSearch}
-            loading={loading}
-            stopLoading={stopLoading}
-            setPageNumber={setPageNumber}
-            setExpandedPhotoIds={setExpandedPhotoIds}
-            reload={reload}
-            styles={styles}
-            FOOTER_HEIGHT={FOOTER_HEIGHT}
-            justCollapsedId={justCollapsedId}
-            onPhotoLongPress={handlePhotoLongPress}
-          />
-        </View>
-        {activeSegment === 2 && (
-          <PhotosListSearchBar
+      <PhotosListContext.Provider value={photosListContextValue}>
+        <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
+          {renderHeader()}
+          <PendingPhotosBanner
             theme={theme}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onSubmitSearch={submitSearch}
-            autoFocus={false}
+            pendingPhotos={pendingPhotos}
+            netAvailable={netAvailable}
+            isUploading={isUploading}
+            clearPendingQueue={clearPendingQueue}
+            toastTopOffset={toastTopOffset}
+            pendingPhotosAnimation={pendingPhotosAnimation}
+            uploadIconAnimation={uploadIconAnimation}
           />
-        )}
-        <PhotosListFooter
-          theme={theme}
-          navigation={navigation}
-          netAvailable={netAvailable}
-          unreadCount={unreadCount}
-          isCameraOpening={isCameraOpening}
-          onCameraPress={checkPermissionsForPhotoTaking}
-          locationReady={!!location}
-        />
-        <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
-      </View>
+          <View style={styles.container}>
+            <InteractionHintBanner hasContent={photosList?.length > 0} />
+            {/* photos - unified masonry layout for all segments */}
+            <PhotosListMasonry
+              activeSegment={activeSegment}
+              photosList={photosList}
+              segmentConfig={segmentConfig}
+              onScroll={handleScroll}
+              masonryRef={masonryRef}
+              getCalculatedDimensions={getCalculatedDimensions}
+              isPhotoExpanded={isPhotoExpanded}
+              searchTerm={searchTerm}
+              uuid={uuid}
+              expandedPhotoIds={expandedPhotoIds}
+              onToggleExpand={handlePhotoToggle}
+              updatePhotoHeight={updatePhotoHeight}
+              onRequestEnsureVisible={ensureItemVisible}
+              onTriggerSearch={triggerSearch}
+              loading={loading}
+              stopLoading={stopLoading}
+              setPageNumber={setPageNumber}
+              setExpandedPhotoIds={setExpandedPhotoIds}
+              reload={reload}
+              styles={styles}
+              FOOTER_HEIGHT={FOOTER_HEIGHT}
+              justCollapsedId={justCollapsedId}
+              onPhotoLongPress={handlePhotoLongPress}
+            />
+          </View>
+          {activeSegment === 2 && (
+            <PhotosListSearchBar
+              theme={theme}
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              onSubmitSearch={submitSearch}
+              autoFocus={false}
+            />
+          )}
+          <PhotosListFooter
+            theme={theme}
+            navigation={navigation}
+            netAvailable={netAvailable}
+            unreadCount={unreadCount}
+            isCameraOpening={isCameraOpening}
+            onCameraPress={checkPermissionsForPhotoTaking}
+            locationReady={!!location}
+          />
+          <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
+        </View>
+      </PhotosListContext.Provider>
     )
   }
 

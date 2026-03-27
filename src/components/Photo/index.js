@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
 import PropTypes from 'prop-types'
+import PhotosListContext from '../../contexts/PhotosListContext'
 
 import { useEvent } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
@@ -486,7 +487,7 @@ const Photo = ({
 
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
-  const [photosList, setPhotosList] = useAtom(STATE.photosList)
+  const { removePhoto } = useContext(PhotosListContext)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
 
   const toastTopOffset = useToastTopOffset()
@@ -532,7 +533,10 @@ const Photo = ({
     uuid,
     toastTopOffset,
     onDeleted: (photoId) => {
-      setPhotosList([...photosList.filter((item) => item.id !== photoId)])
+      removePhoto(photoId)
+    },
+    onRemovedFromWave: (photoId) => {
+      removePhoto(photoId)
     }
   })
 
