@@ -59,6 +59,7 @@ import PhotosListMasonry from './components/PhotosListMasonry'
 import PhotosListContext from '../../contexts/PhotosListContext'
 import UploadContext from '../../contexts/UploadContext'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
+import { subscribeToPhotoDeletion } from '../../events/photoDeletionBus'
 
 import useCameraCapture from './hooks/useCameraCapture'
 import useNetworkStatus from './hooks/useNetworkStatus'
@@ -383,6 +384,13 @@ const PhotosList = ({ searchFromUrl }) => {
           return true
         })
       })
+    })
+  }, [setPhotosList])
+
+  // Subscribe to cross-screen photo deletions
+  useEffect(() => {
+    return subscribeToPhotoDeletion(({ photoId }) => {
+      setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
     })
   }, [setPhotosList])
 

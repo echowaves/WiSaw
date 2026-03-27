@@ -34,6 +34,7 @@ import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 import { emitAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
+import { subscribeToPhotoDeletion } from '../../events/photoDeletionBus'
 import UploadContext from '../../contexts/UploadContext'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
@@ -138,6 +139,13 @@ const WaveDetail = React.forwardRef((_props, ref) => {
       }
     })
   }, [waveUuid])
+
+  // Subscribe to cross-screen photo deletions
+  useEffect(() => {
+    return subscribeToPhotoDeletion(({ photoId }) => {
+      setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+    })
+  }, [])
 
   // Starred-layout segment config
   const segmentConfig = useMemo(() => {

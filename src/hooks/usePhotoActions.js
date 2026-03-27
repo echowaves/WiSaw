@@ -4,6 +4,7 @@ import Toast from 'react-native-toast-message'
 
 import * as reducer from '../components/Photo/reducer'
 import { addPhotoToWave, removePhotoFromWave, createWave } from '../screens/Waves/reducer'
+import { emitPhotoDeletion } from '../events/photoDeletionBus'
 
 const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopOffset, onDeleted, onRemovedFromWave }) => {
   const [bans, setBans] = useState([])
@@ -37,8 +38,11 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
               topOffset: toastTopOffset
             })
 
-            if (deleted && onDeleted) {
-              onDeleted(photo.id)
+            if (deleted) {
+              emitPhotoDeletion({ photoId: photo.id })
+              if (onDeleted) {
+                onDeleted(photo.id)
+              }
             }
           }
         }
