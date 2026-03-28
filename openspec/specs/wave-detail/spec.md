@@ -240,6 +240,22 @@ The wave edit modal in WaveDetail SHALL use `KeyboardAwareScrollView` from `reac
 **Reason**: Long-press on a photo in wave detail now opens the QuickActionsModal (matching main feed behavior) instead of showing a context menu with "Remove from Wave." Photo-to-wave management is handled through the Wave action button in the QuickActionsModal or full photo view.
 **Migration**: Users use the Wave button in the expanded photo view or QuickActionsModal to manage wave assignment.
 
+### Requirement: WaveDetail reads global network atom
+The WaveDetail screen SHALL read `STATE.netAvailable` via `useAtom` instead of creating its own `NetInfo.addEventListener` subscription. It SHALL remove the local `netAvailable` state and `NetInfo` listener effect.
+
+#### Scenario: WaveDetail uses atom for network state
+- **WHEN** the WaveDetail component renders
+- **THEN** it SHALL read `STATE.netAvailable` via `useAtom`
+- **THEN** it SHALL NOT import `NetInfo` or subscribe to `NetInfo.addEventListener`
+
+### Requirement: WaveDetail offline card
+The WaveDetail screen SHALL show an offline card when `netAvailable` is `false`.
+
+#### Scenario: WaveDetail renders offline card
+- **WHEN** `netAvailable` is `false`
+- **THEN** the WaveDetail screen SHALL display an `EmptyStateCard` with `icon='wifi-off'`
+- **THEN** it SHALL NOT fire API calls to load wave photos
+
 ### Requirement: Wave Detail Centered Loading Spinner
 **Reason**: Replaced by the `LinearProgress` bar for consistency with PhotosList. The centered `ActivityIndicator` that showed when `loading && photos.length === 0` is no longer used.
 **Migration**: The `LinearProgress` bar at the top provides loading feedback in all cases. The `EmptyStateCard` continues to render when photos array is empty after load completes.

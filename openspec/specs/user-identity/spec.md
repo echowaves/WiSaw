@@ -54,3 +54,15 @@ The Secret screen form SHALL use `KeyboardAwareScrollView` from `react-native-ke
 #### Scenario: Secret input fields remain visible when keyboard opens
 - **WHEN** a user taps any input field on the Secret screen
 - **THEN** the screen content SHALL scroll so the focused input remains visible above the keyboard
+
+### Requirement: Secret screen offline card
+The Secret (Identity) screen SHALL read `STATE.netAvailable` via `useAtom`. When `netAvailable` is `false`, it SHALL display an `EmptyStateCard` with `icon='wifi-off'` instead of allowing identity operations that require the network.
+
+#### Scenario: Secret renders offline card
+- **WHEN** `netAvailable` is `false`
+- **THEN** the Secret screen SHALL display an offline `EmptyStateCard`
+- **THEN** it SHALL NOT attempt network-dependent identity operations
+
+#### Scenario: Secret loads normally when online
+- **WHEN** `netAvailable` is `true`
+- **THEN** the Secret screen SHALL render its normal identity management interface

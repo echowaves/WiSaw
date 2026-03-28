@@ -61,6 +61,22 @@ The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationP
 - **THEN** all active watcher subscriptions (Phase 2 or Phase 3) SHALL be removed to prevent memory leaks
 - **THEN** any pending Phase 2 timeout SHALL be cleared
 
+#### Scenario: Phase 2 transition executes exactly once
+- **WHEN** Phase 2 watcher callbacks or the timeout trigger `transitionToPhase3()`
+- **THEN** the transition SHALL execute only on the first invocation
+- **THEN** subsequent calls to `transitionToPhase3()` SHALL be silently ignored
+- **THEN** exactly one Phase 3 watcher SHALL be started
+
+#### Scenario: Phase 2 timeout accommodates cold GPS
+- **WHEN** Phase 2 starts on a real device with cold GPS
+- **THEN** the timeout SHALL be 60 seconds to allow satellite acquisition
+- **THEN** the timeout SHALL still be overridden by early exit when accuracy ≤ 50 meters
+
+#### Scenario: Phase 3 transition resets accuracy gate
+- **WHEN** Phase 2 ends and the hook transitions to Phase 3
+- **THEN** `storedAccuracyRef` SHALL be reset to `Infinity` before the Phase 3 watcher is started
+- **THEN** Phase 3 Balanced-accuracy fixes SHALL be accepted immediately, regardless of the accuracy achieved during Phase 2
+
 ### Requirement: Permission Denied UI
 The system SHALL show distinct UI when location permission is denied, prompting the user to enable location access. The alert SHALL include both an "Open Settings" button (for iOS) and text instructions for macOS (System Settings → Privacy & Security → Location Services), since the same app binary runs on both platforms via Mac Catalyst.
 
@@ -70,3 +86,14 @@ The system SHALL show distinct UI when location permission is denied, prompting 
 - **THEN** the alert SHALL include an "Open Settings" button that calls `Linking.openSettings()`
 - **THEN** the alert SHALL include text instructions for macOS users to navigate System Settings → Privacy & Security → Location Services
 - **THEN** the alert SHALL include an "OK" dismiss button
+
+### Requirement: Development logging
+The hook SHALL log phase transitions and watcher callbacks to the console when `__DEV__` is true. Logs SHALL be stripped from production builds automatically by the bundler.
+
+#### Scenario: Phase transition logging
+- **WHEN** `__DEV__` is true and a phase transition occurs (Phase 1 seed, Phase 2 start, Phase 2→3 transition, Phase 3 start)
+- **THEN** a console log SHALL be emitted with the phase name and current accuracy/coords
+
+#### Scenario: Watcher callback logging
+- **WHEN** `__DEV__` is true and a Phase 2 or Phase 3 watcher callback fires
+- **THEN** a console log SHALL be emitted with the fix accuracy, coordinates, and whether the fix was accepted or rejected by the gate

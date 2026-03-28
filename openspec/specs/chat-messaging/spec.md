@@ -68,3 +68,15 @@ The system SHALL adapt the chat interface colors and styling to match the curren
 #### Scenario: Dark mode is active
 - **WHEN** the user has dark mode enabled
 - **THEN** the chat interface renders with dark theme colors and appropriate contrast
+
+### Requirement: Chat offline card
+The Chat screen SHALL read `STATE.netAvailable` via `useAtom`. When `netAvailable` is `false`, it SHALL display an `EmptyStateCard` with `icon='wifi-off'` instead of attempting to load messages or connect WebSocket subscriptions.
+
+#### Scenario: Chat renders offline card
+- **WHEN** `netAvailable` is `false`
+- **THEN** the Chat screen SHALL display an offline `EmptyStateCard`
+- **THEN** it SHALL NOT fire GraphQL queries or establish WebSocket subscriptions
+
+#### Scenario: Chat loads normally when online
+- **WHEN** `netAvailable` is `true`
+- **THEN** the Chat screen SHALL render its normal messaging interface
