@@ -146,7 +146,7 @@ The system SHALL display a `LinearProgress` bar at the top of the WaveDetail con
 - **THEN** the masonry grid and all other UI elements SHALL remain interactive (non-blocking)
 
 ### Requirement: WaveDetail header menu options
-The WaveDetail header SHALL display a kebab (three-dot vertical) menu icon using `MaterialCommunityIcons` `dots-vertical` (size 22) with styled button appearance matching the Waves list header (`SHARED_STYLES.interactive.headerButton`, themed background, and border). Tapping the icon SHALL open an `ActionMenu` modal with icon + label items for wave management. The menu SHALL include: Rename (`pencil-outline`), Edit Description (`text-box-edit-outline`), Merge Into Another Wave... (`call-merge`), and Delete Wave (`trash-can-outline`, destructive). A separator SHALL appear before the Delete item.
+The WaveDetail header SHALL display a kebab (three-dot vertical) menu icon using `MaterialCommunityIcons` `dots-vertical` (size 22) with styled button appearance matching the Waves list header (`SHARED_STYLES.interactive.headerButton`, themed background, and border). Tapping the icon SHALL open an `ActionMenu` modal with icon + label items for wave management. The menu SHALL include: Rename (`pencil-outline`), Edit Description (`text-box-edit-outline`), Merge Into Another Wave... (`call-merge`), and Delete Wave (`trash-can-outline`, destructive). A separator SHALL appear before the Delete item. All handler functions referenced by menu items MUST be defined before the `headerMenuItems` array that references them, to ensure valid function references at construction time.
 
 #### Scenario: Wave Detail header renders kebab icon
 - **WHEN** the user navigates to a Wave Detail screen
@@ -164,11 +164,20 @@ The WaveDetail header SHALL display a kebab (three-dot vertical) menu icon using
 
 #### Scenario: User deletes wave from header menu
 - **WHEN** the user selects Delete Wave from the ActionMenu
-- **THEN** a confirmation dialog is shown
-- **THEN** upon confirmation, the `deleteWave` mutation SHALL be called
+- **THEN** a confirmation `Alert.alert` dialog SHALL be shown with title "Delete Wave" and message "Are you sure? This cannot be undone." with Cancel and Delete buttons
+- **THEN** upon confirmation, the `deleteWave` mutation SHALL be called with `{ waveUuid, uuid }`
 - **THEN** the system SHALL emit `autoGroupDone` to trigger an ungrouped-photos count refresh
+- **THEN** a success toast SHALL be shown with text "Wave deleted"
 - **THEN** the system SHALL navigate back via `router.back()`
-- **THEN** a success toast SHALL be shown
+
+#### Scenario: Delete wave fails
+- **WHEN** the `deleteWave` mutation throws an error
+- **THEN** an error toast SHALL be shown with the error message
+- **THEN** the user SHALL remain on the WaveDetail screen
+
+#### Scenario: Handler declaration order
+- **WHEN** the component defines `headerMenuItems`
+- **THEN** all `onPress` handler functions (`handleDeleteWave`, etc.) MUST be declared above the `headerMenuItems` array in the source code to ensure valid references at construction time
 
 #### Scenario: Owner renames wave
 - **WHEN** the user edits the wave name and taps Save
