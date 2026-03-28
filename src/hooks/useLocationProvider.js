@@ -75,6 +75,9 @@ export default function useLocationProvider () {
     async function startPhase2 () {
       if (cancelled) return
 
+      // Reset accuracy gate so fresh GPS fixes always replace stale cached seed
+      storedAccuracyRef.current = Infinity
+
       function transitionToPhase3 () {
         if (cancelled) return
         if (refineTimer) {
