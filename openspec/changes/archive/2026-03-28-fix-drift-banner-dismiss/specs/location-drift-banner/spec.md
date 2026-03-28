@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Location Drift Banner
 The system SHALL provide a `LocationDriftBanner` component at `src/screens/PhotosList/components/LocationDriftBanner.js` that warns the user when their live device location has drifted significantly from the location the geo feed was loaded with. The banner SHALL only be visible on segment 0 (Global/geo feed). The banner SHALL be tappable to trigger a feed reload. The `showDriftBanner` useMemo SHALL include a `feedLocationVersion` state counter in its dependency array so that it recalculates after every `reload()` call that snapshots the feed location.
 
@@ -26,17 +28,6 @@ The system SHALL provide a `LocationDriftBanner` component at `src/screens/Photo
 - **WHEN** the banner is rendered
 - **THEN** it SHALL use the same card styling as `PendingPhotosBanner` (themed card background, border, shadow, rounded corners, icon + text layout)
 - **THEN** it SHALL use the app's theme colors from the current dark/light mode
-
-### Requirement: Haversine Distance Utility
-The system SHALL provide a pure utility function at `src/utils/haversine.js` that computes the great-circle distance in meters between two geographic coordinate pairs.
-
-#### Scenario: Compute distance between two points
-- **WHEN** `haversine(lat1, lon1, lat2, lon2)` is called with valid numeric coordinates
-- **THEN** it SHALL return the distance in meters using the haversine formula with Earth radius 6371000 meters
-
-#### Scenario: Same point returns zero
-- **WHEN** `haversine(lat, lon, lat, lon)` is called with identical coordinates
-- **THEN** it SHALL return 0
 
 ### Requirement: Feed Location Snapshot
 The system SHALL maintain a `feedLocationRef` (React ref) in the PhotosList screen that stores the coordinates the geo feed was most recently loaded with. This ref SHALL be updated every time the feed reloads, providing the baseline for drift comparison. A `feedLocationVersion` state counter SHALL be incremented alongside each ref update to signal the `showDriftBanner` useMemo to recalculate.

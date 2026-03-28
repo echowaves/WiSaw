@@ -182,6 +182,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
 
   const feedLocationRef = useRef(null)
+  const [feedLocationVersion, setFeedLocationVersion] = useState(0)
 
   const handleIncomingSearch = useCallback(
     (term) => {
@@ -371,7 +372,7 @@ const PhotosList = ({ searchFromUrl }) => {
       locationState.coords.longitude
     )
     return drift > DRIFT_THRESHOLD
-  }, [activeSegment, locationState.coords?.latitude, locationState.coords?.longitude])
+  }, [activeSegment, locationState.coords?.latitude, locationState.coords?.longitude, feedLocationVersion])
 
   const [loading, setLoading] = useState(false)
 
@@ -581,6 +582,7 @@ const PhotosList = ({ searchFromUrl }) => {
     // Snapshot current location for drift comparison
     if (locationState.coords) {
       feedLocationRef.current = locationState.coords
+      setFeedLocationVersion(v => v + 1)
     }
 
     currentBatch = Crypto.randomUUID()
