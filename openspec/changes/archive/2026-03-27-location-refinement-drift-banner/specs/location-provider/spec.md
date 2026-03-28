@@ -1,3 +1,5 @@
+## MODIFIED Requirements
+
 ### Requirement: Location Atom
 The system SHALL provide a global Jotai atom `locationAtom` in `src/state.js` that stores the device's location state as an object with `status`, `coords`, and `accuracy` properties.
 
@@ -60,13 +62,3 @@ The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationP
 - **WHEN** the root layout unmounts (app closing)
 - **THEN** all active watcher subscriptions (Phase 2 or Phase 3) SHALL be removed to prevent memory leaks
 - **THEN** any pending Phase 2 timeout SHALL be cleared
-
-### Requirement: Permission Denied UI
-The system SHALL show distinct UI when location permission is denied, prompting the user to enable location access. The alert SHALL include both an "Open Settings" button (for iOS) and text instructions for macOS (System Settings → Privacy & Security → Location Services), since the same app binary runs on both platforms via Mac Catalyst.
-
-#### Scenario: Permission denied alert
-- **WHEN** the user denies location permission on any platform
-- **THEN** an Alert SHALL be shown explaining that location is needed for nearby photos
-- **THEN** the alert SHALL include an "Open Settings" button that calls `Linking.openSettings()`
-- **THEN** the alert SHALL include text instructions for macOS users to navigate System Settings → Privacy & Security → Location Services
-- **THEN** the alert SHALL include an "OK" dismiss button

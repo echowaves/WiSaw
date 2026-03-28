@@ -54,6 +54,7 @@ import PhotosListFooter from './components/PhotosListFooter'
 import PhotosListHeader from './components/PhotosListHeader'
 import PhotosListSearchBar from './components/PhotosListSearchBar'
 import PendingPhotosBanner from './components/PendingPhotosBanner'
+import LocationDriftBanner from './components/LocationDriftBanner'
 import PhotosListEmptyState from './components/PhotosListEmptyState'
 import PhotosListMasonry from './components/PhotosListMasonry'
 import PhotosListContext from '../../contexts/PhotosListContext'
@@ -65,6 +66,7 @@ import useCameraCapture from './hooks/useCameraCapture'
 import useNetworkStatus from './hooks/useNetworkStatus'
 import usePendingAnimation from './hooks/usePendingAnimation'
 import usePhotoExpansion from './hooks/usePhotoExpansion'
+import haversine from '../../utils/haversine'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -179,6 +181,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [locationState] = useAtom(STATE.locationAtom)
   const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
+
+  const feedLocationRef = useRef(null)
 
   const handleIncomingSearch = useCallback(
     (term) => {
@@ -356,6 +360,19 @@ const PhotosList = ({ searchFromUrl }) => {
   const [, setConsecutiveEmptyResponses] = useState(0)
 
   const [activeSegment, setActiveSegment] = useState(0)
+
+  const DRIFT_THRESHOLD = 500 // meters
+  const showDriftBanner = useMemo(() => {
+    if (activeSegment !== 0) return false
+    if (!feedLocationRef.current || !locationState.coords) return false
+    const drift = haversine(
+      feedLocationRef.current.latitude,
+      feedLocationRef.current.longitude,
+      locationState.coords.latitude,
+      locationState.coords.longitude
+    )
+    return drift > DRIFT_THRESHOLD
+  }, [activeSegment, locationState.coords?.latitude, locationState.coords?.longitude])
 
   const [loading, setLoading] = useState(false)
 
@@ -562,6 +579,11 @@ const PhotosList = ({ searchFromUrl }) => {
   }
 
   const reload = async (segmentOverride = null, searchTermOverride = null) => {
+    // Snapshot current location for drift comparison
+    if (locationState.coords) {
+      feedLocationRef.current = locationState.coords
+    }
+
     currentBatch = Crypto.randomUUID()
 
     setStopLoading(false)
@@ -683,11 +705,11 @@ const PhotosList = ({ searchFromUrl }) => {
   }, [])
 
   useEffect(() => {
-    // Reload feed when location becomes available or changes
-    if (location) {
+    // Load feed once when location first becomes available
+    if (locationState.status === 'ready') {
       reload()
     }
-  }, [locationState.coords?.latitude, locationState.coords?.longitude])
+  }, [locationState.status])
 
   // useEffect(() => {}, [currentBatch])
 
@@ -884,6 +906,9 @@ const PhotosList = ({ searchFromUrl }) => {
             pendingPhotosAnimation={pendingPhotosAnimation}
             uploadIconAnimation={uploadIconAnimation}
           />
+          {showDriftBanner && (
+            <LocationDriftBanner theme={theme} onPress={() => reload()} />
+          )}
           <View style={styles.container}>
             <InteractionHintBanner hasContent={photosList?.length > 0} />
             {/* photos - unified masonry layout for all segments */}

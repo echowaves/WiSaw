@@ -14,4 +14,4 @@ export const waveSortBy = atom('updatedAt')
 
 export const waveSortDirection = atom('desc')
 
-export const locationAtom = atom({ status: 'pending', coords: null })
+export const locationAtom = atom({ status: 'pending', coords: null, accuracy: null })
