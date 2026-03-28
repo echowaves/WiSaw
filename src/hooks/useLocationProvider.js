@@ -9,6 +9,7 @@ import * as STATE from '../state'
 
 const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 5000
+const POSITION_TIMEOUT_MS = 10000
 
 export default function useLocationProvider () {
   const setLocation = useSetAtom(STATE.locationAtom)
@@ -17,6 +18,24 @@ export default function useLocationProvider () {
   useEffect(() => {
     let cancelled = false
     let retryTimeout = null
+    let positionTimeout = null
+    let resolved = false
+
+    function setLocationReady (coords) {
+      if (cancelled) return
+      resolved = true
+      if (positionTimeout) {
+        clearTimeout(positionTimeout)
+        positionTimeout = null
+      }
+      setLocation({
+        status: 'ready',
+        coords: {
+          latitude: coords.latitude,
+          longitude: coords.longitude
+        }
+      })
+    }
 
     async function start () {
       // 1. Request permission
@@ -26,9 +45,9 @@ export default function useLocationProvider () {
       if (status !== 'granted') {
         setLocation({ status: 'denied', coords: null })
         Alert.alert(
-          'WiSaw shows you near-by photos based on your current location.',
-          'You need to enable Location in Settings and Try Again.',
-          [{ text: 'Open Settings', onPress: () => Linking.openSettings() }]
+          'Location Access Needed',
+          'WiSaw needs your location to show nearby photos.\n\nOn iOS: tap "Open Settings" below.\nOn Mac: open System Settings → Privacy & Security → Location Services and enable WiSaw.',
+          [{ text: 'Open Settings', onPress: () => Linking.openSettings() }, { text: 'OK' }]
         )
         return
       }
@@ -37,13 +56,7 @@ export default function useLocationProvider () {
       try {
         const lastKnown = await Location.getLastKnownPositionAsync()
         if (!cancelled && lastKnown) {
-          setLocation({
-            status: 'ready',
-            coords: {
-              latitude: lastKnown.coords.latitude,
-              longitude: lastKnown.coords.longitude
-            }
-          })
+          setLocationReady(lastKnown.coords)
         }
       } catch (e) {
         // Non-fatal: watcher will provide position
@@ -62,15 +75,7 @@ export default function useLocationProvider () {
               timeInterval: 60000
             },
             (loc) => {
-              if (!cancelled) {
-                setLocation({
-                  status: 'ready',
-                  coords: {
-                    latitude: loc.coords.latitude,
-                    longitude: loc.coords.longitude
-                  }
-                })
-              }
+              setLocationReady(loc.coords)
             }
           )
           if (cancelled) {
@@ -87,6 +92,21 @@ export default function useLocationProvider () {
       }
 
       await startWatcher()
+
+      // 4. Timeout fallback: if still pending after ~10s, force a one-shot position
+      if (!resolved && !cancelled) {
+        positionTimeout = setTimeout(async () => {
+          if (resolved || cancelled) return
+          try {
+            const pos = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Lowest
+            })
+            setLocationReady(pos.coords)
+          } catch (e) {
+            // Fallback failed — atom stays pending, watcher continues
+          }
+        }, POSITION_TIMEOUT_MS)
+      }
     }
 
     start()
@@ -94,6 +114,7 @@ export default function useLocationProvider () {
     return () => {
       cancelled = true
       if (retryTimeout) clearTimeout(retryTimeout)
+      if (positionTimeout) clearTimeout(positionTimeout)
       if (watcherRef.current) {
         watcherRef.current.remove()
         watcherRef.current = null

@@ -262,7 +262,7 @@ export async function getPhotos (params) {
     pageNumber
   } = params
 
-  if (!location || netAvailable === false || (activeSegment === 2 && searchTerm.length < 3)) {
+  if ((!location && activeSegment === 0) || netAvailable === false || (activeSegment === 2 && searchTerm.length < 3)) {
     return {
       photos: [],
       batch,

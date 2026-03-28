@@ -869,7 +869,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
 
-  if (isTandcAccepted && location && photosList?.length > 0) {
+  if (isTandcAccepted && (location || activeSegment !== 0) && photosList?.length > 0) {
     return (
       <PhotosListContext.Provider value={photosListContextValue}>
         <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
@@ -945,7 +945,7 @@ const PhotosList = ({ searchFromUrl }) => {
     )
   }
 
-  if (!location) {
+  if (!location && activeSegment === 0) {
     const isPending = locationState.status === 'pending'
     const isDenied = locationState.status === 'denied'
     return (
