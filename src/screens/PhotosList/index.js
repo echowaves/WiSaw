@@ -948,6 +948,7 @@ const PhotosList = ({ searchFromUrl }) => {
   if (!location && activeSegment === 0) {
     const isPending = locationState.status === 'pending'
     const isDenied = locationState.status === 'denied'
+    const isUnavailable = locationState.status === 'unavailable'
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderHeader()}
@@ -999,6 +1000,14 @@ const PhotosList = ({ searchFromUrl }) => {
               subtitle='WiSaw needs location access to show you photos from your area and let others discover your content.'
               actionText='Enable Location'
               onActionPress={() => Linking.openSettings()}
+            />
+          )}
+          {isUnavailable && (
+            <EmptyStateCard
+              icon='location-off'
+              iconType='MaterialIcons'
+              title='Location Unavailable'
+              subtitle="We couldn't determine your location. Try the Watched or Search tabs to browse photos."
             />
           )}
         </ScrollView>

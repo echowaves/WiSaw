@@ -1,7 +1,7 @@
-## MODIFIED Requirements
+## Requirements
 
 ### Requirement: Location-Based Feed Filtering
-The system SHALL filter the Global feed to show only photos taken near the user's current GPS location, reading coordinates from the global `locationAtom`. After auto-grouping, newly wave-assigned photos SHALL continue to appear in the Global feed as before; wave assignment does not remove photos from the location-based feed. The feed query SHALL NOT accept a wave filtering parameter. The feed SHALL show appropriate UI states while location is pending or denied.
+The system SHALL filter the Global feed to show only photos taken near the user's current GPS location, reading coordinates from the global `locationAtom`. After auto-grouping, newly wave-assigned photos SHALL continue to appear in the Global feed as before; wave assignment does not remove photos from the location-based feed. The feed query SHALL NOT accept a wave filtering parameter. The feed SHALL show appropriate UI states while location is pending or denied. When location is unavailable, the watched photos segment and search segment SHALL still load and function normally — only the geo feed segment SHALL require location coordinates.
 
 #### Scenario: User has location permission granted
 - **WHEN** `locationAtom.status` is `ready` and the feed is fetched
@@ -20,6 +20,16 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 - **THEN** the feed SHALL display a banner: "Location access needed" with a "Settings" link
 - **THEN** the feed content area SHALL show an empty state card with message explaining location is required and a button to open Settings
 - **THEN** the feed SHALL NOT call the geo query
+
+#### Scenario: Watched photos load without location
+- **WHEN** `locationAtom.status` is `pending` or `denied` and `activeSegment` is 1 (watched)
+- **THEN** the watched photos query SHALL execute normally using `uuid`, `pageNumber`, and `batch`
+- **THEN** the user SHALL see their watched photos regardless of location state
+
+#### Scenario: Search loads without location
+- **WHEN** `locationAtom.status` is `pending` or `denied` and `activeSegment` is 2 (search) and search term has 3+ characters
+- **THEN** the search query SHALL execute normally using `searchTerm`, `pageNumber`, and `batch`
+- **THEN** search results SHALL be displayed regardless of location state
 
 #### Scenario: Photos remain in feed after auto-grouping
 - **WHEN** photos are assigned to waves via auto-grouping

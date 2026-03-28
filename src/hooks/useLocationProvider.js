@@ -9,7 +9,7 @@ import * as STATE from '../state'
 
 const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 5000
-const POSITION_TIMEOUT_MS = 10000
+const PERM_TIMEOUT_MS = 5000
 
 export default function useLocationProvider () {
   const setLocation = useSetAtom(STATE.locationAtom)
@@ -18,16 +18,9 @@ export default function useLocationProvider () {
   useEffect(() => {
     let cancelled = false
     let retryTimeout = null
-    let positionTimeout = null
-    let resolved = false
 
     function setLocationReady (coords) {
       if (cancelled) return
-      resolved = true
-      if (positionTimeout) {
-        clearTimeout(positionTimeout)
-        positionTimeout = null
-      }
       setLocation({
         status: 'ready',
         coords: {
@@ -38,11 +31,31 @@ export default function useLocationProvider () {
     }
 
     async function start () {
-      // 1. Request permission
-      const { status } = await Location.requestForegroundPermissionsAsync()
+      // 1. Request permission — with timeout fallback for Mac Catalyst
+      //    requestForegroundPermissionsAsync hangs on Mac Catalyst,
+      //    so fall back to getForegroundPermissionsAsync (check-only)
+      let permStatus = null
+      try {
+        const result = await Promise.race([
+          Location.requestForegroundPermissionsAsync(),
+          new Promise((resolve) => setTimeout(() => resolve(null), PERM_TIMEOUT_MS))
+        ])
+        if (result) {
+          permStatus = result.status
+        } else {
+          // requestForeground hung (Mac Catalyst) — try check-only version
+          const checkResult = await Promise.race([
+            Location.getForegroundPermissionsAsync(),
+            new Promise((resolve) => setTimeout(() => resolve(null), PERM_TIMEOUT_MS))
+          ])
+          permStatus = checkResult ? checkResult.status : 'granted'
+        }
+      } catch (e) {
+        permStatus = 'denied'
+      }
       if (cancelled) return
 
-      if (status !== 'granted') {
+      if (permStatus !== 'granted') {
         setLocation({ status: 'denied', coords: null })
         Alert.alert(
           'Location Access Needed',
@@ -92,21 +105,6 @@ export default function useLocationProvider () {
       }
 
       await startWatcher()
-
-      // 4. Timeout fallback: if still pending after ~10s, force a one-shot position
-      if (!resolved && !cancelled) {
-        positionTimeout = setTimeout(async () => {
-          if (resolved || cancelled) return
-          try {
-            const pos = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.Lowest
-            })
-            setLocationReady(pos.coords)
-          } catch (e) {
-            // Fallback failed — atom stays pending, watcher continues
-          }
-        }, POSITION_TIMEOUT_MS)
-      }
     }
 
     start()
@@ -114,7 +112,6 @@ export default function useLocationProvider () {
     return () => {
       cancelled = true
       if (retryTimeout) clearTimeout(retryTimeout)
-      if (positionTimeout) clearTimeout(positionTimeout)
       if (watcherRef.current) {
         watcherRef.current.remove()
         watcherRef.current = null

@@ -1,17 +1,4 @@
-### Requirement: Location Atom
-The system SHALL provide a global Jotai atom `locationAtom` in `src/state.js` that stores the device's location state as an object with `status` and `coords` properties.
-
-#### Scenario: Initial atom state
-- **WHEN** the app starts
-- **THEN** the `locationAtom` SHALL have value `{ status: 'pending', coords: null }`
-
-#### Scenario: Location obtained
-- **WHEN** valid GPS coordinates are received (via last-known position or watcher)
-- **THEN** the atom SHALL be set to `{ status: 'ready', coords: { latitude, longitude } }`
-
-#### Scenario: Permission denied
-- **WHEN** the user denies foreground location permission
-- **THEN** the atom SHALL be set to `{ status: 'denied', coords: null }`
+## MODIFIED Requirements
 
 ### Requirement: Location Provider Hook
 The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationProvider.js` that manages location permission, fast-seed, watcher lifecycle, and atom updates. It SHALL be called once from the root `_layout.tsx`. The permission request SHALL handle Mac Catalyst where `requestForegroundPermissionsAsync` hangs by falling back to `getForegroundPermissionsAsync` with a timeout.
