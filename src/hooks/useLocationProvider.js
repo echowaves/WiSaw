@@ -1,3 +1,4 @@
+/* global __DEV__ */
 import { useEffect, useRef } from 'react'
 
 import * as Linking from 'expo-linking'
@@ -23,12 +24,16 @@ export default function useLocationProvider () {
     let retryTimeout = null
     let refineTimer = null
 
-    function setLocationReady (coords, accuracy) {
+    function setLocationReady (coords, accuracy, phase) {
       if (cancelled) return
       // Only accept if accuracy is equal or better (lower = better)
       const acc = typeof accuracy === 'number' && !Number.isNaN(accuracy) ? accuracy : Infinity
-      if (acc > storedAccuracyRef.current) return
+      if (acc > storedAccuracyRef.current) {
+        if (__DEV__) console.log(`[Location] ${phase} fix REJECTED: ${acc}m > gate ${storedAccuracyRef.current}m`)
+        return
+      }
       storedAccuracyRef.current = acc
+      if (__DEV__) console.log(`[Location] ${phase} fix ACCEPTED: ${acc}m @ (${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)})`)
       setLocation({
         status: 'ready',
         coords: {
@@ -53,9 +58,10 @@ export default function useLocationProvider () {
               timeInterval: 60000
             },
             (loc) => {
-              setLocationReady(loc.coords, loc.coords.accuracy)
+              setLocationReady(loc.coords, loc.coords.accuracy, 'Phase3')
             }
           )
+          if (__DEV__) console.log('[Location] Phase 3 watcher started')
           if (cancelled) {
             sub.remove()
           } else {
@@ -77,6 +83,7 @@ export default function useLocationProvider () {
 
       // Reset accuracy gate so fresh GPS fixes always replace stale cached seed
       storedAccuracyRef.current = Infinity
+      if (__DEV__) console.log('[Location] Phase 2 started, accuracy gate reset')
 
       function transitionToPhase3 () {
         if (cancelled) return
@@ -89,6 +96,9 @@ export default function useLocationProvider () {
           watcherRef.current.remove()
           watcherRef.current = null
         }
+        // Reset accuracy gate so Balanced-tier fixes are accepted after GPS refinement
+        storedAccuracyRef.current = Infinity
+        if (__DEV__) console.log('[Location] Phase 2→3 transition, accuracy gate reset')
         startPhase3()
       }
 
@@ -103,7 +113,7 @@ export default function useLocationProvider () {
             timeInterval: 1000
           },
           (loc) => {
-            setLocationReady(loc.coords, loc.coords.accuracy)
+            setLocationReady(loc.coords, loc.coords.accuracy, 'Phase2')
             // Exit Phase 2 early if accuracy is good enough
             if (loc.coords.accuracy != null && loc.coords.accuracy <= GOOD_ENOUGH_ACCURACY) {
               transitionToPhase3()
@@ -166,6 +176,7 @@ export default function useLocationProvider () {
         if (!cancelled && lastKnown) {
           const acc = lastKnown.coords.accuracy
           storedAccuracyRef.current = typeof acc === 'number' && !Number.isNaN(acc) ? acc : Infinity
+          if (__DEV__) console.log(`[Location] Phase 1 seed: ${storedAccuracyRef.current}m @ (${lastKnown.coords.latitude.toFixed(5)}, ${lastKnown.coords.longitude.toFixed(5)})`)
           setLocation({
             status: 'ready',
             coords: {
