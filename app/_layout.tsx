@@ -7,10 +7,11 @@ import {
   Ionicons,
   MaterialIcons
 } from '@expo/vector-icons'
+import NetInfo from '@react-native-community/netinfo'
 import { useFonts } from 'expo-font'
 import * as Linking from 'expo-linking'
 import { router, Stack, useRootNavigationState } from 'expo-router'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useRef } from 'react'
 import { StatusBar } from 'react-native'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
@@ -44,6 +45,17 @@ export default function RootLayout () {
 
   // Initialize global location provider (permission, watcher, atom)
   useLocationProvider()
+
+  // Global network state — single listener for entire app
+  const setNetAvailable = useSetAtom(STATE.netAvailable)
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state) {
+        setNetAvailable(state.isConnected && state.isInternetReachable !== false)
+      }
+    })
+    return () => unsubscribe()
+  }, [setNetAvailable])
 
   // Load vector icon fonts
   const [fontsLoaded, fontError] = useFonts({

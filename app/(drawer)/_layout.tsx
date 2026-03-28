@@ -206,7 +206,15 @@ function CustomDrawerContent (props) {
 
 export default function DrawerLayout () {
   const [isDark] = useAtom(STATE.isDarkMode)
+  const [netAvailable] = useAtom(STATE.netAvailable)
   const theme = getTheme(isDark)
+
+  const offlineScreenListeners = netAvailable
+    ? undefined
+    : { drawerItemPress: (e) => e.preventDefault() }
+  const offlineItemStyle = netAvailable
+    ? undefined
+    : { opacity: 0.4 }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -259,8 +267,10 @@ export default function DrawerLayout () {
             ),
             drawerLabel: 'Identity',
             title: 'Identity',
-            headerShown: false
+            headerShown: false,
+            drawerItemStyle: offlineItemStyle
           }}
+          listeners={offlineScreenListeners}
         />
         <Drawer.Screen
           name='friends'
@@ -270,8 +280,10 @@ export default function DrawerLayout () {
             ),
             drawerLabel: 'Friends',
             title: 'Friends',
-            headerShown: false
+            headerShown: false,
+            drawerItemStyle: offlineItemStyle
           }}
+          listeners={offlineScreenListeners}
         />
         <Drawer.Screen
           name='waves'
@@ -281,8 +293,10 @@ export default function DrawerLayout () {
             ),
             drawerLabel: 'Waves',
             title: 'Waves',
-            headerShown: false
+            headerShown: false,
+            drawerItemStyle: offlineItemStyle
           }}
+          listeners={offlineScreenListeners}
         />
         <Drawer.Screen
           name='feedback'
@@ -292,8 +306,10 @@ export default function DrawerLayout () {
             ),
             drawerLabel: 'Feedback',
             title: 'Feedback',
-            headerShown: false
+            headerShown: false,
+            drawerItemStyle: offlineItemStyle
           }}
+          listeners={offlineScreenListeners}
         />
 
       </Drawer>

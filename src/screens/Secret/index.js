@@ -24,6 +24,7 @@ import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 
 import Button from '../../components/ui/Button'
+import EmptyStateCard from '../../components/EmptyStateCard'
 import * as reducer from './reducer'
 
 // Import extracted components
@@ -42,6 +43,7 @@ const SecretScreen = () => {
   const [uuid] = useAtom(STATE.uuid)
   const [, setNickName] = useAtom(STATE.nickName)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+  const [netAvailable] = useAtom(STATE.netAvailable)
 
   const toastTopOffset = useToastTopOffset()
 
@@ -206,6 +208,21 @@ const SecretScreen = () => {
       text2: 'enter new Secret',
       topOffset: toastTopOffset
     })
+  }
+
+  if (!netAvailable) {
+    return (
+      <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Identity management requires an internet connection. Please check your connection and try again.'
+          />
+        </View>
+      </SafeAreaView>
+    )
   }
 
   return (

@@ -10,6 +10,7 @@ import Toast from 'react-native-toast-message'
 
 import PropTypes from 'prop-types'
 
+import EmptyStateCard from '../../components/EmptyStateCard'
 import NamePicker from '../../components/NamePicker'
 
 import * as STATE from '../../state'
@@ -88,6 +89,21 @@ const ConfirmFriendship = ({ route }) => {
         topOffset: 60
       })
     }
+  }
+
+  const [netAvailable] = useAtom(STATE.netAvailable)
+
+  if (!netAvailable) {
+    return (
+      <SafeAreaView edges={['top']} style={[styles.container, { justifyContent: 'center', paddingHorizontal: 20 }]}>
+        <EmptyStateCard
+          icon='wifi-off'
+          iconType='MaterialIcons'
+          title='No Internet Connection'
+          subtitle='Confirming a friendship requires an internet connection. Please check your connection and try again.'
+        />
+      </SafeAreaView>
+    )
   }
 
   return (

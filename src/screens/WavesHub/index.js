@@ -409,6 +409,21 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
     )
   }
 
+  const [netAvailable] = useAtom(STATE.netAvailable)
+
+  if (!netAvailable) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND, justifyContent: 'center', paddingHorizontal: 20 }]}>
+        <EmptyStateCard
+          icon='wifi-off'
+          iconType='MaterialIcons'
+          title='No Internet Connection'
+          subtitle='Waves require an internet connection. Please check your connection and try again.'
+        />
+      </View>
+    )
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
       <InteractionHintBanner hasContent={waves.length > 0} />

@@ -21,6 +21,7 @@ import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import EmptyStateCard from '../../components/EmptyStateCard'
 import * as friendsHelper from '../FriendsList/friends_helper'
 import ChatPhoto from './ChatPhoto'
 
@@ -45,6 +46,7 @@ const Chat = ({ route }) => {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+  const [netAvailable] = useAtom(STATE.netAvailable)
 
   const toastTopOffset = useToastTopOffset()
   const theme = getTheme(isDarkMode)
@@ -137,6 +139,21 @@ const Chat = ({ route }) => {
     })
 
   const styles = createStyles(theme)
+
+  if (!netAvailable) {
+    return (
+      <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Chat requires an internet connection. Please check your connection and try again.'
+          />
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   return (
     <SafeAreaView style={[styles.container, safeAreaViewStyle]}>

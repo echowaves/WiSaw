@@ -17,8 +17,9 @@ import Photo from '../../components/Photo'
 import { emitPhotoSearch } from '../../events/photoSearchBus'
 
 import * as CONST from '../../consts'
-import { isDarkMode } from '../../state'
+import { isDarkMode, netAvailable as netAvailableAtom } from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
+import EmptyStateCard from '../../components/EmptyStateCard'
 
 const createStyles = (theme) =>
   StyleSheet.create({
@@ -41,6 +42,7 @@ const createStyles = (theme) =>
 
 const PhotosDetailsShared = ({ route }) => {
   const [isDark] = useAtom(isDarkMode)
+  const [netAvailable] = useAtom(netAvailableAtom)
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
 
@@ -106,8 +108,26 @@ const PhotosDetailsShared = ({ route }) => {
   useEffect(() => {
     // Clear previous photo data when refreshing
     setItem(null)
-    loadPhoto(photoId)
-  }, [photoId, refreshKey]) // Added refreshKey to dependencies to refresh comments when returning from add comment
+    if (netAvailable) {
+      loadPhoto(photoId)
+    }
+  }, [photoId, refreshKey, netAvailable])
+
+  if (!netAvailable) {
+    return (
+      <View style={styles.container}>
+        {renderCustomHeader()}
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Viewing shared photos requires an internet connection. Please check your connection and try again.'
+          />
+        </View>
+      </View>
+    )
+  }
 
   if (item) {
     return (

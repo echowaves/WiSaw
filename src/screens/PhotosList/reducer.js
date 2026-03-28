@@ -147,7 +147,8 @@ export async function getTancAccepted () {
 
 // this function return the time of the very first photo stored in the backend,
 // so that we can tell when to stop requesting new photos while paging through the results
-export async function getZeroMoment () {
+export async function getZeroMoment ({ netAvailable } = {}) {
+  if (netAvailable === false) return 0
   try {
     const { zeroMoment } = (
       await CONST.gqlClient.query({

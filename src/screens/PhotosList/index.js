@@ -63,7 +63,6 @@ import { subscribeToUploadComplete } from '../../events/uploadBus'
 import { subscribeToPhotoDeletion } from '../../events/photoDeletionBus'
 
 import useCameraCapture from './hooks/useCameraCapture'
-import useNetworkStatus from './hooks/useNetworkStatus'
 import usePendingAnimation from './hooks/usePendingAnimation'
 import usePhotoExpansion from './hooks/usePhotoExpansion'
 import haversine from '../../utils/haversine'
@@ -177,7 +176,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const toastTopOffset = useToastTopOffset()
 
   // --- Extracted hooks ---
-  const { netAvailable } = useNetworkStatus()
+  const [netAvailable] = useAtom(STATE.netAvailable)
 
   const [locationState] = useAtom(STATE.locationAtom)
   const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
@@ -700,7 +699,7 @@ const PhotosList = ({ searchFromUrl }) => {
       setIsTandcAccepted(await reducer.getTancAccepted())
     })()
     ;(async () => {
-      setZeroMoment(await reducer.getZeroMoment())
+      setZeroMoment(await reducer.getZeroMoment({ netAvailable }))
     })()
   }, [])
 

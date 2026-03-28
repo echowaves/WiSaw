@@ -22,6 +22,7 @@ import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
 
 import AppHeader from '../../components/AppHeader'
+import EmptyStateCard from '../../components/EmptyStateCard'
 import * as CONST from '../../consts'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as STATE from '../../state'
@@ -33,6 +34,7 @@ const FeedbackScreen = () => {
   const navigation = useNavigation()
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+  const [netAvailable] = useAtom(STATE.netAvailable)
   const toastTopOffset = useToastTopOffset()
 
   const theme = getTheme(isDarkMode)
@@ -390,6 +392,22 @@ const FeedbackScreen = () => {
       flex: 1
     }
   })
+
+  if (!netAvailable) {
+    return (
+      <>
+        <AppHeader title='Feedback' onBack={() => router.back()} />
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20, backgroundColor: theme.BACKGROUND }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Feedback submission requires an internet connection. Please check your connection and try again.'
+          />
+        </View>
+      </>
+    )
+  }
 
   return (
     <>

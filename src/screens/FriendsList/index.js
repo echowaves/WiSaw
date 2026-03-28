@@ -28,6 +28,7 @@ const FriendsList = () => {
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
+  const [netAvailable] = useAtom(STATE.netAvailable)
 
   const theme = getTheme(isDarkMode)
 
@@ -947,6 +948,19 @@ const FriendsList = () => {
           actionText='Add a Friend'
           onActionPress={handleAddFriend}
           iconColor={theme.TEXT_PRIMARY}
+        />
+      </View>
+    )
+  }
+
+  if (!netAvailable) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND, justifyContent: 'center', paddingHorizontal: 20 }}>
+        <EmptyStateCard
+          icon='wifi-off'
+          iconType='MaterialIcons'
+          title='No Internet Connection'
+          subtitle='Friends list requires an internet connection. Please check your connection and try again.'
         />
       </View>
     )

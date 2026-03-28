@@ -1,6 +1,5 @@
-import React, { createContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useMemo } from 'react'
 
-import NetInfo from '@react-native-community/netinfo'
 import { useAtom } from 'jotai'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -18,18 +17,9 @@ const UploadContext = createContext({
 
 export function UploadProvider ({ children }) {
   const [uuid, setUuid] = useAtom(STATE.uuid)
-  const [netAvailable, setNetAvailable] = useState(true)
+  const [netAvailable] = useAtom(STATE.netAvailable)
   const insets = useSafeAreaInsets()
   const topOffset = insets.top + 10
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      if (state) {
-        setNetAvailable(state.isConnected && state.isInternetReachable !== false)
-      }
-    })
-    return () => unsubscribe()
-  }, [])
 
   const {
     pendingPhotos,

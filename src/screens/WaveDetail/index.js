@@ -18,7 +18,6 @@ import * as Haptics from 'expo-haptics'
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
 import * as MediaLibrary from 'expo-media-library'
-import NetInfo from '@react-native-community/netinfo'
 import * as Crypto from 'expo-crypto'
 
 import * as STATE from '../../state'
@@ -87,7 +86,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const [pageNumber, setPageNumber] = useState(0)
   const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
-  const [netAvailable, setNetAvailable] = useState(true)
+  const [netAvailable] = useAtom(STATE.netAvailable)
   const [isCameraOpening, setIsCameraOpening] = useState(false)
 
   // Edit modal
@@ -181,14 +180,6 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const handlePhotoLongPress = useCallback((photo) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     quickActionsRef.current?.open(photo)
-  }, [])
-
-  // Network listener
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setNetAvailable(state.isConnected && state.isInternetReachable !== false)
-    })
-    return unsubscribe
   }, [])
 
   // Pending photos animation
@@ -462,6 +453,19 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   }, [])
 
   const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
+
+  if (!netAvailable) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND, justifyContent: 'center', paddingHorizontal: 20 }]}>
+        <EmptyStateCard
+          icon='wifi-off'
+          iconType='MaterialIcons'
+          title='No Internet Connection'
+          subtitle='Wave details require an internet connection. Please check your connection and try again.'
+        />
+      </View>
+    )
+  }
 
   return (
     <PhotosListContext.Provider value={photosListContextValue}>
