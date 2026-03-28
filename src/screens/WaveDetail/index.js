@@ -274,6 +274,31 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     setMenuVisible(true)
   }
 
+  const handleDeleteWave = () => {
+    Alert.alert(
+      'Delete Wave',
+      'Are you sure? This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await reducer.deleteWave({ waveUuid, uuid })
+              emitAutoGroupDone()
+              Toast.show({ type: 'success', text1: 'Wave deleted' })
+              router.back()
+            } catch (error) {
+              console.error(error)
+              Toast.show({ type: 'error', text1: 'Error deleting wave', text2: error.message })
+            }
+          }
+        }
+      ]
+    )
+  }
+
   const headerMenuItems = [
     {
       key: 'edit-wave',
@@ -304,31 +329,6 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   React.useImperativeHandle(ref, () => ({
     showHeaderMenu
   }), [waveName])
-
-  const handleDeleteWave = () => {
-    Alert.alert(
-      'Delete Wave',
-      'Are you sure? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await reducer.deleteWave({ waveUuid, uuid })
-              emitAutoGroupDone()
-              Toast.show({ type: 'success', text1: 'Wave deleted' })
-              router.back()
-            } catch (error) {
-              console.error(error)
-              Toast.show({ type: 'error', text1: 'Error deleting wave', text2: error.message })
-            }
-          }
-        }
-      ]
-    )
-  }
 
   const handleSaveEdit = async () => {
     if (!editName.trim()) {
