@@ -840,6 +840,12 @@ const PhotosList = ({ searchFromUrl }) => {
     />
   )
 
+  const removePhoto = useCallback((photoId) => {
+    setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+  }, [setPhotosList])
+
+  const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
+
   if (!netAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
@@ -884,12 +890,6 @@ const PhotosList = ({ searchFromUrl }) => {
       </View>
     )
   }
-
-  const removePhoto = useCallback((photoId) => {
-    setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
-  }, [setPhotosList])
-
-  const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
 
   if (isTandcAccepted && (location || activeSegment !== 0) && photosList?.length > 0) {
     return (
