@@ -11,7 +11,7 @@ import * as STATE from '../state'
 const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 5000
 const PERM_TIMEOUT_MS = 5000
-const REFINE_TIMEOUT_MS = 30000
+const REFINE_TIMEOUT_MS = 60000
 const GOOD_ENOUGH_ACCURACY = 50 // meters
 
 export default function useLocationProvider () {
@@ -83,10 +83,13 @@ export default function useLocationProvider () {
 
       // Reset accuracy gate so fresh GPS fixes always replace stale cached seed
       storedAccuracyRef.current = Infinity
+      let phase2Transitioned = false
       if (__DEV__) console.log('[Location] Phase 2 started, accuracy gate reset')
 
       function transitionToPhase3 () {
         if (cancelled) return
+        if (phase2Transitioned) return
+        phase2Transitioned = true
         if (refineTimer) {
           clearTimeout(refineTimer)
           refineTimer = null
