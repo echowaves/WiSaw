@@ -4,7 +4,6 @@ import {
   DrawerItemList
 } from '@react-navigation/drawer'
 import { Drawer } from 'expo-router/drawer'
-import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -74,43 +73,7 @@ const createStyles = (isDark) => {
       color: CONST.MAIN_COLOR,
       marginBottom: 4
     },
-    identityBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.CARD_BACKGROUND,
-      marginHorizontal: 16,
-      marginTop: 8,
-      marginBottom: 4,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: theme.BORDER_LIGHT
-    },
-    identityIconContainer: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: 'rgba(234, 94, 61, 0.1)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: 12
-    },
-    identityNickName: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: theme.TEXT_PRIMARY
-    },
-    identityStatus: {
-      fontSize: 12,
-      color: theme.TEXT_SECONDARY,
-      marginTop: 2
-    },
-    identitySetupText: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: CONST.MAIN_COLOR
-    }
+
   })
 }
 
@@ -120,7 +83,6 @@ function CustomDrawerContent (props) {
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
   )
-  const [nickName] = useAtom(STATE.nickName)
   const styles = createStyles(isDark)
   const theme = getTheme(isDark)
 
@@ -176,35 +138,6 @@ function CustomDrawerContent (props) {
   return (
     <View style={{ flex: 1, backgroundColor: theme.BACKGROUND }}>
       <DrawerContentScrollView {...props}>
-        {/* Identity Badge */}
-        {nickName !== ''
-          ? (
-            <View style={styles.identityBadge}>
-              <View style={styles.identityIconContainer}>
-                <FontAwesome name='user-secret' size={18} color={CONST.MAIN_COLOR} />
-              </View>
-              <View>
-                <Text style={styles.identityNickName}>{nickName}</Text>
-                <Text style={styles.identityStatus}>Identity active</Text>
-              </View>
-            </View>
-            )
-          : (
-            <TouchableOpacity
-              style={styles.identityBadge}
-              onPress={() => {
-                props.navigation.closeDrawer()
-                router.push('/(drawer)/identity')
-              }}
-              activeOpacity={0.7}
-            >
-              <View style={styles.identityIconContainer}>
-                <FontAwesome5 name='user-plus' size={16} color={CONST.MAIN_COLOR} />
-              </View>
-              <Text style={styles.identitySetupText}>Set up identity</Text>
-            </TouchableOpacity>
-            )}
-
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
 
@@ -272,6 +205,51 @@ function CustomDrawerContent (props) {
   )
 }
 
+// Inline components for identity drawer item — read nickName atom for dynamic icon/label
+function IdentityDrawerIcon ({ color, size, focused }) {
+  const [nickName] = useAtom(STATE.nickName)
+  const hasIdentity = nickName !== ''
+  const iconColor = hasIdentity && !focused ? CONST.MAIN_COLOR : color
+
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <FontAwesome name='user-secret' size={22} color={iconColor} />
+      {!hasIdentity && (
+        <View style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: '#FF3B30'
+        }}
+        />
+      )}
+    </View>
+  )
+}
+
+function IdentityDrawerLabel ({ color, focused }) {
+  const [nickName] = useAtom(STATE.nickName)
+  const hasIdentity = nickName !== ''
+
+  return (
+    <Text
+      style={{
+        color,
+        fontSize: 16,
+        fontWeight: '600',
+        marginLeft: -10,
+        textTransform: 'capitalize'
+      }}
+      numberOfLines={1}
+    >
+      {hasIdentity ? nickName : 'Set Up Identity'}
+    </Text>
+  )
+}
+
 export default function DrawerLayout () {
   const [isDark] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
@@ -330,10 +308,8 @@ export default function DrawerLayout () {
         <Drawer.Screen
           name='identity'
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesome name='user-secret' size={22} color={color} />
-            ),
-            drawerLabel: 'Identity',
+            drawerIcon: (props) => <IdentityDrawerIcon {...props} />,
+            drawerLabel: (props) => <IdentityDrawerLabel {...props} />,
             title: 'Identity',
             headerShown: false,
             drawerItemStyle: offlineItemStyle
