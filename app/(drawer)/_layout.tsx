@@ -4,6 +4,7 @@ import {
   DrawerItemList
 } from '@react-navigation/drawer'
 import { Drawer } from 'expo-router/drawer'
+import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -72,6 +73,43 @@ const createStyles = (isDark) => {
       fontWeight: '600',
       color: CONST.MAIN_COLOR,
       marginBottom: 4
+    },
+    identityBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.CARD_BACKGROUND,
+      marginHorizontal: 16,
+      marginTop: 8,
+      marginBottom: 4,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.BORDER_LIGHT
+    },
+    identityIconContainer: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: 'rgba(234, 94, 61, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12
+    },
+    identityNickName: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: theme.TEXT_PRIMARY
+    },
+    identityStatus: {
+      fontSize: 12,
+      color: theme.TEXT_SECONDARY,
+      marginTop: 2
+    },
+    identitySetupText: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: CONST.MAIN_COLOR
     }
   })
 }
@@ -82,6 +120,7 @@ function CustomDrawerContent (props) {
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
   )
+  const [nickName] = useAtom(STATE.nickName)
   const styles = createStyles(isDark)
   const theme = getTheme(isDark)
 
@@ -137,6 +176,35 @@ function CustomDrawerContent (props) {
   return (
     <View style={{ flex: 1, backgroundColor: theme.BACKGROUND }}>
       <DrawerContentScrollView {...props}>
+        {/* Identity Badge */}
+        {nickName !== ''
+          ? (
+            <View style={styles.identityBadge}>
+              <View style={styles.identityIconContainer}>
+                <FontAwesome name='user-secret' size={18} color={CONST.MAIN_COLOR} />
+              </View>
+              <View>
+                <Text style={styles.identityNickName}>{nickName}</Text>
+                <Text style={styles.identityStatus}>Identity active</Text>
+              </View>
+            </View>
+            )
+          : (
+            <TouchableOpacity
+              style={styles.identityBadge}
+              onPress={() => {
+                props.navigation.closeDrawer()
+                router.push('/(drawer)/identity')
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={styles.identityIconContainer}>
+                <FontAwesome5 name='user-plus' size={16} color={CONST.MAIN_COLOR} />
+              </View>
+              <Text style={styles.identitySetupText}>Set up identity</Text>
+            </TouchableOpacity>
+            )}
+
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
 

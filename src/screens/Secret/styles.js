@@ -15,6 +15,43 @@ export const getStyles = (theme) =>
       paddingTop: 30,
       paddingBottom: 100
     },
+    creationHeader: {
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 24,
+      padding: 32,
+      alignItems: 'center',
+      marginBottom: 24,
+      shadowColor: theme.CARD_SHADOW,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 12,
+      elevation: 8,
+      borderWidth: 1,
+      borderColor: theme.BORDER_LIGHT
+    },
+    creationIconContainer: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: 'rgba(234, 94, 61, 0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 20
+    },
+    creationTitle: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: theme.TEXT_PRIMARY,
+      textAlign: 'center',
+      marginBottom: 12,
+      lineHeight: 28
+    },
+    creationSubtitle: {
+      fontSize: 16,
+      color: theme.TEXT_SECONDARY,
+      textAlign: 'center',
+      lineHeight: 22
+    },
     formCard: {
       backgroundColor: theme.CARD_BACKGROUND,
       borderRadius: 16,
@@ -30,6 +67,9 @@ export const getStyles = (theme) =>
       elevation: 4,
       borderWidth: 1,
       borderColor: theme.BORDER_LIGHT
+    },
+    actionsContainer: {
+      marginBottom: 24
     },
     submitButton: {
       backgroundColor: CONST.MAIN_COLOR,
