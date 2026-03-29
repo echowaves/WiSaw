@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { AntDesign, FontAwesome } from '@expo/vector-icons'
 
 import * as CONST from '../../../consts'
+import IdentityHeaderIcon from '../../../components/IdentityHeaderIcon'
 import LinearProgress from '../../../components/ui/LinearProgress'
 import WaveHeaderIcon from '../../../components/WaveHeaderIcon'
 
@@ -45,7 +46,7 @@ const PhotosListHeader = ({ theme, activeSegment, updateIndex, loading, segmentW
           paddingHorizontal: 16
         }}
       >
-        {/* Left: Empty space */}
+        {/* Left: Identity icon */}
         <View
           style={{
             position: 'absolute',
@@ -53,7 +54,9 @@ const PhotosListHeader = ({ theme, activeSegment, updateIndex, loading, segmentW
             width: 40,
             height: 40
           }}
-        />
+        >
+          <IdentityHeaderIcon />
+        </View>
 
         {/* Right: Wave icon */}
         <View
