@@ -1,7 +1,7 @@
 # Quick Actions Modal Specification
 
 ## Purpose
-The quick-actions modal provides instant access to all 5 photo actions (Report, Delete, Star, Wave, Share) from the feed via long-press, without needing to expand the photo. It shows a progressively-loaded photo preview and a loading state while fetching photo details.
+The quick-actions modal provides instant access to all 5 photo actions (Report, Delete, Bookmark, Wave, Share) from the feed via long-press, without needing to expand the photo. It shows a progressively-loaded photo preview and a loading state while fetching photo details.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ The system SHALL display a modal overlay when the user long-presses a photo thum
 #### Scenario: Photo details load successfully
 - **WHEN** the `getPhotoDetails` query completes while the modal is open
 - **THEN** the loading spinner is hidden
-- **THEN** all 5 action buttons (Report, Delete, Star, Wave, Share) appear in their enabled state based on the photo's data
+- **THEN** all 5 action buttons (Report, Delete, Bookmark, Wave, Share) appear as icon-only buttons (no text labels) in their enabled state based on the photo's data
 
 #### Scenario: User dismisses the modal
 - **WHEN** the user taps outside the modal content area
@@ -79,9 +79,10 @@ The system SHALL keep the modal open and update the button state when the user r
 - **THEN** the modal stays open
 - **THEN** the Report button updates to disabled/banned state
 
-#### Scenario: User tries to report a starred photo
-- **WHEN** the user taps Report on a photo that is starred
-- **THEN** a toast shows "Unable to Report Starred photo"
+#### Scenario: User tries to report a bookmarked photo
+- **WHEN** the user taps Report on a photo that is bookmarked
+- **THEN** a toast shows "Can't report bookmarked photo"
+- **THEN** a toast shows "Remove bookmark first"
 - **THEN** the modal stays open
 
 #### Scenario: User tries to report an already-reported photo
@@ -89,20 +90,31 @@ The system SHALL keep the modal open and update the button state when the user r
 - **THEN** a toast shows "Looks like you already Reported this Photo"
 - **THEN** the modal stays open
 
-### Requirement: Quick Actions Modal — Star Action
-The system SHALL keep the modal open and toggle the star state when the user stars or un-stars a photo via the quick-actions modal.
+### Requirement: Quick Actions Modal — Bookmark Action
+The system SHALL keep the modal open and toggle the bookmark state when the user bookmarks or removes a bookmark from a photo via the quick-actions modal. The Bookmark button SHALL display as icon-only (`Ionicons bookmark`/`bookmark-outline`) with no text label, using `#FFD700` gold color when bookmarked.
 
-#### Scenario: User stars a photo from the modal
-- **WHEN** the user taps Star in the quick-actions modal
+#### Scenario: User bookmarks a photo from the modal
+- **WHEN** the user taps the Bookmark icon (outline) in the quick-actions modal
 - **THEN** the `watchPhoto` mutation is called
 - **THEN** the modal stays open
-- **THEN** the Star button updates to show "Starred" with gold color
+- **THEN** the Bookmark icon updates to filled bookmark with gold color
 
-#### Scenario: User un-stars a photo from the modal
-- **WHEN** the user taps Starred in the quick-actions modal
+#### Scenario: User removes bookmark from a photo in the modal
+- **WHEN** the user taps the filled Bookmark icon in the quick-actions modal
 - **THEN** the `unwatchPhoto` mutation is called
 - **THEN** the modal stays open
-- **THEN** the Star button updates to show "Star" with default color
+- **THEN** the Bookmark icon updates to outline bookmark with default color
+
+### Requirement: Quick Actions Modal — Action Button Labels
+All action buttons (Report, Delete, Bookmark, Share) SHALL display as icon-only with no text labels. The Wave button SHALL retain its text label showing the wave name or "Add to Wave".
+
+#### Scenario: Action buttons are icon-only
+- **WHEN** the quick-actions modal displays action buttons after photo details load
+- **THEN** Report SHALL show only the ban icon with no "Report" text
+- **THEN** Delete SHALL show only the trash icon with no "Delete" text
+- **THEN** Bookmark SHALL show only the bookmark icon with no "Bookmark" text
+- **THEN** Share SHALL show only the share icon with no "Share" text
+- **THEN** Wave SHALL show the water icon WITH its text label (wave name or "Add to Wave")
 
 ### Requirement: Quick Actions Modal — Wave Action
 The system SHALL open the WaveSelectorModal on top of the quick-actions modal when the user taps the Wave button. When the user removes a photo from its wave or moves a photo to a different wave, the system SHALL close the QuickActionsModal immediately and notify the parent via callback.

@@ -537,6 +537,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
                 FOOTER_HEIGHT={FOOTER_HEIGHT}
                 justCollapsedId={justCollapsedId}
                 onPhotoLongPress={handlePhotoLongPress}
+                theme={theme}
               />
             </>
             )}

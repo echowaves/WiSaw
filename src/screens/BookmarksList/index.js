@@ -198,6 +198,7 @@ const BookmarksList = () => {
               FOOTER_HEIGHT={FOOTER_HEIGHT}
               justCollapsedId={justCollapsedId}
               onPhotoLongPress={handlePhotoLongPress}
+              theme={theme}
             />
           </View>
           <SearchFab
