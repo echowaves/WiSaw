@@ -146,7 +146,7 @@ export async function getZeroMoment ({ netAvailable } = {}) {
   return 0
 }
 
-async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, searchTerm }) {
+export async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, searchTerm }) {
   const { latitude, longitude } = location.coords
   const whenToStop = moment(zeroMoment || 0)
   try {
@@ -178,7 +178,7 @@ async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, sear
   }
 }
 
-async function requestWatchedPhotos ({ uuid, pageNumber, batch, searchTerm }) {
+export async function requestWatchedPhotos ({ uuid, pageNumber, batch, searchTerm }) {
   try {
     const variables = {
       uuid,

@@ -1,22 +1,14 @@
 import React from 'react'
 
-import { Text, TouchableOpacity, View } from 'react-native'
+import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-import { AntDesign, FontAwesome } from '@expo/vector-icons'
 
 import * as CONST from '../../../consts'
 import IdentityHeaderIcon from '../../../components/IdentityHeaderIcon'
 import LinearProgress from '../../../components/ui/LinearProgress'
 import WaveHeaderIcon from '../../../components/WaveHeaderIcon'
 
-const SEGMENT_TITLES = ['Global', 'Starred']
-const SEGMENT_ICONS = [
-  { Component: FontAwesome, name: 'globe' },
-  { Component: AntDesign, name: 'star' }
-]
-
-const PhotosListHeader = ({ theme, activeSegment, updateIndex, loading, segmentWidth, styles }) => {
+const PhotosListHeader = ({ theme, loading }) => {
   const headerHeight = 60
 
   return (
@@ -67,53 +59,6 @@ const PhotosListHeader = ({ theme, activeSegment, updateIndex, loading, segmentW
           }}
         >
           <WaveHeaderIcon />
-        </View>
-
-        {/* Center: Three segment control */}
-        <View style={styles.headerContainer}>
-          <View style={[styles.customSegmentedControl, { padding: 4 }]}>
-            {SEGMENT_ICONS.map(({ Component, name }, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.segmentButton,
-                  activeSegment === index && styles.activeSegmentButton,
-                  {
-                    paddingVertical: 8,
-                    paddingHorizontal: 20,
-                    width: segmentWidth
-                  }
-                ]}
-              >
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    height: '100%'
-                  }}
-                  onPress={() => updateIndex(index)}
-                >
-                  <Component
-                    name={name}
-                    size={20}
-                    color={activeSegment === index ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY}
-                  />
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      styles.segmentText,
-                      {
-                        color: activeSegment === index ? theme.TEXT_PRIMARY : theme.TEXT_SECONDARY
-                      }
-                    ]}
-                  >
-                    {SEGMENT_TITLES[index]}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
         </View>
       </View>
       {loading && (

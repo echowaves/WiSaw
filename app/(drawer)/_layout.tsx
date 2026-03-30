@@ -1,4 +1,4 @@
-import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import { AntDesign, FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import {
   DrawerContentScrollView,
   DrawerItemList
@@ -311,6 +311,19 @@ export default function DrawerLayout () {
             drawerIcon: (props) => <IdentityDrawerIcon {...props} />,
             drawerLabel: (props) => <IdentityDrawerLabel {...props} />,
             title: 'Identity',
+            headerShown: false,
+            drawerItemStyle: offlineItemStyle
+          }}
+          listeners={offlineScreenListeners}
+        />
+        <Drawer.Screen
+          name='starred'
+          options={{
+            drawerIcon: ({ color, size }) => (
+              <AntDesign name='star' size={22} color={color} />
+            ),
+            drawerLabel: 'Starred',
+            title: 'Starred',
             headerShown: false,
             drawerItemStyle: offlineItemStyle
           }}
