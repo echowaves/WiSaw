@@ -276,6 +276,10 @@ const PhotosList = ({ searchFromUrl }) => {
   }), [uuid, location, zeroMoment, netAvailable])
 
   const reload = useCallback(async (searchTermOverride = null) => {
+    // Skip reload when location is not yet available — the locationState.status
+    // effect will trigger reload once location permission resolves
+    if (!location) return
+
     // Snapshot current location for drift comparison
     if (locationState.coords) {
       feedLocationRef.current = locationState.coords
