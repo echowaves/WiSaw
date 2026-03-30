@@ -26,8 +26,9 @@ The system SHALL re-fetch the waves list and ungrouped photo count from the API 
 
 #### Scenario: Ungrouped count refreshes on focus
 - **WHEN** the Waves index screen regains focus
-- **THEN** the system SHALL call `fetchUngroupedCount()` to re-query `getUngroupedPhotosCount`
-- **THEN** the badge on the kebab menu icon SHALL display the current count
+- **THEN** the system SHALL call `getUngroupedPhotosCount({ uuid })` and `getWavesCount({ uuid })`
+- **THEN** the results SHALL be written to the global `ungroupedPhotosCount` and `wavesCount` atoms
+- **THEN** the badge on the kebab menu icon SHALL display the current ungrouped count
 
 #### Scenario: Wave was renamed while viewing detail
 - **WHEN** the user renamed a wave in WaveDetail and navigates back
@@ -161,7 +162,7 @@ The WavesHub screen SHALL subscribe to identity-change events and reload the wav
 - **THEN** the identity-change listener SHALL be unsubscribed to prevent memory leaks
 
 ### Requirement: Waves Search-Aware Empty State
-The system SHALL display a search-specific empty state when a search query returns zero results, distinct from the default "No Waves Yet" empty state.
+The system SHALL display a search-specific empty state when a search query returns zero results, distinct from the waves explainer empty state.
 
 #### Scenario: Search returns no results
 - **WHEN** the waves list is empty AND `searchText` is non-empty
@@ -170,19 +171,21 @@ The system SHALL display a search-specific empty state when a search query retur
 
 #### Scenario: No waves exist and no search is active
 - **WHEN** the waves list is empty AND `searchText` is empty
-- **THEN** the `ListEmptyComponent` SHALL render the default "No Waves Yet" empty state with "Create a Wave" and optional "Auto Group" actions
+- **THEN** the `ListEmptyComponent` SHALL render `WavesExplainerView` with the current `ungroupedPhotosCount` value and appropriate callbacks
+- **THEN** the existing `EmptyStateCard` with "No Waves Yet" SHALL NOT be rendered
 
-### Requirement: Empty State Shows Auto Group Action
-The system SHALL display an "Auto Group" action button in the empty state card when there are ungrouped photos, in addition to the "Create a Wave" button.
+### Requirement: Waves empty state uses explainer view
+The WavesHub component SHALL render the `WavesExplainerView` component instead of the current `EmptyStateCard` when the waves list is empty and no search term is active. The explainer variant SHALL be determined by the `ungroupedPhotosCount` atom value.
 
-#### Scenario: Empty state with ungrouped photos
-- **WHEN** the waves list is empty AND `ungroupedCount` is greater than zero
-- **THEN** the empty state card SHALL show a secondary action button with text "Auto Group N photos" where N is the count
-- **THEN** tapping the button SHALL call `emitAutoGroup(ungroupedCount)` to trigger the auto-group flow
+#### Scenario: Empty waves list with no search
+- **WHEN** the waves list has zero items and `searchText` is empty
+- **THEN** WavesHub SHALL render `WavesExplainerView` with the current `ungroupedPhotosCount` value and appropriate callbacks
+- **THEN** the existing `EmptyStateCard` with "No Waves Yet" SHALL NOT be rendered
 
-#### Scenario: Empty state with no ungrouped photos
-- **WHEN** the waves list is empty AND `ungroupedCount` is zero
-- **THEN** the empty state card SHALL NOT show the secondary auto-group action button
+#### Scenario: Empty search results
+- **WHEN** the waves list has zero items and `searchText` is non-empty
+- **THEN** WavesHub SHALL continue to render the existing `EmptyStateCard` with "No waves found" and "Clear Search" action
+- **THEN** `WavesExplainerView` SHALL NOT be rendered
 
 ### Requirement: UngroupedCount Prop Passed to WavesHub
 The system SHALL pass the `ungroupedCount` value from the route file to WavesHub as a prop.
@@ -190,6 +193,32 @@ The system SHALL pass the `ungroupedCount` value from the route file to WavesHub
 #### Scenario: Route file passes count
 - **WHEN** the Waves route renders WavesHub
 - **THEN** it SHALL pass `ungroupedCount` as a prop: `<WavesHub ungroupedCount={ungroupedCount} />`
+
+### Requirement: Waves screen syncs global atoms on focus
+The waves index screen SHALL write fetched counts to the global `wavesCount` and `ungroupedPhotosCount` atoms on focus, replacing the local `useState` for ungrouped count.
+
+#### Scenario: Waves screen gains focus
+- **WHEN** the waves index screen gains focus
+- **THEN** it SHALL fetch `getUngroupedPhotosCount({ uuid })` and `getWavesCount({ uuid })`
+- **THEN** it SHALL write the results to the global `ungroupedPhotosCount` and `wavesCount` atoms
+- **THEN** it SHALL NOT maintain a separate local `useState` for ungrouped count
+
+### Requirement: WavesHub updates wavesCount atom on wave mutations
+WavesHub SHALL update the global `wavesCount` atom when waves are created, deleted, or auto-grouped, keeping the atom in sync with local state changes.
+
+#### Scenario: Wave created via modal
+- **WHEN** `handleCreateWave` succeeds and prepends the new wave to the local list
+- **THEN** the `wavesCount` atom SHALL be incremented by 1
+
+#### Scenario: Wave deleted via context menu
+- **WHEN** `handleDeleteWave` succeeds and removes the wave from the local list
+- **THEN** the `wavesCount` atom SHALL be decremented by 1
+- **THEN** the `ungroupedPhotosCount` atom SHALL be incremented by the deleted wave's `photosCount`
+
+#### Scenario: Auto-group creates waves
+- **WHEN** the auto-group process completes with `totalWavesCreated` waves created
+- **THEN** the `wavesCount` atom SHALL be incremented by `totalWavesCreated`
+- **THEN** the `ungroupedPhotosCount` atom SHALL be set to 0
 
 ### Requirement: EmptyStateCard Secondary Action
 The `EmptyStateCard` component SHALL support an optional secondary action button.
