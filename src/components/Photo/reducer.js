@@ -56,7 +56,7 @@ export async function watchPhoto ({ photo, uuid, topOffset }) {
     // eslint-disable-next-line no-console
     console.error({ err1 })
     Toast.show({
-      text1: 'Unable to Star photo',
+      text1: 'Unable to bookmark photo',
       text2: 'Network Issue?',
       type: 'error',
       topOffset
@@ -85,7 +85,7 @@ export async function unwatchPhoto ({ photo, uuid, topOffset }) {
     // eslint-disable-next-line no-console
     console.error({ err2 })
     Toast.show({
-      text1: 'Unable to un-Star photo',
+      text1: 'Unable to remove bookmark',
       text2: 'Maybe Network Issue?',
       type: 'error',
       topOffset

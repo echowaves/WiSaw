@@ -16,16 +16,16 @@ const PhotoActionButtons = ({
 }) => {
   const styles = createStyles(theme)
 
-  const isStarStatusUnknown = photoDetails?.isPhotoWatched === undefined
-  const isStarred = Boolean(photoDetails?.isPhotoWatched)
-  let starAccentColor = theme.TEXT_PRIMARY
-  if (isStarStatusUnknown) {
-    starAccentColor = theme.TEXT_DISABLED
-  } else if (isStarred) {
-    starAccentColor = '#FFD700'
+  const isBookmarkStatusUnknown = photoDetails?.isPhotoWatched === undefined
+  const isBookmarked = Boolean(photoDetails?.isPhotoWatched)
+  let bookmarkAccentColor = theme.TEXT_PRIMARY
+  if (isBookmarkStatusUnknown) {
+    bookmarkAccentColor = theme.TEXT_DISABLED
+  } else if (isBookmarked) {
+    bookmarkAccentColor = '#FFD700'
   }
 
-  const isBannedOrStarred =
+  const isBannedOrBookmarked =
     photoDetails?.isPhotoWatched === undefined ||
     photoDetails?.isPhotoWatched ||
     isPhotoBannedByMe()
@@ -36,13 +36,13 @@ const PhotoActionButtons = ({
       <TouchableOpacity
         style={[
           styles.actionButton,
-          isBannedOrStarred && styles.actionButtonDisabled
+          isBannedOrBookmarked && styles.actionButtonDisabled
         ]}
         onPress={() => {
           if (photoDetails?.isPhotoWatched) {
             Toast.show({
-              text1: 'Unable to Report Starred photo',
-              text2: 'Un-Star photo first',
+              text1: "Can't report bookmarked photo",
+              text2: 'Remove bookmark first',
               type: 'error',
               topOffset: toastTopOffset
             })
@@ -56,17 +56,9 @@ const PhotoActionButtons = ({
       >
         <FontAwesome
           name='ban'
-          color={isBannedOrStarred ? theme.TEXT_DISABLED : theme.STATUS_CAUTION}
+          color={isBannedOrBookmarked ? theme.TEXT_DISABLED : theme.STATUS_CAUTION}
           size={18}
         />
-        {!isBannedOrStarred && (
-          <Text
-            numberOfLines={1}
-            style={[styles.actionButtonText, { color: theme.STATUS_CAUTION }]}
-          >
-            Report
-          </Text>
-        )}
       </TouchableOpacity>
 
       {/* Delete button */}
@@ -79,8 +71,8 @@ const PhotoActionButtons = ({
         onPress={() => {
           if (photoDetails?.isPhotoWatched) {
             Toast.show({
-              text1: 'Unable to delete Starred photo',
-              text2: 'Un-Star photo first',
+              text1: "Can't delete bookmarked photo",
+              text2: 'Remove bookmark first',
               type: 'error',
               topOffset: toastTopOffset
             })
@@ -101,38 +93,22 @@ const PhotoActionButtons = ({
           }
           size={18}
         />
-        {!(photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched) && (
-          <Text
-            numberOfLines={1}
-            style={[styles.actionButtonText, { color: theme.STATUS_ERROR }]}
-          >
-            Delete
-          </Text>
-        )}
       </TouchableOpacity>
 
-      {/* Star button */}
+      {/* Bookmark button */}
       <TouchableOpacity
-        style={[styles.actionButton, isStarStatusUnknown && styles.actionButtonDisabled]}
+        style={[styles.actionButton, isBookmarkStatusUnknown && styles.actionButtonDisabled]}
         onPress={() => onFlipWatch()}
         activeOpacity={0.7}
         delayPressIn={0}
         delayPressOut={0}
-        disabled={isStarStatusUnknown}
+        disabled={isBookmarkStatusUnknown}
       >
         <Ionicons
-          name={isStarred ? 'star' : 'star-outline'}
-          color={starAccentColor}
+          name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+          color={bookmarkAccentColor}
           size={18}
         />
-        {!isStarStatusUnknown && (
-          <Text
-            numberOfLines={1}
-            style={[styles.actionButtonText, { color: starAccentColor }]}
-          >
-            {isStarred ? 'Starred' : 'Star'}
-          </Text>
-        )}
       </TouchableOpacity>
 
       {/* Wave button */}
@@ -182,14 +158,6 @@ const PhotoActionButtons = ({
           }
           size={18}
         />
-        {photoDetails?.isPhotoWatched !== undefined && (
-          <Text
-            numberOfLines={1}
-            style={[styles.actionButtonText, { color: theme.STATUS_SUCCESS }]}
-          >
-            Share
-          </Text>
-        )}
       </TouchableOpacity>
     </View>
   )

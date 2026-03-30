@@ -146,7 +146,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     })
   }, [])
 
-  // Starred-layout segment config
+  // Bookmarked-layout segment config
   const segmentConfig = useMemo(() => {
     const getResponsiveColumns = (baseColumns, largeColumns) => {
       if (width >= 768) return Math.max(3, largeColumns * 1.3)

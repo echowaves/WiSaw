@@ -1,4 +1,4 @@
-import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
 import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
@@ -268,7 +268,7 @@ const ExpandableThumb = ({
             {watchersCount > 0 && commentsCount > 0 && <View style={{ width: 12 }} />}
             {watchersCount > 0 && (
               <View style={commentStyles.commentStatItem}>
-                <AntDesign name='star' size={12} color='#FFD700' />
+                <Ionicons name='bookmark' size={12} color='#FFD700' />
                 <Text style={commentStyles.commentStatText}>{watchersCount}</Text>
               </View>
             )}

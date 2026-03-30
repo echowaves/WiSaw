@@ -58,7 +58,7 @@ const PhotosListMasonry = ({
       }
 
       // Use ExpandableThumb for all segments
-      // Show comments overlay only for starred (segment 1) — layout never changes during search
+      // Show comments overlay only for bookmarked (segment 1) — layout never changes during search
       const shouldShowComments = activeSegment === 1
       const shouldScrollToTop = item.id === justCollapsedId
 

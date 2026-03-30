@@ -20,8 +20,8 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
   const handleDelete = useCallback(() => {
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
-        text1: 'Unable to delete Starred photo',
-        text2: 'Un-Star photo first',
+        text1: "Can't delete bookmarked photo",
+        text2: 'Remove bookmark first',
         type: 'error',
         topOffset: toastTopOffset
       })
@@ -57,8 +57,8 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
   const handleBan = useCallback(() => {
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
-        text1: 'Unable to Report Starred photo',
-        text2: 'Un-Star photo first',
+        text1: "Can't report bookmarked photo",
+        text2: 'Remove bookmark first',
         type: 'error',
         topOffset: toastTopOffset
       })

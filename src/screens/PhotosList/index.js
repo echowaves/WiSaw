@@ -626,7 +626,7 @@ const PhotosList = ({ searchFromUrl }) => {
               icon='location-off'
               iconType='MaterialIcons'
               title='Location Unavailable'
-              subtitle="We couldn't determine your location. Try the Starred screen from the menu or use Search to browse photos."
+              subtitle="We couldn't determine your location. Try the Bookmarks screen from the menu or use Search to browse photos."
             />
           )}
         </ScrollView>

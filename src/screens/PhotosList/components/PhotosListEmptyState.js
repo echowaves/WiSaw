@@ -43,12 +43,12 @@ const PhotosListEmptyState = ({
             reload()
           }
         }
-      case 1: // Starred photos
+      case 1: // Bookmarked photos
         return {
-          icon: 'star',
-          title: 'No Starred Content Yet',
+          icon: 'bookmark',
+          title: 'No Bookmarks Yet',
           subtitle:
-            "Start building your collection! Take photos, comment on others' posts, or star content you love.",
+            "Start building your collection! Take photos, comment on others' posts, or bookmark content you love.",
           actionText: 'Discover Content',
           onActionPress: () => {
             updateIndex(0)

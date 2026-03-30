@@ -33,7 +33,7 @@ import QuickActionsModal from '../../components/QuickActionsModal'
 
 const FOOTER_HEIGHT = 20
 
-const StarredList = () => {
+const BookmarksList = () => {
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
@@ -42,7 +42,7 @@ const StarredList = () => {
   const { width, height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
 
-  // Starred layout config — larger tiles, square aspect ratios
+  // Bookmarks layout config — larger tiles, square aspect ratios
   const segmentConfig = useMemo(() => {
     const getResponsiveColumns = (baseColumns, largeColumns) => {
       if (width >= 768) return Math.max(3, largeColumns * 1.3)
@@ -74,7 +74,7 @@ const StarredList = () => {
 
   // eslint-disable-next-line
   if (__DEV__) {
-    validateFrozenPhotosList(photosList, 'in StarredList render')
+    validateFrozenPhotosList(photosList, 'in BookmarksList render')
   }
 
   const getFetchParams = useCallback(() => ({
@@ -144,7 +144,7 @@ const StarredList = () => {
   if (!netAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title='Starred' onBack={handleBack} />
+        <AppHeader title='Bookmarks' onBack={handleBack} />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -158,7 +158,7 @@ const StarredList = () => {
             icon='wifi-off'
             iconType='MaterialIcons'
             title='No Internet Connection'
-            subtitle='Starred content requires an internet connection.'
+            subtitle='Bookmarked content requires an internet connection.'
             actionText='Try Again'
             onActionPress={reload}
           />
@@ -172,7 +172,7 @@ const StarredList = () => {
     return (
       <PhotosListContext.Provider value={photosListContextValue}>
         <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-          <AppHeader title='Starred' onBack={handleBack} />
+          <AppHeader title='Bookmarks' onBack={handleBack} />
           <View style={{ flex: 1, backgroundColor: theme.INTERACTIVE_BACKGROUND }}>
             <PhotosListMasonry
               activeSegment={1}
@@ -235,16 +235,16 @@ const StarredList = () => {
           onActionPress: handleClearSearch
         }
       : {
-          icon: 'star',
-          title: 'No Starred Content Yet',
-          subtitle: "Start building your collection! Take photos, comment on others' posts, or star content you love.",
+          icon: 'bookmark',
+          title: 'No Bookmarks Yet',
+          subtitle: "Start building your collection! Take photos, comment on others' posts, or bookmark content you love.",
           actionText: 'Discover Content',
           onActionPress: () => router.navigate('/(drawer)/(tabs)')
         }
 
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title='Starred' onBack={handleBack} />
+        <AppHeader title='Bookmarks' onBack={handleBack} />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -274,7 +274,7 @@ const StarredList = () => {
   // Loading state
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-      <AppHeader title='Starred' onBack={handleBack} />
+      <AppHeader title='Bookmarks' onBack={handleBack} />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -310,4 +310,4 @@ const StarredList = () => {
   )
 }
 
-export default StarredList
+export default BookmarksList

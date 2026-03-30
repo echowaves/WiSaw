@@ -1,4 +1,4 @@
-import { AntDesign, FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import { FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons'
 import {
   DrawerContentScrollView,
   DrawerItemList
@@ -317,13 +317,13 @@ export default function DrawerLayout () {
           listeners={offlineScreenListeners}
         />
         <Drawer.Screen
-          name='starred'
+          name='bookmarks'
           options={{
             drawerIcon: ({ color, size }) => (
-              <AntDesign name='star' size={22} color={color} />
+              <Ionicons name='bookmark' size={22} color={color} />
             ),
-            drawerLabel: 'Starred',
-            title: 'Starred',
+            drawerLabel: 'Bookmarks',
+            title: 'Bookmarks',
             headerShown: false,
             drawerItemStyle: offlineItemStyle
           }}

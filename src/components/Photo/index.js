@@ -2,7 +2,7 @@ import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 
-import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
+import { FontAwesome, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import {
   Alert,
@@ -713,9 +713,9 @@ const Photo = ({
 
               {watchersCount > 0 && (
                 <View style={styles.statItem}>
-                  <AntDesign name='star' size={16} color='#FFD700' />
+                  <Ionicons name='bookmark' size={16} color='#FFD700' />
                   <Text style={styles.statsText}>
-                    {watchersCount} Star{watchersCount !== 1 ? 's' : ''}
+                    {watchersCount}
                   </Text>
                 </View>
               )}
