@@ -32,6 +32,7 @@ import * as Constants from 'expo-constants'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 
 import { emitPhotoSearch, subscribeToPhotoSearch } from '../../events/photoSearchBus'
+import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 
@@ -205,6 +206,13 @@ const PhotosList = ({ searchFromUrl }) => {
     const unsubscribe = subscribeToPhotoSearch(handleIncomingSearch)
     return unsubscribe
   }, [handleIncomingSearch])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToIdentityChange(() => {
+      reload()
+    })
+    return unsubscribe
+  }, [reload])
 
   const triggerSearch = useCallback((term) => {
     emitPhotoSearch(term)

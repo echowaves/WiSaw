@@ -1,9 +1,4 @@
-# Privacy Explainer Specification
-
-## Purpose
-The privacy explainer ensures every new user understands WiSaw's zero-PII architecture before creating an identity. It is a one-time full-screen educational view that communicates the privacy-by-design model and the permanence of secret loss.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: One-time privacy explainer before identity creation
 The system SHALL display a full-screen privacy explainer view the first time a user without an established identity visits the identity screen. The explainer MUST be dismissed before the user can access the identity creation form. When the explainer is dismissed, the creation form SHALL animate in visibly with a fade and scale animation.
@@ -29,10 +24,3 @@ The system SHALL display a full-screen privacy explainer view the first time a u
 #### Scenario: User with established identity
 - **WHEN** the user opens the identity screen and has an established identity
 - **THEN** the privacy explainer SHALL NOT be displayed regardless of the SecureStore flag
-
-### Requirement: Explainer uses themed card styling
-The privacy explainer view SHALL use the app's themed card design tokens (`CARD_BACKGROUND`, `CARD_SHADOW`, `BORDER_LIGHT`, `borderRadius: 16`) for visual consistency with the rest of the identity screen.
-
-#### Scenario: Themed rendering
-- **WHEN** the privacy explainer renders in light or dark mode
-- **THEN** all cards and text SHALL use the current theme's tokens for backgrounds, borders, shadows, and text colors

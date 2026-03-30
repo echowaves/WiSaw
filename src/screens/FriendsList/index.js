@@ -19,6 +19,7 @@ import NamePicker from '../../components/NamePicker'
 import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
 import { subscribeToAddFriend } from '../../events/friendAddBus'
+import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
@@ -267,6 +268,13 @@ const FriendsList = () => {
 
     return unsubscribe
   }, [handleAddFriend])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToIdentityChange(() => {
+      reload()
+    })
+    return unsubscribe
+  }, [reload])
 
   const handleShareFriend = async ({ friendshipUuid, contactName, isPending = true }) => {
     try {

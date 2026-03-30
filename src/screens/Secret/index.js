@@ -28,6 +28,7 @@ import useToastTopOffset from '../../hooks/useToastTopOffset'
 
 import Button from '../../components/ui/Button'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import { emitIdentityChange } from '../../events/identityChangeBus'
 import * as reducer from './reducer'
 
 // Import extracted components
@@ -80,8 +81,9 @@ const SecretScreen = () => {
   const fadeAnim = React.useRef(new Animated.Value(0)).current
   const scaleAnim = React.useRef(new Animated.Value(1)).current
 
-  // Animate components on mount
+  // Animate components when render branch changes
   useEffect(() => {
+    fadeAnim.setValue(0)
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -95,7 +97,7 @@ const SecretScreen = () => {
         useNativeDriver: true
       })
     ]).start()
-  }, [])
+  }, [hasSeenExplainer])
 
   const resetFields = async () => {
     const nnn = await reducer.getStoredNickName()
@@ -140,6 +142,7 @@ const SecretScreen = () => {
       })
 
       await resetFields()
+      emitIdentityChange()
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
 
@@ -239,6 +242,7 @@ const SecretScreen = () => {
             await reducer.resetSecret({ topOffset: toastTopOffset })
             setNickName('')
             await resetFields()
+            emitIdentityChange()
             Toast.show({
               text1: 'Secret reset',
               text2: 'enter new Secret',

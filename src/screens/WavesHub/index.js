@@ -32,6 +32,7 @@ import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
+import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 
 const WavesHub = ({ ungroupedCount = 0 }) => {
   const insets = useSafeAreaInsets()
@@ -315,6 +316,13 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
     })
     return unsubscribe
   }, [])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToIdentityChange(() => {
+      handleRefresh()
+    })
+    return unsubscribe
+  }, [handleRefresh])
 
   const handleStartMerge = (wave) => {
     setMergingWave(wave)
