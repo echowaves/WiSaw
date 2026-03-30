@@ -58,8 +58,8 @@ const PhotosListMasonry = ({
       }
 
       // Use ExpandableThumb for all segments
-      // Show comments overlay for starred (segment 1) and search (segment 2)
-      const shouldShowComments = activeSegment === 1 || activeSegment === 2
+      // Show comments overlay only for starred (segment 1) — layout never changes during search
+      const shouldShowComments = activeSegment === 1
       const shouldScrollToTop = item.id === justCollapsedId
 
       return (

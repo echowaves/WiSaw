@@ -10,11 +10,10 @@ import IdentityHeaderIcon from '../../../components/IdentityHeaderIcon'
 import LinearProgress from '../../../components/ui/LinearProgress'
 import WaveHeaderIcon from '../../../components/WaveHeaderIcon'
 
-const SEGMENT_TITLES = ['Global', 'Starred', 'Search']
+const SEGMENT_TITLES = ['Global', 'Starred']
 const SEGMENT_ICONS = [
   { Component: FontAwesome, name: 'globe' },
-  { Component: AntDesign, name: 'star' },
-  { Component: FontAwesome, name: 'search' }
+  { Component: AntDesign, name: 'star' }
 ]
 
 const PhotosListHeader = ({ theme, activeSegment, updateIndex, loading, segmentWidth, styles }) => {

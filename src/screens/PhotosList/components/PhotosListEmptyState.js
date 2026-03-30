@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, ScrollView } from 'react-native'
 import EmptyStateCard from '../../../components/EmptyStateCard'
-import PhotosListSearchBar from './PhotosListSearchBar'
 
 const PhotosListEmptyState = ({
   theme,
@@ -12,16 +11,26 @@ const PhotosListEmptyState = ({
   renderCustomHeader,
   renderPendingPhotos,
   renderFooter,
+  renderSearchFab,
   unreadCount,
   reload,
   updateIndex,
+  isSearchActive,
   searchTerm,
-  setSearchTerm,
-  searchBarRef,
-  submitSearch,
+  onClearSearch,
   FOOTER_HEIGHT
 }) => {
   const getEmptyStateProps = () => {
+    if (isSearchActive) {
+      return {
+        icon: 'search',
+        title: `No results for '${searchTerm}'`,
+        subtitle: 'Try different keywords or clear the search.',
+        actionText: 'Clear Search',
+        onActionPress: onClearSearch
+      }
+    }
+
     switch (activeSegment) {
       case 0: // Global photos
         return {
@@ -31,7 +40,6 @@ const PhotosListEmptyState = ({
             "Be the first to share a moment! Take a photo and let others discover what's happening around you.",
           actionText: 'Take a Photo',
           onActionPress: () => {
-            // TODO: Add photo taking functionality
             reload()
           }
         }
@@ -43,24 +51,7 @@ const PhotosListEmptyState = ({
             "Start building your collection! Take photos, comment on others' posts, or star content you love.",
           actionText: 'Discover Content',
           onActionPress: () => {
-            // Switch to global view to discover content
             updateIndex(0)
-          }
-        }
-      case 2: // Search
-        return {
-          icon: 'search',
-          title: 'No Results Found',
-          subtitle: "Try different keywords or explore what's trending in your area.",
-          actionText: 'Clear Search',
-          onActionPress: () => {
-            // Clear search input and focus, same as the clear button inside input box
-            setSearchTerm('')
-            if (searchBarRef.current) {
-              searchBarRef.current.clear()
-              searchBarRef.current.focus()
-            }
-            reload()
           }
         }
       default:
@@ -91,15 +82,7 @@ const PhotosListEmptyState = ({
         >
           <EmptyStateCard {...getEmptyStateProps()} />
         </ScrollView>
-        {activeSegment === 2 && (
-          <PhotosListSearchBar
-            theme={theme}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onSubmitSearch={submitSearch}
-            autoFocus
-          />
-        )}
+        {renderSearchFab()}
         {renderFooter()}
       </View>
     )

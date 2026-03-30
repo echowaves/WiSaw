@@ -58,6 +58,7 @@ const FEED_BY_DATE_QUERY = gql`
     $lon: Float!
     $batch: String!
     $whenToStop: AWSDateTime!
+    $searchTerm: String
   ) {
     feedByDate(
       daysAgo: $daysAgo
@@ -65,6 +66,7 @@ const FEED_BY_DATE_QUERY = gql`
       lon: $lon
       batch: $batch
       whenToStop: $whenToStop
+      searchTerm: $searchTerm
     ) {
       photos {
         row_number
@@ -88,32 +90,8 @@ const FEED_BY_DATE_QUERY = gql`
 `
 
 const FEED_FOR_WATCHER_QUERY = gql`
-  query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!) {
-    feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch) {
-      photos {
-        row_number
-        id
-        uuid
-        imgUrl
-        thumbUrl
-        videoUrl
-        video
-        commentsCount
-        watchersCount
-        lastComment
-        createdAt
-        width
-        height
-      }
-      batch
-      noMoreData
-    }
-  }
-`
-
-const FEED_FOR_TEXT_SEARCH_QUERY = gql`
-  query feedForTextSearch($searchTerm: String!, $pageNumber: Int!, $batch: String!) {
-    feedForTextSearch(searchTerm: $searchTerm, pageNumber: $pageNumber, batch: $batch) {
+  query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!, $searchTerm: String) {
+    feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch, searchTerm: $searchTerm) {
       photos {
         row_number
         id
@@ -166,7 +144,7 @@ export async function getZeroMoment ({ netAvailable } = {}) {
   return 0
 }
 
-async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment }) {
+async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, searchTerm }) {
   const { latitude, longitude } = location.coords
   const whenToStop = moment(zeroMoment || 0)
   try {
@@ -175,7 +153,8 @@ async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment }) {
       daysAgo: pageNumber,
       lat: latitude,
       lon: longitude,
-      whenToStop
+      whenToStop,
+      searchTerm: searchTerm || undefined
     }
     const response = await CONST.gqlClient.query({
       query: FEED_BY_DATE_QUERY,
@@ -196,12 +175,13 @@ async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment }) {
   }
 }
 
-async function requestWatchedPhotos ({ uuid, pageNumber, batch }) {
+async function requestWatchedPhotos ({ uuid, pageNumber, batch, searchTerm }) {
   try {
     const variables = {
       uuid,
       pageNumber,
-      batch
+      batch,
+      searchTerm: searchTerm || undefined
     }
     const response = await CONST.gqlClient.query({
       query: FEED_FOR_WATCHER_QUERY,
@@ -223,33 +203,6 @@ async function requestWatchedPhotos ({ uuid, pageNumber, batch }) {
   }
 }
 
-async function requestSearchedPhotos ({ pageNumber, searchTerm, batch }) {
-  try {
-    const variables = {
-      searchTerm,
-      batch,
-      pageNumber
-    }
-    const response = await CONST.gqlClient.query({
-      query: FEED_FOR_TEXT_SEARCH_QUERY,
-      variables
-    })
-
-    return {
-      photos: response.data.feedForTextSearch.photos,
-      batch: response.data.feedForTextSearch.batch,
-      noMoreData: response.data.feedForTextSearch.noMoreData
-    }
-  } catch (err6) {
-    console.error({ err6 })
-  }
-  return {
-    photos: [],
-    batch,
-    noMoreData: true
-  }
-}
-
 export async function getPhotos (params) {
   const {
     uuid,
@@ -263,7 +216,7 @@ export async function getPhotos (params) {
     pageNumber
   } = params
 
-  if ((!location && activeSegment === 0) || netAvailable === false || (activeSegment === 2 && searchTerm.length < 3)) {
+  if ((!location && activeSegment === 0) || netAvailable === false) {
     return {
       photos: [],
       batch,
@@ -286,8 +239,6 @@ export async function getPhotos (params) {
         return await requestGeoPhotos(requestParams)
       case 1:
         return await requestWatchedPhotos(requestParams)
-      case 2:
-        return await requestSearchedPhotos(requestParams)
       default:
         break
     }

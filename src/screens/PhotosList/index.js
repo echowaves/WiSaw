@@ -53,7 +53,7 @@ import {
 import EmptyStateCard from '../../components/EmptyStateCard'
 import PhotosListFooter from './components/PhotosListFooter'
 import PhotosListHeader from './components/PhotosListHeader'
-import PhotosListSearchBar from './components/PhotosListSearchBar'
+import SearchFab from '../../components/SearchFab'
 import PendingPhotosBanner from './components/PendingPhotosBanner'
 import LocationDriftBanner from './components/LocationDriftBanner'
 import PhotosListEmptyState from './components/PhotosListEmptyState'
@@ -370,6 +370,10 @@ const PhotosList = ({ searchFromUrl }) => {
   const [, setConsecutiveEmptyResponses] = useState(0)
 
   const [activeSegment, setActiveSegment] = useState(0)
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+
+  // Search is active whenever the search term has content
+  const isSearchActive = searchTerm.length > 0
 
   const DRIFT_THRESHOLD = 500 // meters
   const showDriftBanner = useMemo(() => {
@@ -424,8 +428,6 @@ const PhotosList = ({ searchFromUrl }) => {
     })
   }, [setPhotosList])
 
-  const searchBarRef = React.useRef(null)
-
   // Configuration for different segments - responsive to device size
   const segmentConfig = React.useMemo(() => {
     // Determine columns based on screen width for better responsiveness
@@ -454,13 +456,6 @@ const PhotosList = ({ searchFromUrl }) => {
           ]
         }
       case 1: // Watched - larger items with comments
-        return {
-          spacing: 8,
-          maxItemsPerRow: getResponsiveColumns(2, 4),
-          baseHeight: 200,
-          aspectRatioFallbacks: [1.0] // Square thumbnails for better comment display
-        }
-      case 2: // Search - same layout as starred to accommodate comments
         return {
           spacing: 8,
           maxItemsPerRow: getResponsiveColumns(2, 4),
@@ -525,17 +520,17 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Preloading disabled for consistency; rely on onEndReached
 
-  const load = async (segmentOverride = null, searchTermOverride = null, signal = null) => {
+  const load = async (segmentOverride = null, searchTermOverride = null, signal = null, pageOverride = null) => {
     setLoading(true)
 
     // Use current values if overrides are not provided
     const effectiveSegment = segmentOverride !== null ? segmentOverride : activeSegment
 
-    // Only use search term for search segment (segment 2)
-    let effectiveSearchTerm = ''
-    if (effectiveSegment === 2) {
-      effectiveSearchTerm = searchTermOverride !== null ? searchTermOverride : searchTerm
-    }
+    // Always include search term in queries when present
+    const effectiveSearchTerm = searchTermOverride !== null ? searchTermOverride : searchTerm
+
+    // Use explicit page number to avoid stale closure
+    const effectivePage = pageOverride !== null ? pageOverride : pageNumber
 
     const { photos, batch } = await reducer.getPhotos({
       uuid,
@@ -546,7 +541,7 @@ const PhotosList = ({ searchFromUrl }) => {
       topOffset: toastTopOffset,
       activeSegment: effectiveSegment,
       batch: currentBatch, // clone
-      pageNumber
+      pageNumber: effectivePage
     })
 
     if (signal?.aborted) return
@@ -632,7 +627,8 @@ const PhotosList = ({ searchFromUrl }) => {
     }
 
     // Load new content after state is reset, using the specific segment if provided
-    await load(segmentOverride, searchTermOverride, signal)
+    // Pass page 0 explicitly since setPageNumber(0) hasn't been applied yet
+    await load(segmentOverride, searchTermOverride, signal, 0)
   }
 
   const updateIndex = async (index) => {
@@ -662,8 +658,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
     // Always reload content when any segment is clicked (including current one)
     // Pass the new segment index directly to ensure immediate use
-    // For search segment, pass existing search term if available
-    const searchTermToUse = index === 2 ? searchTerm : null
+    // Always include search term if present
+    const searchTermToUse = searchTerm.length > 0 ? searchTerm : null
     reload(index, searchTermToUse)
   }
 
@@ -761,11 +757,9 @@ const PhotosList = ({ searchFromUrl }) => {
     if (searchFromUrl && searchFromUrl.trim().length > 0) {
       const searchTermToUse = searchFromUrl.trim()
 
-      // Set the search term
+      // Set the search term and activate search via FAB
       setSearchTerm(searchTermToUse)
-
-      // Switch to search segment
-      setActiveSegment(2)
+      setIsSearchExpanded(true)
 
       // Immediately clear photos list
       setPhotosList([])
@@ -776,17 +770,10 @@ const PhotosList = ({ searchFromUrl }) => {
       setConsecutiveEmptyResponses(0)
       currentBatch = Crypto.randomUUID()
 
-      // Focus the search bar if it exists
-      setTimeout(() => {
-        if (searchBarRef.current) {
-          searchBarRef.current.focus()
-        }
-      }, 200)
-
       // Trigger search immediately with the search term directly passed
       const performSearch = async () => {
         try {
-          await reload(2, searchTermToUse)
+          await reload(activeSegment, searchTermToUse)
         } catch (error) {
           // Search failed, but don't break the app
         }
@@ -810,11 +797,9 @@ const PhotosList = ({ searchFromUrl }) => {
     // Close any expanded photos
     setExpandedPhotoIds(new Set())
 
-    // Set the search term
+    // Set the search term and activate search via FAB
     setSearchTerm(searchTermToUse)
-
-    // Switch to search segment
-    setActiveSegment(2)
+    setIsSearchExpanded(true)
 
     // Immediately clear photos list
     setPhotosList([])
@@ -828,7 +813,7 @@ const PhotosList = ({ searchFromUrl }) => {
     // Trigger search immediately with the search term directly passed
     const performSearch = async () => {
       try {
-        await reload(2, searchTermToUse)
+        await reload(activeSegment, searchTermToUse)
       } catch (error) {
         // Search failed, but don't break the app
       }
@@ -837,17 +822,14 @@ const PhotosList = ({ searchFromUrl }) => {
   }, [pendingTriggerSearch, reload])
 
   const submitSearch = async () => {
-    if (searchTerm && searchTerm.length >= 3) {
-      Keyboard.dismiss()
-      reload()
-      // await load()
-    } else {
-      Toast.show({
-        text1: 'Search for more than 3 characters',
-        type: 'error',
-        topOffset: toastTopOffset
-      })
-    }
+    Keyboard.dismiss()
+    reload(activeSegment, searchTerm)
+  }
+
+  const handleClearSearch = () => {
+    setSearchTerm('')
+    setIsSearchExpanded(false)
+    reload(activeSegment, '')
   }
 
   /// //////////////////////////////////////////////////////////////////////////
@@ -857,8 +839,8 @@ const PhotosList = ({ searchFromUrl }) => {
   const handleLoadMore = () => {
     setPageNumber((currentPage) => {
       const newPage = currentPage + 1
-      // Explicit load() call — no pageNumber useEffect
-      load()
+      // Pass newPage explicitly to avoid stale closure
+      load(null, null, null, newPage)
       return newPage
     })
   }
@@ -972,15 +954,17 @@ const PhotosList = ({ searchFromUrl }) => {
               onPhotoLongPress={handlePhotoLongPress}
             />
           </View>
-          {activeSegment === 2 && (
-            <PhotosListSearchBar
-              theme={theme}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onSubmitSearch={submitSearch}
-              autoFocus={false}
-            />
-          )}
+          <SearchFab
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSubmitSearch={submitSearch}
+            onClearSearch={handleClearSearch}
+            isExpanded={isSearchExpanded}
+            setIsExpanded={setIsSearchExpanded}
+            theme={theme}
+            footerHeight={FOOTER_HEIGHT}
+            screenWidth={width}
+          />
           <PhotosListFooter
             theme={theme}
             navigation={navigation}
@@ -1115,13 +1099,25 @@ const PhotosList = ({ searchFromUrl }) => {
             locationReady={!!location}
           />
         )}
+        renderSearchFab={() => (
+          <SearchFab
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSubmitSearch={submitSearch}
+            onClearSearch={handleClearSearch}
+            isExpanded={isSearchExpanded}
+            setIsExpanded={setIsSearchExpanded}
+            theme={theme}
+            footerHeight={FOOTER_HEIGHT}
+            screenWidth={width}
+          />
+        )}
         unreadCount={unreadCount}
         reload={reload}
         updateIndex={updateIndex}
+        isSearchActive={isSearchActive}
         searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        searchBarRef={searchBarRef}
-        submitSearch={submitSearch}
+        onClearSearch={handleClearSearch}
         FOOTER_HEIGHT={FOOTER_HEIGHT}
       />
     )
@@ -1150,22 +1146,17 @@ const PhotosList = ({ searchFromUrl }) => {
         }}
         showsVerticalScrollIndicator
       >
-        {activeSegment === 2 &&
+        {isSearchActive &&
           (loading || (
             <EmptyStateCard
               icon='search'
-              title='Ready to Search'
-              subtitle='Enter a search term above to find photos from your area and beyond.'
-              actionText='Start Exploring'
-              onActionPress={() => {
-                if (searchBarRef.current) {
-                  searchBarRef.current.focus()
-                }
-              }}
+              title={`No results for '${searchTerm}'`}
+              subtitle='Try different keywords or clear the search.'
+              actionText='Clear Search'
+              onActionPress={handleClearSearch}
             />
-
           ))}
-        {activeSegment === 1 &&
+        {!isSearchActive && activeSegment === 1 &&
           (loading || (
             <EmptyStateCard
               icon='star'
@@ -1176,15 +1167,17 @@ const PhotosList = ({ searchFromUrl }) => {
             />
           ))}
       </ScrollView>
-      {activeSegment === 2 && (
-        <PhotosListSearchBar
-          theme={theme}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSubmitSearch={submitSearch}
-          autoFocus={false}
-        />
-      )}
+      <SearchFab
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSubmitSearch={submitSearch}
+        onClearSearch={handleClearSearch}
+        isExpanded={isSearchExpanded}
+        setIsExpanded={setIsSearchExpanded}
+        theme={theme}
+        footerHeight={FOOTER_HEIGHT}
+        screenWidth={width}
+      />
       <PhotosListFooter
         theme={theme}
         navigation={navigation}
