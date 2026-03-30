@@ -183,6 +183,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const feedLocationRef = useRef(null)
   const [feedLocationVersion, setFeedLocationVersion] = useState(0)
+  const abortControllerRef = useRef(null)
 
   const handleIncomingSearch = useCallback(
     (term) => {
@@ -512,7 +513,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Preloading disabled for consistency; rely on onEndReached
 
-  const load = async (segmentOverride = null, searchTermOverride = null) => {
+  const load = async (segmentOverride = null, searchTermOverride = null, signal = null) => {
     setLoading(true)
 
     // Use current values if overrides are not provided
@@ -535,6 +536,8 @@ const PhotosList = ({ searchFromUrl }) => {
       batch: currentBatch, // clone
       pageNumber
     })
+
+    if (signal?.aborted) return
 
     if (batch === currentBatch) {
       // Track consecutive empty responses
@@ -575,10 +578,18 @@ const PhotosList = ({ searchFromUrl }) => {
       }
     }
 
-    setLoading(false)
+    if (!signal?.aborted) {
+      setLoading(false)
+    }
   }
 
   const reload = async (segmentOverride = null, searchTermOverride = null) => {
+    // Cancel any in-flight reload/load chain
+    abortControllerRef.current?.abort()
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+    const { signal } = controller
+
     // Snapshot current location for drift comparison
     if (locationState.coords) {
       feedLocationRef.current = locationState.coords
@@ -589,28 +600,27 @@ const PhotosList = ({ searchFromUrl }) => {
 
     setStopLoading(false)
     setConsecutiveEmptyResponses(0)
-    setPageNumber(null)
     setPhotosList([])
-
-    // setPageNumber(null)
-    // setStopLoading(false)
     setPageNumber(0)
 
     await refreshPendingQueue()
+    if (signal.aborted) return
     await processPendingQueue()
+    if (signal.aborted) return
     if (uuid.length > 0) {
       setFriendsList(
         await friendsHelper.getEnhancedListOfFriendships({
           uuid
         })
       )
+      if (signal.aborted) return
 
       setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid })) // the list of enhanced friends list has to be loaded earlier on
+      if (signal.aborted) return
     }
 
     // Load new content after state is reset, using the specific segment if provided
-    await load(segmentOverride, searchTermOverride)
-    // load()
+    await load(segmentOverride, searchTermOverride, signal)
   }
 
   const updateIndex = async (index) => {
@@ -666,6 +676,8 @@ const PhotosList = ({ searchFromUrl }) => {
 
       return () => {
         isMounted = false
+        // Cancel any in-flight reload/load chains when screen loses focus
+        abortControllerRef.current?.abort()
       }
     }, [])
   )
@@ -726,11 +738,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Removed: no header text visibility effect
 
-  useEffect(() => {
-    if (pageNumber !== null) {
-      load()
-    }
-  }, [pageNumber])
+  // pageNumber useEffect removed — pagination now calls load() explicitly
 
   // Handle search from URL parameter (e.g., from AI tag clicks)
   useEffect(() => {
@@ -829,6 +837,15 @@ const PhotosList = ({ searchFromUrl }) => {
   /// //////////////////////////////////////////////////////////////////////////
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
+
+  const handleLoadMore = () => {
+    setPageNumber((currentPage) => {
+      const newPage = currentPage + 1
+      // Explicit load() call — no pageNumber useEffect
+      load()
+      return newPage
+    })
+  }
 
   const renderHeader = () => (
     <PhotosListHeader
@@ -930,7 +947,7 @@ const PhotosList = ({ searchFromUrl }) => {
               onTriggerSearch={triggerSearch}
               loading={loading}
               stopLoading={stopLoading}
-              setPageNumber={setPageNumber}
+              onLoadMore={handleLoadMore}
               setExpandedPhotoIds={setExpandedPhotoIds}
               reload={reload}
               styles={styles}

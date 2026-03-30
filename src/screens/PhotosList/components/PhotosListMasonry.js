@@ -23,7 +23,7 @@ const PhotosListMasonry = ({
   onRefresh,
   loading,
   stopLoading,
-  setPageNumber,
+  onLoadMore,
   setExpandedPhotoIds,
   reload,
   styles,
@@ -138,11 +138,8 @@ const PhotosListMasonry = ({
         if (!loading && !stopLoading) {
           if (onEndReached) {
             onEndReached()
-          } else {
-            setPageNumber((currentPage) => {
-              const newPage = currentPage + 1
-              return newPage
-            })
+          } else if (onLoadMore) {
+            onLoadMore()
           }
         }
       }}

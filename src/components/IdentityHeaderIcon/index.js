@@ -26,7 +26,7 @@ const IdentityHeaderIcon = () => {
 
   const handleRowPress = () => {
     setIsOpen(false)
-    router.push('/(drawer)/identity')
+    router.navigate('/(drawer)/identity')
   }
 
   const handleBackdropPress = () => {

@@ -190,7 +190,7 @@ const PhotosListFooter = ({
               elevation: 15,
               zIndex: 15
             }}
-            onPress={() => router.push('/friends')}
+            onPress={() => router.navigate('/friends')}
             disabled={!netAvailable}
           >
             <FontAwesome5
