@@ -7,12 +7,8 @@ import {
   useWindowDimensions
 } from 'react-native'
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
-import { router } from 'expo-router'
-import * as Notifications from '../../../utils/notifications'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
-import Badge from '../../../components/ui/Badge'
 import * as CONST from '../../../consts'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const FOOTER_HEIGHT = 90
 
@@ -20,7 +16,6 @@ const PhotosListFooter = ({
   theme,
   navigation,
   netAvailable,
-  unreadCount,
   isCameraOpening,
   onCameraPress,
   locationReady = true,
@@ -30,10 +25,6 @@ const PhotosListFooter = ({
   const insets = useSafeAreaInsets()
 
   const cameraDisabled = isCameraOpening || !locationReady
-
-  React.useEffect(() => {
-    Notifications.setBadgeCountAsync(unreadCount || 0)
-  }, [unreadCount])
 
   const styles = StyleSheet.create({
     footerContainer: {
@@ -61,14 +52,6 @@ const PhotosListFooter = ({
       shadowRadius: 8,
       elevation: 15,
       zIndex: 15
-    },
-    badgeStyle: {
-      backgroundColor: theme.STATUS_ERROR,
-      borderWidth: 2,
-      borderColor: theme.BACKGROUND,
-      minWidth: 20,
-      height: 20,
-      borderRadius: 10
     }
   })
 
@@ -130,10 +113,10 @@ const PhotosListFooter = ({
             disabled={!netAvailable}
           >
             <FontAwesome
-                name='navicon'
-                size={22}
-                color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-              />
+              name='navicon'
+              size={22}
+              color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
+            />
           </TouchableOpacity>
 
           {/* Video Recording Button */}
@@ -175,46 +158,6 @@ const PhotosListFooter = ({
             disabled={cameraDisabled}
           >
             <FontAwesome5 name='camera' color='white' size={28} />
-          </TouchableOpacity>
-
-          {/* Friends List Button */}
-          <TouchableOpacity
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 50,
-              height: 50,
-              borderRadius: 25,
-              backgroundColor: theme.INTERACTIVE_BACKGROUND,
-              position: 'relative',
-              elevation: 15,
-              zIndex: 15
-            }}
-            onPress={() => router.navigate('/friends')}
-            disabled={!netAvailable}
-          >
-            <FontAwesome5
-              name='user-friends'
-              size={22}
-              color={netAvailable ? CONST.MAIN_COLOR : theme.TEXT_DISABLED}
-            />
-            {unreadCount > 0 && (
-              <Badge
-                value={unreadCount}
-                badgeStyle={styles.badgeStyle}
-                textStyle={{
-                  fontSize: 11,
-                  fontWeight: 'bold'
-                }}
-                containerStyle={{
-                  position: 'absolute',
-                  top: -2,
-                  right: -2,
-                  elevation: 20,
-                  zIndex: 20
-                }}
-              />
-            )}
           </TouchableOpacity>
         </View>
       </SafeAreaView>

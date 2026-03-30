@@ -7,6 +7,7 @@ import * as CONST from '../../../consts'
 import IdentityHeaderIcon from '../../../components/IdentityHeaderIcon'
 import LinearProgress from '../../../components/ui/LinearProgress'
 import WaveHeaderIcon from '../../../components/WaveHeaderIcon'
+import FriendsHeaderIcon from '../../../components/FriendsHeaderIcon'
 
 const PhotosListHeader = ({ theme, loading }) => {
   const headerHeight = 60
@@ -49,16 +50,18 @@ const PhotosListHeader = ({ theme, loading }) => {
           <IdentityHeaderIcon />
         </View>
 
-        {/* Right: Wave icon */}
+        {/* Right: Wave + Friends icons */}
         <View
           style={{
             position: 'absolute',
             right: 16,
-            width: 40,
-            height: 40
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8
           }}
         >
           <WaveHeaderIcon />
+          <FriendsHeaderIcon />
         </View>
       </View>
       {loading && (

@@ -160,6 +160,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const [, setFriendsList] = useAtom(STATE.friendsList)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
+  const setFriendsUnreadCount = useSetAtom(STATE.friendsUnreadCount)
 
   const toastTopOffset = useToastTopOffset()
 
@@ -216,7 +217,6 @@ const PhotosList = ({ searchFromUrl }) => {
   }, [locationState.coords?.latitude, locationState.coords?.longitude, feedLocationVersion])
 
   const [unreadCountList, setUnreadCountList] = useState([])
-  const [unreadCount, setUnreadCount] = useState(0)
 
   const {
     pendingPhotos,
@@ -344,7 +344,8 @@ const PhotosList = ({ searchFromUrl }) => {
   })
 
   useEffect(() => {
-    setUnreadCount(unreadCountList.reduce((a, b) => a + (b.unread || 0), 0))
+    const total = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
+    setFriendsUnreadCount(total)
   }, [unreadCountList])
 
   // Long-press handler — open quick-actions modal
@@ -475,7 +476,6 @@ const PhotosList = ({ searchFromUrl }) => {
           theme={theme}
           navigation={navigation}
           netAvailable={netAvailable}
-          unreadCount={unreadCount}
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           locationReady={!!location}
@@ -546,7 +546,6 @@ const PhotosList = ({ searchFromUrl }) => {
             theme={theme}
             navigation={navigation}
             netAvailable={netAvailable}
-            unreadCount={unreadCount}
             isCameraOpening={isCameraOpening}
             onCameraPress={checkPermissionsForPhotoTaking}
             locationReady={!!location}
@@ -635,7 +634,6 @@ const PhotosList = ({ searchFromUrl }) => {
           theme={theme}
           navigation={navigation}
           netAvailable={netAvailable}
-          unreadCount={unreadCount}
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           locationReady={false}
@@ -700,7 +698,6 @@ const PhotosList = ({ searchFromUrl }) => {
           theme={theme}
           navigation={navigation}
           netAvailable={netAvailable}
-          unreadCount={unreadCount}
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           locationReady={!!location}
@@ -758,7 +755,6 @@ const PhotosList = ({ searchFromUrl }) => {
         theme={theme}
         navigation={navigation}
         netAvailable={netAvailable}
-        unreadCount={unreadCount}
         isCameraOpening={isCameraOpening}
         onCameraPress={checkPermissionsForPhotoTaking}
         locationReady={!!location}

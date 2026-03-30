@@ -21,3 +21,5 @@ export const netAvailable = atom(true)
 export const wavesCount = atom(null)
 
 export const ungroupedPhotosCount = atom(null)
+
+export const friendsUnreadCount = atom(null)
