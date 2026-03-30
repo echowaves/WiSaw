@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   useWindowDimensions
 } from 'react-native'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router, useFocusEffect } from 'expo-router'
@@ -44,8 +44,8 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [sortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection] = useAtom(STATE.waveSortDirection)
-  const [, setWavesCount] = useAtom(STATE.wavesCount)
-  const [, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
+  const setWavesCount = useSetAtom(STATE.wavesCount)
+  const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)

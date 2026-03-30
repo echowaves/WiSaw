@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import * as Crypto from 'expo-crypto'
 
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import React, { useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
@@ -170,7 +170,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const [photosList, setPhotosList] = useState([])
   const [, setFriendsList] = useAtom(STATE.friendsList)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
+  const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [pendingTriggerSearch, setPendingTriggerSearch] = useState(null)
@@ -688,6 +688,10 @@ const PhotosList = ({ searchFromUrl }) => {
 
       return () => {
         isMounted = false
+        // Dismiss keyboard immediately so it doesn't interfere with the
+        // destination screen's mount (e.g. WavesHub's KeyboardStickyView
+        // reacts to ongoing keyboard-dismiss animations and freezes).
+        Keyboard.dismiss()
         // Cancel any in-flight reload/load chains when screen loses focus
         abortControllerRef.current?.abort()
       }

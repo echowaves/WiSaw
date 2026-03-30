@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Stack, useRouter, useFocusEffect } from 'expo-router'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import AppHeader from '../../../src/components/AppHeader'
 import ActionMenu from '../../../src/components/ActionMenu'
 import WavesHub from '../../../src/screens/WavesHub'
@@ -18,7 +18,7 @@ export default function WavesScreen() {
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [ungroupedCount, setUngroupedCount] = useAtom(STATE.ungroupedPhotosCount)
-  const [, setWavesCount] = useAtom(STATE.wavesCount)
+  const setWavesCount = useSetAtom(STATE.wavesCount)
   const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
   const [menuVisible, setMenuVisible] = useState(false)

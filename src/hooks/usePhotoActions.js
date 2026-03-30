@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Alert } from 'react-native'
 import Toast from 'react-native-toast-message'
-import { useAtom } from 'jotai'
+import { useSetAtom } from 'jotai'
 
 import * as reducer from '../components/Photo/reducer'
 import { addPhotoToWave, removePhotoFromWave, createWave } from '../screens/Waves/reducer'
@@ -11,7 +11,7 @@ import * as STATE from '../state'
 const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopOffset, onDeleted, onRemovedFromWave }) => {
   const [bans, setBans] = useState([])
   const [waveModalVisible, setWaveModalVisible] = useState(false)
-  const [, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
+  const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
 
   const isOwnPhoto = photo?.uuid === uuid
 
