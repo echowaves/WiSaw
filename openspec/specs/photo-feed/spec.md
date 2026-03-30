@@ -35,10 +35,22 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 #### Scenario: Feed data flow uses explicit parameters
 - **WHEN** `load()` is called from `reload()`, `submitSearch()`, `handleClearSearch()`, or `handleLoadMore()`
 - **THEN** `load()` SHALL accept explicit override parameters `(segmentOverride, searchTermOverride, signal, pageOverride)` to prevent stale React state closures
+- **THEN** `load()` SHALL read `{ photos, batch, noMoreData, nextPage }` from `getPhotos()`
 - **THEN** `reload()` SHALL always pass page 0 explicitly to `load()`
 - **THEN** `handleLoadMore()` SHALL compute the new page inside `setPageNumber`'s state updater and pass it via `load(null, null, null, newPage)`
 - **THEN** `submitSearch()` SHALL call `reload(activeSegment, searchTerm)` without redundant state resets
 - **THEN** `handleClearSearch()` SHALL call `reload(activeSegment, '')` passing the empty string explicitly
+
+#### Scenario: Empty response handling branches on search state
+- **WHEN** `load()` receives an empty photos array
+- **THEN** if `noMoreData` is true, `stopLoading` SHALL be set to true regardless of search state
+- **THEN** if search is active and `noMoreData` is false and `nextPage` is provided, `load()` SHALL auto-page by recursively calling itself with `nextPage`
+- **THEN** if no search term is active, the existing consecutive-empty heuristic SHALL apply (stop on first empty if list is empty, or after 10 consecutive empties)
+
+#### Scenario: Successful response updates page cursor
+- **WHEN** `load()` receives photos and `nextPage` is provided in the response
+- **THEN** `pageNumber` SHALL be updated to `nextPage` via `setPageNumber(nextPage)`
+- **THEN** subsequent `handleLoadMore` calls SHALL start from the updated page number
 
 #### Scenario: Photos remain in feed after auto-grouping
 - **WHEN** photos are assigned to waves via auto-grouping

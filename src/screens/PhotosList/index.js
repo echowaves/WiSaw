@@ -532,7 +532,7 @@ const PhotosList = ({ searchFromUrl }) => {
     // Use explicit page number to avoid stale closure
     const effectivePage = pageOverride !== null ? pageOverride : pageNumber
 
-    const { photos, batch } = await reducer.getPhotos({
+    const { photos, batch, noMoreData, nextPage } = await reducer.getPhotos({
       uuid,
       zeroMoment,
       location,
@@ -547,25 +547,42 @@ const PhotosList = ({ searchFromUrl }) => {
     if (signal?.aborted) return
 
     if (batch === currentBatch) {
-      // Track consecutive empty responses
       if (!photos || photos.length === 0) {
-        setConsecutiveEmptyResponses((prev) => {
-          const newCount = prev + 1
+        if (noMoreData) {
+          // Backend says no more data — stop loading
+          setStopLoading(true)
+        } else if (effectiveSearchTerm && effectiveSearchTerm.length > 0 && nextPage != null) {
+          // Search active, empty page but more data exists — auto-page using backend cursor
+          setPageNumber(nextPage)
+          if (!signal?.aborted) {
+            await load(effectiveSegment, effectiveSearchTerm, signal, nextPage)
+          }
+          return
+        } else {
+          // No search term — use consecutive empty heuristic
+          setConsecutiveEmptyResponses((prev) => {
+            const newCount = prev + 1
 
-          // Stop loading on first empty response if photosList is empty (initial load)
-          // or after 10 consecutive empty responses (pagination exhausted)
-          setPhotosList((currentList) => {
-            if (currentList.length === 0 || newCount >= 10) {
-              setStopLoading(true)
-            }
-            return currentList
+            // Stop loading on first empty response if photosList is empty (initial load)
+            // or after 10 consecutive empty responses (pagination exhausted)
+            setPhotosList((currentList) => {
+              if (currentList.length === 0 || newCount >= 10) {
+                setStopLoading(true)
+              }
+              return currentList
+            })
+
+            return newCount
           })
-
-          return newCount
-        })
+        }
       } else {
         // Reset consecutive empty count when we get data
         setConsecutiveEmptyResponses(0)
+
+        // Update page number to nextPage cursor if backend provided one
+        if (nextPage != null) {
+          setPageNumber(nextPage)
+        }
 
         // Add photos to list - freeze them immediately to prevent mutations
         setPhotosList((currentList) => {

@@ -45,13 +45,20 @@ const SearchFab = ({
   // Animated bar that expands behind the FAB
   const barStyle = useAnimatedStyle(() => ({
     width: interpolate(progress.value, [0, 1], [FAB_SIZE, expandedWidth]),
-    opacity: interpolate(progress.value, [0, 0.3], [0, 1])
+    opacity: interpolate(progress.value, [0, 0.3], [0, 1]),
+    paddingLeft: interpolate(progress.value, [0, 1], [FAB_SIZE + 4, 16]),
+    paddingRight: interpolate(progress.value, [0, 1], [16, FAB_SIZE + 4])
   }))
 
   // Input fades/slides in only when bar is mostly expanded
   const inputOpacity = useAnimatedStyle(() => ({
     opacity: interpolate(progress.value, [0.4, 0.8], [0, 1]),
     width: progress.value > 0.3 ? 'auto' : 0
+  }))
+
+  // FAB button slides from left to right when expanding
+  const fabPositionStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(progress.value, [0, 1], [0, expandedWidth - FAB_SIZE]) }]
   }))
 
   // Slide the whole FAB up when keyboard is visible
@@ -66,8 +73,11 @@ const SearchFab = ({
     }
   })
 
+  const canSubmit = searchTerm.length >= 3
+
   const handleFabPress = () => {
     if (isExpanded) {
+      if (!canSubmit) return
       Keyboard.dismiss()
       onSubmitSearch()
     } else {
@@ -104,6 +114,7 @@ const SearchFab = ({
             value={searchTerm}
             onChangeText={setSearchTerm}
             onSubmitEditing={() => {
+              if (searchTerm.length < 3) return
               Keyboard.dismiss()
               onSubmitSearch()
             }}
@@ -122,19 +133,22 @@ const SearchFab = ({
       </Animated.View>
 
       {/* FAB button — always on top, never clipped */}
-      <Pressable
-        onPress={handleFabPress}
-        style={[
-          styles.fabButton,
-          { backgroundColor: theme.INTERACTIVE_PRIMARY }
-        ]}
-      >
-        <Ionicons
-          name={isExpanded ? 'send' : 'search'}
-          size={22}
-          color='white'
-        />
-      </Pressable>
+      <Animated.View style={fabPositionStyle}>
+        <Pressable
+          onPress={handleFabPress}
+          disabled={isExpanded && !canSubmit}
+          style={[
+            styles.fabButton,
+            { backgroundColor: theme.INTERACTIVE_PRIMARY, opacity: isExpanded && !canSubmit ? 0.4 : 1 }
+          ]}
+        >
+          <Ionicons
+            name={isExpanded ? 'send' : 'search'}
+            size={22}
+            color='white'
+          />
+        </Pressable>
+      </Animated.View>
     </Animated.View>
   )
 }
@@ -157,8 +171,6 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: FAB_SIZE + 4,
-    paddingRight: 16,
     overflow: 'hidden',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,

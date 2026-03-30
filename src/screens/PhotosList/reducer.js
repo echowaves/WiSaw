@@ -85,6 +85,7 @@ const FEED_BY_DATE_QUERY = gql`
       }
       batch
       noMoreData
+      nextPage
     }
   }
 `
@@ -109,6 +110,7 @@ const FEED_FOR_WATCHER_QUERY = gql`
       }
       batch
       noMoreData
+      nextPage
     }
   }
 `
@@ -163,7 +165,8 @@ async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, sear
     return {
       photos: response.data.feedByDate.photos,
       batch: response.data.feedByDate.batch,
-      noMoreData: response.data.feedByDate.noMoreData
+      noMoreData: response.data.feedByDate.noMoreData,
+      nextPage: response.data.feedByDate.nextPage
     }
   } catch (err) {
     console.error({ err })
@@ -191,7 +194,8 @@ async function requestWatchedPhotos ({ uuid, pageNumber, batch, searchTerm }) {
     return {
       photos: response.data.feedForWatcher.photos,
       batch: response.data.feedForWatcher.batch,
-      noMoreData: response.data.feedForWatcher.noMoreData
+      noMoreData: response.data.feedForWatcher.noMoreData,
+      nextPage: response.data.feedForWatcher.nextPage
     }
   } catch (err5) {
     console.error({ err5 })
