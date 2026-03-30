@@ -1,7 +1,7 @@
 ## Requirements
 
 ### Requirement: Location-Based Feed Filtering
-The system SHALL filter the Global feed to show only photos taken near the user's current GPS location, reading coordinates from the global `locationAtom`. After auto-grouping, newly wave-assigned photos SHALL continue to appear in the Global feed as before; wave assignment does not remove photos from the location-based feed. The feed query SHALL NOT accept a wave filtering parameter. The feed SHALL show appropriate UI states while location is pending or denied. When location is unavailable, the watched photos segment and search segment SHALL still load and function normally — only the geo feed segment SHALL require location coordinates. The feed SHALL NOT automatically reload when coordinates change; instead, the user SHALL be notified via a drift banner and must manually trigger a reload.
+The system SHALL filter the Global feed to show only photos taken near the user's current GPS location, reading coordinates from the global `locationAtom`. After auto-grouping, newly wave-assigned photos SHALL continue to appear in the Global feed as before; wave assignment does not remove photos from the location-based feed. The feed query SHALL NOT accept a wave filtering parameter. The feed SHALL show appropriate UI states while location is pending or denied. When location is unavailable, the Starred segment SHALL still load and function normally — only the geo feed segment SHALL require location coordinates. The feed SHALL NOT automatically reload when coordinates change; instead, the user SHALL be notified via a drift banner and must manually trigger a reload.
 
 #### Scenario: User has location permission granted
 - **WHEN** `locationAtom.status` is `ready` and the feed is fetched
@@ -22,14 +22,23 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 - **THEN** the feed SHALL NOT call the geo query
 
 #### Scenario: Watched photos load without location
-- **WHEN** `locationAtom.status` is `pending` or `denied` and `activeSegment` is 1 (watched)
-- **THEN** the watched photos query SHALL execute normally using `uuid`, `pageNumber`, and `batch`
-- **THEN** the user SHALL see their watched photos regardless of location state
+- **WHEN** `locationAtom.status` is `pending` or `denied` and `activeSegment` is 1 (Starred)
+- **THEN** the Starred photos query SHALL execute normally using `uuid`, `pageNumber`, and `batch`
+- **THEN** the user SHALL see their Starred photos regardless of location state
 
-#### Scenario: Search loads without location
-- **WHEN** `locationAtom.status` is `pending` or `denied` and `activeSegment` is 2 (search) and search term has 3+ characters
-- **THEN** the search query SHALL execute normally using `searchTerm`, `pageNumber`, and `batch`
+#### Scenario: Search loads without location via FAB
+- **WHEN** `locationAtom.status` is `pending` or `denied` and `searchTerm` is non-empty
+- **THEN** the search term SHALL be passed as an optional parameter to the active segment's feed endpoint (`feedByDate` or `feedForWatcher`)
+- **THEN** the standalone `feedForTextSearch` endpoint SHALL NOT be used (it is reserved for the web app)
 - **THEN** search results SHALL be displayed regardless of location state
+
+#### Scenario: Feed data flow uses explicit parameters
+- **WHEN** `load()` is called from `reload()`, `submitSearch()`, `handleClearSearch()`, or `handleLoadMore()`
+- **THEN** `load()` SHALL accept explicit override parameters `(segmentOverride, searchTermOverride, signal, pageOverride)` to prevent stale React state closures
+- **THEN** `reload()` SHALL always pass page 0 explicitly to `load()`
+- **THEN** `handleLoadMore()` SHALL compute the new page inside `setPageNumber`'s state updater and pass it via `load(null, null, null, newPage)`
+- **THEN** `submitSearch()` SHALL call `reload(activeSegment, searchTerm)` without redundant state resets
+- **THEN** `handleClearSearch()` SHALL call `reload(activeSegment, '')` passing the empty string explicitly
 
 #### Scenario: Photos remain in feed after auto-grouping
 - **WHEN** photos are assigned to waves via auto-grouping
@@ -46,30 +55,8 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 - **THEN** `feedLocationRef.current` SHALL be set to the current `locationAtom.coords`
 - **THEN** the feed query SHALL use the current `locationAtom.coords`
 
-### Requirement: PhotosList search bar keyboard handling
-The PhotosList search bar SHALL use `KeyboardStickyView` from `react-native-keyboard-controller` with a negative `closed` offset so the search bar is visible above the footer when the keyboard is closed. The `closed` offset SHALL be `-(FOOTER_HEIGHT + FOOTER_GAP)` (currently `-94`) to translate the search bar upward from its natural document-flow position, clearing the absolute-positioned footer. The `opened` offset SHALL remain `KEYBOARD_GAP` (`16`). In the results render branch (`photosList.length > 0`), both the `PhotosListSearchBar` and `PhotosListFooter` SHALL be rendered at the outer View level (outside `<View style={styles.container}>`), matching their placement in the default/empty-state branches.
-
-#### Scenario: Search bar visible when keyboard is closed
-- **WHEN** the search segment is active (`activeSegment === 2`) and the keyboard is closed
-- **THEN** the search bar SHALL be visible on screen, positioned above the footer
-- **THEN** the `KeyboardStickyView` `closed` offset SHALL be `-(FOOTER_HEIGHT + FOOTER_GAP)` to translate the bar upward from its natural position
-
-#### Scenario: Search bar stays above keyboard
-- **WHEN** a user taps the search bar in the photos list
-- **THEN** the search bar SHALL remain positioned directly above the keyboard
-
-#### Scenario: Search bar returns to position above footer
-- **WHEN** the keyboard is dismissed
-- **THEN** the search bar SHALL return to its position above the footer
-
-#### Scenario: Search results render without gap
-- **WHEN** search results are displayed (`photosList.length > 0` and `activeSegment === 2`)
-- **THEN** the `PhotosListSearchBar` and `PhotosListFooter` SHALL be rendered as siblings at the outer `<View style={{ flex: 1 }}>` level, outside `<View style={styles.container}>`
-- **THEN** the masonry grid SHALL start immediately below the header with no empty gap
-
-#### Scenario: Empty search results show search bar
-- **WHEN** a search returns zero results (`photosList.length === 0` and `activeSegment === 2`)
-- **THEN** the search bar SHALL remain visible with the same positioning as the non-empty results state
+### ~~Requirement: PhotosList search bar keyboard handling~~
+**REMOVED**: Replaced by the SearchFab component which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
 
 ### Requirement: Photo feed state management
 The PhotosList screen SHALL store its photo array in screen-local state (`useState`) rather than a global Jotai atom. Photos SHALL be frozen via `createFrozenPhoto` at write boundaries (fetch and upload callbacks). The screen SHALL provide a `PhotosListContext` with a `removePhoto` function that filters the local state, consistent with WaveDetail's pattern. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext` instead of instantiating a local `usePhotoUploader`. Upload completions SHALL be received via the upload bus subscription. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen. The screen SHALL maintain an `AbortController` ref to cancel in-flight `reload()`/`load()` async chains when a new segment switch occurs or when the screen loses focus. All `setState` calls within async `load()`/`reload()` functions SHALL check `signal.aborted` before executing. The `pageNumber` useEffect SHALL be removed; pagination SHALL trigger `load()` explicitly from the pagination call site.
