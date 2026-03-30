@@ -72,7 +72,7 @@ The PhotosList search bar SHALL use `KeyboardStickyView` from `react-native-keyb
 - **THEN** the search bar SHALL remain visible with the same positioning as the non-empty results state
 
 ### Requirement: Photo feed state management
-The PhotosList screen SHALL store its photo array in screen-local state (`useState`) rather than a global Jotai atom. Photos SHALL be frozen via `createFrozenPhoto` at write boundaries (fetch and upload callbacks). The screen SHALL provide a `PhotosListContext` with a `removePhoto` function that filters the local state, consistent with WaveDetail's pattern. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext` instead of instantiating a local `usePhotoUploader`. Upload completions SHALL be received via the upload bus subscription. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen.
+The PhotosList screen SHALL store its photo array in screen-local state (`useState`) rather than a global Jotai atom. Photos SHALL be frozen via `createFrozenPhoto` at write boundaries (fetch and upload callbacks). The screen SHALL provide a `PhotosListContext` with a `removePhoto` function that filters the local state, consistent with WaveDetail's pattern. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext` instead of instantiating a local `usePhotoUploader`. Upload completions SHALL be received via the upload bus subscription. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen. The screen SHALL maintain an `AbortController` ref to cancel in-flight `reload()`/`load()` async chains when a new segment switch occurs or when the screen loses focus. All `setState` calls within async `load()`/`reload()` functions SHALL check `signal.aborted` before executing. The `pageNumber` useEffect SHALL be removed; pagination SHALL trigger `load()` explicitly from the pagination call site.
 
 #### Scenario: PhotosList initializes with empty local state
 - **WHEN** the PhotosList screen mounts
@@ -98,13 +98,25 @@ The PhotosList screen SHALL store its photo array in screen-local state (`useSta
 - **THEN** it SHALL NOT instantiate its own `usePhotoUploader`
 
 #### Scenario: Cross-screen photo deletion received
-- **WHEN** the `photoDeletionBus` emits `{ photoId }`
-- **THEN** the PhotosList screen SHALL remove the photo with that ID from its local state
-- **THEN** the masonry grid SHALL re-render without the deleted photo
+- **WHEN** a `photoDeletionBus` event is emitted with a photo ID
+- **THEN** the PhotosList SHALL remove the matching photo from its local `useState` array
 
-#### Scenario: Deletion bus subscription cleanup
-- **WHEN** the PhotosList screen unmounts
-- **THEN** the `photoDeletionBus` subscription SHALL be cleaned up via the `useEffect` return function
+#### Scenario: Segment switch cancels in-flight loads
+- **WHEN** the user taps a different segment while a `reload()` or `load()` chain is in flight
+- **THEN** the previous AbortController SHALL be aborted
+- **THEN** a new AbortController SHALL be created for the new reload chain
+- **THEN** all `setState` calls from the aborted chain SHALL be skipped
+
+#### Scenario: Screen blur cancels in-flight loads
+- **WHEN** the user navigates away from PhotosList (e.g., to Waves via drawer or header icon)
+- **THEN** the current AbortController SHALL be aborted
+- **THEN** no further `setState` calls from the in-flight chain SHALL execute
+
+#### Scenario: Pagination triggers load explicitly
+- **WHEN** the masonry grid reaches the end threshold and more data is available
+- **THEN** `setPageNumber` SHALL be called with the next page number
+- **THEN** `load()` SHALL be called explicitly from the same handler
+- **THEN** no `useEffect` watching `pageNumber` SHALL exist
 
 ## REMOVED Requirements
 
