@@ -170,6 +170,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const [photosList, setPhotosList] = useState([])
   const [, setFriendsList] = useAtom(STATE.friendsList)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+  const [, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [pendingTriggerSearch, setPendingTriggerSearch] = useState(null)
@@ -400,7 +401,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Subscribe to upload completions via event bus
   useEffect(() => {
-    return subscribeToUploadComplete(({ photo }) => {
+    return subscribeToUploadComplete(({ photo, waveUuid }) => {
       setPhotosList((currentList) => {
         const updatedList = [createFrozenPhoto(photo), ...currentList]
         const seen = new Set()
@@ -410,6 +411,9 @@ const PhotosList = ({ searchFromUrl }) => {
           return true
         })
       })
+      if (!waveUuid) {
+        setUngroupedPhotosCount(prev => (prev ?? 0) + 1)
+      }
     })
   }, [setPhotosList])
 

@@ -9,7 +9,7 @@ import WavesHub from '../../../src/screens/WavesHub'
 import { SHARED_STYLES, getTheme } from '../../../src/theme/sharedStyles'
 import { emitAutoGroup, subscribeToAutoGroupDone } from '../../../src/events/autoGroupBus'
 import { emitAddWave } from '../../../src/events/waveAddBus'
-import { getUngroupedPhotosCount } from '../../../src/screens/Waves/reducer'
+import { getUngroupedPhotosCount, getWavesCount } from '../../../src/screens/Waves/reducer'
 import { saveWaveSortPreferences } from '../../../src/utils/waveStorage'
 import * as STATE from '../../../src/state'
 
@@ -17,38 +17,43 @@ export default function WavesScreen() {
   const router = useRouter()
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [ungroupedCount, setUngroupedCount] = useState(0)
+  const [ungroupedCount, setUngroupedCount] = useAtom(STATE.ungroupedPhotosCount)
+  const [, setWavesCount] = useAtom(STATE.wavesCount)
   const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
   const [menuVisible, setMenuVisible] = useState(false)
   const theme = getTheme(isDarkMode)
 
-  const fetchUngroupedCount = useCallback(async () => {
+  const fetchCounts = useCallback(async () => {
     if (!uuid) return
     try {
-      const count = await getUngroupedPhotosCount({ uuid })
-      setUngroupedCount(count)
+      const [uc, wc] = await Promise.all([
+        getUngroupedPhotosCount({ uuid }),
+        getWavesCount({ uuid })
+      ])
+      setUngroupedCount(uc)
+      setWavesCount(wc)
     } catch (error) {
-      console.error('Failed to fetch ungrouped count:', error)
+      console.error('Failed to fetch wave counts:', error)
     }
   }, [uuid])
 
   useEffect(() => {
     const unsubscribe = subscribeToAutoGroupDone(() => {
-      fetchUngroupedCount()
+      fetchCounts()
     })
     return unsubscribe
-  }, [fetchUngroupedCount])
+  }, [fetchCounts])
 
   useFocusEffect(
     useCallback(() => {
-      fetchUngroupedCount()
-    }, [fetchUngroupedCount])
+      fetchCounts()
+    }, [fetchCounts])
   )
 
   const autoGroupLabel =
-    ungroupedCount > 0
-      ? `Auto Group (${ungroupedCount} ungrouped)`
+    (ungroupedCount ?? 0) > 0
+      ? `Auto Group (${ungroupedCount ?? 0} ungrouped)`
       : 'Auto Group'
 
   const sortOptions = [
@@ -69,7 +74,7 @@ export default function WavesScreen() {
       key: 'autogroup',
       icon: 'view-grid-plus-outline',
       label: autoGroupLabel,
-      onPress: () => emitAutoGroup(ungroupedCount)
+      onPress: () => emitAutoGroup(ungroupedCount ?? 0)
     },
     'separator',
     ...sortOptions.map((opt, i) => ({
@@ -116,7 +121,7 @@ export default function WavesScreen() {
                     size={22}
                     color={theme.TEXT_PRIMARY}
                   />
-                  {ungroupedCount > 0 && (
+                  {(ungroupedCount ?? 0) > 0 && (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>
                         {ungroupedCount}
@@ -129,7 +134,7 @@ export default function WavesScreen() {
           )
         }}
       />
-      <WavesHub ungroupedCount={ungroupedCount} />
+      <WavesHub ungroupedCount={ungroupedCount ?? 0} />
       <ActionMenu
         visible={menuVisible}
         onClose={() => setMenuVisible(false)}

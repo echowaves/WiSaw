@@ -1,14 +1,17 @@
 import { useCallback, useState } from 'react'
 import { Alert } from 'react-native'
 import Toast from 'react-native-toast-message'
+import { useAtom } from 'jotai'
 
 import * as reducer from '../components/Photo/reducer'
 import { addPhotoToWave, removePhotoFromWave, createWave } from '../screens/Waves/reducer'
 import { emitPhotoDeletion } from '../events/photoDeletionBus'
+import * as STATE from '../state'
 
 const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopOffset, onDeleted, onRemovedFromWave }) => {
   const [bans, setBans] = useState([])
   const [waveModalVisible, setWaveModalVisible] = useState(false)
+  const [, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
 
   const isOwnPhoto = photo?.uuid === uuid
 
@@ -145,6 +148,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
     })
     try {
       await addPhotoToWave({ waveUuid: wave.waveUuid, photoId: photo.id, uuid })
+      setUngroupedPhotosCount(prev => Math.max((prev ?? 1) - 1, 0))
       Toast.show({
         text1: `Added to: ${wave.name}`,
         type: 'success',
@@ -202,6 +206,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         waveUuid: newWave.waveUuid
       })
       await addPhotoToWave({ waveUuid: newWave.waveUuid, photoId: photo.id, uuid })
+      setUngroupedPhotosCount(prev => Math.max((prev ?? 1) - 1, 0))
       Toast.show({
         text1: `Added to new wave: ${name}`,
         type: 'success',

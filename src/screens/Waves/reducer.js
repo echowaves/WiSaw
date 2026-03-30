@@ -228,3 +228,20 @@ export const getUngroupedPhotosCount = async ({ uuid }) => {
     throw err
   }
 }
+
+export const getWavesCount = async ({ uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query getWavesCount($uuid: String!) {
+          getWavesCount(uuid: $uuid)
+        }
+      `,
+      variables: { uuid },
+    })
+    return response.data.getWavesCount
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}

@@ -29,6 +29,7 @@ import EmptyStateCard from '../../components/EmptyStateCard'
 import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
+import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
@@ -43,6 +44,8 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [sortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection] = useAtom(STATE.waveSortDirection)
+  const [, setWavesCount] = useAtom(STATE.wavesCount)
+  const [, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -182,6 +185,7 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         uuid
       })
       setWaves(prev => [{ ...newWave, thumbnails: [], photos: [] }, ...prev])
+      setWavesCount(prev => (prev ?? 0) + 1)
       setModalVisible(false)
       setNewWaveName('')
       setNewWaveDescription('')
@@ -205,8 +209,11 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
           style: 'destructive',
           onPress: async () => {
             try {
+              const waveToDelete = waves.find(w => w.waveUuid === waveUuid)
               await reducer.deleteWave({ waveUuid, uuid })
               setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
+              setWavesCount(prev => Math.max((prev ?? 1) - 1, 0))
+              setUngroupedPhotosCount(prev => (prev ?? 0) + (waveToDelete?.photosCount ?? 0))
               emitAutoGroupDone()
               Toast.show({ type: 'success', text1: 'Wave deleted' })
             } catch (error) {
@@ -287,6 +294,8 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
                   text1: 'Photos grouped successfully',
                   text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
                 })
+                setWavesCount(prev => (prev ?? 0) + totalWavesCreated)
+                setUngroupedPhotosCount(0)
                 handleRefresh()
               }
             } catch (error) {
@@ -477,16 +486,11 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
                 />
                 )
               : (
-                <EmptyStateCard
-                  icon='water'
-                  iconType='FontAwesome5'
-                  title='No Waves Yet'
-                  subtitle='Create your first wave to start organizing photos.'
-                  actionText='Create a Wave'
-                  onActionPress={() => setModalVisible(true)}
-                  iconColor={theme.TEXT_PRIMARY}
-                  secondaryActionText={ungroupedCount > 0 ? `Auto Group ${ungroupedCount} photos` : undefined}
-                  onSecondaryActionPress={ungroupedCount > 0 ? () => emitAutoGroup(ungroupedCount) : undefined}
+                <WavesExplainerView
+                  theme={theme}
+                  ungroupedCount={ungroupedCount}
+                  onAutoGroup={() => emitAutoGroup(ungroupedCount)}
+                  onNavigateHome={() => router.navigate('/')}
                 />
                 )
           )
