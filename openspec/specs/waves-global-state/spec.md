@@ -17,7 +17,7 @@ The system SHALL maintain two Jotai atoms in `src/state.js` — `wavesCount` and
 - **THEN** the current atom values SHALL be used directly
 
 ### Requirement: Local atom updates at mutation sites
-The system SHALL update `wavesCount` and `ungroupedPhotosCount` atoms directly at mutation call sites, without additional backend queries.
+The system SHALL update `wavesCount` and `ungroupedPhotosCount` atoms directly at mutation call sites, without additional backend queries. Components that only write to these atoms (never render based on their value) SHALL use `useSetAtom` instead of `useAtom` to avoid unnecessary re-render subscriptions.
 
 #### Scenario: Photo uploaded without wave assignment
 - **WHEN** a photo upload completes and `waveUuid` is undefined
@@ -45,6 +45,11 @@ The system SHALL update `wavesCount` and `ungroupedPhotosCount` atoms directly a
 - **WHEN** a photo is successfully added to a wave via `addPhotoToWave`
 - **THEN** `ungroupedPhotosCount` SHALL be decremented by 1 (floored at 0)
 
+#### Scenario: Write-only consumers do not re-render on external writes
+- **WHEN** a component uses only the setter for `wavesCount` or `ungroupedPhotosCount` (never reads the value)
+- **THEN** it SHALL use `useSetAtom(atom)` instead of `useAtom(atom)`
+- **THEN** it SHALL NOT re-render when another component writes to the same atom
+
 ### Requirement: Focus refresh re-syncs atoms
 The system SHALL re-fetch both `getWavesCount` and `getUngroupedPhotosCount` from the backend when the waves screen gains focus, writing the results to the global atoms to correct any drift.
 
@@ -60,3 +65,11 @@ The system SHALL provide a `getWavesCount` function in `src/screens/Waves/reduce
 - **WHEN** `getWavesCount({ uuid })` is called with a valid uuid
 - **THEN** it SHALL execute the `getWavesCount` GraphQL query
 - **THEN** it SHALL return the integer count from `response.data.getWavesCount`
+
+### Requirement: Keyboard dismissed on PhotosList focus loss
+The system SHALL dismiss the keyboard when PhotosList loses focus, preventing keyboard-animation conflicts with `KeyboardStickyView` / `KeyboardAvoidingView` in destination screens.
+
+#### Scenario: User navigates away from PhotosList with keyboard active
+- **WHEN** the PhotosList screen loses focus (useFocusEffect cleanup fires)
+- **THEN** `Keyboard.dismiss()` SHALL be called immediately
+- **THEN** the keyboard SHALL be fully dismissed before the destination screen mounts

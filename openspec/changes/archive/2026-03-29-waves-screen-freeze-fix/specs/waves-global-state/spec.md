@@ -49,8 +49,3 @@ The system SHALL dismiss the keyboard when PhotosList loses focus, preventing ke
 - **WHEN** the PhotosList screen loses focus (useFocusEffect cleanup fires)
 - **THEN** `Keyboard.dismiss()` SHALL be called immediately
 - **THEN** the keyboard SHALL be fully dismissed before the destination screen mounts
-
-#### Scenario: Waves list defers load until animation completes
-- **WHEN** WavesHub gains focus via `useFocusEffect`
-- **THEN** the `loadWaves` call SHALL be deferred via `InteractionManager.runAfterInteractions()`
-- **THEN** the navigation animation SHALL complete smoothly without JS thread contention
