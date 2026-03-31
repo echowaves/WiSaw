@@ -31,6 +31,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
+import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
@@ -473,6 +474,11 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          ungroupedCount > 0
+            ? <UngroupedPhotosCard ungroupedCount={ungroupedCount} uuid={uuid} theme={theme} />
+            : null
+        }
         ListEmptyComponent={
           !loading && (
             searchText.length > 0

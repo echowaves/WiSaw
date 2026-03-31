@@ -1,62 +1,32 @@
-import React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
-import { FontAwesome5, Ionicons } from '@expo/vector-icons'
-import CachedImage from 'expo-cached-image'
+import React, { useCallback } from 'react'
+import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 
-import * as CONST from '../../consts'
-
-const isValidImageUri = (uri) => {
-  return uri && typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))
-}
+import WavePhotoStrip from '../WavePhotoStrip'
+import { fetchWavePhotos } from '../../screens/WaveDetail/reducer'
 
 const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
   const photoCount = wave.photosCount ?? 0
   const photos = wave.photos || []
 
-  const renderCollage = () => {
-    if (photos.length === 0) {
-      return (
-        <View style={[styles.placeholder, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-          <FontAwesome5 name='water' size={32} color={theme.TEXT_SECONDARY} />
-        </View>
-      )
-    }
-
-    return (
-      <View style={styles.collageContainer}>
-        {[0, 1, 2, 3].map((index) => {
-          const photo = photos[index]
-          if (photo && isValidImageUri(photo.thumbUrl)) {
-            return (
-              <CachedImage
-                key={`${photo.id}`}
-                source={{ uri: photo.thumbUrl }}
-                cacheKey={`${photo.id}-thumb`}
-                style={styles.collageImage}
-                resizeMode='cover'
-              />
-            )
-          }
-          return (
-            <View
-              key={`empty-${index}`}
-              style={[styles.collageImage, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
-            />
-          )
-        })}
-      </View>
-    )
-  }
+  const fetchFn = useCallback(async (pageNumber, batch) => {
+    return fetchWavePhotos({ waveUuid: wave.waveUuid, pageNumber, batch })
+  }, [wave.waveUuid])
 
   return (
-    <TouchableOpacity
+    <View
       style={[styles.card, { backgroundColor: theme.CARD_BACKGROUND }]}
-      onPress={() => onPress(wave)}
-      onLongPress={() => onLongPress(wave)}
-      activeOpacity={0.8}
     >
-      {renderCollage()}
-      <View style={styles.infoContainer}>
+      <WavePhotoStrip
+        initialPhotos={photos}
+        fetchFn={fetchFn}
+        theme={theme}
+      />
+      <Pressable
+        onPress={() => onPress(wave)}
+        onLongPress={() => onLongPress(wave)}
+        style={styles.infoContainer}
+      >
         <View style={styles.infoRow}>
           <View style={styles.infoTextContainer}>
             <Text style={[styles.waveName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
@@ -74,8 +44,8 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
             <Ionicons name='ellipsis-vertical' size={18} color={theme.TEXT_SECONDARY} />
           </TouchableOpacity>
         </View>
-      </View>
-    </TouchableOpacity>
+      </Pressable>
+    </View>
   )
 }
 
@@ -90,21 +60,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4
-  },
-  collageContainer: {
-    width: '100%',
-    aspectRatio: 5,
-    flexDirection: 'row'
-  },
-  collageImage: {
-    flex: 1,
-    height: '100%'
-  },
-  placeholder: {
-    width: '100%',
-    aspectRatio: 5,
-    alignItems: 'center',
-    justifyContent: 'center'
   },
   infoContainer: {
     padding: 10

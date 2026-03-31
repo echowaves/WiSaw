@@ -245,3 +245,42 @@ export const getWavesCount = async ({ uuid }) => {
     throw err
   }
 }
+
+export const requestUngroupedPhotos = async ({ uuid, pageNumber, batch }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query feedForUngrouped($uuid: String!, $pageNumber: Int!, $batch: String!) {
+          feedForUngrouped(uuid: $uuid, pageNumber: $pageNumber, batch: $batch) {
+            photos {
+              row_number
+              id
+              uuid
+              imgUrl
+              thumbUrl
+              videoUrl
+              video
+              commentsCount
+              watchersCount
+              lastComment
+              createdAt
+              width
+              height
+            }
+            batch
+            noMoreData
+          }
+        }
+      `,
+      variables: { uuid, pageNumber, batch },
+    })
+    return {
+      photos: response.data.feedForUngrouped.photos || [],
+      batch: response.data.feedForUngrouped.batch,
+      noMoreData: response.data.feedForUngrouped.noMoreData
+    }
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
