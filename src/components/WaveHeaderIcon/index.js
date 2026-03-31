@@ -7,12 +7,13 @@ import { router } from 'expo-router'
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
-import { getWavesCount, getUngroupedPhotosCount } from '../../screens/Waves/reducer'
+import { getWavesCount, getUngroupedPhotosCount, getBookmarksCount } from '../../screens/Waves/reducer'
 
 const WaveHeaderIcon = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [wavesCount, setWavesCount] = useAtom(STATE.wavesCount)
   const [ungroupedPhotosCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
+  const [, setBookmarksCount] = useAtom(STATE.bookmarksCount)
   const [uuid] = useAtom(STATE.uuid)
   const theme = getTheme(isDarkMode)
 
@@ -21,11 +22,13 @@ const WaveHeaderIcon = () => {
     let cancelled = false
     Promise.all([
       getWavesCount({ uuid }),
-      getUngroupedPhotosCount({ uuid })
-    ]).then(([wc, uc]) => {
+      getUngroupedPhotosCount({ uuid }),
+      getBookmarksCount({ uuid })
+    ]).then(([wc, uc, bc]) => {
       if (cancelled) return
       setWavesCount(wc)
       setUngroupedPhotosCount(uc)
+      setBookmarksCount(bc)
     }).catch(err => console.error('WaveHeaderIcon fetch:', err))
     return () => { cancelled = true }
   }, [wavesCount, uuid])

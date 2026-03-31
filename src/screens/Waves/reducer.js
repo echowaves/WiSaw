@@ -246,6 +246,23 @@ export const getWavesCount = async ({ uuid }) => {
   }
 }
 
+export const getBookmarksCount = async ({ uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query getWatchedCount($uuid: String!) {
+          getWatchedCount(uuid: $uuid)
+        }
+      `,
+      variables: { uuid },
+    })
+    return response.data.getWatchedCount
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
 export const requestUngroupedPhotos = async ({ uuid, pageNumber, batch }) => {
   try {
     const response = await CONST.gqlClient.query({
