@@ -53,13 +53,30 @@ The Starred screen SHALL include `SearchFab` and use `useFeedSearch` for search 
 - **WHEN** the user clears the search
 - **THEN** the feed SHALL reload without a search term
 
-### Requirement: No camera capture on Starred screen
-The Starred screen SHALL NOT include camera capture functionality. No camera FAB, pending uploads banner, or upload-related UI SHALL be present.
+### Requirement: Bookmarks screen footer with drawer menu and camera buttons
+The Bookmarks screen SHALL render `PhotosListFooter` at the bottom of the screen with drawer menu and camera capture buttons. The footer SHALL behave identically to the home feed footer: menu button absolutely positioned left, video and camera buttons centered. The screen SHALL consume `UploadContext` for `enqueueCapture` and use the `useCameraCapture` hook for camera permission handling. The footer's `locationReady` prop SHALL reflect `locationAtom.status === 'ready'`.
 
-#### Scenario: No camera on starred screen
-- **WHEN** the Starred screen is displayed
-- **THEN** no camera button or pending uploads banner SHALL be visible
-- **THEN** the `useCameraCapture` hook SHALL NOT be invoked
+#### Scenario: Footer renders on bookmarks screen
+- **WHEN** the Bookmarks screen is displayed
+- **THEN** a `PhotosListFooter` SHALL render at the bottom with drawer menu, video, and camera buttons
+- **THEN** `FOOTER_HEIGHT` SHALL be 90 to accommodate the footer bar
+
+#### Scenario: Drawer menu button opens drawer
+- **WHEN** the user presses the menu button in the bookmarks footer
+- **THEN** the drawer navigation SHALL open via `navigation.openDrawer()`
+
+#### Scenario: Camera buttons capture photos from bookmarks
+- **WHEN** the user presses the camera or video button in the bookmarks footer
+- **THEN** the `useCameraCapture` hook SHALL handle permissions and enqueue the capture via `UploadContext`
+- **THEN** captured photos SHALL enter the normal upload flow (appearing in the home feed, not automatically bookmarked)
+
+#### Scenario: Camera buttons disabled when location unavailable
+- **WHEN** `locationAtom.status` is not `ready`
+- **THEN** the camera buttons in the footer SHALL appear visually disabled (opacity 0.4)
+
+#### Scenario: Footer renders in all screen states
+- **WHEN** the Bookmarks screen is in any state (offline, loading, empty, or has content)
+- **THEN** the footer SHALL be rendered
 
 ### Requirement: Starred screen does not subscribe to upload events
 The Starred screen SHALL NOT subscribe to the upload completion bus. Newly uploaded photos SHALL NOT be prepended to the Starred feed.

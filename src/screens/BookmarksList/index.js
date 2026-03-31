@@ -1,5 +1,5 @@
-import { useAtom } from 'jotai'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useAtom, useAtomValue } from 'jotai'
+import React, { useCallback, useContext, useMemo, useState } from 'react'
 
 import {
   ScrollView,
@@ -7,7 +7,7 @@ import {
   View
 } from 'react-native'
 
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { requestWatchedPhotos } from '../PhotosList/reducer'
@@ -16,7 +16,9 @@ import AppHeader from '../../components/AppHeader'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import SearchFab from '../../components/SearchFab'
 import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
+import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
 import PhotosListContext from '../../contexts/PhotosListContext'
+import UploadContext from '../../contexts/UploadContext'
 
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
@@ -27,17 +29,26 @@ import {
 import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
 import useFeedLoader from '../PhotosList/hooks/useFeedLoader'
 import useFeedSearch from '../PhotosList/hooks/useFeedSearch'
+import useCameraCapture from '../PhotosList/hooks/useCameraCapture'
 
 import * as Haptics from 'expo-haptics'
 import QuickActionsModal from '../../components/QuickActionsModal'
 
-const FOOTER_HEIGHT = 20
+const FOOTER_HEIGHT = 90
 
 const BookmarksList = () => {
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
   const theme = getTheme(isDarkMode)
+
+  const navigation = useNavigation()
+  const locationState = useAtomValue(STATE.locationAtom)
+  const { enqueueCapture } = useContext(UploadContext)
+  const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({
+    enqueueCapture,
+    toastTopOffset: 100
+  })
 
   const { width, height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
@@ -163,6 +174,14 @@ const BookmarksList = () => {
             onActionPress={reload}
           />
         </ScrollView>
+        <PhotosListFooter
+          theme={theme}
+          navigation={navigation}
+          netAvailable={netAvailable}
+          isCameraOpening={isCameraOpening}
+          onCameraPress={checkPermissionsForPhotoTaking}
+          locationReady={locationState.status === 'ready'}
+        />
       </View>
     )
   }
@@ -220,6 +239,14 @@ const BookmarksList = () => {
               setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
             }}
           />
+          <PhotosListFooter
+            theme={theme}
+            navigation={navigation}
+            netAvailable={netAvailable}
+            isCameraOpening={isCameraOpening}
+            onCameraPress={checkPermissionsForPhotoTaking}
+            locationReady={locationState.status === 'ready'}
+          />
         </View>
       </PhotosListContext.Provider>
     )
@@ -268,6 +295,14 @@ const BookmarksList = () => {
           footerHeight={FOOTER_HEIGHT}
           screenWidth={width}
         />
+        <PhotosListFooter
+          theme={theme}
+          navigation={navigation}
+          netAvailable={netAvailable}
+          isCameraOpening={isCameraOpening}
+          onCameraPress={checkPermissionsForPhotoTaking}
+          locationReady={locationState.status === 'ready'}
+        />
       </View>
     )
   }
@@ -306,6 +341,14 @@ const BookmarksList = () => {
         theme={theme}
         footerHeight={FOOTER_HEIGHT}
         screenWidth={width}
+      />
+      <PhotosListFooter
+        theme={theme}
+        navigation={navigation}
+        netAvailable={netAvailable}
+        isCameraOpening={isCameraOpening}
+        onCameraPress={checkPermissionsForPhotoTaking}
+        locationReady={locationState.status === 'ready'}
       />
     </View>
   )
