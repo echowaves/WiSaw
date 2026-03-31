@@ -26,6 +26,7 @@ export default function useFeedLoader (fetchFn, {
   const [pageNumber, setPageNumber] = useState(0)
   const [, setConsecutiveEmptyResponses] = useState(0)
   const abortControllerRef = useRef(null)
+  const searchTermRef = useRef('')
   const fetchFnRef = useRef(fetchFn)
   fetchFnRef.current = fetchFn
 
@@ -122,6 +123,7 @@ export default function useFeedLoader (fetchFn, {
 
     currentBatch = Crypto.randomUUID()
 
+    searchTermRef.current = searchTermOverride ?? ''
     setStopLoading(false)
     setConsecutiveEmptyResponses(0)
     setPhotosList([])
@@ -133,7 +135,7 @@ export default function useFeedLoader (fetchFn, {
   const handleLoadMore = useCallback((fetchParams) => {
     setPageNumber((currentPage) => {
       const newPage = currentPage + 1
-      load(fetchParams, null, null, newPage)
+      load(fetchParams, searchTermRef.current, null, newPage)
       return newPage
     })
   }, [load])

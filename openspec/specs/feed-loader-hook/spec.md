@@ -21,7 +21,7 @@ The hook SHALL maintain `photosList` in local state via `useState`. Photos SHALL
 - **THEN** photos with IDs already present in `photosList` SHALL be excluded before appending
 
 ### Requirement: Feed loader manages pagination
-The hook SHALL track `pageNumber`, `stopLoading`, and `consecutiveEmptyResponses`. The `handleLoadMore` function SHALL increment the page number and call `load()` explicitly. No `useEffect` watching `pageNumber` SHALL exist.
+The hook SHALL track `pageNumber`, `stopLoading`, and `consecutiveEmptyResponses`. The hook SHALL maintain a `searchTermRef` that stores the active search term. The `reload()` function SHALL write the search term override to `searchTermRef`. The `handleLoadMore` function SHALL increment the page number and call `load()` with the search term from `searchTermRef`, ensuring paginated requests preserve the active search context. No `useEffect` watching `pageNumber` SHALL exist.
 
 #### Scenario: Infinite scroll triggers next page
 - **WHEN** the masonry grid reaches the scroll threshold and `stopLoading` is false
@@ -32,6 +32,19 @@ The hook SHALL track `pageNumber`, `stopLoading`, and `consecutiveEmptyResponses
 - **WHEN** `load()` receives `noMoreData: true` from the fetch response
 - **THEN** `stopLoading` SHALL be set to true
 - **THEN** `handleLoadMore()` SHALL be a no-op
+
+#### Scenario: Pagination preserves search term
+- **WHEN** `reload()` is called with a search term override (e.g., "sunset")
+- **AND** the user scrolls to load more results
+- **THEN** `handleLoadMore()` SHALL pass the stored search term from `searchTermRef` to `load()`
+- **THEN** the paginated API request SHALL include `searchTerm: "sunset"`
+- **THEN** only matching photos SHALL be returned and appended
+
+#### Scenario: Clearing search resets stored term
+- **WHEN** `reload()` is called with an empty string `''` as the search term override
+- **THEN** `searchTermRef` SHALL be set to `''`
+- **THEN** subsequent `handleLoadMore()` calls SHALL pass an empty search term
+- **THEN** the API SHALL return unfiltered results
 
 ### Requirement: Feed loader manages abort control
 The hook SHALL maintain an `AbortController` ref. Calling `reload()` SHALL abort any in-flight `load()` chain. All `setState` calls within async functions SHALL check `signal.aborted` before executing.
