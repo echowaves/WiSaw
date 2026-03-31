@@ -231,11 +231,10 @@ function IdentityDrawerIcon ({ color, size, focused }) {
   )
 }
 
-// Inline component for waves drawer item — show ungrouped photos count badge
+// Inline component for waves drawer item — show red dot when ungrouped photos exist
 function WavesDrawerIcon ({ color, size }) {
   const [ungroupedCount] = useAtom(STATE.ungroupedPhotosCount)
   const showBadge = ungroupedCount != null && ungroupedCount > 0
-  const badgeText = ungroupedCount > 99 ? '99+' : String(ungroupedCount)
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
@@ -243,21 +242,14 @@ function WavesDrawerIcon ({ color, size }) {
       {showBadge && (
         <View style={{
           position: 'absolute',
-          top: -4,
-          right: -10,
-          backgroundColor: '#FF3B30',
-          borderRadius: 10,
-          minWidth: 18,
-          height: 18,
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingHorizontal: 4
+          top: 0,
+          right: 0,
+          width: 8,
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: '#FF3B30'
         }}
-        >
-          <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' }}>
-            {badgeText}
-          </Text>
-        </View>
+        />
       )}
     </View>
   )

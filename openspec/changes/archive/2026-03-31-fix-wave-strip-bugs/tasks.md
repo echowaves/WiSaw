@@ -8,4 +8,4 @@
 
 - [x] 2.1 Add `onPhotoLongPress` prop to `WavePhotoStrip` component signature
 - [x] 2.2 Wrap each `CachedImage` thumbnail in a `Pressable` with `onLongPress` when `onPhotoLongPress` is provided; render plain `CachedImage` when not provided
-- [ ] 2.3 In `WaveCard`, pass `onPhotoLongPress={() => onLongPress(wave)}` to `WavePhotoStrip`
+- [x] 2.3 In `WaveCard`, pass `onPhotoLongPress={() => onLongPress(wave)}` to `WavePhotoStrip`
