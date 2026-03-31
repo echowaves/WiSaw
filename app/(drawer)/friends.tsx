@@ -5,6 +5,7 @@ import AppHeader from '../../src/components/AppHeader'
 import { emitAddFriend } from '../../src/events/friendAddBus'
 import FriendsList from '../../src/screens/FriendsList'
 import { SHARED_STYLES } from '../../src/theme/sharedStyles'
+import { ScreenIconTitle } from '../../src/theme/screenIcons'
 
 export default function Friends () {
   const router = useRouter()
@@ -21,7 +22,7 @@ export default function Friends () {
           header: () => (
             <AppHeader
               onBack={() => router.replace('/')}
-              title='Friends'
+              title={<ScreenIconTitle screenKey='friends' />}
               rightSlot={
                 <TouchableOpacity
                   onPress={handleAddFriend}

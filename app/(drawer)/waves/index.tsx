@@ -11,6 +11,7 @@ import { emitAutoGroup, subscribeToAutoGroupDone } from '../../../src/events/aut
 import { emitAddWave } from '../../../src/events/waveAddBus'
 import { getUngroupedPhotosCount, getWavesCount } from '../../../src/screens/Waves/reducer'
 import { saveWaveSortPreferences } from '../../../src/utils/waveStorage'
+import { ScreenIconTitle } from '../../../src/theme/screenIcons'
 import * as STATE from '../../../src/state'
 
 export default function WavesScreen() {
@@ -100,7 +101,7 @@ export default function WavesScreen() {
           header: () => (
             <AppHeader
               onBack={() => router.back()}
-              title='Waves'
+              title={<ScreenIconTitle screenKey='waves' />}
               rightSlot={
                 <TouchableOpacity
                   onPress={() => setMenuVisible(true)}
@@ -124,7 +125,7 @@ export default function WavesScreen() {
                   {(ungroupedCount ?? 0) > 0 && (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>
-                        {ungroupedCount}
+                        {(ungroupedCount ?? 0) > 99 ? '99+' : ungroupedCount}
                       </Text>
                     </View>
                   )}

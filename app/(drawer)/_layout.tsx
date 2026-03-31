@@ -14,6 +14,7 @@ import * as CONST from '../../src/consts'
 import { UploadProvider } from '../../src/contexts/UploadContext'
 import * as STATE from '../../src/state'
 import { getTheme } from '../../src/theme/sharedStyles'
+import { SCREEN_HEADER_ICONS } from '../../src/theme/screenIcons'
 import {
   getSystemTheme,
   saveFollowSystemPreference,
@@ -213,7 +214,7 @@ function IdentityDrawerIcon ({ color, size, focused }) {
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <FontAwesome name='user-secret' size={22} color={iconColor} />
+      <FontAwesome name={SCREEN_HEADER_ICONS.identity.name} size={22} color={iconColor} />
       {!hasIdentity && (
         <View style={{
           position: 'absolute',
@@ -225,6 +226,38 @@ function IdentityDrawerIcon ({ color, size, focused }) {
           backgroundColor: '#FF3B30'
         }}
         />
+      )}
+    </View>
+  )
+}
+
+// Inline component for waves drawer item — show ungrouped photos count badge
+function WavesDrawerIcon ({ color, size }) {
+  const [ungroupedCount] = useAtom(STATE.ungroupedPhotosCount)
+  const showBadge = ungroupedCount != null && ungroupedCount > 0
+  const badgeText = ungroupedCount > 99 ? '99+' : String(ungroupedCount)
+
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <FontAwesome5 name={SCREEN_HEADER_ICONS.waves.name} size={22} color={color} />
+      {showBadge && (
+        <View style={{
+          position: 'absolute',
+          top: -4,
+          right: -10,
+          backgroundColor: '#FF3B30',
+          borderRadius: 10,
+          minWidth: 18,
+          height: 18,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: 4
+        }}
+        >
+          <Text style={{ color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' }}>
+            {badgeText}
+          </Text>
+        </View>
       )}
     </View>
   )
@@ -333,7 +366,7 @@ export default function DrawerLayout () {
           name='friends'
           options={{
             drawerIcon: ({ color, size }) => (
-              <FontAwesome5 name='user-friends' size={22} color={color} />
+              <FontAwesome5 name={SCREEN_HEADER_ICONS.friends.name} size={22} color={color} />
             ),
             drawerLabel: 'Friends',
             title: 'Friends',
@@ -345,9 +378,7 @@ export default function DrawerLayout () {
         <Drawer.Screen
           name='waves'
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesome5 name='water' size={22} color={color} />
-            ),
+            drawerIcon: (props) => <WavesDrawerIcon {...props} />,
             drawerLabel: 'Waves',
             title: 'Waves',
             headerShown: false,
@@ -359,7 +390,7 @@ export default function DrawerLayout () {
           name='feedback'
           options={{
             drawerIcon: ({ color, size }) => (
-              <MaterialIcons name='feedback' size={22} color={color} />
+              <MaterialIcons name={SCREEN_HEADER_ICONS.feedback.name} size={22} color={color} />
             ),
             drawerLabel: 'Feedback',
             title: 'Feedback',

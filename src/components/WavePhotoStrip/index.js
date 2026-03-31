@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
-import { View, FlatList, ActivityIndicator, StyleSheet } from 'react-native'
+import { View, FlatList, ActivityIndicator, Pressable, StyleSheet } from 'react-native'
 import { FontAwesome5 } from '@expo/vector-icons'
 import CachedImage from 'expo-cached-image'
 import * as Crypto from 'expo-crypto'
@@ -10,9 +10,9 @@ const isValidImageUri = (uri) => {
   return uri && typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))
 }
 
-const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme }) => {
+const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoLongPress }) => {
   const [photos, setPhotos] = useState(initialPhotos)
-  const [pageNumber, setPageNumber] = useState(0)
+  const [pageNumber, setPageNumber] = useState(-1)
   const [batch] = useState(() => Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(!fetchFn)
   const [loading, setLoading] = useState(false)
@@ -31,7 +31,12 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme }) => {
     try {
       const nextPage = pageNumber + 1
       const result = await fetchFn(nextPage, batch)
-      setPhotos(prev => [...prev, ...(result.photos || [])])
+      const fetched = result.photos || []
+      setPhotos(prev => {
+        const existingIds = new Set(prev.map(p => p.id))
+        const newPhotos = fetched.filter(p => !existingIds.has(p.id))
+        return [...prev, ...newPhotos]
+      })
       setPageNumber(nextPage)
       if (result.noMoreData) {
         setNoMoreData(true)
@@ -56,7 +61,7 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme }) => {
     if (!isValidImageUri(item.thumbUrl)) {
       return <View style={[styles.thumbnail, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]} />
     }
-    return (
+    const image = (
       <CachedImage
         source={{ uri: item.thumbUrl }}
         cacheKey={`${item.id}-thumb`}
@@ -64,6 +69,14 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme }) => {
         resizeMode='cover'
       />
     )
+    if (onPhotoLongPress) {
+      return (
+        <Pressable onLongPress={() => onPhotoLongPress(item)}>
+          {image}
+        </Pressable>
+      )
+    }
+    return image
   }
 
   return (

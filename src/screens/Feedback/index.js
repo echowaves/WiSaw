@@ -27,6 +27,7 @@ import * as CONST from '../../consts'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import { ScreenIconTitle } from '../../theme/screenIcons'
 
 const maxStringLength = 2000
 
@@ -396,7 +397,7 @@ const FeedbackScreen = () => {
   if (!netAvailable) {
     return (
       <>
-        <AppHeader title='Feedback' onBack={() => router.back()} />
+        <AppHeader title={<ScreenIconTitle screenKey='feedback' />} onBack={() => router.back()} />
         <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20, backgroundColor: theme.BACKGROUND }}>
           <EmptyStateCard
             icon='wifi-off'
@@ -411,7 +412,7 @@ const FeedbackScreen = () => {
 
   return (
     <>
-      <AppHeader title='Feedback' onBack={() => router.back()} />
+      <AppHeader title={<ScreenIconTitle screenKey='feedback' />} onBack={() => router.back()} />
       <View style={styles.container}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <KeyboardAwareScrollView
