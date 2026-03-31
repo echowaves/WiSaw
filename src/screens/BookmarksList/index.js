@@ -3,9 +3,12 @@ import React, { useCallback, useContext, useMemo, useState } from 'react'
 
 import {
   ScrollView,
+  Text,
   useWindowDimensions,
   View
 } from 'react-native'
+
+import { Ionicons } from '@expo/vector-icons'
 
 import { router, useNavigation } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -41,6 +44,13 @@ const BookmarksList = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
   const theme = getTheme(isDarkMode)
+
+  const headerTitle = (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Ionicons name='bookmark' size={18} color={theme.TEXT_PRIMARY} style={{ marginRight: 6 }} />
+      <Text style={{ color: theme.TEXT_PRIMARY, fontSize: 16, fontWeight: '600' }}>Bookmarks</Text>
+    </View>
+  )
 
   const navigation = useNavigation()
   const locationState = useAtomValue(STATE.locationAtom)
@@ -155,7 +165,7 @@ const BookmarksList = () => {
   if (!netAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title='Bookmarks' onBack={handleBack} />
+        <AppHeader title={headerTitle} onBack={handleBack} />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -191,7 +201,7 @@ const BookmarksList = () => {
     return (
       <PhotosListContext.Provider value={photosListContextValue}>
         <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-          <AppHeader title='Bookmarks' onBack={handleBack} />
+          <AppHeader title={headerTitle} onBack={handleBack} />
           <View style={{ flex: 1, backgroundColor: theme.INTERACTIVE_BACKGROUND }}>
             <PhotosListMasonry
               activeSegment={1}
@@ -272,7 +282,7 @@ const BookmarksList = () => {
 
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title='Bookmarks' onBack={handleBack} />
+        <AppHeader title={headerTitle} onBack={handleBack} />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -310,7 +320,7 @@ const BookmarksList = () => {
   // Loading state
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-      <AppHeader title='Bookmarks' onBack={handleBack} />
+      <AppHeader title={headerTitle} onBack={handleBack} />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
