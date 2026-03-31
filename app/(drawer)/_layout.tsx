@@ -231,14 +231,30 @@ function IdentityDrawerIcon ({ color, size, focused }) {
   )
 }
 
+// Inline component for friends drawer item — show MAIN_COLOR when user has friends
+function FriendsDrawerIcon ({ color, size, focused }) {
+  const [friendsList] = useAtom(STATE.friendsList)
+  const hasFriends = friendsList && friendsList.length > 0
+  const iconColor = hasFriends && !focused ? CONST.MAIN_COLOR : color
+
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <FontAwesome5 name={SCREEN_HEADER_ICONS.friends.name} size={22} color={iconColor} />
+    </View>
+  )
+}
+
 // Inline component for waves drawer item — show red dot when ungrouped photos exist
-function WavesDrawerIcon ({ color, size }) {
+function WavesDrawerIcon ({ color, size, focused }) {
   const [ungroupedCount] = useAtom(STATE.ungroupedPhotosCount)
+  const [wavesCount] = useAtom(STATE.wavesCount)
+  const hasActivity = (wavesCount != null && wavesCount > 0) || (ungroupedCount != null && ungroupedCount > 0)
+  const iconColor = hasActivity && !focused ? CONST.MAIN_COLOR : color
   const showBadge = ungroupedCount != null && ungroupedCount > 0
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <FontAwesome5 name={SCREEN_HEADER_ICONS.waves.name} size={22} color={color} />
+      <FontAwesome5 name={SCREEN_HEADER_ICONS.waves.name} size={22} color={iconColor} />
       {showBadge && (
         <View style={{
           position: 'absolute',
@@ -357,9 +373,7 @@ export default function DrawerLayout () {
         <Drawer.Screen
           name='friends'
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesome5 name={SCREEN_HEADER_ICONS.friends.name} size={22} color={color} />
-            ),
+            drawerIcon: (props) => <FriendsDrawerIcon {...props} />,
             drawerLabel: 'Friends',
             title: 'Friends',
             headerShown: false,
