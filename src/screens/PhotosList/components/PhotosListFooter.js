@@ -81,18 +81,20 @@ const PhotosListFooter = ({
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'space-around',
+            justifyContent: 'center',
             alignItems: 'center',
-            paddingHorizontal: 20,
             paddingTop: 10,
             height: '100%',
             elevation: 14,
-            zIndex: 14
+            zIndex: 14,
+            gap: 24
           }}
         >
-          {/* Navigation Menu Button */}
+          {/* Navigation Menu Button - absolutely positioned left */}
           <TouchableOpacity
             style={{
+              position: 'absolute',
+              left: 20,
               justifyContent: 'center',
               alignItems: 'center',
               width: 50,

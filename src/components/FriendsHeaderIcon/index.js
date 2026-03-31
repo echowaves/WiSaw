@@ -10,11 +10,13 @@ import { getTheme } from '../../theme/sharedStyles'
 
 const FriendsHeaderIcon = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+  const [friendsList] = useAtom(STATE.friendsList)
   const [friendsUnreadCount] = useAtom(STATE.friendsUnreadCount)
   const theme = getTheme(isDarkMode)
 
+  const hasFriends = friendsList && friendsList.length > 0
   const hasUnread = friendsUnreadCount !== null && friendsUnreadCount > 0
-  const iconColor = hasUnread ? CONST.MAIN_COLOR : theme.TEXT_SECONDARY
+  const iconColor = hasFriends ? CONST.MAIN_COLOR : theme.TEXT_SECONDARY
 
   const handlePress = () => {
     router.navigate('/friends')

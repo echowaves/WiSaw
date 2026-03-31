@@ -50,7 +50,7 @@ const PhotosListHeader = ({ theme, loading }) => {
           <IdentityHeaderIcon />
         </View>
 
-        {/* Right: Wave + Friends icons */}
+        {/* Right: Friends + Wave icons */}
         <View
           style={{
             position: 'absolute',
@@ -60,8 +60,8 @@ const PhotosListHeader = ({ theme, loading }) => {
             gap: 8
           }}
         >
-          <WaveHeaderIcon />
           <FriendsHeaderIcon />
+          <WaveHeaderIcon />
         </View>
       </View>
       {loading && (
