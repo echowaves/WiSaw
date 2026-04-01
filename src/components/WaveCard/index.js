@@ -21,6 +21,7 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
         initialPhotos={photos}
         fetchFn={fetchFn}
         theme={theme}
+        onPhotoPress={() => onPress(wave)}
         onPhotoLongPress={() => onLongPress(wave)}
       />
       <Pressable

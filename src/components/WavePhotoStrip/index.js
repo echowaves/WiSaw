@@ -10,7 +10,7 @@ const isValidImageUri = (uri) => {
   return uri && typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))
 }
 
-const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoLongPress }) => {
+const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPhotoLongPress }) => {
   const [photos, setPhotos] = useState(initialPhotos)
   const [pageNumber, setPageNumber] = useState(-1)
   const [batch] = useState(() => Crypto.randomUUID())
@@ -69,9 +69,12 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoLongPress }
         resizeMode='cover'
       />
     )
-    if (onPhotoLongPress) {
+    if (onPhotoPress || onPhotoLongPress) {
       return (
-        <Pressable onLongPress={() => onPhotoLongPress(item)}>
+        <Pressable
+          onPress={onPhotoPress ? () => onPhotoPress(item) : undefined}
+          onLongPress={onPhotoLongPress ? () => onPhotoLongPress(item) : undefined}
+        >
           {image}
         </Pressable>
       )
