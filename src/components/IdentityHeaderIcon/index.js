@@ -20,6 +20,10 @@ const IdentityHeaderIcon = () => {
 
   const hasIdentity = nickName !== ''
 
+  if (hasIdentity) {
+    return null
+  }
+
   const handleIconPress = () => {
     setIsOpen(!isOpen)
   }

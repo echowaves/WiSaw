@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Identity status in drawer menu item
 The drawer's "Identity" menu item SHALL reflect the current identity state. When no identity is set, the item SHALL display the label "Set Up Identity" and show a red dot badge on the icon. When an identity is active, the item SHALL display the user's nickname as the label and show the icon in `MAIN_COLOR`. No functional changes — the header layout context changes (the right side now holds two icons: Waves and Friends) but the identity icon behavior is unchanged.
@@ -20,9 +20,3 @@ The drawer's "Identity" menu item SHALL reflect the current identity state. When
 - **WHEN** the PhotosList header is rendered and the user has no stored nickname
 - **THEN** the `IdentityHeaderIcon` SHALL render in the left position of the header
 - **THEN** the dropdown/popover behavior SHALL function as before
-
-## REMOVED Requirements
-
-### Requirement: Drawer identity badge
-**Reason**: Redundant with the header icon and the enhanced Identity drawer menu item. Three paths to identity was excessive.
-**Migration**: Identity status is now shown directly on the "Identity" drawer menu item.
