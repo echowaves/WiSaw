@@ -1,20 +1,24 @@
-import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import * as Haptics from 'expo-haptics'
 
-import { Alert, Animated, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
-import { PanGestureHandler, State } from 'react-native-gesture-handler'
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { KeyboardStickyView } from 'react-native-keyboard-controller'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
-import { FontAwesome5 } from '@expo/vector-icons'
-
+import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
+import ActionMenu from '../../components/ActionMenu'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import FriendsExplainerView from '../../components/FriendsExplainerView'
+import LinearProgress from '../../components/ui/LinearProgress'
+import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import NamePicker from '../../components/NamePicker'
 import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
@@ -24,14 +28,16 @@ import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
 const FriendsList = () => {
-  const navigation = useNavigation()
-
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
   const [netAvailable] = useAtom(STATE.netAvailable)
+  const [sortBy] = useAtom(STATE.friendsSortBy)
+  const [sortDirection] = useAtom(STATE.friendsSortDirection)
 
   const theme = getTheme(isDarkMode)
+  const insets = useSafeAreaInsets()
+  const searchInputRef = useRef(null)
 
   const createStyles = (theme, isDark) =>
     StyleSheet.create({
@@ -45,20 +51,15 @@ const FriendsList = () => {
       friendItem: {
         backgroundColor: theme.CARD_BACKGROUND,
         flex: 1,
-        position: 'relative',
-        zIndex: 1,
         borderRadius: 20,
-        overflow: 'hidden', // clip inner content to rounded card
-        // Rely on container for shadow to match thumbs
-        elevation: 0
+        overflow: 'hidden'
       },
       friendContent: {
         paddingVertical: 16,
         paddingHorizontal: 16,
-        flex: 1
-      },
-      friendHeader: {
-        ...SHARED_STYLES.layout.spaceBetween
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center'
       },
       friendInfo: {
         marginRight: 12,
@@ -78,168 +79,49 @@ const FriendsList = () => {
         color: theme.TEXT_PRIMARY,
         fontWeight: '500'
       },
-      pendingShareButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        marginLeft: 0,
-        borderRadius: 8,
-        backgroundColor: theme.STATUS_SUCCESS,
-        elevation: 15,
-        zIndex: 15,
-        shadowColor: theme.CARD_SHADOW,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        borderWidth: 1,
-        borderColor: theme.STATUS_SUCCESS_BORDER,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 80,
-        minHeight: 36
-      },
-      pendingShareButtonText: {
-        color: 'white',
-        fontSize: 11,
-        fontWeight: '600',
+      menuButton: {
+        padding: 8,
         marginLeft: 4
-      },
-      shareButtonContainer: {
-        marginTop: 8,
-        alignItems: 'flex-start',
-        flexDirection: 'row',
-        gap: 8
-      },
-      pendingDeleteButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        marginLeft: 0,
-        borderRadius: 8,
-        backgroundColor: theme.STATUS_ERROR_BACKGROUND,
-        elevation: 15,
-        zIndex: 15,
-        shadowColor: theme.STATUS_ERROR,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        borderWidth: 1,
-        borderColor: theme.STATUS_ERROR_BORDER,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 80,
-        minHeight: 36
-      },
-      pendingDeleteButtonText: {
-        color: theme.STATUS_ERROR,
-        fontSize: 11,
-        fontWeight: '600',
-        marginLeft: 4
-      },
-      swipeAction: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        flexDirection: 'row',
-        borderTopLeftRadius: 20,
-        borderBottomLeftRadius: 20,
-        width: 240
-      },
-      rightSwipeAction: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        flexDirection: 'row',
-        borderTopLeftRadius: 20,
-        borderBottomLeftRadius: 20,
-        width: 160,
-        zIndex: 0
-      },
-      leftSwipeAction: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        right: 0,
-        flexDirection: 'row',
-        borderTopRightRadius: 20,
-        borderBottomRightRadius: 20,
-        width: 80,
-        zIndex: 0
-      },
-      stripeOverlayLeft: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        flexDirection: 'row',
-        borderTopLeftRadius: 20,
-        borderBottomLeftRadius: 20,
-        overflow: 'hidden',
-        // Two segments (share/edit), full width to scale properly
-        width: 160,
-        zIndex: 2
-      },
-      stripeOverlayRight: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        right: 0,
-        backgroundColor: theme.STATUS_ERROR,
-        borderTopRightRadius: 20,
-        borderBottomRightRadius: 20,
-        overflow: 'hidden',
-        // Single segment (delete), full width to scale properly
-        width: 80,
-        zIndex: 2
-      },
-      swipeActionButton: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        height: '100%'
-      },
-      shareAction: {
-        backgroundColor: theme.STATUS_SUCCESS,
-        borderTopLeftRadius: 20,
-        borderBottomLeftRadius: 20
-      },
-      editAction: {
-        backgroundColor: theme.STATUS_EDIT,
-        borderTopRightRadius: 20,
-        borderBottomRightRadius: 20
-      },
-      deleteAction: {
-        backgroundColor: theme.STATUS_ERROR,
-        borderTopRightRadius: 20,
-        borderBottomRightRadius: 20
-      },
-      swipeActionText: {
-        color: 'white',
-        fontSize: 11,
-        fontWeight: '600',
-        marginTop: 4,
-        textAlign: 'center'
       },
       friendItemContainer: {
-        // Exact thumb-like card container
         backgroundColor: theme.CARD_BACKGROUND,
         marginHorizontal: 16,
         marginVertical: 8,
         borderRadius: 20,
-        overflow: 'visible', // allow shadow to render outside
+        overflow: 'visible',
         padding: 0,
-        // Shadows (match ExpandableThumb exactly)
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.4,
         shadowRadius: 6,
         elevation: 8,
-        // Subtle border in dark mode for crisp edges
         borderWidth: isDark ? 1.5 : 0,
         borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent'
+      },
+      searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 8
+      },
+      searchInput: {
+        flex: 1,
+        height: 40,
+        borderRadius: 20,
+        paddingLeft: 16,
+        paddingRight: 16,
+        borderWidth: 1,
+        fontSize: 14
+      },
+      clearButton: {
+        position: 'absolute',
+        right: 24,
+        width: 22,
+        height: 22,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(128,128,128,0.2)',
+        borderRadius: 11
       }
     })
 
@@ -255,6 +137,19 @@ const FriendsList = () => {
   const [showShareNameModal, setShowShareNameModal] = useState(false)
   const [shareNameModalData, setShareNameModalData] = useState(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [menuVisible, setMenuVisible] = useState(false)
+  const [menuFriend, setMenuFriend] = useState(null)
+  const [searchText, setSearchText] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchText.trim())
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchText])
 
   const handleAddFriend = useCallback(() => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
@@ -268,13 +163,6 @@ const FriendsList = () => {
 
     return unsubscribe
   }, [handleAddFriend])
-
-  useEffect(() => {
-    const unsubscribe = subscribeToIdentityChange(() => {
-      reload()
-    })
-    return unsubscribe
-  }, [reload])
 
   const handleShareFriend = async ({ friendshipUuid, contactName, isPending = true }) => {
     try {
@@ -425,6 +313,7 @@ const FriendsList = () => {
   }
 
   const reload = useCallback(async () => {
+    setLoading(true)
     try {
       const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
         uuid
@@ -433,11 +322,14 @@ const FriendsList = () => {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('Error loading friendships:', error)
+    } finally {
+      setLoading(false)
     }
   }, [uuid, setFriendsList])
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
+    setLoading(true)
     try {
       const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
         uuid
@@ -448,8 +340,16 @@ const FriendsList = () => {
       console.log('Error refreshing friendships:', error)
     } finally {
       setIsRefreshing(false)
+      setLoading(false)
     }
   }, [uuid, setFriendsList])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToIdentityChange(() => {
+      reload()
+    })
+    return unsubscribe
+  }, [reload])
 
   useEffect(() => {
     // Only load friendships when uuid is properly initialized
@@ -458,508 +358,196 @@ const FriendsList = () => {
     }
   }, [uuid, reload])
 
-  const FriendItem = memo(({ friend }) => {
-    const translateX = useRef(new Animated.Value(0)).current
-    const currentTranslateXRef = useRef(0)
-    const gestureStartOffsetRef = useRef(0)
-    const [isSwipeOpen, setIsSwipeOpen] = useState(false)
-    const [swipeDirection, setSwipeDirection] = useState(null) // 'left' or 'right'
+  // --- Sort and filter logic ---
+  const sortedAndFilteredFriends = useMemo(() => {
+    let list = friendsList || []
 
+    // Client-side search filter
+    if (debouncedSearch) {
+      const term = debouncedSearch.toLowerCase()
+      list = list.filter((f) => {
+        const name = (f?.contact || 'Unnamed Friend').toLowerCase()
+        return name.includes(term)
+      })
+    }
+
+    // Partition: pending first, then confirmed
+    const pending = list.filter((f) => f.uuid2 === null)
+    const confirmed = list.filter((f) => f.uuid2 !== null)
+
+    // Sort confirmed friends
+    const sorted = [...confirmed].sort((a, b) => {
+      const dir = sortDirection === 'asc' ? 1 : -1
+      switch (sortBy) {
+        case 'alphabetical': {
+          const nameA = (a?.contact || 'Unnamed Friend').toLowerCase()
+          const nameB = (b?.contact || 'Unnamed Friend').toLowerCase()
+          return dir * nameA.localeCompare(nameB)
+        }
+        case 'recentChat': {
+          const dateA = a?.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
+          const dateB = b?.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
+          return dir * (dateB - dateA)
+        }
+        case 'recentlyAdded':
+        default: {
+          const dateA = a?.createdAt ? new Date(a.createdAt).getTime() : 0
+          const dateB = b?.createdAt ? new Date(b.createdAt).getTime() : 0
+          return dir * (dateB - dateA)
+        }
+      }
+    })
+
+    return [...pending, ...sorted]
+  }, [friendsList, debouncedSearch, sortBy, sortDirection])
+
+  // --- ActionMenu items for selected friend ---
+  const menuItems = useMemo(() => {
+    if (!menuFriend) return []
+    const isPending = menuFriend.uuid2 === null
+    const displayName = menuFriend?.contact || 'Unnamed Friend'
+
+    if (isPending) {
+      return [
+        {
+          key: 'share',
+          icon: 'share-outline',
+          label: 'Share Link',
+          onPress: () => handleShareFriend({
+            friendshipUuid: menuFriend.friendshipUuid,
+            contactName: displayName,
+            isPending: true
+          })
+        },
+        'separator',
+        {
+          key: 'cancel',
+          icon: 'trash-can-outline',
+          label: 'Cancel Request',
+          destructive: true,
+          onPress: () => handleDeletePendingFriend({
+            friendshipUuid: menuFriend.friendshipUuid,
+            contactName: displayName
+          })
+        }
+      ]
+    }
+
+    return [
+      {
+        key: 'share',
+        icon: 'share-outline',
+        label: 'Share Name',
+        onPress: () => handleShareFriend({
+          friendshipUuid: menuFriend.friendshipUuid,
+          contactName: displayName,
+          isPending: false
+        })
+      },
+      {
+        key: 'edit',
+        icon: 'pencil-outline',
+        label: 'Edit Name',
+        onPress: () => {
+          setSelectedFriendshipUuid(menuFriend.friendshipUuid)
+          setShowNamePicker(true)
+        }
+      },
+      'separator',
+      {
+        key: 'remove',
+        icon: 'trash-can-outline',
+        label: 'Remove Friend',
+        destructive: true,
+        onPress: () => {
+          Alert.alert('Remove Friend', `Are you sure you want to remove ${displayName}?`, [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'Remove',
+              style: 'destructive',
+              onPress: () => handleRemoveFriend({ friendshipUuid: menuFriend.friendshipUuid })
+            }
+          ])
+        }
+      }
+    ]
+  }, [menuFriend])
+
+  const openMenu = useCallback((friend) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    setMenuFriend(friend)
+    setMenuVisible(true)
+  }, [])
+
+  const FriendItem = memo(({ friend, onOpenMenu }) => {
     const displayName = friend?.contact || 'Unnamed Friend'
     const isPending = friend.uuid2 === null
     const hasUnread = friend.unreadCount > 0
 
-    // Keep current value in a ref to compute offsets across gestures
-    useEffect(() => {
-      const id = translateX.addListener(({ value }) => {
-        currentTranslateXRef.current = value
-      })
-      return () => {
-        translateX.removeListener(id)
-      }
-    }, [translateX])
-
-    const clamp = (num, min, max) => Math.min(Math.max(num, min), max)
-
-    const handleSwipeGesture = (event) => {
-      if (isPending) return // Don't allow swipe for pending friends
-
-      const { translationX, state } = event.nativeEvent
-
-      // When a new gesture begins, capture current offset so we continue from it
-      if (state === State.BEGAN) {
-        gestureStartOffsetRef.current = currentTranslateXRef.current || 0
-        return
-      }
-
-      // Update position continuously while swiping (onGestureEvent has no state)
-      if (state === undefined || state === State.ACTIVE) {
-        // Desired position is prior offset + live translation
-        const desired = gestureStartOffsetRef.current + translationX
-        translateX.setValue(clamp(desired, -80, 160))
-      } else if (state === State.END || state === State.CANCELLED) {
-        // Determine if swipe should be open or closed
-        const final = gestureStartOffsetRef.current + translationX
-        if (final > 80) {
-          // Open right swipe action (share/edit)
-          Animated.spring(translateX, {
-            toValue: 160,
-            useNativeDriver: false,
-            tension: 100,
-            friction: 8
-          }).start()
-          setIsSwipeOpen(true)
-          setSwipeDirection('right')
-        } else if (final < -40) {
-          // Open left swipe action (delete)
-          Animated.spring(translateX, {
-            toValue: -80,
-            useNativeDriver: false,
-            tension: 100,
-            friction: 8
-          }).start()
-          setIsSwipeOpen(true)
-          setSwipeDirection('left')
-        } else {
-          // Close the swipe action
-          Animated.spring(translateX, {
-            toValue: 0,
-            useNativeDriver: false,
-            tension: 100,
-            friction: 8
-          }).start()
-          setIsSwipeOpen(false)
-          setSwipeDirection(null)
-        }
-      }
-    }
-
-    // Animated stripes (RIGHT SWIPE): sequential expansion
-    // Blue (share) grows first from 8px to 80px as you swipe 0->72px,
-    // Yellow (edit) stays visible at 8px and starts growing only after blue is full.
-    const shareStripeWidth = translateX.interpolate({
-      inputRange: [0, 80, 160],
-      outputRange: [8, 80, 80],
-      extrapolate: 'clamp'
-    })
-    const editStripeWidth = translateX.interpolate({
-      inputRange: [0, 80, 160],
-      outputRange: [8, 8, 80],
-      extrapolate: 'clamp'
-    })
-
-    // Fade in content (icon + text) when there's enough space
-    const shareContentOpacity = translateX.interpolate({
-      inputRange: [0, 24, 40],
-      outputRange: [0, 0, 1],
-      extrapolate: 'clamp'
-    })
-    const editContentOpacity = translateX.interpolate({
-      inputRange: [0, 96, 112, 128],
-      outputRange: [0, 0, 0, 1],
-      extrapolate: 'clamp'
-    })
-    // Increase left padding when actions are minimized (at rest)
-    const contentPaddingLeft = translateX.interpolate({
-      inputRange: [-80, 0, 160],
-      outputRange: [16, 28, 16],
-      extrapolate: 'clamp'
-    })
-    // Show left overlay stripes only for right-swipe (hide on left-swipe)
-    const leftOverlayOpacity = translateX.interpolate({
-      inputRange: [-1, 0, 160],
-      outputRange: [0, 1, 1],
-      extrapolate: 'clamp'
-    })
-
-    // RIGHT SWIPE LEFT: Expand delete stripe width from 8 -> 80 while content stays put
-    const deleteStripeWidth = translateX.interpolate({
-      inputRange: [-80, 0],
-      outputRange: [80, 8],
-      extrapolate: 'clamp'
-    })
-    const deleteContentOpacity = translateX.interpolate({
-      inputRange: [-80, -56, -40, 0],
-      outputRange: [1, 1, 0, 0],
-      extrapolate: 'clamp'
-    })
-
-    // Show action backgrounds only when swiping starts to avoid showing through when minimized
-    const rightActionsOpacity = translateX.interpolate({
-      inputRange: [-80, 0, 10, 160],
-      outputRange: [0, 0, 1, 1],
-      extrapolate: 'clamp'
-    })
-    const leftActionsOpacity = translateX.interpolate({
-      inputRange: [-80, -10, 0, 160],
-      outputRange: [1, 1, 0, 0],
-      extrapolate: 'clamp'
-    })
-
-    // Note: No opacity applied to the friend item card or stripes to avoid visual fading
-
-    const closeSwipe = () => {
-      Animated.spring(translateX, {
-        toValue: 0,
-        useNativeDriver: false,
-        tension: 100,
-        friction: 8
-      }).start(() => {
-        currentTranslateXRef.current = 0
-        gestureStartOffsetRef.current = 0
-      })
-      setIsSwipeOpen(false)
-      setSwipeDirection(null)
-    }
-
-    const handleShareName = () => {
-      closeSwipe()
-      handleShareFriend({
-        friendshipUuid: friend.friendshipUuid,
-        contactName: displayName,
-        isPending: false
-      })
-    }
-
-    const handleEditFriend = () => {
-      closeSwipe()
-      setSelectedFriendshipUuid(friend.friendshipUuid)
-      setShowNamePicker(true)
-    }
-
-    const handleDeleteFriend = () => {
-      closeSwipe()
-      Alert.alert('Remove Friend', `Are you sure you want to remove ${displayName}?`, [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => handleRemoveFriend({ friendshipUuid: friend.friendshipUuid })
-        }
-      ])
-    }
-
     return (
       <View style={styles.friendItemContainer}>
-        {/* Right Swipe Action Background - Share and Edit (always present behind) */}
-        {!isPending && (
-          <Animated.View
-            style={[styles.rightSwipeAction, { opacity: rightActionsOpacity }]}
-            pointerEvents='box-none'
-          >
-            <TouchableOpacity
-              style={[styles.swipeActionButton, styles.shareAction]}
-              onPress={handleShareName}
-              activeOpacity={0.7}
-            >
-              <FontAwesome5 name='share-alt' size={18} color='white' />
-              <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.swipeActionButton, styles.editAction]}
-              onPress={handleEditFriend}
-              activeOpacity={0.7}
-            >
-              <FontAwesome5 name='edit' size={18} color='white' />
-              <Text style={styles.swipeActionText}>Edit{'\n'}Name</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* Left Swipe Action Background - Delete (always present behind) */}
-        {!isPending && (
-          <Animated.View
-            style={[styles.leftSwipeAction, { opacity: leftActionsOpacity }]}
-            pointerEvents='box-none'
-          >
-            <TouchableOpacity
-              style={[styles.swipeActionButton, styles.deleteAction]}
-              onPress={handleDeleteFriend}
-              activeOpacity={0.7}
-            >
-              <FontAwesome5 name='trash' size={18} color='white' />
-              <Text style={styles.swipeActionText}>Delete{'\n'}Friend</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-
-        {/* Main Friend Item */}
-        <PanGestureHandler
-          onGestureEvent={handleSwipeGesture}
-          onHandlerStateChange={handleSwipeGesture}
-          enabled={!isPending}
-          activeOffsetX={[-20, 20]}
-          failOffsetY={[-20, 20]}
-          shouldCancelWhenOutside
-        >
-          <Animated.View
-            style={[
-              styles.friendItem,
-              {
-                // Keep content fixed when swiping left (no negative translate visually)
-                transform: [
-                  {
-                    translateX: translateX.interpolate({
-                      inputRange: [-80, 0, 160],
-                      outputRange: [0, 0, 160],
-                      extrapolate: 'clamp'
-                    })
+        <View style={styles.friendItem}>
+          <TouchableOpacity
+            onPress={() => {
+              if (!isPending) {
+                router.push({
+                  pathname: '/chat',
+                  params: {
+                    chatUuid: friend?.chatUuid,
+                    contact: JSON.stringify(friend?.contact),
+                    friendshipUuid: friend?.friendshipUuid
                   }
-                ]
+                })
               }
-            ]}
+            }}
+            onLongPress={() => onOpenMenu(friend)}
+            activeOpacity={0.7}
           >
-            <TouchableOpacity
-              onPress={() => {
-                if (isSwipeOpen) {
-                  closeSwipe()
-                  return
-                }
-
-                if (!isPending) {
-                  router.push({
-                    pathname: '/chat',
-                    params: {
-                      chatUuid: friend?.chatUuid,
-                      contact: JSON.stringify(friend?.contact),
-                      friendshipUuid: friend?.friendshipUuid
-                    }
-                  })
-                }
-              }}
-              onLongPress={() => {
-                if (isSwipeOpen) {
-                  closeSwipe()
-                  return
-                }
-
-                // Only allow long press for pending friends to share friendship request
-                if (isPending) {
-                  Haptics.selectionAsync()
-                  handleShareFriend({
-                    friendshipUuid: friend.friendshipUuid,
-                    contactName: displayName,
-                    isPending: true
-                  })
-                }
-              }}
-              disabled={isPending}
-              activeOpacity={isPending ? 1 : 0.7}
-            >
-              {/* Animated padding wrapper to increase left padding when actions minimized */}
-              {isPending ? (
-                <View style={styles.friendContent}>
-                  <View style={styles.friendHeader}>
-                    <View style={styles.friendInfo}>
-                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode='tail'>
-                        {displayName}
-                      </Text>
-                      <>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                          <FontAwesome5
-                            name='clock'
-                            size={12}
-                            color={theme.TEXT_PRIMARY}
-                            style={{ marginRight: 6 }}
-                          />
-                          <Text style={styles.pendingStatus}>Waiting for confirmation</Text>
-                        </View>
-                        {/* Share and Delete buttons container */}
-                        <View style={styles.shareButtonContainer}>
-                          <TouchableOpacity
-                            style={[styles.pendingShareButton]}
-                            onPress={() =>
-                              handleShareFriend({
-                                friendshipUuid: friend.friendshipUuid,
-                                contactName: displayName,
-                                isPending: true
-                              })}
-                            activeOpacity={0.5}
-                            delayPressIn={0}
-                            delayPressOut={0}
-                            hitSlop={{
-                              top: 15,
-                              bottom: 15,
-                              left: 15,
-                              right: 15
-                            }}
-                            pressRetentionOffset={{
-                              top: 20,
-                              bottom: 20,
-                              left: 20,
-                              right: 20
-                            }}
-                            importantForAccessibility='yes'
-                          >
-                            <FontAwesome5 name='share-alt' size={12} color='white' />
-                            <Text style={styles.pendingShareButtonText}>Share</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[styles.pendingDeleteButton]}
-                            onPress={() =>
-                              handleDeletePendingFriend({
-                                friendshipUuid: friend.friendshipUuid,
-                                contactName: displayName
-                              })}
-                            activeOpacity={0.5}
-                            delayPressIn={0}
-                            delayPressOut={0}
-                            hitSlop={{
-                              top: 15,
-                              bottom: 15,
-                              left: 15,
-                              right: 15
-                            }}
-                            pressRetentionOffset={{
-                              top: 20,
-                              bottom: 20,
-                              left: 20,
-                              right: 20
-                            }}
-                            importantForAccessibility='yes'
-                          >
-                            <FontAwesome5 name='trash' size={12} color={theme.STATUS_ERROR} />
-                            <Text style={styles.pendingDeleteButtonText}>Delete</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </>
+            <View style={styles.friendContent}>
+              <View style={styles.friendInfo}>
+                <Text style={styles.friendName} numberOfLines={1} ellipsizeMode='tail'>
+                  {displayName}
+                </Text>
+                {isPending
+                  ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <FontAwesome5
+                        name='clock'
+                        size={12}
+                        color={theme.TEXT_PRIMARY}
+                        style={{ marginRight: 6 }}
+                      />
+                      <Text style={styles.pendingStatus}>Waiting for confirmation</Text>
                     </View>
-                    {/* Right-side spacer removed; fixed padding handles consistency */}
-                  </View>
-                </View>
-              ) : (
-                <Animated.View style={[styles.friendContent, { paddingLeft: contentPaddingLeft }]}>
-                  <View style={styles.friendHeader}>
-                    <View style={styles.friendInfo}>
-                      <Text style={styles.friendName} numberOfLines={1} ellipsizeMode='tail'>
-                        {displayName}
-                      </Text>
-                      <>
-                        <Text style={styles.friendStatus}>
-                          {hasUnread ? `${friend.unreadCount} new messages` : ''}
-                        </Text>
-                      </>
-                    </View>
-                    {/* Right-side spacer removed; fixed padding handles consistency */}
-                  </View>
-                </Animated.View>
-              )}
-            </TouchableOpacity>
-          </Animated.View>
-        </PanGestureHandler>
-
-        {/* Overlay stripes that hint at swipe actions and expand with swipe */}
-        {!isPending && (
-          <>
-            {/* Left edge (for right swipe -> share/edit). Two segments; blue grows first, yellow follows */}
-            <Animated.View
-              pointerEvents='none'
-              style={[styles.stripeOverlayLeft, { opacity: leftOverlayOpacity }]}
-            >
-              <View style={{ flexDirection: 'row', height: '100%' }}>
-                <Animated.View
-                  style={[styles.shareAction, { width: shareStripeWidth, height: '100%' }]}
-                >
-                  <Animated.View
-                    style={{
-                      flex: 1,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: shareContentOpacity
-                    }}
-                  >
-                    <FontAwesome5 name='share-alt' size={18} color='white' />
-                    <Text style={styles.swipeActionText}>Share{'\n'}Name</Text>
-                  </Animated.View>
-                </Animated.View>
-                <Animated.View
-                  style={[styles.editAction, { width: editStripeWidth, height: '100%' }]}
-                >
-                  <Animated.View
-                    style={{
-                      flex: 1,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: editContentOpacity
-                    }}
-                  >
-                    <FontAwesome5 name='edit' size={18} color='white' />
-                    <Text style={styles.swipeActionText}>Edit{'\n'}Name</Text>
-                  </Animated.View>
-                </Animated.View>
+                    )
+                  : (
+                    <Text style={styles.friendStatus}>
+                      {hasUnread ? `${friend.unreadCount} new messages` : ''}
+                    </Text>
+                    )}
               </View>
-            </Animated.View>
-
-            {/* Right edge (for left swipe -> delete). Expand width while content stays put */}
-            <Animated.View
-              pointerEvents='auto'
-              style={[styles.stripeOverlayRight, { width: deleteStripeWidth }]}
-            >
               <TouchableOpacity
-                style={{
-                  flex: 1,
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onPress={handleDeleteFriend}
-                activeOpacity={0.7}
+                style={styles.menuButton}
+                onPress={() => onOpenMenu(friend)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Animated.View
-                  style={{
-                    alignItems: 'center',
-                    opacity: deleteContentOpacity
-                  }}
-                >
-                  <FontAwesome5 name='trash' size={18} color='white' />
-                  <Text style={styles.swipeActionText}>Delete{'\n'}Friend</Text>
-                </Animated.View>
+                <MaterialCommunityIcons
+                  name='dots-vertical'
+                  size={22}
+                  color={theme.TEXT_SECONDARY}
+                />
               </TouchableOpacity>
-            </Animated.View>
-          </>
-        )}
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     )
   })
 
-  const renderFriend = ({ item: friend }) => <FriendItem friend={friend} />
+  const renderFriend = ({ item: friend }) => <FriendItem friend={friend} onOpenMenu={openMenu} />
 
-  if (!friendsList || friendsList.length === 0) {
-    return (
-      <View style={styles.container}>
-        <NamePicker
-          show={showNamePicker}
-          setShow={setShowNamePicker}
-          setContactName={setContactName}
-          headerText={headerText}
-          friendshipUuid={selectedFriendshipUuid}
-        />
-        <ShareOptionsModal
-          visible={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          friendshipUuid={shareModalData?.friendshipUuid}
-          friendName={shareModalData?.friendName}
-          uuid={uuid}
-          topOffset={60}
-        />
-        <ShareFriendNameModal
-          visible={showShareNameModal}
-          onClose={() => setShowShareNameModal(false)}
-          friendshipUuid={shareNameModalData?.friendshipUuid}
-          friendName={shareNameModalData?.friendName}
-          topOffset={60}
-        />
-        <EmptyStateCard
-          icon='users'
-          title='No Friends Yet'
-          subtitle='Add your first friend to start sharing photos and chatting privately. Build your network and stay connected!'
-          actionText='Add a Friend'
-          onActionPress={handleAddFriend}
-          iconColor={theme.TEXT_PRIMARY}
-        />
-      </View>
-    )
-  }
+  const hasAnyFriends = friendsList && friendsList.length > 0
+  const isSearching = searchText.length > 0
 
   if (!netAvailable) {
     return (
@@ -999,8 +587,32 @@ const FriendsList = () => {
           friendName={shareNameModalData?.friendName}
           topOffset={60}
         />
+        <ActionMenu
+          visible={menuVisible}
+          onClose={() => {
+            setMenuVisible(false)
+            setMenuFriend(null)
+          }}
+          title={menuFriend?.contact || 'Unnamed Friend'}
+          items={menuItems}
+        />
+
+        {loading && (
+          <View style={{ backgroundColor: theme.HEADER_BACKGROUND }}>
+            <LinearProgress
+              color={CONST.MAIN_COLOR}
+              style={{ flex: 1, height: 3 }}
+            />
+          </View>
+        )}
+
+        <InteractionHintBanner
+          hasContent={hasAnyFriends}
+          hintText='Long-press a friend for options, or tap ⋮'
+        />
+
         <FlatList
-          data={friendsList}
+          data={sortedAndFilteredFriends}
           renderItem={renderFriend}
           keyExtractor={(item) => item.friendshipUuid}
           style={styles.flatList}
@@ -1016,12 +628,66 @@ const FriendsList = () => {
           windowSize={15}
           updateCellsBatchingPeriod={50}
           removeClippedSubviews
-          getItemLayout={(data, index) => ({
-            length: 80, // Approximate height of each friend item
-            offset: 80 * index,
-            index
-          })}
+          ListEmptyComponent={
+            !loading && (
+              isSearching
+                ? (
+                  <EmptyStateCard
+                    icon='search'
+                    iconType='MaterialIcons'
+                    title='No Friends Found'
+                    subtitle={`No friends matching "${debouncedSearch}"`}
+                    actionText='Clear Search'
+                    onActionPress={() => {
+                      setSearchText('')
+                      if (searchInputRef.current) {
+                        searchInputRef.current.clear()
+                      }
+                    }}
+                    iconColor={theme.TEXT_PRIMARY}
+                  />
+                  )
+                : (
+                  <FriendsExplainerView
+                    theme={theme}
+                    onAddFriend={handleAddFriend}
+                  />
+                  )
+            )
+          }
         />
+
+        {/* Search bar - bottom floating */}
+        {(hasAnyFriends || isSearching) && (
+          <KeyboardStickyView
+            offset={{ closed: -(insets.bottom + 8), opened: 16 }}
+          >
+            <View style={styles.searchContainer}>
+              <TextInput
+                ref={searchInputRef}
+                style={[styles.searchInput, { color: theme.TEXT_PRIMARY, backgroundColor: theme.CARD_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER, paddingRight: searchText ? 36 : 16 }]}
+                placeholder='Search friends...'
+                placeholderTextColor={theme.TEXT_SECONDARY}
+                value={searchText}
+                onChangeText={setSearchText}
+              />
+              {searchText.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSearchText('')
+                    if (searchInputRef.current) {
+                      searchInputRef.current.clear()
+                      searchInputRef.current.focus()
+                    }
+                  }}
+                  style={styles.clearButton}
+                >
+                  <Ionicons name='close' size={14} color={theme.TEXT_PRIMARY} />
+                </TouchableOpacity>
+              )}
+            </View>
+          </KeyboardStickyView>
+        )}
       </View>
     </View>
   )

@@ -1,9 +1,4 @@
-# Interaction Hint Banner Specification
-
-## Purpose
-Shared reusable one-time hint banner component for teaching long-press and ⋮ tap interactions across all screens that support context menus.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: InteractionHintBanner component provides a reusable one-time hint banner
 The system SHALL provide a shared `InteractionHintBanner` React Native component at `src/components/ui/InteractionHintBanner.js` that displays a dismissible hint banner for long-press and ⋮ tap interactions. The component SHALL be fully self-contained, managing its own visibility state, SecureStore persistence, and dismiss behavior. The component SHALL accept an optional `hintText` prop to customize the displayed text.

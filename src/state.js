@@ -14,6 +14,10 @@ export const waveSortBy = atom('updatedAt')
 
 export const waveSortDirection = atom('desc')
 
+export const friendsSortBy = atom('recentlyAdded')
+
+export const friendsSortDirection = atom('desc')
+
 export const locationAtom = atom({ status: 'pending', coords: null, accuracy: null })
 
 export const netAvailable = atom(true)

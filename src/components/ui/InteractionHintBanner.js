@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import * as SecureStore from 'expo-secure-store'
 
-export default function InteractionHintBanner ({ hasContent }) {
+export default function InteractionHintBanner ({ hasContent, hintText = 'Tap and hold for options or tap ⋮' }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function InteractionHintBanner ({ hasContent }) {
     <View style={styles.banner}>
       <View style={styles.content}>
         <Ionicons name='bulb-outline' size={16} color='#FFD700' style={{ marginRight: 8 }} />
-        <Text style={styles.text}>Tap and hold for options or tap ⋮</Text>
+        <Text style={styles.text}>{hintText}</Text>
       </View>
       <TouchableOpacity onPress={dismiss} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
         <Ionicons name='close' size={18} color='rgba(255,255,255,0.8)' />
