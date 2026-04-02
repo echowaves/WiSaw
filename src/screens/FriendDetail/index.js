@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, useImperativeHandle } from 'react'
+import React, { useEffect, useState, useCallback, useMemo, useImperativeHandle, useRef } from 'react'
 import {
   View,
   StyleSheet,
@@ -28,7 +28,30 @@ import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import ActionMenu from '../../components/ActionMenu'
 import NamePicker from '../../components/NamePicker'
+import QuickActionsModal from '../../components/QuickActionsModal'
 import * as friendsHelper from '../FriendsList/friends_helper'
+
+// Lightweight wrapper isolating longPressPhoto state from FriendDetail re-renders
+const QuickActionsModalWrapper = React.memo(
+  React.forwardRef(({ setPhotos }, ref) => {
+    const [longPressPhoto, setLongPressPhoto] = useState(null)
+
+    useImperativeHandle(ref, () => ({
+      open: (photo) => setLongPressPhoto(photo)
+    }), [])
+
+    return (
+      <QuickActionsModal
+        visible={!!longPressPhoto}
+        photo={longPressPhoto}
+        onClose={() => setLongPressPhoto(null)}
+        onPhotoDeleted={(photoId) => {
+          setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+        }}
+      />
+    )
+  })
+)
 
 const FriendDetail = React.forwardRef((_props, ref) => {
   const { friendUuid, friendName: initialFriendName, friendshipUuid } = useLocalSearchParams()
@@ -86,8 +109,11 @@ const FriendDetail = React.forwardRef((_props, ref) => {
     justCollapsedId
   } = usePhotoExpansion({ width, height, insets, segmentConfig })
 
+  const quickActionsRef = useRef(null)
+
   const handlePhotoLongPress = useCallback((photo) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    quickActionsRef.current?.open(photo)
   }, [])
 
   const loadPhotos = useCallback(async (pageNum, currentBatch, refresh = false) => {
@@ -313,6 +339,8 @@ const FriendDetail = React.forwardRef((_props, ref) => {
         onClose={() => setMenuVisible(false)}
         items={headerMenuItems}
       />
+
+      <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
     </View>
   )
 })
