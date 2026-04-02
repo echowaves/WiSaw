@@ -33,7 +33,7 @@ const PendingFriendsCard = ({ pendingFriends, onRemind, onLongPress, theme }) =>
                 Waiting for confirmation
               </Text>
               <Text style={[styles.explainerText, { color: theme.TEXT_SECONDARY }]}>
-                Share the link again to remind them
+                Share this link with your friend to establish the connection. Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security.
               </Text>
             </View>
             <TouchableOpacity
@@ -42,7 +42,7 @@ const PendingFriendsCard = ({ pendingFriends, onRemind, onLongPress, theme }) =>
               activeOpacity={0.8}
             >
               <FontAwesome5 name='share' size={14} color='white' style={{ marginRight: 6 }} />
-              <Text style={styles.remindText}>Remind</Text>
+              <Text style={styles.remindText}>Share</Text>
             </TouchableOpacity>
           </TouchableOpacity>
         )

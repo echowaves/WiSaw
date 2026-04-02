@@ -22,7 +22,6 @@ import LinearProgress from '../../components/ui/LinearProgress'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import NamePicker from '../../components/NamePicker'
 import PendingFriendsCard from '../../components/PendingFriendsCard'
-import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
 import { subscribeToAddFriend } from '../../events/friendAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
@@ -86,8 +85,6 @@ const FriendsList = () => {
   const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [shareModalData, setShareModalData] = useState(null)
-  const [showShareNameModal, setShowShareNameModal] = useState(false)
-  const [shareNameModalData, setShareNameModalData] = useState(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
@@ -116,26 +113,16 @@ const FriendsList = () => {
     return unsubscribe
   }, [handleAddFriend])
 
-  const handleShareFriend = async ({ friendshipUuid, contactName, isPending = true }) => {
+  const handleShareFriend = async ({ friendshipUuid, contactName }) => {
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
 
-      if (isPending) {
-        // Share friendship invitation for pending friends
-        setShareModalData({
-          friendshipUuid,
-          friendName: contactName,
-          isPending
-        })
-        setShowShareModal(true)
-      } else {
-        // Share friend name for confirmed friends
-        setShareNameModalData({
-          friendshipUuid,
-          friendName: contactName
-        })
-        setShowShareNameModal(true)
-      }
+      setShareModalData({
+        friendshipUuid,
+        friendName: contactName,
+        isPending: true
+      })
+      setShowShareModal(true)
     } catch (error) {
       console.error('Error opening share modal:', error)
       Toast.show({
@@ -365,8 +352,7 @@ const FriendsList = () => {
           label: 'Share Link',
           onPress: () => handleShareFriend({
             friendshipUuid: menuFriend.friendshipUuid,
-            contactName: displayName,
-            isPending: true
+            contactName: displayName
           })
         },
         'separator',
@@ -384,16 +370,6 @@ const FriendsList = () => {
     }
 
     return [
-      {
-        key: 'share',
-        icon: 'share-outline',
-        label: 'Share Name',
-        onPress: () => handleShareFriend({
-          friendshipUuid: menuFriend.friendshipUuid,
-          contactName: displayName,
-          isPending: false
-        })
-      },
       {
         key: 'edit',
         icon: 'pencil-outline',
@@ -444,8 +420,7 @@ const FriendsList = () => {
     const displayName = friend?.contact || 'Unnamed Friend'
     handleShareFriend({
       friendshipUuid: friend.friendshipUuid,
-      contactName: displayName,
-      isPending: true
+      contactName: displayName
     })
   }, [])
 
@@ -490,13 +465,6 @@ const FriendsList = () => {
           friendshipUuid={shareModalData?.friendshipUuid}
           friendName={shareModalData?.friendName}
           uuid={uuid}
-          topOffset={60}
-        />
-        <ShareFriendNameModal
-          visible={showShareNameModal}
-          onClose={() => setShowShareNameModal(false)}
-          friendshipUuid={shareNameModalData?.friendshipUuid}
-          friendName={shareNameModalData?.friendName}
           topOffset={60}
         />
         <ActionMenu

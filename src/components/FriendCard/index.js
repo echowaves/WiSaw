@@ -10,6 +10,7 @@ import * as STATE from '../../state'
 const FriendCard = ({ friend, onPress, onLongPress, onPhotoPress, onPhotoLongPress, theme }) => {
   const [uuid] = useAtom(STATE.uuid)
   const displayName = friend?.contact || 'Unnamed Friend'
+  const isUnnamed = !friend?.contact
   const photos = friend.photos || []
   const friendUserUuid = friend.uuid1 === uuid ? friend.uuid2 : friend.uuid1
 
@@ -36,6 +37,11 @@ const FriendCard = ({ friend, onPress, onLongPress, onPhotoPress, onPhotoLongPre
             <Text style={[styles.friendName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
               {displayName}
             </Text>
+            {isUnnamed && (
+              <Text style={[styles.unnamedHint, { color: theme.TEXT_SECONDARY }]}>
+                Long-press to assign a name
+              </Text>
+            )}
           </View>
           <TouchableOpacity
             onPress={(e) => { e.stopPropagation(); onLongPress(friend) }}
@@ -78,6 +84,11 @@ const styles = StyleSheet.create({
   friendName: {
     fontSize: 14,
     fontWeight: '600'
+  },
+  unnamedHint: {
+    fontSize: 12,
+    marginTop: 2,
+    fontStyle: 'italic'
   }
 })
 

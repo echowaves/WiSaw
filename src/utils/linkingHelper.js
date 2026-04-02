@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import * as Linking from 'expo-linking'
-import base64 from 'react-native-base64'
 
 // =============================================================================
 // EXPO ROUTER LINKING CONFIGURATION
@@ -40,54 +39,6 @@ export const linkingConfig = {
 // UTILITY FUNCTIONS
 // =============================================================================
 
-/**
- * Parse friendship data from encoded parameter
- */
-const parseFriendshipData = (encodedData) => {
-  if (!encodedData) {
-    console.log('No data parameter found')
-    return null
-  }
-
-  try {
-    const decodedData = base64.decode(decodeURIComponent(encodedData))
-    console.log('Decoded data:', decodedData)
-
-    const friendshipData = JSON.parse(decodedData)
-    console.log('Parsed friendship data:', friendshipData)
-
-    if (
-      friendshipData.action === 'friendshipName' &&
-      friendshipData.friendshipUuid &&
-      friendshipData.friendName
-    ) {
-      console.log('Successfully parsed friendship data')
-      return {
-        type: 'friendshipName',
-        friendshipUuid: friendshipData.friendshipUuid,
-        friendName: friendshipData.friendName,
-        timestamp: friendshipData.timestamp
-      }
-    }
-
-    console.log('Invalid friendship data structure:', {
-      hasAction: !!friendshipData.action,
-      actionValue: friendshipData.action,
-      hasUuid: !!friendshipData.friendshipUuid,
-      hasName: !!friendshipData.friendName
-    })
-  } catch (error) {
-    console.log('Error parsing friendship data:', error)
-    console.log('Error details:', {
-      name: error.name,
-      message: error.message,
-      encodedData
-    })
-  }
-
-  return null
-}
-
 const trimSlashes = (value = '') => value.replace(/^\/+|\/+$/g, '')
 
 const resolveDeepLinkTarget = (rawPath, queryParams) => {
@@ -114,16 +65,6 @@ const resolveDeepLinkTarget = (rawPath, queryParams) => {
       return {
         type: 'friend',
         friendshipUuid: secondarySegment.trim()
-      }
-    }
-
-    if (
-      primarySegment === 'friendship' ||
-      (primarySegment === 'friendships' && sanitizedPath[1] === 'name')
-    ) {
-      const encodedData = queryParams?.data
-      if (encodedData) {
-        return parseFriendshipData(encodedData)
       }
     }
   }
@@ -188,13 +129,6 @@ export const parseDeepLink = (url) => {
         combinedPath,
         queryParams: params
       })
-
-      // Handle friendship links - new format with type parameter
-      if (params.type === 'friendship' && params.data) {
-        const encodedData = params.data
-        console.log('Encoded data from QR:', encodedData)
-        return parseFriendshipData(encodedData)
-      }
 
       const resolvedTarget = resolveDeepLinkTarget(combinedPath, params)
       if (resolvedTarget) {

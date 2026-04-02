@@ -27,3 +27,11 @@ The FriendsList SHALL distinguish between an empty list due to no friends and an
 #### Scenario: Empty due to search filtering
 - **WHEN** friends exist but the active search term matches none
 - **THEN** the system SHALL display an EmptyStateCard with search-specific messaging (not FriendsExplainerView)
+
+### Requirement: Privacy explainer card in tutorial
+The `FriendsExplainerView` SHALL include a "Private by Design" card (icon: `lock`) explaining that friend names are never stored on servers — they are only kept locally on the device to ensure privacy and security — and must be re-assigned when switching devices.
+
+#### Scenario: Empty friends list shows privacy card
+- **WHEN** the user has no friends and views the FriendsExplainerView
+- **THEN** a card with a lock icon and title "Private by Design" SHALL be displayed
+- **THEN** the card body SHALL explain that friend names are never stored on servers, only kept locally on the device, and must be re-assigned on a new device

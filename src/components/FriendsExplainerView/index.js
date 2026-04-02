@@ -18,6 +18,11 @@ const CARDS = [
     icon: 'images',
     title: 'Photo Sharing',
     body: 'See your friends\' photos in a dedicated feed. No phone numbers or emails needed.'
+  },
+  {
+    icon: 'lock',
+    title: 'Private by Design',
+    body: 'Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security. If you switch devices, you\'ll need to assign the friend name to your connection on the new device.'
   }
 ]
 

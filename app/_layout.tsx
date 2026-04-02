@@ -96,43 +96,6 @@ export default function RootLayout () {
           }, 100)
           break
 
-        case 'friendshipName':
-          console.log(
-            'Processing friendship name update:',
-            linkData.friendshipUuid,
-            linkData.friendName
-          )
-          router.replace('/friends')
-          setTimeout(async () => {
-            try {
-              const currentUuid = await SecretReducer.getUUID()
-              const friendsHelper = await import(
-                '../src/screens/FriendsList/friends_helper'
-              )
-              await friendsHelper.setContactName({
-                uuid: currentUuid,
-                friendshipUuid: linkData.friendshipUuid,
-                contactName: linkData.friendName
-              })
-
-              Toast.show({
-                text1: 'Friend name updated!',
-                text2: `Updated to "${linkData.friendName}"`,
-                type: 'success',
-                topOffset: 100
-              })
-            } catch (error) {
-              console.error('Error updating friend name:', error)
-              Toast.show({
-                text1: 'Update failed',
-                text2: 'Could not update friend name',
-                type: 'error',
-                topOffset: 100
-              })
-            }
-          }, 100)
-          break
-
         default:
           console.log('Unknown link type, navigating to home')
           router.replace('/')

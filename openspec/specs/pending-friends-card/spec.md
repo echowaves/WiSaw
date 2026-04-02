@@ -17,15 +17,16 @@ The `PendingFriendsCard` component SHALL render a dashed-border card with tinted
 - **WHEN** there are no pending friends
 - **THEN** the `PendingFriendsCard` SHALL NOT render
 
-**Requirement: Pending friend items show status and remind action**
-Each pending friend within the card SHALL display the friend's name, a "Waiting for confirmation" status line, an explanation text ("When confirmed, you'll see each other's photos shared nearby"), and a "Remind" button. The Remind button SHALL re-share the friendship invitation link via `ShareOptionsModal`.
+**Requirement: Pending friend items show status and share action**
+Each pending friend within the card SHALL display the friend's name, a "Waiting for confirmation" status line, an explanation text ("Share this link with your friend to establish the connection. Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security."), and a "Share" button. The Share button SHALL re-share the friendship invitation link via `ShareOptionsModal`.
 
-#### Scenario: Remind button re-shares invitation
-- **WHEN** the user taps "Remind" on a pending friend
+#### Scenario: Share button re-shares invitation
+- **WHEN** the user taps "Share" on a pending friend
 - **THEN** the `ShareOptionsModal` SHALL open with that friendship's UUID
 - **THEN** the user can share the invitation link via the native share sheet or QR code
 
-#### Scenario: Pending friend displays explanation
+#### Scenario: Pending friend displays privacy-aware explanation
 - **WHEN** a pending friend item renders
-- **THEN** it SHALL display "Waiting for confirmation" with a clock indicator
+- **THEN** it SHALL display "Waiting for confirmation" as the status line
+- **THEN** it SHALL display "Share this link with your friend to establish the connection. Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security." as the explainer text
 - **THEN** it SHALL display "When confirmed, you'll see each other's photos shared nearby"

@@ -1,7 +1,6 @@
 /* global jest, describe, it, expect, beforeEach */
 
 import * as Linking from 'expo-linking'
-import base64 from 'react-native-base64'
 
 import { parseDeepLink } from '../linkingHelper'
 
@@ -10,14 +9,6 @@ jest.mock('expo-linking', () => ({
   createURL: jest.fn(() => 'wisaw://'),
   addEventListener: jest.fn(() => ({ remove: jest.fn() })),
   getInitialURL: jest.fn()
-}))
-
-jest.mock('react-native-base64', () => ({
-  __esModule: true,
-  default: {
-    encode: (value) => Buffer.from(value, 'utf8').toString('base64'),
-    decode: (value) => Buffer.from(value, 'base64').toString('utf8')
-  }
 }))
 
 describe('parseDeepLink', () => {
@@ -56,28 +47,6 @@ describe('parseDeepLink', () => {
     expect(result).toEqual({
       type: 'friend',
       friendshipUuid: 'uuid-123'
-    })
-  })
-
-  it('decodes friendship name updates from custom scheme link params', () => {
-    const payload = {
-      action: 'friendshipName',
-      friendshipUuid: 'uuid-555',
-      friendName: 'Sam Example',
-      timestamp: 1735928573
-    }
-
-    const encoded = base64.encode(JSON.stringify(payload))
-
-    const result = parseDeepLink(
-      `wisaw://friendship?type=friendship&data=${encodeURIComponent(encoded)}`
-    )
-
-    expect(result).toEqual({
-      type: 'friendshipName',
-      friendshipUuid: 'uuid-555',
-      friendName: 'Sam Example',
-      timestamp: 1735928573
     })
   })
 })
