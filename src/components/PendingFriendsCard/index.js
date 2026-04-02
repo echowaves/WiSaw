@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons'
+import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 
 import * as CONST from '../../consts'
 
@@ -36,14 +36,23 @@ const PendingFriendsCard = ({ pendingFriends, onRemind, onLongPress, theme }) =>
                 Share this link with your friend to establish the connection. Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security.
               </Text>
             </View>
-            <TouchableOpacity
-              style={styles.remindButton}
-              onPress={() => onRemind(friend)}
-              activeOpacity={0.8}
-            >
-              <FontAwesome5 name='share' size={14} color='white' style={{ marginRight: 6 }} />
-              <Text style={styles.remindText}>Share</Text>
-            </TouchableOpacity>
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity
+                style={styles.remindButton}
+                onPress={() => onRemind(friend)}
+                activeOpacity={0.8}
+              >
+                <FontAwesome5 name='share' size={14} color='white' style={{ marginRight: 6 }} />
+                <Text style={styles.remindText}>Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => onLongPress(friend)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.menuButton}
+              >
+                <Ionicons name='ellipsis-vertical' size={18} color={theme.TEXT_SECONDARY} />
+              </TouchableOpacity>
+            </View>
           </TouchableOpacity>
         )
       })}
@@ -106,6 +115,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '600'
+  },
+  menuButton: {
+    padding: 4,
+    marginTop: 8
   }
 })
 
