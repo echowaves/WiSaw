@@ -313,8 +313,9 @@ const ExpandableThumb = ({
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={{
             position: 'absolute',
-            top: 6,
+            bottom: 6,
             right: 6,
+            zIndex: 2,
             backgroundColor: 'rgba(0,0,0,0.4)',
             borderRadius: 12,
             width: 24,
