@@ -42,17 +42,15 @@ export const initialState = {
 
 export async function createFriendship ({ uuid, topOffset, contactName, autoShare = false }) {
   try {
-    const { friendship } = (
+    const friendship = (
       await CONST.gqlClient.mutate({
         mutation: gql`
           mutation createFriendship($uuid: String!) {
             createFriendship(uuid: $uuid) {
-              friendship {
-                createdAt
-                friendshipUuid
-                uuid1
-                uuid2
-              }
+              createdAt
+              friendshipUuid
+              uuid1
+              uuid2
             }
           }
         `,
