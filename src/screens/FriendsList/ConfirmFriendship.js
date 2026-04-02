@@ -15,8 +15,6 @@ import NamePicker from '../../components/NamePicker'
 
 import * as STATE from '../../state'
 
-import * as reducer from './reducer'
-
 import { SHARED_STYLES } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
@@ -65,8 +63,6 @@ const ConfirmFriendship = ({ route }) => {
           uuid
         })
       )
-
-      reducer.reloadUnreadCountsList({ uuid })
 
       Toast.show({
         text1: 'Friendship confirmed!',

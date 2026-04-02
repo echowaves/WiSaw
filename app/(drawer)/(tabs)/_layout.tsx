@@ -48,32 +48,6 @@ export default function TabsLayout () {
           } as any
         }}
       />
-      <Stack.Screen
-        name='chat'
-        options={{
-          title: 'Chat',
-          headerTintColor: CONST.MAIN_COLOR,
-          headerBackTitle: '',
-          headerStyle: {
-            backgroundColor: SHARED_STYLES.theme.HEADER_BACKGROUND,
-            borderBottomWidth: 1,
-            borderBottomColor: SHARED_STYLES.theme.HEADER_BORDER,
-            shadowColor: SHARED_STYLES.theme.HEADER_SHADOW,
-            shadowOffset: {
-              width: 0,
-              height: 2
-            },
-            shadowOpacity: 1,
-            shadowRadius: 4,
-            elevation: 3
-          } as any,
-          headerTitleStyle: {
-            fontSize: 18,
-            fontWeight: '600',
-            color: SHARED_STYLES.theme.TEXT_PRIMARY
-          } as any
-        }}
-      />
     </Stack>
   )
 }

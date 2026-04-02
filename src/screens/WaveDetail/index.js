@@ -11,7 +11,7 @@ import {
   TextInput,
   useWindowDimensions
 } from 'react-native'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
 import { router, useLocalSearchParams, useNavigation } from 'expo-router'
 import * as Haptics from 'expo-haptics'
@@ -25,6 +25,7 @@ import LinearProgress from '../../components/ui/LinearProgress'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
+import { saveWaveFeedSortPreferences } from '../../utils/waveStorage'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import QuickActionsModal from '../../components/QuickActionsModal'
@@ -77,6 +78,10 @@ const WaveDetail = React.forwardRef((_props, ref) => {
   const { waveUuid, waveName: initialWaveName } = useLocalSearchParams()
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+  const [waveFeedSortBy] = useAtom(STATE.waveFeedSortBy)
+  const [waveFeedSortDirection] = useAtom(STATE.waveFeedSortDirection)
+  const setWaveFeedSortBy = useSetAtom(STATE.waveFeedSortBy)
+  const setWaveFeedSortDirection = useSetAtom(STATE.waveFeedSortDirection)
   const navigation = useNavigation()
 
   const [waveName, setWaveName] = useState(initialWaveName || '')
@@ -220,7 +225,9 @@ const WaveDetail = React.forwardRef((_props, ref) => {
       const data = await reducer.fetchWavePhotos({
         waveUuid,
         pageNumber: pageNum,
-        batch: currentBatch
+        batch: currentBatch,
+        sortBy: waveFeedSortBy,
+        sortDirection: waveFeedSortDirection
       })
 
       const frozenPhotos = data.photos.map(createFrozenPhoto)
@@ -242,7 +249,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     } finally {
       setLoading(false)
     }
-  }, [waveUuid])
+  }, [waveUuid, waveFeedSortBy, waveFeedSortDirection])
 
   useEffect(() => {
     setPageNumber(0)
@@ -252,7 +259,7 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
     loadPhotos(0, newBatch, true)
-  }, [waveUuid])
+  }, [waveUuid, waveFeedSortBy, waveFeedSortDirection])
 
   const handleRefresh = () => {
     setPageNumber(0)
@@ -299,6 +306,13 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     )
   }
 
+  const feedSortOptions = [
+    { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
+    { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
+    { label: 'Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc', icon: 'sort-descending' },
+    { label: 'Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc', icon: 'sort-ascending' }
+  ]
+
   const headerMenuItems = [
     {
       key: 'edit-wave',
@@ -323,7 +337,21 @@ const WaveDetail = React.forwardRef((_props, ref) => {
       label: 'Delete Wave',
       destructive: true,
       onPress: handleDeleteWave
-    }
+    },
+    'separator',
+    ...feedSortOptions.map((opt, i) => ({
+      key: `feed-sort-${i}`,
+      icon: opt.icon,
+      label: opt.label,
+      checked: opt.sortBy === waveFeedSortBy && opt.sortDirection === waveFeedSortDirection,
+      onPress: () => {
+        if (opt.sortBy !== waveFeedSortBy || opt.sortDirection !== waveFeedSortDirection) {
+          setWaveFeedSortBy(opt.sortBy)
+          setWaveFeedSortDirection(opt.sortDirection)
+          saveWaveFeedSortPreferences({ sortBy: opt.sortBy, sortDirection: opt.sortDirection })
+        }
+      }
+    }))
   ]
 
   React.useImperativeHandle(ref, () => ({
@@ -546,7 +574,6 @@ const WaveDetail = React.forwardRef((_props, ref) => {
           theme={theme}
           navigation={navigation}
           netAvailable={netAvailable}
-          unreadCount={0}
           isCameraOpening={isCameraOpening}
           onCameraPress={checkPermissionsForPhotoTaking}
           locationReady={!!location}

@@ -113,19 +113,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
       mutation: gql`
         mutation acceptFriendshipRequest($friendshipUuid: String!, $uuid: String!) {
           acceptFriendshipRequest(friendshipUuid: $friendshipUuid, uuid: $uuid) {
-            chat {
-              chatUuid
-              createdAt
-            }
-            chatUser {
-              chatUuid
-              createdAt
-              invitedByUuid
-              lastReadAt
-              uuid
-            }
             friendship {
-              chatUuid
               createdAt
               friendshipUuid
               uuid1
@@ -140,9 +128,8 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
       }
     })
 
-    const { friendship, chat, chatUser } = result.data.acceptFriendshipRequest
-    // console.log({ friendship, chat, chatUser })
-    return { friendship, chat, chatUser }
+    const { friendship } = result.data.acceptFriendshipRequest
+    return { friendship }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('confirmFriendship GraphQL error:', error)
@@ -198,32 +185,6 @@ const getLocalContact = async ({ friendshipUuid }) => {
   }
 }
 
-export const getUnreadCountsList = async ({ uuid }) => {
-  try {
-    const unreadCountsList = (
-      await CONST.gqlClient.query({
-        query: gql`
-          query getUnreadCountsList($uuid: String!) {
-            getUnreadCountsList(uuid: $uuid) {
-              chatUuid
-              unread
-              updatedAt
-            }
-          }
-        `,
-        variables: {
-          uuid
-        },
-      })
-    ).data.getUnreadCountsList
-    return unreadCountsList
-  } catch (err61) {
-    // eslint-disable-next-line no-console
-    console.log({ err61 }) // eslint-disable-line
-  }
-  return []
-}
-
 const getRemoteListOfFriendships = async ({ uuid }) => {
   try {
     const friendsList = (
@@ -231,17 +192,20 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
         query: gql`
           query getFriendshipsList($uuid: String!) {
             getFriendshipsList(uuid: $uuid) {
-              chatUuid
               createdAt
               friendshipUuid
               uuid1
               uuid2
+              photos {
+                id
+                thumbUrl
+              }
             }
           }
         `,
         variables: {
           uuid
-        },
+        }
       })
     ).data.getFriendshipsList
     return friendsList
@@ -253,10 +217,7 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
 }
 
 export const getEnhancedListOfFriendships = async ({ uuid }) => {
-  const [remoteFriendships, unreadCountsList] = await Promise.all([
-    getRemoteListOfFriendships({ uuid }),
-    getUnreadCountsList({ uuid })
-  ])
+  const remoteFriendships = await getRemoteListOfFriendships({ uuid })
 
   const enhancedFriendships = await Promise.all(
     // not sure if this is going to scale
@@ -264,16 +225,11 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
       try {
         const { friendshipUuid } = friendship
         const contact = await getLocalContact({ friendshipUuid })
-        const unread = unreadCountsList.find(
-          (unreadChat) => unreadChat.chatUuid === friendship.chatUuid
-        )
 
         const localContact = {
           key: friendship.friendshipUuid,
           contact,
-          ...friendship,
-          unreadCount: unread?.unread || 0,
-          updatedAt: unread?.updatedAt || Date.now()
+          ...friendship
         }
         return localContact
       } catch (error) {
@@ -284,33 +240,12 @@ export const getEnhancedListOfFriendships = async ({ uuid }) => {
         return {
           key: friendship.friendshipUuid,
           contact: null, // Will show as 'Unnamed Friend'
-          ...friendship,
-          unreadCount: 0,
-          updatedAt: Date.now()
+          ...friendship
         }
       }
     })
   )
-  // Sort by most recent updates first (descending order)
-  return enhancedFriendships.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  )
-}
-
-export const resetUnreadCount = async ({ chatUuid, uuid }) => {
-  const lastReadAt = await CONST.gqlClient.mutate({
-    mutation: gql`
-      mutation resetUnreadCount($chatUuid: String!, $uuid: String!) {
-        resetUnreadCount(chatUuid: $chatUuid, uuid: $uuid)
-      }
-    `,
-    variables: {
-      chatUuid,
-      uuid
-    }
-  })
-  // console.log({ lastReadAt })
-  return lastReadAt
+  return enhancedFriendships
 }
 
 // Function to remove a friend (wrapper around deleteFriendship)

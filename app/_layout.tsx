@@ -28,7 +28,7 @@ import {
   loadThemePreference,
   subscribeToSystemTheme
 } from '../src/utils/themeStorage'
-import { loadWaveSortPreferences } from '../src/utils/waveStorage'
+import { loadWaveSortPreferences, loadWaveFeedSortPreferences, loadFriendFeedSortPreferences } from '../src/utils/waveStorage'
 
 export default function RootLayout () {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -39,6 +39,10 @@ export default function RootLayout () {
   )
   const [, setWaveSortBy] = useAtom(STATE.waveSortBy)
   const [, setWaveSortDirection] = useAtom(STATE.waveSortDirection)
+  const [, setWaveFeedSortBy] = useAtom(STATE.waveFeedSortBy)
+  const [, setWaveFeedSortDirection] = useAtom(STATE.waveFeedSortDirection)
+  const [, setFriendFeedSortBy] = useAtom(STATE.friendFeedSortBy)
+  const [, setFriendFeedSortDirection] = useAtom(STATE.friendFeedSortDirection)
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -187,13 +191,17 @@ export default function RootLayout () {
           nickNameResult,
           themePreferenceResult,
           followSystemResult,
-          waveSortResult
+          waveSortResult,
+          waveFeedSortResult,
+          friendFeedSortResult
         ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
           loadThemePreference(),
           loadFollowSystemPreference(),
-          loadWaveSortPreferences()
+          loadWaveSortPreferences(),
+          loadWaveFeedSortPreferences(),
+          loadFriendFeedSortPreferences()
         ])
 
         if (isCancelled) return
@@ -212,6 +220,18 @@ export default function RootLayout () {
         if (waveSortPrefs) {
           setWaveSortBy(waveSortPrefs.sortBy)
           setWaveSortDirection(waveSortPrefs.sortDirection)
+        }
+
+        const waveFeedSortPrefs = getResolvedValue(waveFeedSortResult, null)
+        if (waveFeedSortPrefs) {
+          setWaveFeedSortBy(waveFeedSortPrefs.sortBy)
+          setWaveFeedSortDirection(waveFeedSortPrefs.sortDirection)
+        }
+
+        const friendFeedSortPrefs = getResolvedValue(friendFeedSortResult, null)
+        if (friendFeedSortPrefs) {
+          setFriendFeedSortBy(friendFeedSortPrefs.sortBy)
+          setFriendFeedSortDirection(friendFeedSortPrefs.sortDirection)
         }
 
         console.log(`✅ App state initialized in ${Date.now() - startTime}ms`)

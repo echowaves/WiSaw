@@ -5,6 +5,8 @@ import Toast from 'react-native-toast-message'
 // this is not a password or sensitive info, so SecureStore is used for simplicity
 const ACTIVE_WAVE_KEY = 'ACTIVE_WAVE'
 const WAVE_SORT_PREFERENCES_KEY = 'WAVE_SORT_PREFERENCES'
+const WAVE_FEED_SORT_KEY = 'WAVE_FEED_SORT_PREFERENCES'
+const FRIEND_FEED_SORT_KEY = 'FRIEND_FEED_SORT_PREFERENCES'
 
 export const saveActiveWave = async (wave) => {
   try {
@@ -84,6 +86,66 @@ export const loadWaveSortPreferences = async () => {
     return null
   } catch (error) {
     console.error('Failed to load wave sort preferences:', error)
+    return null
+  }
+}
+
+export const saveWaveFeedSortPreferences = async ({ sortBy, sortDirection }) => {
+  try {
+    await SecureStore.setItemAsync(
+      WAVE_FEED_SORT_KEY,
+      JSON.stringify({ sortBy, sortDirection })
+    )
+  } catch (error) {
+    console.error('Failed to save wave feed sort preferences:', error)
+  }
+}
+
+export const loadWaveFeedSortPreferences = async () => {
+  try {
+    const timeoutPromise = new Promise((_resolve, reject) => {
+      setTimeout(() => reject(new Error('Wave feed sort storage timeout')), 3000)
+    })
+
+    const getItemPromise = SecureStore.getItemAsync(WAVE_FEED_SORT_KEY)
+    const json = await Promise.race([getItemPromise, timeoutPromise])
+
+    if (json) {
+      return JSON.parse(json)
+    }
+    return null
+  } catch (error) {
+    console.error('Failed to load wave feed sort preferences:', error)
+    return null
+  }
+}
+
+export const saveFriendFeedSortPreferences = async ({ sortBy, sortDirection }) => {
+  try {
+    await SecureStore.setItemAsync(
+      FRIEND_FEED_SORT_KEY,
+      JSON.stringify({ sortBy, sortDirection })
+    )
+  } catch (error) {
+    console.error('Failed to save friend feed sort preferences:', error)
+  }
+}
+
+export const loadFriendFeedSortPreferences = async () => {
+  try {
+    const timeoutPromise = new Promise((_resolve, reject) => {
+      setTimeout(() => reject(new Error('Friend feed sort storage timeout')), 3000)
+    })
+
+    const getItemPromise = SecureStore.getItemAsync(FRIEND_FEED_SORT_KEY)
+    const json = await Promise.race([getItemPromise, timeoutPromise])
+
+    if (json) {
+      return JSON.parse(json)
+    }
+    return null
+  } catch (error) {
+    console.error('Failed to load friend feed sort preferences:', error)
     return null
   }
 }

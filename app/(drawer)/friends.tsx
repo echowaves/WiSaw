@@ -26,8 +26,7 @@ export default function Friends () {
   const sortOptions = [
     { label: 'Alphabetical A-Z', sortBy: 'alphabetical', sortDirection: 'asc', icon: 'sort-alphabetical-ascending' },
     { label: 'Alphabetical Z-A', sortBy: 'alphabetical', sortDirection: 'desc', icon: 'sort-alphabetical-descending' },
-    { label: 'Recently Added', sortBy: 'recentlyAdded', sortDirection: 'desc', icon: 'sort-descending' },
-    { label: 'Most Recent Chat', sortBy: 'recentChat', sortDirection: 'desc', icon: 'message-text-clock-outline' }
+    { label: 'Recently Added', sortBy: 'recentlyAdded', sortDirection: 'desc', icon: 'sort-descending' }
   ]
 
   const menuItems = sortOptions.map((opt, i) => ({

@@ -23,7 +23,6 @@ export const linkingConfig = {
               'photos/[id]': 'photos/:id',
               'shared/[photoId]': 'photos/:photoId',
               'confirm-friendship/[friendshipUuid]': 'friends/:friendshipUuid',
-              chat: 'chat',
               'modal-input': 'input',
               pinch: 'pinch'
             }

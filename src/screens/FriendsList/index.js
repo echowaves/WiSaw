@@ -1,12 +1,12 @@
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import * as Haptics from 'expo-haptics'
 
-import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 
-import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
@@ -16,15 +16,17 @@ import * as STATE from '../../state'
 
 import ActionMenu from '../../components/ActionMenu'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import FriendCard from '../../components/FriendCard'
 import FriendsExplainerView from '../../components/FriendsExplainerView'
 import LinearProgress from '../../components/ui/LinearProgress'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import NamePicker from '../../components/NamePicker'
+import PendingFriendsCard from '../../components/PendingFriendsCard'
 import ShareFriendNameModal from '../../components/ShareFriendNameModal'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
 import { subscribeToAddFriend } from '../../events/friendAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
-import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
+import { getTheme } from '../../theme/sharedStyles'
 import * as friendsHelper from './friends_helper'
 
 const FriendsList = () => {
@@ -39,7 +41,7 @@ const FriendsList = () => {
   const insets = useSafeAreaInsets()
   const searchInputRef = useRef(null)
 
-  const createStyles = (theme, isDark) =>
+  const createStyles = (theme) =>
     StyleSheet.create({
       container: {
         flex: 1,
@@ -47,56 +49,6 @@ const FriendsList = () => {
       },
       flatList: {
         flex: 1
-      },
-      friendItem: {
-        backgroundColor: theme.CARD_BACKGROUND,
-        flex: 1,
-        borderRadius: 20,
-        overflow: 'hidden'
-      },
-      friendContent: {
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center'
-      },
-      friendInfo: {
-        marginRight: 12,
-        flex: 1
-      },
-      friendName: {
-        ...SHARED_STYLES.text.subheading,
-        fontSize: 16,
-        marginBottom: 4
-      },
-      friendStatus: {
-        ...SHARED_STYLES.text.secondary,
-        fontSize: 14
-      },
-      pendingStatus: {
-        fontSize: 14,
-        color: theme.TEXT_PRIMARY,
-        fontWeight: '500'
-      },
-      menuButton: {
-        padding: 8,
-        marginLeft: 4
-      },
-      friendItemContainer: {
-        backgroundColor: theme.CARD_BACKGROUND,
-        marginHorizontal: 16,
-        marginVertical: 8,
-        borderRadius: 20,
-        overflow: 'visible',
-        padding: 0,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 6,
-        elevation: 8,
-        borderWidth: isDark ? 1.5 : 0,
-        borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'transparent'
       },
       searchContainer: {
         flexDirection: 'row',
@@ -125,10 +77,10 @@ const FriendsList = () => {
       }
     })
 
-  const styles = createStyles(theme, isDarkMode)
+  const styles = createStyles(theme)
 
   const headerText =
-    'Choose a friendly name to help you remember this person when chatting or sharing content.'
+    'Choose a friendly name to help you remember this person when sharing content.'
 
   const [showNamePicker, setShowNamePicker] = useState(false)
   const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState(null)
@@ -384,11 +336,6 @@ const FriendsList = () => {
           const nameB = (b?.contact || 'Unnamed Friend').toLowerCase()
           return dir * nameA.localeCompare(nameB)
         }
-        case 'recentChat': {
-          const dateA = a?.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0
-          const dateB = b?.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0
-          return dir * (dateB - dateA)
-        }
         case 'recentlyAdded':
         default: {
           const dateA = a?.createdAt ? new Date(a.createdAt).getTime() : 0
@@ -398,8 +345,11 @@ const FriendsList = () => {
       }
     })
 
-    return [...pending, ...sorted]
+    return { pending, confirmed: sorted }
   }, [friendsList, debouncedSearch, sortBy, sortDirection])
+
+  const pendingFriends = sortedAndFilteredFriends.pending
+  const confirmedFriends = sortedAndFilteredFriends.confirmed
 
   // --- ActionMenu items for selected friend ---
   const menuItems = useMemo(() => {
@@ -479,72 +429,34 @@ const FriendsList = () => {
     setMenuVisible(true)
   }, [])
 
-  const FriendItem = memo(({ friend, onOpenMenu }) => {
+  const handleFriendPress = useCallback((friend) => {
+    const friendUserUuid = friend.uuid1 === uuid ? friend.uuid2 : friend.uuid1
+    router.push({
+      pathname: `/friendships/${friendUserUuid}`,
+      params: {
+        friendName: friend?.contact || 'Unnamed Friend',
+        friendshipUuid: friend.friendshipUuid
+      }
+    })
+  }, [uuid])
+
+  const handleRemindPending = useCallback((friend) => {
     const displayName = friend?.contact || 'Unnamed Friend'
-    const isPending = friend.uuid2 === null
-    const hasUnread = friend.unreadCount > 0
+    handleShareFriend({
+      friendshipUuid: friend.friendshipUuid,
+      contactName: displayName,
+      isPending: true
+    })
+  }, [])
 
-    return (
-      <View style={styles.friendItemContainer}>
-        <View style={styles.friendItem}>
-          <TouchableOpacity
-            onPress={() => {
-              if (!isPending) {
-                router.push({
-                  pathname: '/chat',
-                  params: {
-                    chatUuid: friend?.chatUuid,
-                    contact: JSON.stringify(friend?.contact),
-                    friendshipUuid: friend?.friendshipUuid
-                  }
-                })
-              }
-            }}
-            onLongPress={() => onOpenMenu(friend)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.friendContent}>
-              <View style={styles.friendInfo}>
-                <Text style={styles.friendName} numberOfLines={1} ellipsizeMode='tail'>
-                  {displayName}
-                </Text>
-                {isPending
-                  ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <FontAwesome5
-                        name='clock'
-                        size={12}
-                        color={theme.TEXT_PRIMARY}
-                        style={{ marginRight: 6 }}
-                      />
-                      <Text style={styles.pendingStatus}>Waiting for confirmation</Text>
-                    </View>
-                    )
-                  : (
-                    <Text style={styles.friendStatus}>
-                      {hasUnread ? `${friend.unreadCount} new messages` : ''}
-                    </Text>
-                    )}
-              </View>
-              <TouchableOpacity
-                style={styles.menuButton}
-                onPress={() => onOpenMenu(friend)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <MaterialCommunityIcons
-                  name='dots-vertical'
-                  size={22}
-                  color={theme.TEXT_SECONDARY}
-                />
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    )
-  })
-
-  const renderFriend = ({ item: friend }) => <FriendItem friend={friend} onOpenMenu={openMenu} />
+  const renderFriend = ({ item: friend }) => (
+    <FriendCard
+      friend={friend}
+      onPress={handleFriendPress}
+      onLongPress={openMenu}
+      theme={theme}
+    />
+  )
 
   const hasAnyFriends = friendsList && friendsList.length > 0
   const isSearching = searchText.length > 0
@@ -612,7 +524,7 @@ const FriendsList = () => {
         />
 
         <FlatList
-          data={sortedAndFilteredFriends}
+          data={confirmedFriends}
           renderItem={renderFriend}
           keyExtractor={(item) => item.friendshipUuid}
           style={styles.flatList}
@@ -628,6 +540,14 @@ const FriendsList = () => {
           windowSize={15}
           updateCellsBatchingPeriod={50}
           removeClippedSubviews
+          ListHeaderComponent={
+            <PendingFriendsCard
+              pendingFriends={pendingFriends}
+              onRemind={handleRemindPending}
+              onLongPress={openMenu}
+              theme={theme}
+            />
+          }
           ListEmptyComponent={
             !loading && (
               isSearching

@@ -7,17 +7,17 @@ const CARDS = [
   {
     icon: 'user-friends',
     title: 'Connect with Friends',
-    body: 'Add friends to share photos privately and start conversations. Your connections are secure and only visible to you.'
+    body: 'Add friends to share photos privately. Your connections are secure and only visible to you.'
   },
   {
     icon: 'share-alt',
     title: 'Easy Sharing',
-    body: 'Share a link or QR code to connect with someone. Once they accept, you can chat and share photos privately.'
+    body: 'Share a link or QR code to connect with someone. Once they accept, you can view each other\'s photos.'
   },
   {
-    icon: 'comments',
-    title: 'Private Conversations',
-    body: 'Chat with your friends directly. Messages are tied to your friendship — no phone numbers or emails needed.'
+    icon: 'images',
+    title: 'Photo Sharing',
+    body: 'See your friends\' photos in a dedicated feed. No phone numbers or emails needed.'
   }
 ]
 
@@ -36,7 +36,7 @@ const FriendsExplainerView = ({ theme, onAddFriend }) => {
         </View>
         <Text style={styles.title}>Connect with Friends</Text>
         <Text style={styles.subtitle}>
-          Add friends to share photos and chat privately. No accounts or phone numbers needed.
+          Add friends to share photos privately. No accounts or phone numbers needed.
         </Text>
       </View>
 

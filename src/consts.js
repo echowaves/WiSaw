@@ -48,11 +48,9 @@ export const TRANSPARENT_ICONS_COLOR = 'rgba(10,10,10,.5)'
 
 // Build absolute URIs using Paths.document (new FileSystem API)
 export const PENDING_UPLOADS_FOLDER = new FSDirectory(Paths.document, 'pendingUploads')
-export const PENDING_UPLOADS_FOLDER_CHAT = new FSDirectory(Paths.document, 'pendingUploadsChat')
 // export const IMAGE_CACHE_FOLDER = `${FileSystem.cacheDirectory}images/`
 // these are not sensitive keys, just identifiers
 export const PENDING_UPLOADS_KEY = 'PENDING_UPLOADS'
-export const PENDING_CHAT_UPLOADS_KEY = 'PENDING_CHAT_UPLOADS'
 
 export const FRIENDSHIP_PREFIX = 'FRIENDSHIP-'
 

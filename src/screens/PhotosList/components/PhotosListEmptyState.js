@@ -12,7 +12,6 @@ const PhotosListEmptyState = ({
   renderPendingPhotos,
   renderFooter,
   renderSearchFab,
-  unreadCount,
   reload,
   updateIndex,
   isSearchActive,

@@ -6,7 +6,6 @@ import React, { useCallback, useContext, useEffect, useImperativeHandle, useMemo
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import { router, useNavigation } from 'expo-router'
 import * as Notifications from '../../utils/notifications'
-import * as SecureStore from 'expo-secure-store'
 
 import * as BackgroundTask from 'expo-background-task'
 import * as Haptics from 'expo-haptics'
@@ -39,7 +38,6 @@ import { requestGeoPhotos } from './reducer'
 
 import QuickActionsModal from '../../components/QuickActionsModal'
 
-import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import {
@@ -70,11 +68,7 @@ const BACKGROUND_TASK_NAME = 'background-task'
 TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
   // const now = Date.now()
   try {
-    const uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
-    const unreadCountList = await friendsHelper.getUnreadCountsList({ uuid })
-
-    const badgeCount = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
-    Notifications.setBadgeCountAsync(badgeCount || 0)
+    Notifications.setBadgeCountAsync(0)
     // console.log("background task", { badgeCount })
 
     // Be sure to return the successful result type!
@@ -160,7 +154,6 @@ const PhotosList = ({ searchFromUrl }) => {
   const [, setFriendsList] = useAtom(STATE.friendsList)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
-  const setFriendsUnreadCount = useSetAtom(STATE.friendsUnreadCount)
 
   const toastTopOffset = useToastTopOffset()
 
@@ -215,8 +208,6 @@ const PhotosList = ({ searchFromUrl }) => {
     )
     return drift > DRIFT_THRESHOLD
   }, [locationState.coords?.latitude, locationState.coords?.longitude, feedLocationVersion])
-
-  const [unreadCountList, setUnreadCountList] = useState([])
 
   const {
     pendingPhotos,
@@ -292,7 +283,6 @@ const PhotosList = ({ searchFromUrl }) => {
       setFriendsList(
         await friendsHelper.getEnhancedListOfFriendships({ uuid })
       )
-      setUnreadCountList(await friendsHelper.getUnreadCountsList({ uuid }))
     }
 
     await feedReload(getFetchParams(), searchTermOverride)
@@ -342,11 +332,6 @@ const PhotosList = ({ searchFromUrl }) => {
     pendingPhotosCount: pendingPhotos.length,
     netAvailable
   })
-
-  useEffect(() => {
-    const total = unreadCountList.reduce((a, b) => a + (b.unread || 0), 0)
-    setFriendsUnreadCount(total)
-  }, [unreadCountList])
 
   // Long-press handler — open quick-actions modal
   const quickActionsRef = useRef(null)
