@@ -4,4 +4,4 @@
 
 ## 2. Verify
 
-- [ ] 2.1 Manually test renaming a friend from the FriendDetail screen via NamePicker
+- [x] 2.1 Manually test renaming a friend from the FriendDetail screen via NamePicker
