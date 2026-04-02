@@ -1,7 +1,7 @@
 # Friendships Specification
 
 ## Purpose
-The friendship system enables users to establish peer-to-peer connections via text-based deep links or QR codes, manage pending and confirmed friendships, edit friend display names, and store friend data securely on-device. Friendships enable private chat messaging between connected users.
+The friendship system enables users to establish peer-to-peer connections via text-based deep links or QR codes, manage pending and confirmed friendships, edit friend display names, and store friend data securely on-device. Friendships enable private photo sharing between connected users.
 
 ## Requirements
 
@@ -52,7 +52,7 @@ The system SHALL support a dual-state friendship model with pending and confirme
 
 #### Scenario: User confirms a pending friendship
 - **WHEN** the user accepts a pending friendship request via the confirmation screen
-- **THEN** the friendship moves to confirmed state and both parties can chat
+- **THEN** the friendship moves to confirmed state and both parties can see each other's shared photos
 
 ### Requirement: Friend Name Editing
 The system SHALL allow users to set and edit custom display names for their friends.

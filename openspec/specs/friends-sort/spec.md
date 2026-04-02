@@ -6,7 +6,7 @@ Enables user-selectable sort options for the friends list with pending friends a
 ## Requirements
 
 ### Requirement: Friends list sort options
-The friends screen SHALL provide sort options accessible via a header ActionMenu (⋮ button). Available sort options SHALL be: Alphabetical A-Z, Alphabetical Z-A, Recently Added, and Most Recent Chat.
+The friends screen SHALL provide sort options accessible via a header ActionMenu (⋮ button). Available sort options SHALL be: Alphabetical A-Z, Alphabetical Z-A, and Recently Added.
 
 #### Scenario: User selects a sort option
 - **WHEN** the user opens the header ActionMenu and selects a sort option
