@@ -30,3 +30,15 @@ Each pending friend within the card SHALL display the friend's name, a "Waiting 
 - **THEN** it SHALL display "Waiting for confirmation" as the status line
 - **THEN** it SHALL display "Share this link with your friend to establish the connection. Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security." as the explainer text
 - **THEN** it SHALL display "When confirmed, you'll see each other's photos shared nearby"
+
+**Requirement: Pending friend row has kebab menu button**
+Each pending friend row SHALL display a kebab menu button (`ellipsis-vertical` icon) at the bottom-right of the row. Tapping the kebab button SHALL trigger the same ActionMenu as long-pressing the row.
+
+#### Scenario: Tapping kebab opens ActionMenu
+- **WHEN** the user taps the kebab `⋮` button on a pending friend row
+- **THEN** the ActionMenu SHALL open with "Share Link" and "Cancel Request" items
+
+#### Scenario: Kebab button position
+- **WHEN** a pending friend row renders
+- **THEN** the kebab button SHALL appear at the bottom-right of the row
+- **THEN** the Share button SHALL remain at the top-right inline with the friend name
