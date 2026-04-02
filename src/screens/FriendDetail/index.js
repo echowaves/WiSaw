@@ -204,10 +204,10 @@ const FriendDetail = React.forwardRef((_props, ref) => {
     )
   }
 
-  const setContactName = async (name) => {
-    await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName: name })
-    setFriendName(name)
-    router.setParams({ friendName: name })
+  const setContactName = async ({ contactName }) => {
+    await friendsHelper.addFriendshipLocally({ friendshipUuid, contactName })
+    setFriendName(contactName)
+    router.setParams({ friendName: contactName })
   }
 
   const feedSortOptions = [
