@@ -7,7 +7,6 @@ import { Drawer } from 'expo-router/drawer'
 import { useAtom } from 'jotai'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
@@ -317,9 +316,8 @@ export default function DrawerLayout () {
     : { opacity: 0.4 }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <UploadProvider>
-        <Drawer
+    <UploadProvider>
+      <Drawer
         screenOptions={{
           headerShown: false,
           drawerStyle: {
@@ -418,8 +416,7 @@ export default function DrawerLayout () {
         />
 
       </Drawer>
-      </UploadProvider>
-    </GestureHandlerRootView>
+    </UploadProvider>
   )
 }
 

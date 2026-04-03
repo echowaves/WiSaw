@@ -13,14 +13,6 @@ export default function TabsLayout () {
           headerShown: false // PhotosList will handle its own header
         }}
       />
-      <Stack.Screen
-        name='pinch'
-        options={{
-          headerTintColor: CONST.MAIN_COLOR,
-          gestureEnabled: false,
-          headerShown: false
-        }}
-      />
       <Stack.Screen name='shared/[photoId]' />
       <Stack.Screen
         name='confirm-friendship/[friendshipUuid]'

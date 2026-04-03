@@ -15,11 +15,12 @@ import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-vi
 
 import CachedImage from 'expo-cached-image'
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 import * as CONST from '../../consts'
 import isValidImageUri from '../../utils/isValidImageUri'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
-import SafeAreaView from '../SafeAreaView'
 
 const createStyles = (theme) =>
   StyleSheet.create({
@@ -72,6 +73,7 @@ const PinchableView = ({ route, navigation }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const styles = createStyles(theme)
+  const insets = useSafeAreaInsets()
 
   const { photo } = route.params
   const { width, height } = useWindowDimensions()
@@ -101,14 +103,15 @@ const PinchableView = ({ route, navigation }) => {
   )
 
   const renderCustomHeader = () => (
-    <SafeAreaView
+    <View
       style={{
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         zIndex: 1000,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        paddingTop: insets.top
       }}
     >
       <View
@@ -124,7 +127,7 @@ const PinchableView = ({ route, navigation }) => {
         {renderHeaderTitle()}
         <View style={{ width: 40 }} />
       </View>
-    </SafeAreaView>
+    </View>
   )
 
   // Remove the useEffect that was calling navigation.setOptions

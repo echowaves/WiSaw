@@ -9,6 +9,7 @@ import {
 } from '@expo/vector-icons'
 import NetInfo from '@react-native-community/netinfo'
 import { useFonts } from 'expo-font'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import * as Linking from 'expo-linking'
 import { router, Stack, useRootNavigationState } from 'expo-router'
 import { useAtom, useSetAtom } from 'jotai'
@@ -272,23 +273,26 @@ export default function RootLayout () {
   }, [handleDeepLink, rootNavigationState?.key])
 
   return (
-    <SafeAreaProvider>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor='transparent'
-        translucent={false}
-      />
-      <KeyboardProvider statusBarTranslucent>
-        <Stack
-          screenOptions={{
-            headerShown: false
-          }}
-        >
-          <Stack.Screen name='(drawer)' options={{ headerShown: false }} />
-          <Stack.Screen name='modal-input' options={{ presentation: 'modal', headerShown: false }} />
-        </Stack>
-      </KeyboardProvider>
-      <Toast />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor='transparent'
+          translucent={false}
+        />
+        <KeyboardProvider statusBarTranslucent>
+          <Stack
+            screenOptions={{
+              headerShown: false
+            }}
+          >
+            <Stack.Screen name='(drawer)' options={{ headerShown: false }} />
+            <Stack.Screen name='pinch' options={{ presentation: 'fullScreenModal', gestureEnabled: false, headerShown: false }} />
+            <Stack.Screen name='modal-input' options={{ presentation: 'modal', headerShown: false }} />
+          </Stack>
+        </KeyboardProvider>
+        <Toast />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   )
 }
