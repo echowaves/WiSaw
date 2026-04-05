@@ -1,6 +1,7 @@
 import { gql } from '@apollo/client'
 
 import { Storage } from 'expo-storage'
+import * as SecureStore from 'expo-secure-store'
 import * as CONST from '../../consts'
 
 export const testStorage = async () => {
@@ -9,19 +10,19 @@ export const testStorage = async () => {
     const testValue = 'Test Friend'
 
     // Clear any existing value
-    await Storage.removeItem({ key: testKey })
+    await SecureStore.deleteItemAsync(testKey)
 
     // Set value
-    await Storage.setItem({ key: testKey, value: testValue })
+    await SecureStore.setItemAsync(testKey, testValue)
 
     // Get value
-    const retrieved = await Storage.getItem({ key: testKey })
+    const retrieved = await SecureStore.getItemAsync(testKey)
 
     // eslint-disable-next-line no-console
-    console.log('Storage test - Set:', testValue, 'Retrieved:', retrieved)
+    console.log('SecureStore test - Set:', testValue, 'Retrieved:', retrieved)
 
     // Clean up
-    await Storage.removeItem({ key: testKey })
+    await SecureStore.deleteItemAsync(testKey)
 
     return retrieved === testValue
   } catch (error) {
@@ -42,24 +43,32 @@ export const addFriendshipLocally = async ({ friendshipUuid, contactName }) => {
     }
 
     const key = `${CONST.FRIENDSHIP_PREFIX}${friendshipUuid}`
-    await Storage.removeItem({ key }) // always cleanup first
-    await Storage.setItem({ key, value: contactName })
+
+    // Write to secure store
+    await SecureStore.setItemAsync(key, contactName)
 
     // Verify the storage operation
-    const verification = await Storage.getItem({ key })
+    const verification = await SecureStore.getItemAsync(key)
     if (verification !== contactName) {
       // eslint-disable-next-line no-console
       console.error(
-        `Storage verification failed: expected "${contactName}", got "${verification}". Retrying...`
+        `SecureStore verification failed: expected "${contactName}", got "${verification}". Retrying...`
       )
       // Retry once
-      await Storage.setItem({ key, value: contactName })
-      const retryVerification = await Storage.getItem({ key })
+      await SecureStore.setItemAsync(key, contactName)
+      const retryVerification = await SecureStore.getItemAsync(key)
       if (retryVerification !== contactName) {
         throw new Error(
-          `Storage verification failed after retry: expected "${contactName}", got "${retryVerification}"`
+          `SecureStore verification failed after retry: expected "${contactName}", got "${retryVerification}"`
         )
       }
+    }
+
+    // Clean up any legacy expo-storage entry
+    try {
+      await Storage.removeItem({ key })
+    } catch (cleanupError) {
+      // Non-critical — ignore cleanup failures
     }
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -69,9 +78,18 @@ export const addFriendshipLocally = async ({ friendshipUuid, contactName }) => {
 }
 
 export const deleteFriendship = async ({ friendshipUuid }) => {
-  // cleanup local contact
+  // cleanup local contact from both stores
   const key = `${CONST.FRIENDSHIP_PREFIX}${friendshipUuid}`
-  await Storage.removeItem({ key })
+  try {
+    await SecureStore.deleteItemAsync(key)
+  } catch (e) {
+    // Non-critical — entry may not exist in secure store
+  }
+  try {
+    await Storage.removeItem({ key })
+  } catch (e) {
+    // Non-critical — entry may not exist in expo-storage
+  }
 
   const { deleteFriendship: deleteFriendshipResult } = (
     await CONST.gqlClient.mutate({
@@ -155,19 +173,30 @@ const getLocalContact = async ({ friendshipUuid }) => {
 
     const key = `${CONST.FRIENDSHIP_PREFIX}${friendshipUuid}`
 
-    // Try to get the item from storage
-    const localFriendshipName = await Storage.getItem({ key })
+    // 1. Check secure store first
+    const secureName = await SecureStore.getItemAsync(key)
+    if (secureName && typeof secureName === 'string') {
+      return secureName
+    }
 
-    if (!localFriendshipName) {
+    // 2. Fall back to expo-storage (legacy) and migrate if found
+    const legacyName = await Storage.getItem({ key })
+    if (!legacyName || typeof legacyName !== 'string') {
       return null
     }
 
-    // Validate that we got a valid string
-    if (typeof localFriendshipName !== 'string') {
-      return null
+    // 3. Migrate to secure store
+    try {
+      await SecureStore.setItemAsync(key, legacyName)
+      // Only delete from expo-storage after successful secure store write
+      await Storage.removeItem({ key })
+    } catch (migrationError) {
+      // eslint-disable-next-line no-console
+      console.warn(`Failed to migrate friend name for ${friendshipUuid} to secure store:`, migrationError)
+      // Still return the name even if migration failed
     }
 
-    return localFriendshipName
+    return legacyName
   } catch (error) {
     // For storage errors, we'll just return null and let the UI handle it gracefully
     // This prevents the app from crashing due to corrupted storage entries
