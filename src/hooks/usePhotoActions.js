@@ -178,7 +178,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       waveUuid: null
     })
     try {
-      await removePhotoFromWave({ waveUuid: previousDetails.waveUuid, photoId: photo.id })
+      await removePhotoFromWave({ waveUuid: previousDetails.waveUuid, photoId: photo.id, uuid })
       Toast.show({
         text1: 'Removed from wave',
         type: 'success',

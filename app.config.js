@@ -17,6 +17,7 @@ module.exports = {
       'expo-background-task',
       'expo-font',
       'expo-video',
+      '@react-native-community/datetimepicker',
       [
         'expo-build-properties',
         {

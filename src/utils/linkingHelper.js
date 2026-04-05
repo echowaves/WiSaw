@@ -22,6 +22,7 @@ export const linkingConfig = {
               'photos/[id]': 'photos/:id',
               'shared/[photoId]': 'photos/:photoId',
               'confirm-friendship/[friendshipUuid]': 'friends/:friendshipUuid',
+              'waves/join': 'wave/join/:waveUuid',
               'modal-input': 'input',
               pinch: 'pinch'
             }
@@ -65,6 +66,23 @@ const resolveDeepLinkTarget = (rawPath, queryParams) => {
       return {
         type: 'friend',
         friendshipUuid: secondarySegment.trim()
+      }
+    }
+
+    // Wave routes: /wave/join/{waveUuid} or /wave/invite/{inviteToken}
+    if (primarySegment === 'wave' && secondarySegment) {
+      const [, tertiarySegment] = sanitizedPath.slice(1)
+      if (secondarySegment === 'join' && tertiarySegment) {
+        return {
+          type: 'wave-join',
+          waveUuid: tertiarySegment.trim()
+        }
+      }
+      if (secondarySegment === 'invite' && tertiarySegment) {
+        return {
+          type: 'wave-invite',
+          inviteToken: tertiarySegment.trim()
+        }
       }
     }
   }

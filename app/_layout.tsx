@@ -97,6 +97,22 @@ export default function RootLayout () {
           }, 100)
           break
 
+        case 'wave-join':
+          console.log('Navigating to wave join:', linkData.waveUuid)
+          router.replace('/')
+          setTimeout(() => {
+            router.push({ pathname: '/waves/join', params: { waveUuid: linkData.waveUuid } })
+          }, 100)
+          break
+
+        case 'wave-invite':
+          console.log('Navigating to wave invite join:', linkData.inviteToken)
+          router.replace('/')
+          setTimeout(() => {
+            router.push({ pathname: '/waves/join', params: { inviteToken: linkData.inviteToken } })
+          }, 100)
+          break
+
         default:
           console.log('Unknown link type, navigating to home')
           router.replace('/')

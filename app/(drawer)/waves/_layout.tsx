@@ -25,6 +25,34 @@ export default function WavesLayout () {
           headerShown: false
         }}
       />
+      <Stack.Screen
+        name='join'
+        options={{
+          title: 'Join Wave',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name='settings'
+        options={{
+          title: 'Wave Settings',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name='members'
+        options={{
+          title: 'Wave Members',
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name='moderation'
+        options={{
+          title: 'Moderation',
+          headerShown: false
+        }}
+      />
     </Stack>
   )
 }

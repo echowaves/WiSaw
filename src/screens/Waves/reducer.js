@@ -21,6 +21,16 @@ export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection
               updatedAt
               createdBy
               photosCount
+              open
+              frozen
+              startDate
+              endDate
+              isFrozen
+              isActive
+              myRole
+              joinUrl
+              location
+              radius
               photos {
                 id
                 thumbUrl
@@ -40,26 +50,37 @@ export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection
   }
 }
 
-export const createWave = async ({ name, description, uuid }) => {
+export const createWave = async ({ name, description, uuid, lat, lon, radius }) => {
   try {
+    const variables = { name, description, uuid }
+    if (lat !== undefined) variables.lat = lat
+    if (lon !== undefined) variables.lon = lon
+    if (radius !== undefined) variables.radius = radius
+
     const response = await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation createWave($name: String!, $description: String!, $uuid: String!) {
-          createWave(name: $name, description: $description, uuid: $uuid) {
+        mutation createWave($name: String!, $description: String!, $uuid: String!, $lat: Float, $lon: Float, $radius: Int) {
+          createWave(name: $name, description: $description, uuid: $uuid, lat: $lat, lon: $lon, radius: $radius) {
             waveUuid
             name
             description
             createdAt
             updatedAt
             createdBy
+            open
+            frozen
+            startDate
+            endDate
+            isFrozen
+            isActive
+            myRole
+            joinUrl
+            location
+            radius
           }
         }
       `,
-      variables: {
-        name,
-        description,
-        uuid
-      }
+      variables
     })
     return response.data.createWave
   } catch (err) {
@@ -68,27 +89,43 @@ export const createWave = async ({ name, description, uuid }) => {
   }
 }
 
-export const updateWave = async ({ waveUuid, uuid, name, description }) => {
+export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, radius, open, frozen, startDate, endDate }) => {
   try {
+    const variables = { waveUuid, uuid }
+    if (name !== undefined) variables.name = name
+    if (description !== undefined) variables.description = description
+    if (lat !== undefined) variables.lat = lat
+    if (lon !== undefined) variables.lon = lon
+    if (radius !== undefined) variables.radius = radius
+    if (open !== undefined) variables.open = open
+    if (frozen !== undefined) variables.frozen = frozen
+    if (startDate !== undefined) variables.startDate = startDate
+    if (endDate !== undefined) variables.endDate = endDate
+
     const response = await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation updateWave($waveUuid: String!, $uuid: String!, $name: String!, $description: String!) {
-          updateWave(waveUuid: $waveUuid, uuid: $uuid, name: $name, description: $description) {
+        mutation updateWave($waveUuid: String!, $uuid: String!, $name: String, $description: String, $lat: Float, $lon: Float, $radius: Int, $open: Boolean, $frozen: Boolean, $startDate: AWSDateTime, $endDate: AWSDateTime) {
+          updateWave(waveUuid: $waveUuid, uuid: $uuid, name: $name, description: $description, lat: $lat, lon: $lon, radius: $radius, open: $open, frozen: $frozen, startDate: $startDate, endDate: $endDate) {
             waveUuid
             name
             description
             createdAt
             updatedAt
             createdBy
+            open
+            frozen
+            startDate
+            endDate
+            isFrozen
+            isActive
+            myRole
+            joinUrl
+            location
+            radius
           }
         }
       `,
-      variables: {
-        waveUuid,
-        uuid,
-        name,
-        description
-      }
+      variables
     })
     return response.data.updateWave
   } catch (err) {
@@ -163,17 +200,18 @@ export const addPhotoToWave = async ({ waveUuid, photoId, uuid }) => {
   }
 }
 
-export const removePhotoFromWave = async ({ waveUuid, photoId }) => {
+export const removePhotoFromWave = async ({ waveUuid, photoId, uuid }) => {
   try {
     const response = await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation removePhotoFromWave($waveUuid: String!, $photoId: String!) {
-          removePhotoFromWave(waveUuid: $waveUuid, photoId: $photoId)
+        mutation removePhotoFromWave($waveUuid: String!, $photoId: String!, $uuid: String!) {
+          removePhotoFromWave(waveUuid: $waveUuid, photoId: $photoId, uuid: $uuid)
         }
       `,
       variables: {
         waveUuid,
-        photoId
+        photoId,
+        uuid
       }
     })
     return response.data.removePhotoFromWave
@@ -296,6 +334,327 @@ export const requestUngroupedPhotos = async ({ uuid, pageNumber, batch }) => {
       batch: response.data.feedForUngrouped.batch,
       noMoreData: response.data.feedForUngrouped.noMoreData
     }
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+// =============================================================================
+// Wave Join & Invite Operations
+// =============================================================================
+
+const WAVE_FIELDS = `
+  waveUuid
+  name
+  description
+  createdAt
+  updatedAt
+  createdBy
+  photosCount
+  open
+  frozen
+  startDate
+  endDate
+  isFrozen
+  isActive
+  myRole
+  joinUrl
+  location
+  radius
+`
+
+export const joinOpenWave = async ({ waveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation joinOpenWave($waveUuid: String!, $uuid: String!) {
+          joinOpenWave(waveUuid: $waveUuid, uuid: $uuid) {
+            ${WAVE_FIELDS}
+          }
+        }
+      `,
+      variables: { waveUuid, uuid }
+    })
+    return response.data.joinOpenWave
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const joinWaveByInvite = async ({ inviteToken, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation joinWaveByInvite($inviteToken: String!, $uuid: String!) {
+          joinWaveByInvite(inviteToken: $inviteToken, uuid: $uuid) {
+            ${WAVE_FIELDS}
+          }
+        }
+      `,
+      variables: { inviteToken, uuid }
+    })
+    return response.data.joinWaveByInvite
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const createWaveInvite = async ({ waveUuid, uuid, expiresAt, maxUses }) => {
+  try {
+    const variables = { waveUuid, uuid }
+    if (expiresAt !== undefined) variables.expiresAt = expiresAt
+    if (maxUses !== undefined) variables.maxUses = maxUses
+
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation createWaveInvite($waveUuid: String!, $uuid: String!, $expiresAt: AWSDateTime, $maxUses: Int) {
+          createWaveInvite(waveUuid: $waveUuid, uuid: $uuid, expiresAt: $expiresAt, maxUses: $maxUses) {
+            inviteToken
+            waveUuid
+            deepLink
+            expiresAt
+            maxUses
+            useCount
+            active
+            createdAt
+          }
+        }
+      `,
+      variables
+    })
+    return response.data.createWaveInvite
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const revokeWaveInvite = async ({ inviteToken, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation revokeWaveInvite($inviteToken: String!, $uuid: String!) {
+          revokeWaveInvite(inviteToken: $inviteToken, uuid: $uuid)
+        }
+      `,
+      variables: { inviteToken, uuid }
+    })
+    return response.data.revokeWaveInvite
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const listWaveInvites = async ({ waveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query listWaveInvites($waveUuid: String!, $uuid: String!) {
+          listWaveInvites(waveUuid: $waveUuid, uuid: $uuid) {
+            inviteToken
+            waveUuid
+            deepLink
+            expiresAt
+            maxUses
+            useCount
+            active
+            createdAt
+          }
+        }
+      `,
+      variables: { waveUuid, uuid }
+    })
+    return response.data.listWaveInvites
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+// =============================================================================
+// Member Management Operations
+// =============================================================================
+
+export const listWaveMembers = async ({ waveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query listWaveMembers($waveUuid: String!, $uuid: String!) {
+          listWaveMembers(waveUuid: $waveUuid, uuid: $uuid) {
+            uuid
+            nickName
+            role
+            createdAt
+          }
+        }
+      `,
+      variables: { waveUuid, uuid }
+    })
+    return response.data.listWaveMembers
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const assignFacilitator = async ({ waveUuid, targetUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation assignFacilitator($waveUuid: String!, $targetUuid: String!, $uuid: String!) {
+          assignFacilitator(waveUuid: $waveUuid, targetUuid: $targetUuid, uuid: $uuid)
+        }
+      `,
+      variables: { waveUuid, targetUuid, uuid }
+    })
+    return response.data.assignFacilitator
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const removeFacilitator = async ({ waveUuid, targetUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation removeFacilitator($waveUuid: String!, $targetUuid: String!, $uuid: String!) {
+          removeFacilitator(waveUuid: $waveUuid, targetUuid: $targetUuid, uuid: $uuid)
+        }
+      `,
+      variables: { waveUuid, targetUuid, uuid }
+    })
+    return response.data.removeFacilitator
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const removeUserFromWave = async ({ waveUuid, targetUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation removeUserFromWave($waveUuid: String!, $targetUuid: String!, $uuid: String!) {
+          removeUserFromWave(waveUuid: $waveUuid, targetUuid: $targetUuid, uuid: $uuid)
+        }
+      `,
+      variables: { waveUuid, targetUuid, uuid }
+    })
+    return response.data.removeUserFromWave
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+// =============================================================================
+// Moderation Operations
+// =============================================================================
+
+export const reportWavePhoto = async ({ waveUuid, photoId, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation reportWavePhoto($waveUuid: String!, $photoId: String!, $uuid: String!) {
+          reportWavePhoto(waveUuid: $waveUuid, photoId: $photoId, uuid: $uuid) {
+            id
+            photoId
+            uuid
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { waveUuid, photoId, uuid }
+    })
+    return response.data.reportWavePhoto
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const dismissWaveReport = async ({ reportId, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation dismissWaveReport($reportId: ID!, $uuid: String!) {
+          dismissWaveReport(reportId: $reportId, uuid: $uuid)
+        }
+      `,
+      variables: { reportId, uuid }
+    })
+    return response.data.dismissWaveReport
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const banUserFromWave = async ({ waveUuid, targetUuid, uuid, reason }) => {
+  try {
+    const variables = { waveUuid, targetUuid, uuid }
+    if (reason !== undefined) variables.reason = reason
+
+    const response = await CONST.gqlClient.mutate({
+      mutation: gql`
+        mutation banUserFromWave($waveUuid: String!, $targetUuid: String!, $uuid: String!, $reason: String) {
+          banUserFromWave(waveUuid: $waveUuid, targetUuid: $targetUuid, uuid: $uuid, reason: $reason)
+        }
+      `,
+      variables
+    })
+    return response.data.banUserFromWave
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const listWaveAbuseReports = async ({ waveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query listWaveAbuseReports($waveUuid: String!, $uuid: String!) {
+          listWaveAbuseReports(waveUuid: $waveUuid, uuid: $uuid) {
+            id
+            photoId
+            uuid
+            createdAt
+            updatedAt
+          }
+        }
+      `,
+      variables: { waveUuid, uuid }
+    })
+    return response.data.listWaveAbuseReports
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const listWaveBans = async ({ waveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query listWaveBans($waveUuid: String!, $uuid: String!) {
+          listWaveBans(waveUuid: $waveUuid, uuid: $uuid) {
+            uuid
+            bannedBy
+            reason
+            createdAt
+          }
+        }
+      `,
+      variables: { waveUuid, uuid }
+    })
+    return response.data.listWaveBans
   } catch (err) {
     console.error({ err })
     throw err

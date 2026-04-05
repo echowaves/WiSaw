@@ -19,6 +19,7 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
 import * as MediaLibrary from 'expo-media-library'
 import * as Crypto from 'expo-crypto'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as STATE from '../../state'
 import LinearProgress from '../../components/ui/LinearProgress'
@@ -46,6 +47,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import PhotosListContext from '../../contexts/PhotosListContext'
+import WaveShareModal from '../../components/WaveShareModal'
 
 const FOOTER_HEIGHT = 90
 
@@ -74,7 +76,7 @@ const QuickActionsModalWrapper = React.memo(
   })
 )
 
-const WaveDetail = React.forwardRef((_props, ref) => {
+const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
   const { waveUuid, waveName: initialWaveName } = useLocalSearchParams()
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
@@ -105,6 +107,9 @@ const WaveDetail = React.forwardRef((_props, ref) => {
 
   // Action menu state
   const [menuVisible, setMenuVisible] = useState(false)
+
+  // Share modal state
+  const [shareModalVisible, setShareModalVisible] = useState(false)
 
   const quickActionsRef = useRef(null)
   const { width, height } = useWindowDimensions()
@@ -180,6 +185,8 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     masonryRef,
     justCollapsedId
   } = usePhotoExpansion({ width, height, insets, segmentConfig })
+
+  const isOwner = myRole === 'owner'
 
   // Long-press handler
   const handlePhotoLongPress = useCallback((photo) => {
@@ -313,31 +320,79 @@ const WaveDetail = React.forwardRef((_props, ref) => {
     { label: 'Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc', icon: 'sort-ascending' }
   ]
 
+  const isFacilitator = myRole === 'facilitator'
+  const canManage = isOwner || isFacilitator
+
   const headerMenuItems = [
-    {
-      key: 'edit-wave',
-      icon: 'pencil-outline',
-      label: 'Edit Wave',
-      onPress: () => {
-        setEditName(waveName)
-        setEditDescription('')
-        setEditModalVisible(true)
-      }
-    },
-    {
-      key: 'merge',
-      icon: 'call-merge',
-      label: 'Merge Into Another Wave...',
-      onPress: () => setMergeModalVisible(true)
-    },
-    'separator',
-    {
-      key: 'delete',
-      icon: 'trash-can-outline',
-      label: 'Delete Wave',
-      destructive: true,
-      onPress: handleDeleteWave
-    },
+    // Share Wave (owner + facilitator)
+    ...(canManage
+      ? [{
+          key: 'share-wave',
+          icon: 'share-variant-outline',
+          label: 'Share Wave',
+          onPress: () => setShareModalVisible(true)
+        }]
+      : []),
+    // Edit Wave (owner only)
+    ...(isOwner
+      ? [{
+          key: 'edit-wave',
+          icon: 'pencil-outline',
+          label: 'Edit Wave',
+          onPress: () => {
+            setEditName(waveName)
+            setEditDescription('')
+            setEditModalVisible(true)
+          }
+        }]
+      : []),
+    // Wave Settings (owner only)
+    ...(isOwner
+      ? [{
+          key: 'wave-settings',
+          icon: 'cog-outline',
+          label: 'Wave Settings',
+          onPress: () => router.push({ pathname: '/waves/settings', params: { waveUuid, waveName } })
+        }]
+      : []),
+    // Manage Members (owner only)
+    ...(isOwner
+      ? [{
+          key: 'manage-members',
+          icon: 'account-group-outline',
+          label: 'Manage Members',
+          onPress: () => router.push({ pathname: '/waves/members', params: { waveUuid, waveName } })
+        }]
+      : []),
+    // Moderation (owner + facilitator)
+    ...(canManage
+      ? [{
+          key: 'moderation',
+          icon: 'shield-check-outline',
+          label: 'Moderation',
+          onPress: () => router.push({ pathname: '/waves/moderation', params: { waveUuid, waveName } })
+        }]
+      : []),
+    // Merge (owner only)
+    ...(isOwner
+      ? [{
+          key: 'merge',
+          icon: 'call-merge',
+          label: 'Merge Into Another Wave...',
+          onPress: () => setMergeModalVisible(true)
+        }]
+      : []),
+    ...(isOwner ? ['separator'] : []),
+    // Delete (owner only)
+    ...(isOwner
+      ? [{
+          key: 'delete',
+          icon: 'trash-can-outline',
+          label: 'Delete Wave',
+          destructive: true,
+          onPress: handleDeleteWave
+        }]
+      : []),
     'separator',
     ...feedSortOptions.map((opt, i) => ({
       key: `feed-sort-${i}`,
@@ -509,6 +564,15 @@ const WaveDetail = React.forwardRef((_props, ref) => {
           uploadIconAnimation={uploadIconAnimation}
         />
 
+        {isFrozen && (
+          <View style={styles.frozenBanner}>
+            <MaterialCommunityIcons name='snowflake' size={16} color='#60A5FA' />
+            <Text style={styles.frozenBannerText}>
+              This wave is frozen — no new photos, edits, or deletions allowed
+            </Text>
+          </View>
+        )}
+
         {loading && (
           <View
             style={{
@@ -531,10 +595,10 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             <EmptyStateCard
               icon='images'
               iconType='FontAwesome5'
-              title='No Photos Yet'
-              subtitle='Add photos to this wave or take a new one.'
-              actionText='Add Photos'
-              onActionPress={() => router.push({ pathname: '/waves/photo-selection', params: { waveUuid, waveName } })}
+              title={isFrozen ? 'Wave is Frozen' : 'No Photos Yet'}
+              subtitle={isFrozen ? 'This wave is frozen and no new content can be added.' : 'Add photos to this wave or take a new one.'}
+              actionText={isFrozen && !isOwner ? undefined : 'Add Photos'}
+              onActionPress={isFrozen && !isOwner ? undefined : () => router.push({ pathname: '/waves/photo-selection', params: { waveUuid, waveName } })}
               iconColor={theme.TEXT_PRIMARY}
             />
             )
@@ -570,15 +634,17 @@ const WaveDetail = React.forwardRef((_props, ref) => {
             </>
             )}
 
-        <PhotosListFooter
-          theme={theme}
-          navigation={navigation}
-          netAvailable={netAvailable}
-          isCameraOpening={isCameraOpening}
-          onCameraPress={checkPermissionsForPhotoTaking}
-          locationReady={!!location}
-          waveUuid={waveUuid}
-        />
+        {(!isFrozen || isOwner) && (
+          <PhotosListFooter
+            theme={theme}
+            navigation={navigation}
+            netAvailable={netAvailable}
+            isCameraOpening={isCameraOpening}
+            onCameraPress={checkPermissionsForPhotoTaking}
+            locationReady={!!location}
+            waveUuid={waveUuid}
+          />
+        )}
 
         <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
 
@@ -636,6 +702,14 @@ const WaveDetail = React.forwardRef((_props, ref) => {
           onSelectTarget={handleMergeTargetSelected}
           sourceWave={{ waveUuid, name: waveName }}
           uuid={uuid}
+        />
+
+        <WaveShareModal
+          visible={shareModalVisible}
+          onClose={() => setShareModalVisible(false)}
+          wave={{ waveUuid, name: waveName }}
+          uuid={uuid}
+          topOffset={toastTopOffset}
         />
 
         <ActionMenu
@@ -700,6 +774,20 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: '600',
     fontSize: 16
+  },
+  frozenBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(96, 165, 250, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8
+  },
+  frozenBannerText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#60A5FA',
+    fontWeight: '500'
   }
 })
 
