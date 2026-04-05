@@ -3,7 +3,7 @@ import { gql } from '@apollo/client'
 import { Storage } from 'expo-storage'
 import * as SecureStore from 'expo-secure-store'
 import * as CONST from '../../consts'
-
+// TODO: in 2028 cleanup migration logic from expo-starage to secure store, and only use secure store for friends list. This will simplify the code and reduce potential points of failure. For now, we have to support both due to existing users having data in expo-storage.
 export const testStorage = async () => {
   try {
     const testKey = 'TEST_FRIEND_NAME'
@@ -192,7 +192,7 @@ const getLocalContact = async ({ friendshipUuid }) => {
       await Storage.removeItem({ key })
     } catch (migrationError) {
       // eslint-disable-next-line no-console
-      console.warn(`Failed to migrate friend name for ${friendshipUuid} to secure store:`, migrationError)
+      console.warn('Failed to migrate friend name for %s to secure store:', friendshipUuid, migrationError)
       // Still return the name even if migration failed
     }
 
@@ -203,7 +203,7 @@ const getLocalContact = async ({ friendshipUuid }) => {
     if (error.message && error.message.includes('not readable')) {
       // eslint-disable-next-line no-console
       console.warn(
-        `Storage entry for friendship ${friendshipUuid} is corrupted, will show as 'Unnamed Friend'`
+        'Storage entry for friendship %s is corrupted, will show as Unnamed Friend', friendshipUuid
       )
     } else {
       // eslint-disable-next-line no-console
