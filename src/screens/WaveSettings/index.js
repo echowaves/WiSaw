@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Switch,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   ScrollView,
   Platform
@@ -31,12 +30,12 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   // Settings state
   const [isOpen, setIsOpen] = useState(false)
   const [isFrozen, setIsFrozen] = useState(false)
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
+  const [splashDate, setSplashDate] = useState(null)
+  const [freezeDate, setFreezeDate] = useState(null)
 
   // Date picker visibility
-  const [showStartPicker, setShowStartPicker] = useState(false)
-  const [showEndPicker, setShowEndPicker] = useState(false)
+  const [showSplashPicker, setShowSplashPicker] = useState(false)
+  const [showFreezePicker, setShowFreezePicker] = useState(false)
 
   // Load current settings via a no-change update call
   const loadSettings = useCallback(async () => {
@@ -44,9 +43,9 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     try {
       const wave = await updateWave({ waveUuid, uuid, name: waveName })
       setIsOpen(wave.open === true)
-      setIsFrozen(wave.frozen === true || wave.isFrozen === true)
-      setStartDate(wave.startDate ? new Date(wave.startDate) : null)
-      setEndDate(wave.endDate ? new Date(wave.endDate) : null)
+      setIsFrozen(wave.isFrozen === true)
+      setSplashDate(wave.splashDate ? new Date(wave.splashDate) : null)
+      setFreezeDate(wave.freezeDate ? new Date(wave.freezeDate) : null)
     } catch (error) {
       console.error(error)
       Toast.show({ type: 'error', text1: 'Error loading settings', text2: error.message })
@@ -72,97 +71,61 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     }
   }
 
-  const handleToggleFrozen = async (value) => {
-    if (value) {
-      Alert.alert(
-        'Freeze Wave?',
-        'Freezing prevents all new photos, edits, and deletions (except by the owner). Are you sure?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Freeze',
-            onPress: async () => {
-              setSaving(true)
-              try {
-                await updateWave({ waveUuid, uuid, frozen: true })
-                setIsFrozen(true)
-                Toast.show({ type: 'success', text1: 'Wave frozen' })
-              } catch (error) {
-                Toast.show({ type: 'error', text1: 'Error freezing wave', text2: error.message })
-              } finally {
-                setSaving(false)
-              }
-            }
-          }
-        ]
-      )
-    } else {
-      setSaving(true)
-      try {
-        await updateWave({ waveUuid, uuid, frozen: false })
-        setIsFrozen(false)
-        Toast.show({ type: 'success', text1: 'Wave unfrozen' })
-      } catch (error) {
-        Toast.show({ type: 'error', text1: 'Error unfreezing wave', text2: error.message })
-      } finally {
-        setSaving(false)
-      }
-    }
-  }
-
-  const handleStartDateChange = async (_event, selectedDate) => {
-    setShowStartPicker(Platform.OS === 'ios')
+  const handleSplashDateChange = async (_event, selectedDate) => {
+    setShowSplashPicker(Platform.OS === 'ios')
     if (selectedDate) {
       setSaving(true)
       try {
-        await updateWave({ waveUuid, uuid, startDate: selectedDate.toISOString() })
-        setStartDate(selectedDate)
-        Toast.show({ type: 'success', text1: 'Start date updated' })
+        await updateWave({ waveUuid, uuid, splashDate: selectedDate.toISOString() })
+        setSplashDate(selectedDate)
+        Toast.show({ type: 'success', text1: 'Splash date updated' })
       } catch (error) {
-        Toast.show({ type: 'error', text1: 'Error updating start date', text2: error.message })
+        Toast.show({ type: 'error', text1: 'Error updating splash date', text2: error.message })
       } finally {
         setSaving(false)
       }
     }
   }
 
-  const handleEndDateChange = async (_event, selectedDate) => {
-    setShowEndPicker(Platform.OS === 'ios')
+  const handleFreezeDateChange = async (_event, selectedDate) => {
+    setShowFreezePicker(Platform.OS === 'ios')
     if (selectedDate) {
       setSaving(true)
       try {
-        await updateWave({ waveUuid, uuid, endDate: selectedDate.toISOString() })
-        setEndDate(selectedDate)
-        Toast.show({ type: 'success', text1: 'End date updated' })
+        const result = await updateWave({ waveUuid, uuid, freezeDate: selectedDate.toISOString() })
+        setFreezeDate(selectedDate)
+        setIsFrozen(result.isFrozen === true)
+        Toast.show({ type: 'success', text1: 'Freeze date updated' })
       } catch (error) {
-        Toast.show({ type: 'error', text1: 'Error updating end date', text2: error.message })
+        Toast.show({ type: 'error', text1: 'Error updating freeze date', text2: error.message })
       } finally {
         setSaving(false)
       }
     }
   }
 
-  const clearStartDate = async () => {
+  const clearSplashDate = async () => {
     setSaving(true)
     try {
-      await updateWave({ waveUuid, uuid, startDate: null })
-      setStartDate(null)
-      Toast.show({ type: 'success', text1: 'Start date cleared' })
+      await updateWave({ waveUuid, uuid, splashDate: null })
+      setSplashDate(null)
+      Toast.show({ type: 'success', text1: 'Splash date cleared' })
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Error clearing start date', text2: error.message })
+      Toast.show({ type: 'error', text1: 'Error clearing splash date', text2: error.message })
     } finally {
       setSaving(false)
     }
   }
 
-  const clearEndDate = async () => {
+  const clearFreezeDate = async () => {
     setSaving(true)
     try {
-      await updateWave({ waveUuid, uuid, endDate: null })
-      setEndDate(null)
-      Toast.show({ type: 'success', text1: 'End date cleared' })
+      const result = await updateWave({ waveUuid, uuid, freezeDate: null })
+      setFreezeDate(null)
+      setIsFrozen(result.isFrozen === true)
+      Toast.show({ type: 'success', text1: 'Freeze date cleared' })
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Error clearing end date', text2: error.message })
+      Toast.show({ type: 'error', text1: 'Error clearing freeze date', text2: error.message })
     } finally {
       setSaving(false)
     }
@@ -187,7 +150,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
         <View style={styles.frozenNotice}>
           <MaterialCommunityIcons name='snowflake' size={16} color='#60A5FA' />
           <Text style={styles.frozenNoticeText}>
-            Wave is frozen. Only the freeze toggle can be changed.
+            Wave is frozen. Set a future freeze date to unfreeze.
           </Text>
         </View>
       )}
@@ -213,71 +176,50 @@ const WaveSettings = ({ waveUuid, waveName }) => {
         </View>
       </View>
 
-      {/* Freeze Toggle */}
-      <View style={[styles.section, { backgroundColor: theme.CARD_BACKGROUND }]}>
-        <View style={styles.row}>
-          <View style={styles.rowLabel}>
-            <MaterialCommunityIcons name='snowflake' size={20} color={theme.TEXT_PRIMARY} />
-            <View style={styles.labelText}>
-              <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>Freeze Wave</Text>
-              <Text style={[styles.settingDescription, { color: theme.TEXT_SECONDARY }]}>
-                Prevent all new photos, edits, and deletions (except by owner)
-              </Text>
-            </View>
-          </View>
-          <Switch
-            value={isFrozen}
-            onValueChange={handleToggleFrozen}
-            disabled={saving}
-            trackColor={{ false: theme.INTERACTIVE_BORDER, true: '#60A5FA' }}
-          />
-        </View>
-      </View>
-
-      {/* Start Date */}
+      {/* Splash Date */}
       <View style={[styles.section, { backgroundColor: theme.CARD_BACKGROUND }]}>
         <View style={styles.row}>
           <View style={styles.rowLabel}>
             <MaterialCommunityIcons name='calendar-start' size={20} color={theme.TEXT_PRIMARY} />
             <View style={styles.labelText}>
-              <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>Start Date</Text>
+              <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>Splash Date</Text>
               <Text style={[styles.settingDescription, { color: theme.TEXT_SECONDARY }]}>
-                Wave becomes active on this date
+                Wave goes live on this date
               </Text>
             </View>
           </View>
           <View style={styles.dateActions}>
             <TouchableOpacity
-              onPress={() => setShowStartPicker(true)}
+              onPress={() => setShowSplashPicker(true)}
               disabled={saving || isFrozen}
               style={[styles.dateButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
             >
-              <Text style={[styles.dateText, { color: theme.TEXT_PRIMARY }]}>{formatDate(startDate)}</Text>
+              <Text style={[styles.dateText, { color: theme.TEXT_PRIMARY }]}>{formatDate(splashDate)}</Text>
             </TouchableOpacity>
-            {startDate && (
-              <TouchableOpacity onPress={clearStartDate} disabled={saving || isFrozen} style={styles.clearButton}>
+            {splashDate && (
+              <TouchableOpacity onPress={clearSplashDate} disabled={saving || isFrozen} style={styles.clearButton}>
                 <MaterialCommunityIcons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
               </TouchableOpacity>
             )}
           </View>
         </View>
-        {showStartPicker && (
+        {showSplashPicker && (
           <DateTimePicker
-            value={startDate || new Date()}
+            value={splashDate || new Date()}
             mode='date'
             display='default'
-            onChange={handleStartDateChange}
+            onChange={handleSplashDateChange}
           />
         )}
       </View>
 
-      {/* End Date */}
+      {/* Freeze Date */}
       <View style={[styles.section, { backgroundColor: theme.CARD_BACKGROUND }]}>
         <View style={styles.row}>
           <View style={styles.rowLabel}>
             <MaterialCommunityIcons name='calendar-end' size={20} color={theme.TEXT_PRIMARY} />
             <View style={styles.labelText}>
-              <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>End Date</Text>
+              <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>Freeze Date</Text>
               <Text style={[styles.settingDescription, { color: theme.TEXT_SECONDARY }]}>
                 Wave auto-freezes after this date
               </Text>
@@ -285,25 +227,25 @@ const WaveSettings = ({ waveUuid, waveName }) => {
           </View>
           <View style={styles.dateActions}>
             <TouchableOpacity
-              onPress={() => setShowEndPicker(true)}
-              disabled={saving || isFrozen}
+              onPress={() => setShowFreezePicker(true)}
+              disabled={saving}
               style={[styles.dateButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
             >
-              <Text style={[styles.dateText, { color: theme.TEXT_PRIMARY }]}>{formatDate(endDate)}</Text>
+              <Text style={[styles.dateText, { color: theme.TEXT_PRIMARY }]}>{formatDate(freezeDate)}</Text>
             </TouchableOpacity>
-            {endDate && (
-              <TouchableOpacity onPress={clearEndDate} disabled={saving || isFrozen} style={styles.clearButton}>
+            {freezeDate && (
+              <TouchableOpacity onPress={clearFreezeDate} disabled={saving} style={styles.clearButton}>
                 <MaterialCommunityIcons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
               </TouchableOpacity>
             )}
           </View>
         </View>
-        {showEndPicker && (
+        {showFreezePicker && (
           <DateTimePicker
-            value={endDate || new Date()}
+            value={freezeDate || new Date()}
             mode='date'
             display='default'
-            onChange={handleEndDateChange}
+            onChange={handleFreezeDateChange}
           />
         )}
       </View>

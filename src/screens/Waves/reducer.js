@@ -22,11 +22,9 @@ export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection
               createdBy
               photosCount
               open
-              frozen
-              startDate
-              endDate
+              splashDate
+              freezeDate
               isFrozen
-              isActive
               myRole
               joinUrl
               location
@@ -68,11 +66,9 @@ export const createWave = async ({ name, description, uuid, lat, lon, radius }) 
             updatedAt
             createdBy
             open
-            frozen
-            startDate
-            endDate
+            splashDate
+            freezeDate
             isFrozen
-            isActive
             myRole
             joinUrl
             location
@@ -89,7 +85,7 @@ export const createWave = async ({ name, description, uuid, lat, lon, radius }) 
   }
 }
 
-export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, radius, open, frozen, startDate, endDate }) => {
+export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, radius, open, splashDate, freezeDate }) => {
   try {
     const variables = { waveUuid, uuid }
     if (name !== undefined) variables.name = name
@@ -98,14 +94,13 @@ export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, 
     if (lon !== undefined) variables.lon = lon
     if (radius !== undefined) variables.radius = radius
     if (open !== undefined) variables.open = open
-    if (frozen !== undefined) variables.frozen = frozen
-    if (startDate !== undefined) variables.startDate = startDate
-    if (endDate !== undefined) variables.endDate = endDate
+    if (splashDate !== undefined) variables.splashDate = splashDate
+    if (freezeDate !== undefined) variables.freezeDate = freezeDate
 
     const response = await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation updateWave($waveUuid: String!, $uuid: String!, $name: String, $description: String, $lat: Float, $lon: Float, $radius: Int, $open: Boolean, $frozen: Boolean, $startDate: AWSDateTime, $endDate: AWSDateTime) {
-          updateWave(waveUuid: $waveUuid, uuid: $uuid, name: $name, description: $description, lat: $lat, lon: $lon, radius: $radius, open: $open, frozen: $frozen, startDate: $startDate, endDate: $endDate) {
+        mutation updateWave($waveUuid: String!, $uuid: String!, $name: String, $description: String, $lat: Float, $lon: Float, $radius: Int, $open: Boolean, $splashDate: AWSDateTime, $freezeDate: AWSDateTime) {
+          updateWave(waveUuid: $waveUuid, uuid: $uuid, name: $name, description: $description, lat: $lat, lon: $lon, radius: $radius, open: $open, splashDate: $splashDate, freezeDate: $freezeDate) {
             waveUuid
             name
             description
@@ -113,11 +108,9 @@ export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, 
             updatedAt
             createdBy
             open
-            frozen
-            startDate
-            endDate
+            splashDate
+            freezeDate
             isFrozen
-            isActive
             myRole
             joinUrl
             location
@@ -353,11 +346,9 @@ const WAVE_FIELDS = `
   createdBy
   photosCount
   open
-  frozen
-  startDate
-  endDate
+  splashDate
+  freezeDate
   isFrozen
-  isActive
   myRole
   joinUrl
   location

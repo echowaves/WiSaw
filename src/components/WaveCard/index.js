@@ -58,7 +58,7 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
                   </Text>
                 </View>
               )}
-              {wave.isActive === false && (
+              {wave.splashDate && new Date(wave.splashDate) > new Date() && (
                 <View style={[styles.roleBadge, { backgroundColor: '#FEF3C7' }]}>
                   <Text style={[styles.roleBadgeText, { color: '#D97706' }]}>Pending</Text>
                 </View>
