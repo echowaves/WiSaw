@@ -85,6 +85,39 @@ export const createWave = async ({ name, description, uuid, lat, lon, radius }) 
   }
 }
 
+export const getWave = async ({ waveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query getWave($waveUuid: String!, $uuid: String!) {
+          getWave(waveUuid: $waveUuid, uuid: $uuid) {
+            waveUuid
+            name
+            description
+            createdAt
+            updatedAt
+            createdBy
+            open
+            splashDate
+            freezeDate
+            isFrozen
+            myRole
+            joinUrl
+            location
+            radius
+          }
+        }
+      `,
+      variables: { waveUuid, uuid },
+      fetchPolicy: 'network-only'
+    })
+    return response.data.getWave
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
 export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, radius, open, splashDate, freezeDate }) => {
   try {
     const variables = { waveUuid, uuid }

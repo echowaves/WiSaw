@@ -17,7 +17,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
-import { updateWave } from '../Waves/reducer'
+import { getWave, updateWave } from '../Waves/reducer'
 
 const WaveSettings = ({ waveUuid, waveName }) => {
   const [uuid] = useAtom(STATE.uuid)
@@ -37,11 +37,11 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   const [showSplashPicker, setShowSplashPicker] = useState(false)
   const [showFreezePicker, setShowFreezePicker] = useState(false)
 
-  // Load current settings via a no-change update call
+  // Load current settings via getWave query
   const loadSettings = useCallback(async () => {
     setLoading(true)
     try {
-      const wave = await updateWave({ waveUuid, uuid, name: waveName })
+      const wave = await getWave({ waveUuid, uuid })
       setIsOpen(wave.open === true)
       setIsFrozen(wave.isFrozen === true)
       setSplashDate(wave.splashDate ? new Date(wave.splashDate) : null)
@@ -52,7 +52,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     } finally {
       setLoading(false)
     }
-  }, [waveUuid, uuid, waveName])
+  }, [waveUuid, uuid])
 
   useEffect(() => {
     loadSettings()
