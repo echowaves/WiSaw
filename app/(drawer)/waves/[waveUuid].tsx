@@ -1,10 +1,11 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useRef } from 'react'
+import { Stack, useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router'
+import React, { useRef, useState, useCallback } from 'react'
 import { TouchableOpacity, View, Text } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useAtom } from 'jotai'
 import AppHeader from '../../../src/components/AppHeader'
 import WaveDetail from '../../../src/screens/WaveDetail'
+import { getWave } from '../../../src/screens/Waves/reducer'
 import * as STATE from '../../../src/state'
 import { getTheme, SHARED_STYLES } from '../../../src/theme/sharedStyles'
 import * as CONST from '../../../src/consts'
@@ -19,11 +20,28 @@ export default function WaveDetailScreen() {
   const router = useRouter()
   const { waveUuid, waveName, myRole, isFrozen } = useLocalSearchParams()
   const waveDetailRef = useRef<{ showHeaderMenu: () => void }>(null)
+  const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDarkMode)
 
-  const frozen = isFrozen === '1'
-  const roleConfig = typeof myRole === 'string' ? ROLE_CONFIG[myRole] : null
+  const [frozen, setFrozen] = useState(isFrozen === '1')
+  const [role, setRole] = useState(String(myRole || ''))
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!waveUuid || !uuid) return
+      getWave({ waveUuid: String(waveUuid), uuid })
+        .then((wave) => {
+          if (wave) {
+            setFrozen(wave.isFrozen === true)
+            setRole(wave.myRole || '')
+          }
+        })
+        .catch(() => { /* retain stale state */ })
+    }, [waveUuid, uuid])
+  )
+
+  const roleConfig = ROLE_CONFIG[role] || null
 
   const headerTitle = (
     <View style={{ alignItems: 'center' }}>
@@ -86,7 +104,7 @@ export default function WaveDetailScreen() {
           )
         }}
       />
-      <WaveDetail ref={waveDetailRef} isFrozen={frozen} myRole={String(myRole || '')} />
+      <WaveDetail ref={waveDetailRef} isFrozen={frozen} myRole={role} />
     </>
   )
 }
