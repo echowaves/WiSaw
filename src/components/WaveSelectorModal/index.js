@@ -1,10 +1,11 @@
 /* global console */
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 
-import { FontAwesome5, Ionicons } from '@expo/vector-icons'
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Modal,
   StyleSheet,
@@ -13,13 +14,18 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
+import * as Location from 'expo-location'
+import Slider from '@react-native-community/slider'
 
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
-import { isDarkMode } from '../../state'
+import { isDarkMode, locationAtom } from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as CONST from '../../consts'
 import { listWaves } from '../../screens/Waves/reducer'
 import * as Crypto from 'expo-crypto'
+
+const MILES_TO_METERS = 1609
+const DEFAULT_RADIUS_MILES = 10
 
 const WaveSelectorModal = ({
   visible,
@@ -32,6 +38,7 @@ const WaveSelectorModal = ({
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
+  const locationState = useAtomValue(locationAtom)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -43,6 +50,14 @@ const WaveSelectorModal = ({
   const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
+
+  // Location state for wave creation
+  const [showLocationSection, setShowLocationSection] = useState(false)
+  const [createLat, setCreateLat] = useState(null)
+  const [createLon, setCreateLon] = useState(null)
+  const [createLocationText, setCreateLocationText] = useState('')
+  const [createRadiusMiles, setCreateRadiusMiles] = useState(DEFAULT_RADIUS_MILES)
+  const [createAddressInput, setCreateAddressInput] = useState('')
 
   const fetchWaves = useCallback(async (pageNum, currentBatch, searchTerm, refresh = false) => {
     if (refresh) {
@@ -102,6 +117,7 @@ const WaveSelectorModal = ({
       setDebouncedSearch('')
       setShowCreateInput(false)
       setNewWaveName('')
+      resetCreateLocation()
     }
   }, [visible, fetchWaves])
 
@@ -120,7 +136,65 @@ const WaveSelectorModal = ({
     if (!trimmed) return
     setShowCreateInput(false)
     setNewWaveName('')
-    onCreateWave(trimmed)
+    if (createLat !== null && createLon !== null) {
+      onCreateWave(trimmed, { lat: createLat, lon: createLon, radius: createRadiusMiles * MILES_TO_METERS })
+    } else {
+      onCreateWave(trimmed)
+    }
+    resetCreateLocation()
+  }
+
+  const resetCreateLocation = () => {
+    setShowLocationSection(false)
+    setCreateLat(null)
+    setCreateLon(null)
+    setCreateLocationText('')
+    setCreateRadiusMiles(DEFAULT_RADIUS_MILES)
+    setCreateAddressInput('')
+  }
+
+  const handleCreateUseMyLocation = async () => {
+    if (locationState.status !== 'ready' || !locationState.coords) {
+      Alert.alert('Location Unavailable', 'Your device location is not available.')
+      return
+    }
+    const { latitude, longitude } = locationState.coords
+    try {
+      const results = await Location.reverseGeocodeAsync({ latitude, longitude })
+      const text = results && results.length > 0
+        ? [results[0].city, results[0].region, results[0].country].filter(Boolean).join(', ')
+        : `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`
+      setCreateLat(latitude)
+      setCreateLon(longitude)
+      setCreateLocationText(text)
+    } catch {
+      setCreateLat(latitude)
+      setCreateLon(longitude)
+      setCreateLocationText(`${latitude.toFixed(2)}, ${longitude.toFixed(2)}`)
+    }
+  }
+
+  const handleCreateAddressSubmit = async () => {
+    const trimmed = createAddressInput.trim()
+    if (!trimmed) return
+    try {
+      const results = await Location.geocodeAsync(trimmed)
+      if (!results || results.length === 0) {
+        Alert.alert('Not Found', 'Could not find that address.')
+        return
+      }
+      const { latitude, longitude } = results[0]
+      const reverseResults = await Location.reverseGeocodeAsync({ latitude, longitude })
+      const text = reverseResults && reverseResults.length > 0
+        ? [reverseResults[0].city, reverseResults[0].region, reverseResults[0].country].filter(Boolean).join(', ')
+        : `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`
+      setCreateLat(latitude)
+      setCreateLon(longitude)
+      setCreateLocationText(text)
+      setCreateAddressInput('')
+    } catch (error) {
+      Alert.alert('Error', 'Could not geocode address.')
+    }
   }
 
   const styles = makeStyles(theme)
@@ -197,31 +271,97 @@ const WaveSelectorModal = ({
           {/* Create New Wave */}
           {showCreateInput
             ? (
-              <View style={styles.createInputRow}>
-                <TextInput
-                  style={styles.createInput}
-                  placeholder='Wave name...'
-                  placeholderTextColor={theme.TEXT_SECONDARY}
-                  value={newWaveName}
-                  onChangeText={setNewWaveName}
-                  autoFocus
-                  onSubmitEditing={handleCreateSubmit}
-                  returnKeyType='done'
-                />
+              <>
+                <View style={styles.createInputRow}>
+                  <TextInput
+                    style={styles.createInput}
+                    placeholder='Wave name...'
+                    placeholderTextColor={theme.TEXT_SECONDARY}
+                    value={newWaveName}
+                    onChangeText={setNewWaveName}
+                    autoFocus
+                    onSubmitEditing={handleCreateSubmit}
+                    returnKeyType='done'
+                  />
+                  <TouchableOpacity
+                    style={[styles.createSubmitButton, !newWaveName.trim() && { opacity: 0.4 }]}
+                    onPress={handleCreateSubmit}
+                    disabled={!newWaveName.trim()}
+                  >
+                    <Ionicons name='checkmark' size={20} color='#fff' />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.createCancelButton}
+                    onPress={() => { setShowCreateInput(false); setNewWaveName(''); resetCreateLocation() }}
+                  >
+                    <Ionicons name='close' size={20} color={theme.TEXT_SECONDARY} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Set Location (optional) */}
                 <TouchableOpacity
-                  style={[styles.createSubmitButton, !newWaveName.trim() && { opacity: 0.4 }]}
-                  onPress={handleCreateSubmit}
-                  disabled={!newWaveName.trim()}
+                  style={styles.locationToggle}
+                  onPress={() => setShowLocationSection(!showLocationSection)}
                 >
-                  <Ionicons name='checkmark' size={20} color='#fff' />
+                  <MaterialCommunityIcons name='map-marker' size={16} color={theme.TEXT_SECONDARY} />
+                  <Text style={[styles.locationToggleText, { color: theme.TEXT_SECONDARY }]}>
+                    Set Location (optional)
+                  </Text>
+                  <Ionicons name={showLocationSection ? 'chevron-up' : 'chevron-down'} size={16} color={theme.TEXT_SECONDARY} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.createCancelButton}
-                  onPress={() => { setShowCreateInput(false); setNewWaveName('') }}
-                >
-                  <Ionicons name='close' size={20} color={theme.TEXT_SECONDARY} />
-                </TouchableOpacity>
-              </View>
+
+                {showLocationSection && (
+                  <View style={styles.locationSection}>
+                    {createLocationText
+                      ? (
+                        <Text style={[styles.locationDisplayText, { color: theme.TEXT_PRIMARY }]}>
+                          {createLocationText}
+                        </Text>
+                        )
+                      : (
+                        <Text style={[styles.locationDisplayText, { color: theme.TEXT_SECONDARY }]}>
+                          No location set
+                        </Text>
+                        )}
+
+                    <TouchableOpacity
+                      onPress={handleCreateUseMyLocation}
+                      style={[styles.useLocationButton, { backgroundColor: CONST.MAIN_COLOR }]}
+                    >
+                      <MaterialCommunityIcons name='crosshairs-gps' size={14} color='#fff' />
+                      <Text style={styles.useLocationText}>Use My Location</Text>
+                    </TouchableOpacity>
+
+                    <TextInput
+                      style={[styles.addressInput, { backgroundColor: theme.BACKGROUND, borderColor: theme.BORDER_LIGHT, color: theme.TEXT_PRIMARY }]}
+                      placeholder='Enter city or address...'
+                      placeholderTextColor={theme.TEXT_SECONDARY}
+                      value={createAddressInput}
+                      onChangeText={setCreateAddressInput}
+                      onSubmitEditing={handleCreateAddressSubmit}
+                      returnKeyType='search'
+                    />
+
+                    {createLat !== null && (
+                      <View style={styles.radiusRow}>
+                        <Text style={[styles.radiusLabel, { color: theme.TEXT_SECONDARY }]}>
+                          Radius: {createRadiusMiles} mi
+                        </Text>
+                        <Slider
+                          style={styles.radiusSlider}
+                          minimumValue={1}
+                          maximumValue={50}
+                          step={1}
+                          value={createRadiusMiles}
+                          onValueChange={setCreateRadiusMiles}
+                          minimumTrackTintColor={CONST.MAIN_COLOR}
+                          maximumTrackTintColor={theme.BORDER_LIGHT}
+                        />
+                      </View>
+                    )}
+                  </View>
+                )}
+              </>
               )
             : (
               <TouchableOpacity
@@ -425,6 +565,58 @@ const makeStyles = (theme) =>
     emptyText: {
       color: theme.TEXT_DISABLED,
       fontSize: 15
+    },
+    locationToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 8,
+      gap: 6
+    },
+    locationToggleText: {
+      fontSize: 13,
+      flex: 1
+    },
+    locationSection: {
+      paddingHorizontal: 20,
+      paddingBottom: 8,
+      gap: 8
+    },
+    locationDisplayText: {
+      fontSize: 13
+    },
+    useLocationButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      alignSelf: 'flex-start'
+    },
+    useLocationText: {
+      color: '#fff',
+      fontSize: 12,
+      fontWeight: '600'
+    },
+    addressInput: {
+      height: 36,
+      borderRadius: 8,
+      borderWidth: 1,
+      paddingHorizontal: 10,
+      fontSize: 13
+    },
+    radiusRow: {
+      marginTop: 4
+    },
+    radiusLabel: {
+      fontSize: 12,
+      marginBottom: 2
+    },
+    radiusSlider: {
+      width: '100%',
+      height: 32
     }
   })
 
