@@ -19,8 +19,8 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Test WaveSettings: set location via "Use My Location", verify reverse-geocoded text displays, save, reload — location persists
-- [ ] 4.2 Test WaveSettings: enter an address, verify geocoding resolves and displays normalized text, save, reload
-- [ ] 4.3 Test WaveSettings: adjust radius slider, save, reload — radius persists (miles ↔ meters conversion correct)
-- [ ] 4.4 Test WaveSelectorModal: create a wave with location/radius, verify params reach `createWave` mutation
-- [ ] 4.5 Test WaveSelectorModal: create a wave without setting location, verify no location params sent
+- [x] 4.1 Test WaveSettings: set location via "Use My Location", verify reverse-geocoded text displays, save, reload — location persists
+- [x] 4.2 Test WaveSettings: enter an address, verify geocoding resolves and displays normalized text, save, reload
+- [x] 4.3 Test WaveSettings: adjust radius slider, save, reload — radius persists (miles ↔ meters conversion correct)
+- [x] 4.4 Test WaveSelectorModal: create a wave with location/radius, verify params reach `createWave` mutation
+- [x] 4.5 Test WaveSelectorModal: create a wave without setting location, verify no location params sent

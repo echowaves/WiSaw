@@ -49,12 +49,26 @@ The system SHALL provide a modal overlay component that displays the user's wave
 - **WHEN** the user taps outside the modal or presses the close button
 - **THEN** the modal closes without any wave changes
 
-#### Scenario: User creates a new wave from modal
-- **WHEN** the user taps "Create New Wave" at the top of the wave list
-- **THEN** an inline text input is shown for entering the wave name
-- **WHEN** the user submits the name
-- **THEN** the `onCreateWave` callback is called with the entered name
+#### Scenario: User creates a new wave with location
+- **WHEN** the user taps "Create New Wave" and enters a wave name
+- **AND** the user optionally sets a location via "Use My Location" or address input
+- **AND** the user optionally adjusts the radius slider
+- **WHEN** the user submits
+- **THEN** the `onCreateWave` callback SHALL be called with the entered name and optional `lat`, `lon`, `radius` parameters
 - **THEN** the modal closes
+
+#### Scenario: User creates a wave without location
+- **WHEN** the user taps "Create New Wave" and enters a wave name without setting a location
+- **WHEN** the user submits
+- **THEN** the `onCreateWave` callback SHALL be called with only the name (no location params)
+- **THEN** the modal closes
+
+#### Scenario: Location fields visibility during creation
+- **WHEN** the user taps "Create New Wave" and the inline input is shown
+- **THEN** a "Set Location (optional)" expandable section SHALL appear below the name input
+- **AND** the section SHALL be collapsed by default
+- **WHEN** the user taps to expand
+- **THEN** the "Use My Location" button, address input, and radius slider SHALL appear
 
 #### Scenario: User cancels new wave creation
 - **WHEN** the user taps "Create New Wave" and then clears the input or taps cancel
