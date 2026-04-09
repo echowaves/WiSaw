@@ -33,10 +33,6 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   const [splashDate, setSplashDate] = useState(null)
   const [freezeDate, setFreezeDate] = useState(null)
 
-  // Date picker visibility
-  const [showSplashPicker, setShowSplashPicker] = useState(false)
-  const [showFreezePicker, setShowFreezePicker] = useState(false)
-
   // Load current settings via getWave query
   const loadSettings = useCallback(async () => {
     setLoading(true)
@@ -72,7 +68,6 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   }
 
   const handleSplashDateChange = async (_event, selectedDate) => {
-    setShowSplashPicker(Platform.OS === 'ios')
     if (selectedDate) {
       setSaving(true)
       try {
@@ -88,7 +83,6 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   }
 
   const handleFreezeDateChange = async (_event, selectedDate) => {
-    setShowFreezePicker(Platform.OS === 'ios')
     if (selectedDate) {
       setSaving(true)
       try {
@@ -131,9 +125,33 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     }
   }
 
-  const formatDate = (date) => {
-    if (!date) return 'Not set'
-    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+  const handleSetSplashDate = async () => {
+    const today = new Date()
+    setSaving(true)
+    try {
+      await updateWave({ waveUuid, uuid, splashDate: today.toISOString() })
+      setSplashDate(today)
+      Toast.show({ type: 'success', text1: 'Splash date set' })
+    } catch (error) {
+      Toast.show({ type: 'error', text1: 'Error setting splash date', text2: error.message })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleSetFreezeDate = async () => {
+    const today = new Date()
+    setSaving(true)
+    try {
+      const result = await updateWave({ waveUuid, uuid, freezeDate: today.toISOString() })
+      setFreezeDate(today)
+      setIsFrozen(result.isFrozen === true)
+      Toast.show({ type: 'success', text1: 'Freeze date set' })
+    } catch (error) {
+      Toast.show({ type: 'error', text1: 'Error setting freeze date', text2: error.message })
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) {
@@ -189,28 +207,32 @@ const WaveSettings = ({ waveUuid, waveName }) => {
             </View>
           </View>
           <View style={styles.dateActions}>
-            <TouchableOpacity
-              onPress={() => setShowSplashPicker(true)}
-              disabled={saving || isFrozen}
-              style={[styles.dateButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
-            >
-              <Text style={[styles.dateText, { color: theme.TEXT_PRIMARY }]}>{formatDate(splashDate)}</Text>
-            </TouchableOpacity>
-            {splashDate && (
-              <TouchableOpacity onPress={clearSplashDate} disabled={saving || isFrozen} style={styles.clearButton}>
-                <MaterialCommunityIcons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
-              </TouchableOpacity>
-            )}
+            {splashDate
+              ? (
+                <>
+                  <DateTimePicker
+                    value={splashDate}
+                    mode='date'
+                    display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                    onChange={handleSplashDateChange}
+                    disabled={saving || isFrozen}
+                  />
+                  <TouchableOpacity onPress={clearSplashDate} disabled={saving || isFrozen} style={styles.clearButton}>
+                    <MaterialCommunityIcons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
+                  </TouchableOpacity>
+                </>
+                )
+              : (
+                <TouchableOpacity
+                  onPress={handleSetSplashDate}
+                  disabled={saving || isFrozen}
+                  style={[styles.setDateButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
+                >
+                  <Text style={[styles.setDateText, { color: CONST.MAIN_COLOR }]}>Set Date</Text>
+                </TouchableOpacity>
+                )}
           </View>
         </View>
-        {showSplashPicker && (
-          <DateTimePicker
-            value={splashDate || new Date()}
-            mode='date'
-            display='default'
-            onChange={handleSplashDateChange}
-          />
-        )}
       </View>
 
       {/* Freeze Date */}
@@ -226,28 +248,32 @@ const WaveSettings = ({ waveUuid, waveName }) => {
             </View>
           </View>
           <View style={styles.dateActions}>
-            <TouchableOpacity
-              onPress={() => setShowFreezePicker(true)}
-              disabled={saving}
-              style={[styles.dateButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
-            >
-              <Text style={[styles.dateText, { color: theme.TEXT_PRIMARY }]}>{formatDate(freezeDate)}</Text>
-            </TouchableOpacity>
-            {freezeDate && (
-              <TouchableOpacity onPress={clearFreezeDate} disabled={saving} style={styles.clearButton}>
-                <MaterialCommunityIcons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
-              </TouchableOpacity>
-            )}
+            {freezeDate
+              ? (
+                <>
+                  <DateTimePicker
+                    value={freezeDate}
+                    mode='date'
+                    display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                    onChange={handleFreezeDateChange}
+                    disabled={saving}
+                  />
+                  <TouchableOpacity onPress={clearFreezeDate} disabled={saving} style={styles.clearButton}>
+                    <MaterialCommunityIcons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
+                  </TouchableOpacity>
+                </>
+                )
+              : (
+                <TouchableOpacity
+                  onPress={handleSetFreezeDate}
+                  disabled={saving}
+                  style={[styles.setDateButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
+                >
+                  <Text style={[styles.setDateText, { color: CONST.MAIN_COLOR }]}>Set Date</Text>
+                </TouchableOpacity>
+                )}
           </View>
         </View>
-        {showFreezePicker && (
-          <DateTimePicker
-            value={freezeDate || new Date()}
-            mode='date'
-            display='default'
-            onChange={handleFreezeDateChange}
-          />
-        )}
       </View>
 
       {saving && (
@@ -311,15 +337,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4
   },
-  dateButton: {
+  setDateButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1
   },
-  dateText: {
+  setDateText: {
     fontSize: 13,
-    fontWeight: '500'
+    fontWeight: '600'
   },
   clearButton: {
     padding: 4
