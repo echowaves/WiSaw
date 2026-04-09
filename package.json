@@ -7,8 +7,7 @@
   "license": "MIT",
   "main": "expo-router/entry",
   "scripts": {
-    "start": "npx expo start",
-    "startdev": "npx expo start --dev-client",
+    "start": "npx expo start --dev-client",
     "build:android": "eas build -p android --profile development",
     "build:ios": "eas build -p ios --profile development",
     "clear": "npm cache clean --force",
