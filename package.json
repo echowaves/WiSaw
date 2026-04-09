@@ -8,8 +8,10 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "npx expo start --dev-client",
-    "build:android": "eas build -p android --profile development",
-    "build:ios": "eas build -p ios --profile development",
+    "build-ios-for-simulator": "rm -rf ios && npx expo prebuild -p ios && xcodebuild -workspace ios/WiSaw.xcworkspace -scheme WiSaw -sdk iphonesimulator -configuration Debug build && xcrun simctl install booted $(find ~/Library/Developer/Xcode/DerivedData/WiSaw-*/Build/Products/Debug-iphonesimulator -name 'WiSaw.app' -maxdepth 1)",
+    "build-android-for-simulator": "rm -rf android && npx expo run:android",
+    "build:android-for-device": "eas build -p android --profile development",
+    "build:ios-for-device": "eas build -p ios --profile development",
     "clear": "npm cache clean --force",
     "reset:simulator": "xcrun simctl erase all",
     "android": "expo run:android",
