@@ -3,14 +3,13 @@ import { useAtom } from 'jotai'
 import React from 'react'
 import {
   Platform,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
