@@ -3,13 +3,12 @@ import { useAtom } from 'jotai'
 import { useMemo } from 'react'
 import {
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View
 } from 'react-native'
-import { EdgeInsets, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { EdgeInsets, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'

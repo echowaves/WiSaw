@@ -9,8 +9,8 @@ The system SHALL save the user's wave list sort preferences (sortBy and sortDire
 - **WHEN** user has never changed the sort order (no stored preference exists)
 - **THEN** the Waves screen SHALL default to sorting by `updatedAt` descending
 
-#### Scenario: Storage read fails or times out
-- **WHEN** the device storage read fails or exceeds 3 seconds
+#### Scenario: Storage read fails
+- **WHEN** the device storage read fails
 - **THEN** the system SHALL fall back to the default sort (`updatedAt` descending) without blocking app startup
 
 ### Requirement: Sort state is managed via global atoms

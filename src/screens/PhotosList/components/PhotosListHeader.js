@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import * as CONST from '../../../consts'
 import IdentityHeaderIcon from '../../../components/IdentityHeaderIcon'
+import BookmarksHeaderIcon from '../../../components/BookmarksHeaderIcon'
 import LinearProgress from '../../../components/ui/LinearProgress'
 import WaveHeaderIcon from '../../../components/WaveHeaderIcon'
 import FriendsHeaderIcon from '../../../components/FriendsHeaderIcon'
@@ -50,7 +51,7 @@ const PhotosListHeader = ({ theme, loading }) => {
           <IdentityHeaderIcon />
         </View>
 
-        {/* Right: Friends + Wave icons */}
+        {/* Right: Bookmarks + Friends + Wave icons */}
         <View
           style={{
             position: 'absolute',
@@ -60,6 +61,7 @@ const PhotosListHeader = ({ theme, loading }) => {
             gap: 8
           }}
         >
+          <BookmarksHeaderIcon />
           <FriendsHeaderIcon />
           <WaveHeaderIcon />
         </View>

@@ -178,7 +178,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       waveUuid: null
     })
     try {
-      await removePhotoFromWave({ waveUuid: previousDetails.waveUuid, photoId: photo.id })
+      await removePhotoFromWave({ waveUuid: previousDetails.waveUuid, photoId: photo.id, uuid })
       Toast.show({
         text1: 'Removed from wave',
         type: 'success',
@@ -196,10 +196,16 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
     }
   }, [photo, photoDetails, setPhotoDetails, toastTopOffset, onRemovedFromWave])
 
-  const handleCreateWave = useCallback(async (name) => {
+  const handleCreateWave = useCallback(async (name, locationParams) => {
     setWaveModalVisible(false)
     try {
-      const newWave = await createWave({ name, description: '', uuid })
+      const createParams = { name, description: '', uuid }
+      if (locationParams) {
+        createParams.lat = locationParams.lat
+        createParams.lon = locationParams.lon
+        createParams.radius = locationParams.radius
+      }
+      const newWave = await createWave(createParams)
       setPhotoDetails({
         ...photoDetails,
         waveName: newWave.name,

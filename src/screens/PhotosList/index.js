@@ -13,6 +13,7 @@ import * as TaskManager from 'expo-task-manager'
 
 import {
   Keyboard,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,

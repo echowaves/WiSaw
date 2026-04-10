@@ -19,6 +19,17 @@ The system SHALL support friendship invitation links via link.wisaw.com/friends/
 - **WHEN** a user taps a friendship invitation link
 - **THEN** the app opens and navigates to the friendship confirmation screen
 
+### Requirement: Wave Deep Links
+The system SHALL support wave deep links via link.wisaw.com/wave/join/[waveUuid] and link.wisaw.com/wave/invite/[inviteToken] URLs.
+
+#### Scenario: User opens a wave join deep link
+- **WHEN** a user taps a wave join link on their device
+- **THEN** the app opens and navigates to the wave join confirmation screen with the waveUuid
+
+#### Scenario: User opens a wave invite deep link
+- **WHEN** a user taps a wave invite link on their device
+- **THEN** the app opens and navigates to the wave join confirmation screen with the inviteToken
+
 ### Requirement: Cold Start Deep Link Handling
 The system SHALL properly handle app launch via deep link by delaying navigation until the Expo Router is fully ready.
 

@@ -32,6 +32,7 @@ import MergeWaveModal from '../../components/MergeWaveModal'
 import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
+import WaveShareModal from '../../components/WaveShareModal'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
@@ -80,6 +81,9 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
 
   // Context menu state
   const [contextMenuWave, setContextMenuWave] = useState(null)
+
+  // Share modal state
+  const [shareModalWave, setShareModalWave] = useState(null)
 
   const loadingRef = useRef(false)
   const hasMountedRef = useRef(false)
@@ -381,35 +385,57 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
     setContextMenuWave(wave)
   }
 
-  const contextMenuItems = contextMenuWave && contextMenuWave.createdBy === uuid
+  const contextMenuItems = contextMenuWave
     ? [
-        {
-          key: 'edit-wave',
-          icon: 'pencil-outline',
-          label: 'Edit Wave',
-          onPress: () => handleEditWave(contextMenuWave)
-        },
-        {
-          key: 'merge',
-          icon: 'call-merge',
-          label: 'Merge Into Another Wave...',
-          onPress: () => handleStartMerge(contextMenuWave)
-        },
-        'separator',
-        {
-          key: 'delete',
-          icon: 'trash-can-outline',
-          label: 'Delete Wave',
-          destructive: true,
-          onPress: () => handleDeleteWave(contextMenuWave.waveUuid)
-        }
+        // Share Wave (owner + facilitator)
+        ...(['owner', 'facilitator'].includes(contextMenuWave.myRole)
+          ? [{
+              key: 'share-wave',
+              icon: 'share-variant-outline',
+              label: 'Share Wave',
+              onPress: () => setShareModalWave(contextMenuWave)
+            }]
+          : []),
+        // Edit Wave (owner only)
+        ...(contextMenuWave.myRole === 'owner'
+          ? [{
+              key: 'edit-wave',
+              icon: 'pencil-outline',
+              label: 'Edit Wave',
+              onPress: () => handleEditWave(contextMenuWave)
+            }]
+          : []),
+        // Merge (owner only)
+        ...(contextMenuWave.myRole === 'owner'
+          ? [{
+              key: 'merge',
+              icon: 'call-merge',
+              label: 'Merge Into Another Wave...',
+              onPress: () => handleStartMerge(contextMenuWave)
+            }]
+          : []),
+        ...(contextMenuWave.myRole === 'owner' ? ['separator'] : []),
+        // Delete (owner only)
+        ...(contextMenuWave.myRole === 'owner'
+          ? [{
+              key: 'delete',
+              icon: 'trash-can-outline',
+              label: 'Delete Wave',
+              destructive: true,
+              onPress: () => handleDeleteWave(contextMenuWave.waveUuid)
+            }]
+          : [])
       ]
     : []
 
   const handleWavePress = (wave) => {
     router.push({
       pathname: `/waves/${wave.waveUuid}`,
-      params: { waveName: wave.name }
+      params: {
+        waveName: wave.name,
+        myRole: wave.myRole || '',
+        isFrozen: wave.isFrozen ? '1' : '0'
+      }
     })
   }
 
@@ -636,6 +662,13 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         onClose={() => setContextMenuWave(null)}
         title={contextMenuWave?.name}
         items={contextMenuItems}
+      />
+
+      <WaveShareModal
+        visible={!!shareModalWave}
+        onClose={() => setShareModalWave(null)}
+        wave={shareModalWave}
+        uuid={uuid}
       />
 
       {/* Search bar - bottom floating */}

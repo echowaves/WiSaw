@@ -1,13 +1,21 @@
 import React, { useCallback } from 'react'
 import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
 import WavePhotoStrip from '../WavePhotoStrip'
 import { fetchWavePhotos } from '../../screens/WaveDetail/reducer'
+import * as CONST from '../../consts'
+
+const ROLE_CONFIG = {
+  owner: { label: 'Owner', color: CONST.MAIN_COLOR },
+  facilitator: { label: 'Facilitator', color: '#8B5CF6' },
+  contributor: { label: 'Contributor', color: '#6B7280' }
+}
 
 const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
   const photoCount = wave.photosCount ?? 0
   const photos = wave.photos || []
+  const roleConfig = ROLE_CONFIG[wave.myRole] || ROLE_CONFIG.contributor
 
   const fetchFn = useCallback(async (pageNumber, batch) => {
     return fetchWavePhotos({ waveUuid: wave.waveUuid, pageNumber, batch })
@@ -31,12 +39,31 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
       >
         <View style={styles.infoRow}>
           <View style={styles.infoTextContainer}>
-            <Text style={[styles.waveName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
-              {wave.name}
-            </Text>
-            <Text style={[styles.photoCount, { color: theme.TEXT_SECONDARY }]}>
-              {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={[styles.waveName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
+                {wave.name}
+              </Text>
+              {wave.isFrozen && (
+                <MaterialCommunityIcons name='snowflake' size={14} color='#3B82F6' style={styles.frozenIcon} />
+              )}
+            </View>
+            <View style={styles.metaRow}>
+              <Text style={[styles.photoCount, { color: theme.TEXT_SECONDARY }]}>
+                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+              </Text>
+              {wave.myRole && (
+                <View style={[styles.roleBadge, { backgroundColor: `${roleConfig.color}15` }]}>
+                  <Text style={[styles.roleBadgeText, { color: roleConfig.color }]}>
+                    {roleConfig.label}
+                  </Text>
+                </View>
+              )}
+              {wave.splashDate && new Date(wave.splashDate) > new Date() && (
+                <View style={[styles.roleBadge, { backgroundColor: '#FEF3C7' }]}>
+                  <Text style={[styles.roleBadgeText, { color: '#D97706' }]}>Pending</Text>
+                </View>
+              )}
+            </View>
           </View>
           <TouchableOpacity
             onPress={(e) => { e.stopPropagation(); onLongPress(wave) }}
@@ -78,11 +105,33 @@ const styles = StyleSheet.create({
   },
   waveName: {
     fontSize: 14,
-    fontWeight: '600'
+    fontWeight: '600',
+    flex: 1
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  frozenIcon: {
+    marginLeft: 4
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2
   },
   photoCount: {
-    fontSize: 12,
-    marginTop: 2
+    fontSize: 12
+  },
+  roleBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 6
+  },
+  roleBadgeText: {
+    fontSize: 10,
+    fontWeight: '600'
   }
 })
 

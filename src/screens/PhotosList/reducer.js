@@ -1,7 +1,7 @@
 /* global console */
 // import { Platform } from 'react-native'
 
-import * as SecureStore from 'expo-secure-store'
+import { Storage } from 'expo-storage'
 
 import moment from 'moment'
 
@@ -30,7 +30,6 @@ export {
 
 // import { getUUID } from '../Secret/reducer'
 //  date '+%Y%m%d%H%M%S'
-// this is not a password or sensitive info, so SecureStore is used for simplicity
 const IS_TANDC_ACCEPTED_KEY = 'wisaw_is_tandc_accepted_on_this_device'
 
 export const initialState = {
@@ -117,7 +116,7 @@ const FEED_FOR_WATCHER_QUERY = gql`
 
 export async function getTancAccepted () {
   try {
-    return (await SecureStore.getItemAsync(IS_TANDC_ACCEPTED_KEY)) === 'true'
+    return (await Storage.getItem({ key: IS_TANDC_ACCEPTED_KEY })) === 'true'
   } catch (err) {
     console.error('T&C', { err })
 
@@ -264,7 +263,7 @@ export async function getPhotos (params) {
 
 export function acceptTandC () {
   try {
-    SecureStore.setItemAsync(IS_TANDC_ACCEPTED_KEY, 'true')
+    Storage.setItem({ key: IS_TANDC_ACCEPTED_KEY, value: 'true' })
     return true
   } catch (err8) {
     console.error({ err8 })
