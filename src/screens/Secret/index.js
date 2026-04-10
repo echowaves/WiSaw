@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 
 import * as Haptics from 'expo-haptics'
-import * as SecureStore from 'expo-secure-store'
+import { Storage } from 'expo-storage'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import Toast from 'react-native-toast-message'
 
@@ -190,7 +190,7 @@ const SecretScreen = () => {
   useEffect(() => {
     const checkExplainer = async () => {
       try {
-        const seen = await SecureStore.getItemAsync('identityPrivacyExplainerSeen')
+        const seen = await Storage.getItem({ key: 'identityPrivacyExplainerSeen' })
         setHasSeenExplainer(!!seen)
       } catch { /* noop */ }
     }
@@ -200,7 +200,7 @@ const SecretScreen = () => {
   const handleDismissExplainer = async () => {
     setHasSeenExplainer(true)
     try {
-      await SecureStore.setItemAsync('identityPrivacyExplainerSeen', 'true')
+      await Storage.setItem({ key: 'identityPrivacyExplainerSeen', value: 'true' })
     } catch { /* noop */ }
   }
 

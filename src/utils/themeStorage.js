@@ -1,14 +1,13 @@
-import * as SecureStore from 'expo-secure-store'
+import { Storage } from 'expo-storage'
 import { Appearance } from 'react-native'
 import Toast from 'react-native-toast-message'
 
-// these are not a password or sensitive info, so SecureStore is used for simplicity
 const THEME_KEY = 'USER_THEME_PREFERENCE'
 const FOLLOW_SYSTEM_KEY = 'FOLLOW_SYSTEM_THEME'
 
 export const saveThemePreference = async (isDark) => {
   try {
-    await SecureStore.setItemAsync(THEME_KEY, isDark ? 'dark' : 'light')
+    await Storage.setItem({ key: THEME_KEY, value: isDark ? 'dark' : 'light' })
   } catch (error) {
     console.error('Failed to save theme preference:', error)
     Toast.show({
@@ -22,13 +21,7 @@ export const saveThemePreference = async (isDark) => {
 
 export const loadThemePreference = async () => {
   try {
-    // Add timeout protection
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Theme storage timeout')), 3000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(THEME_KEY)
-    const theme = await Promise.race([getItemPromise, timeoutPromise])
+    const theme = await Storage.getItem({ key: THEME_KEY })
     return theme === 'dark'
   } catch (error) {
     console.error('Failed to load theme preference:', error)
@@ -44,7 +37,7 @@ export const loadThemePreference = async () => {
 
 export const saveFollowSystemPreference = async (followSystem) => {
   try {
-    await SecureStore.setItemAsync(FOLLOW_SYSTEM_KEY, followSystem ? 'true' : 'false')
+    await Storage.setItem({ key: FOLLOW_SYSTEM_KEY, value: followSystem ? 'true' : 'false' })
   } catch (error) {
     console.error('Failed to save follow system preference:', error)
     Toast.show({
@@ -58,13 +51,7 @@ export const saveFollowSystemPreference = async (followSystem) => {
 
 export const loadFollowSystemPreference = async () => {
   try {
-    // Add timeout protection
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Follow system storage timeout')), 3000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(FOLLOW_SYSTEM_KEY)
-    const followSystem = await Promise.race([getItemPromise, timeoutPromise])
+    const followSystem = await Storage.getItem({ key: FOLLOW_SYSTEM_KEY })
     return followSystem === 'true'
   } catch (error) {
     console.error('Failed to load follow system preference:', error)

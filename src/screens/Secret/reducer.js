@@ -166,13 +166,7 @@ const storeUUID = async (uuid) => {
 export async function getUUID () {
   let uuid
   try {
-    // Add a timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('SecureStore timeout')), 5000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(CONST.UUID_KEY)
-    uuid = await Promise.race([getItemPromise, timeoutPromise])
+    uuid = await SecureStore.getItemAsync(CONST.UUID_KEY)
   } catch (err13) {
     console.error('uuid', { err13 })
     // Show toast for UUID loading error (but don't throw to prevent app hang)
@@ -223,13 +217,7 @@ const storeNickName = async (nickName) => {
 
 export async function getStoredNickName () {
   try {
-    // Add timeout protection
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('NickName storage timeout')), 3000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(CONST.NICK_NAME_KEY)
-    const nickName = await Promise.race([getItemPromise, timeoutPromise])
+    const nickName = await SecureStore.getItemAsync(CONST.NICK_NAME_KEY)
     return nickName || ''
   } catch (err15) {
     console.error('nick bname', { err15 })

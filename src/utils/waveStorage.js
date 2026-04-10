@@ -1,71 +1,16 @@
-/* global console, setTimeout */
-import * as SecureStore from 'expo-secure-store'
-import Toast from 'react-native-toast-message'
+/* global console */
+import { Storage } from 'expo-storage'
 
-// this is not a password or sensitive info, so SecureStore is used for simplicity
-const ACTIVE_WAVE_KEY = 'ACTIVE_WAVE'
 const WAVE_SORT_PREFERENCES_KEY = 'WAVE_SORT_PREFERENCES'
 const WAVE_FEED_SORT_KEY = 'WAVE_FEED_SORT_PREFERENCES'
 const FRIEND_FEED_SORT_KEY = 'FRIEND_FEED_SORT_PREFERENCES'
 
-export const saveActiveWave = async (wave) => {
-  try {
-    if (wave) {
-      await SecureStore.setItemAsync(ACTIVE_WAVE_KEY, JSON.stringify(wave))
-    } else {
-      await SecureStore.deleteItemAsync(ACTIVE_WAVE_KEY)
-    }
-  } catch (error) {
-    console.error('Failed to save active wave:', error)
-    Toast.show({
-      text1: 'Wave Save Error',
-      text2: 'Unable to save wave selection',
-      type: 'error',
-      visibilityTime: 3000
-    })
-  }
-}
-
-export const loadActiveWave = async () => {
-  try {
-    // Add timeout protection
-    const timeoutPromise = new Promise((_resolve, reject) => {
-      setTimeout(() => reject(new Error('Wave storage timeout')), 3000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(ACTIVE_WAVE_KEY)
-    const waveJson = await Promise.race([getItemPromise, timeoutPromise])
-
-    if (waveJson) {
-      return JSON.parse(waveJson)
-    }
-    return null
-  } catch (error) {
-    console.error('Failed to load active wave:', error)
-    Toast.show({
-      text1: 'Wave Loading Error',
-      text2: 'Unable to restore wave selection',
-      type: 'error',
-      visibilityTime: 3000
-    })
-    return null
-  }
-}
-
-export const clearActiveWave = async () => {
-  try {
-    await SecureStore.deleteItemAsync(ACTIVE_WAVE_KEY)
-  } catch (error) {
-    console.error('Failed to clear active wave:', error)
-  }
-}
-
 export const saveWaveSortPreferences = async ({ sortBy, sortDirection }) => {
   try {
-    await SecureStore.setItemAsync(
-      WAVE_SORT_PREFERENCES_KEY,
-      JSON.stringify({ sortBy, sortDirection })
-    )
+    await Storage.setItem({
+      key: WAVE_SORT_PREFERENCES_KEY,
+      value: JSON.stringify({ sortBy, sortDirection })
+    })
   } catch (error) {
     console.error('Failed to save wave sort preferences:', error)
   }
@@ -73,12 +18,7 @@ export const saveWaveSortPreferences = async ({ sortBy, sortDirection }) => {
 
 export const loadWaveSortPreferences = async () => {
   try {
-    const timeoutPromise = new Promise((_resolve, reject) => {
-      setTimeout(() => reject(new Error('Wave sort storage timeout')), 3000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(WAVE_SORT_PREFERENCES_KEY)
-    const json = await Promise.race([getItemPromise, timeoutPromise])
+    const json = await Storage.getItem({ key: WAVE_SORT_PREFERENCES_KEY })
 
     if (json) {
       return JSON.parse(json)
@@ -92,10 +32,10 @@ export const loadWaveSortPreferences = async () => {
 
 export const saveWaveFeedSortPreferences = async ({ sortBy, sortDirection }) => {
   try {
-    await SecureStore.setItemAsync(
-      WAVE_FEED_SORT_KEY,
-      JSON.stringify({ sortBy, sortDirection })
-    )
+    await Storage.setItem({
+      key: WAVE_FEED_SORT_KEY,
+      value: JSON.stringify({ sortBy, sortDirection })
+    })
   } catch (error) {
     console.error('Failed to save wave feed sort preferences:', error)
   }
@@ -103,12 +43,7 @@ export const saveWaveFeedSortPreferences = async ({ sortBy, sortDirection }) => 
 
 export const loadWaveFeedSortPreferences = async () => {
   try {
-    const timeoutPromise = new Promise((_resolve, reject) => {
-      setTimeout(() => reject(new Error('Wave feed sort storage timeout')), 3000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(WAVE_FEED_SORT_KEY)
-    const json = await Promise.race([getItemPromise, timeoutPromise])
+    const json = await Storage.getItem({ key: WAVE_FEED_SORT_KEY })
 
     if (json) {
       return JSON.parse(json)
@@ -122,10 +57,10 @@ export const loadWaveFeedSortPreferences = async () => {
 
 export const saveFriendFeedSortPreferences = async ({ sortBy, sortDirection }) => {
   try {
-    await SecureStore.setItemAsync(
-      FRIEND_FEED_SORT_KEY,
-      JSON.stringify({ sortBy, sortDirection })
-    )
+    await Storage.setItem({
+      key: FRIEND_FEED_SORT_KEY,
+      value: JSON.stringify({ sortBy, sortDirection })
+    })
   } catch (error) {
     console.error('Failed to save friend feed sort preferences:', error)
   }
@@ -133,12 +68,7 @@ export const saveFriendFeedSortPreferences = async ({ sortBy, sortDirection }) =
 
 export const loadFriendFeedSortPreferences = async () => {
   try {
-    const timeoutPromise = new Promise((_resolve, reject) => {
-      setTimeout(() => reject(new Error('Friend feed sort storage timeout')), 3000)
-    })
-
-    const getItemPromise = SecureStore.getItemAsync(FRIEND_FEED_SORT_KEY)
-    const json = await Promise.race([getItemPromise, timeoutPromise])
+    const json = await Storage.getItem({ key: FRIEND_FEED_SORT_KEY })
 
     if (json) {
       return JSON.parse(json)

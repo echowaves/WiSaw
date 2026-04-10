@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import * as SecureStore from 'expo-secure-store'
+import { Storage } from 'expo-storage'
 
 export default function InteractionHintBanner ({ hasContent, hintText = 'Tap and hold for options or tap ⋮' }) {
   const [visible, setVisible] = useState(false)
@@ -9,7 +9,7 @@ export default function InteractionHintBanner ({ hasContent, hintText = 'Tap and
   useEffect(() => {
     const check = async () => {
       try {
-        const shown = await SecureStore.getItemAsync('interactionHintShown')
+        const shown = await Storage.getItem({ key: 'interactionHintShown' })
         if (!shown) setVisible(true)
       } catch { /* noop */ }
     }
@@ -19,7 +19,7 @@ export default function InteractionHintBanner ({ hasContent, hintText = 'Tap and
   const dismiss = useCallback(async () => {
     setVisible(false)
     try {
-      await SecureStore.setItemAsync('interactionHintShown', 'true')
+      await Storage.setItem({ key: 'interactionHintShown', value: 'true' })
     } catch { /* noop */ }
   }, [])
 
