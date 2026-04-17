@@ -14,6 +14,7 @@ import * as TaskManager from 'expo-task-manager'
 import {
   Keyboard,
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -641,8 +642,10 @@ const PhotosList = ({ searchFromUrl }) => {
           icon: 'globe',
           title: 'No Photos in Your Area',
           subtitle: "Be the first to share a moment! Take a photo and let others discover what's happening around you.",
-          actionText: 'Take a Photo',
-          onActionPress: () => reload()
+          actionText: 'Refresh',
+          onActionPress: () => reload(),
+          secondaryActionText: 'Take a Photo',
+          onSecondaryActionPress: () => checkPermissionsForPhotoTaking({ cameraType: 'camera' })
         }
 
     return (
@@ -666,6 +669,12 @@ const PhotosList = ({ searchFromUrl }) => {
             paddingBottom: FOOTER_HEIGHT + 80
           }}
           showsVerticalScrollIndicator
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={reload}
+            />
+          }
         >
           <EmptyStateCard {...emptyStateProps} />
         </ScrollView>

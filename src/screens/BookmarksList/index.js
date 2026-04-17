@@ -2,6 +2,7 @@ import { useAtom, useAtomValue } from 'jotai'
 import React, { useCallback, useContext, useMemo, useState } from 'react'
 
 import {
+  RefreshControl,
   ScrollView,
   Text,
   useWindowDimensions,
@@ -291,6 +292,12 @@ const BookmarksList = () => {
             paddingBottom: FOOTER_HEIGHT + 80
           }}
           showsVerticalScrollIndicator
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={reload}
+            />
+          }
         >
           <EmptyStateCard {...emptyStateProps} />
         </ScrollView>

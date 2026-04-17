@@ -3,6 +3,8 @@ import {
   View,
   StyleSheet,
   Alert,
+  ScrollView,
+  RefreshControl,
   useWindowDimensions
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
@@ -286,13 +288,26 @@ const FriendDetail = React.forwardRef((_props, ref) => {
 
       {photos.length === 0 && !loading
         ? (
-          <EmptyStateCard
-            icon='images'
-            iconType='FontAwesome5'
-            title='No Photos Yet'
-            subtitle='No shared photos from this friend yet.'
-            iconColor={theme.TEXT_PRIMARY}
-          />
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}
+            refreshControl={
+              <RefreshControl
+                refreshing={loading}
+                onRefresh={handleRefresh}
+              />
+            }
+          >
+            <EmptyStateCard
+              icon='images'
+              iconType='FontAwesome5'
+              title='No Photos Yet'
+              subtitle='No shared photos from this friend yet.'
+              iconColor={theme.TEXT_PRIMARY}
+              actionText='Refresh'
+              onActionPress={handleRefresh}
+            />
+          </ScrollView>
           )
         : (
           <>
