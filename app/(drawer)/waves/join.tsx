@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import {
   ActivityIndicator,
   ScrollView,
@@ -17,32 +19,106 @@ import AppHeader from '../../../src/components/AppHeader'
 import * as STATE from '../../../src/state'
 import * as CONST from '../../../src/consts'
 import { joinOpenWave, joinWaveByInvite } from '../../../src/screens/Waves/reducer'
-import { getTheme, SHARED_STYLES } from '../../../src/theme/sharedStyles'
+import { getTheme } from '../../../src/theme/sharedStyles'
 
-export default function WaveJoinScreen () {
+interface JoinWaveResult {
+  waveUuid: string
+  name: string
+  myRole?: string
+  isFrozen?: boolean
+}
+
+interface JoinErrorResult {
+  key: 'already-member' | 'invite-expired' | 'invite-max-uses' | 'banned' | 'not-found' | 'generic'
+  title: string
+  message: string
+}
+
+interface JoinErrorShape {
+  message?: unknown
+  waveUuid?: unknown
+  waveName?: unknown
+}
+
+const getOptionalString = (value: unknown): string => (typeof value === 'string' ? value : '')
+
+const normalizeJoinError = (err: unknown): JoinErrorResult => {
+  const errObj = err as JoinErrorShape
+  const rawMessage = getOptionalString(errObj.message).toLowerCase()
+
+  if (rawMessage.includes('already') && rawMessage.includes('member')) {
+    return {
+      key: 'already-member',
+      title: 'Already a member',
+      message: 'You are already a member of this wave. Opening wave details...'
+    }
+  }
+
+  if (rawMessage.includes('expired')) {
+    return {
+      key: 'invite-expired',
+      title: 'Invite expired',
+      message: 'This invite has expired. Ask for a new invitation link.'
+    }
+  }
+
+  if ((rawMessage.includes('max') && rawMessage.includes('use')) || rawMessage.includes('usage limit')) {
+    return {
+      key: 'invite-max-uses',
+      title: 'Invite no longer valid',
+      message: 'This invite has reached its maximum number of uses.'
+    }
+  }
+
+  if (rawMessage.includes('banned')) {
+    return {
+      key: 'banned',
+      title: 'Access denied',
+      message: 'You are banned from this wave and cannot join it.'
+    }
+  }
+
+  if (rawMessage.includes('not found') || rawMessage.includes('does not exist')) {
+    return {
+      key: 'not-found',
+      title: 'Wave not found',
+      message: 'The wave or invite link is invalid.'
+    }
+  }
+
+  return {
+    key: 'generic',
+    title: 'Could not join wave',
+    message: getOptionalString(errObj.message).length > 0 ? getOptionalString(errObj.message) : 'Unable to join wave'
+  }
+}
+
+export default function WaveJoinScreen (): React.JSX.Element {
   const router = useRouter()
   const { waveUuid, inviteToken } = useLocalSearchParams()
+  const waveUuidValue = getOptionalString(waveUuid)
+  const inviteTokenValue = getOptionalString(inviteToken)
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDarkMode)
 
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState('')
   const [joined, setJoined] = useState(false)
 
-  const isInvite = Boolean(inviteToken)
+  const isInvite = inviteTokenValue.length > 0
 
   const handleJoin = useCallback(async () => {
-    if (!uuid) return
+    if (uuid === '') return
     setLoading(true)
-    setError(null)
+    setError('')
 
     try {
-      let wave
+      let wave: JoinWaveResult
       if (isInvite) {
-        wave = await joinWaveByInvite({ inviteToken, uuid })
+        wave = (await joinWaveByInvite({ inviteToken: inviteTokenValue, uuid })) as JoinWaveResult
       } else {
-        wave = await joinOpenWave({ waveUuid, uuid })
+        wave = (await joinOpenWave({ waveUuid: waveUuidValue, uuid })) as JoinWaveResult
       }
       setJoined(true)
       Toast.show({
@@ -57,17 +133,43 @@ export default function WaveJoinScreen () {
           pathname: `/waves/${wave.waveUuid}`,
           params: {
             waveName: wave.name,
-            myRole: wave.myRole || 'contributor',
+            myRole: getOptionalString(wave.myRole).length > 0 ? getOptionalString(wave.myRole) : 'contributor',
             isFrozen: wave.isFrozen ? '1' : '0'
           }
         })
       }, 500)
-    } catch (err) {
-      const message = err?.message || 'Unable to join wave'
-      setError(message)
+    } catch (err: unknown) {
+      const normalized = normalizeJoinError(err)
+      const errObj = err as JoinErrorShape
+
+      if (normalized.key === 'already-member') {
+        const targetWaveUuid = getOptionalString(errObj.waveUuid).length > 0 ? getOptionalString(errObj.waveUuid) : waveUuidValue
+        const targetWaveName = getOptionalString(errObj.waveName).length > 0 ? getOptionalString(errObj.waveName) : 'Wave'
+
+        if (targetWaveUuid.length > 0) {
+          Toast.show({
+            text1: normalized.title,
+            text2: normalized.message,
+            type: 'info',
+            topOffset: 60,
+            visibilityTime: 2500
+          })
+
+          router.replace({
+            pathname: `/waves/${targetWaveUuid}`,
+            params: {
+              waveName: targetWaveName,
+              myRole: 'contributor'
+            }
+          })
+          return
+        }
+      }
+
+      setError(normalized.message)
       Toast.show({
-        text1: 'Could not join wave',
-        text2: message,
+        text1: normalized.title,
+        text2: normalized.message,
         type: 'error',
         topOffset: 60,
         visibilityTime: 4000
@@ -75,7 +177,7 @@ export default function WaveJoinScreen () {
     } finally {
       setLoading(false)
     }
-  }, [uuid, isInvite, inviteToken, waveUuid, router])
+  }, [uuid, isInvite, inviteTokenValue, waveUuidValue, router])
 
   return (
     <>
@@ -129,7 +231,7 @@ export default function WaveJoinScreen () {
           </View>
 
           {/* Error Display */}
-          {error && (
+          {typeof error === 'string' && error.length > 0 && (
             <View style={[styles.errorCard, { backgroundColor: '#FFF0F0', borderColor: '#FFCCCC' }]}>
               <MaterialCommunityIcons name='alert-circle-outline' size={20} color='#CC0000' />
               <Text style={styles.errorText}>{error}</Text>
@@ -140,7 +242,7 @@ export default function WaveJoinScreen () {
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.joinButton, { backgroundColor: CONST.MAIN_COLOR }, (loading || joined) && styles.disabledButton]}
-              onPress={handleJoin}
+              onPress={() => { void handleJoin() }}
               disabled={loading || joined}
               activeOpacity={0.7}
             >

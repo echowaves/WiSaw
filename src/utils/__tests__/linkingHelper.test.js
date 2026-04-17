@@ -49,4 +49,54 @@ describe('parseDeepLink', () => {
       friendshipUuid: 'uuid-123'
     })
   })
+
+  it('handles custom scheme wave join links', () => {
+    const result = parseDeepLink('wisaw://wave/join/wave-123')
+
+    expect(result).toEqual({
+      type: 'wave-join',
+      waveUuid: 'wave-123'
+    })
+  })
+
+  it('handles custom scheme wave invite links', () => {
+    const result = parseDeepLink('wisaw://wave/invite/invite-abc')
+
+    expect(result).toEqual({
+      type: 'wave-invite',
+      inviteToken: 'invite-abc'
+    })
+  })
+
+  it('handles universal links for wave join', () => {
+    Linking.parse.mockReturnValue({
+      hostname: 'link.wisaw.com',
+      path: 'wave/join/wave-456',
+      queryParams: {}
+    })
+
+    const result = parseDeepLink('https://link.wisaw.com/wave/join/wave-456')
+
+    expect(Linking.parse).toHaveBeenCalled()
+    expect(result).toEqual({
+      type: 'wave-join',
+      waveUuid: 'wave-456'
+    })
+  })
+
+  it('handles universal links for wave invite', () => {
+    Linking.parse.mockReturnValue({
+      hostname: 'link.wisaw.com',
+      path: 'wave/invite/token-789',
+      queryParams: {}
+    })
+
+    const result = parseDeepLink('https://link.wisaw.com/wave/invite/token-789')
+
+    expect(Linking.parse).toHaveBeenCalled()
+    expect(result).toEqual({
+      type: 'wave-invite',
+      inviteToken: 'token-789'
+    })
+  })
 })
