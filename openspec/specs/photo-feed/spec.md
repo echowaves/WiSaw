@@ -46,6 +46,12 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 - **THEN** `feedLocationRef.current` SHALL be set to the current `locationAtom.coords`
 - **THEN** the feed query SHALL use the current `locationAtom.coords`
 
+#### Scenario: Empty state supports pull-to-refresh
+- **WHEN** the global photos feed returns zero results
+- **THEN** the empty state `ScrollView` SHALL include a `RefreshControl` wired to `reload()`
+- **THEN** the primary action button SHALL be labeled "Refresh"
+- **THEN** a secondary button labeled "Take a Photo" SHALL be present to open the camera
+
 Removed behavior note: PhotosList search bar keyboard handling has been replaced by the SearchFab component, which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
 
 ### Requirement: Photo feed state management

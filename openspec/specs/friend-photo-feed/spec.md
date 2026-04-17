@@ -29,12 +29,14 @@ The `FriendDetail` screen SHALL accept `friendUuid` and `friendName` from route 
 - **WHEN** the user scrolls to the end of the photo list and `noMoreData` is false
 - **THEN** it SHALL fetch the next page and append photos to the list
 
-#### Scenario: Empty state
+#### Scenario: Empty state with refresh
 - **WHEN** the friend has no photos
-- **THEN** the screen SHALL display an empty state message
+- **THEN** the screen SHALL display an empty state card
+- **THEN** the empty state SHALL be wrapped in a `ScrollView` with a `RefreshControl` wired to `handleRefresh()`
+- **THEN** the empty state card SHALL include a "Refresh" action button that calls `handleRefresh()`
 
 #### Scenario: Pull to refresh
-- **WHEN** the user triggers a refresh
+- **WHEN** the user triggers a refresh (pull gesture or button tap)
 - **THEN** the screen SHALL reset to page 0 with a new batch UUID and reload photos
 
 #### Scenario: Sort params passed to feedForFriend
