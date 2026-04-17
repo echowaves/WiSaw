@@ -5,7 +5,7 @@ Visual card component for displaying confirmed friends with photo strip previews
 
 ## Requirements
 
-**Requirement: FriendCard renders photo strip and friend info**
+### Requirement: FriendCard renders photo strip and friend info
 The `FriendCard` component SHALL accept `friend`, `onPress`, `onLongPress`, and `theme` props. It SHALL render a `WavePhotoStrip` showing the friend's photos with `initialPhotos` from `friend.photos` and a `fetchFn` that calls `fetchFriendPhotos`. Below the strip, it SHALL render an info row with the friend's display name and a vertical ellipsis menu button.
 
 #### Scenario: Render confirmed friend with photos

@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for user identity in WiSaw.
+
 ## MODIFIED Requirements
+
+## Requirements
 
 ### Requirement: Identity Management Screen
 The system SHALL provide an identity screen with two distinct visual states: a creation flow when no identity exists, and an active-identity profile view when an identity is established.

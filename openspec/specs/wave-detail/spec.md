@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave detail in WiSaw.
+
+## Requirements
+
 ### Requirement: Wave Photo Masonry Display
 The system SHALL display a wave's photos in a masonry grid layout using `PhotosListMasonry` and `ExpandableThumb` components with the starred-layout configuration (spacing: 8, responsive columns, baseHeight: 200), providing full interaction parity with the main feed's starred segment. The `fetchWavePhotos` reducer SHALL pass `sortBy` and `sortDirection` parameters to the `feedForWave` GraphQL query. When sort preferences change, the screen SHALL reset pagination to page 0 with a new batch and re-fetch photos. When a photo is expanded inline, the view SHALL automatically scroll so the expanded photo's top edge is visible below the header. When a photo is deleted, removed from the wave, or moved to another wave — whether from the collapsed QuickActionsModal or from within the expanded `Photo` component — the photo SHALL be immediately filtered from the wave's local photo list and the masonry grid SHALL re-render without it. WaveDetail SHALL provide a `PhotosListContext` so the `Photo` component's deletion handler updates the correct screen-local state. Uploaded photos SHALL only be prepended to the wave's photo list when the upload bus emits an event with a `waveUuid` matching the current wave. The screen SHALL subscribe to the `photoDeletionBus` and remove matching photos from its local state when a deletion event is received from another screen. The initial data load and full state reset (pagination, expanded photos, batch) SHALL only occur when `waveUuid` changes, NOT on every focus return. Expanded photo state SHALL be preserved when returning from modal overlays such as the comment input modal. Photo actions (remove, delete, comment) SHALL be gated by the user's `myRole` and the wave's `isFrozen` state.
 
@@ -278,13 +283,19 @@ The wave edit modal in WaveDetail SHALL use `KeyboardAwareScrollView` from `reac
 ## REMOVED Requirements
 
 ### Requirement: Set Upload Target from Wave Detail
-**Reason**: The upload target concept is being removed entirely. Photos are now tagged to waves contextually via the footer camera when viewing a wave detail screen.
+The system SHALL **Reason**: The upload target concept is being removed entirely. Photos are now tagged to waves contextually via the footer camera when viewing a wave detail screen.
 **Migration**: Users take photos directly from the wave detail screen's camera footer instead of pre-selecting an upload target.
 
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement
 ### Requirement: Remove Photo from Wave
-**Reason**: Long-press on a photo in wave detail now opens the QuickActionsModal (matching main feed behavior) instead of showing a context menu with "Remove from Wave." Photo-to-wave management is handled through the Wave action button in the QuickActionsModal or full photo view.
+The system SHALL **Reason**: Long-press on a photo in wave detail now opens the QuickActionsModal (matching main feed behavior) instead of showing a context menu with "Remove from Wave." Photo-to-wave management is handled through the Wave action button in the QuickActionsModal or full photo view.
 **Migration**: Users use the Wave button in the expanded photo view or QuickActionsModal to manage wave assignment.
 
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement
 ### Requirement: WaveDetail reads global network atom
 The WaveDetail screen SHALL read `STATE.netAvailable` via `useAtom` instead of creating its own `NetInfo.addEventListener` subscription. It SHALL remove the local `netAvailable` state and `NetInfo` listener effect.
 
@@ -302,9 +313,12 @@ The WaveDetail screen SHALL show an offline card when `netAvailable` is `false`.
 - **THEN** it SHALL NOT fire API calls to load wave photos
 
 ### Requirement: Wave Detail Centered Loading Spinner
-**Reason**: Replaced by the `LinearProgress` bar for consistency with PhotosList. The centered `ActivityIndicator` that showed when `loading && photos.length === 0` is no longer used.
+The system SHALL **Reason**: Replaced by the `LinearProgress` bar for consistency with PhotosList. The centered `ActivityIndicator` that showed when `loading && photos.length === 0` is no longer used.
 **Migration**: The `LinearProgress` bar at the top provides loading feedback in all cases. The `EmptyStateCard` continues to render when photos array is empty after load completes.
 
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement
 ### Requirement: Wave GraphQL Field Names
 The `listWaves` query, `createWave` mutation, and `updateWave` mutation SHALL request and send the following renamed fields in their GraphQL operations:
 - `splashDate` (previously `startDate`): the date when the wave goes live

@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for drawer bookmarks icon in WiSaw.
+
 ## Requirements
 
 ### Requirement: Bookmarks drawer icon color reflects bookmark state

@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for reload location guard in WiSaw.
+
+## Requirements
+
 ### Requirement: Reload skips geo-feed request when location is unavailable
 The PhotosList `reload()` function SHALL return immediately without calling `feedReload` when the derived `location` value is null (i.e., `locationState.status` is not `'ready'`).
 

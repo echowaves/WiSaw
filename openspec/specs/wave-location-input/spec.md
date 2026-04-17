@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave location input in WiSaw.
+
 ## ADDED Requirements
+
+## Requirements
 
 ### Requirement: Use My Location button
 The wave location input SHALL provide a "Use My Location" button that captures the device's current coordinates.

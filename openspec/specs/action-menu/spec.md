@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for action menu in WiSaw.
+
+## Requirements
+
 ### Requirement: ActionMenu Component
 The system SHALL provide a reusable `ActionMenu` component at `src/components/ActionMenu/index.js` that renders a themed center-card modal with a list of icon + label menu items. The card SHALL include a close button in the upper-right corner of the header.
 

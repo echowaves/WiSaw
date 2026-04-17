@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for photo deletion sync in WiSaw.
+
+## Requirements
+
 ### Requirement: Photo deletion event bus
 The system SHALL provide a `photoDeletionBus` module in `src/events/photoDeletionBus.js` that follows the Set-based listener pattern used by other event buses (`uploadBus`, `waveAddBus`, etc.). The bus SHALL expose `emitPhotoDeletion({ photoId })` and `subscribeToPhotoDeletion(listener)`. `subscribeToPhotoDeletion` SHALL return an unsubscribe function that removes the listener from the Set. Listener errors SHALL be caught and logged without affecting other listeners.
 

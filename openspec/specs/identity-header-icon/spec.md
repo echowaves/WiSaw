@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for identity header icon in WiSaw.
+
 ## Requirements
 
 ### Requirement: Identity status in drawer menu item
@@ -24,5 +27,9 @@ The drawer's "Identity" menu item SHALL reflect the current identity state. When
 ## REMOVED Requirements
 
 ### Requirement: Drawer identity badge
-**Reason**: Redundant with the header icon and the enhanced Identity drawer menu item. Three paths to identity was excessive.
+The system SHALL **Reason**: Redundant with the header icon and the enhanced Identity drawer menu item. Three paths to identity was excessive.
 **Migration**: Identity status is now shown directly on the "Identity" drawer menu item.
+
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement

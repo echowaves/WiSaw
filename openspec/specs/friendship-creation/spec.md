@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for friendship creation in WiSaw.
+
+## Requirements
+
 ### Requirement: createFriendship mutation matches backend schema
 The client `createFriendship` GraphQL mutation SHALL query `Friendship` fields (`friendshipUuid`, `uuid1`, `uuid2`, `createdAt`) directly on the mutation return type, without a nested `friendship` wrapper.
 

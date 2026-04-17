@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for location drift banner in WiSaw.
+
+## Requirements
+
 ### Requirement: Location Drift Banner
 The system SHALL provide a `LocationDriftBanner` component at `src/screens/PhotosList/components/LocationDriftBanner.js` that warns the user when their live device location has drifted significantly from the location the geo feed was loaded with. The banner SHALL only be visible on segment 0 (Global/geo feed). The banner SHALL be tappable to trigger a feed reload. The `showDriftBanner` useMemo SHALL include a `feedLocationVersion` state counter in its dependency array so that it recalculates after every `reload()` call that snapshots the feed location.
 

@@ -5,7 +5,7 @@ Enables viewing a friend's shared photos in a dedicated photo feed screen, acces
 
 ## Requirements
 
-**Requirement: Friend photo feed data fetching**
+### Requirement: Friend photo feed data fetching
 The `fetchFriendPhotos` reducer function SHALL call the `feedForFriend` GraphQL query with `uuid`, `friendUuid`, `pageNumber`, and `batch` parameters. It SHALL return `{ photos, batch, noMoreData }` matching the `PhotoFeed` type. The query SHALL request the same photo fields as `feedForWave` (`id`, `uuid`, `imgUrl`, `thumbUrl`, `videoUrl`, `video`, `commentsCount`, `watchersCount`, `lastComment`, `createdAt`, `width`, `height`).
 
 #### Scenario: Fetch first page of friend photos
@@ -17,7 +17,7 @@ The `fetchFriendPhotos` reducer function SHALL call the `feedForFriend` GraphQL 
 - **WHEN** the friend has no shared photos
 - **THEN** `fetchFriendPhotos` SHALL return `{ photos: [], batch, noMoreData: true }`
 
-**Requirement: Friend detail screen renders photo feed**
+### Requirement: Friend detail screen renders photo feed
 The `FriendDetail` screen SHALL accept `friendUuid` and `friendName` from route params via `useLocalSearchParams`. It SHALL fetch photos using `fetchFriendPhotos` with paginated loading, passing `sortBy` and `sortDirection` parameters to the `feedForFriend` query. It SHALL render the photos using `PhotosListMasonry` with the expand/collapse pattern via `usePhotoExpansion`. When sort preferences change, the screen SHALL reset pagination to page 0 with a new batch and re-fetch photos. It SHALL NOT include a camera footer or photo upload capabilities. The screen SHALL render a `QuickActionsModalWrapper` and wire `handlePhotoLongPress` to open it, so that long-pressing a photo thumbnail or tapping the ⋮ pill opens the quick-actions modal with photo preview and action buttons — matching the main photo feed behavior.
 
 #### Scenario: Initial load
@@ -60,7 +60,7 @@ The `FriendDetail` screen SHALL accept `friendUuid` and `friendName` from route 
 - **WHEN** a photo is deleted through the quick-actions modal in the friend feed
 - **THEN** the photo SHALL be removed from the local photo list without a full re-fetch
 
-**Requirement: Friend detail route and header**
+### Requirement: Friend detail route and header
 The friend detail screen SHALL be accessible at `app/friendships/[friendUuid].tsx`. The header SHALL display the friend's name as the title. The header SHALL include a back button and a kebab menu button on the right.
 
 #### Scenario: Header displays friend name
@@ -71,7 +71,7 @@ The friend detail screen SHALL be accessible at `app/friendships/[friendUuid].ts
 - **WHEN** navigating without a `friendName` param
 - **THEN** the header title SHALL display "Friend"
 
-**Requirement: Friend detail kebab menu**
+### Requirement: Friend detail kebab menu
 The kebab menu on the friend detail screen SHALL expose friend-specific actions via `ActionMenu`: Edit Name and Remove Friend. Edit Name SHALL open a name picker. Remove Friend SHALL show a confirmation alert and call the appropriate deletion function.
 
 #### Scenario: Edit friend name
@@ -84,7 +84,7 @@ The kebab menu on the friend detail screen SHALL expose friend-specific actions 
 - **WHEN** the user confirms removal
 - **THEN** the friendship SHALL be deleted and the user SHALL be navigated back
 
-**Requirement: Friend photo feed uses friend user UUID**
+### Requirement: Friend photo feed uses friend user UUID
 The `FriendCard` component and friend detail navigation SHALL pass the friend's **user UUID** (derived from `uuid1`/`uuid2`) to `fetchFriendPhotos` and the `/friendships/[friendUuid]` route. The `friendshipUuid` SHALL be passed as a separate route parameter.
 
 #### Scenario: FriendCard fetches photos with correct UUID

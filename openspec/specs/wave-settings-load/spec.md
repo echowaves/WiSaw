@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave settings load in WiSaw.
+
 ## ADDED Requirements
+
+## Requirements
 
 ### Requirement: getWave query function
 The waves reducer SHALL export a `getWave` function that executes the GraphQL query `getWave(waveUuid: String!, uuid: String!): Wave` and returns the Wave object.

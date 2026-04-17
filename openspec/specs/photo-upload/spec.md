@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for photo upload in WiSaw.
+
 ## MODIFIED Requirements
+
+## Requirements
 
 ### Requirement: Wave-Tagged Photo Uploads
 The system SHALL attach a wave UUID to uploaded photos when a `waveUuid` is provided by the screen context (e.g., the Wave Detail footer camera). Upload completion notifications SHALL be broadcast via the upload event bus with the queue item's `waveUuid` metadata, replacing per-screen `onPhotoUploaded` callbacks.

@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave hub in WiSaw.
+
+## Requirements
+
 ### Requirement: Waves List Focus Refresh
 The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. Thumbnail `Photo` objects (with `id` and `thumbUrl`) SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries. `WaveCard` SHALL pass `wave.photos` as `initialPhotos` to `WavePhotoStrip`, which SHALL use `CachedImage` with `cacheKey` `${photo.id}-thumb` and React `key` `photo.id`.
 
@@ -54,11 +59,14 @@ The system SHALL re-fetch the waves list and ungrouped photo count from the API 
 ## REMOVED Requirements
 
 ### Requirement: Upload Target Bar Display
-**Reason**: The upload target concept is being removed entirely. Users no longer set a persistent upload target wave.
+The system SHALL **Reason**: The upload target concept is being removed entirely. Users no longer set a persistent upload target wave.
 **Migration**: Users navigate to a wave detail screen and use the camera footer there to upload photos to a specific wave.
 
 ## MODIFIED Requirements
 
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement
 ### Requirement: Wave Card Context Menu
 The system SHALL show an `ActionMenu` modal on long-press of a wave card with icon + label management options.
 

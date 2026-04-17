@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for secure logging in WiSaw.
+
+## Requirements
+
 ### Requirement: Console statements SHALL use parameterized format strings
 All `console.log`, `console.warn`, and `console.error` calls across the codebase SHALL pass a literal string as the first argument, using `%s` and `%d` format tokens for variable substitution. Variables SHALL be passed as subsequent arguments rather than interpolated into template literals.
 

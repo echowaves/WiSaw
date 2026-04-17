@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for location provider in WiSaw.
+
+## Requirements
+
 ### Requirement: Location Atom
 The system SHALL provide a global Jotai atom `locationAtom` in `src/state.js` that stores the device's location state as an object with `status`, `coords`, and `accuracy` properties.
 

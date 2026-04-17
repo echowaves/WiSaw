@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave facilitator identity gate in WiSaw.
+
+## Requirements
 
 ### Requirement: Facilitator identity gate
 The app SHALL prevent facilitators from performing moderation duties until they have established an identity (registered a secret) on the device.

@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for feed search hook in WiSaw.
+
 ## Requirements
 
 ### Requirement: Feed search hook encapsulates search state

@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for identity change event in WiSaw.
+
+## Requirements
+
 ### Requirement: Identity change event bus
 The system SHALL provide an event bus module (`src/events/identityChangeBus.js`) that allows any screen to subscribe to identity-change notifications. The module SHALL export `subscribeToIdentityChange(listener)` and `emitIdentityChange()` functions following the same `Set`-based listener pattern used by `friendAddBus.js`.
 

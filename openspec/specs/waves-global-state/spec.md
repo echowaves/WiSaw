@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for waves global state in WiSaw.
+
+## Requirements
+
 ### Requirement: Global wave count atoms
 The system SHALL maintain two Jotai atoms in `src/state.js` — `wavesCount` and `ungroupedPhotosCount` — both defaulting to `null`. These atoms provide global wave state readable by any component.
 

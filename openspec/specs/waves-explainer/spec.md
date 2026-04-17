@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for waves explainer in WiSaw.
+
+## Requirements
+
 ### Requirement: Waves explainer view with ungrouped photos
 The system SHALL display a multi-card educational view when the waves list is empty and the user has ungrouped photos. The view SHALL explain what waves are, highlight that photos are ready to organize, and provide an auto-group CTA.
 

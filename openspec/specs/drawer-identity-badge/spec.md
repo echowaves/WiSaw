@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for drawer identity badge in WiSaw.
+
 ## ADDED Requirements
+
+## Requirements
 
 ### Requirement: Drawer displays identity badge when identity is established
 The system SHALL display an identity badge at the top of the drawer navigation content when the user has a non-empty nickname, showing the nickname and a user icon.

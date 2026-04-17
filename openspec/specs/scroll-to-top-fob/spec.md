@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for scroll to top fob in WiSaw.
+
 ## Requirements
 
 ### Requirement: FOB appears on downward scroll past threshold

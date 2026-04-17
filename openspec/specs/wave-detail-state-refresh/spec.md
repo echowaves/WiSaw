@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave detail state refresh in WiSaw.
+
+## Requirements
+
 ### Requirement: Wave metadata refreshes on screen focus
 The WaveDetail route screen SHALL re-fetch wave metadata (`isFrozen`, `myRole`) from the backend every time the screen gains focus.
 

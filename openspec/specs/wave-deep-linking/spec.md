@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave deep linking in WiSaw.
+
+## Requirements
 
 ### Requirement: Wave join deep link routing
 The deep link resolver SHALL recognize `/wave/join/{waveUuid}` URLs and resolve them to `{ type: 'wave-join', waveUuid }`.

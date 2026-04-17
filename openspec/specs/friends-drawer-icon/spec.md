@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for friends drawer icon in WiSaw.
+
 ## Requirements
 
 ### Requirement: Friends drawer icon color reflects activity state

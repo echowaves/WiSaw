@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for ungrouped photos card in WiSaw.
+
 ## Requirements
 
 ### Requirement: Ungrouped photos card displays ungrouped photos

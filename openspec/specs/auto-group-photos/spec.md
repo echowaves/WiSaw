@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for auto group photos in WiSaw.
+
+## Requirements
+
 ### Requirement: Auto-group button on Waves screen
 The Waves screen SHALL display an "Auto-Group" action button in the upper-right nav bar header that shows the number of ungrouped photos as a badge. The badge SHALL update after auto-group operations complete and on screen mount.
 

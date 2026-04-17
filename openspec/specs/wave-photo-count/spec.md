@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave photo count in WiSaw.
+
+## Requirements
+
 ### Requirement: Accurate Photo Count from GraphQL
 The system SHALL display the wave photo count using the `photosCount` field from the GraphQL `Wave` type instead of computing it from the `photos` array length.
 

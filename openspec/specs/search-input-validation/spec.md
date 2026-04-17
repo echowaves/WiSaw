@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for search input validation in WiSaw.
+
 ## Requirements
 
 ### Requirement: Minimum search term length for submission

@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave settings in WiSaw.
+
+## Requirements
 
 ### Requirement: Wave settings screen
 The app SHALL provide a wave settings screen accessible to wave owners only, allowing configuration of wave type, dates, geo boundaries, and freeze status.

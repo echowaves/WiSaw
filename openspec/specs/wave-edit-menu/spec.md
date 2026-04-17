@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave edit menu in WiSaw.
+
 ## ADDED Requirements
+
+## Requirements
 
 ### Requirement: Single edit wave menu item
 The wave action sheet SHALL display a single "Edit Wave" menu item instead of separate "Rename" and "Edit Description" items. This item SHALL only be visible to the wave owner.

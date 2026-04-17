@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for drawer waves badge in WiSaw.
+
 ## Requirements
 
 ### Requirement: Waves drawer item shows ungrouped photo count badge

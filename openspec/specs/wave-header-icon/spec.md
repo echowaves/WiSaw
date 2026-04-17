@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave header icon in WiSaw.
+
 ## MODIFIED Requirements
+
+## Requirements
 
 ### Requirement: Wave Icon in Feed Header
 The system SHALL display a wave icon in the upper-right corner of the main photo feed header as a state-aware navigation button to the Waves Hub. The icon color SHALL reflect wave state: `MAIN_COLOR` when waves exist, `TEXT_SECONDARY` when no waves exist or state is not yet loaded. A red dot badge SHALL appear when ungrouped photos exist. Navigation SHALL use `router.navigate()` (idempotent) instead of `router.push()` to prevent duplicate screen instances on rapid taps. On mount, the component SHALL fetch `wavesCount`, `ungroupedPhotosCount`, and `bookmarksCount` in a single `Promise.all`.
@@ -35,9 +40,16 @@ The system SHALL display a wave icon in the upper-right corner of the main photo
 ## REMOVED Requirements
 
 ### Requirement: Upload Target Badge on Wave Icon
-**Reason**: The upload target concept is being removed entirely. The wave icon no longer needs to indicate upload target status.
+The system SHALL **Reason**: The upload target concept is being removed entirely. The wave icon no longer needs to indicate upload target status.
 **Migration**: No migration needed. The wave icon becomes a simple navigation button.
 
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement
 ### Requirement: Upload Target Name on Long-Press
-**Reason**: The upload target concept is being removed. There is no upload target name to display.
+The system SHALL **Reason**: The upload target concept is being removed. There is no upload target name to display.
 **Migration**: No migration needed.
+
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement

@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for identity profile card in WiSaw.
+
 ## ADDED Requirements
+
+## Requirements
 
 ### Requirement: Identity profile card displays nickname and status
 The system SHALL display an `IdentityProfileCard` component when the user has an established identity, showing their nickname and an active status indicator using the app's card-based design language (`CARD_BACKGROUND`, `borderRadius: 16`, themed shadows).

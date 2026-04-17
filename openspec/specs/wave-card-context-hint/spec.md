@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave card context hint in WiSaw.
+
+## Requirements
+
 ### Requirement: WaveCard displays a tappable three-dot icon
 Each WaveCard SHALL display a vertical three-dot (⋮) icon in the info row, right-aligned, that opens the same context menu as long-press.
 

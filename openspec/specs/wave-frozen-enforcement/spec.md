@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave frozen enforcement in WiSaw.
+
+## Requirements
 
 ### Requirement: Block photo removal from frozen wave
 The app SHALL prevent users from removing photos from a frozen wave, except for the wave owner.

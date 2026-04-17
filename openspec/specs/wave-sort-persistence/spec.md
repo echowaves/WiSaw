@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave sort persistence in WiSaw.
+
+## Requirements
+
 ### Requirement: Wave sort preferences persist across app restarts
 The system SHALL save the user's wave list sort preferences (sortBy and sortDirection) to device storage whenever the user changes them, and SHALL restore those preferences when the app starts.
 

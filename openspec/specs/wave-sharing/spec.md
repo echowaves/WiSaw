@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave sharing in WiSaw.
+
+## Requirements
 
 ### Requirement: Wave share modal
 The app SHALL provide a `WaveShareModal` component that generates a QR code and shareable link for a wave. The modal SHALL adapt its behavior based on whether the wave is open or invite-only.

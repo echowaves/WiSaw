@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave merge in WiSaw.
+
+## Requirements
+
 ### Requirement: User can merge one wave into another
 The system SHALL allow the user to merge a source wave into a target wave. All photos from the source wave SHALL be moved to the target wave, and the source wave SHALL be deleted.
 

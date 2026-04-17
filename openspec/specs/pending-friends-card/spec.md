@@ -5,7 +5,7 @@ Groups pending friend requests into a single card displayed at the top of the fr
 
 ## Requirements
 
-**Requirement: PendingFriendsCard groups pending friends**
+### Requirement: PendingFriendsCard groups pending friends
 The `PendingFriendsCard` component SHALL render a dashed-border card with tinted background (matching `UngroupedPhotosCard` styling) that groups all pending friend requests. It SHALL display a header with a clock icon and "Pending Friends (N)" count. It SHALL only render when there are pending friends.
 
 #### Scenario: Display pending friends card
@@ -17,7 +17,7 @@ The `PendingFriendsCard` component SHALL render a dashed-border card with tinted
 - **WHEN** there are no pending friends
 - **THEN** the `PendingFriendsCard` SHALL NOT render
 
-**Requirement: Pending friend items show status and share action**
+### Requirement: Pending friend items show status and share action
 Each pending friend within the card SHALL display the friend's name, a "Waiting for confirmation" status line, an explanation text ("Share this link with your friend to establish the connection. Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security."), and a "Share" button. The Share button SHALL re-share the friendship invitation link via `ShareOptionsModal`.
 
 #### Scenario: Share button re-shares invitation
@@ -31,7 +31,7 @@ Each pending friend within the card SHALL display the friend's name, a "Waiting 
 - **THEN** it SHALL display "Share this link with your friend to establish the connection. Friend names are never stored on our servers — they are only kept locally on your device to ensure privacy and security." as the explainer text
 - **THEN** it SHALL display "When confirmed, you'll see each other's photos shared nearby"
 
-**Requirement: Pending friend row has kebab menu button**
+### Requirement: Pending friend row has kebab menu button
 Each pending friend row SHALL display a kebab menu button (`ellipsis-vertical` icon) at the bottom-right of the row. Tapping the kebab button SHALL trigger the same ActionMenu as long-pressing the row.
 
 #### Scenario: Tapping kebab opens ActionMenu

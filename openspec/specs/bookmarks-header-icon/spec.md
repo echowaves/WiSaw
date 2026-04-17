@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for bookmarks header icon in WiSaw.
+
+## Requirements
+
 ### Requirement: Bookmarks icon visible in header
 The system SHALL display a bookmarks icon in the top navigation bar of the photos list screen, positioned to the left of the Friends and Waves icons.
 

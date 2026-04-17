@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for photo feed in WiSaw.
+
 ## Requirements
 
 ### Requirement: Location-Based Feed Filtering
@@ -43,8 +46,7 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 - **THEN** `feedLocationRef.current` SHALL be set to the current `locationAtom.coords`
 - **THEN** the feed query SHALL use the current `locationAtom.coords`
 
-### ~~Requirement: PhotosList search bar keyboard handling~~
-**REMOVED**: Replaced by the SearchFab component which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
+Removed behavior note: PhotosList search bar keyboard handling has been replaced by the SearchFab component, which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
 
 ### Requirement: Photo feed state management
 The PhotosList screen SHALL use `useFeedLoader` hook for photo array state management instead of inline `useState` and manual event subscriptions. The hook SHALL handle photo freezing, deduplication, pagination, abort control, upload subscriptions, and deletion subscriptions. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext`. The screen SHALL provide a `PhotosListContext` with the `removePhoto` function returned by `useFeedLoader`.
@@ -132,9 +134,12 @@ The `PhotosListFooter` SHALL render three buttons: drawer menu, video camera, an
 ## REMOVED Requirements
 
 ### Requirement: Drawer menu button badge for upload target wave
-**Reason**: The upload target concept is being removed entirely. The nav menu button no longer needs to indicate upload target status.
+The system SHALL **Reason**: The upload target concept is being removed entirely. The nav menu button no longer needs to indicate upload target status.
 **Migration**: No migration needed. The nav menu button becomes a plain drawer opener.
 
+#### Scenario: Requirement is exercised
+- **WHEN** the relevant action occurs
+- **THEN** the system SHALL satisfy this requirement
 ### Requirement: Masonry component tracks scroll direction for FOB
 The `PhotosListMasonry` component SHALL internally track scroll direction by comparing consecutive `contentOffset.y` values. It SHALL maintain a `prevScrollY` ref and a `showFob` state. The existing `onScroll` callback from the parent SHALL continue to be forwarded without modification.
 

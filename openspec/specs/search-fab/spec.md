@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for search fab in WiSaw.
+
 ## Requirements
 
 ### Requirement: Search FAB renders on photo feed

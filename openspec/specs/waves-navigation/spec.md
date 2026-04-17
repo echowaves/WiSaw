@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for waves navigation in WiSaw.
+
+## Requirements
+
 ### Requirement: Waves Stack Navigation Group
 The system SHALL provide a Stack navigator wrapping all wave-related screens under the `app/(drawer)/waves/` directory, enabling proper back-stack navigation between the waves list, wave detail, and photo selection screens.
 

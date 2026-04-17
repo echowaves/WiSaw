@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for friends header icon in WiSaw.
+
 ## Requirements
 
 ### Requirement: Friends header icon renders with badge

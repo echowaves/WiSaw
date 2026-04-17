@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for waves auto group header in WiSaw.
+
+## Requirements
+
 ### Requirement: Auto-Group Button in Waves Header
 The system SHALL display a kebab (three-dot vertical) menu icon in the upper-right navigation bar of the Waves screen. The button SHALL use reactive theme colors from `getTheme(isDarkMode)` (not static `SHARED_STYLES.theme`) to properly support dark mode. The icon SHALL display an inline ungrouped-count badge when the count is greater than zero. Tapping the icon SHALL open an `ActionMenu` modal with management and sort options, using icons and visual separators between action groups.
 

@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave photo strip in WiSaw.
+
 ## Requirements
 
 ### Requirement: Wave photo strip renders horizontal scrollable thumbnails

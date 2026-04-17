@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave moderation in WiSaw.
+
+## Requirements
 
 ### Requirement: Report wave photo
 Any wave member SHALL be able to report a photo within a wave for abuse.

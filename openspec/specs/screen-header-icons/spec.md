@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for screen header icons in WiSaw.
+
 ## Requirements
 
 ### Requirement: Screen header icon map

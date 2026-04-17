@@ -1,3 +1,6 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for feed loader hook in WiSaw.
+
 ## Requirements
 
 ### Requirement: Feed loader hook encapsulates feed lifecycle

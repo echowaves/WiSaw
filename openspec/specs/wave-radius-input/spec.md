@@ -1,4 +1,9 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave radius input in WiSaw.
+
 ## ADDED Requirements
+
+## Requirements
 
 ### Requirement: Radius slider control
 The wave radius input SHALL provide a slider for setting the geo-fence radius in miles.

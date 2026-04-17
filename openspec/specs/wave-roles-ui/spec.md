@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave roles ui in WiSaw.
+
+## Requirements
 
 ### Requirement: Role display on wave cards
 Each wave card in the Waves Hub SHALL display the user's role as a badge or label.

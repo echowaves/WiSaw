@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for waves list sort in WiSaw.
+
+## Requirements
+
 ### Requirement: Waves List Sort State
 The system SHALL maintain session-only sort state for the waves list with `sortBy` (either `"createdAt"` or `"updatedAt"`) and `sortDirection` (either `"asc"` or `"desc"`). The default sort SHALL be `updatedAt` / `desc`.
 

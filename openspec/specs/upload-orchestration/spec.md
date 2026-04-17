@@ -1,3 +1,8 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for upload orchestration in WiSaw.
+
+## Requirements
+
 ### Requirement: Upload event bus
 The system SHALL provide an upload event bus (`src/events/uploadBus.js`) following the existing Set-based listener pattern. The bus SHALL emit `{ photo, waveUuid }` on each successful upload completion.
 

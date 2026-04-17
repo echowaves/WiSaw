@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave graphql operations in WiSaw.
+
+## Requirements
 
 ### Requirement: Join open wave mutation
 The frontend SHALL provide a `joinOpenWave` function that calls the GraphQL `joinOpenWave` mutation.

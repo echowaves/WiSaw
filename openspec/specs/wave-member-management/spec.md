@@ -1,3 +1,7 @@
+## Purpose
+This specification defines expected user-visible behavior, constraints, and validation scenarios for wave member management in WiSaw.
+
+## Requirements
 
 ### Requirement: Wave members list
 The app SHALL provide a screen listing all members of a wave with their roles, accessible to owners and facilitators.
