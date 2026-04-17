@@ -78,7 +78,7 @@ const QuickActionsModalWrapper = React.memo(
 
 const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
   const { waveUuid, waveName: initialWaveName } = useLocalSearchParams()
-  const [uuid, setUuid] = useAtom(STATE.uuid)
+  const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [waveFeedSortBy] = useAtom(STATE.waveFeedSortBy)
   const [waveFeedSortDirection] = useAtom(STATE.waveFeedSortDirection)
@@ -137,7 +137,7 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
     return subscribeToUploadComplete(({ photo, waveUuid: uploadWaveUuid }) => {
       if (uploadWaveUuid === waveUuid) {
         setPhotos((currentList) => {
-          const updatedList = [createFrozenPhoto(photo), ...currentList]
+          const updatedList = [createFrozenPhoto({ ...photo, waveIsFrozen: Boolean(isFrozen), waveViewerRole: myRole || '' }), ...currentList]
           const seen = new Set()
           return updatedList.filter((p) => {
             if (seen.has(p.id)) return false
@@ -237,7 +237,11 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
         sortDirection: waveFeedSortDirection
       })
 
-      const frozenPhotos = data.photos.map(createFrozenPhoto)
+      const frozenPhotos = data.photos.map((item) => createFrozenPhoto({
+        ...item,
+        waveIsFrozen: Boolean(isFrozen),
+        waveViewerRole: myRole || ''
+      }))
 
       if (refresh) {
         setPhotos(frozenPhotos)
@@ -256,7 +260,7 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
     } finally {
       setLoading(false)
     }
-  }, [waveUuid, waveFeedSortBy, waveFeedSortDirection])
+  }, [waveUuid, waveFeedSortBy, waveFeedSortDirection, isFrozen, myRole])
 
   useEffect(() => {
     setPageNumber(0)
@@ -324,6 +328,20 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
   const canManage = isOwner || isFacilitator
 
   const headerMenuItems = [
+    // Report Content (contributors)
+    ...(!canManage
+      ? [{
+          key: 'report-content',
+          icon: 'flag-outline',
+          label: 'Report Content',
+          onPress: () => {
+            Alert.alert(
+              'Report content',
+              'Long press a photo and tap the report button to send it to wave moderators.'
+            )
+          }
+        }]
+      : []),
     // Share Wave (owner + facilitator)
     ...(canManage
       ? [{

@@ -736,6 +736,15 @@ const Photo = ({
             padding: 8
           }}
           onPress={() => {
+            if (photo?.waveIsFrozen && photo?.waveViewerRole !== 'owner') {
+              Toast.show({
+                text1: 'Wave is frozen',
+                text2: 'Only the wave owner can delete comments in frozen waves',
+                type: 'info',
+                topOffset: toastTopOffset
+              })
+              return
+            }
             Alert.alert(
               'Delete Comment?',
               "This can't be undone. Are you sure? ",
@@ -852,11 +861,21 @@ const Photo = ({
     if (!photoDetails?.comments) {
       return <Text />
     }
+    const commentsLocked = photo?.waveIsFrozen && photo?.waveViewerRole !== 'owner'
     return (
       <View style={styles.addCommentCard}>
         <TouchableOpacity
-          style={styles.addCommentButton}
-          onPress={() =>
+          style={[styles.addCommentButton, commentsLocked && { opacity: 0.5 }]}
+          onPress={() => {
+            if (commentsLocked) {
+              Toast.show({
+                text1: 'Wave is frozen',
+                text2: 'Comments are locked for frozen waves',
+                type: 'info',
+                topOffset: toastTopOffset
+              })
+              return
+            }
             router.push({
               pathname: '/modal-input',
               params: {
@@ -864,7 +883,8 @@ const Photo = ({
                 uuid,
                 topOffset: toastTopOffset
               }
-            })}
+            })
+          }}
           activeOpacity={0.7}
         >
           <Ionicons name='add-circle' size={18} color={theme.STATUS_SUCCESS} />

@@ -4,7 +4,7 @@ import Toast from 'react-native-toast-message'
 import { useSetAtom } from 'jotai'
 
 import * as reducer from '../components/Photo/reducer'
-import { addPhotoToWave, removePhotoFromWave, createWave } from '../screens/Waves/reducer'
+import { addPhotoToWave, removePhotoFromWave, createWave, reportWavePhoto } from '../screens/Waves/reducer'
 import { emitPhotoDeletion } from '../events/photoDeletionBus'
 import * as STATE from '../state'
 
@@ -14,10 +14,20 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
   const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
 
   const isOwnPhoto = photo?.uuid === uuid
+  const isFrozenWaveForNonOwner = Boolean(photo?.waveIsFrozen) && photo?.waveViewerRole !== 'owner'
 
   const isPhotoBannedByMe = useCallback(() => bans.includes(photo?.id), [bans, photo?.id])
 
   const handleDelete = useCallback(() => {
+    if (isFrozenWaveForNonOwner && photoDetails?.waveUuid) {
+      Toast.show({
+        text1: 'Wave is frozen',
+        text2: 'Only the wave owner can delete photos in frozen waves',
+        type: 'info',
+        topOffset: toastTopOffset
+      })
+      return
+    }
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: "Can't delete bookmarked photo",
@@ -52,9 +62,60 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       ],
       { cancelable: true }
     )
-  }, [photo, photoDetails?.isPhotoWatched, uuid, toastTopOffset, onDeleted])
+  }, [photo, photoDetails?.isPhotoWatched, photoDetails?.waveUuid, uuid, toastTopOffset, onDeleted, isFrozenWaveForNonOwner])
 
   const handleBan = useCallback(() => {
+    if (photoDetails?.waveUuid) {
+      if (isFrozenWaveForNonOwner) {
+        Toast.show({
+          text1: 'Wave is frozen',
+          text2: 'Reporting is disabled for frozen waves',
+          type: 'info',
+          topOffset: toastTopOffset
+        })
+        return
+      }
+      if (isPhotoBannedByMe()) {
+        Toast.show({
+          text1: 'Looks like you already Reported this Photo',
+          text2: 'You can only Report same Photo once',
+          type: 'error',
+          topOffset: toastTopOffset
+        })
+      } else {
+        Alert.alert(
+          'Report wave content?',
+          'This photo will be sent to wave moderators for review. Continue?',
+          [
+            { text: 'No', onPress: () => null, style: 'cancel' },
+            {
+              text: 'Yes',
+              onPress: async () => {
+                try {
+                  await reportWavePhoto({ waveUuid: photoDetails.waveUuid, photoId: photo.id, uuid })
+                  setBans((prev) => [...prev, photo.id])
+                  Toast.show({
+                    text1: 'Reported to moderators',
+                    type: 'success',
+                    topOffset: toastTopOffset
+                  })
+                } catch (err) {
+                  Toast.show({
+                    text1: 'Unable to report content',
+                    text2: 'Try again later',
+                    type: 'error',
+                    topOffset: toastTopOffset
+                  })
+                }
+              }
+            }
+          ],
+          { cancelable: true }
+        )
+      }
+      return
+    }
+
     if (photoDetails?.isPhotoWatched) {
       Toast.show({
         text1: "Can't report bookmarked photo",
@@ -88,7 +149,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         { cancelable: true }
       )
     }
-  }, [photo, photoDetails?.isPhotoWatched, uuid, toastTopOffset, isPhotoBannedByMe])
+  }, [photo, photoDetails?.isPhotoWatched, photoDetails?.waveUuid, uuid, toastTopOffset, isPhotoBannedByMe, isFrozenWaveForNonOwner])
 
   const handleFlipWatch = useCallback(async () => {
     try {
@@ -167,6 +228,15 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
   }, [photo, photoDetails, setPhotoDetails, uuid, toastTopOffset, onRemovedFromWave])
 
   const handleWaveRemove = useCallback(async () => {
+    if (isFrozenWaveForNonOwner && photoDetails?.waveUuid) {
+      Toast.show({
+        text1: 'Wave is frozen',
+        text2: 'Only the wave owner can remove photos from a frozen wave',
+        type: 'info',
+        topOffset: toastTopOffset
+      })
+      return
+    }
     setWaveModalVisible(false)
     if (onRemovedFromWave) {
       onRemovedFromWave(photo.id)
@@ -194,7 +264,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         topOffset: toastTopOffset
       })
     }
-  }, [photo, photoDetails, setPhotoDetails, toastTopOffset, onRemovedFromWave])
+  }, [photo, photoDetails, setPhotoDetails, toastTopOffset, onRemovedFromWave, isFrozenWaveForNonOwner])
 
   const handleCreateWave = useCallback(async (name, locationParams) => {
     setWaveModalVisible(false)

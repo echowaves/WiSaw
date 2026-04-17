@@ -7,6 +7,7 @@ import {
   Share,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native'
@@ -24,6 +25,8 @@ const WaveShareModal = ({
 }) => {
   const [shareUrl, setShareUrl] = useState('')
   const [loading, setLoading] = useState(false)
+  const [inviteExpiryHours, setInviteExpiryHours] = useState('24')
+  const [inviteMaxUses, setInviteMaxUses] = useState('')
 
   const isOpen = wave?.open === true
 
@@ -38,7 +41,16 @@ const WaveShareModal = ({
     } else if (!isOpen) {
       // For invite-only waves, generate an invite
       setLoading(true)
-      createWaveInvite({ waveUuid: wave.waveUuid, uuid })
+      const parsedHours = Number.parseInt(inviteExpiryHours, 10)
+      const parsedMaxUses = Number.parseInt(inviteMaxUses, 10)
+      const expiresAt = Number.isFinite(parsedHours) && parsedHours > 0
+        ? new Date(Date.now() + parsedHours * 60 * 60 * 1000).toISOString()
+        : undefined
+      const maxUses = Number.isFinite(parsedMaxUses) && parsedMaxUses > 0
+        ? parsedMaxUses
+        : undefined
+
+      createWaveInvite({ waveUuid: wave.waveUuid, uuid, expiresAt, maxUses })
         .then((invite) => {
           setShareUrl(invite.deepLink)
         })
@@ -53,7 +65,7 @@ const WaveShareModal = ({
         })
         .finally(() => setLoading(false))
     }
-  }, [visible, wave, isOpen, uuid, topOffset])
+  }, [visible, wave, isOpen, uuid, topOffset, inviteExpiryHours, inviteMaxUses])
 
   const handleShare = useCallback(async () => {
     if (!shareUrl) return
@@ -114,6 +126,36 @@ const WaveShareModal = ({
                 {isOpen ? 'Anyone with this link can join' : 'Invite-only — share this invitation'}
               </Text>
             </View>
+
+            {!isOpen && (
+              <View style={styles.optionsPanel}>
+                <Text style={styles.sectionTitle}>Invite Options</Text>
+                <View style={styles.inputRow}>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Expires In (hours)</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={inviteExpiryHours}
+                      onChangeText={setInviteExpiryHours}
+                      keyboardType='number-pad'
+                      placeholder='24'
+                      placeholderTextColor='#999'
+                    />
+                  </View>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Max Uses</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={inviteMaxUses}
+                      onChangeText={setInviteMaxUses}
+                      keyboardType='number-pad'
+                      placeholder='Unlimited'
+                      placeholderTextColor='#999'
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
 
             {/* QR Code Section */}
             <View style={styles.qrSection}>
@@ -277,6 +319,34 @@ const styles = StyleSheet.create({
   },
   optionsContainer: {
     marginBottom: 10
+  },
+  optionsPanel: {
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16
+  },
+  inputRow: {
+    flexDirection: 'row',
+    gap: 10
+  },
+  inputGroup: {
+    flex: 1
+  },
+  inputLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 6
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#e4e4e4',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: '#333',
+    backgroundColor: '#fff'
   },
   optionButton: {
     flexDirection: 'row',
