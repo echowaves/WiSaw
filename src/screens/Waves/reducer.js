@@ -25,6 +25,7 @@ export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection
               splashDate
               freezeDate
               isFrozen
+              freezeMode
               myRole
               joinUrl
               location
@@ -69,6 +70,7 @@ export const createWave = async ({ name, description, uuid, lat, lon, radius }) 
             splashDate
             freezeDate
             isFrozen
+            freezeMode
             myRole
             joinUrl
             location
@@ -101,6 +103,7 @@ export const getWave = async ({ waveUuid, uuid }) => {
             splashDate
             freezeDate
             isFrozen
+            freezeMode
             myRole
             joinUrl
             location
@@ -118,7 +121,7 @@ export const getWave = async ({ waveUuid, uuid }) => {
   }
 }
 
-export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, radius, open, splashDate, freezeDate }) => {
+export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, radius, open, splashDate, freezeDate, freezeMode }) => {
   try {
     const variables = { waveUuid, uuid }
     if (name !== undefined) variables.name = name
@@ -129,11 +132,12 @@ export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, 
     if (open !== undefined) variables.open = open
     if (splashDate !== undefined) variables.splashDate = splashDate
     if (freezeDate !== undefined) variables.freezeDate = freezeDate
+    if (freezeMode !== undefined) variables.freezeMode = freezeMode
 
     const response = await CONST.gqlClient.mutate({
       mutation: gql`
-        mutation updateWave($waveUuid: String!, $uuid: String!, $name: String, $description: String, $lat: Float, $lon: Float, $radius: Int, $open: Boolean, $splashDate: AWSDateTime, $freezeDate: AWSDateTime) {
-          updateWave(waveUuid: $waveUuid, uuid: $uuid, name: $name, description: $description, lat: $lat, lon: $lon, radius: $radius, open: $open, splashDate: $splashDate, freezeDate: $freezeDate) {
+        mutation updateWave($waveUuid: String!, $uuid: String!, $name: String, $description: String, $lat: Float, $lon: Float, $radius: Int, $open: Boolean, $splashDate: AWSDateTime, $freezeDate: AWSDateTime, $freezeMode: WaveFreezeMode) {
+          updateWave(waveUuid: $waveUuid, uuid: $uuid, name: $name, description: $description, lat: $lat, lon: $lon, radius: $radius, open: $open, splashDate: $splashDate, freezeDate: $freezeDate, freezeMode: $freezeMode) {
             waveUuid
             name
             description
@@ -144,6 +148,7 @@ export const updateWave = async ({ waveUuid, uuid, name, description, lat, lon, 
             splashDate
             freezeDate
             isFrozen
+            freezeMode
             myRole
             joinUrl
             location

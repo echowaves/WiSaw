@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   View,
   Text,
@@ -38,6 +38,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   // Settings state
   const [isOpen, setIsOpen] = useState(false)
   const [isFrozen, setIsFrozen] = useState(false)
+  const [freezeMode, setFreezeMode] = useState('AUTO')
   const [splashDate, setSplashDate] = useState(null)
   const [freezeDate, setFreezeDate] = useState(null)
 
@@ -48,6 +49,14 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   const [radiusMiles, setRadiusMiles] = useState(DEFAULT_RADIUS_MILES)
   const [addressInput, setAddressInput] = useState('')
 
+  // Compute date-frozen: matches backend logic for gating editable settings
+  const isDateFrozen = useMemo(() => {
+    const now = new Date()
+    if (splashDate && now < splashDate) return true
+    if (freezeDate && now > freezeDate) return true
+    return false
+  }, [splashDate, freezeDate])
+
   // Load current settings via getWave query
   const loadSettings = useCallback(async () => {
     setLoading(true)
@@ -55,6 +64,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       const wave = await getWave({ waveUuid, uuid })
       setIsOpen(wave.open === true)
       setIsFrozen(wave.isFrozen === true)
+      setFreezeMode(wave.freezeMode || 'AUTO')
       setSplashDate(wave.splashDate ? new Date(wave.splashDate) : null)
       setFreezeDate(wave.freezeDate ? new Date(wave.freezeDate) : null)
 
@@ -190,6 +200,21 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     }
   }
 
+  const handleFreezeModeChange = async (mode) => {
+    if (mode === freezeMode) return
+    setSaving(true)
+    try {
+      const result = await updateWave({ waveUuid, uuid, freezeMode: mode })
+      setFreezeMode(mode)
+      setIsFrozen(result.isFrozen === true)
+      Toast.show({ type: 'success', text1: `Freeze mode set to ${mode === 'AUTO' ? 'Auto' : mode === 'FROZEN' ? 'Frozen' : 'Unlocked'}` })
+    } catch (error) {
+      Toast.show({ type: 'error', text1: 'Error updating freeze mode', text2: error.message })
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleUseMyLocation = async () => {
     if (locationState.status !== 'ready' || !locationState.coords) {
       Alert.alert('Location Unavailable', 'Your device location is not available. Please enable location services.')
@@ -274,7 +299,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
         <View style={styles.frozenNotice}>
           <MaterialCommunityIcons name='snowflake' size={16} color='#60A5FA' />
           <Text style={styles.frozenNoticeText}>
-            Wave is frozen. Set a future freeze date to unfreeze.
+            Wave is frozen. Change freeze mode or set a future freeze date to unfreeze.
           </Text>
         </View>
       )}
@@ -294,7 +319,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
           <Switch
             value={isOpen}
             onValueChange={handleToggleOpen}
-            disabled={saving || isFrozen}
+            disabled={saving || isDateFrozen}
             trackColor={{ false: theme.INTERACTIVE_BORDER, true: CONST.MAIN_COLOR }}
           />
         </View>
@@ -321,9 +346,9 @@ const WaveSettings = ({ waveUuid, waveName }) => {
                     mode='date'
                     display={Platform.OS === 'ios' ? 'compact' : 'default'}
                     onChange={handleSplashDateChange}
-                    disabled={saving || isFrozen}
+                    disabled={saving || isDateFrozen}
                   />
-                  <TouchableOpacity onPress={clearSplashDate} disabled={saving || isFrozen} style={styles.clearButton}>
+                  <TouchableOpacity onPress={clearSplashDate} disabled={saving || isDateFrozen} style={styles.clearButton}>
                     <MaterialCommunityIcons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
                   </TouchableOpacity>
                 </>
@@ -331,7 +356,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
               : (
                 <TouchableOpacity
                   onPress={handleSetSplashDate}
-                  disabled={saving || isFrozen}
+                  disabled={saving || isDateFrozen}
                   style={[styles.setDateButton, { backgroundColor: theme.INTERACTIVE_BACKGROUND, borderColor: theme.INTERACTIVE_BORDER }]}
                 >
                   <Text style={[styles.setDateText, { color: CONST.MAIN_COLOR }]}>Set Date</Text>
@@ -382,6 +407,55 @@ const WaveSettings = ({ waveUuid, waveName }) => {
         </View>
       </View>
 
+      {/* Freeze Mode */}
+      <View style={[styles.section, { backgroundColor: theme.CARD_BACKGROUND }]}>
+        <View style={styles.rowLabel}>
+          <MaterialCommunityIcons name='snowflake' size={20} color={theme.TEXT_PRIMARY} />
+          <View style={styles.labelText}>
+            <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>Freeze Mode</Text>
+            <Text style={[styles.settingDescription, { color: theme.TEXT_SECONDARY }]}>
+              Override automatic freeze behavior
+            </Text>
+          </View>
+        </View>
+        <View style={styles.freezeModeRow}>
+          {[
+            { value: 'AUTO', label: 'Auto', icon: 'autorenew' },
+            { value: 'FROZEN', label: 'Frozen', icon: 'snowflake' },
+            { value: 'UNFROZEN', label: 'Unlocked', icon: 'lock-open-variant-outline' }
+          ].map((mode) => (
+            <TouchableOpacity
+              key={mode.value}
+              onPress={() => handleFreezeModeChange(mode.value)}
+              disabled={saving}
+              style={[
+                styles.freezeModeButton,
+                {
+                  backgroundColor: freezeMode === mode.value
+                    ? theme.INTERACTIVE_PRIMARY
+                    : theme.INTERACTIVE_BACKGROUND,
+                  borderColor: theme.INTERACTIVE_BORDER
+                }
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={mode.icon}
+                size={16}
+                color={freezeMode === mode.value ? '#FFFFFF' : CONST.MAIN_COLOR}
+              />
+              <Text
+                style={[
+                  styles.freezeModeText,
+                  { color: freezeMode === mode.value ? '#FFFFFF' : CONST.MAIN_COLOR }
+                ]}
+              >
+                {mode.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
       {/* Location */}
       <View style={[styles.section, { backgroundColor: theme.CARD_BACKGROUND }]}>
         <View style={styles.rowLabel}>
@@ -400,7 +474,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
 
         <TouchableOpacity
           onPress={handleUseMyLocation}
-          disabled={saving || isFrozen}
+          disabled={saving || isDateFrozen}
           style={[styles.locationButton, { backgroundColor: CONST.MAIN_COLOR }]}
         >
           <MaterialCommunityIcons name='crosshairs-gps' size={16} color='#fff' />
@@ -416,7 +490,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
             onChangeText={setAddressInput}
             onSubmitEditing={handleAddressSubmit}
             returnKeyType='search'
-            editable={!saving && !isFrozen}
+            editable={!saving && !isDateFrozen}
           />
         </View>
 
@@ -435,7 +509,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
               onSlidingComplete={handleRadiusSave}
               minimumTrackTintColor={CONST.MAIN_COLOR}
               maximumTrackTintColor={theme.INTERACTIVE_BORDER}
-              disabled={saving || isFrozen}
+              disabled={saving || isDateFrozen}
             />
           </View>
         )}
@@ -514,6 +588,27 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4
+  },
+  freezeModeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    gap: 4
+  },
+  freezeModeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 6
+  },
+  freezeModeText: {
+    fontSize: 13,
+    fontWeight: '600'
   },
   locationDisplay: {
     fontSize: 14,
