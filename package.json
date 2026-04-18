@@ -12,6 +12,7 @@
     "build-android-for-simulator": "rm -rf android && npx expo run:android",
     "build:android-for-device": "eas build -p android --profile development",
     "build:ios-for-device": "eas build -p ios --profile development",
+    "build:ios-for-device-locally": "npx expo run:ios --device",
     "clear": "npm cache clean --force",
     "reset:simulator": "xcrun simctl erase all",
     "android": "expo run:android",
