@@ -19,9 +19,6 @@ const SecretInputField = ({
       marginBottom: 16
     },
     passwordToggle: {
-      position: 'absolute',
-      right: 12,
-      top: 12,
       padding: 8
     }
   })

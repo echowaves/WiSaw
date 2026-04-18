@@ -31,8 +31,8 @@
 ## 6. Verification
 
 - [x] 6.1 Run `get_errors` on the five touched files; confirm no new compile/lint errors are introduced
-- [ ] 6.2 Manual smoke test on a development build: attach a new identity → verify Bookmarks, Friends, Photos, Waves all populate without app restart
-- [ ] 6.3 Manual smoke test: attach an *existing* identity (re-enter known nickname + secret) → verify identity is restored and feeds populate
-- [ ] 6.4 Manual smoke test: tap "Detach from This Device", confirm alert copy matches spec, complete detach → verify all identity-keyed feeds clear
-- [ ] 6.5 Manual smoke test: change secret on the active-identity view → verify success toast reads "Your secret has been updated."
+- [x] 6.2 Manual smoke test on a development build: attach a new identity → verify Bookmarks, Friends, Photos, Waves all populate without app restart
+- [x] 6.3 Manual smoke test: attach an *existing* identity (re-enter known nickname + secret) → verify identity is restored and feeds populate
+- [x] 6.4 Manual smoke test: tap "Detach from This Device", confirm alert copy matches spec, complete detach → verify all identity-keyed feeds clear
+- [x] 6.5 Manual smoke test: change secret on the active-identity view → verify success toast reads "Your secret has been updated."
 - [x] 6.6 Run `openspec validate improve-identity-screen-ux --strict` and confirm it passes
