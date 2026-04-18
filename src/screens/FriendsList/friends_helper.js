@@ -131,12 +131,10 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
       mutation: gql`
         mutation acceptFriendshipRequest($friendshipUuid: String!, $uuid: String!) {
           acceptFriendshipRequest(friendshipUuid: $friendshipUuid, uuid: $uuid) {
-            friendship {
-              createdAt
-              friendshipUuid
-              uuid1
-              uuid2
-            }
+            createdAt
+            friendshipUuid
+            uuid1
+            uuid2
           }
         }
       `,
@@ -146,7 +144,7 @@ export const confirmFriendship = async ({ friendshipUuid, uuid }) => {
       }
     })
 
-    const { friendship } = result.data.acceptFriendshipRequest
+    const friendship = result.data.acceptFriendshipRequest
     return { friendship }
   } catch (error) {
     // eslint-disable-next-line no-console
