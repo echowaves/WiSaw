@@ -21,11 +21,15 @@ The waves reducer SHALL export a `getWave` function that executes the GraphQL qu
 - **THEN** the query SHALL use `fetchPolicy: 'network-only'` to bypass Apollo cache
 
 ### Requirement: WaveSettings loads via getWave query
-The WaveSettings `loadSettings` function SHALL use the `getWave` query instead of `updateWave` to load the current wave state.
+The WaveSettings `loadSettings` function SHALL use the `getWave` query and populate `freezeMode` state in addition to existing fields.
 
-#### Scenario: Loading settings for a non-frozen wave
-- **WHEN** WaveSettings opens for a wave that is not frozen
-- **THEN** `loadSettings` SHALL call `getWave({ waveUuid, uuid })` and populate `isOpen`, `isFrozen`, `splashDate`, `freezeDate`, `location`, and `radius` state from the response
+#### Scenario: Loading settings for a wave with freeze mode
+- **WHEN** WaveSettings opens for a wave
+- **THEN** `loadSettings` SHALL call `getWave({ waveUuid, uuid })` and populate `isOpen`, `isFrozen`, `freezeMode`, `splashDate`, `freezeDate`, `location`, and `radius` state from the response
+
+#### Scenario: Loading settings for a wave without freeze mode
+- **WHEN** WaveSettings opens for a wave that does not have a `freezeMode` field (backward compatibility)
+- **THEN** `loadSettings` SHALL default `freezeMode` to `"AUTO"`
 
 #### Scenario: Loading settings for a frozen wave
 - **WHEN** WaveSettings opens for a wave that is frozen (`isFrozen === true`)
