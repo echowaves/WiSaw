@@ -136,7 +136,7 @@ const SecretScreen = () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       Toast.show({
         text1: 'Success! 🎉',
-        text2: 'Your identity has been secured.',
+        text2: nickNameEntered ? 'Your secret has been updated.' : 'Identity attached to this device.',
         topOffset: toastTopOffset,
         type: 'success'
       })
@@ -231,12 +231,12 @@ const SecretScreen = () => {
 
   const handleReset = async () => {
     Alert.alert(
-      'Reset Your Identity?',
-      'Because we never store any personal information on our servers, there is no way to recover a lost secret. Make sure you have your current secret written down before proceeding.\n\nThis will disconnect your current identity from this phone.',
+      'Detach Identity from This Device?',
+      'This removes your identity from this device only. Your nickname and secret still work — you can re-attach here or on any other device anytime, as long as you remember them.\n\nIf you forget your nickname or secret, no one can recover them — including us.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Reset',
+          text: 'Detach',
           style: 'destructive',
           onPress: async () => {
             await reducer.resetSecret({ topOffset: toastTopOffset })
@@ -244,8 +244,8 @@ const SecretScreen = () => {
             await resetFields()
             emitIdentityChange()
             Toast.show({
-              text1: 'Secret reset',
-              text2: 'enter new Secret',
+              text1: 'Identity detached',
+              text2: 'Enter your nickname and secret to re-attach',
               topOffset: toastTopOffset
             })
           }
@@ -362,8 +362,8 @@ const SecretScreen = () => {
                 <View style={{ height: 12 }} />
 
                 <ActionRow
-                  icon='redo'
-                  label='Reset Identity'
+                  icon='unlink'
+                  label='Detach from This Device'
                   onPress={handleReset}
                   destructive
                   theme={theme}
@@ -409,9 +409,9 @@ const SecretScreen = () => {
               <View style={styles.creationIconContainer}>
                 <FontAwesome5 name='user-shield' size={40} color='#EA5E3D' />
               </View>
-              <Text style={styles.creationTitle}>Create Your Anonymous Identity</Text>
+              <Text style={styles.creationTitle}>Attach Identity to This Device</Text>
               <Text style={styles.creationSubtitle}>
-                We never store any personal information on our servers. Your secret is the only way to access your identity — write it down and keep it safe.
+                Enter a nickname and secret. New here? We’ll create your identity. Returning on a new device? We’ll reconnect you to your existing one — same nickname and secret work anywhere.
               </Text>
             </View>
 
@@ -454,10 +454,10 @@ const SecretScreen = () => {
             </View>
 
             <Button
-              title={isSubmitting ? 'Creating...' : 'Create Identity'}
+              title={isSubmitting ? 'Attaching...' : 'Attach Identity'}
               icon={
                 <FontAwesome5
-                  name={isSubmitting ? 'hourglass' : 'user-shield'}
+                  name={isSubmitting ? 'hourglass' : 'link'}
                   size={18}
                   color='white'
                   style={{ marginRight: 8 }}

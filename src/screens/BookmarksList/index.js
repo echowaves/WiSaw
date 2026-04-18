@@ -37,6 +37,7 @@ import useCameraCapture from '../PhotosList/hooks/useCameraCapture'
 
 import * as Haptics from 'expo-haptics'
 import QuickActionsModal from '../../components/QuickActionsModal'
+import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 
 const FOOTER_HEIGHT = 90
 
@@ -155,6 +156,14 @@ const BookmarksList = () => {
       reload()
     }
   }, [netAvailable, uuid])
+
+  // Reload when identity is attached or detached
+  React.useEffect(() => {
+    const unsubscribe = subscribeToIdentityChange(() => {
+      reload()
+    })
+    return unsubscribe
+  }, [reload])
 
   const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
 

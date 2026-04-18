@@ -37,7 +37,7 @@ const PrivacyNoticeCard = ({ theme }) => {
         <Text style={styles.title}>Your Privacy is Protected</Text>
       </View>
       <Text style={styles.text}>
-        {'• No personal information is stored on our servers\n• Your secret is the only key to your identity\n• Use a strong, unique secret you\'ll remember\n• Lost secrets cannot be recovered — this is how we protect your privacy'}
+        {'• No personal info on our servers — your nickname and secret are your identity\n• The same nickname + secret works on any device, anywhere\n• Forget your nickname or secret and no one can recover it — including us\n• Detach anytime; your identity isn\'t deleted, just removed from this device'}
       </Text>
     </View>
   )

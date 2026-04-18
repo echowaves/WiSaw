@@ -7,17 +7,17 @@ const CARDS = [
   {
     icon: 'shield-alt',
     title: 'Zero Personal Data',
-    body: 'We never store your email, phone number, or any personal information on our servers. Your identity exists only on your device.'
+    body: 'We never store your email, phone number, or any personal information on our servers. Your identity exists only as a nickname-and-secret pair you control.'
   },
   {
     icon: 'key',
-    title: 'Your Secret = Your Key',
-    body: 'Your secret is the only way to access your identity. It is never stored in plain text — only you know it.'
+    title: 'Your Secret Travels With You',
+    body: 'Use the same nickname and secret on any device to attach your identity. We don’t track devices — only the nickname and secret match.'
   },
   {
     icon: 'exclamation-triangle',
-    title: 'No Recovery Possible',
-    body: 'Because we have no personal information, we have no way to identify you. If you lose your secret, your identity cannot be recovered — by anyone.'
+    title: 'Only You Can Restore It',
+    body: 'Since we don’t know who you are, only your nickname and secret unlock your identity. Write them somewhere safe — if either is lost, the identity is unreachable forever.'
   }
 ]
 
@@ -36,7 +36,7 @@ const PrivacyExplainerView = ({ theme, onDismiss }) => {
         </View>
         <Text style={styles.title}>Privacy by Design</Text>
         <Text style={styles.subtitle}>
-          Before you create your identity, here is how we protect your privacy.
+          Before you attach your identity, here is how we protect your privacy.
         </Text>
       </View>
 

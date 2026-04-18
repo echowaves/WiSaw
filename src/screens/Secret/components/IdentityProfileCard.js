@@ -65,7 +65,7 @@ const IdentityProfileCard = ({ nickName, theme }) => {
       <Text style={styles.nickName}>{nickName}</Text>
       <View style={styles.statusBadge}>
         <View style={styles.statusDot} />
-        <Text style={styles.statusText}>Identity active</Text>
+        <Text style={styles.statusText}>Attached to this device</Text>
       </View>
     </View>
   )
