@@ -296,7 +296,6 @@ function IdentityDrawerLabel ({ color, focused }) {
         marginLeft: -10,
         textTransform: 'capitalize'
       }}
-      numberOfLines={1}
     >
       {hasIdentity ? nickName : 'Set Up Identity'}
     </Text>

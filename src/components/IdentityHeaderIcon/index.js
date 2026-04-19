@@ -76,7 +76,6 @@ const IdentityHeaderIcon = () => {
                 />
                 <Text
                   style={[styles.popoverLabel, { color: theme.TEXT_PRIMARY }]}
-                  numberOfLines={1}
                 >
                   {hasIdentity ? nickName : 'Set Up Identity'}
                 </Text>
@@ -119,7 +118,7 @@ const styles = StyleSheet.create({
   popover: {
     position: 'absolute',
     left: 16,
-    minWidth: 180,
+    minWidth: 220,
     borderRadius: 12,
     borderWidth: 1,
     shadowOffset: { width: 0, height: 4 },
