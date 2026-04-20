@@ -77,7 +77,7 @@ function syncToEas (vars) {
         ` --name ${key}` +
         ` --value ${JSON.stringify(value)}` +
         ' --environment production' +
-        ' --visibility plaintext' +
+        ' --visibility sensitive' +
         ' --force' +
         ' --non-interactive',
         { stdio: 'pipe' }
