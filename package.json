@@ -1,8 +1,8 @@
 {
   "name": "wisaw",
   "version": "7.5.3",
-  "buildNumber": "588",
-  "versionCode": 588,
+  "buildNumber": "589",
+  "versionCode": 589,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",
@@ -17,7 +17,7 @@
     "reset:simulator": "xcrun simctl erase all",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "build": "source .env && eas build",
+    "build": "source .env && node scripts/sync-eas-env.js && eas build",
     "publish:prod": "source .env && eas update --branch production",
     "lint": "npx ts-standard",
     "lint:fix": "npx ts-standard --fix"

@@ -8,8 +8,19 @@ import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
 // import { getMainDefinition } from '@apollo/client/utilities'
 
 import Constants from 'expo-constants'
+import { Alert } from 'react-native'
 
 export const { API_URI, API_KEY, PRIVATE_IMG_HOST } = Constants.expoConfig.extra
+
+// Startup diagnostic: detect missing API configuration early
+if (!API_URI || !API_KEY) {
+  console.error('API configuration missing', { API_URI: API_URI || '(empty)', API_KEY: API_KEY ? '(set)' : '(empty)' })
+  Alert.alert(
+    'Configuration Error',
+    'The app cannot connect to the server because API configuration is missing. This is a build configuration issue — please contact the developer.',
+    [{ text: 'OK' }]
+  )
+}
 // alert(JSON.stringify({ API_URI, API_KEY }))
 // const { API_URI, API_KEY } = process.env
 // console.log({ API_URI, API_KEY })
