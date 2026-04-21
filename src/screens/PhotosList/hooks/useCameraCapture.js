@@ -81,15 +81,15 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
     try {
       const cameraPermission = await checkPermission({
         permissionFunction: ImagePicker.requestCameraPermissionsAsync,
-        alertHeader: 'Do you want to take photo with wisaw?',
-        alertBody: "Why don't you enable photo permission?"
+        alertHeader: 'Camera Access',
+        alertBody: 'WiSaw needs camera access to capture and share photos. You can enable it in Settings.'
       })
 
       if (cameraPermission === 'granted') {
         const photoAlbomPermission = await checkPermission({
           permissionFunction: ImagePicker.requestMediaLibraryPermissionsAsync,
-          alertHeader: 'Do you want to save photo on your device?',
-          alertBody: "Why don't you enable the permission?",
+          alertHeader: 'Photo Library Access',
+          alertBody: 'WiSaw needs photo library access to save your captured photos. You can enable it in Settings.',
           permissionFunctionArgument: true
         })
 

@@ -23,12 +23,12 @@ export const TANDC_POINTS = [
   'Photos you capture are saved to your album and shared to the global WiSaw feed.',
   'People nearby can discover your photos in real time.',
   "You can explore what others are sharing around you as soon as it's posted.",
-  'Abusive or inappropriate photos can be removed immediately and disappear for everyone.',
-  'The community does not tolerate objectionable content or abusive behavior.',
-  'Repeat offenders will be removed from WiSaw by the community.'
+  'All content is reviewed by automated AI systems, community reports, and human moderators. Objectionable material may be removed immediately.',
+  'Users whose content is reported 3 times will be blocked from posting new content.',
+  'The community does not tolerate objectionable content or abusive behavior. Repeat offenders will be permanently banned from WiSaw.'
 ]
 
-const FOOTER_NOTE = 'You can revisit these guidelines anytime from Settings.'
+const FOOTER_NOTE = 'You can revisit these terms anytime from Settings.'
 
 export interface TandCModalProps {
   onAccept: () => void
@@ -58,7 +58,7 @@ export default function TandCModal ({
               color={theme.INTERACTIVE_PRIMARY}
               style={styles.heroIcon}
             />
-            <Text style={styles.title}>WiSaw Community Guidelines</Text>
+            <Text style={styles.title}>WiSaw Terms of Use</Text>
             <Text style={styles.subtitle}>{TANDC_DESCRIPTION}</Text>
           </View>
 

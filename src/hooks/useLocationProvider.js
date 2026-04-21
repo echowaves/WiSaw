@@ -166,8 +166,8 @@ export default function useLocationProvider () {
       if (permStatus !== 'granted') {
         setLocation({ status: 'denied', coords: null, accuracy: null })
         Alert.alert(
-          'Location Access Needed',
-          'WiSaw needs your location to show nearby photos.\n\nOn iOS: tap "Open Settings" below.\nOn Mac: open System Settings → Privacy & Security → Location Services and enable WiSaw.',
+          'Location Access',
+          'WiSaw uses your location to show photos from people nearby. Without it, the photo feed and sharing features are unavailable. You can enable location access in Settings.',
           [{ text: 'Open Settings', onPress: () => Linking.openSettings() }, { text: 'OK' }]
         )
         return

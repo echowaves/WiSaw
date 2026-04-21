@@ -568,7 +568,7 @@ const PhotosList = ({ searchFromUrl }) => {
             onPress={() => Linking.openSettings()}
             style={{ backgroundColor: theme.CARD_BACKGROUND, paddingVertical: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: theme.BORDER_LIGHT }}
           >
-            <Text style={{ color: theme.STATUS_ERROR, fontSize: 14, textAlign: 'center' }}>Location access needed — tap to open Settings</Text>
+            <Text style={{ color: theme.STATUS_ERROR, fontSize: 14, textAlign: 'center' }}>Location access is needed to show nearby photos — tap to open Settings</Text>
           </TouchableOpacity>
         )}
         <PendingPhotosBanner
@@ -603,7 +603,7 @@ const PhotosList = ({ searchFromUrl }) => {
               icon='location-on'
               iconType='MaterialIcons'
               title='Location Access Needed'
-              subtitle='WiSaw needs location access to show you photos from your area and let others discover your content.'
+              subtitle='WiSaw uses your location to show photos from people nearby and let others discover your content. You can enable it in Settings.'
               actionText='Enable Location'
               onActionPress={() => Linking.openSettings()}
             />

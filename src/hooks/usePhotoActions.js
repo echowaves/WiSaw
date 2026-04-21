@@ -85,7 +85,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       } else {
         Alert.alert(
           'Report wave content?',
-          'This photo will be sent to wave moderators for review. Continue?',
+          'This photo will be reviewed by moderators and automated systems. Objectionable content will be removed. Continue?',
           [
             { text: 'No', onPress: () => null, style: 'cancel' },
             {
@@ -135,7 +135,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
     } else {
       Alert.alert(
         'Report abusive Photo?',
-        'The user who posted this photo will be banned. Are you sure?',
+        'This report will be reviewed by moderators and automated systems. Users reported 3 times will be blocked from posting new content. Are you sure?',
         [
           { text: 'No', onPress: () => null, style: 'cancel' },
           {
