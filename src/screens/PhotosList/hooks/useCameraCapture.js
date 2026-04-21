@@ -23,6 +23,10 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
     if (status !== 'granted') {
       Alert.alert(alertHeader, alertBody, [
         {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
           text: 'Open Settings',
           onPress: () => {
             Linking.openSettings()

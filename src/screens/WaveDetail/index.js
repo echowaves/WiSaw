@@ -495,6 +495,7 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
       const cameraStatus = await ImagePicker.requestCameraPermissionsAsync()
       if (cameraStatus.status !== 'granted') {
         Alert.alert('Camera Access', 'WiSaw needs camera access to capture photos for this wave. You can enable it in Settings.', [
+          { text: 'Cancel', style: 'cancel' },
           { text: 'Open Settings', onPress: () => Linking.openSettings() }
         ])
         return
@@ -503,6 +504,7 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
       const libraryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync(true)
       if (libraryStatus.status !== 'granted') {
         Alert.alert('Photo Library Access', 'WiSaw needs photo library access to save your captured photos. You can enable it in Settings.', [
+          { text: 'Cancel', style: 'cancel' },
           { text: 'Open Settings', onPress: () => Linking.openSettings() }
         ])
         return
