@@ -198,6 +198,7 @@ const PhotosList = ({ searchFromUrl }) => {
 
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
   const [zeroMoment, setZeroMoment] = useState(0)
+  const [locationDismissed, setLocationDismissed] = useState(false)
 
   const DRIFT_THRESHOLD = 500 // meters
   const showDriftBanner = useMemo(() => {
@@ -598,7 +599,7 @@ const PhotosList = ({ searchFromUrl }) => {
               subtitle="We're finding your location so we can show nearby photos."
             />
           )}
-          {isDenied && (
+          {isDenied && !locationDismissed && (
             <EmptyStateCard
               icon='location-on'
               iconType='MaterialIcons'
@@ -606,6 +607,16 @@ const PhotosList = ({ searchFromUrl }) => {
               subtitle='WiSaw uses your location to show photos from people nearby and let others discover your content. You can enable it in Settings.'
               actionText='Enable Location'
               onActionPress={() => Linking.openSettings()}
+              secondaryActionText='Cancel'
+              onSecondaryActionPress={() => setLocationDismissed(true)}
+            />
+          )}
+          {isDenied && locationDismissed && (
+            <EmptyStateCard
+              icon='location-off'
+              iconType='MaterialIcons'
+              title='Location Unavailable'
+              subtitle='Unable to show nearby photos without location access'
             />
           )}
           {isUnavailable && (

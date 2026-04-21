@@ -168,7 +168,7 @@ export default function useLocationProvider () {
         Alert.alert(
           'Location Access',
           'WiSaw uses your location to show photos from people nearby. Without it, the photo feed and sharing features are unavailable. You can enable location access in Settings.',
-          [{ text: 'Open Settings', onPress: () => Linking.openSettings() }, { text: 'OK' }]
+          [{ text: 'Cancel', style: 'cancel' }, { text: 'Open Settings', onPress: () => Linking.openSettings() }]
         )
         return
       }
