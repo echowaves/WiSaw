@@ -21,8 +21,17 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 #### Scenario: Location permission denied
 - **WHEN** `locationAtom.status` is `denied`
 - **THEN** the feed SHALL display a banner: "Location access needed" with a "Settings" link
-- **THEN** the feed content area SHALL show an empty state card with message explaining location is required and a button to open Settings
+- **THEN** the feed content area SHALL show an empty state card with title "Location Access Needed" and a message explaining location is required
+- **THEN** the card SHALL include a primary action button labeled "Enable Location" that opens device Settings
+- **THEN** the card SHALL include a secondary action button labeled "Cancel"
 - **THEN** the feed SHALL NOT call the geo query
+
+#### Scenario: Location denied and user dismisses empty state
+- **WHEN** `locationAtom.status` is `denied` and the user taps "Cancel" on the empty state card
+- **THEN** the empty state card SHALL transition to a neutral state with the `location-off` icon
+- **THEN** the card SHALL display the message "Unable to show nearby photos without location access"
+- **THEN** the card SHALL NOT display any action buttons
+- **THEN** the dismissed state SHALL be local to the component (resets on remount)
 
 #### Scenario: Feed data flow uses explicit parameters
 - **WHEN** `load()` is called from `reload()`, `submitSearch()`, `handleClearSearch()`, or `handleLoadMore()`
