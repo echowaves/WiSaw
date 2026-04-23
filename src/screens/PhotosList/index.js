@@ -221,22 +221,14 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // Global feed layout config - compact masonry
   const segmentConfig = React.useMemo(() => {
-    const getResponsiveColumns = (baseColumns, largeColumns) => {
-      if (width >= 768) return Math.max(3, largeColumns * 1.3)
-      if (width >= 428) return Math.max(3, largeColumns / 1.3)
-      if (width >= 390) return Math.max(3, baseColumns / 1.3)
-      return Math.max(3, baseColumns / 6)
-    }
-
     return {
       spacing: 5,
-      maxItemsPerRow: getResponsiveColumns(4, 6),
       baseHeight: 100,
       aspectRatioFallbacks: [
         0.56, 0.67, 0.75, 1.0, 1.33, 1.5, 1.78
       ]
     }
-  }, [width])
+  }, [])
 
   // --- Feed loader hook ---
   const {
@@ -490,6 +482,7 @@ const PhotosList = ({ searchFromUrl }) => {
               activeSegment={0}
               photosList={photosList}
               segmentConfig={segmentConfig}
+              columns={{ 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }}
               onScroll={handleScroll}
               masonryRef={masonryRef}
               searchTerm={searchTerm}

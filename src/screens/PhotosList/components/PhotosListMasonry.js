@@ -13,6 +13,8 @@ const SCROLL_THRESHOLD = 200
 const SCROLL_DELTA_MIN = 5
 const INACTIVITY_TIMEOUT = 3000
 
+const FEED_COLUMNS = { 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }
+
 const PhotosListMasonry = ({
   activeSegment,
   photosList,
@@ -36,7 +38,8 @@ const PhotosListMasonry = ({
   expandedItemIds,
   getExpandedHeight,
   toggleExpand,
-  updateExpandedHeight
+  updateExpandedHeight,
+  columns = FEED_COLUMNS
 }) => {
   const prevScrollY = useRef(0)
   const [showFob, setShowFob] = useState(false)
@@ -175,7 +178,7 @@ const PhotosListMasonry = ({
           return photosList
         })()}
         layoutMode='column'
-        columns={2}
+        columns={columns}
         renderItem={renderMasonryItem}
         spacing={segmentConfig.spacing}
         getExtraHeight={getExtraHeight}

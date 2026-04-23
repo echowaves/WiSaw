@@ -17,7 +17,7 @@ The Starred screen SHALL be accessible as a drawer menu item positioned between 
 - **THEN** tapping the item SHALL have no effect
 
 ### Requirement: Starred screen displays watched photos feed
-The Starred screen SHALL display the user's watched/starred photos using the `feedForWatcher` GraphQL query. It SHALL use `useFeedLoader` with `requestWatchedPhotos` as the fetch function. It SHALL NOT require GPS location. It SHALL use the starred-specific layout config (larger tiles, fewer columns, square aspect ratios).
+The Starred screen SHALL display the user's watched/starred photos using the `feedForWatcher` GraphQL query. It SHALL use `useFeedLoader` with `requestWatchedPhotos` as the fetch function. It SHALL NOT require GPS location. It SHALL use the starred-specific layout config (larger tiles, square aspect ratios) and pass a comment-screen column profile (`{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }`) to `PhotosListMasonry` via the `columns` prop.
 
 #### Scenario: Starred screen loads watched photos
 - **WHEN** the user navigates to the Starred screen
@@ -28,6 +28,10 @@ The Starred screen SHALL display the user's watched/starred photos using the `fe
 - **WHEN** the user opens the Starred screen and location is pending or denied
 - **THEN** the feed SHALL load normally using only `uuid`
 - **THEN** no location-related empty states or banners SHALL be shown
+
+#### Scenario: Starred screen uses comment-screen columns
+- **WHEN** the BookmarksList screen renders `PhotosListMasonry`
+- **THEN** it SHALL pass `columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}` to the masonry component
 
 ### Requirement: Starred screen uses AppHeader
 The Starred screen SHALL use the shared `AppHeader` component with a title that includes an Ionicons `bookmark` icon followed by the text "Bookmarks". The icon SHALL use `theme.TEXT_PRIMARY` as its color. The icon and text SHALL be rendered as a `React.ReactNode` passed to AppHeader's `title` prop. The header SHALL support the drawer back button for navigation. It SHALL NOT include segment controls.

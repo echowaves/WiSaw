@@ -64,7 +64,7 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 Removed behavior note: PhotosList search bar keyboard handling has been replaced by the SearchFab component, which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
 
 ### Requirement: Photo viewing interaction
-The photo feed SHALL display photos in a column masonry grid. When a user taps a thumbnail, the photo SHALL expand inline to full grid width showing the complete Photo detail view, instead of navigating to a modal route.
+The photo feed SHALL display photos in a column masonry grid with responsive column counts based on screen width. The PhotosList screen SHALL pass a feed column profile (`{ 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }`) to `PhotosListMasonry` via the `columns` prop. When a user taps a thumbnail, the photo SHALL expand inline to full grid width showing the complete Photo detail view, instead of navigating to a modal route.
 
 #### Scenario: Tap photo in feed
 - **WHEN** user taps a photo thumbnail in the main feed
@@ -77,6 +77,10 @@ The photo feed SHALL display photos in a column masonry grid. When a user taps a
 #### Scenario: Feed scroll position preserved
 - **WHEN** a photo is expanded and then collapsed
 - **THEN** the feed scroll position remains near the collapsed thumbnail's position
+
+#### Scenario: Feed uses responsive columns
+- **WHEN** the PhotosList screen renders `PhotosListMasonry`
+- **THEN** it SHALL pass `columns={{ 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }}` to the masonry component
 
 ### Requirement: Photo feed state management
 The PhotosList screen SHALL use `useFeedLoader` hook for photo array state management instead of inline `useState` and manual event subscriptions. The hook SHALL handle photo freezing, deduplication, pagination, abort control, upload subscriptions, and deletion subscriptions. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext`. The screen SHALL provide a `PhotosListContext` with the `removePhoto` function returned by `useFeedLoader`.

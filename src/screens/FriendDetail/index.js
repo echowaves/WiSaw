@@ -4,8 +4,7 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
-  RefreshControl,
-  useWindowDimensions
+  RefreshControl
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
@@ -76,25 +75,17 @@ const FriendDetail = React.forwardRef((_props, ref) => {
   const [menuVisible, setMenuVisible] = useState(false)
   const [showNamePicker, setShowNamePicker] = useState(false)
 
-  const { width } = useWindowDimensions()
   const theme = getTheme(isDarkMode)
   const toastTopOffset = useToastTopOffset()
 
   // Bookmarked-layout segment config (same as WaveDetail)
   const segmentConfig = useMemo(() => {
-    const getResponsiveColumns = (baseColumns, largeColumns) => {
-      if (width >= 768) return Math.max(3, largeColumns * 1.3)
-      if (width >= 428) return Math.max(3, largeColumns / 1.3)
-      if (width >= 390) return Math.max(3, baseColumns / 1.3)
-      return Math.max(3, baseColumns / 6)
-    }
     return {
       spacing: 8,
-      maxItemsPerRow: getResponsiveColumns(2, 4),
       baseHeight: 200,
       aspectRatioFallbacks: [1.0]
     }
-  }, [width])
+  }, [])
 
   const {
     handleScroll,
@@ -313,6 +304,7 @@ const FriendDetail = React.forwardRef((_props, ref) => {
               activeSegment={1}
               photosList={photos}
               segmentConfig={segmentConfig}
+              columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
               onScroll={handleScroll}
               masonryRef={masonryRef}
               uuid={uuid}
