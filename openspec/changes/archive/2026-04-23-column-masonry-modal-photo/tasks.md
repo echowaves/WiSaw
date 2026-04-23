@@ -55,15 +55,3 @@
 - [x] 8.2 Remove dead expansion-related imports and unused code across all modified files
 - [x] 8.3 Verify no TypeScript or lint errors across all modified files
 
-## 9. Verification
-
-- [ ] 9.1 Verify column masonry layout renders correctly in global feed (segment 0) — photos at natural aspect ratios, 2 columns
-- [ ] 9.2 Verify bookmarked segment (segment 1) shows comment sections below thumbnails with correct height, theme colors, truncated text
-- [ ] 9.3 Verify tapping a thumbnail opens `/photo-detail` modal with full Photo component — image, comments, actions all work
-- [ ] 9.4 Verify closing the modal returns to the grid with scroll position preserved
-- [ ] 9.5 Verify deleting a photo in the modal removes it from the underlying grid
-- [ ] 9.6 Verify ⋮ pill visible and tappable, positioned on image area above comment section
-- [ ] 9.7 Verify long-press opens QuickActionsModal from all screens
-- [ ] 9.8 Verify dark mode renders correctly — comment sections, modal, thumbnails
-- [ ] 9.9 Verify WaveDetail and FriendDetail screens use column masonry and modal navigation
-- [ ] 9.10 Verify scroll-to-top FOB still works in all screens

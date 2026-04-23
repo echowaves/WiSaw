@@ -103,6 +103,13 @@ The system SHALL display a wave's photos in a masonry grid layout using `PhotosL
 - **THEN** pagination SHALL be reset to page 0
 - **THEN** photos SHALL be reloaded from the server
 
+### Requirement: Photo viewing in wave detail
+The wave detail photo feed SHALL use inline expansion for photo detail viewing instead of modal navigation, consistent with the main feed behavior.
+
+#### Scenario: Tap photo in wave detail
+- **WHEN** user taps a photo thumbnail in a wave's photo feed
+- **THEN** the photo expands inline showing full detail
+
 ### Requirement: Wave Detail Footer with Camera
 The system SHALL display a `PhotosListFooter` at the bottom of the Wave Detail screen with camera, video, drawer, and friends buttons. Photos captured from this footer SHALL be automatically tagged to the current wave. The `enqueueCapture` function SHALL be consumed from `UploadContext`.
 

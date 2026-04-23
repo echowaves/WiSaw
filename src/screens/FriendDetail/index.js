@@ -98,7 +98,11 @@ const FriendDetail = React.forwardRef((_props, ref) => {
 
   const {
     handleScroll,
-    masonryRef
+    masonryRef,
+    expandedItemIds,
+    getExpandedHeight,
+    toggleExpand,
+    updateExpandedHeight
   } = usePhotoExpansion()
 
   const quickActionsRef = useRef(null)
@@ -322,6 +326,10 @@ const FriendDetail = React.forwardRef((_props, ref) => {
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
               removePhoto={removePhoto}
+              expandedItemIds={expandedItemIds}
+              getExpandedHeight={getExpandedHeight}
+              toggleExpand={toggleExpand}
+              updateExpandedHeight={updateExpandedHeight}
             />
           </>
           )}

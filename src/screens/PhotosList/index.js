@@ -296,7 +296,11 @@ const PhotosList = ({ searchFromUrl }) => {
   // --- Extracted hooks (depend on values above) ---
   const {
     handleScroll,
-    masonryRef
+    masonryRef,
+    expandedItemIds,
+    getExpandedHeight,
+    toggleExpand,
+    updateExpandedHeight
   } = usePhotoExpansion()
 
   // --- Feed search hook ---
@@ -500,6 +504,10 @@ const PhotosList = ({ searchFromUrl }) => {
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
               removePhoto={removePhoto}
+              expandedItemIds={expandedItemIds}
+              getExpandedHeight={getExpandedHeight}
+              toggleExpand={toggleExpand}
+              updateExpandedHeight={updateExpandedHeight}
             />
           </View>
           <SearchFab

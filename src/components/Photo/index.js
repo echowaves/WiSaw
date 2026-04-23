@@ -479,6 +479,7 @@ const Photo = ({
   refreshKey = 0,
   onHeightMeasured,
   embedded = true,
+  containerWidth: containerWidthProp,
   onRequestEnsureVisible,
   onTriggerSearch
 }) => {
@@ -497,7 +498,7 @@ const Photo = ({
   // Get dynamic safe area and window dimensions
   const insets = useSafeAreaInsets()
   const dimensions = useWindowDimensions()
-  const screenWidth = dimensions.width
+  const screenWidth = containerWidthProp || dimensions.width
   const screenHeight = dimensions.height || 800 // Fallback to reasonable height
 
   // Header offset: use safe area when not embedded
@@ -619,6 +620,8 @@ const Photo = ({
           }, 100) // Small delay to prevent flicker
 
           setPhotoDetails(newPhotoDetails)
+          // Re-measure after content loads so masonry can correct expanded height
+          scheduleHeightRecalc()
         }
       }
     })
@@ -921,6 +924,7 @@ const Photo = ({
                 global.suppressEnsureVisibleUntil = global.suppressEnsureVisibleUntil || new Map()
                 global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
                 setAiTagsCollapsed((v) => !v)
+                // Explicit user toggle: schedule height recalc to grow/shrink expanded item
                 scheduleHeightRecalc()
                 // After layout update, scroll to the header only
                 setTimeout(() => {
@@ -988,6 +992,7 @@ const Photo = ({
                 global.suppressEnsureVisibleUntil = global.suppressEnsureVisibleUntil || new Map()
                 global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
                 setAiTextCollapsed((v) => !v)
+                // Explicit user toggle: schedule height recalc
                 scheduleHeightRecalc()
                 setTimeout(() => {
                   try {
@@ -1054,6 +1059,7 @@ const Photo = ({
                 global.suppressEnsureVisibleUntil = global.suppressEnsureVisibleUntil || new Map()
                 global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
                 setAiModerationCollapsed((v) => !v)
+                // Explicit user toggle: schedule height recalc
                 scheduleHeightRecalc()
                 setTimeout(() => {
                   try {
@@ -1154,7 +1160,7 @@ const Photo = ({
       const containerWidth = screenWidth
 
       return (
-        <View style={styles.imageCardContainer}>
+        <View style={[styles.imageCardContainer, { width: screenWidth, maxWidth: screenWidth }]}>
           <ImageView photo={photo} containerWidth={containerWidth} embedded={embedded} />
         </View>
       )
@@ -1191,14 +1197,18 @@ const Photo = ({
       style={[
         styles.container,
         {
-          paddingTop: !embedded ? headerOffset : 0
+          paddingTop: !embedded ? headerOffset : 0,
+          width: screenWidth,
+          maxWidth: screenWidth,
+          overflow: 'hidden'    // Clip any overflowing content
         }
       ]}
       onLayout={(event) => {
-        // Optional: Report height for debugging or external needs without storing it
-        if (onHeightMeasured) {
+        // Only measure on layout when NOT embedded (normal modal view)
+        // When embedded in masonry, measurements are triggered explicitly via scheduleHeightRecalc()
+        // to avoid feedback loops between onLayout → onHeightMeasured → state change → layout → onLayout...
+        if (onHeightMeasured && !embedded) {
           const { height: measuredHeight } = event.nativeEvent.layout
-          // Always report current height, no state comparison needed
           if (measuredHeight > 0) {
             onHeightMeasured(measuredHeight)
           }
@@ -1252,6 +1262,7 @@ Photo.propTypes = {
   refreshKey: PropTypes.number,
   onHeightMeasured: PropTypes.func,
   embedded: PropTypes.bool,
+  containerWidth: PropTypes.number,
   onRequestEnsureVisible: PropTypes.func,
   onTriggerSearch: PropTypes.func
 }

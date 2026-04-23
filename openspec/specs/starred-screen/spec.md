@@ -87,6 +87,13 @@ The Bookmarks screen SHALL render `PhotosListFooter` at the bottom of the screen
 - **WHEN** the Bookmarks screen is in any state (offline, loading, empty, or has content)
 - **THEN** the footer SHALL be rendered
 
+### Requirement: Photo viewing in bookmarks
+The bookmarks screen SHALL use inline expansion for photo detail viewing instead of modal navigation, consistent with the main feed behavior.
+
+#### Scenario: Tap photo in bookmarks
+- **WHEN** user taps a photo thumbnail in the bookmarks list
+- **THEN** the photo expands inline showing full detail
+
 ### Requirement: Starred screen does not subscribe to upload events
 The Starred screen SHALL NOT subscribe to the upload completion bus. Newly uploaded photos SHALL NOT be prepended to the Starred feed.
 

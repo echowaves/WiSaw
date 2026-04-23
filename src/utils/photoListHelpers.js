@@ -4,6 +4,22 @@
 
 export const COMMENT_SECTION_HEIGHT = 44
 
+// Height estimation constants for inline-expanded photo detail (initial estimate only)
+export const EXPANDED_ACTION_BAR_HEIGHT = 60
+export const EXPANDED_COMMENTS_ESTIMATE = 200
+export const EXPANDED_PADDING = 40
+
+/**
+ * Estimate expanded height for a photo at full grid width.
+ * This is a rough initial estimate — the actual height is measured after first render
+ * and cached for an immediate single relayout correction.
+ */
+export const estimateExpandedHeight = (item, fullWidth) => {
+  const aspectRatio = (item.width && item.height) ? item.width / item.height : 1.0
+  const imageHeight = Math.round(fullWidth / aspectRatio)
+  return imageHeight + EXPANDED_ACTION_BAR_HEIGHT + EXPANDED_COMMENTS_ESTIMATE + EXPANDED_PADDING
+}
+
 const READONLY_PHOTO_FLAG = Symbol.for('wisaw.photo.readonly')
 
 const coerceNumber = (value, fallback = 0) => {

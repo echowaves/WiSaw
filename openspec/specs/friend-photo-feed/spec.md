@@ -62,6 +62,13 @@ The `FriendDetail` screen SHALL accept `friendUuid` and `friendName` from route 
 - **WHEN** a photo is deleted through the quick-actions modal in the friend feed
 - **THEN** the photo SHALL be removed from the local photo list without a full re-fetch
 
+### Requirement: Photo viewing in friend detail
+The friend photo feed SHALL use inline expansion for photo detail viewing instead of modal navigation, consistent with the main feed behavior.
+
+#### Scenario: Tap photo in friend feed
+- **WHEN** user taps a photo thumbnail in a friend's photo feed
+- **THEN** the photo expands inline showing full detail
+
 ### Requirement: Friend detail route and header
 The friend detail screen SHALL be accessible at `app/friendships/[friendUuid].tsx`. The header SHALL display the friend's name as the title. The header SHALL include a back button and a kebab menu button on the right.
 

@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
@@ -15,7 +14,6 @@ import { getTheme } from '../../theme/sharedStyles'
 
 const ImageView = ({ photo, containerWidth, embedded = true }) => {
   const scale = useRef(new Animated.Value(1)).current
-  const navigation = useNavigation()
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const { width: screenWidth } = useWindowDimensions()
@@ -28,20 +26,6 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   const imageWidth = baseWidth
   const imageHeight =
     photo && photo.width && photo.height ? (photo.height * imageWidth) / photo.width : 300 // Fallback height if dimensions not available
-
-  // Debug logging for shared photo details
-  if (!embedded) {
-    console.log('🖼️ ImageView rendering with:', {
-      photoId: photo?.id,
-      imgUrl: photo?.imgUrl,
-      thumbUrl: photo?.thumbUrl,
-      photoWidth: photo?.width,
-      photoHeight: photo?.height,
-      imageWidth,
-      imageHeight,
-      embedded
-    })
-  }
 
   const onPinchEvent = (event) => {
     router.push({
@@ -71,11 +55,13 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   }
 
   const imageContainerStyle = {
-    width: '100%',
+    width: imageWidth,
+    maxWidth: imageWidth,  // Explicit max, not percentage-based
     height: imageHeight,
     borderRadius: 0,
     overflow: 'hidden',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    alignSelf: 'center'  // Center horizontally if width is constrained
   }
 
   return (

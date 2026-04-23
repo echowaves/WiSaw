@@ -173,7 +173,11 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
   // Shared photo expansion hook (scroll management only)
   const {
     handleScroll,
-    masonryRef
+    masonryRef,
+    expandedItemIds,
+    getExpandedHeight,
+    toggleExpand,
+    updateExpandedHeight
   } = usePhotoExpansion()
 
   const isOwner = myRole === 'owner'
@@ -631,6 +635,10 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
                 onPhotoLongPress={handlePhotoLongPress}
                 theme={theme}
                 removePhoto={removePhoto}
+                expandedItemIds={expandedItemIds}
+                getExpandedHeight={getExpandedHeight}
+                toggleExpand={toggleExpand}
+                updateExpandedHeight={updateExpandedHeight}
               />
             </>
             )}

@@ -63,6 +63,21 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 
 Removed behavior note: PhotosList search bar keyboard handling has been replaced by the SearchFab component, which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
 
+### Requirement: Photo viewing interaction
+The photo feed SHALL display photos in a column masonry grid. When a user taps a thumbnail, the photo SHALL expand inline to full grid width showing the complete Photo detail view, instead of navigating to a modal route.
+
+#### Scenario: Tap photo in feed
+- **WHEN** user taps a photo thumbnail in the main feed
+- **THEN** the photo expands inline in the masonry grid showing full detail (image, actions, comments)
+
+#### Scenario: Collapse expanded photo
+- **WHEN** user taps the collapse control on an expanded photo
+- **THEN** the photo collapses back to thumbnail size and the grid resumes normal column flow
+
+#### Scenario: Feed scroll position preserved
+- **WHEN** a photo is expanded and then collapsed
+- **THEN** the feed scroll position remains near the collapsed thumbnail's position
+
 ### Requirement: Photo feed state management
 The PhotosList screen SHALL use `useFeedLoader` hook for photo array state management instead of inline `useState` and manual event subscriptions. The hook SHALL handle photo freezing, deduplication, pagination, abort control, upload subscriptions, and deletion subscriptions. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext`. The screen SHALL provide a `PhotosListContext` with the `removePhoto` function returned by `useFeedLoader`.
 

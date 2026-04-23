@@ -1,13 +1,13 @@
 /* global __DEV__ */
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { View } from 'react-native'
-import { router } from 'expo-router'
-import { useSetAtom } from 'jotai'
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import { TouchableOpacity, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 import ExpandableThumb from '../../../components/ExpandableThumb'
+import Photo from '../../../components/Photo'
+import PhotosListContext from '../../../contexts/PhotosListContext'
 import ScrollToTopFob from '../../../components/ScrollToTopFob'
 import { validateFrozenPhotosList, COMMENT_SECTION_HEIGHT } from '../../../utils/photoListHelpers'
-import { photoDetailAtom } from '../../../state'
 
 const SCROLL_THRESHOLD = 200
 const SCROLL_DELTA_MIN = 5
@@ -32,12 +32,27 @@ const PhotosListMasonry = ({
   FOOTER_HEIGHT,
   onPhotoLongPress,
   theme,
-  removePhoto
+  removePhoto,
+  expandedItemIds,
+  getExpandedHeight,
+  toggleExpand,
+  updateExpandedHeight
 }) => {
   const prevScrollY = useRef(0)
   const [showFob, setShowFob] = useState(false)
   const inactivityTimer = useRef(null)
-  const setPhotoDetail = useSetAtom(photoDetailAtom)
+
+  const removePhotoContext = useMemo(() => ({ removePhoto: removePhoto || (() => {}) }), [removePhoto])
+
+  // The masonry library overwrites item.width and item.height with layout dimensions.
+  // We need to preserve the original photo dimensions for aspect-ratio calculations.
+  const photosById = useMemo(() => {
+    const map = new Map()
+    for (const p of photosList || []) {
+      if (p?.id) map.set(p.id, p)
+    }
+    return map
+  }, [photosList])
 
   useEffect(() => {
     return () => {
@@ -74,11 +89,6 @@ const PhotosListMasonry = ({
     }
   }, [masonryRef])
 
-  const handlePhotoPress = useCallback((item) => {
-    setPhotoDetail({ photo: item, removePhoto: removePhoto || (() => {}) })
-    router.push('/photo-detail')
-  }, [setPhotoDetail, removePhoto])
-
   const getExtraHeight = useCallback((item) => {
     if (activeSegment !== 1) return 0
     const hasComments = (item.commentsCount || 0) > 0
@@ -90,27 +100,64 @@ const PhotosListMasonry = ({
 
   // Render function for individual masonry items
   const renderMasonryItem = useCallback(
-    ({ item, index, dimensions, extraHeight }) => {
+    ({ item, index, dimensions, extraHeight, isExpanded }) => {
+      // The masonry mutates item.width/height to be the layout dims; restore originals from photosList
+      const originalPhoto = photosById.get(item.id) || item
+      if (isExpanded) {
+        return (
+          <PhotosListContext.Provider value={removePhotoContext}>
+            <View style={{ width: dimensions.width, overflow: 'hidden' }}>
+              <TouchableOpacity
+                onPress={() => toggleExpand(item.id)}
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  zIndex: 10,
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  borderRadius: 16,
+                  width: 32,
+                  height: 32,
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
+                <Ionicons name='chevron-up' size={20} color='white' />
+              </TouchableOpacity>
+              <Photo
+                photo={originalPhoto}
+                embedded
+                containerWidth={dimensions.width}
+                onHeightMeasured={(h) => updateExpandedHeight(item.id, h)}
+              />
+            </View>
+          </PhotosListContext.Provider>
+        )
+      }
+
       const shouldShowComments = activeSegment === 1
 
       return (
         <ExpandableThumb
-          item={item}
+          item={originalPhoto}
           index={index}
           thumbWidth={dimensions.width}
           thumbHeight={dimensions.height}
           activeSegment={activeSegment}
           showComments={shouldShowComments}
           extraHeight={extraHeight || 0}
-          onPress={handlePhotoPress}
+          onPress={() => toggleExpand(item.id)}
           onLongPress={onPhotoLongPress}
         />
       )
     },
     [
       activeSegment,
-      handlePhotoPress,
-      onPhotoLongPress
+      toggleExpand,
+      updateExpandedHeight,
+      onPhotoLongPress,
+      removePhotoContext,
+      photosById
     ]
   )
 
@@ -132,6 +179,8 @@ const PhotosListMasonry = ({
         renderItem={renderMasonryItem}
         spacing={segmentConfig.spacing}
         getExtraHeight={getExtraHeight}
+        expandedItemIds={expandedItemIds}
+        getExpandedHeight={getExpandedHeight}
         keyExtractor={(item) => `${item.id}`}
         onScroll={handleInternalScroll}
         onEndReached={() => {
@@ -158,10 +207,11 @@ const PhotosListMasonry = ({
           reload()
         }}
         scrollEventThrottle={16}
-        initialNumToRender={8}
-        maxToRenderPerBatch={8}
-        windowSize={9}
-        updateCellsBatchingPeriod={32}
+        initialNumToRender={30}
+        maxToRenderPerBatch={30}
+        windowSize={99}
+        removeClippedSubviews={false}
+        updateCellsBatchingPeriod={16}
         style={{
           ...styles.container,
           flex: 1
@@ -171,7 +221,6 @@ const PhotosListMasonry = ({
           paddingBottom: FOOTER_HEIGHT + 20
         }}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews
       />
       {theme && <ScrollToTopFob visible={showFob} onPress={handleScrollToTop} theme={theme} />}
     </View>

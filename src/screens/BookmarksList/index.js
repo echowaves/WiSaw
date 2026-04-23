@@ -114,7 +114,11 @@ const BookmarksList = () => {
   // --- Photo expansion ---
   const {
     handleScroll,
-    masonryRef
+    masonryRef,
+    expandedItemIds,
+    getExpandedHeight,
+    toggleExpand,
+    updateExpandedHeight
   } = usePhotoExpansion()
 
   // --- Feed search ---
@@ -221,6 +225,10 @@ const BookmarksList = () => {
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
               removePhoto={removePhoto}
+              expandedItemIds={expandedItemIds}
+              getExpandedHeight={getExpandedHeight}
+              toggleExpand={toggleExpand}
+              updateExpandedHeight={updateExpandedHeight}
             />
           </View>
           <SearchFab
