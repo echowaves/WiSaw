@@ -24,7 +24,6 @@ import {
 } from 'react-native'
 
 import * as Linking from 'expo-linking'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as Constants from 'expo-constants'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
@@ -193,8 +192,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const isFocused = useIsFocused()
   const hasOpenedTandcRef = useRef(false)
 
-  const { width, height } = useWindowDimensions()
-  const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
 
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
   const [zeroMoment, setZeroMoment] = useState(0)
@@ -297,17 +295,9 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // --- Extracted hooks (depend on values above) ---
   const {
-    expandedPhotoIds,
-    setExpandedPhotoIds,
-    isPhotoExpanded,
-    handlePhotoToggle,
-    getCalculatedDimensions,
-    updatePhotoHeight,
-    ensureItemVisible,
     handleScroll,
-    masonryRef,
-    justCollapsedId
-  } = usePhotoExpansion({ width, height, insets, segmentConfig })
+    masonryRef
+  } = usePhotoExpansion()
 
   // --- Feed search hook ---
   const {
@@ -323,7 +313,7 @@ const PhotosList = ({ searchFromUrl }) => {
     onSearch: (term) => reload(term),
     onClear: () => reload(''),
     searchFromUrl,
-    onBeforeSearch: () => setExpandedPhotoIds(new Set())
+    onBeforeSearch: () => {}
   })
 
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({
@@ -498,25 +488,18 @@ const PhotosList = ({ searchFromUrl }) => {
               segmentConfig={segmentConfig}
               onScroll={handleScroll}
               masonryRef={masonryRef}
-              getCalculatedDimensions={getCalculatedDimensions}
-              isPhotoExpanded={isPhotoExpanded}
               searchTerm={searchTerm}
               uuid={uuid}
-              expandedPhotoIds={expandedPhotoIds}
-              onToggleExpand={handlePhotoToggle}
-              updatePhotoHeight={updatePhotoHeight}
-              onRequestEnsureVisible={ensureItemVisible}
               onTriggerSearch={triggerSearch}
               loading={loading}
               stopLoading={stopLoading}
               onLoadMore={handleLoadMore}
-              setExpandedPhotoIds={setExpandedPhotoIds}
               reload={reload}
               styles={styles}
               FOOTER_HEIGHT={FOOTER_HEIGHT}
-              justCollapsedId={justCollapsedId}
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
+              removePhoto={removePhoto}
             />
           </View>
           <SearchFab

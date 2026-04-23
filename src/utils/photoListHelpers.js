@@ -2,6 +2,8 @@
  * Utility functions for safely handling photosList items to prevent unauthorized mutations
  */
 
+export const COMMENT_SECTION_HEIGHT = 44
+
 const READONLY_PHOTO_FLAG = Symbol.for('wisaw.photo.readonly')
 
 const coerceNumber = (value, fallback = 0) => {
@@ -108,52 +110,6 @@ export const createFrozenPhoto = (photo) => {
   }
 
   return readOnlyPhoto
-}
-
-/**
- * Calculate responsive dimensions for photos based on expansion state
- * @param {Object} photo - Photo object with width, height properties
- * @param {boolean} isExpanded - Whether the photo is in expanded state
- * @param {number} screenWidth - Available screen width for expanded photos
- * @param {number} maxItemsPerRow - Maximum items per row for responsive sizing
- * @param {number} spacing - Spacing between items
- * @returns {Object} - Calculated dimensions { width, height }
- */
-export const calculatePhotoDimensions = (
-  photo,
-  isExpanded,
-  screenWidth,
-  maxItemsPerRow = 4,
-  spacing = 5
-) => {
-  // Removed debug logging to reduce console noise
-
-  if (!isExpanded) {
-    // For collapsed state, calculate width based on desired columns to fit more items per row
-    const totalSpacing = spacing * (maxItemsPerRow - 1)
-    const availableWidth = screenWidth - totalSpacing
-    const collapsedWidth = availableWidth / maxItemsPerRow
-
-    const aspectRatio = photo.width && photo.height ? photo.width / photo.height : 1
-
-    return {
-      width: collapsedWidth,
-      height: collapsedWidth / aspectRatio
-    }
-  }
-
-  // For expanded state, let flex layout handle the height dynamically
-  // Return initial image dimensions and let the Photo component size itself
-  const aspectRatio = photo.width && photo.height ? photo.width / photo.height : 1
-  const expandedWidth = screenWidth
-  const imageHeight = expandedWidth / aspectRatio
-
-  // Removed debug logging to reduce console noise
-
-  return {
-    width: expandedWidth,
-    height: imageHeight // Initial height, but flex layout will adjust as needed
-  }
 }
 
 /**

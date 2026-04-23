@@ -12,7 +12,6 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 
 import { router, useNavigation } from 'expo-router'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { requestWatchedPhotos } from '../PhotosList/reducer'
 
@@ -62,8 +61,7 @@ const BookmarksList = () => {
     toastTopOffset: 100
   })
 
-  const { width, height } = useWindowDimensions()
-  const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
 
   // Bookmarks layout config — larger tiles, square aspect ratios
   const segmentConfig = useMemo(() => {
@@ -115,17 +113,9 @@ const BookmarksList = () => {
 
   // --- Photo expansion ---
   const {
-    expandedPhotoIds,
-    setExpandedPhotoIds,
-    isPhotoExpanded,
-    handlePhotoToggle,
-    getCalculatedDimensions,
-    updatePhotoHeight,
-    ensureItemVisible,
     handleScroll,
-    masonryRef,
-    justCollapsedId
-  } = usePhotoExpansion({ width, height, insets, segmentConfig })
+    masonryRef
+  } = usePhotoExpansion()
 
   // --- Feed search ---
   const {
@@ -140,7 +130,7 @@ const BookmarksList = () => {
   } = useFeedSearch({
     onSearch: (term) => reload(term),
     onClear: () => reload(''),
-    onBeforeSearch: () => setExpandedPhotoIds(new Set())
+    onBeforeSearch: () => {}
   })
 
   // Long-press handler
@@ -219,25 +209,18 @@ const BookmarksList = () => {
               segmentConfig={segmentConfig}
               onScroll={handleScroll}
               masonryRef={masonryRef}
-              getCalculatedDimensions={getCalculatedDimensions}
-              isPhotoExpanded={isPhotoExpanded}
               searchTerm={searchTerm}
               uuid={uuid}
-              expandedPhotoIds={expandedPhotoIds}
-              onToggleExpand={handlePhotoToggle}
-              updatePhotoHeight={updatePhotoHeight}
-              onRequestEnsureVisible={ensureItemVisible}
               onTriggerSearch={triggerSearch}
               loading={loading}
               stopLoading={stopLoading}
               onLoadMore={handleLoadMore}
-              setExpandedPhotoIds={setExpandedPhotoIds}
               reload={reload}
               styles={{}}
               FOOTER_HEIGHT={FOOTER_HEIGHT}
-              justCollapsedId={justCollapsedId}
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
+              removePhoto={removePhoto}
             />
           </View>
           <SearchFab

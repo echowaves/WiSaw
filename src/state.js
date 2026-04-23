@@ -28,6 +28,8 @@ export const friendFeedSortDirection = atom('desc')
 
 export const locationAtom = atom({ status: 'pending', coords: null, accuracy: null })
 
+export const photoDetailAtom = atom(null)
+
 export const netAvailable = atom(true)
 
 export const wavesCount = atom(null)

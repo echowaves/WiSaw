@@ -27,7 +27,6 @@ import {
   createFrozenPhoto
 } from '../../utils/photoListHelpers'
 import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import ActionMenu from '../../components/ActionMenu'
 import NamePicker from '../../components/NamePicker'
 import QuickActionsModal from '../../components/QuickActionsModal'
@@ -77,8 +76,7 @@ const FriendDetail = React.forwardRef((_props, ref) => {
   const [menuVisible, setMenuVisible] = useState(false)
   const [showNamePicker, setShowNamePicker] = useState(false)
 
-  const { width, height } = useWindowDimensions()
-  const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
   const theme = getTheme(isDarkMode)
   const toastTopOffset = useToastTopOffset()
 
@@ -99,19 +97,15 @@ const FriendDetail = React.forwardRef((_props, ref) => {
   }, [width])
 
   const {
-    expandedPhotoIds,
-    setExpandedPhotoIds,
-    isPhotoExpanded,
-    handlePhotoToggle,
-    getCalculatedDimensions,
-    updatePhotoHeight,
-    ensureItemVisible,
     handleScroll,
-    masonryRef,
-    justCollapsedId
-  } = usePhotoExpansion({ width, height, insets, segmentConfig })
+    masonryRef
+  } = usePhotoExpansion()
 
   const quickActionsRef = useRef(null)
+
+  const removePhoto = useCallback((photoId) => {
+    setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+  }, [])
 
   const handlePhotoLongPress = useCallback((photo) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
@@ -156,7 +150,6 @@ const FriendDetail = React.forwardRef((_props, ref) => {
     setPageNumber(0)
     setStopLoading(false)
     setNoMoreData(false)
-    setExpandedPhotoIds(new Set())
     const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
     loadPhotos(0, newBatch, true)
@@ -318,25 +311,17 @@ const FriendDetail = React.forwardRef((_props, ref) => {
               segmentConfig={segmentConfig}
               onScroll={handleScroll}
               masonryRef={masonryRef}
-              getCalculatedDimensions={getCalculatedDimensions}
-              isPhotoExpanded={isPhotoExpanded}
               uuid={uuid}
-              expandedPhotoIds={expandedPhotoIds}
-              onToggleExpand={handlePhotoToggle}
-              updatePhotoHeight={updatePhotoHeight}
-              onRequestEnsureVisible={ensureItemVisible}
               onEndReached={handleLoadMore}
               onRefresh={handleRefresh}
               loading={loading}
               stopLoading={stopLoading}
-              setPageNumber={setPageNumber}
-              setExpandedPhotoIds={setExpandedPhotoIds}
               reload={handleRefresh}
               styles={{}}
               FOOTER_HEIGHT={0}
-              justCollapsedId={justCollapsedId}
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
+              removePhoto={removePhoto}
             />
           </>
           )}

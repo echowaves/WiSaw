@@ -1,10 +1,13 @@
 /* global __DEV__ */
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
+import { router } from 'expo-router'
+import { useSetAtom } from 'jotai'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 import ExpandableThumb from '../../../components/ExpandableThumb'
 import ScrollToTopFob from '../../../components/ScrollToTopFob'
-import { validateFrozenPhotosList } from '../../../utils/photoListHelpers'
+import { validateFrozenPhotosList, COMMENT_SECTION_HEIGHT } from '../../../utils/photoListHelpers'
+import { photoDetailAtom } from '../../../state'
 
 const SCROLL_THRESHOLD = 200
 const SCROLL_DELTA_MIN = 5
@@ -16,31 +19,25 @@ const PhotosListMasonry = ({
   segmentConfig,
   onScroll,
   masonryRef,
-  getCalculatedDimensions,
-  isPhotoExpanded,
   searchTerm,
   uuid,
-  expandedPhotoIds,
-  onToggleExpand,
-  updatePhotoHeight,
-  onRequestEnsureVisible,
   onTriggerSearch,
   onEndReached,
   onRefresh,
   loading,
   stopLoading,
   onLoadMore,
-  setExpandedPhotoIds,
   reload,
   styles,
   FOOTER_HEIGHT,
-  justCollapsedId,
   onPhotoLongPress,
-  theme
+  theme,
+  removePhoto
 }) => {
   const prevScrollY = useRef(0)
   const [showFob, setShowFob] = useState(false)
   const inactivityTimer = useRef(null)
+  const setPhotoDetail = useSetAtom(photoDetailAtom)
 
   useEffect(() => {
     return () => {
@@ -76,71 +73,43 @@ const PhotosListMasonry = ({
       }
     }
   }, [masonryRef])
+
+  const handlePhotoPress = useCallback((item) => {
+    setPhotoDetail({ photo: item, removePhoto: removePhoto || (() => {}) })
+    router.push('/photo-detail')
+  }, [setPhotoDetail, removePhoto])
+
+  const getExtraHeight = useCallback((item) => {
+    if (activeSegment !== 1) return 0
+    const hasComments = (item.commentsCount || 0) > 0
+    const hasWatchers = (item.watchersCount || 0) > 0
+    const hasLastComment = item.lastComment && item.lastComment.trim().length > 0
+    if (hasComments || hasWatchers || hasLastComment) return COMMENT_SECTION_HEIGHT
+    return 0
+  }, [activeSegment])
+
   // Render function for individual masonry items
   const renderMasonryItem = useCallback(
-    ({ item, index, dimensions }) => {
-      // Removed debug logging to reduce console noise
-
-      // DEFENSIVE FIX: ExpoMasonryLayout sometimes bypasses getItemDimensions and provides corrupted dimensions
-      // If the calculated dimensions don't match the aspect ratio, recalculate them properly
-      let correctedDimensions = dimensions
-      if (item.width && item.height) {
-        const originalAspectRatio = item.width / item.height
-        const calculatedAspectRatio = dimensions.width / dimensions.height
-        const aspectRatioDifference = Math.abs(originalAspectRatio - calculatedAspectRatio)
-
-        // If aspect ratios differ significantly (more than 5%), recalculate
-        if (aspectRatioDifference > 0.05) {
-          const recalculatedDimensions = getCalculatedDimensions(item)
-          // eslint-disable-next-line
-          if (__DEV__) {
-            console.log(
-              `🛠️ DIMENSIONS CORRECTION: Photo ${item.id} had corrupted dimensions ${dimensions.width}x${dimensions.height} (AR: ${calculatedAspectRatio.toFixed(3)}), correcting to ${recalculatedDimensions.width}x${recalculatedDimensions.height} (AR: ${(recalculatedDimensions.width / recalculatedDimensions.height).toFixed(3)})`
-            )
-          }
-          correctedDimensions = recalculatedDimensions
-        }
-      }
-
-      // Use ExpandableThumb for all segments
-      // Show comments overlay only for bookmarked (segment 1) — layout never changes during search
+    ({ item, index, dimensions, extraHeight }) => {
       const shouldShowComments = activeSegment === 1
-      const shouldScrollToTop = item.id === justCollapsedId
 
       return (
         <ExpandableThumb
           item={item}
           index={index}
-          thumbWidth={correctedDimensions.width}
-          thumbHeight={correctedDimensions.height}
-          photosList={photosList}
-          searchTerm={searchTerm}
+          thumbWidth={dimensions.width}
+          thumbHeight={dimensions.height}
           activeSegment={activeSegment}
-          uuid={uuid}
-          isExpanded={isPhotoExpanded(item.id)}
-          onToggleExpand={onToggleExpand}
-          expandedPhotoIds={expandedPhotoIds}
-          updatePhotoHeight={updatePhotoHeight}
-          onRequestEnsureVisible={onRequestEnsureVisible}
           showComments={shouldShowComments}
-          onTriggerSearch={onTriggerSearch}
-          shouldScrollToTop={shouldScrollToTop}
+          extraHeight={extraHeight || 0}
+          onPress={handlePhotoPress}
           onLongPress={onPhotoLongPress}
         />
       )
     },
     [
-      photosList?.length,
-      searchTerm,
       activeSegment,
-      uuid,
-      expandedPhotoIds,
-      onToggleExpand,
-      isPhotoExpanded,
-      updatePhotoHeight,
-      onTriggerSearch,
-      getCalculatedDimensions,
-      justCollapsedId,
+      handlePhotoPress,
       onPhotoLongPress
     ]
   )
@@ -155,29 +124,15 @@ const PhotosListMasonry = ({
           // Validate photos before passing to masonry layout
           if (__DEV__) {
             validateFrozenPhotosList(photosList, 'before masonry render')
-
-            // Removed debug logging to reduce console noise
           }
           return photosList
         })()}
+        layoutMode='column'
+        columns={2}
         renderItem={renderMasonryItem}
         spacing={segmentConfig.spacing}
-        maxItemsPerRow={segmentConfig.maxItemsPerRow}
-        baseHeight={segmentConfig.baseHeight}
-        aspectRatioFallbacks={segmentConfig.aspectRatioFallbacks}
-        keyExtractor={(item) => `${item.id}-${isPhotoExpanded(item.id) ? 'expanded' : 'collapsed'}`}
-        // Calculate dimensions dynamically based on expansion state
-        getItemDimensions={(item, calculatedDimensions) => {
-          // Use our unified dimension calculation
-          const dynamicDimensions = getCalculatedDimensions(item)
-
-          // Removed debug logging to reduce console noise
-
-          return {
-            width: dynamicDimensions.width,
-            height: dynamicDimensions.height
-          }
-        }}
+        getExtraHeight={getExtraHeight}
+        keyExtractor={(item) => `${item.id}`}
         onScroll={handleInternalScroll}
         onEndReached={() => {
           // Load more when user reaches the end
@@ -190,8 +145,6 @@ const PhotosListMasonry = ({
           }
         }}
         onEndReachedThreshold={0.2}
-        // Remove viewability-driven state updates to reduce re-renders
-        // Add validation callback to detect mutations after masonry operations
         onLayout={() => {
           if (__DEV__) {
             // Validate photos are still frozen after layout operations
@@ -202,8 +155,6 @@ const PhotosListMasonry = ({
         }}
         refreshing={false}
         onRefresh={() => {
-          // Collapse all expanded photos before refreshing
-          setExpandedPhotoIds(new Set())
           reload()
         }}
         scrollEventThrottle={16}
@@ -213,11 +164,11 @@ const PhotosListMasonry = ({
         updateCellsBatchingPeriod={32}
         style={{
           ...styles.container,
-          flex: 1 // Allow the scroll area to take full available height
+          flex: 1
         }}
         contentContainerStyle={{
-          paddingTop: 5, // Match left/right margins
-          paddingBottom: FOOTER_HEIGHT + 20 // Add padding to ensure content is visible above footer
+          paddingTop: 5,
+          paddingBottom: FOOTER_HEIGHT + 20
         }}
         showsVerticalScrollIndicator={false}
         removeClippedSubviews

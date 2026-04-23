@@ -1173,17 +1173,13 @@ const Photo = ({
 
   // Render close button for embedded mode
   const renderCloseButton = () => {
-    if (!embedded) return null
+    if (embedded) return null
 
     return (
       <CloseButton
         style={{ right: 20 }}
         onPress={() => {
-          if (global.expandableThumbMinimize) {
-            global.expandableThumbMinimize(photo?.id)
-          } else {
-            router.back()
-          }
+          router.back()
         }}
       />
     )

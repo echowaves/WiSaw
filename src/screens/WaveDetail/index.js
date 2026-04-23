@@ -43,7 +43,6 @@ import {
   createFrozenPhoto
 } from '../../utils/photoListHelpers'
 import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import PhotosListContext from '../../contexts/PhotosListContext'
@@ -112,8 +111,7 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
   const [shareModalVisible, setShareModalVisible] = useState(false)
 
   const quickActionsRef = useRef(null)
-  const { width, height } = useWindowDimensions()
-  const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
   const theme = getTheme(isDarkMode)
   const toastTopOffset = useToastTopOffset()
 
@@ -172,19 +170,11 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
     }
   }, [width])
 
-  // Shared photo expansion hook (scroll-to-visible, state, toggle)
+  // Shared photo expansion hook (scroll management only)
   const {
-    expandedPhotoIds,
-    setExpandedPhotoIds,
-    isPhotoExpanded,
-    handlePhotoToggle,
-    getCalculatedDimensions,
-    updatePhotoHeight,
-    ensureItemVisible,
     handleScroll,
-    masonryRef,
-    justCollapsedId
-  } = usePhotoExpansion({ width, height, insets, segmentConfig })
+    masonryRef
+  } = usePhotoExpansion()
 
   const isOwner = myRole === 'owner'
 
@@ -266,7 +256,6 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
     setPageNumber(0)
     setStopLoading(false)
     setNoMoreData(false)
-    setExpandedPhotoIds(new Set())
     const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
     loadPhotos(0, newBatch, true)
@@ -631,25 +620,17 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
                 segmentConfig={segmentConfig}
                 onScroll={handleScroll}
                 masonryRef={masonryRef}
-                getCalculatedDimensions={getCalculatedDimensions}
-                isPhotoExpanded={isPhotoExpanded}
                 uuid={uuid}
-                expandedPhotoIds={expandedPhotoIds}
-                onToggleExpand={handlePhotoToggle}
-                updatePhotoHeight={updatePhotoHeight}
-                onRequestEnsureVisible={ensureItemVisible}
                 onEndReached={handleLoadMore}
                 onRefresh={handleRefresh}
                 loading={loading}
                 stopLoading={stopLoading}
-                setPageNumber={setPageNumber}
-                setExpandedPhotoIds={setExpandedPhotoIds}
                 reload={handleRefresh}
                 styles={{}}
                 FOOTER_HEIGHT={FOOTER_HEIGHT}
-                justCollapsedId={justCollapsedId}
                 onPhotoLongPress={handlePhotoLongPress}
                 theme={theme}
+                removePhoto={removePhoto}
               />
             </>
             )}
