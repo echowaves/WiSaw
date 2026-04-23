@@ -1,9 +1,19 @@
+const path = require('path')
 const { getDefaultConfig } = require('@expo/metro-config')
+
+// Local expo-masonry-layout for development
+const masonryLayoutRoot = path.resolve(__dirname, '../expo-masonry-layout')
 
 const config = getDefaultConfig(__dirname, {
   // Enable CSS support
   isCSSEnabled: true
 })
+
+// Watch the local masonry layout package so Metro can resolve it
+config.watchFolders = [masonryLayoutRoot]
+
+// Ensure react/react-native resolve from WiSaw's node_modules, not the library's
+config.resolver.nodeModulesPaths = [path.resolve(__dirname, 'node_modules')]
 
 // Performance optimizations
 config.transformer.minifierConfig = {
