@@ -85,7 +85,7 @@ const PhotosListMasonry = ({
     setShowFob(false)
     if (masonryRef?.current) {
       if (typeof masonryRef.current.scrollToOffset === 'function') {
-        masonryRef.current.scrollToOffset({ offset: 0, animated: true })
+        masonryRef.current.scrollToOffset(0, { animated: true })
       } else if (typeof masonryRef.current.scrollTo === 'function') {
         masonryRef.current.scrollTo({ y: 0, animated: true })
       }
@@ -184,6 +184,7 @@ const PhotosListMasonry = ({
         getExtraHeight={getExtraHeight}
         expandedItemIds={expandedItemIds}
         getExpandedHeight={getExpandedHeight}
+        autoScrollOnExpand={{ animated: true, viewOffset: 8 }}
         keyExtractor={(item) => `${item.id}`}
         onScroll={handleInternalScroll}
         onEndReached={() => {

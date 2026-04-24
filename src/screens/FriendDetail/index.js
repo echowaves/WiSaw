@@ -88,7 +88,6 @@ const FriendDetail = React.forwardRef((_props, ref) => {
   }, [])
 
   const {
-    handleScroll,
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
@@ -305,7 +304,6 @@ const FriendDetail = React.forwardRef((_props, ref) => {
               photosList={photos}
               segmentConfig={segmentConfig}
               columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
-              onScroll={handleScroll}
               masonryRef={masonryRef}
               uuid={uuid}
               onEndReached={handleLoadMore}

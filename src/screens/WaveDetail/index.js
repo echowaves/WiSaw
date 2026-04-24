@@ -161,9 +161,8 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
     }
   }, [])
 
-  // Shared photo expansion hook (scroll management only)
+  // Shared photo expansion hook
   const {
-    handleScroll,
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
@@ -614,7 +613,6 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
                 photosList={photos}
                 segmentConfig={segmentConfig}
                 columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
-                onScroll={handleScroll}
                 masonryRef={masonryRef}
                 uuid={uuid}
                 onEndReached={handleLoadMore}

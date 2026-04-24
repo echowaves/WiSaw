@@ -66,14 +66,11 @@ export default function usePhotoExpansion () {
     setLayoutVersion((v) => v + 1)
   }, [])
 
-  const handleScroll = useCallback((event) => {}, [])
-
   return {
     expandedItemIds,
     getExpandedHeight,
     toggleExpand,
     updateExpandedHeight,
-    handleScroll,
     masonryRef
   }
 }

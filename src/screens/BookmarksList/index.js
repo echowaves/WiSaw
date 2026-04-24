@@ -105,7 +105,6 @@ const BookmarksList = () => {
 
   // --- Photo expansion ---
   const {
-    handleScroll,
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
@@ -204,7 +203,6 @@ const BookmarksList = () => {
               photosList={photosList}
               segmentConfig={segmentConfig}
               columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
-              onScroll={handleScroll}
               masonryRef={masonryRef}
               searchTerm={searchTerm}
               uuid={uuid}

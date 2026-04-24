@@ -287,7 +287,6 @@ const PhotosList = ({ searchFromUrl }) => {
 
   // --- Extracted hooks (depend on values above) ---
   const {
-    handleScroll,
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
@@ -483,7 +482,6 @@ const PhotosList = ({ searchFromUrl }) => {
               photosList={photosList}
               segmentConfig={segmentConfig}
               columns={{ 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }}
-              onScroll={handleScroll}
               masonryRef={masonryRef}
               searchTerm={searchTerm}
               uuid={uuid}
