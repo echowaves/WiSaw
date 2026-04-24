@@ -106,6 +106,14 @@ export default function useFeedLoader (fetchFn, {
           )
           return deduplicatedList
         })
+        // Auto-page in search mode: continue loading next pages without
+        // waiting for onEndReached (which may not fire in column-mode masonry)
+        if (effectiveSearchTerm && effectiveSearchTerm.length > 0 && !noMoreData && nextPage != null) {
+          if (!signal?.aborted) {
+            await load(fetchParams, effectiveSearchTerm, signal, nextPage)
+          }
+          return
+        }
       }
     }
 
