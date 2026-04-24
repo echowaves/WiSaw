@@ -21,7 +21,7 @@ The system SHALL render a floating action button (FAB) with a magnifying glass i
 - **THEN** the FAB SHALL NOT be rendered
 
 ### Requirement: FAB expands into inline search bar
-The system SHALL animate the FAB into an inline search bar when tapped. When collapsed, the FAB SHALL display a magnifying glass icon anchored at the left edge. When expanding, the FAB button SHALL animate from the left edge to the right edge of the bar, and the icon SHALL change to a send icon. The search input field SHALL fade in on the left side. The clear button (✕) SHALL only appear when the input text is non-empty. The animation SHALL use Reanimated's `withSpring` for a natural feel.
+The system SHALL animate the FAB into an inline search bar when tapped. When collapsed, the FAB SHALL display a magnifying glass icon anchored at the left edge. When expanding, the FAB button SHALL animate from the left edge to the right edge of the bar, and the icon SHALL change to a send icon. The search input field SHALL fade in on the left side. The clear button (✕) SHALL appear whenever the search bar is expanded, regardless of whether any text has been entered. The animation SHALL use Reanimated's `withSpring` for a natural feel.
 
 #### Scenario: User taps FAB to expand
 - **WHEN** the user taps the collapsed FAB
@@ -37,9 +37,9 @@ The system SHALL animate the FAB into an inline search bar when tapped. When col
 
 #### Scenario: Clear button visibility
 - **WHEN** the search bar is expanded and the input text is empty
-- **THEN** the clear button (✕) SHALL NOT be visible
+- **THEN** the clear button (✕) SHALL be visible between the TextInput and the FAB button
 - **WHEN** the search bar is expanded and the input text is non-empty
-- **THEN** the clear button (✕) SHALL appear between the TextInput and the FAB button
+- **THEN** the clear button (✕) SHALL be visible between the TextInput and the FAB button
 
 #### Scenario: User taps FAB icon when expanded
 - **WHEN** the user taps the FAB button (send icon) while the search bar is expanded
@@ -123,7 +123,7 @@ Both `feedByDate` and `feedForWatcher` GraphQL queries SHALL include `nextPage` 
 - **THEN** the abort signal SHALL be checked before each recursive `load()` call
 
 ### Requirement: Search dismissal clears and collapses
-The system SHALL dismiss search mode when the user taps the clear button (✕), collapsing the search bar back to the FAB and reloading the segment without a search filter.
+The system SHALL dismiss search mode when the user taps the clear button (✕), collapsing the search bar back to the FAB and reloading the segment without a search filter. This SHALL work whether or not text has been entered.
 
 #### Scenario: User taps clear button
 - **WHEN** the user taps the ✕ button in the expanded search bar

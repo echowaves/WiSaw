@@ -41,11 +41,15 @@ The system SHALL use the Photo component's `onHeightMeasured` callback to update
 - **THEN** no re-trigger occurs (prevents infinite relayout loops)
 
 ### Requirement: Expanded item renders Photo component
-The expanded masonry item SHALL render `<Photo embedded={true} onHeightMeasured={updateCache} />` wrapped in a `PhotosListContext.Provider` that provides `removePhoto`.
+The expanded masonry item SHALL render `<Photo embedded={true} onHeightMeasured={updateCache} />` wrapped in a `PhotosListContext.Provider` that provides `removePhoto`. The collapse control SHALL use a close (X) icon to visually distinguish it from the scroll-to-top FOB.
 
 #### Scenario: Photo component receives correct props
 - **WHEN** an item is expanded in the masonry grid
 - **THEN** the `renderItem` callback receives `isExpanded: true` and renders the full Photo component with `embedded={true}`
+
+#### Scenario: Collapse button uses close icon
+- **WHEN** an item is expanded in the masonry grid
+- **THEN** the collapse button SHALL display a `close` (X) icon instead of `chevron-up`
 
 #### Scenario: Photo context provides removePhoto
 - **WHEN** the expanded Photo component deletes a photo
