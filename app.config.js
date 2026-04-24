@@ -18,6 +18,7 @@ module.exports = {
       'expo-font',
       'expo-video',
       '@react-native-community/datetimepicker',
+      './plugins/withEntryFile',
       [
         'expo-build-properties',
         {
