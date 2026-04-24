@@ -121,7 +121,7 @@ const SearchFab = ({
             returnKeyType='search'
             style={[styles.input, { color: theme.TEXT_PRIMARY }]}
           />
-          {searchTerm.length > 0 && (
+          {isExpanded && (
             <Pressable
               onPress={onClearSearch}
               style={[styles.clearButton, { backgroundColor: theme.INTERACTIVE_SECONDARY }]}

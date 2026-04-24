@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons'
 const FOB_SIZE = 40
 
 const ScrollToTopFob = ({ visible, onPress, theme }) => {
-  const translateX = useSharedValue(80)
+  const translateX = useSharedValue(-80)
   const opacity = useSharedValue(0)
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const ScrollToTopFob = ({ visible, onPress, theme }) => {
       translateX.value = withSpring(0, { damping: 18, stiffness: 120 })
       opacity.value = withSpring(1, { damping: 18, stiffness: 120 })
     } else {
-      translateX.value = withTiming(80, { duration: 200 })
+      translateX.value = withTiming(-80, { duration: 200 })
       opacity.value = withTiming(0, { duration: 200 })
     }
   }, [visible])
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     top: 12,
-    right: 12,
+    left: 12,
     zIndex: 10
   },
   button: {

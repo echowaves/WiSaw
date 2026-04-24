@@ -125,7 +125,7 @@ const PhotosListMasonry = ({
                   alignItems: 'center'
                 }}
               >
-                <Ionicons name='chevron-up' size={20} color='white' />
+                <Ionicons name='close' size={20} color='white' />
               </TouchableOpacity>
               <Photo
                 photo={originalPhoto}
