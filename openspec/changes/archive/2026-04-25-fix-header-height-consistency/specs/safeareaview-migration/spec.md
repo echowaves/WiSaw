@@ -1,9 +1,4 @@
-## Purpose
-This specification defines expected user-visible behavior, constraints, and validation scenarios for safeareaview migration in WiSaw.
-
-## ADDED Requirements
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: SafeAreaView uses react-native-safe-area-context
 All usages of `SafeAreaView` SHALL import from `react-native-safe-area-context` instead of the core `react-native` package.

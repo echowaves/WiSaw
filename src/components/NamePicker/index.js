@@ -217,7 +217,6 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
               />
             </TouchableOpacity>
           }
-          safeTopOnly
         />
 
         <KeyboardAwareScrollView

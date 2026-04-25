@@ -2,14 +2,12 @@ import { Ionicons } from '@expo/vector-icons'
 import { useAtom } from 'jotai'
 import React from 'react'
 import {
-  Platform,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
@@ -17,18 +15,15 @@ interface AppHeaderProps {
   title: string | React.ReactNode
   onBack?: () => void
   rightSlot?: React.ReactNode
-  safeTopOnly?: boolean
 }
 
 export default function AppHeader({
   title,
   onBack,
   rightSlot,
-  safeTopOnly = false
 }: AppHeaderProps) {
   const [isDark] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDark)
-  const insets = useSafeAreaInsets()
 
   const styles = StyleSheet.create({
     safeArea: {
@@ -45,12 +40,11 @@ export default function AppHeader({
       elevation: 3
     },
     contentContainer: {
+      height: 60,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 16,
-      paddingVertical: 12,
-      minHeight: 56
     },
     leftArea: {
       flex: 0,
@@ -91,21 +85,8 @@ export default function AppHeader({
     }
   })
 
-  const Outer = safeTopOnly ? View : (SafeAreaView as any)
-
-  // On Android, add explicit status bar padding since SafeAreaView doesn't handle it properly
-  const androidStatusBarHeight = Platform.OS === 'android' ? (StatusBar.currentHeight || 0) : 0
-
-  const outerProps: any = safeTopOnly
-    ? {
-      style: [styles.safeArea, { paddingTop: insets.top }]
-    }
-    : {
-      style: [styles.safeArea, Platform.OS === 'android' && { paddingTop: androidStatusBarHeight }]
-    }
-
   return (
-    <Outer {...outerProps}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.contentContainer}>
           <View style={styles.leftArea}>
@@ -143,6 +124,6 @@ export default function AppHeader({
           </View>
         </View>
       </View>
-    </Outer>
+    </SafeAreaView>
   )
 }
