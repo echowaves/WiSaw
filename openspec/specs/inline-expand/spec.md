@@ -19,11 +19,12 @@ The photo feed SHALL use `expo-masonry-layout`'s native `expandedItemIds` prop t
 - **THEN** the previously expanded item collapses and the newly tapped item expands
 
 ### Requirement: Expanded height estimation
-The system SHALL provide a `getExpandedHeight` callback that returns a deterministic pixel height for expanded items. The initial estimate SHALL be computed from the photo's aspect ratio and a fixed UI chrome height (action bar + comments estimate + padding).
+The system SHALL provide a `getExpandedHeight` callback that returns a deterministic pixel height for expanded items. The initial estimate SHALL be computed from the photo's aspect ratio and a fixed UI chrome height (action bar + comments estimate + padding). The estimate SHALL account for the outer card wrapper's vertical chrome (margins and borders) when the photo is rendered in embedded mode.
 
 #### Scenario: Initial height calculation
 - **WHEN** `getExpandedHeight` is called for an item with no cached measured height
-- **THEN** it returns `imageHeight(aspectRatio, fullWidth) + ACTION_BAR_HEIGHT + COMMENTS_ESTIMATE + PADDING`
+- **THEN** it returns `imageHeight(aspectRatio, fullWidth) + ACTION_BAR_HEIGHT + COMMENTS_ESTIMATE + PADDING + CARD_CHROME_HEIGHT`
+- **THEN** `CARD_CHROME_HEIGHT` SHALL account for the outer card's `marginVertical` and `borderWidth` (approximately 18px)
 
 #### Scenario: Cached height used on re-expansion
 - **WHEN** `getExpandedHeight` is called for an item that was previously expanded and measured
@@ -40,8 +41,7 @@ The system SHALL use the Photo component's `onHeightMeasured` callback to update
 - **WHEN** the measured height matches the cached height
 - **THEN** no re-trigger occurs (prevents infinite relayout loops)
 
-### Requirement: Expanded item renders Photo component
-The expanded masonry item SHALL render `<Photo embedded={true} onHeightMeasured={updateCache} />` wrapped in a `PhotosListContext.Provider` that provides `removePhoto`. The collapse control SHALL use a close (X) icon to visually distinguish it from the scroll-to-top FOB.
+### Requirement: Expanded item renders Photo component The close button SHALL be positioned as a floating overlay above the outer card wrapper so it is not clipped by the card's `overflow: 'hidden'`.
 
 #### Scenario: Photo component receives correct props
 - **WHEN** an item is expanded in the masonry grid
@@ -53,6 +53,11 @@ The expanded masonry item SHALL render `<Photo embedded={true} onHeightMeasured=
 
 #### Scenario: Photo context provides removePhoto
 - **WHEN** the expanded Photo component deletes a photo
+- **THEN** `removePhoto` from `PhotosListContext` removes the photo from the feed list
+
+#### Scenario: Close button not clipped by card
+- **WHEN** the expanded photo renders inside a card with `overflow: 'hidden'`
+- **THEN** the close button SHALL be positioned outside (above) the card wrapper in the z-order so it remains fully visible and tappable
 - **THEN** `removePhoto` from `PhotosListContext` removes the photo from the feed list
 
 ### Requirement: Expansion state management hook
