@@ -43,7 +43,7 @@ import { subscribeToPhotoRefresh, emitPhotoRefresh } from '../../events/photoRef
 
 import ImageView from './ImageView'
 
-const VideoSection = ({ photo, screenWidth, screenHeight, isDevBuild, imageCardContainerStyle }) => {
+const VideoSection = ({ photo, screenWidth, screenHeight, isDevBuild, imageCardContainerStyle, embedded }) => {
   const videoPlayer = useVideoPlayer(photo.videoUrl, (player) => {
     player.loop = true
   })
@@ -95,7 +95,7 @@ const VideoSection = ({ photo, screenWidth, screenHeight, isDevBuild, imageCardC
         style={{
           width: '100%',
           height: videoHeight,
-          borderRadius: 20,
+          borderRadius: embedded ? 0 : 20,
           overflow: 'hidden'
         }}
       >
@@ -1242,6 +1242,7 @@ const Photo = ({
         screenHeight={height}
         isDevBuild={isDevBuild}
         imageCardContainerStyle={styles.imageCardContainer}
+        embedded={embedded}
       />
     )
   }
