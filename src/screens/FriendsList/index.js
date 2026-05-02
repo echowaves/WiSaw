@@ -6,26 +6,26 @@ import * as Haptics from 'expo-haptics'
 
 import { Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 
-import { Ionicons } from '@expo/vector-icons'
+import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Toast from 'react-native-toast-message'
 
-import * as CONST from '../../consts'
 import * as STATE from '../../state'
 
 import ActionMenu from '../../components/ActionMenu'
+import AppHeader from '../../components/AppHeader'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import FriendCard from '../../components/FriendCard'
 import FriendsExplainerView from '../../components/FriendsExplainerView'
-import LinearProgress from '../../components/ui/LinearProgress'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import NamePicker from '../../components/NamePicker'
 import PendingFriendsCard from '../../components/PendingFriendsCard'
 import ShareOptionsModal from '../../components/ShareOptionsModal'
-import { subscribeToAddFriend } from '../../events/friendAddBus'
+import { emitAddFriend, subscribeToAddFriend } from '../../events/friendAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
-import { getTheme } from '../../theme/sharedStyles'
+import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
+import { ScreenIconTitle } from '../../theme/screenIcons'
 import * as friendsHelper from './friends_helper'
 
 const FriendsList = () => {
@@ -33,8 +33,8 @@ const FriendsList = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
   const [netAvailable] = useAtom(STATE.netAvailable)
-  const [sortBy] = useAtom(STATE.friendsSortBy)
-  const [sortDirection] = useAtom(STATE.friendsSortDirection)
+  const [sortBy, setSortBy] = useAtom(STATE.friendsSortBy)
+  const [sortDirection, setSortDirection] = useAtom(STATE.friendsSortDirection)
 
   const theme = getTheme(isDarkMode)
   const insets = useSafeAreaInsets()
@@ -89,6 +89,7 @@ const FriendsList = () => {
   const [loading, setLoading] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
   const [menuFriend, setMenuFriend] = useState(null)
+  const [sortMenuVisible, setSortMenuVisible] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
@@ -104,6 +105,62 @@ const FriendsList = () => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
     setShowNamePicker(true)
   }, [])
+
+  const sortOptions = [
+    { label: 'Alphabetical A-Z', sortBy: 'alphabetical', sortDirection: 'asc', icon: 'sort-alphabetical-ascending' },
+    { label: 'Alphabetical Z-A', sortBy: 'alphabetical', sortDirection: 'desc', icon: 'sort-alphabetical-descending' },
+    { label: 'Recently Added', sortBy: 'recentlyAdded', sortDirection: 'desc', icon: 'sort-descending' }
+  ]
+
+  const sortMenuItems = sortOptions.map((opt, i) => ({
+    key: `sort-${i}`,
+    icon: opt.icon,
+    label: opt.label,
+    checked: opt.sortBy === sortBy && opt.sortDirection === sortDirection,
+    onPress: () => {
+      setSortBy(opt.sortBy)
+      setSortDirection(opt.sortDirection)
+    }
+  }))
+
+  const headerRightSlot = (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <TouchableOpacity
+        onPress={() => emitAddFriend()}
+        style={[
+          SHARED_STYLES.interactive.headerButton,
+          {
+            backgroundColor: theme.INTERACTIVE_BACKGROUND,
+            borderWidth: 1,
+            borderColor: theme.INTERACTIVE_BORDER
+          }
+        ]}
+      >
+        <FontAwesome5
+          name='plus'
+          size={18}
+          color={theme.TEXT_PRIMARY}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => setSortMenuVisible(true)}
+        style={[
+          SHARED_STYLES.interactive.headerButton,
+          {
+            backgroundColor: theme.INTERACTIVE_BACKGROUND,
+            borderWidth: 1,
+            borderColor: theme.INTERACTIVE_BORDER
+          }
+        ]}
+      >
+        <MaterialCommunityIcons
+          name='dots-vertical'
+          size={22}
+          color={theme.TEXT_PRIMARY}
+        />
+      </TouchableOpacity>
+    </View>
+  )
 
   useEffect(() => {
     const unsubscribe = subscribeToAddFriend(() => {
@@ -438,19 +495,33 @@ const FriendsList = () => {
 
   if (!netAvailable) {
     return (
-      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND, justifyContent: 'center', paddingHorizontal: 20 }}>
-        <EmptyStateCard
-          icon='wifi-off'
-          iconType='MaterialIcons'
-          title='No Internet Connection'
-          subtitle='Friends list requires an internet connection. Please check your connection and try again.'
+      <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
+        <AppHeader
+          title={<ScreenIconTitle screenKey='friends' />}
+          onBack={() => router.replace('/')}
+          rightSlot={headerRightSlot}
+          loading={loading}
         />
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Friends list requires an internet connection. Please check your connection and try again.'
+          />
+        </View>
       </View>
     )
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
+      <AppHeader
+        title={<ScreenIconTitle screenKey='friends' />}
+        onBack={() => router.replace('/')}
+        rightSlot={headerRightSlot}
+        loading={loading}
+      />
       <View style={styles.container}>
         <NamePicker
           show={showNamePicker}
@@ -476,15 +547,6 @@ const FriendsList = () => {
           title={menuFriend?.contact || 'Unnamed Friend'}
           items={menuItems}
         />
-
-        {loading && (
-          <View style={{ backgroundColor: theme.HEADER_BACKGROUND }}>
-            <LinearProgress
-              color={CONST.MAIN_COLOR}
-              style={{ flex: 1, height: 3 }}
-            />
-          </View>
-        )}
 
         <InteractionHintBanner
           hasContent={hasAnyFriends}
@@ -577,6 +639,11 @@ const FriendsList = () => {
           </KeyboardStickyView>
         )}
       </View>
+      <ActionMenu
+        visible={sortMenuVisible}
+        onClose={() => setSortMenuVisible(false)}
+        items={sortMenuItems}
+      />
     </View>
   )
 }

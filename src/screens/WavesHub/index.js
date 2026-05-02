@@ -11,18 +11,18 @@ import {
   ActivityIndicator,
   useWindowDimensions
 } from 'react-native'
-import { useAtom, useSetAtom } from 'jotai'
-import { FontAwesome5, Ionicons } from '@expo/vector-icons'
+import { useAtom } from 'jotai'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router, useFocusEffect } from 'expo-router'
 import * as Crypto from 'expo-crypto'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
-import * as SecureStore from 'expo-secure-store'
 
 import * as STATE from '../../state'
 import * as CONST from '../../consts'
-import { getTheme } from '../../theme/sharedStyles'
-import LinearProgress from '../../components/ui/LinearProgress'
+import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
+import { ScreenIconTitle } from '../../theme/screenIcons'
+import AppHeader from '../../components/AppHeader'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
@@ -33,21 +33,23 @@ import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
-import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
-import { subscribeToAddWave } from '../../events/waveAddBus'
+import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
+import { subscribeToAddWave, emitAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
+import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
+import { saveWaveSortPreferences } from '../../utils/waveStorage'
 
-const WavesHub = ({ ungroupedCount = 0 }) => {
+const WavesHub = () => {
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const numColumns = width >= 768 ? 2 : 1
 
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [sortBy] = useAtom(STATE.waveSortBy)
-  const [sortDirection] = useAtom(STATE.waveSortDirection)
-  const setWavesCount = useSetAtom(STATE.wavesCount)
-  const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
+  const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
+  const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
+  const [, setWavesCount] = useAtom(STATE.wavesCount)
+  const [ungroupedCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -89,6 +91,110 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
   const hasMountedRef = useRef(false)
 
   const theme = getTheme(isDarkMode)
+
+  // Sort menu state
+  const [headerMenuVisible, setHeaderMenuVisible] = useState(false)
+
+  const fetchCounts = useCallback(async () => {
+    if (!uuid) return
+    try {
+      const [uc, wc] = await Promise.all([
+        getUngroupedPhotosCount({ uuid }),
+        getWavesCount({ uuid })
+      ])
+      setUngroupedPhotosCount(uc)
+      setWavesCount(wc)
+    } catch (error) {
+      console.error('Failed to fetch wave counts:', error)
+    }
+  }, [uuid])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAutoGroupDone(() => {
+      fetchCounts()
+    })
+    return unsubscribe
+  }, [fetchCounts])
+
+  const autoGroupLabel =
+    (ungroupedCount ?? 0) > 0
+      ? `Auto Group (${ungroupedCount ?? 0} ungrouped)`
+      : 'Auto Group'
+
+  const sortOptions = [
+    { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
+    { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
+    { label: 'Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc', icon: 'sort-descending' },
+    { label: 'Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc', icon: 'sort-ascending' }
+  ]
+
+  const headerMenuItems = [
+    {
+      key: 'create',
+      icon: 'plus-circle-outline',
+      label: 'Create New Wave',
+      onPress: () => emitAddWave()
+    },
+    {
+      key: 'autogroup',
+      icon: 'view-grid-plus-outline',
+      label: autoGroupLabel,
+      onPress: () => emitAutoGroup(ungroupedCount ?? 0)
+    },
+    'separator',
+    ...sortOptions.map((opt, i) => ({
+      key: `sort-${i}`,
+      icon: opt.icon,
+      label: opt.label,
+      checked: opt.sortBy === sortBy && opt.sortDirection === sortDirection,
+      onPress: () => {
+        if (opt.sortBy !== sortBy || opt.sortDirection !== sortDirection) {
+          setSortBy(opt.sortBy)
+          setSortDirection(opt.sortDirection)
+          saveWaveSortPreferences({ sortBy: opt.sortBy, sortDirection: opt.sortDirection })
+        }
+      }
+    }))
+  ]
+
+  const headerRightSlot = (
+    <TouchableOpacity
+      onPress={() => setHeaderMenuVisible(true)}
+      style={[
+        SHARED_STYLES.interactive.headerButton,
+        {
+          backgroundColor: theme.INTERACTIVE_BACKGROUND,
+          borderWidth: 1,
+          borderColor: theme.INTERACTIVE_BORDER,
+          flexDirection: 'row',
+          alignItems: 'center'
+        }
+      ]}
+    >
+      <MaterialCommunityIcons
+        name='dots-vertical'
+        size={22}
+        color={theme.TEXT_PRIMARY}
+      />
+      {(ungroupedCount ?? 0) > 0 && (
+        <View
+          style={{
+            backgroundColor: '#FF3B30',
+            borderRadius: 10,
+            height: 20,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 6,
+            marginLeft: 4
+          }}
+        >
+          <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: 'bold' }}>
+            {(ungroupedCount ?? 0) > 99 ? '99+' : ungroupedCount}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  )
 
   const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false, searchTerm) => {
     if (loadingRef.current) return
@@ -156,10 +262,9 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
       const newBatch = Crypto.randomUUID()
       setBatch(newBatch)
       loadWaves(0, newBatch, true, debouncedSearch || undefined)
-    }, [loadWaves, debouncedSearch])
+      fetchCounts()
+    }, [loadWaves, debouncedSearch, fetchCounts])
   )
-
-
 
   const handleRefresh = () => {
     setRefreshing(true)
@@ -457,37 +562,34 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
 
   if (!netAvailable) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND, justifyContent: 'center', paddingHorizontal: 20 }]}>
-        <EmptyStateCard
-          icon='wifi-off'
-          iconType='MaterialIcons'
-          title='No Internet Connection'
-          subtitle='Waves require an internet connection. Please check your connection and try again.'
+      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+        <AppHeader
+          title={<ScreenIconTitle screenKey='waves' />}
+          onBack={() => router.back()}
+          rightSlot={headerRightSlot}
+          loading={loading}
         />
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Waves require an internet connection. Please check your connection and try again.'
+          />
+        </View>
       </View>
     )
   }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+      <AppHeader
+        title={<ScreenIconTitle screenKey='waves' />}
+        onBack={() => router.back()}
+        rightSlot={headerRightSlot}
+        loading={loading}
+      />
       <InteractionHintBanner hasContent={waves.length > 0} />
-
-      {loading && (
-        <View
-          style={{
-            height: 3,
-            backgroundColor: theme.HEADER_BACKGROUND
-          }}
-        >
-          <LinearProgress
-            color={CONST.MAIN_COLOR}
-            style={{
-              flex: 1,
-              height: 3
-            }}
-          />
-        </View>
-      )}
 
       <FlatList
         data={filteredWaves}
@@ -669,6 +771,12 @@ const WavesHub = ({ ungroupedCount = 0 }) => {
         onClose={() => setShareModalWave(null)}
         wave={shareModalWave}
         uuid={uuid}
+      />
+
+      <ActionMenu
+        visible={headerMenuVisible}
+        onClose={() => setHeaderMenuVisible(false)}
+        items={headerMenuItems}
       />
 
       {/* Search bar - bottom floating */}
