@@ -4,18 +4,18 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  TouchableOpacity
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import * as Crypto from 'expo-crypto'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as STATE from '../../state'
-import LinearProgress from '../../components/ui/LinearProgress'
-import * as CONST from '../../consts'
-import { getTheme } from '../../theme/sharedStyles'
+import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
 import { saveFriendFeedSortPreferences } from '../../utils/waveStorage'
 import EmptyStateCard from '../../components/EmptyStateCard'
@@ -30,6 +30,7 @@ import ActionMenu from '../../components/ActionMenu'
 import NamePicker from '../../components/NamePicker'
 import QuickActionsModal from '../../components/QuickActionsModal'
 import * as friendsHelper from '../FriendsList/friends_helper'
+import AppHeader from '../../components/AppHeader'
 
 // Lightweight wrapper isolating longPressPhoto state from FriendDetail re-renders
 const QuickActionsModalWrapper = React.memo(
@@ -53,7 +54,7 @@ const QuickActionsModalWrapper = React.memo(
   })
 )
 
-const FriendDetail = React.forwardRef((_props, ref) => {
+const FriendDetail = () => {
   const { friendUuid, friendName: initialFriendName, friendshipUuid } = useLocalSearchParams()
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
@@ -237,41 +238,51 @@ const FriendDetail = React.forwardRef((_props, ref) => {
     }))
   ]
 
-  useImperativeHandle(ref, () => ({
-    showHeaderMenu
-  }), [friendName])
+  const headerRightSlot = (
+    <TouchableOpacity
+      onPress={showHeaderMenu}
+      style={[
+        SHARED_STYLES.interactive.headerButton,
+        {
+          backgroundColor: theme.INTERACTIVE_BACKGROUND,
+          borderWidth: 1,
+          borderColor: theme.INTERACTIVE_BORDER
+        }
+      ]}
+    >
+      <MaterialCommunityIcons name='dots-vertical' size={22} color={theme.TEXT_PRIMARY} />
+    </TouchableOpacity>
+  )
 
   if (!netAvailable) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND, justifyContent: 'center', paddingHorizontal: 20 }]}>
-        <EmptyStateCard
-          icon='wifi-off'
-          iconType='MaterialIcons'
-          title='No Internet Connection'
-          subtitle='Friend photos require an internet connection. Please check your connection and try again.'
+      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+        <AppHeader
+          title={String(friendName || 'Friend')}
+          onBack={() => router.back()}
+          rightSlot={headerRightSlot}
+          loading={loading}
         />
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Friend photos require an internet connection. Please check your connection and try again.'
+          />
+        </View>
       </View>
     )
   }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-      {loading && (
-        <View
-          style={{
-            height: 3,
-            backgroundColor: theme.HEADER_BACKGROUND
-          }}
-        >
-          <LinearProgress
-            color={CONST.MAIN_COLOR}
-            style={{
-              flex: 1,
-              height: 3
-            }}
-          />
-        </View>
-      )}
+      <AppHeader
+        title={String(friendName || 'Friend')}
+        onBack={() => router.back()}
+        rightSlot={headerRightSlot}
+        loading={loading}
+      />
 
       {photos.length === 0 && !loading
         ? (
@@ -341,7 +352,7 @@ const FriendDetail = React.forwardRef((_props, ref) => {
       <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
     </View>
   )
-})
+}
 
 const styles = StyleSheet.create({
   container: {

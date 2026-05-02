@@ -160,7 +160,7 @@ const BookmarksList = () => {
   if (!netAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title={headerTitle} onBack={handleBack} />
+        <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -196,7 +196,7 @@ const BookmarksList = () => {
     return (
       <PhotosListContext.Provider value={photosListContextValue}>
         <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-          <AppHeader title={headerTitle} onBack={handleBack} />
+          <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
           <View style={{ flex: 1, backgroundColor: theme.INTERACTIVE_BACKGROUND }}>
             <PhotosListMasonry
               activeSegment={1}
@@ -274,7 +274,7 @@ const BookmarksList = () => {
 
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title={headerTitle} onBack={handleBack} />
+        <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -318,7 +318,7 @@ const BookmarksList = () => {
   // Loading state
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-      <AppHeader title={headerTitle} onBack={handleBack} />
+      <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{

@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
-import { router, useLocalSearchParams, useNavigation } from 'expo-router'
+import { router, useLocalSearchParams, useNavigation, useFocusEffect } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
@@ -21,10 +21,10 @@ import * as Crypto from 'expo-crypto'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as STATE from '../../state'
-import LinearProgress from '../../components/ui/LinearProgress'
 import * as CONST from '../../consts'
-import { getTheme } from '../../theme/sharedStyles'
+import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
+import { getWave } from '../Waves/reducer'
 import { saveWaveFeedSortPreferences } from '../../utils/waveStorage'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import EmptyStateCard from '../../components/EmptyStateCard'
@@ -46,6 +46,7 @@ import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import PhotosListContext from '../../contexts/PhotosListContext'
 import WaveShareModal from '../../components/WaveShareModal'
+import AppHeader from '../../components/AppHeader'
 
 const FOOTER_HEIGHT = 90
 
@@ -74,8 +75,14 @@ const QuickActionsModalWrapper = React.memo(
   })
 )
 
-const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
-  const { waveUuid, waveName: initialWaveName } = useLocalSearchParams()
+const ROLE_CONFIG = {
+  owner: { label: 'Owner', color: CONST.MAIN_COLOR },
+  facilitator: { label: 'Facilitator', color: '#8B5CF6' },
+  contributor: { label: 'Contributor', color: '#6B7280' }
+}
+
+const WaveDetail = () => {
+  const { waveUuid, waveName: initialWaveName, myRole: initialRole, isFrozen: initialFrozen } = useLocalSearchParams()
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [waveFeedSortBy] = useAtom(STATE.waveFeedSortBy)
@@ -83,6 +90,25 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
   const setWaveFeedSortBy = useSetAtom(STATE.waveFeedSortBy)
   const setWaveFeedSortDirection = useSetAtom(STATE.waveFeedSortDirection)
   const navigation = useNavigation()
+
+  const [isFrozen, setIsFrozen] = useState(initialFrozen === '1')
+  const [myRole, setMyRole] = useState(String(initialRole || ''))
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!waveUuid || !uuid) return
+      getWave({ waveUuid: String(waveUuid), uuid })
+        .then((wave) => {
+          if (wave) {
+            setIsFrozen(wave.isFrozen === true)
+            setMyRole(wave.myRole || '')
+          }
+        })
+        .catch(() => { /* retain stale state */ })
+    }, [waveUuid, uuid])
+  )
+
+  const roleConfig = ROLE_CONFIG[myRole] || null
 
   const [waveName, setWaveName] = useState(initialWaveName || '')
   const [photos, setPhotos] = useState([])
@@ -410,9 +436,54 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
     }))
   ]
 
-  React.useImperativeHandle(ref, () => ({
-    showHeaderMenu
-  }), [waveName])
+  const headerTitle = (
+    <View style={{ alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {isFrozen && (
+          <MaterialCommunityIcons
+            name='snowflake'
+            size={16}
+            color='#60A5FA'
+            style={{ marginRight: 4 }}
+          />
+        )}
+        <Text
+          style={{ color: theme.TEXT_PRIMARY, fontSize: 16, fontWeight: '600' }}
+          numberOfLines={1}
+        >
+          {String(waveName || 'Wave')}
+        </Text>
+      </View>
+      {roleConfig && (
+        <Text
+          style={{
+            fontSize: 11,
+            color: roleConfig.color,
+            fontWeight: '600',
+            marginTop: 2
+          }}
+        >
+          {roleConfig.label}
+        </Text>
+      )}
+    </View>
+  )
+
+  const headerRightSlot = (
+    <TouchableOpacity
+      onPress={showHeaderMenu}
+      style={[
+        SHARED_STYLES.interactive.headerButton,
+        {
+          backgroundColor: theme.INTERACTIVE_BACKGROUND,
+          borderWidth: 1,
+          borderColor: theme.INTERACTIVE_BORDER
+        }
+      ]}
+    >
+      <MaterialCommunityIcons name='dots-vertical' size={22} color={theme.TEXT_PRIMARY} />
+    </TouchableOpacity>
+  )
 
   const handleSaveEdit = async () => {
     if (!editName.trim()) {
@@ -542,13 +613,21 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
 
   if (!netAvailable) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND, justifyContent: 'center', paddingHorizontal: 20 }]}>
-        <EmptyStateCard
-          icon='wifi-off'
-          iconType='MaterialIcons'
-          title='No Internet Connection'
-          subtitle='Wave details require an internet connection. Please check your connection and try again.'
+      <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+        <AppHeader
+          title={headerTitle}
+          onBack={() => router.back()}
+          rightSlot={headerRightSlot}
+          loading={loading}
         />
+        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+          <EmptyStateCard
+            icon='wifi-off'
+            iconType='MaterialIcons'
+            title='No Internet Connection'
+            subtitle='Wave details require an internet connection. Please check your connection and try again.'
+          />
+        </View>
       </View>
     )
   }
@@ -556,6 +635,12 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
   return (
     <PhotosListContext.Provider value={photosListContextValue}>
       <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
+        <AppHeader
+          title={headerTitle}
+          onBack={() => router.back()}
+          rightSlot={headerRightSlot}
+          loading={loading}
+        />
         <PendingPhotosBanner
           theme={theme}
           pendingPhotos={pendingPhotos}
@@ -573,23 +658,6 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
             <Text style={styles.frozenBannerText}>
               This wave is frozen — no new photos, edits, or deletions allowed
             </Text>
-          </View>
-        )}
-
-        {loading && (
-          <View
-            style={{
-              height: 3,
-              backgroundColor: theme.HEADER_BACKGROUND
-            }}
-          >
-            <LinearProgress
-              color={CONST.MAIN_COLOR}
-              style={{
-                flex: 1,
-                height: 3
-              }}
-            />
           </View>
         )}
 
@@ -719,7 +787,7 @@ const WaveDetail = React.forwardRef(({ isFrozen, myRole }, ref) => {
       </View>
     </PhotosListContext.Provider>
   )
-})
+}
 
 const styles = StyleSheet.create({
   container: {

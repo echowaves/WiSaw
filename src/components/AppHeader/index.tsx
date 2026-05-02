@@ -10,17 +10,21 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import LinearProgress from '../ui/LinearProgress'
+import * as CONST from '../../consts'
 
 interface AppHeaderProps {
   title: string | React.ReactNode
   onBack?: () => void
   rightSlot?: React.ReactNode
+  loading?: boolean
 }
 
 export default function AppHeader({
   title,
   onBack,
   rightSlot,
+  loading,
 }: AppHeaderProps) {
   const [isDark] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDark)
@@ -123,6 +127,22 @@ export default function AppHeader({
             {rightSlot || <View style={{ width: 44 }} />}
           </View>
         </View>
+        {loading && (
+          <View
+            style={{
+              height: 3,
+              backgroundColor: theme.HEADER_BACKGROUND
+            }}
+          >
+            <LinearProgress
+              color={CONST.MAIN_COLOR}
+              style={{
+                flex: 1,
+                height: 3
+              }}
+            />
+          </View>
+        )}
       </View>
     </SafeAreaView>
   )
