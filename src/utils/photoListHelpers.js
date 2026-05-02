@@ -9,7 +9,7 @@ export const EXPANDED_ACTION_BAR_HEIGHT = 60
 export const EXPANDED_COMMENTS_ESTIMATE = 200
 export const EXPANDED_PADDING = 40
 // Outer card chrome: marginVertical (8+8) + borderWidth (1+1)
-export const CARD_CHROME_HEIGHT = 18
+export const CARD_CHROME_HEIGHT = 0
 
 /**
  * Estimate expanded height for a photo at full grid width.

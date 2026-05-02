@@ -477,15 +477,15 @@ const createStyles = (theme) =>
       backgroundColor: theme.CARD_BACKGROUND,
       borderRadius: 20,
       overflow: 'hidden',
-      borderWidth: 1,
-      borderColor: theme.CARD_BORDER,
-      shadowColor: theme.CARD_SHADOW,
+      borderWidth: 0,
+      borderColor: 'transparent',
+      shadowColor: '#000',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
+      shadowOpacity: 0.4,
+      shadowRadius: 6,
       elevation: 8,
-      marginVertical: 8,
-      marginHorizontal: 8
+      marginVertical: 0,
+      marginHorizontal: 0
     },
     // Flattened variants for inner sections when inside the outer card
     photoInfoCardFlat: {
@@ -1302,7 +1302,9 @@ const Photo = ({
           paddingTop: !embedded ? headerOffset : 0,
           width: screenWidth,
           maxWidth: screenWidth,
-          overflow: 'hidden'    // Clip any overflowing content
+          ...(embedded
+            ? { backgroundColor: 'transparent' }
+            : { overflow: 'hidden' })
         }
       ]}
       onLayout={(event) => {
