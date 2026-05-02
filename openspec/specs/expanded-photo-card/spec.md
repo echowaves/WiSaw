@@ -4,20 +4,27 @@ Defines the visual card wrapper and layout structure for photos expanded inline 
 ## Requirements
 
 ### Requirement: Unified card wrapper for expanded photo
-When a photo is expanded inline in the masonry grid (`embedded === true`), the entire expanded view SHALL be wrapped in a single card container with `borderRadius: 20`, `overflow: 'hidden'`, themed background, border, and shadow. This card SHALL visually distinguish the expanded photo from the surrounding feed.
+When a photo is expanded inline in the masonry grid (`embedded === true`), the entire expanded view SHALL be wrapped in a single card container with `borderRadius: 20`, `overflow: 'hidden'`, and themed background. The card's shadow, border, and margins SHALL match the collapsed `ExpandableThumb` exactly: `shadowColor: '#000'`, `shadowOffset: { width: 0, height: 4 }`, `shadowOpacity: 0.4`, `shadowRadius: 6`, `elevation: 8`, `borderWidth: 0`, `borderColor: 'transparent'`, and zero explicit margins. The outer measurement container SHALL NOT obscure the card's rounded appearance.
 
-#### Scenario: Expanded photo renders inside a card
+#### Scenario: Expanded photo appears as floating rounded card
 - **WHEN** a photo thumbnail is tapped to expand in the masonry feed
-- **THEN** the expanded Photo component SHALL render inside a card container with rounded corners (`borderRadius: 20`), themed `CARD_BACKGROUND`, `CARD_BORDER`, and shadow
+- **THEN** the expanded view SHALL appear as a floating rounded card with no visible rectangular background behind it
 
-#### Scenario: Card clips photo image corners
-- **WHEN** the photo image renders inside the card container
-- **THEN** the image SHALL fill the card edge-to-edge (no padding around the image)
-- **THEN** the card's `overflow: 'hidden'` SHALL clip the image corners to match the card's rounded corners
+#### Scenario: Card shadow matches collapsed thumb
+- **WHEN** the expanded card renders inside the masonry grid
+- **THEN** the card's shadow SHALL use `shadowColor: '#000'`, `shadowOpacity: 0.4`, `shadowRadius: 6`, `shadowOffset: { width: 0, height: 4 }`, `elevation: 8` — identical to the collapsed `ExpandableThumb`
 
-#### Scenario: Card wrapper only applies in embedded mode
-- **WHEN** the Photo component renders with `embedded === false` (standalone detail screen)
-- **THEN** no outer card wrapper SHALL be applied — the layout remains unchanged
+#### Scenario: Card has no stroke border
+- **WHEN** the expanded card renders
+- **THEN** `borderWidth` SHALL be `0` and `borderColor` SHALL be `'transparent'` — matching the collapsed thumb
+
+#### Scenario: Card uses no explicit margins
+- **WHEN** the expanded card renders inside the masonry grid
+- **THEN** `marginVertical` and `marginHorizontal` SHALL be `0` — the masonry `spacing` prop handles inter-item gaps
+
+#### Scenario: Outer container is transparent in embedded mode
+- **WHEN** the Photo component renders with `embedded === true`
+- **THEN** the outer container `View` SHALL have `backgroundColor: 'transparent'` and SHALL NOT have `overflow: 'hidden'`
 
 ### Requirement: Section render order in expanded card
 Within the expanded card, content sections SHALL render in this order: photo/video, action buttons, photo info (author/date/stats), comments, add comment button, AI recognitions.
