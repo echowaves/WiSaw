@@ -8,6 +8,8 @@ export const COMMENT_SECTION_HEIGHT = 44
 export const EXPANDED_ACTION_BAR_HEIGHT = 60
 export const EXPANDED_COMMENTS_ESTIMATE = 200
 export const EXPANDED_PADDING = 40
+// Outer card chrome: marginVertical (8+8) + borderWidth (1+1)
+export const CARD_CHROME_HEIGHT = 18
 
 /**
  * Estimate expanded height for a photo at full grid width.
@@ -17,7 +19,7 @@ export const EXPANDED_PADDING = 40
 export const estimateExpandedHeight = (item, fullWidth) => {
   const aspectRatio = (item.width && item.height) ? item.width / item.height : 1.0
   const imageHeight = Math.round(fullWidth / aspectRatio)
-  return imageHeight + EXPANDED_ACTION_BAR_HEIGHT + EXPANDED_COMMENTS_ESTIMATE + EXPANDED_PADDING
+  return imageHeight + EXPANDED_ACTION_BAR_HEIGHT + EXPANDED_COMMENTS_ESTIMATE + EXPANDED_PADDING + CARD_CHROME_HEIGHT
 }
 
 const READONLY_PHOTO_FLAG = Symbol.for('wisaw.photo.readonly')

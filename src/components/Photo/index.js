@@ -471,6 +471,75 @@ const createStyles = (theme) =>
       marginVertical: 6,
       height: 4,
       borderRadius: 2
+    },
+    // Outer card wrapper for embedded (masonry-expanded) mode
+    expandedCardContainer: {
+      backgroundColor: theme.CARD_BACKGROUND,
+      borderRadius: 20,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: theme.CARD_BORDER,
+      shadowColor: theme.CARD_SHADOW,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+      marginVertical: 8,
+      marginHorizontal: 8
+    },
+    // Flattened variants for inner sections when inside the outer card
+    photoInfoCardFlat: {
+      backgroundColor: 'transparent',
+      marginHorizontal: 0,
+      marginVertical: 0,
+      borderRadius: 0,
+      borderWidth: 0,
+      shadowColor: 'transparent',
+      shadowOpacity: 0,
+      elevation: 0,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.CARD_BORDER
+    },
+    commentsCardFlat: {
+      backgroundColor: 'transparent',
+      marginHorizontal: 0,
+      marginVertical: 0,
+      borderRadius: 0,
+      borderWidth: 0,
+      shadowColor: 'transparent',
+      shadowOpacity: 0,
+      elevation: 0,
+      paddingVertical: 8,
+      paddingHorizontal: 12
+    },
+    actionCardFlat: {
+      backgroundColor: 'transparent',
+      marginHorizontal: 0,
+      marginVertical: 0,
+      marginTop: 0,
+      borderRadius: 0,
+      borderWidth: 0,
+      shadowColor: 'transparent',
+      shadowOpacity: 0,
+      elevation: 0,
+      padding: 6,
+      borderTopWidth: 1,
+      borderTopColor: theme.CARD_BORDER
+    },
+    aiRecognitionCardFlat: {
+      backgroundColor: 'transparent',
+      marginHorizontal: 0,
+      marginVertical: 2,
+      borderRadius: 0,
+      borderWidth: 0,
+      shadowColor: 'transparent',
+      shadowOpacity: 0,
+      elevation: 0,
+      paddingVertical: 6,
+      paddingHorizontal: 0,
+      alignSelf: 'flex-start'
     }
   })
 
@@ -694,7 +763,7 @@ const Photo = ({
     const watchersCount = photoDetails?.watchersCount || 0
 
     return (
-      <View style={styles.photoInfoCard}>
+      <View style={embedded ? styles.photoInfoCardFlat : styles.photoInfoCard}>
         <View style={styles.headerInfo}>
           <View style={styles.authorRow}>
             <Text style={styles.authorName} numberOfLines={1} ellipsizeMode='tail'>
@@ -801,7 +870,7 @@ const Photo = ({
 
     if (allComments.length > 0) {
       return (
-        <View style={styles.commentsCard}>
+        <View style={embedded ? styles.commentsCardFlat : styles.commentsCard}>
           <View style={styles.commentsSection}>
             {allComments.map((comment, i) => (
               <TouchableOpacity
@@ -914,7 +983,7 @@ const Photo = ({
     return (
       <View style={styles.aiRecognitionContainer}>
         {labels?.length > 0 && (
-          <View style={styles.aiRecognitionCard}>
+          <View style={embedded ? styles.aiRecognitionCardFlat : styles.aiRecognitionCard}>
             <TouchableOpacity
               ref={aiTagsHeaderRef}
               style={[styles.aiRecognitionHeader, aiTagsCollapsed && styles.aiHeaderTight]}
@@ -983,7 +1052,7 @@ const Photo = ({
         )}
 
         {textDetections?.length > 0 && (
-          <View style={styles.aiRecognitionCard}>
+          <View style={embedded ? styles.aiRecognitionCardFlat : styles.aiRecognitionCard}>
             <TouchableOpacity
               ref={aiTextHeaderRef}
               style={[styles.aiRecognitionHeader, aiTextCollapsed && styles.aiHeaderTight]}
@@ -1050,7 +1119,7 @@ const Photo = ({
         )}
 
         {moderationLabels?.length > 0 && (
-          <View style={styles.aiRecognitionCard}>
+          <View style={embedded ? styles.aiRecognitionCardFlat : styles.aiRecognitionCard}>
             <TouchableOpacity
               ref={aiModerationHeaderRef}
               style={[styles.aiRecognitionHeader, aiModerationCollapsed && styles.aiHeaderTight]}
@@ -1128,14 +1197,14 @@ const Photo = ({
     return (
       <View
         style={[
-          styles.actionCard,
-          {
-            // Add top margin when close button is visible (embedded mode)
-            marginTop: embedded ? Math.max(insets.top * 0.5, 8) : Math.max(insets.top, 8)
+          embedded ? styles.actionCardFlat : styles.actionCard,
+          !embedded && {
+            // Add top margin when close button is visible (standalone mode)
+            marginTop: Math.max(insets.top, 8)
           }
         ]}
       >
-        <View style={styles.actionButtonsWrapper}>
+        <View style={embedded ? { marginTop: 8 } : styles.actionButtonsWrapper}>
           <PhotoActionButtons
             photoDetails={photoDetails}
             isOwnPhoto={isOwnPhoto}
@@ -1191,6 +1260,39 @@ const Photo = ({
     )
   }
 
+  const renderContent = () => (
+    <>
+      {photoDetails?.isPhotoWatched === undefined && (
+        <LinearProgress
+          color='#4FC3F7'
+          style={[
+            styles.loadingProgress,
+            {
+              marginHorizontal: 12,
+              marginVertical: 0,
+              height: 4,
+              borderRadius: 2,
+              shadowColor: '#4FC3F7',
+              shadowOffset: {
+                width: 0,
+                height: 2
+              },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+              elevation: 5
+            }
+          ]}
+        />
+      )}
+      {renderPhotoRow()}
+      {renderActionCard()}
+      {renderCommentsStats()}
+      {renderCommentsRows}
+      {renderAddCommentsRow()}
+      {renderRecognitions()}
+    </>
+  )
+
   return (
     <View
       ref={containerRef}
@@ -1216,34 +1318,17 @@ const Photo = ({
       }}
     >
       {renderCloseButton()}
-      {renderActionCard()}
-      {photoDetails?.isPhotoWatched === undefined && (
-        <LinearProgress
-          color='#4FC3F7'
-          style={[
-            styles.loadingProgress,
-            {
-              marginHorizontal: 12,
-              marginVertical: 0,
-              height: 4,
-              borderRadius: 2,
-              shadowColor: '#4FC3F7',
-              shadowOffset: {
-                width: 0,
-                height: 2
-              },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              elevation: 5
-            }
-          ]}
-        />
-      )}
-      {renderPhotoRow()}
-      {renderCommentsStats()}
-      {renderCommentsRows}
-      {renderAddCommentsRow()}
-      {renderRecognitions()}
+      {embedded
+        ? (
+          <View style={styles.expandedCardContainer}>
+            {renderContent()}
+          </View>
+          )
+        : (
+          <>
+            {renderContent()}
+          </>
+          )}
       <WaveSelectorModal
         visible={waveModalVisible}
         onClose={() => setWaveModalVisible(false)}

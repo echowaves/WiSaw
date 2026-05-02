@@ -109,13 +109,13 @@ const PhotosListMasonry = ({
       if (isExpanded) {
         return (
           <PhotosListContext.Provider value={removePhotoContext}>
-            <View style={{ width: dimensions.width, overflow: 'hidden' }}>
+            <View style={{ width: dimensions.width, overflow: 'visible' }}>
               <TouchableOpacity
                 onPress={() => toggleExpand(item.id)}
                 style={{
                   position: 'absolute',
-                  top: 8,
-                  right: 8,
+                  top: 16,
+                  right: 16,
                   zIndex: 10,
                   backgroundColor: 'rgba(0,0,0,0.5)',
                   borderRadius: 16,
