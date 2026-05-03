@@ -15,8 +15,9 @@ When the Photo component is rendered in embedded mode (`embedded === true`) with
 
 #### Scenario: User submits inline comment via send button
 - **WHEN** the user types a comment and taps the send button
-- **THEN** the comment SHALL be submitted via `reducer.submitComment()`
-- **THEN** an optimistic comment SHALL appear immediately in the comments list with the current user's `uuid` and current timestamp as `updatedAt`
+- **THEN** the comment SHALL be submitted via `reducer.submitComment()` which waits for the backend mutation response
+- **THEN** the real backend comment object SHALL be appended to the local `photoDetails.comments` state immediately upon mutation success
+- **THEN** no optimistic/fake comment object SHALL be injected into state
 - **THEN** a `photoRefreshBus` event SHALL be emitted with the photo's ID
 - **THEN** the inline input SHALL collapse back to the "Add Comment" button
 
@@ -50,7 +51,11 @@ When the Photo component is rendered in embedded mode (`embedded === true`) with
 
 #### Scenario: Keyboard scrolls input into view
 - **WHEN** the inline input appears and the keyboard rises
-- **THEN** the masonry list SHALL scroll so the input row is visible above the keyboard
+- **THEN** the component SHALL register a one-shot `Keyboard.addListener('keyboardDidShow')` listener
+- **THEN** inside the listener callback, the input SHALL be measured via `measureInWindow` and compared against `e.endCoordinates.screenY` (the keyboard's top edge)
+- **THEN** if the input bottom exceeds the keyboard top, `onRequestEnsureVisible` SHALL be called with the `keyboardTop` value
+- **THEN** the masonry list SHALL use `keyboardTop` as the viewport bottom boundary for scroll offset calculation
+- **THEN** the listener SHALL be removed after firing once
 
 ### Requirement: Inline input height recalculation
 When the inline comment input appears or disappears, the expanded masonry cell SHALL recalculate its height to accommodate the content change.
