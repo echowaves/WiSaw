@@ -1,9 +1,4 @@
-# Inline Comment Input Specification
-
-## Purpose
-Provides inline comment composition within expanded masonry grid cards in embedded mode, replacing the modal navigation pattern for embedded photo contexts.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Inline comment composition in embedded mode
 When the Photo component is rendered in embedded mode (`embedded === true`) within the masonry grid, the "Add Comment" action SHALL display an inline text input within the expanded card instead of navigating to the `/modal-input` route. The inline input SHALL appear in the same position as the "Add Comment" button, replacing it. The input row SHALL include a cancel button and a send button.
@@ -51,22 +46,3 @@ When the Photo component is rendered in embedded mode (`embedded === true`) with
 #### Scenario: Keyboard scrolls input into view
 - **WHEN** the inline input appears and the keyboard rises
 - **THEN** the masonry list SHALL scroll so the input row is visible above the keyboard
-
-### Requirement: Inline input height recalculation
-When the inline comment input appears or disappears, the expanded masonry cell SHALL recalculate its height to accommodate the content change.
-
-#### Scenario: Input appears and cell grows
-- **WHEN** the inline comment input is shown
-- **THEN** `scheduleHeightRecalc()` SHALL fire and the masonry cell SHALL grow to fit the input
-
-#### Scenario: Input hides and cell shrinks
-- **WHEN** the inline comment input is hidden (after submit or dismiss)
-- **THEN** `scheduleHeightRecalc()` SHALL fire and the masonry cell SHALL shrink to remove the input space
-
-### Requirement: Frozen wave comment lock
-The inline comment input SHALL respect wave freeze state, matching the existing modal behavior.
-
-#### Scenario: Wave is frozen for non-owner
-- **WHEN** the user taps "Add Comment" on a photo in a frozen wave and the user is not the wave owner
-- **THEN** a toast SHALL display "Comments are locked for frozen waves"
-- **THEN** the inline input SHALL NOT appear

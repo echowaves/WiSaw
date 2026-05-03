@@ -605,6 +605,8 @@ const Photo = ({
   const [aiModerationCollapsed, setAiModerationCollapsed] = useState(embedded)
   const [showCommentInput, setShowCommentInput] = useState(false)
   const [commentInputText, setCommentInputText] = useState('')
+  const isSubmittingCommentRef = useRef(false)
+  const commentInputRef = useRef(null)
 
   const {
     handleBan,
@@ -931,7 +933,7 @@ const Photo = ({
 
     if (embedded && showCommentInput) {
       return (
-        <View style={styles.addCommentCard}>
+        <View style={styles.addCommentCard} ref={commentInputRef}>
           <View style={styles.inlineCommentInputRow}>
             <TextInput
               style={styles.inlineCommentInput}
@@ -940,18 +942,17 @@ const Photo = ({
               value={commentInputText}
               onChangeText={setCommentInputText}
               autoFocus
-              onBlur={() => {
-                setShowCommentInput(false)
-                setCommentInputText('')
-              }}
               returnKeyType='send'
               onSubmitEditing={async () => {
                 if (!commentInputText.trim()) return
+                isSubmittingCommentRef.current = true
                 const text = commentInputText.trim()
                 setOptimisticComment({
                   id: `optimistic-${Date.now()}`,
                   comment: text,
-                  createdAt: new Date().toISOString()
+                  uuid,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
                 })
                 setShowCommentInput(false)
                 setCommentInputText('')
@@ -962,16 +963,29 @@ const Photo = ({
                   topOffset: toastTopOffset
                 })
                 emitPhotoRefresh(photo?.id)
+                isSubmittingCommentRef.current = false
               }}
             />
             <TouchableOpacity
+              onPress={() => {
+                setShowCommentInput(false)
+                setCommentInputText('')
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={async () => {
                 if (!commentInputText.trim()) return
+                isSubmittingCommentRef.current = true
                 const text = commentInputText.trim()
                 setOptimisticComment({
                   id: `optimistic-${Date.now()}`,
                   comment: text,
-                  createdAt: new Date().toISOString()
+                  uuid,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
                 })
                 setShowCommentInput(false)
                 setCommentInputText('')
@@ -982,6 +996,7 @@ const Photo = ({
                   topOffset: toastTopOffset
                 })
                 emitPhotoRefresh(photo?.id)
+                isSubmittingCommentRef.current = false
               }}
               disabled={!commentInputText.trim()}
               style={{ opacity: commentInputText.trim() ? 1 : 0.4 }}
@@ -1009,6 +1024,20 @@ const Photo = ({
             }
             if (embedded) {
               setShowCommentInput(true)
+              // Scroll the input into view after it renders and keyboard appears
+              setTimeout(() => {
+                try {
+                  if (typeof onRequestEnsureVisible === 'function' && commentInputRef.current) {
+                    commentInputRef.current.measureInWindow((x, y, w, h) => {
+                      if (h > 0) {
+                        onRequestEnsureVisible({ y, height: h })
+                      }
+                    })
+                  }
+                } catch (e) {
+                  // best-effort
+                }
+              }, 300)
             } else {
               router.push({
                 pathname: '/modal-input',

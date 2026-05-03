@@ -43,6 +43,7 @@ const PhotosListMasonry = ({
   const prevScrollY = useRef(0)
   const [showFob, setShowFob] = useState(false)
   const inactivityTimer = useRef(null)
+  const containerViewRef = useRef(null)
 
   const removePhotoContext = useMemo(() => ({ removePhoto: removePhoto || (() => {}) }), [removePhoto])
 
@@ -130,6 +131,26 @@ const PhotosListMasonry = ({
                 photo={originalPhoto}
                 embedded
                 containerWidth={dimensions.width}
+                onRequestEnsureVisible={({ y, height }) => {
+                  if (!masonryRef?.current || !containerViewRef?.current) return
+                  try {
+                    containerViewRef.current.measureInWindow((mx, my, mw, mh) => {
+                      if (mh > 0) {
+                        const elementBottom = y + height
+                        const viewportBottom = my + mh
+                        if (elementBottom > viewportBottom) {
+                          const currentOffset = prevScrollY.current || 0
+                          const scrollBy = elementBottom - viewportBottom + 60
+                          if (typeof masonryRef.current.scrollToOffset === 'function') {
+                            masonryRef.current.scrollToOffset(currentOffset + scrollBy, { animated: true })
+                          }
+                        }
+                      }
+                    })
+                  } catch (e) {
+                    // best-effort scroll
+                  }
+                }}
               />
             </View>
           </PhotosListContext.Provider>
@@ -162,7 +183,7 @@ const PhotosListMasonry = ({
   )
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} ref={containerViewRef}>
       <ExpoMasonryLayout
         // Force remount per segment to clear internal layout/scroll caches
         key={`segment-${activeSegment}`}
