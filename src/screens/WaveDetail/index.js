@@ -192,8 +192,7 @@ const WaveDetail = () => {
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
-    toggleExpand,
-    updateExpandedHeight
+    toggleExpand
   } = usePhotoExpansion()
 
   const isOwner = myRole === 'owner'
@@ -696,7 +695,6 @@ const WaveDetail = () => {
                 expandedItemIds={expandedItemIds}
                 getExpandedHeight={getExpandedHeight}
                 toggleExpand={toggleExpand}
-                updateExpandedHeight={updateExpandedHeight}
               />
             </>
             )}

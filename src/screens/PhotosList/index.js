@@ -290,8 +290,7 @@ const PhotosList = ({ searchFromUrl }) => {
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
-    toggleExpand,
-    updateExpandedHeight
+    toggleExpand
   } = usePhotoExpansion()
 
   // --- Feed search hook ---
@@ -498,7 +497,6 @@ const PhotosList = ({ searchFromUrl }) => {
               expandedItemIds={expandedItemIds}
               getExpandedHeight={getExpandedHeight}
               toggleExpand={toggleExpand}
-              updateExpandedHeight={updateExpandedHeight}
             />
           </View>
           <SearchFab

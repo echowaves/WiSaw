@@ -92,8 +92,7 @@ const FriendDetail = () => {
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
-    toggleExpand,
-    updateExpandedHeight
+    toggleExpand
   } = usePhotoExpansion()
 
   const quickActionsRef = useRef(null)
@@ -330,7 +329,6 @@ const FriendDetail = () => {
               expandedItemIds={expandedItemIds}
               getExpandedHeight={getExpandedHeight}
               toggleExpand={toggleExpand}
-              updateExpandedHeight={updateExpandedHeight}
             />
           </>
           )}

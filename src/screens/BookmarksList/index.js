@@ -108,8 +108,7 @@ const BookmarksList = () => {
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
-    toggleExpand,
-    updateExpandedHeight
+    toggleExpand
   } = usePhotoExpansion()
 
   // --- Feed search ---
@@ -219,7 +218,6 @@ const BookmarksList = () => {
               expandedItemIds={expandedItemIds}
               getExpandedHeight={getExpandedHeight}
               toggleExpand={toggleExpand}
-              updateExpandedHeight={updateExpandedHeight}
             />
           </View>
           <SearchFab

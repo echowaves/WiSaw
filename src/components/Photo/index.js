@@ -9,6 +9,7 @@ import {
   InteractionManager,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   useWindowDimensions,
   View
@@ -342,6 +343,24 @@ const createStyles = (theme) =>
       textAlign: 'center',
       letterSpacing: 0.3
     },
+    inlineCommentInputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: `${theme.STATUS_SUCCESS}15`,
+      borderRadius: 25,
+      borderWidth: 1.5,
+      borderColor: `${theme.STATUS_SUCCESS}40`,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      gap: 8,
+      minHeight: 36
+    },
+    inlineCommentInput: {
+      flex: 1,
+      color: theme.TEXT_PRIMARY,
+      fontSize: 14,
+      paddingVertical: 4
+    },
     // Enhanced AI recognition cards
     aiRecognitionContainer: {
       marginVertical: 0,
@@ -546,7 +565,6 @@ const createStyles = (theme) =>
 const Photo = ({
   photo,
   refreshKey = 0,
-  onHeightMeasured,
   embedded = true,
   containerWidth: containerWidthProp,
   onRequestEnsureVisible,
@@ -585,6 +603,8 @@ const Photo = ({
   const [aiTagsCollapsed, setAiTagsCollapsed] = useState(embedded)
   const [aiTextCollapsed, setAiTextCollapsed] = useState(embedded)
   const [aiModerationCollapsed, setAiModerationCollapsed] = useState(embedded)
+  const [showCommentInput, setShowCommentInput] = useState(false)
+  const [commentInputText, setCommentInputText] = useState('')
 
   const {
     handleBan,
@@ -621,34 +641,10 @@ const Photo = ({
 
   const { width, height } = useWindowDimensions()
 
-  // Root container ref for measuring height on-demand
-  const containerRef = useRef(null)
   // Refs for recognition section headers to target scrolling to them
   const aiTagsHeaderRef = useRef(null)
   const aiTextHeaderRef = useRef(null)
   const aiModerationHeaderRef = useRef(null)
-
-  // Schedule a measurement of the container and report via onHeightMeasured
-  const scheduleHeightRecalc = () => {
-    // Allow layout to settle
-    setTimeout(() => {
-      try {
-        const view = containerRef.current
-        if (!view || !onHeightMeasured) return
-        if (view.measure) {
-          view.measure((x, y, w, h) => {
-            if (h > 0) onHeightMeasured(h)
-          })
-        } else if (view.measureInWindow) {
-          view.measureInWindow((x, y, w, h) => {
-            if (h > 0) onHeightMeasured(h)
-          })
-        }
-      } catch (e) {
-        // best-effort; onLayout will still catch changes
-      }
-    }, 40)
-  }
 
   // Main data loading effect
   useEffect(() => {
@@ -689,8 +685,6 @@ const Photo = ({
           }, 100) // Small delay to prevent flicker
 
           setPhotoDetails(newPhotoDetails)
-          // Re-measure after content loads so masonry can correct expanded height
-          scheduleHeightRecalc()
         }
       }
     })
@@ -934,6 +928,71 @@ const Photo = ({
       return <Text />
     }
     const commentsLocked = photo?.waveIsFrozen && photo?.waveViewerRole !== 'owner'
+
+    if (embedded && showCommentInput) {
+      return (
+        <View style={styles.addCommentCard}>
+          <View style={styles.inlineCommentInputRow}>
+            <TextInput
+              style={styles.inlineCommentInput}
+              placeholder='Add a comment...'
+              placeholderTextColor={theme.TEXT_SECONDARY}
+              value={commentInputText}
+              onChangeText={setCommentInputText}
+              autoFocus
+              onBlur={() => {
+                setShowCommentInput(false)
+                setCommentInputText('')
+              }}
+              returnKeyType='send'
+              onSubmitEditing={async () => {
+                if (!commentInputText.trim()) return
+                const text = commentInputText.trim()
+                setOptimisticComment({
+                  id: `optimistic-${Date.now()}`,
+                  comment: text,
+                  createdAt: new Date().toISOString()
+                })
+                setShowCommentInput(false)
+                setCommentInputText('')
+                await reducer.submitComment({
+                  inputText: text,
+                  uuid,
+                  photo,
+                  topOffset: toastTopOffset
+                })
+                emitPhotoRefresh(photo?.id)
+              }}
+            />
+            <TouchableOpacity
+              onPress={async () => {
+                if (!commentInputText.trim()) return
+                const text = commentInputText.trim()
+                setOptimisticComment({
+                  id: `optimistic-${Date.now()}`,
+                  comment: text,
+                  createdAt: new Date().toISOString()
+                })
+                setShowCommentInput(false)
+                setCommentInputText('')
+                await reducer.submitComment({
+                  inputText: text,
+                  uuid,
+                  photo,
+                  topOffset: toastTopOffset
+                })
+                emitPhotoRefresh(photo?.id)
+              }}
+              disabled={!commentInputText.trim()}
+              style={{ opacity: commentInputText.trim() ? 1 : 0.4 }}
+            >
+              <Ionicons name='send' size={20} color={theme.STATUS_SUCCESS} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )
+    }
+
     return (
       <View style={styles.addCommentCard}>
         <TouchableOpacity
@@ -948,14 +1007,18 @@ const Photo = ({
               })
               return
             }
-            router.push({
-              pathname: '/modal-input',
-              params: {
-                photo: JSON.stringify(photo),
-                uuid,
-                topOffset: toastTopOffset
-              }
-            })
+            if (embedded) {
+              setShowCommentInput(true)
+            } else {
+              router.push({
+                pathname: '/modal-input',
+                params: {
+                  photo: JSON.stringify(photo),
+                  uuid,
+                  topOffset: toastTopOffset
+                }
+              })
+            }
           }}
           activeOpacity={0.7}
         >
@@ -993,8 +1056,6 @@ const Photo = ({
                 global.suppressEnsureVisibleUntil = global.suppressEnsureVisibleUntil || new Map()
                 global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
                 setAiTagsCollapsed((v) => !v)
-                // Explicit user toggle: schedule height recalc to grow/shrink expanded item
-                scheduleHeightRecalc()
                 // After layout update, scroll to the header only
                 setTimeout(() => {
                   try {
@@ -1061,8 +1122,6 @@ const Photo = ({
                 global.suppressEnsureVisibleUntil = global.suppressEnsureVisibleUntil || new Map()
                 global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
                 setAiTextCollapsed((v) => !v)
-                // Explicit user toggle: schedule height recalc
-                scheduleHeightRecalc()
                 setTimeout(() => {
                   try {
                     if (typeof onRequestEnsureVisible === 'function') {
@@ -1128,8 +1187,6 @@ const Photo = ({
                 global.suppressEnsureVisibleUntil = global.suppressEnsureVisibleUntil || new Map()
                 global.suppressEnsureVisibleUntil.set(photo?.id, now + 600)
                 setAiModerationCollapsed((v) => !v)
-                // Explicit user toggle: schedule height recalc
-                scheduleHeightRecalc()
                 setTimeout(() => {
                   try {
                     if (typeof onRequestEnsureVisible === 'function') {
@@ -1296,7 +1353,6 @@ const Photo = ({
 
   return (
     <View
-      ref={containerRef}
       style={[
         styles.container,
         {
@@ -1308,17 +1364,6 @@ const Photo = ({
             : { overflow: 'hidden' })
         }
       ]}
-      onLayout={(event) => {
-        // Only measure on layout when NOT embedded (normal modal view)
-        // When embedded in masonry, measurements are triggered explicitly via scheduleHeightRecalc()
-        // to avoid feedback loops between onLayout → onHeightMeasured → state change → layout → onLayout...
-        if (onHeightMeasured && !embedded) {
-          const { height: measuredHeight } = event.nativeEvent.layout
-          if (measuredHeight > 0) {
-            onHeightMeasured(measuredHeight)
-          }
-        }
-      }}
     >
       {renderCloseButton()}
       {embedded
@@ -1348,7 +1393,6 @@ const Photo = ({
 Photo.propTypes = {
   photo: PropTypes.object.isRequired,
   refreshKey: PropTypes.number,
-  onHeightMeasured: PropTypes.func,
   embedded: PropTypes.bool,
   containerWidth: PropTypes.number,
   onRequestEnsureVisible: PropTypes.func,

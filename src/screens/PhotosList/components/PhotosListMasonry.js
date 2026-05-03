@@ -38,7 +38,6 @@ const PhotosListMasonry = ({
   expandedItemIds,
   getExpandedHeight,
   toggleExpand,
-  updateExpandedHeight,
   columns = FEED_COLUMNS
 }) => {
   const prevScrollY = useRef(0)
@@ -131,7 +130,6 @@ const PhotosListMasonry = ({
                 photo={originalPhoto}
                 embedded
                 containerWidth={dimensions.width}
-                onHeightMeasured={(h) => updateExpandedHeight(item.id, h)}
               />
             </View>
           </PhotosListContext.Provider>
@@ -157,7 +155,6 @@ const PhotosListMasonry = ({
     [
       activeSegment,
       toggleExpand,
-      updateExpandedHeight,
       onPhotoLongPress,
       removePhotoContext,
       photosById
