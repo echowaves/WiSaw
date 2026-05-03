@@ -131,13 +131,13 @@ const PhotosListMasonry = ({
                 photo={originalPhoto}
                 embedded
                 containerWidth={dimensions.width}
-                onRequestEnsureVisible={({ y, height }) => {
+                onRequestEnsureVisible={({ y, height, keyboardTop }) => {
                   if (!masonryRef?.current || !containerViewRef?.current) return
                   try {
                     containerViewRef.current.measureInWindow((mx, my, mw, mh) => {
                       if (mh > 0) {
                         const elementBottom = y + height
-                        const viewportBottom = my + mh
+                        const viewportBottom = keyboardTop || (my + mh)
                         if (elementBottom > viewportBottom) {
                           const currentOffset = prevScrollY.current || 0
                           const scrollBy = elementBottom - viewportBottom + 60

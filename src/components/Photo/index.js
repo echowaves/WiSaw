@@ -7,6 +7,7 @@ import moment from 'moment'
 import {
   Alert,
   InteractionManager,
+  Keyboard,
   StyleSheet,
   Text,
   TextInput,
@@ -598,7 +599,6 @@ const Photo = ({
   // State for photo details and refresh triggers
   const [photoDetails, setPhotoDetails] = useState(null)
   const [internalRefreshKey, setInternalRefreshKey] = useState(0)
-  const [optimisticComment, setOptimisticComment] = useState(null)
   // Collapsible state for AI sections (default collapsed when embedded/expanded)
   const [aiTagsCollapsed, setAiTagsCollapsed] = useState(embedded)
   const [aiTextCollapsed, setAiTextCollapsed] = useState(embedded)
@@ -654,16 +654,6 @@ const Photo = ({
 
     const task = InteractionManager.runAfterInteractions(async () => {
       if (componentIsMounted.current) {
-        // If this is a refresh after comment submission, add delay for backend consistency
-        const isRefreshAfterComment = internalRefreshKey > 0
-        if (isRefreshAfterComment) {
-          await new Promise((resolve) => {
-            setTimeout(resolve, 1500)
-          })
-        }
-
-        setPhotoDetails(null)
-
         const loadedPhotoDetails = await reducer.getPhotoDetails({
           photoId: photo?.id,
           uuid
@@ -676,16 +666,6 @@ const Photo = ({
             lastUpdated: Date.now()
           }
 
-          // Check if optimistic comment should be cleared after data loads
-          setTimeout(() => {
-            if (
-              optimisticComment &&
-              loadedPhotoDetails?.comments?.some((c) => c.comment === optimisticComment.comment)
-            ) {
-              setOptimisticComment(null)
-            }
-          }, 100) // Small delay to prevent flicker
-
           setPhotoDetails(newPhotoDetails)
         }
       }
@@ -695,7 +675,7 @@ const Photo = ({
       componentIsMounted.current = false
       task.cancel()
     }
-  }, [photo?.id, uuid, refreshKey, internalRefreshKey]) // Remove optimisticComment from deps
+  }, [photo?.id, uuid, refreshKey, internalRefreshKey])
 
   // Subscribe to photoRefreshBus for cross-screen comment refresh
   useEffect(() => {
@@ -707,15 +687,7 @@ const Photo = ({
     return unsubscribe
   }, [photo?.id])
 
-  // Register optimistic comment callback
-  useEffect(() => {
-    global.photoOptimisticCallbacks = global.photoOptimisticCallbacks || new Map()
-    global.photoOptimisticCallbacks.set(photo?.id, setOptimisticComment)
-
-    return () => {
-      global.photoOptimisticCallbacks?.delete(photo?.id)
-    }
-  }, [photo?.id]) // Reset component state when photo content changes (no height tracking)
+  // Reset component state when photo content changes (no height tracking)
   useEffect(() => {
     // Component setup that doesn't involve height measurements
   }, [photo?.id, refreshKey])
@@ -861,36 +833,26 @@ const Photo = ({
   }
 
   const renderCommentsRows = useMemo(() => {
-    const realComments = photoDetails?.comments || []
-    const allComments = optimisticComment ? [...realComments, optimisticComment] : realComments
+    const allComments = photoDetails?.comments || []
 
     if (allComments.length > 0) {
       return (
         <View style={embedded ? styles.commentsCardFlat : styles.commentsCard}>
           <View style={styles.commentsSection}>
-            {allComments.map((comment, i) => (
+            {allComments.map((comment) => (
               <TouchableOpacity
-                key={comment.id || `optimistic-${comment.comment}-${i}`} // More stable key
+                key={comment.id}
                 onPress={() => {
-                  if (comment.id) {
-                    // Only allow interaction with real comments
-                    setPhotoDetails(
-                      reducer.toggleCommentButtons({
-                        photoDetails,
-                        commentId: comment.id
-                      })
-                    )
-                  }
+                  setPhotoDetails(
+                    reducer.toggleCommentButtons({
+                      photoDetails,
+                      commentId: comment.id
+                    })
+                  )
                 }}
-                activeOpacity={comment.id ? 0.8 : 1} // No press feedback for optimistic comments
+                activeOpacity={0.8}
               >
-                <View
-                  style={[
-                    styles.commentCard,
-                    !comment.id && { opacity: 0.7 },
-                    comment.id ? {} : { backgroundColor: `${theme.CARD_BACKGROUND}80` } // Subtle visual difference for optimistic
-                  ]}
-                >
+                <View style={styles.commentCard}>
                   <Text style={styles.commentText}>{comment.comment}</Text>
 
                   {!comment.hiddenButtons && (
@@ -918,12 +880,10 @@ const Photo = ({
     return <View />
   }, [
     photoDetails?.comments,
-    optimisticComment,
     uuid,
     friendsList,
-    theme.CARD_BACKGROUND,
     photoDetails
-  ]) // Added photoDetails to prevent issues with toggleCommentButtons
+  ])
 
   const renderAddCommentsRow = () => {
     if (!photoDetails?.comments) {
@@ -947,21 +907,20 @@ const Photo = ({
                 if (!commentInputText.trim()) return
                 isSubmittingCommentRef.current = true
                 const text = commentInputText.trim()
-                setOptimisticComment({
-                  id: `optimistic-${Date.now()}`,
-                  comment: text,
-                  uuid,
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
-                })
                 setShowCommentInput(false)
                 setCommentInputText('')
-                await reducer.submitComment({
+                const newComment = await reducer.submitComment({
                   inputText: text,
                   uuid,
                   photo,
                   topOffset: toastTopOffset
                 })
+                if (newComment && photoDetails) {
+                  setPhotoDetails({
+                    ...photoDetails,
+                    comments: [...(photoDetails.comments || []), newComment]
+                  })
+                }
                 emitPhotoRefresh(photo?.id)
                 isSubmittingCommentRef.current = false
               }}
@@ -980,21 +939,20 @@ const Photo = ({
                 if (!commentInputText.trim()) return
                 isSubmittingCommentRef.current = true
                 const text = commentInputText.trim()
-                setOptimisticComment({
-                  id: `optimistic-${Date.now()}`,
-                  comment: text,
-                  uuid,
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString()
-                })
                 setShowCommentInput(false)
                 setCommentInputText('')
-                await reducer.submitComment({
+                const newComment = await reducer.submitComment({
                   inputText: text,
                   uuid,
                   photo,
                   topOffset: toastTopOffset
                 })
+                if (newComment && photoDetails) {
+                  setPhotoDetails({
+                    ...photoDetails,
+                    comments: [...(photoDetails.comments || []), newComment]
+                  })
+                }
                 emitPhotoRefresh(photo?.id)
                 isSubmittingCommentRef.current = false
               }}
@@ -1024,20 +982,21 @@ const Photo = ({
             }
             if (embedded) {
               setShowCommentInput(true)
-              // Scroll the input into view after it renders and keyboard appears
-              setTimeout(() => {
+              // Scroll the input into view once the keyboard has fully appeared
+              const keyboardSub = Keyboard.addListener('keyboardDidShow', (e) => {
                 try {
                   if (typeof onRequestEnsureVisible === 'function' && commentInputRef.current) {
                     commentInputRef.current.measureInWindow((x, y, w, h) => {
                       if (h > 0) {
-                        onRequestEnsureVisible({ y, height: h })
+                        onRequestEnsureVisible({ y, height: h, keyboardTop: e.endCoordinates.screenY })
                       }
                     })
                   }
-                } catch (e) {
+                } catch (err) {
                   // best-effort
                 }
-              }, 300)
+                keyboardSub.remove()
+              })
             } else {
               router.push({
                 pathname: '/modal-input',

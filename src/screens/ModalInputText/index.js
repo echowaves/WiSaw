@@ -133,20 +133,6 @@ const ModalInputText = ({ route }) => {
     try {
       const commentText = inputText.trim()
 
-      // Create optimistic comment immediately
-      const optimisticComment = {
-        comment: commentText,
-        uuid,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString() // Add updatedAt for consistent date rendering
-        // No id to distinguish from real comments
-      }
-
-      // Show optimistic comment immediately
-      if (global.photoOptimisticCallbacks?.has(photo?.id)) {
-        global.photoOptimisticCallbacks.get(photo?.id)(optimisticComment)
-      }
-
       // Navigate back immediately for better UX
       router.back()
 
@@ -158,17 +144,11 @@ const ModalInputText = ({ route }) => {
         topOffset
       })
 
-      // Trigger refresh after a shorter delay to reduce flickering
-      setTimeout(() => {
-        emitPhotoRefresh({ photoId: photo?.id })
-      }, 300)
+      // Trigger refresh so the Photo component reloads with the real comment
+      emitPhotoRefresh({ photoId: photo?.id })
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('❌ ModalInputText: Error submitting comment:', error)
-      // Clear optimistic comment on error
-      if (global.photoOptimisticCallbacks?.has(photo?.id)) {
-        global.photoOptimisticCallbacks.get(photo?.id)(null)
-      }
     }
   }
 

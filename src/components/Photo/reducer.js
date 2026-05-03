@@ -185,7 +185,8 @@ export async function submitComment ({ inputText, photo, uuid, topOffset }) {
               id
               active
               comment
-              createdAt
+              updatedAt
+              uuid
             }
           }
         `,
@@ -206,6 +207,8 @@ export async function submitComment ({ inputText, photo, uuid, topOffset }) {
       topOffset,
       visibilityTime: 500
     })
+
+    return { ...comment, hiddenButtons: true }
   } catch (err5) {
     console.error({ err5 }) // eslint-disable-line
     Toast.show({
