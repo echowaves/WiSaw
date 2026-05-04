@@ -35,6 +35,11 @@ When the Photo component is rendered in embedded mode (`embedded === true`) with
 - **THEN** the inline input SHALL collapse back to the "Add Comment" button
 - **THEN** any unsent text SHALL be discarded
 
+#### Scenario: Close button position
+- **WHEN** the inline comment input is displayed
+- **THEN** the close button (X) appears before the text input field
+- **AND** the send button appears after the text input field
+
 #### Scenario: User taps outside the inline input
 - **WHEN** the user taps outside the inline input causing the TextInput to lose focus
 - **THEN** the inline input SHALL remain visible (NOT auto-dismiss)
@@ -75,3 +80,11 @@ The inline comment input SHALL respect wave freeze state, matching the existing 
 - **WHEN** the user taps "Add Comment" on a photo in a frozen wave and the user is not the wave owner
 - **THEN** a toast SHALL display "Comments are locked for frozen waves"
 - **THEN** the inline input SHALL NOT appear
+
+### Requirement: Send button disabled state
+The send button SHALL be disabled when the text input is empty.
+
+#### Scenario: Send button disabled when input is empty
+- **WHEN** the text input is empty
+- **THEN** the send button is disabled (opacity 0.4)
+- **AND** the close button remains enabled
