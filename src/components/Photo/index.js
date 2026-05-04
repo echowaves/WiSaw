@@ -895,6 +895,15 @@ const Photo = ({
       return (
         <View style={styles.addCommentCard} ref={commentInputRef}>
           <View style={styles.inlineCommentInputRow}>
+            <TouchableOpacity
+              onPress={() => {
+                setShowCommentInput(false)
+                setCommentInputText('')
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
+            </TouchableOpacity>
             <TextInput
               style={styles.inlineCommentInput}
               placeholder='Add a comment...'
@@ -925,15 +934,6 @@ const Photo = ({
                 isSubmittingCommentRef.current = false
               }}
             />
-            <TouchableOpacity
-              onPress={() => {
-                setShowCommentInput(false)
-                setCommentInputText('')
-              }}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Ionicons name='close-circle' size={20} color={theme.TEXT_SECONDARY} />
-            </TouchableOpacity>
             <TouchableOpacity
               onPress={async () => {
                 if (!commentInputText.trim()) return
