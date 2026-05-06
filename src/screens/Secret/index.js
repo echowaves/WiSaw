@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 
 import {
   Alert,
-  Animated,
   Keyboard,
   SafeAreaView,
   Text,
@@ -77,27 +76,6 @@ const SecretScreen = () => {
 
   const [errorsMap, setErrorsMap] = useState(new Map())
 
-  // Animation values
-  const fadeAnim = React.useRef(new Animated.Value(0)).current
-  const scaleAnim = React.useRef(new Animated.Value(1)).current
-
-  // Animate components when render branch changes
-  useEffect(() => {
-    fadeAnim.setValue(0)
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true
-      })
-    ]).start()
-  }, [hasSeenExplainer])
 
   const resetFields = async () => {
     const nnn = await reducer.getStoredNickName()
@@ -283,12 +261,7 @@ const SecretScreen = () => {
             contentInsetAdjustmentBehavior='automatic'
             bottomOffset={20}
           >
-            <Animated.View
-              style={{
-                opacity: fadeAnim,
-                transform: [{ scale: scaleAnim }]
-              }}
-            >
+            <View>
               <IdentityProfileCard nickName={nickNameText} theme={theme} />
 
               <View style={styles.actionsContainer}>
@@ -371,7 +344,7 @@ const SecretScreen = () => {
               </View>
 
               <PrivacyNoticeCard theme={theme} />
-            </Animated.View>
+            </View>
           </KeyboardAwareScrollView>
         </TouchableWithoutFeedback>
       </SafeAreaView>
@@ -399,12 +372,7 @@ const SecretScreen = () => {
           contentInsetAdjustmentBehavior='automatic'
           bottomOffset={20}
         >
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }]
-            }}
-          >
+          <View>
             <View style={styles.creationHeader}>
               <View style={styles.creationIconContainer}>
                 <FontAwesome5 name='user-shield' size={40} color='#EA5E3D' />
@@ -472,7 +440,7 @@ const SecretScreen = () => {
             />
 
             <PrivacyNoticeCard theme={theme} />
-          </Animated.View>
+          </View>
         </KeyboardAwareScrollView>
       </TouchableWithoutFeedback>
     </SafeAreaView>
