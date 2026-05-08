@@ -38,7 +38,8 @@ const PhotosListMasonry = ({
   expandedItemIds,
   getExpandedHeight,
   toggleExpand,
-  columns = FEED_COLUMNS
+  columns = FEED_COLUMNS,
+  onCommentInputToggle
 }) => {
   const prevScrollY = useRef(0)
   const [showFob, setShowFob] = useState(false)
@@ -128,10 +129,11 @@ const PhotosListMasonry = ({
                 <Ionicons name='close' size={20} color='white' />
               </TouchableOpacity>
               <Photo
-                photo={originalPhoto}
-                embedded
-                containerWidth={dimensions.width}
-                onRequestEnsureVisible={({ y, height, keyboardTop }) => {
+               photo={originalPhoto}
+               embedded
+               containerWidth={dimensions.width}
+               onCommentInputToggle={onCommentInputToggle}
+               onRequestEnsureVisible={({ y, height, keyboardTop }) => {
                   if (!masonryRef?.current || !containerViewRef?.current) return
                   try {
                     containerViewRef.current.measureInWindow((mx, my, mw, mh) => {

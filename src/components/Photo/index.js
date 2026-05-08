@@ -569,7 +569,8 @@ const Photo = ({
   embedded = true,
   containerWidth: containerWidthProp,
   onRequestEnsureVisible,
-  onTriggerSearch
+  onTriggerSearch,
+  onCommentInputToggle
 }) => {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
@@ -607,6 +608,13 @@ const Photo = ({
   const [commentInputText, setCommentInputText] = useState('')
   const isSubmittingCommentRef = useRef(false)
   const commentInputRef = useRef(null)
+
+  // Notify parent when comment input opens/closes
+  useEffect(() => {
+    if (onCommentInputToggle && typeof onCommentInputToggle === 'function') {
+      onCommentInputToggle(showCommentInput)
+    }
+  }, [showCommentInput, onCommentInputToggle])
 
   const {
     handleBan,
@@ -1384,7 +1392,8 @@ Photo.propTypes = {
   embedded: PropTypes.bool,
   containerWidth: PropTypes.number,
   onRequestEnsureVisible: PropTypes.func,
-  onTriggerSearch: PropTypes.func
+  onTriggerSearch: PropTypes.func,
+  onCommentInputToggle: PropTypes.func
 }
 
 export default Photo

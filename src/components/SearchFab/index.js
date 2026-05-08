@@ -21,7 +21,8 @@ const SearchFab = ({
   setIsExpanded,
   theme,
   footerHeight,
-  screenWidth
+  screenWidth,
+  isCommentEditing = false
 }) => {
   const progress = useSharedValue(isExpanded ? 1 : 0)
   const inputRef = useRef(null)
@@ -54,6 +55,13 @@ const SearchFab = ({
   const inputOpacity = useAnimatedStyle(() => ({
     opacity: interpolate(progress.value, [0.4, 0.8], [0, 1]),
     width: progress.value > 0.3 ? 'auto' : 0
+  }))
+
+  // Fade out when comment editing is active
+  const fabVisibilityStyle = useAnimatedStyle(() => ({
+    opacity: isCommentEditing
+      ? withSpring(0, { damping: 15, stiffness: 120 })
+      : withSpring(1, { damping: 15, stiffness: 120 })
   }))
 
   // FAB button slides from left to right when expanding
@@ -89,9 +97,10 @@ const SearchFab = ({
     <Animated.View
       style={[
         styles.wrapper,
-        keyboardStyle
+        keyboardStyle,
+        fabVisibilityStyle
       ]}
-      pointerEvents='box-none'
+      pointerEvents={isCommentEditing ? 'none' : 'box-none'}
     >
       {/* Expanding search bar background */}
       <Animated.View

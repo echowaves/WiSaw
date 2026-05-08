@@ -45,6 +45,8 @@ const BookmarksList = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
   const theme = getTheme(isDarkMode)
+    // Comment editing state for SearchFab visibility
+  const [isCommentEditing, setIsCommentEditing] = useState(false)
 
   const headerTitle = (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -218,18 +220,20 @@ const BookmarksList = () => {
               expandedItemIds={expandedItemIds}
               getExpandedHeight={getExpandedHeight}
               toggleExpand={toggleExpand}
-            />
+              onCommentInputToggle={setIsCommentEditing}
+              />
           </View>
           <SearchFab
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onSubmitSearch={submitSearch}
-            onClearSearch={handleClearSearch}
-            isExpanded={isSearchExpanded}
-            setIsExpanded={setIsSearchExpanded}
-            theme={theme}
-            footerHeight={FOOTER_HEIGHT}
-            screenWidth={width}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSubmitSearch={submitSearch}
+          onClearSearch={handleClearSearch}
+          isExpanded={isSearchExpanded}
+          setIsExpanded={setIsSearchExpanded}
+          theme={theme}
+          footerHeight={FOOTER_HEIGHT}
+          screenWidth={width}
+          isCommentEditing={isCommentEditing}
           />
           <QuickActionsModal
             visible={!!longPressPhoto}
@@ -291,15 +295,16 @@ const BookmarksList = () => {
           <EmptyStateCard {...emptyStateProps} />
         </ScrollView>
         <SearchFab
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSubmitSearch={submitSearch}
-          onClearSearch={handleClearSearch}
-          isExpanded={isSearchExpanded}
-          setIsExpanded={setIsSearchExpanded}
-          theme={theme}
-          footerHeight={FOOTER_HEIGHT}
-          screenWidth={width}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSubmitSearch={submitSearch}
+        onClearSearch={handleClearSearch}
+        isExpanded={isSearchExpanded}
+        setIsExpanded={setIsSearchExpanded}
+        theme={theme}
+        footerHeight={FOOTER_HEIGHT}
+        screenWidth={width}
+        isCommentEditing={isCommentEditing}
         />
         <PhotosListFooter
           theme={theme}
@@ -338,15 +343,16 @@ const BookmarksList = () => {
           ))}
       </ScrollView>
       <SearchFab
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onSubmitSearch={submitSearch}
-        onClearSearch={handleClearSearch}
-        isExpanded={isSearchExpanded}
-        setIsExpanded={setIsSearchExpanded}
-        theme={theme}
-        footerHeight={FOOTER_HEIGHT}
-        screenWidth={width}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      onSubmitSearch={submitSearch}
+      onClearSearch={handleClearSearch}
+      isExpanded={isSearchExpanded}
+      setIsExpanded={setIsSearchExpanded}
+      theme={theme}
+      footerHeight={FOOTER_HEIGHT}
+      screenWidth={width}
+      isCommentEditing={isCommentEditing}
       />
       <PhotosListFooter
         theme={theme}

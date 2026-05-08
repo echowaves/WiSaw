@@ -197,6 +197,8 @@ const PhotosList = ({ searchFromUrl }) => {
   const [isTandcAccepted, setIsTandcAccepted] = useState(true)
   const [zeroMoment, setZeroMoment] = useState(0)
   const [locationDismissed, setLocationDismissed] = useState(false)
+  // Comment editing state for SearchFab visibility
+  const [isCommentEditing, setIsCommentEditing] = useState(false)
 
   const DRIFT_THRESHOLD = 500 // meters
   const showDriftBanner = useMemo(() => {
@@ -497,18 +499,20 @@ const PhotosList = ({ searchFromUrl }) => {
               expandedItemIds={expandedItemIds}
               getExpandedHeight={getExpandedHeight}
               toggleExpand={toggleExpand}
-            />
+              onCommentInputToggle={setIsCommentEditing}
+             />
           </View>
           <SearchFab
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            onSubmitSearch={submitSearch}
-            onClearSearch={handleClearSearch}
-            isExpanded={isSearchExpanded}
-            setIsExpanded={setIsSearchExpanded}
-            theme={theme}
-            footerHeight={FOOTER_HEIGHT}
-            screenWidth={width}
+           searchTerm={searchTerm}
+           setSearchTerm={setSearchTerm}
+           onSubmitSearch={submitSearch}
+           onClearSearch={handleClearSearch}
+           isExpanded={isSearchExpanded}
+           setIsExpanded={setIsSearchExpanded}
+           theme={theme}
+           footerHeight={FOOTER_HEIGHT}
+           screenWidth={width}
+           isCommentEditing={isCommentEditing}
           />
           <PhotosListFooter
             theme={theme}
