@@ -34,7 +34,7 @@ import * as CONST from '../../consts'
 //       }
 //     default:
 //       return state
-//   }
+//    }
 // }
 
 export async function registerSecret ({ secret, topOffset, nickName, uuid }) {
@@ -69,6 +69,8 @@ export async function registerSecret ({ secret, topOffset, nickName, uuid }) {
       text1: 'Secret attached to this device.',
       topOffset
     })
+
+    return returnedSecret
   } catch (err9) {
     console.log({ err9 })
     Toast.show({
@@ -113,6 +115,8 @@ export async function updateSecret ({ nickName, oldSecret, secret, uuid, topOffs
       text1: 'Secret updated.',
       topOffset
     })
+
+    return updatedSecret
   } catch (err10) {
     console.error({ err10 })
     Toast.show({

@@ -44,7 +44,7 @@ import { getStyles } from './styles'
 import { validateAllFields } from './utils/validation'
 
 const SecretScreen = () => {
-  const [uuid] = useAtom(STATE.uuid)
+  const [uuid, setUuid] = useAtom(STATE.uuid)
   const [, setNickName] = useAtom(STATE.nickName)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
@@ -53,7 +53,7 @@ const SecretScreen = () => {
 
   const theme = getTheme(isDarkMode)
 
-  // Get safe area view style for proper status bar handling on Android
+   // Get safe area view style for proper status bar handling on Android
   const safeAreaViewStyle = useSafeAreaViewStyle()
 
   const [nickNameEntered, setNickNameEntered] = useState(false)
@@ -85,31 +85,33 @@ const SecretScreen = () => {
     setSecret('')
     setSecretConfirm('')
     setShowChangeSecret(false)
-  }
+   }
   const handleSubmit = async () => {
     if (isSubmitting) return
 
     setIsSubmitting(true)
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
 
+    let result
     try {
       if (nickNameEntered) {
-        await reducer.updateSecret({
+        result = await reducer.updateSecret({
           nickName: nickNameText,
           oldSecret,
           secret,
           uuid,
           topOffset: toastTopOffset
-        })
-      } else {
-        await reducer.registerSecret({
+         })
+       } else {
+        result = await reducer.registerSecret({
           secret,
           topOffset: toastTopOffset,
           nickName: nickNameText,
           uuid
-        })
-      }
+         })
+        }
       setNickName(nickNameText)
+      setUuid(result.uuid)
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       Toast.show({
@@ -117,14 +119,14 @@ const SecretScreen = () => {
         text2: nickNameEntered ? 'Your secret has been updated.' : 'Identity attached to this device.',
         topOffset: toastTopOffset,
         type: 'success'
-      })
+       })
 
       await resetFields()
       emitIdentityChange()
-    } catch (error) {
+     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
 
-      // Parse error message for more specific feedback
+       // Parse error message for more specific feedback
       let errorTitle = 'Error'
       let errorMessage = 'Failed to save your identity. Please try again.'
 
@@ -132,88 +134,88 @@ const SecretScreen = () => {
         if (error.message.includes('network') || error.message.includes('Network')) {
           errorTitle = 'Connection Error'
           errorMessage = 'Please check your internet connection and try again.'
-        } else if (error.message.includes('invalid') || error.message.includes('Invalid')) {
+         } else if (error.message.includes('invalid') || error.message.includes('Invalid')) {
           errorTitle = 'Invalid Data'
           errorMessage = 'Please check your information and try again.'
-        } else if (error.message.includes('exists') || error.message.includes('duplicate')) {
+         } else if (error.message.includes('exists') || error.message.includes('duplicate')) {
           errorTitle = 'Name Already Taken'
           errorMessage = 'This nickname is already in use. Please choose a different one.'
-        } else if (
+         } else if (
           error.message.includes('unauthorized') ||
           error.message.includes('Unauthorized')
-        ) {
+         ) {
           errorTitle = 'Authentication Error'
           errorMessage = 'Your current secret is incorrect. Please verify and try again.'
-        } else {
+         } else {
           errorMessage = error.message
-        }
-      }
+         }
+       }
 
       Toast.show({
         text1: errorTitle,
         text2: errorMessage,
         type: 'error',
         topOffset: toastTopOffset
-      })
-    } finally {
+       })
+     } finally {
       setIsSubmitting(false)
-    }
-  }
+     }
+   }
 
   useEffect(() => {
     resetFields()
-  }, [])
+   }, [])
 
-  // Check if user has seen privacy explainer
+   // Check if user has seen privacy explainer
   useEffect(() => {
     const checkExplainer = async () => {
       try {
         const seen = await Storage.getItem({ key: 'identityPrivacyExplainerSeen' })
         setHasSeenExplainer(!!seen)
-      } catch { /* noop */ }
-    }
+       } catch { /* noop */ }
+     }
     checkExplainer()
-  }, [])
+   }, [])
 
   const handleDismissExplainer = async () => {
     setHasSeenExplainer(true)
     try {
       await Storage.setItem({ key: 'identityPrivacyExplainerSeen', value: 'true' })
-    } catch { /* noop */ }
-  }
+     } catch { /* noop */ }
+   }
 
-  // Calculate password strength
+   // Calculate password strength
   useEffect(() => {
     try {
       setStrength(zxcvbn(secret).score) // from 0 to 4
-    } catch (error) {
+     } catch (error) {
       setStrength(0)
-    }
-  }, [secret])
+     }
+   }, [secret])
 
-  // Validate all fields
+   // Validate all fields
   useEffect(() => {
     const errors = validateAllFields(nickNameText, secret, secretConfirm, strength)
     setErrorsMap(errors)
-  }, [nickNameText, secret, secretConfirm, strength])
+   }, [nickNameText, secret, secretConfirm, strength])
 
   useEffect(() => {
     if (errorsMap.size === 0 && secret.length > 0) {
       setCanSubmit(true)
-    } else {
+     } else {
       setCanSubmit(false)
-    }
-  }, [errorsMap])
+     }
+   }, [errorsMap])
 
   const styles = getStyles(theme)
 
   const handleReset = async () => {
     Alert.alert(
-      'Detach Identity from This Device?',
-      'This removes your identity from this device only. Your nickname and secret still work — you can re-attach here or on any other device anytime, as long as you remember them.\n\nIf you forget your nickname or secret, no one can recover them — including us.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
+       'Detach Identity from This Device?',
+       'This removes your identity from this device only. Your nickname and secret still work — you can re-attach here or on any other device anytime, as long as you remember them.\n\nIf you forget your nickname or secret, no one can recover them — including us.',
+       [
+         { text: 'Cancel', style: 'cancel' },
+         {
           text: 'Detach',
           style: 'destructive',
           onPress: async () => {
@@ -225,225 +227,225 @@ const SecretScreen = () => {
               text1: 'Identity detached',
               text2: 'Enter your nickname and secret to re-attach',
               topOffset: toastTopOffset
-            })
-          }
-        }
-      ],
-      { cancelable: true }
-    )
-  }
+             })
+           }
+         }
+       ],
+       { cancelable: true }
+     )
+   }
 
   if (!netAvailable) {
     return (
-      <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
-        <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
-          <EmptyStateCard
-            icon='wifi-off'
-            iconType='MaterialIcons'
-            title='No Internet Connection'
-            subtitle='Identity management requires an internet connection. Please check your connection and try again.'
-          />
-        </View>
-      </SafeAreaView>
-    )
-  }
+       <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+         <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
+           <EmptyStateCard
+             icon='wifi-off'
+             iconType='MaterialIcons'
+             title='No Internet Connection'
+             subtitle='Identity management requires an internet connection. Please check your connection and try again.'
+            />
+         </View>
+       </SafeAreaView>
+     )
+   }
 
-  // ── Active Identity View ──
+   // ── Active Identity View ──
   if (nickNameEntered) {
     return (
-      <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <KeyboardAwareScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps='handled'
-            contentInsetAdjustmentBehavior='automatic'
-            bottomOffset={20}
+       <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+           <KeyboardAwareScrollView
+             style={styles.scrollView}
+             contentContainerStyle={styles.contentContainer}
+             showsVerticalScrollIndicator={false}
+             keyboardShouldPersistTaps='handled'
+             contentInsetAdjustmentBehavior='automatic'
+             bottomOffset={20}
+            >
+              <View>
+                <IdentityProfileCard nickName={nickNameText} theme={theme} />
+
+                <View style={styles.actionsContainer}>
+                  <ActionRow
+                   icon='key'
+                   label='Change Secret'
+                   onPress={() => setShowChangeSecret(!showChangeSecret)}
+                   theme={theme}
+                   />
+
+                  {showChangeSecret && (
+                    <View style={styles.formCard}>
+                      <SecretInputField
+                       placeholder='Current secret'
+                       value={oldSecret}
+                       onChangeText={setOldSecret}
+                       showPassword={showOldPassword}
+                       setShowPassword={setShowOldPassword}
+                       theme={theme}
+                       leftIconName='key'
+                       />
+
+                      <SecretInputField
+                       placeholder='New secret'
+                       value={secret}
+                       onChangeText={setSecret}
+                       showPassword={showPassword}
+                       setShowPassword={setShowPassword}
+                       theme={theme}
+                       />
+
+                      {secret.length > 0 && (
+                        <PasswordStrengthIndicator
+                         strength={strength}
+                         theme={theme}
+                         errorMessage={errorsMap.get('secret')}
+                         />
+                       )}
+
+                      <SecretInputField
+                       placeholder='Confirm secret'
+                       value={secretConfirm}
+                       onChangeText={setSecretConfirm}
+                       showPassword={showConfirmPassword}
+                       setShowPassword={setShowConfirmPassword}
+                       theme={theme}
+                       errorMessage={errorsMap.get('secretConfirm')}
+                       leftIconName='check-circle'
+                       />
+
+                      <Button
+                       title={isSubmitting ? 'Updating...' : 'Update Secret'}
+                       icon={
+                          <FontAwesome5
+                           name={isSubmitting ? 'hourglass' : 'edit'}
+                           size={18}
+                           color='white'
+                           style={{ marginRight: 8 }}
+                           />
+                         }
+                       size='lg'
+                       buttonStyle={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
+                       titleStyle={styles.submitButtonTitle}
+                       onPress={handleSubmit}
+                       disabled={!canSubmit || isSubmitting}
+                       loading={isSubmitting}
+                       />
+                    </View>
+                  )}
+
+                  <View style={{ height: 12 }} />
+
+                  <ActionRow
+                   icon='unlink'
+                   label='Detach from This Device'
+                   onPress={handleReset}
+                   destructive
+                   theme={theme}
+                   />
+                </View>
+
+                <PrivacyNoticeCard theme={theme} />
+              </View>
+            </KeyboardAwareScrollView>
+         </TouchableWithoutFeedback>
+       </SafeAreaView>
+     )
+   }
+
+   // ── No Identity — Privacy Explainer Gate ──
+  if (!hasSeenExplainer) {
+    return (
+       <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+         <PrivacyExplainerView theme={theme} onDismiss={handleDismissExplainer} />
+       </SafeAreaView>
+     )
+   }
+
+   // ── No Identity — Creation Flow ──
+  return (
+     <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+         <KeyboardAwareScrollView
+           style={styles.scrollView}
+           contentContainerStyle={styles.contentContainer}
+           showsVerticalScrollIndicator={false}
+           keyboardShouldPersistTaps='handled'
+           contentInsetAdjustmentBehavior='automatic'
+           bottomOffset={20}
           >
             <View>
-              <IdentityProfileCard nickName={nickNameText} theme={theme} />
-
-              <View style={styles.actionsContainer}>
-                <ActionRow
-                  icon='key'
-                  label='Change Secret'
-                  onPress={() => setShowChangeSecret(!showChangeSecret)}
-                  theme={theme}
-                />
-
-                {showChangeSecret && (
-                  <View style={styles.formCard}>
-                    <SecretInputField
-                      placeholder='Current secret'
-                      value={oldSecret}
-                      onChangeText={setOldSecret}
-                      showPassword={showOldPassword}
-                      setShowPassword={setShowOldPassword}
-                      theme={theme}
-                      leftIconName='key'
-                    />
-
-                    <SecretInputField
-                      placeholder='New secret'
-                      value={secret}
-                      onChangeText={setSecret}
-                      showPassword={showPassword}
-                      setShowPassword={setShowPassword}
-                      theme={theme}
-                    />
-
-                    {secret.length > 0 && (
-                      <PasswordStrengthIndicator
-                        strength={strength}
-                        theme={theme}
-                        errorMessage={errorsMap.get('secret')}
-                      />
-                    )}
-
-                    <SecretInputField
-                      placeholder='Confirm secret'
-                      value={secretConfirm}
-                      onChangeText={setSecretConfirm}
-                      showPassword={showConfirmPassword}
-                      setShowPassword={setShowConfirmPassword}
-                      theme={theme}
-                      errorMessage={errorsMap.get('secretConfirm')}
-                      leftIconName='check-circle'
-                    />
-
-                    <Button
-                      title={isSubmitting ? 'Updating...' : 'Update Secret'}
-                      icon={
-                        <FontAwesome5
-                          name={isSubmitting ? 'hourglass' : 'edit'}
-                          size={18}
-                          color='white'
-                          style={{ marginRight: 8 }}
-                        />
-                      }
-                      size='lg'
-                      buttonStyle={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
-                      titleStyle={styles.submitButtonTitle}
-                      onPress={handleSubmit}
-                      disabled={!canSubmit || isSubmitting}
-                      loading={isSubmitting}
-                    />
-                  </View>
-                )}
-
-                <View style={{ height: 12 }} />
-
-                <ActionRow
-                  icon='unlink'
-                  label='Detach from This Device'
-                  onPress={handleReset}
-                  destructive
-                  theme={theme}
-                />
+              <View style={styles.creationHeader}>
+                <View style={styles.creationIconContainer}>
+                  <FontAwesome5 name='user-shield' size={40} color='#EA5E3D' />
+                </View>
+                <Text style={styles.creationTitle}>Attach Identity to This Device</Text>
+                <Text style={styles.creationSubtitle}>
+                 Enter a nickname and secret. New here? We'll create your identity. Returning on a new device? We'll reconnect you to your existing one — same nickname and secret work anywhere.
+                </Text>
               </View>
+
+              <View style={styles.formCard}>
+                <NicknameInputField
+                 value={nickNameText}
+                 onChangeText={setNickNameText}
+                 disabled={false}
+                 theme={theme}
+                 errorMessage={errorsMap.get('nickName')}
+                 />
+
+                <SecretInputField
+                 placeholder='New secret'
+                 value={secret}
+                 onChangeText={setSecret}
+                 showPassword={showPassword}
+                 setShowPassword={setShowPassword}
+                 theme={theme}
+                 />
+
+                {secret.length > 0 && (
+                  <PasswordStrengthIndicator
+                   strength={strength}
+                   theme={theme}
+                   errorMessage={errorsMap.get('secret')}
+                   />
+                 )}
+
+                <SecretInputField
+                 placeholder='Confirm secret'
+                 value={secretConfirm}
+                 onChangeText={setSecretConfirm}
+                 showPassword={showConfirmPassword}
+                 setShowPassword={setShowConfirmPassword}
+                 theme={theme}
+                 errorMessage={errorsMap.get('secretConfirm')}
+                 leftIconName='check-circle'
+                 />
+              </View>
+
+              <Button
+               title={isSubmitting ? 'Attaching...' : 'Attach Identity'}
+               icon={
+                  <FontAwesome5
+                   name={isSubmitting ? 'hourglass' : 'link'}
+                   size={18}
+                   color='white'
+                   style={{ marginRight: 8 }}
+                   />
+                 }
+               size='lg'
+               buttonStyle={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
+               titleStyle={styles.submitButtonTitle}
+               onPress={handleSubmit}
+               disabled={!canSubmit || isSubmitting}
+               loading={isSubmitting}
+               />
 
               <PrivacyNoticeCard theme={theme} />
             </View>
           </KeyboardAwareScrollView>
-        </TouchableWithoutFeedback>
-      </SafeAreaView>
-    )
-  }
-
-  // ── No Identity — Privacy Explainer Gate ──
-  if (!hasSeenExplainer) {
-    return (
-      <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
-        <PrivacyExplainerView theme={theme} onDismiss={handleDismissExplainer} />
-      </SafeAreaView>
-    )
-  }
-
-  // ── No Identity — Creation Flow ──
-  return (
-    <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <KeyboardAwareScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.contentContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps='handled'
-          contentInsetAdjustmentBehavior='automatic'
-          bottomOffset={20}
-        >
-          <View>
-            <View style={styles.creationHeader}>
-              <View style={styles.creationIconContainer}>
-                <FontAwesome5 name='user-shield' size={40} color='#EA5E3D' />
-              </View>
-              <Text style={styles.creationTitle}>Attach Identity to This Device</Text>
-              <Text style={styles.creationSubtitle}>
-                Enter a nickname and secret. New here? We’ll create your identity. Returning on a new device? We’ll reconnect you to your existing one — same nickname and secret work anywhere.
-              </Text>
-            </View>
-
-            <View style={styles.formCard}>
-              <NicknameInputField
-                value={nickNameText}
-                onChangeText={setNickNameText}
-                disabled={false}
-                theme={theme}
-                errorMessage={errorsMap.get('nickName')}
-              />
-
-              <SecretInputField
-                placeholder='New secret'
-                value={secret}
-                onChangeText={setSecret}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
-                theme={theme}
-              />
-
-              {secret.length > 0 && (
-                <PasswordStrengthIndicator
-                  strength={strength}
-                  theme={theme}
-                  errorMessage={errorsMap.get('secret')}
-                />
-              )}
-
-              <SecretInputField
-                placeholder='Confirm secret'
-                value={secretConfirm}
-                onChangeText={setSecretConfirm}
-                showPassword={showConfirmPassword}
-                setShowPassword={setShowConfirmPassword}
-                theme={theme}
-                errorMessage={errorsMap.get('secretConfirm')}
-                leftIconName='check-circle'
-              />
-            </View>
-
-            <Button
-              title={isSubmitting ? 'Attaching...' : 'Attach Identity'}
-              icon={
-                <FontAwesome5
-                  name={isSubmitting ? 'hourglass' : 'link'}
-                  size={18}
-                  color='white'
-                  style={{ marginRight: 8 }}
-                />
-              }
-              size='lg'
-              buttonStyle={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
-              titleStyle={styles.submitButtonTitle}
-              onPress={handleSubmit}
-              disabled={!canSubmit || isSubmitting}
-              loading={isSubmitting}
-            />
-
-            <PrivacyNoticeCard theme={theme} />
-          </View>
-        </KeyboardAwareScrollView>
-      </TouchableWithoutFeedback>
-    </SafeAreaView>
-  )
-}
+       </TouchableWithoutFeedback>
+     </SafeAreaView>
+   )
+ }
 export default SecretScreen

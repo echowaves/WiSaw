@@ -1,7 +1,4 @@
-## Purpose
-This specification defines expected user-visible behavior, constraints, and validation scenarios for user identity in WiSaw.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Identity Management Screen
 The system SHALL provide an identity screen with two distinct visual states: an attach flow when no identity exists on the device, and an active-identity profile view when an identity is attached. The attach flow SHALL be framed as binding the device to either a new or pre-existing identity (not as account creation), since the backend `registerSecret` mutation is idempotent on `(nickName, secret)`.
@@ -72,6 +69,8 @@ The show/hide password toggle icon in `SecretInputField` SHALL be vertically cen
 #### Scenario: Toggle icon has adequate tap target
 - **WHEN** the toggle icon renders
 - **THEN** it SHALL have at least `padding: 8` to ensure a comfortable tap target without relying on absolute positioning
+
+## ADDED Requirements
 
 ### Requirement: Identity atoms synchronize on attach
 When the user establishes identity on a device (attach flow succeeds), the system SHALL update both the `uuid` and `nickName` Jotai atoms synchronously, ensuring all identity-change subscribers receive the complete identity immediately.
