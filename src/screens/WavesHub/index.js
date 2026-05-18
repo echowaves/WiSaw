@@ -9,9 +9,10 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
-  useWindowDimensions
+  useWindowDimensions,
+  AppState
 } from 'react-native'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router, useFocusEffect } from 'expo-router'
@@ -34,10 +35,12 @@ import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
-import { subscribeToAddWave, emitAddWave } from '../../events/waveAddBus'
+import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
+import { useLocationDrift } from '../../hooks/useLocationDrift'
+import { setLastTriggerLocation } from '../../utils/groupingAtom'
 
 const WavesHub = () => {
   const insets = useSafeAreaInsets()
@@ -50,6 +53,7 @@ const WavesHub = () => {
   const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
   const [, setWavesCount] = useAtom(STATE.wavesCount)
   const [ungroupedCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
+  const location = useAtomValue(STATE.locationAtom)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -87,6 +91,10 @@ const WavesHub = () => {
   // Share modal state
   const [shareModalWave, setShareModalWave] = useState(null)
 
+  // Auto-group location drift detection
+  const { shouldTrigger, isReady: driftReady } = useLocationDrift()
+  const autoGroupTriggeredRef = useRef(false)
+
   const loadingRef = useRef(false)
   const hasMountedRef = useRef(false)
 
@@ -116,11 +124,6 @@ const WavesHub = () => {
     return unsubscribe
   }, [fetchCounts])
 
-  const autoGroupLabel =
-    (ungroupedCount ?? 0) > 0
-      ? `Auto Group (${ungroupedCount ?? 0} ungrouped)`
-      : 'Auto Group'
-
   const sortOptions = [
     { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
     { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
@@ -129,19 +132,6 @@ const WavesHub = () => {
   ]
 
   const headerMenuItems = [
-    {
-      key: 'create',
-      icon: 'plus-circle-outline',
-      label: 'Create New Wave',
-      onPress: () => emitAddWave()
-    },
-    {
-      key: 'autogroup',
-      icon: 'view-grid-plus-outline',
-      label: autoGroupLabel,
-      onPress: () => emitAutoGroup(ungroupedCount ?? 0)
-    },
-    'separator',
     ...sortOptions.map((opt, i) => ({
       key: `sort-${i}`,
       icon: opt.icon,
@@ -158,42 +148,68 @@ const WavesHub = () => {
   ]
 
   const headerRightSlot = (
-    <TouchableOpacity
-      onPress={() => setHeaderMenuVisible(true)}
-      style={[
-        SHARED_STYLES.interactive.headerButton,
-        {
-          backgroundColor: theme.INTERACTIVE_BACKGROUND,
-          borderWidth: 1,
-          borderColor: theme.INTERACTIVE_BORDER,
-          flexDirection: 'row',
-          alignItems: 'center'
-        }
-      ]}
-    >
-      <MaterialCommunityIcons
-        name='dots-vertical'
-        size={22}
-        color={theme.TEXT_PRIMARY}
-      />
-      {(ungroupedCount ?? 0) > 0 && (
-        <View
-          style={{
-            backgroundColor: '#FF3B30',
-            borderRadius: 10,
-            height: 20,
-            justifyContent: 'center',
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      {/* Grouping Settings Button */}
+      <TouchableOpacity
+        onPress={() => router.push('/grouping-settings')}
+        style={[
+          SHARED_STYLES.interactive.headerButton,
+          {
+            backgroundColor: theme.INTERACTIVE_BACKGROUND,
+            borderWidth: 1,
+            borderColor: theme.INTERACTIVE_BORDER,
+            flexDirection: 'row',
             alignItems: 'center',
-            paddingHorizontal: 6,
-            marginLeft: 4
-          }}
-        >
-          <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: 'bold' }}>
-            {(ungroupedCount ?? 0) > 99 ? '99+' : ungroupedCount}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
+            paddingHorizontal: 10,
+            paddingVertical: 8,
+            gap: 4
+          }
+        ]}
+      >
+        <MaterialCommunityIcons
+          name='map-plus'
+          size={18}
+          color={theme.TEXT_PRIMARY}
+        />
+      </TouchableOpacity>
+      {/* Kebab Menu */}
+      <TouchableOpacity
+        onPress={() => setHeaderMenuVisible(true)}
+        style={[
+          SHARED_STYLES.interactive.headerButton,
+          {
+            backgroundColor: theme.INTERACTIVE_BACKGROUND,
+            borderWidth: 1,
+            borderColor: theme.INTERACTIVE_BORDER,
+            flexDirection: 'row',
+            alignItems: 'center'
+          }
+        ]}
+      >
+        <MaterialCommunityIcons
+          name='dots-vertical'
+          size={22}
+          color={theme.TEXT_PRIMARY}
+        />
+        {(ungroupedCount ?? 0) > 0 && (
+          <View
+            style={{
+              backgroundColor: '#FF3B30',
+              borderRadius: 10,
+              height: 20,
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: 6,
+              marginLeft: 4
+            }}
+          >
+            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: 'bold' }}>
+              {(ungroupedCount ?? 0) > 99 ? '99+' : ungroupedCount}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
   )
 
   const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false, searchTerm) => {
@@ -407,6 +423,10 @@ const WavesHub = () => {
                 setWavesCount(prev => (prev ?? 0) + totalWavesCreated)
                 setUngroupedPhotosCount(0)
                 handleRefresh()
+                // Task 4.3: Update last trigger location after successful auto-group
+                if (location.status === 'ready' && location.coords) {
+                  await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
+                }
               }
             } catch (error) {
               console.error(error)
@@ -420,7 +440,7 @@ const WavesHub = () => {
         }
       ]
     )
-  }, [uuid])
+  }, [uuid, location])
 
   useEffect(() => {
     const unsubscribe = subscribeToAutoGroup((count) => {
@@ -443,13 +463,31 @@ const WavesHub = () => {
     return unsubscribe
   }, [handleRefresh])
 
-  const handleStartMerge = (wave) => {
-    setMergingWave(wave)
+  // Auto-trigger: when location drift exceeds threshold, trigger auto-group
+  // Only fires once per app foreground session (reset on app background)
+  useEffect(() => {
+    if (!driftReady || !shouldTrigger || autoGroupTriggeredRef.current) return
+    if (ungroupedCount === 0) return
+    autoGroupTriggeredRef.current = true
+    handleAutoGroup(ungroupedCount)
+  }, [driftReady, shouldTrigger, ungroupedCount])
+
+  // Reset trigger flag when app goes to background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'background') {
+        autoGroupTriggeredRef.current = false
+      }
+    })
+    return () => subscription.remove()
+  }, [])
+
+  const handleStartMerge = (sourceWave) => {
+    setMergingWave(sourceWave)
     setMergeModalVisible(true)
   }
 
-  const handleMergeTargetSelected = (targetWave) => {
-    setMergeModalVisible(false)
+  const handleMergeTargetSelected = async (targetWave) => {
     const sourcePhotos = mergingWave?.photosCount ?? 0
     Alert.alert(
       `Merge "${mergingWave?.name}" into "${targetWave.name}"?`,

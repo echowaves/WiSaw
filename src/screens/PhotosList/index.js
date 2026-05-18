@@ -60,7 +60,7 @@ import usePendingAnimation from './hooks/usePendingAnimation'
 import usePhotoExpansion from './hooks/usePhotoExpansion'
 import useFeedLoader from './hooks/useFeedLoader'
 import useFeedSearch from './hooks/useFeedSearch'
-import haversine from '../../utils/haversine'
+import { haversine } from '../../utils/haversine'
 
 const BACKGROUND_TASK_NAME = 'background-task'
 
@@ -83,7 +83,7 @@ TaskManager.defineTask(BACKGROUND_TASK_NAME, async () => {
 
 // 2. Register the task at some point in your app by providing the same name, and some configuration options for how the background task should behave
 // Note: This does NOT need to be in the global scope and CAN be used in your React components!
-async function registerBackgroundFetchAsync() {
+async function registerBackgroundFetchAsync () {
   try {
     // Only register when BackgroundTask is available (not Expo Go / simulator on iOS)
     const status = await BackgroundTask.getStatusAsync()
@@ -500,19 +500,19 @@ const PhotosList = ({ searchFromUrl }) => {
               getExpandedHeight={getExpandedHeight}
               toggleExpand={toggleExpand}
               onCommentInputToggle={setIsCommentEditing}
-             />
+            />
           </View>
           <SearchFab
-           searchTerm={searchTerm}
-           setSearchTerm={setSearchTerm}
-           onSubmitSearch={submitSearch}
-           onClearSearch={handleClearSearch}
-           isExpanded={isSearchExpanded}
-           setIsExpanded={setIsSearchExpanded}
-           theme={theme}
-           footerHeight={FOOTER_HEIGHT}
-           screenWidth={width}
-           isCommentEditing={isCommentEditing}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSubmitSearch={submitSearch}
+            onClearSearch={handleClearSearch}
+            isExpanded={isSearchExpanded}
+            setIsExpanded={setIsSearchExpanded}
+            theme={theme}
+            footerHeight={FOOTER_HEIGHT}
+            screenWidth={width}
+            isCommentEditing={isCommentEditing}
           />
           <PhotosListFooter
             theme={theme}
