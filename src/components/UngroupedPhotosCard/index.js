@@ -2,14 +2,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { FontAwesome5 } from '@expo/vector-icons'
 import * as Crypto from 'expo-crypto'
+import { useAtomValue } from 'jotai'
 
 import * as CONST from '../../consts'
 import { requestUngroupedPhotos } from '../../screens/Waves/reducer'
 import { emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
+import { groupingAtom } from '../../utils/groupingAtom'
 import WavePhotoStrip from '../WavePhotoStrip'
 
 const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
+  const grouping = useAtomValue(groupingAtom)
+  const { groupingLevel } = grouping
   const [initialPhotos, setInitialPhotos] = useState([])
   const batchRef = useRef(Crypto.randomUUID())
   const fetchedRef = useRef(false)
@@ -61,9 +65,9 @@ const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
 
         <TouchableOpacity
          style={styles.button}
-         onPress={() => emitAutoGroup(ungroupedCount)}
+         onPress={() => emitAutoGroup(ungroupedCount, groupingLevel)}
          activeOpacity={0.8}
-        >
+         >
           <FontAwesome5 name='magic' size={16} color='white' style={{ marginRight: 8 }} />
           <View>
             <Text style={styles.buttonTitle}>Auto Group Into Waves</Text>

@@ -40,7 +40,7 @@ import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
 import { useLocationDrift } from '../../hooks/useLocationDrift'
-import { setLastTriggerLocation } from '../../utils/groupingAtom'
+import { setLastTriggerLocation, groupingAtom } from '../../utils/groupingAtom'
 
 const WavesHub = () => {
   const insets = useSafeAreaInsets()
@@ -54,6 +54,8 @@ const WavesHub = () => {
   const [, setWavesCount] = useAtom(STATE.wavesCount)
   const [ungroupedCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
   const location = useAtomValue(STATE.locationAtom)
+  const grouping = useAtomValue(groupingAtom)
+  const { groupingLevel } = grouping
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -386,68 +388,69 @@ const WavesHub = () => {
     }
   }
 
-  const handleAutoGroup = useCallback((count) => {
+  const handleAutoGroup = useCallback((count, eventGroupingLevel) => {
+    const gl = eventGroupingLevel || groupingLevel
     const countText = count > 0
-      ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves. Continue?`
-      : 'This will automatically group your ungrouped photos into waves. Continue?'
+       ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves at ${gl} level. Continue?`
+       : `This will automatically group your ungrouped photos into waves at ${gl} level. Continue?`
     Alert.alert(
-      'Auto-Group Photos',
+       'Auto-Group Photos',
       countText,
-      [
+       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Auto-Group',
-          onPress: async () => {
-            setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0 })
-            setAutoGrouping(true)
-            let totalWavesCreated = 0
-            let totalPhotosGrouped = 0
-            try {
-              let result
-              do {
-                result = await reducer.autoGroupPhotos({ uuid })
-                if (result.photosGrouped > 0) {
-                  totalWavesCreated += 1
-                  totalPhotosGrouped += result.photosGrouped
-                  setAutoGroupProgress({ photosGrouped: totalPhotosGrouped, wavesCreated: totalWavesCreated })
+         text: 'Auto-Group',
+         onPress: async () => {
+           setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0 })
+           setAutoGrouping(true)
+           let totalWavesCreated = 0
+           let totalPhotosGrouped = 0
+           try {
+             let result
+             do {
+               result = await reducer.autoGroupPhotos({ uuid, groupingLevel: gl })
+               if (result.photosGrouped > 0) {
+                 totalWavesCreated += 1
+                 totalPhotosGrouped += result.photosGrouped
+                 setAutoGroupProgress({ photosGrouped: totalPhotosGrouped, wavesCreated: totalWavesCreated })
                 }
-              } while (result.hasMore)
-              if (totalWavesCreated === 0) {
-                Toast.show({ type: 'info', text1: 'No ungrouped photos found', text2: 'All your photos are already in waves' })
+               } while (result.hasMore)
+             if (totalWavesCreated === 0) {
+               Toast.show({ type: 'info', text1: 'No ungrouped photos found', text2: 'All your photos are already in waves' })
               } else {
-                Toast.show({
-                  type: 'success',
-                  text1: 'Photos grouped successfully',
-                  text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
+               Toast.show({
+                 type: 'success',
+                 text1: `Photos grouped successfully (${gl} level)`,
+                 text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
                 })
-                setWavesCount(prev => (prev ?? 0) + totalWavesCreated)
-                setUngroupedPhotosCount(0)
-                handleRefresh()
+               setWavesCount(prev => (prev ?? 0) + totalWavesCreated)
+               setUngroupedPhotosCount(0)
+               handleRefresh()
                 // Task 4.3: Update last trigger location after successful auto-group
-                if (location.status === 'ready' && location.coords) {
-                  await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
+               if (location.status === 'ready' && location.coords) {
+                 await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
                 }
               }
-            } catch (error) {
+             } catch (error) {
               console.error(error)
               Toast.show({ type: 'error', text1: 'Error auto-grouping photos', text2: error.message })
               if (totalWavesCreated > 0) handleRefresh()
-            } finally {
+             } finally {
               setAutoGrouping(false)
               emitAutoGroupDone()
-            }
+             }
+           }
           }
-        }
-      ]
-    )
-  }, [uuid, location])
+        ]
+      )
+    }, [uuid, location, groupingLevel])
 
-  useEffect(() => {
-    const unsubscribe = subscribeToAutoGroup((count) => {
-      handleAutoGroup(count)
-    })
-    return unsubscribe
-  }, [handleAutoGroup])
+   useEffect(() => {
+     const unsubscribe = subscribeToAutoGroup((count, eventGroupingLevel) => {
+       handleAutoGroup(count, eventGroupingLevel)
+      })
+     return unsubscribe
+    }, [handleAutoGroup])
 
   useEffect(() => {
     const unsubscribe = subscribeToAddWave(() => {
