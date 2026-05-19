@@ -4,7 +4,7 @@ import { useAtomValue } from 'jotai'
 import { groupingAtom } from '../utils/groupingAtom'
 import { locationAtom } from '../state'
 import { haversine } from '../utils/haversine'
-import { getGranularityThreshold } from '../utils/groupingStorage'
+import { getGroupingThreshold } from '../utils/groupingStorage'
 
 export function useLocationDrift () {
   const grouping = useAtomValue(groupingAtom)
@@ -20,7 +20,7 @@ export function useLocationDrift () {
       return
     }
 
-    if (!grouping.granularity) {
+    if (!grouping.groupingLevel) {
       setIsReady(false)
       return
     }
@@ -51,10 +51,10 @@ export function useLocationDrift () {
       return
     }
 
-    const threshold = getGranularityThreshold(grouping.granularity)
+    const threshold = getGroupingThreshold(grouping.groupingLevel)
     setShouldTrigger(distance > threshold)
     lastCheckRef.current = now
-  }, [location.status, location.coords, grouping.granularity, grouping.lastTriggerLat, grouping.lastTriggerLon])
+  }, [location.status, location.coords, grouping.groupingLevel, grouping.lastTriggerLat, grouping.lastTriggerLon])
 
   useEffect(() => {
     const handleForeground = () => {

@@ -1,13 +1,13 @@
 import { atom } from 'jotai'
-import { loadGroupingSettings, saveGroupingEnabled, saveGroupingGranularity, saveLastTriggerLocation, saveLastTriggerTimestamp } from './groupingStorage'
+import { loadGroupingSettings, saveGroupingEnabled, saveGroupingLevel, saveLastTriggerLocation, saveLastTriggerTimestamp } from './groupingStorage'
 
 /**
  * Grouping settings atom — initialized with defaults, hydrated asynchronously.
- * Shape: { enabled, granularity, lastTriggerLat, lastTriggerLon, lastTriggerTs }
+ * Shape: { enabled, groupingLevel, lastTriggerLat, lastTriggerLon, lastTriggerTs }
  */
 let _groupingState = {
   enabled: true,
-  granularity: 'CITY',
+  groupingLevel: 'CITY',
   lastTriggerLat: null,
   lastTriggerLon: null,
   lastTriggerTs: null
@@ -27,7 +27,7 @@ export const updateGroupingAtom = atom(
     _groupingState = next
     set(groupingAtom, next)
     return next
-  }
+   }
 )
 
 /**
@@ -51,12 +51,12 @@ export async function setGroupingEnabled (enabled) {
 }
 
 /**
- * Convenience: save the grouping granularity preset.
- * @param {'DISTRICT'|'CITY'|'REGION'|'COUNTRY'} granularity
+ * Convenience: save the grouping level preset.
+ * @param {'DISTRICT'|'CITY'|'REGION'|'COUNTRY'} groupingLevel
  */
-export async function setGroupingGranularity (granularity) {
-  await saveGroupingGranularity(granularity)
-  _groupingState.granularity = granularity
+export async function setGroupingLevel (groupingLevel) {
+  await saveGroupingLevel(groupingLevel)
+  _groupingState.groupingLevel = groupingLevel
 }
 
 /**

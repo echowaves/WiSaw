@@ -530,7 +530,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
             <View style={styles.labelText}>
               <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>Auto-Group Settings</Text>
               <Text style={[styles.settingDescription, { color: theme.TEXT_SECONDARY }]}>
-                Granularity: {grouping.granularity || 'CITY'} · {grouping.enabled ? 'Enabled' : 'Disabled'}
+                Grouping Level: {grouping.groupingLevel || 'CITY'} · {grouping.enabled ? 'Enabled' : 'Disabled'}
               </Text>
             </View>
             <MaterialCommunityIcons name='chevron-right' size={20} color={theme.TEXT_SECONDARY} />

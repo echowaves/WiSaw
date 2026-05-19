@@ -17,14 +17,14 @@ import AppHeader from '../../components/AppHeader'
 import {
   groupingAtom,
   setGroupingEnabled,
-  setGroupingGranularity
+  setGroupingLevel
 } from '../../utils/groupingAtom'
 
-const GRANULARITY_OPTIONS = [
-  { key: 'DISTRICT', label: 'Near', icon: 'walk', description: 'Within ~10 km' },
-  { key: 'CITY', label: 'Medium', icon: 'business', description: 'Within ~50 km' },
-  { key: 'REGION', label: 'Far', icon: 'planet', description: 'Within ~250 km' },
-  { key: 'COUNTRY', label: 'World', icon: 'map', description: 'Within ~1000 km' }
+const GROUPING_LEVEL_OPTIONS = [
+  { key: 'DISTRICT', label: 'Near', icon: 'walk', description: 'Same district' },
+  { key: 'CITY', label: 'Medium', icon: 'business', description: 'Same city' },
+  { key: 'REGION', label: 'Far', icon: 'planet', description: 'Same region' },
+  { key: 'COUNTRY', label: 'World', icon: 'map', description: 'Same country' }
 ]
 
 export default function GroupingSettings () {
@@ -34,18 +34,18 @@ export default function GroupingSettings () {
   const styles = useMemo(() => createStyles(theme), [theme])
 
   const [enabled, setEnabled] = useState(grouping.enabled ?? true)
-  const [granularity, setGranularity] = useState(grouping.granularity || 'CITY')
+  const [groupingLevel, setGroupingLevelState] = useState(grouping.groupingLevel || 'CITY')
 
   // Hydrate from AsyncStorage on mount + react to app foreground
   useEffect(() => {
     STATE.hydrateGroupingAtom?.().then((settings) => {
       setEnabled(settings.enabled ?? true)
-      setGranularity(settings.granularity || 'CITY')
+      setGroupingLevelState(settings.groupingLevel || 'CITY')
     })
     const sub = AppState.addEventListener('change', () => {
       STATE.hydrateGroupingAtom?.().then((settings) => {
         setEnabled(settings.enabled ?? true)
-        setGranularity(settings.granularity || 'CITY')
+        setGroupingLevelState(settings.groupingLevel || 'CITY')
       })
     })
     return () => sub.remove()
@@ -56,9 +56,9 @@ export default function GroupingSettings () {
     setGroupingEnabled(value)
   }
 
-  const handleGranularityPress = (key) => {
-    setGranularity(key)
-    setGroupingGranularity(key)
+  const handleGroupingLevelPress = (key) => {
+    setGroupingLevelState(key)
+    setGroupingLevel(key)
   }
 
   return (
@@ -89,22 +89,22 @@ export default function GroupingSettings () {
           </View>
         </View>
 
-        {/* Granularity Selector */}
+        {/* Grouping Level Selector */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionIcon}>🗺️</Text>
-            <Text style={styles.sectionTitle}>Granularity</Text>
+            <Text style={styles.sectionTitle}>Grouping Level</Text>
           </View>
           <Text style={styles.sectionDescription}>
             How far should users be to be grouped into the same wave?
           </Text>
           <View style={styles.segmentContainer}>
-            {GRANULARITY_OPTIONS.map((opt) => {
-              const isSelected = granularity === opt.key
+            {GROUPING_LEVEL_OPTIONS.map((opt) => {
+              const isSelected = groupingLevel === opt.key
               return (
                 <Pressable
                   key={opt.key}
-                  onPress={() => handleGranularityPress(opt.key)}
+                  onPress={() => handleGroupingLevelPress(opt.key)}
                   style={[
                     styles.segmentOption,
                     isSelected && styles.segmentOptionSelected,
@@ -143,7 +143,7 @@ export default function GroupingSettings () {
         <View style={[styles.infoCard, { backgroundColor: theme.CARD_BACKGROUND }]}>
           <Text style={[styles.infoIcon, { color: theme.INTERACTIVE_PRIMARY }]}>ℹ️</Text>
           <Text style={[styles.infoText, { color: theme.TEXT_SECONDARY }]}>
-            Auto-group triggers when you move beyond the selected distance threshold. Photos are grouped server-side using reverse geocoding and local timestamps.
+            Auto-group triggers when you move beyond the selected field-matching and local timestamps.
           </Text>
         </View>
       </ScrollView>
