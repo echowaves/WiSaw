@@ -37,8 +37,13 @@ The system SHALL display a confirmation dialog before executing the auto-group o
 - **WHEN** the user cancels
 - **THEN** no mutation SHALL be called and the screen SHALL remain unchanged
 
-### Requirement: Auto-group mutation execution
-The system SHALL call the `autoGroupPhotosIntoWaves(uuid: String!, groupingLevel: GroupingLevel!)` GraphQL mutation in a loop to group ungrouped photos into waves one wave at a time. Each call returns `{ waveUuid: String, name: String, photosGrouped: Int!, photosRemaining: Int!, hasMore: Boolean! }`. The loop SHALL continue while `hasMore` is `true`. **The `groupingLevel` parameter SHALL be read from the user's configured grouping settings (`groupingAtom.groupingLevel`) at the time of each call.** During execution, a progress overlay SHALL be displayed.
+### Requirement: Auto-group uses persisted grouping level
+The system SHALL call the `autoGroupPhotosIntoWaves(uuid: String!, groupingLevel: GroupingLevel!)` GraphQL mutation with the **persisted** `groupingLevel` value from the user's settings. The `groupingLevel` SHALL be read from `groupingAtom` which is hydrated from AsyncStorage at app startup. If the atom is not yet hydrated, the default value `CITY` SHALL be used as fallback.
+
+#### Scenario: Auto-group uses persisted grouping level after restart
+- **WHEN** the user sets grouping level to "DISTRICT" in Settings, closes the app, and restarts it
+- **THEN** `groupingAtom` SHALL be hydrated from AsyncStorage with `groupingLevel: "DISTRICT"` during app startup
+- **THEN** when the user triggers auto-group, the mutation SHALL be called with `groupingLevel: "DISTRICT"`
 
 #### Scenario: Auto-group uses configured grouping level
 - **WHEN** the user triggers auto-group with grouping level set to "DISTRICT" in settings
@@ -70,6 +75,14 @@ The system SHALL call the `autoGroupPhotosIntoWaves(uuid: String!, groupingLevel
 - **WHEN** the `groupingLevel` parameter is not provided
 - **THEN** the server SHALL fall back to the default grouping level "CITY"
 - **THEN** the system SHALL NOT crash or show an error
+
+#### Scenario: Settings UI reflects persisted value after restart
+- **WHEN** the user sets grouping level to "DISTRICT", closes and restarts the app
+- **THEN** the Grouping Settings screen SHALL display "Near (DISTRICT)" as selected
+- **THEN** the `groupingAtom.groupingLevel` SHALL equal `"DISTRICT"` before any user interaction
+
+### Requirement: Auto-group mutation execution
+The system SHALL call the `autoGroupPhotosIntoWaves(uuid: String!, groupingLevel: GroupingLevel!)` GraphQL mutation in a loop to group ungrouped photos into waves one wave at a time. Each call returns `{ waveUuid: String, name: String, photosGrouped: Int!, photosRemaining: Int!, hasMore: Boolean! }`. The loop SHALL continue while `hasMore` is `true`. **The `groupingLevel` parameter SHALL be read from the user's configured grouping settings (`groupingAtom.groupingLevel`) at the time of each call.** During execution, a progress overlay SHALL be displayed.
 
 #### Scenario: Progress overlay appears during auto-group
 - **WHEN** the user confirms the auto-group action

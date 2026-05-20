@@ -30,6 +30,7 @@ import {
   subscribeToSystemTheme
 } from '../src/utils/themeStorage'
 import { loadWaveSortPreferences, loadWaveFeedSortPreferences, loadFriendFeedSortPreferences } from '../src/utils/waveStorage'
+import { hydrateGroupingAtom } from '../src/utils/groupingAtom'
 
 export default function RootLayout () {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -173,16 +174,18 @@ export default function RootLayout () {
           followSystemResult,
           waveSortResult,
           waveFeedSortResult,
-          friendFeedSortResult
-        ] = await Promise.allSettled([
+          friendFeedSortResult,
+          groupingResult
+         ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
           loadThemePreference(),
           loadFollowSystemPreference(),
           loadWaveSortPreferences(),
           loadWaveFeedSortPreferences(),
-          loadFriendFeedSortPreferences()
-        ])
+          loadFriendFeedSortPreferences(),
+          hydrateGroupingAtom()
+         ])
 
         if (isCancelled) return
 
@@ -212,7 +215,12 @@ export default function RootLayout () {
         if (friendFeedSortPrefs) {
           setFriendFeedSortBy(friendFeedSortPrefs.sortBy)
           setFriendFeedSortDirection(friendFeedSortPrefs.sortDirection)
-        }
+         }
+
+        const groupingSettings = getResolvedValue(groupingResult, null)
+        if (groupingSettings) {
+          console.log('✅ Grouping settings hydrated:', groupingSettings.groupingLevel)
+         }
 
         console.log(`✅ App state initialized in ${Date.now() - startTime}ms`)
       } catch (error) {

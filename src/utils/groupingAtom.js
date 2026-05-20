@@ -51,12 +51,15 @@ export async function setGroupingEnabled (enabled) {
 }
 
 /**
- * Convenience: save the grouping level preset.
- * @param {'DISTRICT'|'CITY'|'REGION'|'COUNTRY'} groupingLevel
- */
+  * Convenience: save the grouping level preset.
+  * @param {'DISTRICT'|'CITY'|'REGION'|'COUNTRY'} groupingLevel
+  */
 export async function setGroupingLevel (groupingLevel) {
   await saveGroupingLevel(groupingLevel)
-  _groupingState.groupingLevel = groupingLevel
+  const next = { ..._groupingState, groupingLevel }
+  _groupingState = next
+  // Update the Jotai atom so subscribers re-render
+  groupingAtom.write(next)
 }
 
 /**
