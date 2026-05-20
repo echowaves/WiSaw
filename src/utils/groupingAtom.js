@@ -5,6 +5,17 @@ import { loadGroupingSettings, saveGroupingEnabled, saveGroupingLevel, saveLastT
  * Grouping settings atom — initialized with defaults, hydrated asynchronously.
  * Shape: { enabled, groupingLevel, lastTriggerLat, lastTriggerLon, lastTriggerTs }
  */
+// Ref to store the Jotai set function from a React component
+let _setGroupingRef = null
+
+/**
+ * Call this from a React component to register the Jotai setter.
+ * Usage: const setGrouping = useSetAtom(groupingAtom); useEffect(() => { registerGroupingSetter(setGrouping) }, [])
+ */
+export function registerGroupingSetter (setGrouping) {
+  _setGroupingRef = setGrouping
+}
+
 let _groupingState = {
   enabled: true,
   groupingLevel: 'CITY',
@@ -13,28 +24,7 @@ let _groupingState = {
   lastTriggerTs: null
 }
 
-export const groupingAtom = atom(
-  (get) => _groupingState,
-  (_get, set, updates) => {
-    _groupingState = { ..._groupingState, ...updates }
-    set(groupingAtom, _groupingState)
-  }
-)
-
-/**
- * Writable atom that updates grouping settings.
- * Usage: const update = useSetAtom(updateGroupingAtom)
- *        await update({ enabled: false })
- */
-export const updateGroupingAtom = atom(
-  null,
-  async (get, set, updates) => {
-    const next = { ...get(groupingAtom), ...updates }
-    _groupingState = next
-    set(groupingAtom, next)
-    return next
-   }
-)
+export const groupingAtom = atom(_groupingState)
 
 /**
  * Hydrate the grouping atom from AsyncStorage.
@@ -53,7 +43,10 @@ export async function hydrateGroupingAtom () {
  */
 export async function setGroupingEnabled (enabled) {
   await saveGroupingEnabled(enabled)
-  _groupingState.enabled = enabled
+  _groupingState = { ..._groupingState, enabled }
+  if (_setGroupingRef) {
+    _setGroupingRef({ enabled })
+  }
 }
 
 /**
@@ -62,10 +55,10 @@ export async function setGroupingEnabled (enabled) {
   */
 export async function setGroupingLevel (groupingLevel) {
   await saveGroupingLevel(groupingLevel)
-  const next = { ..._groupingState, groupingLevel }
-  _groupingState = next
-  // Update the Jotai atom so subscribers re-render
-  groupingAtom.write(next)
+  _groupingState = { ..._groupingState, groupingLevel }
+  if (_setGroupingRef) {
+    _setGroupingRef({ groupingLevel })
+  }
 }
 
 /**
@@ -76,7 +69,8 @@ export async function setGroupingLevel (groupingLevel) {
 export async function setLastTriggerLocation (lat, lon) {
   await saveLastTriggerLocation(lat, lon)
   await saveLastTriggerTimestamp(Date.now())
-  _groupingState.lastTriggerLat = lat
-  _groupingState.lastTriggerLon = lon
-  _groupingState.lastTriggerTs = Date.now()
+  _groupingState = { ..._groupingState, lastTriggerLat: lat, lastTriggerLon: lon, lastTriggerTs: Date.now() }
+  if (_setGroupingRef) {
+    _setGroupingRef({ lastTriggerLat: lat, lastTriggerLon: lon, lastTriggerTs: Date.now() })
+  }
 }

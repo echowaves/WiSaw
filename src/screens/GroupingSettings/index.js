@@ -8,7 +8,7 @@ import {
   Text,
   View
 } from 'react-native'
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { router } from 'expo-router'
 
 import * as STATE from '../../state'
@@ -16,6 +16,7 @@ import { getTheme } from '../../theme/sharedStyles'
 import AppHeader from '../../components/AppHeader'
 import {
   groupingAtom,
+  registerGroupingSetter,
   setGroupingEnabled,
   setGroupingLevel
 } from '../../utils/groupingAtom'
@@ -30,8 +31,14 @@ const GROUPING_LEVEL_OPTIONS = [
 export default function GroupingSettings () {
   const isDarkMode = useAtomValue(STATE.isDarkMode)
   const grouping = useAtomValue(groupingAtom)
+  const setGrouping = useSetAtom(groupingAtom)
   const theme = useMemo(() => getTheme(isDarkMode), [isDarkMode])
   const styles = useMemo(() => createStyles(theme), [theme])
+
+  // Register the Jotai setter ref so external updates propagate
+  useEffect(() => {
+    registerGroupingSetter(setGrouping)
+  }, [])
 
   const [enabled, setEnabled] = useState(grouping.enabled ?? true)
   const [groupingLevel, setGroupingLevelState] = useState(grouping.groupingLevel || 'CITY')
