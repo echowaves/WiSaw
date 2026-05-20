@@ -13,7 +13,13 @@ let _groupingState = {
   lastTriggerTs: null
 }
 
-export const groupingAtom = atom(_groupingState)
+export const groupingAtom = atom(
+  (get) => _groupingState,
+  (_get, set, updates) => {
+    _groupingState = { ..._groupingState, ...updates }
+    set(groupingAtom, _groupingState)
+  }
+)
 
 /**
  * Writable atom that updates grouping settings.
