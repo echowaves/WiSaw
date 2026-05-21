@@ -16,7 +16,7 @@ import * as CONST from '../../../consts'
 import isValidLocation from '../../../utils/isValidLocation'
 import { loadActiveWave } from '../../../utils/activeWaveStorage'
 import { isLocationInWave, createWave, autoGroupPhotos } from '../../Waves/reducer'
-import _groupingState from '../../../utils/groupingAtom'
+import { _groupingState } from '../../../utils/groupingAtom'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
