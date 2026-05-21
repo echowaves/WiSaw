@@ -4,12 +4,17 @@ This specification defines expected user-visible behavior, constraints, and vali
 ## Requirements
 
 ### Requirement: Waves List Focus Refresh
-The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. Thumbnail `Photo` objects (with `id` and `thumbUrl`) SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries. `WaveCard` SHALL pass `wave.photos` as `initialPhotos` to `WavePhotoStrip`, which SHALL use `CachedImage` with `cacheKey` `${photo.id}-thumb` and React `key` `photo.id`.
+The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. The `useFocusEffect` callback SHALL NOT be wrapped in `useCallback`, ensuring it executes on every focus event regardless of dependency stability. Thumbnail `Photo` objects (with `id` and `thumbUrl`) SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries. `WaveCard` SHALL pass `wave.photos` as `initialPhotos` to `WavePhotoStrip`, which SHALL use `CachedImage` with `cacheKey` `${photo.id}-thumb` and React `key` `photo.id`.
 
 #### Scenario: User returns to Waves screen after viewing wave detail
 - **WHEN** the Waves screen (WavesHub) regains focus (via `useFocusEffect`)
 - **THEN** the system SHALL reset pagination and call `loadWaves` with page 0, a new batch UUID, and the current `sortBy`/`sortDirection` values in refresh mode
 - **THEN** the waves list SHALL be replaced with the fresh server response including updated names, photo counts, and thumbnail URLs in the current sort order
+
+#### Scenario: Repeated visits always refresh
+- **WHEN** the user navigates away from the Waves screen and returns multiple times without changing sort or search
+- **THEN** each return SHALL trigger a fresh `loadWaves` call
+- **THEN** the `loadingRef` guard SHALL prevent concurrent duplicate fetches if the previous call is still in-flight
 
 #### Scenario: First mount triggers single fetch
 - **WHEN** the Waves screen mounts for the first time

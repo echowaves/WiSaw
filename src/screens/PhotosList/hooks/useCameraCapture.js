@@ -75,9 +75,9 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
         location: { coords: locationState.coords }
       }
 
-      // Grouping disabled: pass through waveUuid unchanged
+      // Grouping disabled: upload as ungrouped (no waveUuid)
       if (!grouping.enabled) {
-        await enqueueCapture({ ...captureArgs, waveUuid })
+        await enqueueCapture({ ...captureArgs })
         return
       }
 

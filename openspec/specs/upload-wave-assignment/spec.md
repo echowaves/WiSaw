@@ -6,7 +6,14 @@ Wave assignment logic runs during photo upload (not capture time). Before upload
 ## Requirements
 
 ### Requirement: Wave assignment at upload time
-The system SHALL assign a wave UUID to each photo during upload by loading the current active wave, checking location drift via `isLocationInWave(lat, lon, waveUuid)`, and assigning the photo to either the current wave or a newly created one.
+The system SHALL assign a wave UUID to each photo during upload by loading the current active wave, checking location drift via `isLocationInWave(lat, lon, waveUuid)`, and assigning the photo to either the current wave or a newly created one. **When auto-grouping is disabled (`grouping.enabled === false`), the system SHALL skip all wave assignment logic and upload the photo as ungrouped regardless of screen context — no `waveUuid` SHALL be passed to `enqueueCapture`, even when the capture originates from a wave detail screen.**
+
+#### Scenario: Photo captured with grouping disabled (any screen)
+- **WHEN** a photo is captured from any screen (main feed, wave detail, bookmarks)
+- **AND** `grouping.enabled` is `false`
+- **THEN** the photo SHALL be enqueued without a `waveUuid` (ungrouped)
+- **THEN** no `isLocationInWave` check SHALL be performed
+- **THEN** no auto-group mutation SHALL be called
 
 #### Scenario: Photo fits current active wave
 - **WHEN** `processCompleteUpload` is called for a photo with grouping enabled
@@ -49,6 +56,11 @@ The system SHALL flush any pending ungrouped photos via `autoGroupPhotosIntoWave
 - **WHEN** `processCompleteUpload` is called and there are no pending ungrouped photos
 - **THEN** the system SHALL skip the flush step
 - **THEN** proceed directly to wave assignment for the current photo
+
+#### Scenario: Auto-grouping disabled — skip flush entirely
+- **WHEN** `processCompleteUpload` is called with grouping disabled (`grouping.enabled === false`)
+- **AND** there are pending ungrouped photos in the queue
+- **THEN** the system SHALL skip the flush step regardless of pending items
 
 #### Scenario: Auto-grouping disabled — skip flush entirely
 - **WHEN** `processCompleteUpload` is called with grouping disabled (`grouping.enabled === false`)

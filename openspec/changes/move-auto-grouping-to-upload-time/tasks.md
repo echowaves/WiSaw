@@ -33,6 +33,6 @@
 
 ## 6. Update tests and verify
 
-- [ ] 6.1 Run existing test suite to ensure no regressions
-- [ ] 6.2 Test capture flow with grouping enabled/disabled, online/offline
-- [ ] 6.3 Test upload flow with active wave (fits), drifted photo (new wave created), no active wave (new wave created)
+- [x] 6.1 Run existing test suite to ensure no regressions
+- [x] 6.2 Test capture flow with grouping enabled/disabled, online/offline
+- [x] 6.3 Test upload flow with active wave (fits), drifted photo (new wave created), no active wave (new wave created)

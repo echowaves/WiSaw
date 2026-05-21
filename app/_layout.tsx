@@ -30,7 +30,7 @@ import {
   subscribeToSystemTheme
 } from '../src/utils/themeStorage'
 import { loadWaveSortPreferences, loadWaveFeedSortPreferences, loadFriendFeedSortPreferences } from '../src/utils/waveStorage'
-import { hydrateGroupingAtom } from '../src/utils/groupingAtom'
+import { hydrateGroupingAtom, groupingAtom } from '../src/utils/groupingAtom'
 import { hydrateActiveWaveAtom } from '../src/utils/activeWaveStorage'
 
 export default function RootLayout () {
@@ -47,6 +47,7 @@ export default function RootLayout () {
   const [, setFriendFeedSortBy] = useAtom(STATE.friendFeedSortBy)
   const [, setFriendFeedSortDirection] = useAtom(STATE.friendFeedSortDirection)
   const setActiveWave = useSetAtom(STATE.activeWaveAtom)
+  const setGrouping = useSetAtom(groupingAtom)
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -223,6 +224,7 @@ export default function RootLayout () {
 
         const groupingSettings = getResolvedValue(groupingResult, null)
         if (groupingSettings) {
+          setGrouping(groupingSettings)
           console.log('✅ Grouping settings hydrated:', groupingSettings.groupingLevel)
          }
 

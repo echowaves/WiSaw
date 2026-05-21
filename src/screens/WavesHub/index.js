@@ -286,14 +286,14 @@ const WavesHub = () => {
   }, [debouncedSearch])
 
   useFocusEffect(
-    useCallback(() => {
+    () => {
       setPageNumber(0)
       setNoMoreData(false)
       const newBatch = Crypto.randomUUID()
       setBatch(newBatch)
       loadWaves(0, newBatch, true, debouncedSearch || undefined)
       fetchCounts()
-    }, [loadWaves, debouncedSearch, fetchCounts])
+    }
   )
 
   const handleRefresh = () => {
