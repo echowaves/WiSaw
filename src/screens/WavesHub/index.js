@@ -74,7 +74,7 @@ const WavesHub = () => {
   const [creating, setCreating] = useState(false)
 
   const [autoGrouping, setAutoGrouping] = useState(false)
-  const [autoGroupProgress, setAutoGroupProgress] = useState({ photosGrouped: 0, wavesCreated: 0 })
+  const [autoGroupProgress, setAutoGroupProgress] = useState({ photosGrouped: 0, wavesCreated: 0, photosRemaining: 0 })
 
   // Edit modal state
   const [editModalVisible, setEditModalVisible] = useState(false)
@@ -401,30 +401,30 @@ const WavesHub = () => {
         {
          text: 'Auto-Group',
          onPress: async () => {
-           setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0 })
+           setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0, photosRemaining: 0 })
            setAutoGrouping(true)
-           let totalWavesCreated = 0
+           const waveUuidSet = new Set()
            let totalPhotosGrouped = 0
            try {
              let result
              do {
                result = await reducer.autoGroupPhotos({ uuid, groupingLevel: gl })
                if (result.photosGrouped > 0) {
-                 totalWavesCreated += 1
+                 if (result.waveUuid) waveUuidSet.add(result.waveUuid)
                  totalPhotosGrouped += result.photosGrouped
-                 setAutoGroupProgress({ photosGrouped: totalPhotosGrouped, wavesCreated: totalWavesCreated })
+                 setAutoGroupProgress({ photosGrouped: totalPhotosGrouped, wavesCreated: waveUuidSet.size, photosRemaining: result.photosRemaining ?? 0 })
                 }
                } while (result.hasMore)
-             if (totalWavesCreated === 0) {
+             if (waveUuidSet.size === 0) {
                Toast.show({ type: 'info', text1: 'No ungrouped photos found', text2: 'All your photos are already in waves' })
               } else {
                Toast.show({
                  type: 'success',
                  text1: `Photos grouped successfully (${gl} level)`,
-                 text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
+                 text2: `Created ${waveUuidSet.size} wave${waveUuidSet.size !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
                 })
-               setWavesCount(prev => (prev ?? 0) + totalWavesCreated)
-               setUngroupedPhotosCount(0)
+               setWavesCount(prev => (prev ?? 0) + waveUuidSet.size)
+               setUngroupedPhotosCount(result.photosRemaining ?? 0)
                handleRefresh()
                 // Task 4.3: Update last trigger location after successful auto-group
                if (location.status === 'ready' && location.coords) {
@@ -434,7 +434,7 @@ const WavesHub = () => {
              } catch (error) {
               console.error(error)
               Toast.show({ type: 'error', text1: 'Error auto-grouping photos', text2: error.message })
-              if (totalWavesCreated > 0) handleRefresh()
+              if (waveUuidSet.size > 0) handleRefresh()
              } finally {
               setAutoGrouping(false)
               emitAutoGroupDone()
@@ -785,6 +785,11 @@ const WavesHub = () => {
                 <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 16 }}>
                   {autoGroupProgress.wavesCreated} wave{autoGroupProgress.wavesCreated !== 1 ? 's' : ''} created
                 </Text>
+                {autoGroupProgress.photosRemaining > 0 && (
+                  <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 14, marginTop: 4 }}>
+                    {autoGroupProgress.photosRemaining} remaining
+                  </Text>
+                )}
               </>
             )}
           </View>
