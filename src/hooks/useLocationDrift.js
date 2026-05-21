@@ -15,6 +15,13 @@ export function useLocationDrift () {
   const lastCheckRef = useRef(null)
 
   useEffect(() => {
+    // Task 7.1: return shouldTrigger: false when grouping is disabled
+    if (!grouping.enabled) {
+      setShouldTrigger(false)
+      setIsReady(false)
+      return
+    }
+
     if (location.status !== 'ready') {
       setIsReady(false)
       return
@@ -54,7 +61,7 @@ export function useLocationDrift () {
     const threshold = getGroupingThreshold(grouping.groupingLevel)
     setShouldTrigger(distance > threshold)
     lastCheckRef.current = now
-  }, [location.status, location.coords, grouping.groupingLevel, grouping.lastTriggerLat, grouping.lastTriggerLon])
+  }, [location.status, location.coords, grouping.enabled, grouping.groupingLevel, grouping.lastTriggerLat, grouping.lastTriggerLon])
 
   useEffect(() => {
     const handleForeground = () => {

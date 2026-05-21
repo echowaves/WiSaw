@@ -36,4 +36,6 @@ export const ungroupedPhotosCount = atom(null)
 
 export const bookmarksCount = atom(null)
 
+export const activeWaveAtom = atom(null)
+
 export { hydrateGroupingAtom } from './utils/groupingAtom'

@@ -31,6 +31,7 @@ import {
 } from '../src/utils/themeStorage'
 import { loadWaveSortPreferences, loadWaveFeedSortPreferences, loadFriendFeedSortPreferences } from '../src/utils/waveStorage'
 import { hydrateGroupingAtom } from '../src/utils/groupingAtom'
+import { hydrateActiveWaveAtom } from '../src/utils/activeWaveStorage'
 
 export default function RootLayout () {
   const [uuid, setUuid] = useAtom(STATE.uuid)
@@ -45,6 +46,7 @@ export default function RootLayout () {
   const [, setWaveFeedSortDirection] = useAtom(STATE.waveFeedSortDirection)
   const [, setFriendFeedSortBy] = useAtom(STATE.friendFeedSortBy)
   const [, setFriendFeedSortDirection] = useAtom(STATE.friendFeedSortDirection)
+  const setActiveWave = useSetAtom(STATE.activeWaveAtom)
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -175,7 +177,8 @@ export default function RootLayout () {
           waveSortResult,
           waveFeedSortResult,
           friendFeedSortResult,
-          groupingResult
+          groupingResult,
+          activeWaveResult
          ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
@@ -184,7 +187,8 @@ export default function RootLayout () {
           loadWaveSortPreferences(),
           loadWaveFeedSortPreferences(),
           loadFriendFeedSortPreferences(),
-          hydrateGroupingAtom()
+          hydrateGroupingAtom(),
+          hydrateActiveWaveAtom()
          ])
 
         if (isCancelled) return
@@ -221,6 +225,12 @@ export default function RootLayout () {
         if (groupingSettings) {
           console.log('✅ Grouping settings hydrated:', groupingSettings.groupingLevel)
          }
+
+        const activeWave = getResolvedValue(activeWaveResult, null)
+        if (activeWave) {
+          setActiveWave(activeWave)
+          console.log('✅ Active wave hydrated:', activeWave.name)
+        }
 
         console.log(`✅ App state initialized in ${Date.now() - startTime}ms`)
       } catch (error) {

@@ -30,6 +30,7 @@ export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection
               joinUrl
               location
               radius
+              isActive
               photos {
                 id
                 thumbUrl
@@ -196,6 +197,7 @@ export const autoGroupPhotos = async ({ uuid, groupingLevel }) => {
             photosGrouped
             photosRemaining
             hasMore
+            isNewWave
            }
           }
         `,
@@ -685,6 +687,24 @@ export const listWaveBans = async ({ waveUuid, uuid }) => {
       variables: { waveUuid, uuid }
     })
     return response.data.listWaveBans
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
+export const isLocationInWave = async ({ lat, lon, waveUuid, uuid }) => {
+  try {
+    const response = await CONST.gqlClient.query({
+      query: gql`
+        query isLocationInWave($lat: Float!, $lon: Float!, $waveUuid: String!, $uuid: String!) {
+          isLocationInWave(lat: $lat, lon: $lon, waveUuid: $waveUuid, uuid: $uuid)
+        }
+      `,
+      variables: { lat, lon, waveUuid, uuid },
+      fetchPolicy: 'network-only'
+    })
+    return response.data.isLocationInWave
   } catch (err) {
     console.error({ err })
     throw err

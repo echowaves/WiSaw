@@ -14,9 +14,6 @@ import { useAtom, useSetAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
 import { router, useLocalSearchParams, useNavigation, useFocusEffect } from 'expo-router'
 import * as Haptics from 'expo-haptics'
-import * as ImagePicker from 'expo-image-picker'
-import * as Linking from 'expo-linking'
-import * as MediaLibrary from 'expo-media-library'
 import * as Crypto from 'expo-crypto'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
@@ -47,6 +44,7 @@ import ActionMenu from '../../components/ActionMenu'
 import PhotosListContext from '../../contexts/PhotosListContext'
 import WaveShareModal from '../../components/WaveShareModal'
 import AppHeader from '../../components/AppHeader'
+import useCameraCapture from '../PhotosList/hooks/useCameraCapture'
 
 const FOOTER_HEIGHT = 90
 
@@ -118,7 +116,6 @@ const WaveDetail = () => {
   const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
   const [netAvailable] = useAtom(STATE.netAvailable)
-  const [isCameraOpening, setIsCameraOpening] = useState(false)
 
   // Edit modal
   const [editModalVisible, setEditModalVisible] = useState(false)
@@ -153,6 +150,9 @@ const WaveDetail = () => {
     enqueueCapture,
     clearPendingQueue
   } = useContext(UploadContext)
+
+  // Camera capture with drift check (task 8.1)
+  const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({ enqueueCapture, toastTopOffset })
 
   // Subscribe to upload completions — only prepend photos matching this wave
   useEffect(() => {
@@ -537,71 +537,6 @@ const WaveDetail = () => {
         }
       ]
     )
-  }
-
-  // Camera flow
-  const checkPermissionsForPhotoTaking = async ({ cameraType, waveUuid: targetWaveUuid }) => {
-    if (isCameraOpening) return
-    setIsCameraOpening(true)
-
-    try {
-      const cameraStatus = await ImagePicker.requestCameraPermissionsAsync()
-      if (cameraStatus.status !== 'granted') {
-        Alert.alert('Camera Access', 'WiSaw needs camera access to capture photos for this wave. You can enable it in Settings.', [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Open Settings', onPress: () => Linking.openSettings() }
-        ])
-        return
-      }
-
-      const libraryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync(true)
-      if (libraryStatus.status !== 'granted') {
-        Alert.alert('Photo Library Access', 'WiSaw needs photo library access to save your captured photos. You can enable it in Settings.', [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Open Settings', onPress: () => Linking.openSettings() }
-        ])
-        return
-      }
-
-      let cameraReturn
-      if (cameraType === 'camera') {
-        cameraReturn = await ImagePicker.launchCameraAsync({
-          mediaTypes: ['images'],
-          quality: 1.0,
-          exif: true
-        })
-      } else {
-        cameraReturn = await ImagePicker.launchCameraAsync({
-          mediaTypes: ['videos'],
-          videoMaxDuration: 5,
-          quality: 1.0,
-          exif: true
-        })
-      }
-
-      if (cameraReturn.canceled === false) {
-        if (locationState.status !== 'ready') {
-          Toast.show({
-            text1: 'Waiting for location...',
-            text2: 'Please wait until GPS coordinates are available.',
-            type: 'info',
-            topOffset: toastTopOffset
-          })
-          return
-        }
-        await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
-        await enqueueCapture({
-          cameraImgUrl: cameraReturn.assets[0].uri,
-          type: cameraReturn.assets[0].type,
-          location: { coords: locationState.coords },
-          waveUuid: targetWaveUuid
-        })
-      }
-    } catch (error) {
-      console.error('Error in camera flow:', error)
-    } finally {
-      setIsCameraOpening(false)
-    }
   }
 
   const removePhoto = useCallback((photoId) => {
