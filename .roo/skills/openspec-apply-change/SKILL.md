@@ -11,6 +11,8 @@ metadata:
 
 Implement tasks from an OpenSpec change.
 
+**MODE ISOLATION: Stay in apply mode.** Do NOT auto-transition to archive, verify, or any other mode. After completing all tasks (or pausing on a blocker), present the summary and stop. Never call `/opsx:archive` or equivalent commands on your own initiative.
+
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
@@ -45,8 +47,8 @@ Implement tasks from an OpenSpec change.
    - Dynamic instruction based on current state
 
    **Handle states:**
-   - If `state: "blocked"` (missing artifacts): show message, suggest using openspec-continue-change
-   - If `state: "all_done"`: congratulate, suggest archive
+   - If `state: "blocked"` (missing artifacts): show message, explain what's missing. Do NOT auto-switch to propose mode — let the user decide how to fix it.
+   - If `state: "all_done"`: congratulate and summarize. You MAY suggest archive as an option, but do not call `/opsx:archive` automatically.
    - Otherwise: proceed to implementation
 
 4. **Read context files**
@@ -75,7 +77,7 @@ Implement tasks from an OpenSpec change.
 
    **Pause if:**
    - Task is unclear → ask for clarification
-   - Implementation reveals a design issue → suggest updating artifacts
+   - Implementation reveals a design issue → suggest updating artifacts (e.g., "This changes the design. Want me to update design.md?")
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
 
@@ -142,7 +144,7 @@ What would you like to do?
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
 - If task is ambiguous, pause and ask before implementing
-- If implementation reveals issues, pause and suggest artifact updates
+- If implementation reveals issues, pause and suggest artifact updates — but do NOT auto-generate new artifacts without user confirmation
 - Keep code changes minimal and scoped to each task
 - Update task checkbox immediately after completing each task
 - Pause on errors, blockers, or unclear requirements - don't guess
@@ -153,4 +155,5 @@ What would you like to do?
 This skill supports the "actions on a change" model:
 
 - **Can be invoked anytime**: Before all artifacts are done (if tasks exist), after partial implementation, interleaved with other actions
-- **Allows artifact updates**: If implementation reveals design issues, suggest updating artifacts - not phase-locked, work fluidly
+- **Allows artifact updates**: If implementation reveals design issues, suggest updating artifacts — not phase-locked, work fluidly
+- **Does NOT auto-transition modes**: After finishing or pausing, present the summary and STOP. Let the user decide whether to archive, verify, sync specs, or do something else.

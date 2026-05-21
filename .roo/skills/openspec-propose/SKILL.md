@@ -18,6 +18,8 @@ I'll create a change with artifacts:
 
 When ready to implement, run /opsx:apply
 
+**MODE ISOLATION: Stay in propose mode.** Do NOT auto-transition to apply mode. After generating all artifacts, present the summary and stop. Never call `/opsx:apply` or equivalent implementation commands on your own initiative.
+
 ---
 
 **Input**: The user's request should include a change name (kebab-case) OR a description of what they want to build.
@@ -34,18 +36,18 @@ When ready to implement, run /opsx:apply
    **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
 
 2. **Create the change directory**
-   ```bash
-   openspec new change "<name>"
-   ```
-   This creates a scaffolded change at `openspec/changes/<name>/` with `.openspec.yaml`.
+  ```bash
+  openspec new change "<name>"
+  ```
+  This creates a scaffolded change at `openspec/changes/<name>/` with `.openspec.yaml`.
 
 3. **Get the artifact build order**
-   ```bash
-   openspec status --change "<name>" --json
-   ```
-   Parse the JSON to get:
-   - `applyRequires`: array of artifact IDs needed before implementation (e.g., `["tasks"]`)
-   - `artifacts`: list of all artifacts with their status and dependencies
+  ```bash
+  openspec status --change "<name>" --json
+  ```
+  Parse the JSON to get:
+  - `applyRequires`: array of artifact IDs needed before implementation (e.g., `["tasks"]`)
+  - `artifacts`: list of all artifacts with their status and dependencies
 
 4. **Create artifacts in sequence until apply-ready**
 
@@ -79,18 +81,26 @@ When ready to implement, run /opsx:apply
       - Use **AskUserQuestion tool** to clarify
       - Then continue with creation
 
-5. **Show final status**
-   ```bash
-   openspec status --change "<name>"
-   ```
+5. **Show final status and STOP**
+  ```bash
+  openspec status --change "<name>"
+  ```
 
 **Output**
 
 After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
-- What's ready: "All artifacts created! Ready for implementation."
+- What's ready: "All artifacts created."
 - Prompt: "Run `/opsx:apply` or ask me to implement to start working on the tasks."
+
+**CRITICAL: After showing the summary, STOP. Do NOT:**
+- Call `/opsx:apply` or equivalent implementation commands
+- Start implementing any tasks
+- Transition to apply mode on your own initiative
+- Generate code files under `src/`, `app/`, `components/`, etc.
+
+The user must explicitly ask to implement before you do anything beyond the summary.
 
 **Artifact Creation Guidelines**
 
@@ -108,3 +118,5 @@ After completing all artifacts, summarize:
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
 - If a change with that name already exists, ask if user wants to continue it or create a new one
 - Verify each artifact file exists after writing before proceeding to next
+- **Stay in propose mode** - After generating all artifacts and showing the summary, STOP. Do not auto-transition to apply mode or start implementing.
+- **Never write application code** - Propose mode only creates OpenSpec artifacts (proposal.md, design.md, tasks.md), never source code files.

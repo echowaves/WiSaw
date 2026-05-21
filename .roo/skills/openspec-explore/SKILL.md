@@ -11,9 +11,17 @@ metadata:
 
 Enter explore mode. Think deeply. Visualize freely. Follow the conversation wherever it goes.
 
-**IMPORTANT: Explore mode is for thinking, not implementing.** You may read files, search code, and investigate the codebase, but you must NEVER write code or implement features. If the user asks you to implement something, remind them to exit explore mode first and create a change proposal. You MAY create OpenSpec artifacts (proposals, designs, specs) if the user asks—that's capturing thinking, not implementing.
+**CRITICAL: Explore mode is for thinking ONLY.** You may read files, search code, and investigate the codebase, but you must NEVER write application code or implement features. If the user asks you to implement something, remind them to exit explore mode first (e.g., `/opsx:propose` or `/opsx:apply`).
+
+**You MAY create OpenSpec artifacts** (proposals, designs, specs) if the user explicitly asks — this is capturing thinking, not implementing. But you must NEVER auto-generate these artifacts without an explicit request.
 
 **This is a stance, not a workflow.** There are no fixed steps, no required sequence, no mandatory outputs. You're a thinking partner helping the user explore.
+
+**MODE ISOLATION: Stay in explore mode until explicitly told otherwise.** Do NOT:
+- Generate spec files, design documents, or task lists without an explicit request from the user
+- Suggest running `/opsx:propose` or `/opsx:apply` as a next step — only offer it if the user asks about next steps
+- Transition to propose or apply mode on your own initiative
+- Write any code files (`.js`, `.tsx`, `.ts`, etc.) under `src/`, `app/`, `components/`, etc.
 
 ---
 
@@ -79,30 +87,29 @@ Depending on what the user brings, you might:
 
 You have full context of the OpenSpec system. Use it naturally, don't force it.
 
-### Check for context
+### Check for context (optional)
 
-At the start, quickly check what exists:
+At the start, you may check what exists:
 ```bash
 openspec list --json
 ```
 
-This tells you:
-- If there are active changes
-- Their names, schemas, and status
-- What the user might be working on
+This tells you if there are active changes and their status. Only do this if relevant to the conversation.
 
 ### When no change exists
 
-Think freely. When insights crystallize, you might offer:
+Think freely about the problem. You might offer:
 
-- "This feels solid enough to start a change. Want me to create a proposal?"
-- Or keep exploring - no pressure to formalize
+- "This feels solid enough to start a change — want me to create a proposal?" (only as an offer, never auto-create)
+- Or keep exploring without any pressure to formalize
+
+**NEVER auto-generate a proposal, design, or spec file.** Only create these artifacts if the user explicitly asks.
 
 ### When a change exists
 
 If the user mentions a change or you detect one is relevant:
 
-1. **Read existing artifacts for context**
+1. **Read existing artifacts for context** (if helpful)
    - `openspec/changes/<name>/proposal.md`
    - `openspec/changes/<name>/design.md`
    - `openspec/changes/<name>/tasks.md`
@@ -112,7 +119,7 @@ If the user mentions a change or you detect one is relevant:
    - "Your design mentions using Redis, but we just realized SQLite fits better..."
    - "The proposal scopes this to premium users, but we're now thinking everyone..."
 
-3. **Offer to capture when decisions are made**
+3. **Offer to capture decisions when the user asks**
 
     | Insight Type               | Where to Capture               |
     |----------------------------|--------------------------------|
@@ -128,7 +135,15 @@ If the user mentions a change or you detect one is relevant:
    - "This is a new requirement. Add it to specs?"
    - "This changes scope. Update the proposal?"
 
-4. **The user decides** - Offer and move on. Don't pressure. Don't auto-capture.
+4. **The user decides** — Offer and move on. Don't pressure. Don't auto-capture.
+
+### NEVER do these things in explore mode:
+
+- Write code files (`.js`, `.tsx`, `.ts`, etc.)
+- Run `/opsx:apply` or equivalent implementation commands
+- Generate spec, design, or task artifacts without explicit user request
+- Suggest transitioning to propose/apply mode unless the user asks about next steps
+- Auto-create a change directory with `openspec new change ...`
 
 ---
 
@@ -278,11 +293,13 @@ But this summary is optional. Sometimes the thinking IS the value.
 
 ## Guardrails
 
-- **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
+- **Don't implement** - Never write application code or implement features. Creating OpenSpec artifacts (proposals, designs, specs) is fine ONLY if explicitly requested by the user.
+- **Don't auto-generate artifacts** - Never create proposal.md, design.md, tasks.md, or spec files without an explicit request from the user.
 - **Don't fake understanding** - If something is unclear, dig deeper
 - **Don't rush** - Discovery is thinking time, not task time
 - **Don't force structure** - Let patterns emerge naturally
 - **Don't auto-capture** - Offer to save insights, don't just do it
+- **Don't transition modes** - Stay in explore mode until the user explicitly asks to move to propose or apply. Never suggest running `/opsx:apply` as a next step unless asked about next steps.
 - **Do visualize** - A good diagram is worth many paragraphs
 - **Do explore the codebase** - Ground discussions in reality
 - **Do question assumptions** - Including the user's and your own
