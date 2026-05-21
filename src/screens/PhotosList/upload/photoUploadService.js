@@ -16,6 +16,7 @@ import * as CONST from '../../../consts'
 import isValidLocation from '../../../utils/isValidLocation'
 import { loadActiveWave } from '../../../utils/activeWaveStorage'
 import { isLocationInWave, createWave, autoGroupPhotos } from '../../Waves/reducer'
+import _groupingState from '../../../utils/groupingAtom'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -494,6 +495,9 @@ export const flushUngroupedPhotos = async (uuid) => {
   try {
     if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') return false
 
+    // Respect user's grouping preference — skip auto-group when disabled
+    if (!_groupingState.enabled) return false
+
     // Check if there are any pending ungrouped items first
     const queue = await readQueue()
     const hasUngrouped = queue.some((item) => !item.waveUuid && item.originalCameraUrl)
@@ -650,14 +654,17 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
     let isNewWave = false
 
     if (uuid && typeof uuid === 'string' && uuid.trim() && netAvailable) {
-      try {
-        const result = await checkAndAssignWave({ lat, lon, uuid: uuid.trim(), netAvailable })
-        if (result.waveUuid) {
-          assignedWaveUuid = result.waveUuid
-          isNewWave = result.isNewWave
+      // Respect user's grouping preference — skip wave assignment when disabled
+      if (_groupingState.enabled) {
+        try {
+          const result = await checkAndAssignWave({ lat, lon, uuid: uuid.trim(), netAvailable })
+          if (result.waveUuid) {
+            assignedWaveUuid = result.waveUuid
+            isNewWave = result.isNewWave
+          }
+        } catch (waveErr) {
+          console.warn('[processCompleteUpload] wave assignment failed:', waveErr)
         }
-      } catch (waveErr) {
-        console.warn('[processCompleteUpload] wave assignment failed:', waveErr)
       }
     }
 

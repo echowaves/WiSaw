@@ -26,6 +26,9 @@ let _groupingState = {
 
 export const groupingAtom = atom(_groupingState)
 
+// Export for direct access from non-React code (e.g., upload service)
+export { _groupingState }
+
 /**
  * Hydrate the grouping atom from AsyncStorage.
  * Call this once at app startup (e.g., in _app.tsx).
