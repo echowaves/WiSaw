@@ -62,11 +62,6 @@ The system SHALL flush any pending ungrouped photos via `autoGroupPhotosIntoWave
 - **AND** there are pending ungrouped photos in the queue
 - **THEN** the system SHALL skip the flush step regardless of pending items
 
-#### Scenario: Auto-grouping disabled — skip flush entirely
-- **WHEN** `processCompleteUpload` is called with grouping disabled (`grouping.enabled === false`)
-- **AND** there are pending ungrouped photos in the queue
-- **THEN** the system SHALL skip the flush step regardless of pending items
-
 ### Requirement: Drift check when network available
 The drift check via `isLocationInWave` SHALL run only when network connectivity is confirmed and the photo has been processed locally.
 
