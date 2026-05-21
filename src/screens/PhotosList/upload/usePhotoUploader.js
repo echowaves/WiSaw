@@ -90,7 +90,8 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
         const uploadedPhoto = await processCompleteUpload({
           item: currentItem,
           uuid: activeUuid,
-          topOffset
+          topOffset,
+          netAvailable
         })
 
         if (uploadedPhoto) {

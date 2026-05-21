@@ -14,6 +14,10 @@ import { gql } from '@apollo/client'
 
 import * as CONST from '../../../consts'
 import isValidLocation from '../../../utils/isValidLocation'
+import { loadActiveWave } from '../../../utils/activeWaveStorage'
+import { isLocationInWave, createWave, autoGroupPhotos } from '../../Waves/reducer'
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 /**
  * Utility: Wrap a promise with a timeout to prevent hanging uploads
@@ -420,6 +424,93 @@ const uploadFile = async ({
   return null
 }
 
+/**
+ * Generate a human-readable wave name from coordinates.
+ * Format: "Lat°N Lon°W - Month Day, Year" (e.g., "40.71°N 74.01°W - May 21, 2026")
+ */
+export const generateWaveName = (lat, lon) => {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return 'New Wave'
+
+  const latDir = lat >= 0 ? 'N' : 'S'
+  const lonDir = lon >= 0 ? 'E' : 'W'
+  const date = new Date()
+  const month = MONTHS[date.getMonth()]
+  const day = date.getDate()
+  const year = date.getFullYear()
+
+  return `${Math.abs(lat).toFixed(2)}°${latDir} ${Math.abs(lon).toFixed(2)}°${lonDir} - ${month} ${day}, ${year}`
+}
+
+/**
+ * Check if the photo fits within the current active wave, or create a new one.
+ * Returns { waveUuid: string|null, isNewWave: boolean }.
+ */
+export const checkAndAssignWave = async ({ lat, lon, uuid }) => {
+  try {
+    // Offline: skip drift check
+    if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {
+      console.warn('[checkAndAssignWave] Invalid UUID')
+      return { waveUuid: null, isNewWave: false }
+    }
+
+    const active = await loadActiveWave()
+    if (!active?.waveUuid) {
+      // No active wave — create new one
+      try {
+        const name = generateWaveName(lat, lon)
+        const newWave = await createWave({ name, description: '', uuid: uuid.trim(), lat, lon })
+        return { waveUuid: newWave.waveUuid, isNewWave: true }
+      } catch (createErr) {
+        console.error('[checkAndAssignWave] createWave failed:', createErr)
+        return { waveUuid: null, isNewWave: false }
+      }
+    }
+
+    // Check if location fits within the active wave
+    const inWave = await isLocationInWave({ lat, lon, waveUuid: active.waveUuid, uuid: uuid.trim() })
+    if (inWave) {
+      return { waveUuid: active.waveUuid, isNewWave: false }
+    }
+
+    // Drifted — create new wave
+    try {
+      const name = generateWaveName(lat, lon)
+      const newWave = await createWave({ name, description: '', uuid: uuid.trim(), lat, lon })
+      return { waveUuid: newWave.waveUuid, isNewWave: true }
+    } catch (createErr) {
+      console.error('[checkAndAssignWave] createWave failed after drift:', createErr)
+      return { waveUuid: null, isNewWave: false }
+    }
+  } catch (err) {
+    console.error('[checkAndAssignWave] error:', err)
+    return { waveUuid: null, isNewWave: false }
+  }
+}
+
+/**
+ * Flush pending ungrouped photos by calling autoGroupPhotosIntoWaves.
+ */
+export const flushUngroupedPhotos = async (uuid) => {
+  try {
+    if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') return false
+
+    // Check if there are any pending ungrouped items first
+    const queue = await readQueue()
+    const hasUngrouped = queue.some((item) => !item.waveUuid && item.originalCameraUrl)
+    if (!hasUngrouped) return false
+
+    // Run auto-group to flush ungrouped photos (loop until no more)
+    let result
+    do {
+      result = await autoGroupPhotos({ uuid: uuid.trim(), groupingLevel: 'CITY' })
+    } while (result?.hasMore)
+    return true
+  } catch (err) {
+    console.warn('[flushUngroupedPhotos] failed:', err)
+    return false
+  }
+}
+
 export const uploadItem = async ({ item }) => {
   try {
     if (item.type === 'video') {
@@ -505,7 +596,7 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
   }
 }
 
-export const processCompleteUpload = async ({ item, uuid, topOffset = 100 }) => {
+export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAvailable = true }) => {
   try {
     let processedItem = item
     if (!item.localImgUrl) {
@@ -544,6 +635,34 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100 }) => 
       await removeFromQueue(item)
       return null
     }
+
+    // Task 3.2 + 6: Flush ungrouped photos before processing (clean state)
+    try {
+      await flushUngroupedPhotos(uuid)
+    } catch (flushErr) {
+      console.warn('[processCompleteUpload] flush failed, continuing:', flushErr)
+    }
+
+    // Task 2.1 + 6: Wave assignment at upload time
+    const lat = processedItem.location.coords.latitude
+    const lon = processedItem.location.coords.longitude
+    let assignedWaveUuid = processedItem.waveUuid || null
+    let isNewWave = false
+
+    if (uuid && typeof uuid === 'string' && uuid.trim() && netAvailable) {
+      try {
+        const result = await checkAndAssignWave({ lat, lon, uuid: uuid.trim(), netAvailable })
+        if (result.waveUuid) {
+          assignedWaveUuid = result.waveUuid
+          isNewWave = result.isNewWave
+        }
+      } catch (waveErr) {
+        console.warn('[processCompleteUpload] wave assignment failed:', waveErr)
+      }
+    }
+
+    // Task 2.2: Store the assigned waveUuid on processed item
+    processedItem = { ...processedItem, waveUuid: assignedWaveUuid }
 
     let { photo } = processedItem
     if (!photo) {
@@ -637,6 +756,17 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100 }) => 
               uuid: uuid.trim()
             }
           })
+
+          // Task 2.3: If a new wave was created during upload, persist it for next capture
+          if (isNewWave) {
+            try {
+              const { saveActiveWave } = await import('../../../utils/activeWaveStorage')
+              const newWaveName = generateWaveName(lat, lon)
+              await saveActiveWave({ waveUuid: processedItem.waveUuid, name: newWaveName })
+            } catch (activeWaveErr) {
+              console.warn('[processCompleteUpload] failed to update active wave:', activeWaveErr)
+            }
+          }
         } catch (waveError) {
           console.error('Failed to add photo to wave:', waveError)
           Toast.show({
