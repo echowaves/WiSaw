@@ -495,8 +495,8 @@ export const flushUngroupedPhotos = async (uuid) => {
   try {
     if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') return false
 
-    // Respect user's grouping preference — skip auto-group when disabled
-    if (!_groupingState.enabled) return false
+    // Respect user's grouping preference — skip auto-group when disabled (defensive check for undefined state)
+    if (!(_groupingState && _groupingState.enabled)) return false
 
     // Check if there are any pending ungrouped items first
     const queue = await readQueue()
@@ -654,8 +654,8 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
     let isNewWave = false
 
     if (uuid && typeof uuid === 'string' && uuid.trim() && netAvailable) {
-      // Respect user's grouping preference — skip wave assignment when disabled
-      if (_groupingState.enabled) {
+      // Respect user's grouping preference — skip wave assignment when disabled (defensive check for undefined state)
+      if (_groupingState && _groupingState.enabled) {
         try {
           const result = await checkAndAssignWave({ lat, lon, uuid: uuid.trim(), netAvailable })
           if (result.waveUuid) {
