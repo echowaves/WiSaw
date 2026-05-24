@@ -198,6 +198,7 @@ export const autoGroupPhotos = async ({ uuid, groupingLevel }) => {
             photosRemaining
             hasMore
             isNewWave
+            wavesCreated
            }
           }
         `,
