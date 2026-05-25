@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
   AppState
 } from 'react-native'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import { router, useFocusEffect } from 'expo-router'
@@ -41,7 +41,6 @@ import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
 import { useLocationDrift } from '../../hooks/useLocationDrift'
 import { setLastTriggerLocation, groupingAtom } from '../../utils/groupingAtom'
-import { saveActiveWave, clearActiveWave } from '../../utils/activeWaveStorage'
 
 const WavesHub = () => {
   const insets = useSafeAreaInsets()
@@ -57,8 +56,6 @@ const WavesHub = () => {
   const location = useAtomValue(STATE.locationAtom)
   const grouping = useAtomValue(groupingAtom)
   const { groupingLevel } = grouping
-  const activeWave = useAtomValue(STATE.activeWaveAtom)
-  const setActiveWave = useSetAtom(STATE.activeWaveAtom)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -235,15 +232,6 @@ const WavesHub = () => {
 
       if (refresh) {
         setWaves(newWaves)
-        // Sync active wave from listWaves (task 3.1)
-        const active = newWaves.find(w => w.isActive)
-        if (active) {
-          setActiveWave({ waveUuid: active.waveUuid, name: active.name })
-          saveActiveWave({ waveUuid: active.waveUuid, name: active.name })
-        } else {
-          setActiveWave(null)
-          clearActiveWave()
-        }
       } else {
         setWaves(prev => [...prev, ...newWaves])
       }
@@ -355,11 +343,6 @@ const WavesHub = () => {
               setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
               setWavesCount(prev => Math.max((prev ?? 1) - 1, 0))
               setUngroupedPhotosCount(prev => (prev ?? 0) + (waveToDelete?.photosCount ?? 0))
-              // Clear active wave if it was the deleted wave (task 3.2)
-              if (activeWave && activeWave.waveUuid === waveUuid) {
-                setActiveWave(null)
-                clearActiveWave()
-              }
               emitAutoGroupDone()
               Toast.show({ type: 'success', text1: 'Wave deleted' })
             } catch (error) {
@@ -447,11 +430,6 @@ const WavesHub = () => {
                 // Task 4.3: Update last trigger location after successful auto-group
                if (location.status === 'ready' && location.coords) {
                  await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
-                }
-                // Update active wave if auto-group created a new wave (task 4.2)
-               if (result.isNewWave && result.waveUuid && result.name) {
-                 setActiveWave({ waveUuid: result.waveUuid, name: result.name })
-                 saveActiveWave({ waveUuid: result.waveUuid, name: result.name })
                 }
               }
              } catch (error) {
