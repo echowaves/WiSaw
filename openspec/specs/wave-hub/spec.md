@@ -44,6 +44,11 @@ The system SHALL re-fetch the waves list and ungrouped photo count from the API 
 - **THEN** the results SHALL be written to the global `ungroupedPhotosCount` and `wavesCount` atoms
 - **THEN** the ungrouped card visibility SHALL update based on the new count
 
+#### Scenario: Refresh does not sync active wave
+- **WHEN** `loadWaves` completes in refresh mode
+- **THEN** the system SHALL NOT search for an `isActive` wave in the results
+- **THEN** the system SHALL NOT call `setActiveWave`, `saveActiveWave`, or `clearActiveWave`
+
 #### Scenario: Ungrouped photos card shown as list header
 - **WHEN** `ungroupedPhotosCount > 0`
 - **THEN** WavesHub SHALL render `UngroupedPhotosCard` as the `ListHeaderComponent` of the waves FlatList
@@ -252,11 +257,13 @@ WavesHub SHALL update the global `wavesCount` atom when waves are created, delet
 - **WHEN** `handleDeleteWave` succeeds and removes the wave from the local list
 - **THEN** the `wavesCount` atom SHALL be decremented by 1
 - **THEN** the `ungroupedPhotosCount` atom SHALL be incremented by the deleted wave's `photosCount`
+- **THEN** the system SHALL NOT check or clear any active wave state
 
 #### Scenario: Auto-group creates waves
 - **WHEN** the auto-group process completes with `totalWavesCreated` waves created
 - **THEN** the `wavesCount` atom SHALL be incremented by `totalWavesCreated`
 - **THEN** the `ungroupedPhotosCount` atom SHALL be set to 0
+- **THEN** the system SHALL NOT save an active wave from the auto-group result
 
 ### Requirement: EmptyStateCard Secondary Action
 The `EmptyStateCard` component SHALL support an optional secondary action button.
