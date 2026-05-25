@@ -22,6 +22,9 @@ The client MUST provide four grouping level options in the settings UI, with fie
 | REGION | Far | Same region |
 | COUNTRY | World | Same country |
 
+The info card below the options SHALL display:
+> "Photos are grouped into waves by location and season. Each wave covers one season (e.g. Winter, Spring) at the selected grouping level."
+
 #### Scenario: User sees Grouping Level options
 
 - **WHEN** user opens Grouping Settings screen
@@ -31,6 +34,12 @@ The client MUST provide four grouping level options in the settings UI, with fie
 
 - **WHEN** user taps "Medium" (CITY)
 - **THEN** system stores `groupingLevel: 'CITY'` to AsyncStorage and Jotai atom
+
+#### Scenario: Info card describes season-based grouping
+
+- **WHEN** user views the Grouping Settings screen
+- **THEN** the info card SHALL display text describing season-based grouping behavior
+- **AND** SHALL NOT reference "field-matching" or "local timestamps"
 
 ### Requirement: Storage Migration
 

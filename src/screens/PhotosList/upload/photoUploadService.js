@@ -506,7 +506,7 @@ export const flushUngroupedPhotos = async (uuid) => {
     // Run auto-group to flush ungrouped photos (loop until no more)
     let result
     do {
-      result = await autoGroupPhotos({ uuid: uuid.trim(), groupingLevel: 'CITY' })
+      result = await autoGroupPhotos({ uuid: uuid.trim(), groupingLevel: _groupingState.groupingLevel || 'CITY' })
     } while (result?.hasMore)
     return true
   } catch (err) {

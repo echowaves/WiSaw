@@ -4,6 +4,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
 import WavePhotoStrip from '../WavePhotoStrip'
 import { fetchWavePhotos } from '../../screens/WaveDetail/reducer'
+import { normalizeWaveName } from '../../utils/normalizeWaveName'
 import * as CONST from '../../consts'
 
 const ROLE_CONFIG = {
@@ -41,7 +42,7 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
           <View style={styles.infoTextContainer}>
             <View style={styles.nameRow}>
               <Text style={[styles.waveName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
-                {wave.name}
+                {normalizeWaveName(wave.name)}
               </Text>
               {wave.isFrozen && (
                 <MaterialCommunityIcons name='snowflake' size={14} color='#3B82F6' style={styles.frozenIcon} />

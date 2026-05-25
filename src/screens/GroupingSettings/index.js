@@ -150,7 +150,7 @@ export default function GroupingSettings () {
         <View style={[styles.infoCard, { backgroundColor: theme.CARD_BACKGROUND }]}>
           <Text style={[styles.infoIcon, { color: theme.INTERACTIVE_PRIMARY }]}>ℹ️</Text>
           <Text style={[styles.infoText, { color: theme.TEXT_SECONDARY }]}>
-            Auto-group triggers when you move beyond the selected field-matching and local timestamps.
+            Photos are grouped into waves by location and season. Each wave covers one season (e.g. Winter, Spring) at the selected grouping level.
           </Text>
         </View>
       </ScrollView>
