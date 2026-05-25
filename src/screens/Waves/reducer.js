@@ -41,6 +41,7 @@ export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection
         }
       `,
       variables,
+      fetchPolicy: 'network-only',
     })
     return response.data.listWaves
   } catch (err) {
@@ -293,6 +294,7 @@ export const getUngroupedPhotosCount = async ({ uuid }) => {
         }
       `,
       variables: { uuid },
+      fetchPolicy: 'network-only',
     })
     return response.data.getUngroupedPhotosCount
   } catch (err) {
@@ -310,6 +312,7 @@ export const getWavesCount = async ({ uuid }) => {
         }
       `,
       variables: { uuid },
+      fetchPolicy: 'network-only',
     })
     return response.data.getWavesCount
   } catch (err) {

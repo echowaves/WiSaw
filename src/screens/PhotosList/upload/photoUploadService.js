@@ -593,13 +593,6 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
       return null
     }
 
-    // Task 3.2 + 6: Flush ungrouped photos before processing (clean state)
-    try {
-      await flushUngroupedPhotos(uuid)
-    } catch (flushErr) {
-      console.warn('[processCompleteUpload] flush failed, continuing:', flushErr)
-    }
-
     let { photo } = processedItem
     if (!photo) {
       if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {

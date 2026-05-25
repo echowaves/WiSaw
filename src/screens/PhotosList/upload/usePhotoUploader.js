@@ -8,12 +8,14 @@ import * as CONST from '../../../consts'
 import { emitUploadComplete } from '../../../events/uploadBus'
 import {
   clearQueue,
+  flushUngroupedPhotos,
   getQueue,
   initPendingUploads,
   processCompleteUpload,
   queueFileForUpload,
   removeFromQueue
 } from './photoUploadService'
+import { _groupingState } from '../../../utils/groupingAtom'
 
 const RETRY_DELAY_MS = 750
 
@@ -123,6 +125,15 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
         }
         if (remainingQueue.length === 0) {
           cleanupRetry()
+          // Flush ungrouped photos after all uploads complete, with a delay
+          // to let the backend process the last upload
+          if (_groupingState && _groupingState.enabled) {
+            setTimeout(() => {
+              flushUngroupedPhotos(activeUuid).catch((err) => {
+                console.warn('[usePhotoUploader] post-drain flush failed:', err)
+              })
+            }, 5000)
+          }
         }
       }
     } finally {
