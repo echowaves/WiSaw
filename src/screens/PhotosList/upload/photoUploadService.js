@@ -451,11 +451,6 @@ export const flushUngroupedPhotos = async (uuid) => {
     // Respect user's grouping preference — skip auto-group when disabled (defensive check for undefined state)
     if (!(_groupingState && _groupingState.enabled)) return false
 
-    // Check if there are any pending ungrouped items first
-    const queue = await readQueue()
-    const hasUngrouped = queue.some((item) => !item.waveUuid && item.originalCameraUrl)
-    if (!hasUngrouped) return false
-
     // Run auto-group to flush ungrouped photos (loop until no more)
     let result
     do {
