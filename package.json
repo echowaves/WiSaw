@@ -34,7 +34,7 @@
     "@react-navigation/drawer": "7.9.4",
     "@react-navigation/native": "7.2.2",
     "@types/react": "19.2.10",
-    "expo": "55.0.12",
+    "expo": "55.0.26",
     "expo-asset": "55.0.13",
     "expo-audio": "55.0.12",
     "expo-background-task": "55.0.13",
