@@ -9,8 +9,7 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
-  useWindowDimensions,
-  AppState
+  useWindowDimensions
 } from 'react-native'
 import { useAtom, useAtomValue } from 'jotai'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
@@ -39,8 +38,9 @@ import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
-import { useLocationDrift } from '../../hooks/useLocationDrift'
-import { setLastTriggerLocation, groupingAtom } from '../../utils/groupingAtom'
+// import { useLocationDrift } from '../../hooks/useLocationDrift' - DISABLED per change proposal
+// import { setLastTriggerLocation } from '../../utils/groupingAtom' - DISABLED with location drift trigger
+import { groupingAtom } from '../../utils/groupingAtom'
 
 const WavesHub = () => {
   const insets = useSafeAreaInsets()
@@ -93,9 +93,9 @@ const WavesHub = () => {
   // Share modal state
   const [shareModalWave, setShareModalWave] = useState(null)
 
-  // Auto-group location drift detection
-  const { shouldTrigger, isReady: driftReady } = useLocationDrift()
-  const autoGroupTriggeredRef = useRef(false)
+  // Auto-group location drift detection - DISABLED per change proposal
+  // const { shouldTrigger, isReady: driftReady } = useLocationDrift()
+  // const autoGroupTriggeredRef = useRef(false)
 
   const loadingRef = useRef(false)
   const hasMountedRef = useRef(false)
@@ -427,10 +427,10 @@ const WavesHub = () => {
                setWavesCount(prev => (prev ?? 0) + totalWavesCreated)
                setUngroupedPhotosCount(result.photosRemaining ?? 0)
                handleRefresh()
-                // Task 4.3: Update last trigger location after successful auto-group
-               if (location.status === 'ready' && location.coords) {
-                 await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
-                }
+                // Task 4.3: Update last trigger location after successful auto-group - DISABLED with location drift trigger
+               // if (location.status === 'ready' && location.coords) {
+               //   await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
+               // }
               }
              } catch (error) {
               console.error(error)
@@ -468,24 +468,26 @@ const WavesHub = () => {
   }, [handleRefresh])
 
   // Auto-trigger: when location drift exceeds threshold, trigger auto-group
-  // Only fires once per app foreground session (reset on app background)
-  useEffect(() => {
-    if (!grouping.enabled) return // Task 7.2: defense-in-depth guard
-    if (!driftReady || !shouldTrigger || autoGroupTriggeredRef.current) return
-    if (ungroupedCount === 0) return
-    autoGroupTriggeredRef.current = true
-    handleAutoGroup(ungroupedCount)
-  }, [driftReady, shouldTrigger, ungroupedCount, grouping.enabled])
+  // DISABLED: Location drift auto-trigger removed per change proposal.
+  // Auto-grouping now only occurs after upload completes or via manual triggers.
+  // useEffect(() => {
+  //   if (!grouping.enabled) return // Task 7.2: defense-in-depth guard
+  //   if (!driftReady || !shouldTrigger || autoGroupTriggeredRef.current) return
+  //   if (ungroupedCount === 0) return
+  //   autoGroupTriggeredRef.current = true
+  //   handleAutoGroup(ungroupedCount)
+  // }, [driftReady, shouldTrigger, ungroupedCount, grouping.enabled])
 
   // Reset trigger flag when app goes to background
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'background') {
-        autoGroupTriggeredRef.current = false
-      }
-    })
-    return () => subscription.remove()
-  }, [])
+  // DISABLED: No longer needed since location drift auto-trigger is disabled.
+  // useEffect(() => {
+  //   const subscription = AppState.addEventListener('change', (state) => {
+  //     if (state === 'background') {
+  //       autoGroupTriggeredRef.current = false
+  //     }
+  //   })
+  //   return () => subscription.remove()
+  // }, [])
 
   const handleStartMerge = (sourceWave) => {
     setMergingWave(sourceWave)
