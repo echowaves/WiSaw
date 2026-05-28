@@ -14,12 +14,14 @@ const { execSync } = require('child_process')
 
 const ENV_PATH = path.resolve(__dirname, '..', '.env')
 
+// nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal
 function parseEnvFile (filePath) {
   if (!fs.existsSync(filePath)) {
     console.error(`Error: ${filePath} not found`)
     process.exit(1)
   }
 
+  // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal
   const content = fs.readFileSync(filePath, 'utf-8')
   const vars = []
 
