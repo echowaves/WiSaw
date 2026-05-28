@@ -273,25 +273,23 @@ const WavesHub = () => {
     loadWaves(0, newBatch, true, debouncedSearch || undefined)
   }, [debouncedSearch])
 
-  useFocusEffect(
-    useCallback(() => {
-      loadingRef.current = false
-      setPageNumber(0)
-      setNoMoreData(false)
-      const newBatch = Crypto.randomUUID()
-      setBatch(newBatch)
-      loadWaves(0, newBatch, true, debouncedSearch || undefined)
-      fetchCounts()
-    }, [loadWaves, debouncedSearch, fetchCounts])
-  )
-
-  const handleRefresh = () => {
+const handleRefresh = useCallback(() => {
+    loadingRef.current = false
     setRefreshing(true)
     setPageNumber(0)
+    setNoMoreData(false)
     const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
     loadWaves(0, newBatch, true, debouncedSearch || undefined)
-  }
+    fetchCounts()
+   }, [loadWaves, debouncedSearch, fetchCounts])
+
+  useFocusEffect(
+    useCallback(() => {
+      loadingRef.current = false
+      handleRefresh()
+      }, [handleRefresh])
+   )
 
   const handleLoadMore = () => {
     if (!noMoreData && !loading) {

@@ -1,6 +1,5 @@
-## Purpose
-This specification defines expected user-visible behavior, constraints, and validation scenarios for wave hub in WiSaw.
-## Requirements
+## MODIFIED Requirements
+
 ### Requirement: Waves List Focus Refresh
 The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. The `useFocusEffect` callback SHALL be wrapped in `useCallback` (required by the React Navigation API to prevent infinite re-render loops), and the loading guard ref SHALL be reset to `false` at the start of each focus callback to prevent stale lock-outs from prior navigations. Thumbnail `Photo` objects (with `id` and `thumbUrl`) SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries. `WaveCard` SHALL pass `wave.photos` as `initialPhotos` to `WavePhotoStrip`, which SHALL use `CachedImage` with `cacheKey` `${photo.id}-thumb` and React `key` `photo.id`. The `handleRefresh` function (used by FlatList pull-to-refresh) SHALL perform the same state resets as the focus callback: reset `loadingRef.current` to `false`, reset `noMoreData` to `false`, and call `fetchCounts()`, so that pull-to-refresh produces identical results to gaining focus.
 
@@ -66,4 +65,3 @@ The system SHALL re-fetch the waves list and ungrouped photo count from the API 
 - **THEN** the system SHALL set `noMoreData` to `false` and call `fetchCounts()`
 - **THEN** the waves list SHALL be replaced with fresh data from page 0
 - **THEN** the ungrouped photo count and wave count badges SHALL reflect the latest server state
-
