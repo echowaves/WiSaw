@@ -20,7 +20,8 @@ rules:
     - Always write code in a modular fashion, separating concerns into different files and components.
     - Always include error handling and loading states for asynchronous operations (e.g., data fetching,
     - For accessing back end API, always refer to the GraphQL schema at https://github.com/echowaves/WiSaw.cdk/blob/main/graphql/schema.graphql , use github mcp server for that. 
-    
+    - All generated code must have a maximum cyclomatic complexity of 8 or less. Refactor complex functions by extracting helper functions, using early returns, and breaking down conditional logic into smaller reusable pieces.
+
   dependencies:
     - Do not add any new dependencies to the project unless the user explicitly requests or approves it. Solve problems using existing dependencies and built-in APIs first.
     - Always use the expo-cached-image package for image caching and displaying cached images. Do not replace it with custom wrappers or alternative libraries.
