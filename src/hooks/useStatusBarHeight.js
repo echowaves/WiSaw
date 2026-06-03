@@ -14,20 +14,3 @@ export const useStatusBarHeight = () => {
 
   // iOS uses safe area insets
   return insets.top
-}
-
-/**
- * Custom hook for SafeAreaView styles with status bar padding
- * @param {Object} baseStyle - Base SafeAreaView style object
- * @returns {Object} SafeAreaView style with platform-specific padding
- */
-export const useSafeAreaViewStyle = (baseStyle = {}) => {
-  const statusBarHeight = useStatusBarHeight()
-
-  return {
-    ...baseStyle,
-    ...(Platform.OS === 'android' && {
-      paddingTop: statusBarHeight
-    })
-  }
-}

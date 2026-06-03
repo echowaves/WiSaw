@@ -4,11 +4,11 @@ import React, { useEffect, useState } from 'react'
 import {
   Alert,
   Keyboard,
-  SafeAreaView,
   Text,
   TouchableWithoutFeedback,
   View
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import * as Haptics from 'expo-haptics'
 import { Storage } from 'expo-storage'
@@ -24,7 +24,6 @@ import zxcvbn from '../../zxcvbn'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
-import { useSafeAreaViewStyle } from '../../hooks/useStatusBarHeight'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 
 import Button from '../../components/ui/Button'
@@ -56,7 +55,7 @@ const SecretScreen = () => {
   const theme = getTheme(isDarkMode)
 
    // Get safe area view style for proper status bar handling on Android
-  const safeAreaViewStyle = useSafeAreaViewStyle()
+
 
   const [nickNameEntered, setNickNameEntered] = useState(false)
   const [nickNameText, setNickNameText] = useState('')
@@ -238,7 +237,7 @@ const SecretScreen = () => {
 
   if (!netAvailable) {
     return (
-       <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+        <SafeAreaView style={styles.container}>
          <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
            <EmptyStateCard
              icon='wifi-off'
@@ -254,7 +253,7 @@ const SecretScreen = () => {
    // ── Active Identity View ──
   if (nickNameEntered) {
     return (
-       <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+        <SafeAreaView style={styles.container}>
          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
            <KeyboardAwareScrollView
              style={styles.scrollView}
@@ -357,7 +356,7 @@ const SecretScreen = () => {
    // ── No Identity — Privacy Explainer Gate ──
   if (!hasSeenExplainer) {
     return (
-       <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+        <SafeAreaView style={styles.container}>
          <PrivacyExplainerView theme={theme} onDismiss={handleDismissExplainer} />
        </SafeAreaView>
      )
@@ -365,7 +364,7 @@ const SecretScreen = () => {
 
    // ── No Identity — Creation Flow ──
   return (
-     <SafeAreaView style={[styles.container, safeAreaViewStyle]}>
+      <SafeAreaView style={styles.container}>
        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
          <KeyboardAwareScrollView
            style={styles.scrollView}

@@ -1,14 +1,13 @@
 import React from 'react'
 import {
   View,
-  SafeAreaView,
   TouchableOpacity,
   StyleSheet,
   useWindowDimensions
 } from 'react-native'
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
 import * as CONST from '../../../consts'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context'
 
 const FOOTER_HEIGHT = 90
 
