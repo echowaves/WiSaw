@@ -17,12 +17,13 @@ import { useCallback, useEffect, useRef } from 'react'
 import { StatusBar } from 'react-native'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import Toast from 'react-native-toast-message'
+import Toast, { BaseToast } from 'react-native-toast-message'
 
 import useLocationProvider from '../src/hooks/useLocationProvider'
 import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
 import { parseDeepLink } from '../src/utils/linkingHelper'
+import ErrorDetailModal from '../src/components/ErrorDetailModal'
 import {
   getSystemTheme,
   loadFollowSystemPreference,
@@ -31,14 +32,29 @@ import {
 } from '../src/utils/themeStorage'
 import { loadWaveSortPreferences, loadWaveFeedSortPreferences, loadFriendFeedSortPreferences } from '../src/utils/waveStorage'
 import { hydrateGroupingAtom, groupingAtom } from '../src/utils/groupingAtom'
+import { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
+import { errorContextAtom } from '../src/atoms/errorAtom'
 
-export default function RootLayout () {
+// Custom error toast component with 2-line message and tap support
+const ErrorToastWithTap = (props: any) => (
+  <BaseToast
+     {...props}
+    text2NumberOfLines={2}
+    onPress={() => {
+      const cb = getCurrentOnPress()
+      if (cb) cb()
+      }}
+    />
+)
+
+
+export default function RootLayout (): JSX.Element {
   const [uuid, setUuid] = useAtom(STATE.uuid)
   const [nickName, setNickName] = useAtom(STATE.nickName)
   const [isDarkMode, setIsDarkMode] = useAtom(STATE.isDarkMode)
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
-  )
+   )
   const [, setWaveSortBy] = useAtom(STATE.waveSortBy)
   const [, setWaveSortDirection] = useAtom(STATE.waveSortDirection)
   const [, setWaveFeedSortBy] = useAtom(STATE.waveFeedSortBy)
@@ -46,6 +62,10 @@ export default function RootLayout () {
   const [, setFriendFeedSortBy] = useAtom(STATE.friendFeedSortBy)
   const [, setFriendFeedSortDirection] = useAtom(STATE.friendFeedSortDirection)
   const setGrouping = useSetAtom(groupingAtom)
+  const setAtomSet = useSetAtom(errorContextAtom)
+  useEffect(() => {
+    setAtomSetter(setAtomSet)
+  }, [setAtomSet])
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -122,11 +142,9 @@ export default function RootLayout () {
     } catch (error) {
       console.error('Error during navigation:', error)
       router.replace('/')
-      Toast.show({
-        text1: 'Navigation Error',
-        text2: 'Unable to navigate to requested content',
-        type: 'error',
-        position: 'top',
+      showErrorToast({
+        title: 'Navigation Error',
+        message: 'Unable to navigate to requested content',
         topOffset: 60,
         visibilityTime: 4000
       })
@@ -317,7 +335,8 @@ export default function RootLayout () {
             <Stack.Screen name='modal-input' options={{ presentation: 'modal', headerShown: false }} />
           </Stack>
         </KeyboardProvider>
-        <Toast />
+         <Toast config={{ error: ErrorToastWithTap }} />
+        <ErrorDetailModal />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   )

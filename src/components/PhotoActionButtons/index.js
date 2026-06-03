@@ -1,6 +1,6 @@
 import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import Toast from 'react-native-toast-message'
+import showErrorToast from '../../utils/showErrorToast'
 
 const PhotoActionButtons = ({
   photoDetails,
@@ -40,10 +40,9 @@ const PhotoActionButtons = ({
         ]}
         onPress={() => {
           if (photoDetails?.isPhotoWatched) {
-            Toast.show({
-              text1: "Can't report bookmarked photo",
-              text2: 'Remove bookmark first',
-              type: 'error',
+            showErrorToast({
+              title: "Can't report bookmarked photo",
+              message: 'Remove bookmark first',
               topOffset: toastTopOffset
             })
           } else {
@@ -70,10 +69,9 @@ const PhotoActionButtons = ({
         ]}
         onPress={() => {
           if (photoDetails?.isPhotoWatched) {
-            Toast.show({
-              text1: "Can't delete bookmarked photo",
-              text2: 'Remove bookmark first',
-              type: 'error',
+            showErrorToast({
+              title: "Can't delete bookmarked photo",
+              message: 'Remove bookmark first',
               topOffset: toastTopOffset
             })
           } else {

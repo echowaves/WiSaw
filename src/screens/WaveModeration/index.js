@@ -9,7 +9,7 @@ import {
   ActivityIndicator
 } from 'react-native'
 import { useAtom } from 'jotai'
-import Toast from 'react-native-toast-message'
+import showErrorToast from '../../utils/showErrorToast'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 
@@ -23,6 +23,7 @@ import {
   banUserFromWave
 } from '../Waves/reducer'
 import ActionMenu from '../../components/ActionMenu'
+import Toast from 'react-native-toast-message'
 
 const WaveModeration = ({ waveUuid, waveName }) => {
   const [uuid] = useAtom(STATE.uuid)
@@ -44,7 +45,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
       setReports(data || [])
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error loading reports', text2: error.message })
+      showErrorToast({ title: 'Error loading reports', message: error.message })
     } finally {
       setLoading(false)
     }
@@ -62,7 +63,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
       Toast.show({ type: 'success', text1: 'Report dismissed' })
       setReports(prev => prev.filter(r => r.id !== report.id))
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Error dismissing report', text2: error.message })
+      showErrorToast({ title: 'Error dismissing report', message: error.message })
     }
   }
 
@@ -81,7 +82,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
               Toast.show({ type: 'success', text1: 'Photo removed from wave' })
               setReports(prev => prev.filter(r => r.id !== report.id))
             } catch (error) {
-              Toast.show({ type: 'error', text1: 'Error', text2: error.message })
+              showErrorToast({ title: 'Error', message: error.message })
             }
           }
         }
@@ -109,7 +110,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
               Toast.show({ type: 'success', text1: 'User banned' })
               loadReports()
             } catch (error) {
-              Toast.show({ type: 'error', text1: 'Error', text2: error.message })
+              showErrorToast({ title: 'Error', message: error.message })
             }
           }
         }

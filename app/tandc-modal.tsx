@@ -3,6 +3,7 @@ import { Stack, useRouter } from 'expo-router'
 import { useCallback } from 'react'
 import { BackHandler } from 'react-native'
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../src/utils/showErrorToast'
 
 import useToastTopOffset from '../src/hooks/useToastTopOffset'
 import * as reducer from '../src/screens/PhotosList/reducer'
@@ -30,15 +31,11 @@ export default function TandCModalScreen () {
     const accepted = reducer.acceptTandC()
 
     if (!accepted) {
-      Toast.show({
-        text1: 'Something went wrong',
-        text2: 'Please try again in a moment.',
-        type: 'error',
-        position: 'top',
-        topOffset: toastTopOffset,
-        visibilityTime: 3000
+      showErrorToast({
+        title: 'Something went wrong',
+        message: 'Please try again in a moment.',
+        topOffset: toastTopOffset
       })
-      return
     }
 
     Toast.show({

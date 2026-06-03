@@ -12,6 +12,7 @@ import {
   View
 } from 'react-native'
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../utils/showErrorToast'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
 import { createWaveInvite } from '../screens/Waves/reducer'
@@ -56,10 +57,9 @@ const WaveShareModal = ({
         })
         .catch((err) => {
           console.error('Failed to create wave invite:', err)
-          Toast.show({
-            type: 'error',
-            text1: 'Failed to create invite',
-            text2: err.message || 'Try again later',
+          showErrorToast({
+            title: 'Failed to create invite',
+            message: err.message || 'Try again later',
             topOffset
           })
         })
@@ -90,11 +90,9 @@ const WaveShareModal = ({
     } catch (error) {
       if (error.message !== 'User did not share') {
         console.error('Error sharing wave:', error)
-        Toast.show({
-          type: 'error',
-          text1: 'Sharing failed',
-          text2: 'Unable to share wave',
-          visibilityTime: 3000,
+        showErrorToast({
+          title: 'Sharing failed',
+          message: 'Unable to share wave',
           topOffset
         })
       }

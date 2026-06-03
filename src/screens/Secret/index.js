@@ -15,6 +15,8 @@ import { Storage } from 'expo-storage'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import Toast from 'react-native-toast-message'
 
+import showErrorToast from '../../utils/showErrorToast'
+
 import { FontAwesome5 } from '@expo/vector-icons'
 
 import zxcvbn from '../../zxcvbn'
@@ -151,12 +153,11 @@ const SecretScreen = () => {
          }
        }
 
-      Toast.show({
-        text1: errorTitle,
-        text2: errorMessage,
-        type: 'error',
+      showErrorToast({
+        title: errorTitle,
+        message: errorMessage,
         topOffset: toastTopOffset
-       })
+      })
      } finally {
       setIsSubmitting(false)
      }

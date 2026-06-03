@@ -9,6 +9,7 @@ import {
   ActivityIndicator
 } from 'react-native'
 import { useAtom } from 'jotai'
+import showErrorToast from '../../utils/showErrorToast'
 import Toast from 'react-native-toast-message'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
@@ -59,7 +60,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
       setBans(bansData || [])
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error loading members', text2: error.message })
+      showErrorToast({ title: 'Error loading members', message: error.message })
     } finally {
       setLoading(false)
     }
@@ -75,7 +76,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
       Toast.show({ type: 'success', text1: `${member.nickName || 'User'} is now a facilitator` })
       loadData()
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Error', text2: error.message })
+      showErrorToast({ title: 'Error', message: error.message })
     }
   }
 
@@ -85,7 +86,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
       Toast.show({ type: 'success', text1: `${member.nickName || 'User'} is no longer a facilitator` })
       loadData()
     } catch (error) {
-      Toast.show({ type: 'error', text1: 'Error', text2: error.message })
+      showErrorToast({ title: 'Error', message: error.message })
     }
   }
 
@@ -104,7 +105,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
               Toast.show({ type: 'success', text1: 'Member removed' })
               loadData()
             } catch (error) {
-              Toast.show({ type: 'error', text1: 'Error', text2: error.message })
+              showErrorToast({ title: 'Error', message: error.message })
             }
           }
         }
@@ -127,7 +128,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
               Toast.show({ type: 'success', text1: 'Invite revoked' })
               loadData()
             } catch (error) {
-              Toast.show({ type: 'error', text1: 'Error', text2: error.message })
+              showErrorToast({ title: 'Error', message: error.message })
             }
           }
         }

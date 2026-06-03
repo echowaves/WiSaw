@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Alert } from 'react-native'
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../utils/showErrorToast'
 import { useSetAtom } from 'jotai'
 
 import * as reducer from '../components/Photo/reducer'
@@ -29,10 +30,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       return
     }
     if (photoDetails?.isPhotoWatched) {
-      Toast.show({
-        text1: "Can't delete bookmarked photo",
-        text2: 'Remove bookmark first',
-        type: 'error',
+      showErrorToast({
+        title: "Can't delete bookmarked photo",
+        message: 'Remove bookmark first',
         topOffset: toastTopOffset
       })
       return
@@ -76,10 +76,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         return
       }
       if (isPhotoBannedByMe()) {
-        Toast.show({
-          text1: 'Looks like you already Reported this Photo',
-          text2: 'You can only Report same Photo once',
-          type: 'error',
+        showErrorToast({
+          title: 'Looks like you already Reported this Photo',
+          message: 'You can only Report same Photo once',
           topOffset: toastTopOffset
         })
       } else {
@@ -100,10 +99,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
                     topOffset: toastTopOffset
                   })
                 } catch (err) {
-                  Toast.show({
-                    text1: 'Unable to report content',
-                    text2: 'Try again later',
-                    type: 'error',
+                  showErrorToast({
+                    title: 'Unable to report content',
+                    message: err,
                     topOffset: toastTopOffset
                   })
                 }
@@ -117,19 +115,17 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
     }
 
     if (photoDetails?.isPhotoWatched) {
-      Toast.show({
-        text1: "Can't report bookmarked photo",
-        text2: 'Remove bookmark first',
-        type: 'error',
+      showErrorToast({
+        title: "Can't report bookmarked photo",
+        message: 'Remove bookmark first',
         topOffset: toastTopOffset
-      })
+       })
       return
-    }
+     }
     if (isPhotoBannedByMe()) {
-      Toast.show({
-        text1: 'Looks like you already Reported this Photo',
-        text2: 'You can only Report same Photo once',
-        type: 'error',
+      showErrorToast({
+        title: 'Looks like you already Reported this Photo',
+        message: 'You can only Report same Photo once',
         topOffset: toastTopOffset
       })
     } else {
@@ -175,10 +171,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         })
       }
     } catch (err) {
-      Toast.show({
-        text1: 'Unable to complete',
-        text2: 'Network issue? Try again later',
-        type: 'error',
+      showErrorToast({
+        title: 'Unable to complete',
+        message: err,
         topOffset: toastTopOffset
       })
     }
@@ -218,10 +213,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       })
     } catch (err) {
       setPhotoDetails(previousDetails)
-      Toast.show({
-        text1: 'Failed to add to wave',
-        text2: 'Try again later',
-        type: 'error',
+      showErrorToast({
+        title: 'Failed to add to wave',
+        message: err,
         topOffset: toastTopOffset
       })
     }
@@ -257,10 +251,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       })
     } catch (err) {
       setPhotoDetails(previousDetails)
-      Toast.show({
-        text1: 'Failed to remove from wave',
-        text2: 'Try again later',
-        type: 'error',
+      showErrorToast({
+        title: 'Failed to remove from wave',
+        message: err,
         topOffset: toastTopOffset
       })
     }
@@ -290,10 +283,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         visibilityTime: 1500
       })
     } catch (err) {
-      Toast.show({
-        text1: 'Failed to create wave',
-        text2: 'Try again later',
-        type: 'error',
+      showErrorToast({
+        title: 'Failed to create wave',
+        message: err,
         topOffset: toastTopOffset
       })
     }

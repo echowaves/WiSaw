@@ -3,6 +3,8 @@ import * as Haptics from 'expo-haptics'
 import React, { useEffect, useState } from 'react'
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Toast from 'react-native-toast-message'
+import { useAtom } from 'jotai'
+import showErrorToast from '../utils/showErrorToast'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
 import * as friendsHelper from '../screens/FriendsList/friends_helper'
@@ -55,13 +57,9 @@ const ShareOptionsModal = ({
       }
     } catch (error) {
       console.error('Error sharing friendship:', error)
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Sharing failed',
-        text2: 'Unable to share friendship request',
-        visibilityTime: 3000,
-        autoHide: true,
+      showErrorToast({
+        title: 'Sharing failed',
+        message: 'Unable to share friendship request',
         topOffset
       })
     }

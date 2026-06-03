@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useAtom } from 'jotai'
-import Toast from 'react-native-toast-message'
+import showErrorToast from '../../../src/utils/showErrorToast'
 
 import AppHeader from '../../../src/components/AppHeader'
 import * as STATE from '../../../src/state'
@@ -167,12 +167,10 @@ export default function WaveJoinScreen (): React.JSX.Element {
       }
 
       setError(normalized.message)
-      Toast.show({
-        text1: normalized.title,
-        text2: normalized.message,
-        type: 'error',
-        topOffset: 60,
-        visibilityTime: 4000
+      showErrorToast({
+        title: normalized.title,
+        message: normalized.message,
+        topOffset: 60
       })
     } finally {
       setLoading(false)

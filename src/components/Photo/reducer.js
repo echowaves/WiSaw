@@ -1,4 +1,5 @@
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../../utils/showErrorToast'
 
 // import { CacheManager } from 'expo-cached-image'
 import { gql } from '@apollo/client'
@@ -55,10 +56,9 @@ export async function watchPhoto ({ photo, uuid, topOffset }) {
   } catch (err1) {
     // eslint-disable-next-line no-console
     console.error({ err1 })
-    Toast.show({
-      text1: 'Unable to bookmark photo',
-      text2: 'Network Issue?',
-      type: 'error',
+    showErrorToast({
+      title: 'Unable to bookmark photo',
+      message: err1,
       topOffset
     })
   }
@@ -84,10 +84,9 @@ export async function unwatchPhoto ({ photo, uuid, topOffset }) {
   } catch (err2) {
     // eslint-disable-next-line no-console
     console.error({ err2 })
-    Toast.show({
-      text1: 'Unable to remove bookmark',
-      text2: 'Maybe Network Issue?',
-      type: 'error',
+    showErrorToast({
+      title: 'Unable to remove bookmark',
+      message: err2,
       topOffset
     })
   }
@@ -148,10 +147,9 @@ export async function deletePhoto ({ photo, uuid, topOffset }) {
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.error({ err3 })
-    Toast.show({
-      text1: 'Unable to delete',
-      text2: 'Network Issue?',
-      type: 'error',
+    showErrorToast({
+      title: 'Unable to delete',
+      message: err3,
       topOffset
     })
   }
@@ -165,10 +163,9 @@ export async function sharePhoto ({ photo, photoDetails, topOffset }) {
   } catch (err4) {
     // eslint-disable-next-line no-console
     console.error({ err4 })
-    Toast.show({
-      text1: 'Unable to share photo',
-      text2: 'Wait a bit and try again',
-      type: 'error',
+    showErrorToast({
+      title: 'Unable to share photo',
+      message: err4,
       topOffset
     })
   }
@@ -211,10 +208,9 @@ export async function submitComment ({ inputText, photo, uuid, topOffset }) {
     return { ...comment, hiddenButtons: true }
   } catch (err5) {
     console.error({ err5 }) // eslint-disable-line
-    Toast.show({
-      text1: 'Unable to add comment',
-      text2: `${err5}`,
-      type: 'error',
+    showErrorToast({
+      title: 'Unable to add comment',
+      message: err5,
       topOffset
     })
   }
@@ -315,10 +311,9 @@ export async function deleteComment ({ photo, photoDetails, comment, uuid, topOf
   } catch (err7) {
     // eslint-disable-next-line no-console
     console.error({ err7 })
-    Toast.show({
-      text1: 'Unable to delete comment',
-      text2: 'Network Issue?',
-      type: 'error',
+    showErrorToast({
+      title: 'Unable to delete comment',
+      message: err7,
       topOffset
     })
   }

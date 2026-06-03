@@ -14,6 +14,7 @@ import {
 import { useAtom, useAtomValue } from 'jotai'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../../utils/showErrorToast'
 import { router, useFocusEffect } from 'expo-router'
 import * as Crypto from 'expo-crypto'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
@@ -240,10 +241,9 @@ const WavesHub = () => {
       setBatch(data.batch)
     } catch (error) {
       console.error(error)
-      Toast.show({
-        type: 'error',
-        text1: 'Error loading waves',
-        text2: error.message
+      showErrorToast({
+        title: 'Error loading waves',
+        message: error.message
       })
     } finally {
       loadingRef.current = false
@@ -319,7 +319,7 @@ const handleRefresh = useCallback(() => {
       Toast.show({ type: 'success', text1: 'Wave created' })
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error creating wave', text2: error.message })
+      showErrorToast({ title: 'Error creating wave', message: error.message })
     } finally {
       setCreating(false)
     }
@@ -345,7 +345,7 @@ const handleRefresh = useCallback(() => {
               Toast.show({ type: 'success', text1: 'Wave deleted' })
             } catch (error) {
               console.error(error)
-              Toast.show({ type: 'error', text1: 'Error deleting wave', text2: error.message })
+              showErrorToast({ title: 'Error deleting wave', message: error.message })
             }
           }
         }
@@ -381,7 +381,7 @@ const handleRefresh = useCallback(() => {
       Toast.show({ type: 'success', text1: 'Wave updated' })
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error updating wave', text2: error.message })
+      showErrorToast({ title: 'Error updating wave', message: error.message })
     } finally {
       setUpdating(false)
     }
@@ -432,7 +432,7 @@ const handleRefresh = useCallback(() => {
               }
              } catch (error) {
               console.error(error)
-              Toast.show({ type: 'error', text1: 'Error auto-grouping photos', text2: error.message })
+              showErrorToast({ title: 'Error auto-grouping photos', message: error.message })
               if (totalWavesCreated > 0) handleRefresh()
              } finally {
               setAutoGrouping(false)
@@ -519,7 +519,7 @@ const handleRefresh = useCallback(() => {
               Toast.show({ type: 'success', text1: 'Waves merged successfully' })
             } catch (error) {
               console.error(error)
-              Toast.show({ type: 'error', text1: 'Error merging waves', text2: error.message })
+              showErrorToast({ title: 'Error merging waves', message: error.message })
             } finally {
               setMergingWave(null)
             }

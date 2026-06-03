@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../../utils/showErrorToast'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import * as Crypto from 'expo-crypto'
@@ -134,7 +135,7 @@ const FriendDetail = () => {
       }
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error loading photos', text2: error.message })
+      showErrorToast({ title: 'Error loading photos', message: error.message })
     } finally {
       setLoading(false)
     }
@@ -185,7 +186,7 @@ const FriendDetail = () => {
               router.back()
             } catch (error) {
               console.error(error)
-              Toast.show({ type: 'error', text1: 'Error removing friend', text2: error.message })
+              showErrorToast({ title: 'Error removing friend', message: error.message })
             }
           }
         }

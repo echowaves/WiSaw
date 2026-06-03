@@ -12,6 +12,7 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 import CachedImage from 'expo-cached-image'
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../../utils/showErrorToast'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Crypto from 'expo-crypto'
 
@@ -94,7 +95,7 @@ const PhotoSelectionMode = () => {
       setBatch(data.batch)
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error loading photos', text2: error.message })
+      showErrorToast({ title: 'Error loading photos', message: error.message })
     } finally {
       setLoading(false)
     }
@@ -140,10 +141,9 @@ const PhotoSelectionMode = () => {
       router.back()
     } catch (error) {
       console.error(error)
-      Toast.show({
-        type: 'error',
-        text1: `Added ${successCount} of ${selectedIds.size} photos`,
-        text2: error.message
+      showErrorToast({
+        title: `Added ${successCount} of ${selectedIds.size} photos`,
+        message: error.message
       })
     } finally {
       setAdding(false)

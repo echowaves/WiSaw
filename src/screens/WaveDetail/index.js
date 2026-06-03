@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
 import Toast from 'react-native-toast-message'
+import showErrorToast from '../../utils/showErrorToast'
 import { router, useLocalSearchParams, useNavigation, useFocusEffect } from 'expo-router'
 import * as Haptics from 'expo-haptics'
 import * as Crypto from 'expo-crypto'
@@ -265,7 +266,7 @@ const WaveDetail = () => {
       }
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error loading photos', text2: error.message })
+      showErrorToast({ title: 'Error loading photos', message: error.message })
     } finally {
       setLoading(false)
     }
@@ -317,7 +318,7 @@ const WaveDetail = () => {
               router.back()
             } catch (error) {
               console.error(error)
-              Toast.show({ type: 'error', text1: 'Error deleting wave', text2: error.message })
+              showErrorToast({ title: 'Error deleting wave', message: error.message })
             }
           }
         }
@@ -503,7 +504,7 @@ const WaveDetail = () => {
       Toast.show({ type: 'success', text1: 'Wave updated' })
     } catch (error) {
       console.error(error)
-      Toast.show({ type: 'error', text1: 'Error updating wave', text2: error.message })
+      showErrorToast({ title: 'Error updating wave', message: error.message })
     } finally {
       setSaving(false)
     }
@@ -531,7 +532,7 @@ const WaveDetail = () => {
               router.back()
             } catch (error) {
               console.error(error)
-              Toast.show({ type: 'error', text1: 'Error merging waves', text2: error.message })
+              showErrorToast({ title: 'Error merging waves', message: error.message })
             }
           }
         }
