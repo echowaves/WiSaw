@@ -60,7 +60,7 @@ const PhotosListFooter = ({
         backgroundColor: theme.CARD_BACKGROUND,
         width,
         height: FOOTER_HEIGHT,
-        paddingBottom: insets.bottom,
+
         ...styles.footerContainer,
         shadowOffset: {
           width: 0,
@@ -72,8 +72,7 @@ const PhotosListFooter = ({
         zIndex: 14
       }}
     >
-      <SafeAreaView
-        style={{
+      <SafeAreaView        edges={['bottom']}        style={{
           flex: 1
         }}
       >

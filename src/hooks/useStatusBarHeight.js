@@ -14,3 +14,4 @@ export const useStatusBarHeight = () => {
 
   // iOS uses safe area insets
   return insets.top
+}
