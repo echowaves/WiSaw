@@ -12,6 +12,7 @@ context: |
   Key conventions: Kebab-case file names, screen-level state with Jotai atoms, anonymous user identity via device UUID
   Dependencies: Always use exact versions in package.json (no ^ or ~ prefixes)
   Package manager: npm
+  Backend repo: /Users/dmitry/hacks/wisaw/Wisaw.cdk (absolute path, sibling to this workspace
 
 
 rules:
@@ -26,7 +27,7 @@ rules:
     - Do not add any new dependencies to the project unless the user explicitly requests or approves it. Solve problems using existing dependencies and built-in APIs first.
     - Always use the expo-cached-image package for image caching and displaying cached images. Do not replace it with custom wrappers or alternative libraries.
     - Always use the expo-storage package for key-value storage. Do not replace it with custom wrappers or direct AsyncStorage usage.
-    - The latest backend code can be found relative to this workspace in ../Wisaw.cdk
+     - The latest backend code can be found at /Users/dmitry/hacks/wisaw/Wisaw.cdk
   security:
     - The .env file must never be committed to version control. It must remain in .gitignore at all times.
     - Secrets and sensitive values from .env (API keys, tokens, credentials, connection strings) must never be hardcoded or leaked into any versioned file. Always reference them via environment variables at runtime.
