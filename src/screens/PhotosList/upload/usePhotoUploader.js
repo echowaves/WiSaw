@@ -16,6 +16,7 @@ import {
   removeFromQueue
 } from './photoUploadService'
 import { _groupingState } from '../../../utils/groupingAtom'
+import { emitAutoGroupSilent } from '../../../events/autoGroupBus'
 
 const RETRY_DELAY_MS = 750
 
@@ -128,10 +129,12 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
           // Flush ungrouped photos after all uploads complete, with a delay
           // to let the backend process the last upload
           if (_groupingState && _groupingState.enabled) {
-            setTimeout(() => {
-              flushUngroupedPhotos(activeUuid).catch((err) => {
-                console.warn('[usePhotoUploader] post-drain flush failed:', err)
-              })
+            setTimeout(async () => {
+              const result = await flushUngroupedPhotos(activeUuid)
+              if (result && result !== false) {
+                // Trigger silent auto-group to show progress overlay if on Waves screen
+                emitAutoGroupSilent(result.photosGrouped, _groupingState.groupingLevel)
+              }
             }, 5000)
           }
         }

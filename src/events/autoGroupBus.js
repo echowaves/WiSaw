@@ -12,15 +12,19 @@ export const subscribeToAutoGroup = (listener) => {
     }
  }
 
-export const emitAutoGroup = (count, groupingLevel) => {
+export const emitAutoGroup = (count, groupingLevel, silent = false) => {
   autoGroupListeners.forEach((listener) => {
     try {
-      listener(count, groupingLevel)
+      listener(count, groupingLevel, silent)
      } catch (error) {
       console.error('Error handling auto-group trigger:', error)
      }
     })
  }
+
+export const emitAutoGroupSilent = (count, groupingLevel) => {
+  emitAutoGroup(count, groupingLevel, true)
+}
 
 const autoGroupDoneListeners = new Set()
 

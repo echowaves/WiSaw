@@ -16,6 +16,7 @@ import * as CONST from '../../../consts'
 import isValidLocation from '../../../utils/isValidLocation'
 import { autoGroupPhotos } from '../../Waves/reducer'
 import { _groupingState } from '../../../utils/groupingAtom'
+import { emitAutoGroupDone } from '../../../events/autoGroupBus'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -453,10 +454,24 @@ export const flushUngroupedPhotos = async (uuid) => {
 
     // Run auto-group to flush ungrouped photos (loop until no more)
     let result
+    let totalPhotosGrouped = 0
+    let totalWavesCreated = 0
     do {
       result = await autoGroupPhotos({ uuid: uuid.trim(), groupingLevel: _groupingState.groupingLevel || 'CITY' })
+      if (result.photosGrouped > 0) {
+        totalPhotosGrouped += result.photosGrouped
+        totalWavesCreated += result.wavesCreated ?? 0
+      }
     } while (result?.hasMore)
-    return true
+
+    // Emit completion event to trigger badge updates
+    emitAutoGroupDone()
+
+    return {
+      wavesCreated: totalWavesCreated,
+      photosGrouped: totalPhotosGrouped,
+      photosRemaining: result?.photosRemaining ?? 0
+    }
   } catch (err) {
     console.warn('[flushUngroupedPhotos] failed:', err)
     return false
