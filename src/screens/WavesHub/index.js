@@ -100,6 +100,7 @@ const WavesHub = () => {
 
   const loadingRef = useRef(false)
   const hasMountedRef = useRef(false)
+  const autoGroupRunningRef = useRef(false)
 
   const theme = getTheme(isDarkMode)
 
@@ -389,6 +390,13 @@ const handleRefresh = useCallback(() => {
 
   // Extracted auto-group logic for reuse between manual and silent modes
   const runAutoGroup = useCallback(async (count, gl, silent = false) => {
+    // Guard: prevent concurrent auto-group execution (causes UI freeze)
+    if (autoGroupRunningRef.current) {
+      console.log(`[WAVES-HUB] Auto-group already running (${silent ? 'silent' : 'manual'}), skipping duplicate trigger`)
+      return
+    }
+
+    autoGroupRunningRef.current = true
     setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0, photosRemaining: 0 })
     setAutoGrouping(true)
     let totalPhotosGrouped = 0
@@ -428,6 +436,7 @@ const handleRefresh = useCallback(() => {
       showErrorToast({ title: 'Error auto-grouping photos', message: error.message })
       if (totalWavesCreated > 0) handleRefresh()
     } finally {
+      autoGroupRunningRef.current = false
       setAutoGrouping(false)
       emitAutoGroupDone()
     }

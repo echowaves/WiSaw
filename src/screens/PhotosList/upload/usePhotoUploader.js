@@ -32,6 +32,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
   const processingRef = useRef(false)
   const retryTimeoutRef = useRef(null)
   const processQueueRef = useRef(null)
+  const needsFlushRef = useRef(false)
 
   const syncQueueFromStorage = useCallback(async () => {
     const queue = await getQueue()
@@ -77,9 +78,10 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
     processingRef.current = true
     setIsUploading(true)
 
-    try {
-      let queue = await syncQueueFromStorage()
+    let queue = await syncQueueFromStorage()
+    needsFlushRef.current = queue.length > 0
 
+    try {
       while (queue.length > 0) {
         const currentItem = queue[0]
 
@@ -115,8 +117,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
       }
 
       if (netAvailable) {
-        const remainingQueue = await syncQueueFromStorage()
-        if (remainingQueue.length > 0 && !retryTimeoutRef.current) {
+        if (queue.length > 0 && !retryTimeoutRef.current) {
           retryTimeoutRef.current = setTimeout(() => {
             retryTimeoutRef.current = null
             if (processQueueRef.current) {
@@ -124,24 +125,28 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
             }
           }, RETRY_DELAY_MS)
         }
-        if (remainingQueue.length === 0) {
+        if (queue.length === 0) {
           cleanupRetry()
-          // Flush ungrouped photos after all uploads complete, with a delay
-          // to let the backend process the last upload
-          if (_groupingState && _groupingState.enabled) {
-            setTimeout(async () => {
-              const result = await flushUngroupedPhotos(activeUuid)
-              if (result && result !== false) {
-                // Trigger silent auto-group to show progress overlay if on Waves screen
-                emitAutoGroupSilent(result.photosGrouped, _groupingState.groupingLevel)
-              }
-            }, 5000)
-          }
         }
       }
     } finally {
       processingRef.current = false
       setIsUploading(false)
+
+      // Schedule flush after 5s if we processed uploads in this cycle
+      if (needsFlushRef.current && _groupingState && _groupingState.enabled) {
+        needsFlushRef.current = false
+        setTimeout(async () => {
+          try {
+            const result = await flushUngroupedPhotos(activeUuid)
+            if (result && result !== false) {
+              emitAutoGroupSilent(result.photosGrouped, _groupingState.groupingLevel)
+            }
+          } catch {
+            // Ignore flush errors
+          }
+        }, 5000)
+      }
     }
   }, [cleanupRetry, netAvailable, resolveUuid, syncQueueFromStorage, topOffset])
 
