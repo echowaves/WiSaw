@@ -1,8 +1,8 @@
 ## 1. Fix inline send button touch handling
 
-- [x] 1.1 Replace `onPress` with `onTouchStart` on the send button `TouchableOpacity` in `src/components/Photo/index.js` to capture the tap before the `TextInput` blur causes a layout shift
-- [x] 1.2 Call `Keyboard.dismiss()` as the first action in the `onTouchStart` handler to dismiss the keyboard immediately before the submit begins
-- [x] 1.3 Ensure the `isSubmittingCommentRef.current` guard prevents double submissions if multiple touch events fire
+- [x] 1.1 Use `onStartShouldSetResponder` to claim gesture before TextInput blur
+- [x] 1.2 Call `Keyboard.dismiss()` in `onResponderGrant` to dismiss keyboard before blur
+- [x] 1.3 Move submit logic to `onPress` which will fire reliably after gesture is claimed
 
 ## 2. Verify
 

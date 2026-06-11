@@ -950,13 +950,13 @@ const Photo = ({
               }}
             />
             <TouchableOpacity
-              onTouchStart={async (e) => {
-                e.preventDefault()
-                // Guard: prevent double-submit if multiple touch events fire
+              onStartShouldSetResponder={() => true}
+              onResponderGrant={() => {
+                Keyboard.dismiss()
+              }}
+              onPress={async () => {
                 if (!commentInputText.trim() || isSubmittingCommentRef.current) return
                 isSubmittingCommentRef.current = true
-                // Dismiss keyboard immediately before submit to avoid layout race
-                Keyboard.dismiss()
                 const text = commentInputText.trim()
                 setShowCommentInput(false)
                 setCommentInputText('')
