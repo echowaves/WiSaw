@@ -15,7 +15,7 @@ The existing `handleFlipWatch` hook already demonstrates the correct pattern: aw
 ## Goals / Non-Goals
 
 **Goals:**
-- Expanded photo card shows correct bookmark count after comment submission
+- Expanded photo card shows correct `isPhotoWatched` (bookmark state) after comment submission
 - Modal input flow refreshes the expanded card before navigating back
 - `watchPhoto` completes before refetch triggers
 - No stale data overwrite on refresh
@@ -23,7 +23,10 @@ The existing `handleFlipWatch` hook already demonstrates the correct pattern: aw
 **Non-Goals:**
 - Thumbnail card (feed list) refresh — out of scope for this change
 - Optimistic updates — not needed; the fix ensures the actual data is correct
-- Backend schema changes — `getPhotoDetails` already returns `watchersCount`
+- Backend schema changes — `watchersCount` is not available in `PhotoDetails` GraphQL type
+
+**Known Limitation:**
+The `watchersCount` field is not returned by the `getPhotoDetails` GraphQL query. It only exists on the `Photo` type (for list feeds), not on `PhotoDetails`. Bookmark count display will remain at the last known value from the original photo object. To display accurate bookmark count after comment submission, the backend must add `watchersCount` to the `PhotoDetails` type.
 
 ## Decisions
 
@@ -33,9 +36,11 @@ The existing `handleFlipWatch` hook already demonstrates the correct pattern: aw
 **Alternative considered:** Remove `watchPhoto` entirely and rely on `getPhotoDetails` to return the correct `isPhotoWatched`. But `watchPhoto` is the mutation that triggers the backend logic — we can't skip it.
 
 ### 2. Remove `watchersCount` override in Photo load handler
-**Why:** The GraphQL query already returns `watchersCount`. Overwriting it with `photo.watchersCount` discards the fresh value. Simply removing the override lets the query result stand.
+**Why:** The GraphQL query `getPhotoDetails` does not return `watchersCount` (it's not in the `PhotoDetails` backend type). Removing the override prevents the code from trying to use a field that doesn't exist.
 
-**Alternative considered:** Add a conditional (`only override if query returns null`). But the query reliably returns `watchersCount` — the override is just legacy code that's now harmful.
+**Known Limitation:** `watchersCount` is not available in the `PhotoDetails` GraphQL type. Only `isPhotoWatched` is returned, which is sufficient to update the bookmark button state (filled/empty icon). Bookmark count display will remain at the last known value from the original photo object.
+
+**Alternative considered:** Add `watchersCount` to the `getPhotoDetails` query. This was tested and failed with GraphQL error `Field 'watchersCount' in type 'PhotoDetails' is undefined`, confirming the backend doesn't support this field on `PhotoDetails`.
 
 ### 3. Add refresh to modal input before `router.back()`
 **Why:** The user returns to the expanded card immediately after dismissing the modal. They need to see the updated state.

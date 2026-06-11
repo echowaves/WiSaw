@@ -1,2 +1,10 @@
 schema: spec-driven
 created: 2026-06-11
+status: implementation-complete
+last-updated: 2026-06-11
+summary: >
+  Fix photo card refresh when comment is added. Backend auto-bookmarks on comment,
+  but frontend wasn't refreshing properly due to missing await on watchPhoto(),
+  wrong emitPhotoRefresh argument shape, and missing refresh in modal flow.
+  Known limitation: watchersCount is not returned by getPhotoDetails GraphQL query
+  (not in PhotoDetails backend type), so bookmark count display remains static.

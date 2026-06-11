@@ -14,7 +14,7 @@ The system SHALL allow users to post anonymous comments on any photo via a modal
 - **THEN** the comment is not submitted and the input remains active
 
 ### Requirement: Comment Input Modal
-The system SHALL provide an interactive comment composer as a root-level modal route (`app/modal-input.tsx`) with `presentation: 'modal'`, accessible from any navigator stack in the app. The modal SHALL display a text field and a send button in a custom `AppHeader`. After comment submission, the system SHALL emit a photo refresh signal and await the refresh before calling `router.back()`, ensuring the expanded card displays updated state (including bookmark count and watch status) when the user returns. After dismissal without submission, `router.back()` SHALL return the user to the screen they came from. When the Photo component is rendered in embedded mode (`embedded === true`), the "Add Comment" action SHALL use the inline comment input instead of navigating to the modal route.
+The system SHALL provide an interactive comment composer as a root-level modal route (`app/modal-input.tsx`) with `presentation: 'modal'`, accessible from any navigator stack in the app. The modal SHALL display a text field and a send button in a custom `AppHeader`. After comment submission, the system SHALL emit a photo refresh signal and await `getPhotoDetails` before calling `router.back()`, ensuring the expanded card displays updated state (including `isPhotoWatched` bookmark status) when the user returns. After dismissal without submission, `router.back()` SHALL return the user to the screen they came from. When the Photo component is rendered in embedded mode (`embedded === true`), the "Add Comment" action SHALL use the inline comment input instead of navigating to the modal route.
 
 #### Scenario: User opens comment input from PhotosList
 - **WHEN** the user taps "Add Comment" on a photo expanded in PhotosList
@@ -34,3 +34,15 @@ The system SHALL provide an interactive comment composer as a root-level modal r
 #### Scenario: User opens comment input from standalone photo view
 - **WHEN** the user taps "Add Comment" on a Photo rendered with `embedded === false`
 - **THEN** the modal input interface SHALL open as a modal overlay
+
+### Requirement: Inline Comment Submission Refresh
+When a user submits a comment via the inline comment input in the expanded photo card, the system SHALL await the `watchPhoto` mutation, re-fetch photo details via `getPhotoDetails`, update the local `photoDetails` state, and emit a photo refresh signal.
+
+#### Scenario: Inline comment submission updates photo state
+- **WHEN** the user types a comment in the inline input and submits
+- **THEN** the `watchPhoto` mutation completes, photo details are re-fetched, the local state is updated with fresh data including `isPhotoWatched`
+- **THEN** the photo refresh signal is emitted and the bookmark icon state updates correctly
+
+#### Scenario: Inline comment submission uses correct emitPhotoRefresh argument
+- **WHEN** `emitPhotoRefresh` is called after inline comment submission
+- **THEN** the argument MUST be `{ photoId }` (object with photoId property), not a raw string, to ensure subscribers receive the correct `photoId` value
