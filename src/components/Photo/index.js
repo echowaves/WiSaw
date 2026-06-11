@@ -945,6 +945,7 @@ const Photo = ({
                   }
                   emitPhotoRefresh({ photoId: photo.id })
                 }
+                Keyboard.dismiss()
                 isSubmittingCommentRef.current = false
               }}
             />
@@ -975,6 +976,7 @@ const Photo = ({
                   }
                   emitPhotoRefresh({ photoId: photo.id })
                 }
+                Keyboard.dismiss()
                 isSubmittingCommentRef.current = false
               }}
               disabled={!commentInputText.trim()}

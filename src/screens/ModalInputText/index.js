@@ -1,8 +1,7 @@
 import { useNavigation } from '@react-navigation/native'
+import { Keyboard, StatusBar, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
-
-import { StatusBar, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Ionicons } from '@expo/vector-icons'
@@ -133,7 +132,9 @@ const ModalInputText = ({ route }) => {
     try {
       const commentText = inputText.trim()
 
-      // Navigate back immediately for better UX
+      Keyboard.dismiss()
+
+      // Navigate back
       router.back()
 
       // Submit comment to backend
@@ -149,6 +150,7 @@ const ModalInputText = ({ route }) => {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('❌ ModalInputText: Error submitting comment:', error)
+      Keyboard.dismiss()
     }
   }
 

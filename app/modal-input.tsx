@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
+import { Keyboard, TouchableOpacity, useWindowDimensions } from 'react-native'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
-import { TouchableOpacity, useWindowDimensions } from 'react-native'
 import AppHeader from '../src/components/AppHeader'
 import * as reducer from '../src/components/Photo/reducer'
 import { emitPhotoRefresh } from '../src/events/photoRefreshBus'
@@ -49,6 +49,7 @@ export default function ModalInputScreen () {
         })
       }
 
+      Keyboard.dismiss()
       router.back()
     } catch (error) {
       console.error('Error submitting comment:', error)
