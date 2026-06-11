@@ -72,7 +72,8 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
       const captureArgs = {
         cameraImgUrl: cameraReturn.assets[0].uri,
         type: cameraReturn.assets[0].type,
-        location: { coords: locationState.coords }
+        location: { coords: locationState.coords },
+        waveUuid
       }
 
       // Grouping disabled: upload as ungrouped (no waveUuid)
