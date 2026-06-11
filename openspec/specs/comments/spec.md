@@ -2,9 +2,7 @@
 
 ## Purpose
 The comments system enables anonymous real-time engagement on photos through a comment thread interface with live WebSocket updates. Users can view, post, and interact with comments on any photo in the feed or via deep-linked shared photos.
-
 ## Requirements
-
 ### Requirement: Comment Posting
 The system SHALL allow users to post anonymous comments on any photo via a modal input interface with a send button. After successful submission, the system SHALL await the `watchPhoto` mutation (which bookmarks the photo on the backend), then emit a photo refresh signal via `photoRefreshBus` to notify all mounted Photo instances. The `watchPhoto` mutation MUST complete before the refresh signal is emitted, ensuring the bookmarked state is persisted before any re-fetch occurs.
 
@@ -105,3 +103,4 @@ After a user submits a comment via either the inline comment input or modal inpu
 - **WHEN** the user taps send without entering text
 - **THEN** the comment is not submitted
 - **THEN** the input remains active with keyboard visible
+
