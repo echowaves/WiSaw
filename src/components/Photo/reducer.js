@@ -196,7 +196,7 @@ export async function submitComment ({ inputText, photo, uuid, topOffset }) {
     ).data.createComment
 
     // lets update the state in the photos collection so it renders the right number of likes in the list
-    watchPhoto({ photo, uuid, topOffset })
+    await watchPhoto({ photo, uuid, topOffset })
 
     Toast.show({
       text1: 'Comment added',

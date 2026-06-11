@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { TouchableOpacity, useWindowDimensions } from 'react-native'
 import AppHeader from '../src/components/AppHeader'
 import * as reducer from '../src/components/Photo/reducer'
+import { emitPhotoRefresh } from '../src/events/photoRefreshBus'
 import ModalInputText from '../src/screens/ModalInputText'
 import { SHARED_STYLES } from '../src/theme/sharedStyles'
 
@@ -32,12 +33,22 @@ export default function ModalInputScreen () {
 
     setIsSubmitting(true)
     try {
-      await reducer.submitComment({
+      const newComment = await reducer.submitComment({
         inputText: inputText.trim(),
         uuid,
         photo: parsedPhoto,
         topOffset: Number(topOffset)
       })
+
+      // Refresh photo details so bookmark state updates before navigation
+      if (newComment && parsedPhoto?.id) {
+        emitPhotoRefresh({ photoId: parsedPhoto.id })
+        await reducer.getPhotoDetails({
+          photoId: parsedPhoto.id,
+          uuid
+        })
+      }
+
       router.back()
     } catch (error) {
       console.error('Error submitting comment:', error)

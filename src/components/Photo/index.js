@@ -670,7 +670,6 @@ const Photo = ({
         if (componentIsMounted.current) {
           const newPhotoDetails = {
             ...loadedPhotoDetails,
-            watchersCount: photo.watchersCount,
             lastUpdated: Date.now()
           }
 
@@ -932,13 +931,20 @@ const Photo = ({
                   photo,
                   topOffset: toastTopOffset
                 })
-                if (newComment && photoDetails) {
-                  setPhotoDetails({
-                    ...photoDetails,
-                    comments: [...(photoDetails.comments || []), newComment]
+                if (newComment) {
+                  // Re-fetch to get updated bookmark state + watchersCount from backend
+                  const updatedPhotoDetails = await reducer.getPhotoDetails({
+                    photoId: photo.id,
+                    uuid
                   })
+                  if (updatedPhotoDetails) {
+                    setPhotoDetails({
+                      ...updatedPhotoDetails,
+                      lastUpdated: Date.now()
+                    })
+                  }
+                  emitPhotoRefresh({ photoId: photo.id })
                 }
-                emitPhotoRefresh(photo?.id)
                 isSubmittingCommentRef.current = false
               }}
             />
@@ -955,13 +961,20 @@ const Photo = ({
                   photo,
                   topOffset: toastTopOffset
                 })
-                if (newComment && photoDetails) {
-                  setPhotoDetails({
-                    ...photoDetails,
-                    comments: [...(photoDetails.comments || []), newComment]
+                if (newComment) {
+                  // Re-fetch to get updated bookmark state + watchersCount from backend
+                  const updatedPhotoDetails = await reducer.getPhotoDetails({
+                    photoId: photo.id,
+                    uuid
                   })
+                  if (updatedPhotoDetails) {
+                    setPhotoDetails({
+                      ...updatedPhotoDetails,
+                      lastUpdated: Date.now()
+                    })
+                  }
+                  emitPhotoRefresh({ photoId: photo.id })
                 }
-                emitPhotoRefresh(photo?.id)
                 isSubmittingCommentRef.current = false
               }}
               disabled={!commentInputText.trim()}
