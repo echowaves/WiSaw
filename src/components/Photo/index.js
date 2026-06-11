@@ -609,7 +609,6 @@ const Photo = ({
   const isSubmittingCommentRef = useRef(false)
   const commentInputRef = useRef(null)
   const cancelTappedRef = useRef(false)
-  const sendTappedRef = useRef(false)
 
   // Notify parent when comment input opens/closes
   useEffect(() => {
@@ -951,8 +950,8 @@ const Photo = ({
                 isSubmittingCommentRef.current = false
               }}
               onBlur={() => {
-                if (!sendTappedRef.current || cancelTappedRef.current || !commentInputText.trim() || isSubmittingCommentRef.current) return
-                sendTappedRef.current = false
+                console.log('[Comment] onBlur fired', { cancel: cancelTappedRef.current, text: commentInputText, submitting: isSubmittingCommentRef.current })
+                if (cancelTappedRef.current || !commentInputText.trim() || isSubmittingCommentRef.current) return
                 cancelTappedRef.current = false
                 isSubmittingCommentRef.current = true
                 const text = commentInputText.trim()
@@ -978,8 +977,7 @@ const Photo = ({
               }}
             />
             <TouchableOpacity
-              onTouchStart={() => { sendTappedRef.current = true }}
-              onPress={() => { /* handled by onBlur */ }}
+              onPress={() => { /* blur from this tap triggers onBlur submit */ }}
               activeOpacity={0.7}
               style={{ opacity: commentInputText.trim() ? 1 : 0.4 }}
             >
