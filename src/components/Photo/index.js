@@ -950,9 +950,13 @@ const Photo = ({
               }}
             />
             <TouchableOpacity
-              onPress={async () => {
-                if (!commentInputText.trim()) return
+              onTouchStart={async (e) => {
+                e.preventDefault()
+                // Guard: prevent double-submit if multiple touch events fire
+                if (!commentInputText.trim() || isSubmittingCommentRef.current) return
                 isSubmittingCommentRef.current = true
+                // Dismiss keyboard immediately before submit to avoid layout race
+                Keyboard.dismiss()
                 const text = commentInputText.trim()
                 setShowCommentInput(false)
                 setCommentInputText('')
@@ -976,10 +980,9 @@ const Photo = ({
                   }
                   emitPhotoRefresh({ photoId: photo.id })
                 }
-                Keyboard.dismiss()
                 isSubmittingCommentRef.current = false
               }}
-              disabled={!commentInputText.trim()}
+              activeOpacity={0.7}
               style={{ opacity: commentInputText.trim() ? 1 : 0.4 }}
             >
               <Ionicons name='send' size={20} color={theme.STATUS_SUCCESS} />
