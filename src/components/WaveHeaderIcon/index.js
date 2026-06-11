@@ -8,6 +8,7 @@ import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import { getWavesCount, getUngroupedPhotosCount, getBookmarksCount } from '../../screens/Waves/reducer'
+import { subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 
 const WaveHeaderIcon = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
@@ -32,6 +33,25 @@ const WaveHeaderIcon = () => {
     }).catch(err => console.error('WaveHeaderIcon fetch:', err))
     return () => { cancelled = true }
   }, [wavesCount, uuid])
+
+  // Subscribe to auto-group completion event to refresh badge
+  useEffect(() => {
+    const unsubscribeDone = subscribeToAutoGroupDone(() => {
+      let cancelled = false
+      Promise.all([
+        getWavesCount({ uuid }),
+        getUngroupedPhotosCount({ uuid }),
+        getBookmarksCount({ uuid })
+      ]).then(([wc, uc, bc]) => {
+        if (cancelled) return
+        setWavesCount(wc)
+        setUngroupedPhotosCount(uc)
+        setBookmarksCount(bc)
+      }).catch(err => console.error('WaveHeaderIcon fetch:', err))
+      return () => { cancelled = true }
+    })
+    return unsubscribeDone
+  }, [uuid, setWavesCount, setUngroupedPhotosCount, setBookmarksCount])
 
   const hasActivity = (wavesCount !== null && wavesCount > 0) || (ungroupedPhotosCount !== null && ungroupedPhotosCount > 0)
   const iconColor = hasActivity ? CONST.MAIN_COLOR : theme.TEXT_SECONDARY
