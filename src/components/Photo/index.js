@@ -950,7 +950,6 @@ const Photo = ({
                 isSubmittingCommentRef.current = false
               }}
               onBlur={() => {
-                console.log('[Comment] onBlur fired', { cancel: cancelTappedRef.current, text: commentInputText, submitting: isSubmittingCommentRef.current })
                 if (cancelTappedRef.current || !commentInputText.trim() || isSubmittingCommentRef.current) return
                 cancelTappedRef.current = false
                 isSubmittingCommentRef.current = true

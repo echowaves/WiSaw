@@ -19,27 +19,33 @@ The existing spec (`openspec/specs/inline-comment-input/spec.md`) already define
 
 ## Decisions
 
-### Use `onTouchStart` flag + `onBlur` submit pattern
+### Use `onBlur` to trigger submission
 
-The `onTouchStart` event fires before the `TextInput` blur, so it reliably sets a flag. The actual submission happens in the `TextInput`'s `onBlur` handler, which always fires when the keyboard dismisses.
+When the `TextInput` is focused (keyboard visible) and the user taps the send button, the `TextInput` loses focus which triggers the `onBlur` event. The `onBlur` handler checks if the text is non-empty and if the cancel button was not tapped, then submits the comment and dismisses the keyboard.
 
 ```
 Current flow (broken):
-  Touch → TextInput blur → keyboard dismiss → layout shift → onPress lost
+  Touch → TextInput blur → keyboard dismiss → layout shift → onPress lost (requires second tap)
 
 Fixed flow:
-  Touch → onTouchStart sets flag → blur fires → onBlur sees flag → submits
+  Touch → TextInput blur → onBlur fires → check guards → submit → keyboard dismiss
 ```
 
-Two refs track intent:
-- `sendTappedRef` — set by `onTouchStart` on send button, checked/reset in `onBlur`
+A single `cancelTappedRef` tracks intent:
 - `cancelTappedRef` — set by cancel button `onPress`, checked in `onBlur` to skip submission
+- No `sendTappedRef` needed because any blur with non-empty text and no cancel triggers submission
 
-This prevents `onBlur` from submitting on random taps outside the input, while still catching the send button tap even when `onPress` is cancelled.
+This approach works because on iOS the keyboard overlay intercepts touch events at the native level, preventing `onPress` from firing on the send button. However, the `TextInput`'s `onBlur` always fires reliably when focus is lost.
+
+**Why this works:**
+- `onBlur` fires on the TextInput regardless of what view receives the tap
+- The empty text check (`!commentInputText.trim()`) prevents submitting empty comments
+- `isSubmittingCommentRef.current` guard prevents duplicate submissions during async
+- `cancelTappedRef` prevents accidental submission when user cancels instead
 
 **Alternatives considered:**
 - `onStartShouldSetResponder` — claimed the gesture but keyboard dismiss still caused layout shift, cancelling `onPress`
-- `onTouchStart` with direct submit — `e.preventDefault()` is meaningless in RN, and direct submit in `onTouchStart` still races with blur
+- `onTouchStart` with direct submit or flag — did not work on iOS due to keyboard intercepting touches
 - `ScrollView` with `keyboardShouldPersistTaps='handled'` — structural change, `ExpoMasonryLayout` doesn't expose this prop
 
 ## Risks / Trade-offs
