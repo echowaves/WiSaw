@@ -1,8 +1,9 @@
 ## 1. Fix inline send button touch handling
 
-- [x] 1.1 Use `onStartShouldSetResponder` to claim gesture before TextInput blur
-- [x] 1.2 Call `Keyboard.dismiss()` in `onResponderGrant` to dismiss keyboard before blur
-- [x] 1.3 Move submit logic to `onPress` which will fire reliably after gesture is claimed
+- [x] 1.1 Add `sendTappedRef` and `cancelTappedRef` ref flags
+- [x] 1.2 Add `onTouchStart` on send button to set `sendTappedRef`
+- [x] 1.3 Add `onBlur` on TextInput that checks flag and submits (skip if cancel was tapped)
+- [x] 1.4 Cancel button sets `cancelTappedRef` before clearing state
 
 ## 2. Verify
 

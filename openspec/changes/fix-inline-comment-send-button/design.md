@@ -19,24 +19,28 @@ The existing spec (`openspec/specs/inline-comment-input/spec.md`) already define
 
 ## Decisions
 
-### Use `onTouchStart` with guard flag instead of `onPress`
+### Use `onTouchStart` flag + `onBlur` submit pattern
 
-The `onTouchStart` event fires before the `TextInput` blur propagates, so it captures the user's intent before the layout shift cancels the gesture.
+The `onTouchStart` event fires before the `TextInput` blur, so it reliably sets a flag. The actual submission happens in the `TextInput`'s `onBlur` handler, which always fires when the keyboard dismisses.
 
 ```
 Current flow (broken):
   Touch → TextInput blur → keyboard dismiss → layout shift → onPress lost
-  
+
 Fixed flow:
-  Touch → onTouchStart fires → submit starts → keyboard dismiss → layout shift
+  Touch → onTouchStart sets flag → blur fires → onBlur sees flag → submits
 ```
 
-The existing `isSubmittingCommentRef.current` flag already guards against double submissions, which also protects against the `onTouchStart` firing multiple times (touch start + potential subsequent events).
+Two refs track intent:
+- `sendTappedRef` — set by `onTouchStart` on send button, checked/reset in `onBlur`
+- `cancelTappedRef` — set by cancel button `onPress`, checked in `onBlur` to skip submission
+
+This prevents `onBlur` from submitting on random taps outside the input, while still catching the send button tap even when `onPress` is cancelled.
 
 **Alternatives considered:**
-- `onStartShouldSetResponder` on the button — more verbose, returns boolean, less idiomatic for this simple case
-- Wrapping in `ScrollView` with `keyboardShouldPersistTaps='handled'` — structural change, may affect masonry layout behavior
-- Extracting submit logic to a shared function — good hygiene but orthogonal to the fix
+- `onStartShouldSetResponder` — claimed the gesture but keyboard dismiss still caused layout shift, cancelling `onPress`
+- `onTouchStart` with direct submit — `e.preventDefault()` is meaningless in RN, and direct submit in `onTouchStart` still races with blur
+- `ScrollView` with `keyboardShouldPersistTaps='handled'` — structural change, `ExpoMasonryLayout` doesn't expose this prop
 
 ## Risks / Trade-offs
 

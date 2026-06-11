@@ -608,6 +608,8 @@ const Photo = ({
   const [commentInputText, setCommentInputText] = useState('')
   const isSubmittingCommentRef = useRef(false)
   const commentInputRef = useRef(null)
+  const cancelTappedRef = useRef(false)
+  const sendTappedRef = useRef(false)
 
   // Notify parent when comment input opens/closes
   useEffect(() => {
@@ -904,6 +906,7 @@ const Photo = ({
           <View style={styles.inlineCommentInputRow}>
             <TouchableOpacity
               onPress={() => {
+                cancelTappedRef.current = true
                 setShowCommentInput(false)
                 setCommentInputText('')
               }}
@@ -920,41 +923,6 @@ const Photo = ({
               autoFocus
               returnKeyType='send'
               onSubmitEditing={async () => {
-                if (!commentInputText.trim()) return
-                isSubmittingCommentRef.current = true
-                const text = commentInputText.trim()
-                setShowCommentInput(false)
-                setCommentInputText('')
-                const newComment = await reducer.submitComment({
-                  inputText: text,
-                  uuid,
-                  photo,
-                  topOffset: toastTopOffset
-                })
-                if (newComment) {
-                  // Re-fetch to get updated bookmark state + watchersCount from backend
-                  const updatedPhotoDetails = await reducer.getPhotoDetails({
-                    photoId: photo.id,
-                    uuid
-                  })
-                  if (updatedPhotoDetails) {
-                    setPhotoDetails({
-                      ...updatedPhotoDetails,
-                      lastUpdated: Date.now()
-                    })
-                  }
-                  emitPhotoRefresh({ photoId: photo.id })
-                }
-                Keyboard.dismiss()
-                isSubmittingCommentRef.current = false
-              }}
-            />
-            <TouchableOpacity
-              onStartShouldSetResponder={() => true}
-              onResponderGrant={() => {
-                Keyboard.dismiss()
-              }}
-              onPress={async () => {
                 if (!commentInputText.trim() || isSubmittingCommentRef.current) return
                 isSubmittingCommentRef.current = true
                 const text = commentInputText.trim()
@@ -967,7 +935,6 @@ const Photo = ({
                   topOffset: toastTopOffset
                 })
                 if (newComment) {
-                  // Re-fetch to get updated bookmark state + watchersCount from backend
                   const updatedPhotoDetails = await reducer.getPhotoDetails({
                     photoId: photo.id,
                     uuid
@@ -980,8 +947,39 @@ const Photo = ({
                   }
                   emitPhotoRefresh({ photoId: photo.id })
                 }
+                Keyboard.dismiss()
                 isSubmittingCommentRef.current = false
               }}
+              onBlur={() => {
+                if (!sendTappedRef.current || cancelTappedRef.current || !commentInputText.trim() || isSubmittingCommentRef.current) return
+                sendTappedRef.current = false
+                cancelTappedRef.current = false
+                isSubmittingCommentRef.current = true
+                const text = commentInputText.trim()
+                setShowCommentInput(false)
+                setCommentInputText('')
+                Keyboard.dismiss()
+                reducer.submitComment({
+                  inputText: text,
+                  uuid,
+                  photo,
+                  topOffset: toastTopOffset
+                }).then((newComment) => {
+                  if (newComment) {
+                    reducer.getPhotoDetails({ photoId: photo.id, uuid })
+                      .then((updated) => {
+                        if (updated) setPhotoDetails({ ...updated, lastUpdated: Date.now() })
+                        emitPhotoRefresh({ photoId: photo.id })
+                      })
+                  }
+                }).finally(() => {
+                  isSubmittingCommentRef.current = false
+                })
+              }}
+            />
+            <TouchableOpacity
+              onTouchStart={() => { sendTappedRef.current = true }}
+              onPress={() => { /* handled by onBlur */ }}
               activeOpacity={0.7}
               style={{ opacity: commentInputText.trim() ? 1 : 0.4 }}
             >

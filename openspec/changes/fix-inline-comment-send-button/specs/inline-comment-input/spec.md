@@ -2,7 +2,7 @@
 
 ### Requirement: Send button disabled state
 
-The send button SHALL be disabled when the text input is empty. The send button SHALL use `onTouchStart` (not `onPress`) to handle taps, ensuring the touch event is captured before the focused `TextInput` blurs and dismisses the keyboard, which would otherwise cancel the gesture due to layout shift.
+The send button SHALL be disabled when the text input is empty. The send button SHALL use `onTouchStart` to set a flag indicating the send was tapped, and the `TextInput` SHALL use `onBlur` to check that flag and submit the comment — this avoids the race condition where `onPress` is cancelled by the blur-induced layout shift.
 
 #### Scenario: Send button disabled when input is empty
 
@@ -22,5 +22,18 @@ The send button SHALL be disabled when the text input is empty. The send button 
 #### Scenario: Send button tap does not race with blur
 
 - **WHEN** the user taps the send button and the TextInput loses focus
-- **THEN** the send handler SHALL execute immediately via `onTouchStart` before the blur event causes layout shift
+- **THEN** `onTouchStart` on the send button SHALL set a flag before blur occurs
+- **THEN** `onBlur` on the TextInput SHALL detect the flag and submit the comment
 - **THEN** the comment SHALL be submitted successfully
+
+#### Scenario: Tapping outside input does not submit
+
+- **WHEN** the user taps outside the inline input (not the send button) causing the TextInput to lose focus
+- **THEN** the comment SHALL NOT be submitted
+- **THEN** the inline input SHALL remain visible (per existing spec behavior)
+
+#### Scenario: Cancel button does not submit
+
+- **WHEN** the user taps the cancel button
+- **THEN** the inline input SHALL collapse without submitting any comment
+- **AND** the `onBlur` handler SHALL skip submission because cancel was tapped first
