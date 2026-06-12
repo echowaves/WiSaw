@@ -17,12 +17,17 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
   const [noMoreData, setNoMoreData] = useState(!fetchFn)
   const [loading, setLoading] = useState(false)
   const stopLoading = useRef(false)
+  const flatListRef = useRef(null)
+  // Only enable auto-scroll after the user physically scrolls (detected by momentum)
+  const userHasScrolled = useRef(false)
+  const [autoScrollTrigger, setAutoScrollTrigger] = useState(false)
 
   useEffect(() => {
-    if (initialPhotos.length > 0) {
-      setPhotos(initialPhotos)
+    if (autoScrollTrigger) {
+      flatListRef.current?.scrollToEnd({ animated: false })
+      setAutoScrollTrigger(false)
     }
-  }, [initialPhotos])
+  }, [autoScrollTrigger])
 
   const handleLoadMore = useCallback(async () => {
     if (!fetchFn || noMoreData || stopLoading.current) return
@@ -37,6 +42,10 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
         const newPhotos = fetched.filter(p => !existingIds.has(p.id))
         return [...prev, ...newPhotos]
       })
+      // Only auto-scroll if user has physically scrolled (prevents mount-triggered scrolls)
+      if (userHasScrolled.current) {
+        setAutoScrollTrigger(true)
+      }
       setPageNumber(nextPage)
       if (result.noMoreData) {
         setNoMoreData(true)
@@ -84,6 +93,7 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
 
   return (
     <FlatList
+      ref={flatListRef}
       data={photos}
       renderItem={renderItem}
       keyExtractor={item => `${item.id}`}
@@ -91,6 +101,7 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
       showsHorizontalScrollIndicator={false}
       onEndReached={handleLoadMore}
       onEndReachedThreshold={0.5}
+      onMomentumScrollEnd={() => { userHasScrolled.current = true }}
       contentContainerStyle={styles.stripContent}
       ListFooterComponent={loading ? <ActivityIndicator size='small' color={CONST.MAIN_COLOR} style={styles.loader} /> : null}
     />
