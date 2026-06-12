@@ -25,6 +25,9 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
   // Sync internal photos state when initialPhotos prop changes (prevents stale state after refresh)
   useEffect(() => {
     setPhotos(initialPhotos)
+    setPageNumber(-1)
+    setNoMoreData(false)
+    stopLoading.current = false
   }, [initialPhotos])
 
   useEffect(() => {

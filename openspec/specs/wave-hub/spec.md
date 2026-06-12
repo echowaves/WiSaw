@@ -83,6 +83,25 @@ The `WavePhotoStrip` component SHALL sync its internal `photos` state whenever t
 - **AND** pagination state SHALL reset (new batch UUID, page 0)
 - **AND** the user CAN continue paginating from the refreshed state
 
+### Requirement: WavePhotoStrip pagination resets with photo data
+When `initialPhotos` changes, WavePhotoStrip SHALL also reset its pagination metadata to prevent stale state from blocking subsequent paginated fetches.
+
+#### Scenario: Pagination metadata resets on refresh
+- **WHEN** the user has scrolled through a wave's photos (pagination has loaded pages 0, 1, 2)
+- **AND** pageNumber = 2, noMoreData = false, stopLoading.current = false
+- **WHEN** a refresh triggers `initialPhotos` to change
+- **THEN** WavePhotoStrip SHALL reset pageNumber to -1
+- **THEN** WavePhotoStrip SHALL reset noMoreData to false
+- **THEN** WavePhotoStrip SHALL reset stopLoading.current to false
+- **THEN** the user SHALL be able to scroll right to load more photos starting from page 0
+
+#### Scenario: handleLoadMore does not return early after refresh
+- **WHEN** initialPhotos has just been reset by the useEffect
+- **THEN** noMoreData SHALL be false
+- **THEN** stopLoading.current SHALL be false
+- **THEN** handleLoadMore SHALL NOT return early due to these guards
+- **THEN** onEndReached SHALL successfully trigger a fetch for page 0
+
 ### Requirement: Badge counts refresh on upload completion
 WavesHub SHALL subscribe to the upload bus and call `fetchCounts()` when a wave-specific upload completes (when `waveUuid` is present in the event). This ensures badge counts update in real-time without requiring the user to navigate away and back.
 
