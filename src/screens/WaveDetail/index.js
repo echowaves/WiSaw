@@ -46,6 +46,7 @@ import PhotosListContext from '../../contexts/PhotosListContext'
 import WaveShareModal from '../../components/WaveShareModal'
 import AppHeader from '../../components/AppHeader'
 import useCameraCapture from '../PhotosList/hooks/useCameraCapture'
+import usePendingAnimation from '../PhotosList/hooks/usePendingAnimation'
 
 const FOOTER_HEIGHT = 90
 
@@ -140,10 +141,6 @@ const WaveDetail = () => {
   const [locationState] = useAtom(STATE.locationAtom)
   const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
 
-  // Pending photos animation refs
-  const pendingPhotosAnimation = useRef(new Animated.Value(0)).current
-  const uploadIconAnimation = useRef(new Animated.Value(1)).current
-
   // Upload handler
   const {
     pendingPhotos,
@@ -151,6 +148,9 @@ const WaveDetail = () => {
     enqueueCapture,
     clearPendingQueue
   } = useContext(UploadContext)
+
+  // Pending photos animation
+  const { pendingPhotosAnimation, uploadIconAnimation } = usePendingAnimation({ pendingPhotosCount: pendingPhotos.length, netAvailable })
 
   // Camera capture with drift check (task 8.1)
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({ enqueueCapture, toastTopOffset })

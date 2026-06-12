@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useContext } from 'react'
 import {
   View,
   Text,
@@ -38,6 +38,9 @@ import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAuto
 import { subscribeToUploadComplete } from '../../events/uploadBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
+import UploadContext from '../../contexts/UploadContext'
+import usePendingAnimation from '../PhotosList/hooks/usePendingAnimation'
+import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
 // import { useLocationDrift } from '../../hooks/useLocationDrift' - DISABLED per change proposal
@@ -94,6 +97,12 @@ const WavesHub = () => {
 
   // Share modal state
   const [shareModalWave, setShareModalWave] = useState(null)
+
+  // Upload context
+  const { pendingPhotos, isUploading, clearPendingQueue } = useContext(UploadContext)
+  const toastTopOffset = insets.top + 10
+  const [netAvailable] = useAtom(STATE.netAvailable)
+  const { pendingPhotosAnimation, uploadIconAnimation } = usePendingAnimation({ pendingPhotosCount: pendingPhotos.length, netAvailable })
 
   // Auto-group location drift detection - DISABLED per change proposal
   // const { shouldTrigger, isReady: driftReady } = useLocationDrift()
@@ -637,8 +646,6 @@ const handleRefresh = useCallback(() => {
     )
   }
 
-  const [netAvailable] = useAtom(STATE.netAvailable)
-
   if (!netAvailable) {
     return (
       <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
@@ -667,6 +674,16 @@ const handleRefresh = useCallback(() => {
         onBack={() => router.back()}
         rightSlot={headerRightSlot}
         loading={loading}
+      />
+      <PendingPhotosBanner
+        theme={theme}
+        pendingPhotos={pendingPhotos}
+        netAvailable={netAvailable}
+        isUploading={isUploading}
+        clearPendingQueue={clearPendingQueue}
+        toastTopOffset={toastTopOffset}
+        pendingPhotosAnimation={pendingPhotosAnimation}
+        uploadIconAnimation={uploadIconAnimation}
       />
       <InteractionHintBanner hasContent={waves.length > 0} />
 
