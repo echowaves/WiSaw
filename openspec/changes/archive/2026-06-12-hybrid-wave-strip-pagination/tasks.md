@@ -16,9 +16,9 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Open a wave card with 3–4 initial photos → scroll the photo strip right → verify page 1 loads → verify auto-scroll keeps user at the new end
-- [ ] 4.2 Continue scrolling right → verify page 2 loads → verify auto-scroll continues to work seamlessly
-- [ ] 4.3 Open a wave card with 0 initial photos → verify page 0 loads → verify NO auto-scroll jump occurs
-- [ ] 4.4 After page loads, try tapping a photo → verify tap is not interrupted by auto-scroll
-- [ ] 4.5 Long-press a photo → verify long-press is not interrupted by auto-scroll
-- [ ] 4.6 Verify the `stopLoading.current` guard prevents double-fetches during the brief window after auto-scroll
+- [x] 4.1 Open a wave card with 3–4 initial photos → scroll the photo strip right → verify page 1 loads → verify auto-scroll keeps user at the new end
+- [x] 4.2 Continue scrolling right → verify page 2 loads → verify auto-scroll continues to work seamlessly
+- [x] 4.3 Open a wave card with 0 initial photos → verify page 0 loads → verify NO auto-scroll jump occurs
+- [x] 4.4 After page loads, try tapping a photo → verify tap is not interrupted by auto-scroll
+- [x] 4.5 Long-press a photo → verify long-press is not interrupted by auto-scroll
+- [x] 4.6 Verify the `stopLoading.current` guard prevents double-fetches during the brief window after auto-scroll

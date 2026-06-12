@@ -12,7 +12,7 @@
 - **THEN** returned photos SHALL be deduplicated and appended
 - **THEN** `scrollToEnd({ animated: false })` SHALL be called to reposition the user at the new end
 
-### Requirement: Wave photo strip auto-scrolls after pagination loads (NEW)
+### Requirement: Wave photo strip auto-scrolls after pagination loads
 When photos are successfully fetched and appended during horizontal pagination, the strip SHALL auto-scroll to the end using `scrollToEnd({ animated: false })` to keep the user in the "load more" zone for seamless continuous scrolling. Auto-scroll SHALL be skipped when the strip starts with 0 initial photos (first load from empty state) to avoid visual jumping.
 
 #### Scenario: Auto-scroll after loading additional photos

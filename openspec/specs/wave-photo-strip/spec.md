@@ -1,8 +1,6 @@
 ## Purpose
 This specification defines expected user-visible behavior, constraints, and validation scenarios for wave photo strip in WiSaw.
-
 ## Requirements
-
 ### Requirement: Wave photo strip renders horizontal scrollable thumbnails
 The `WavePhotoStrip` component SHALL render a horizontal `FlatList` of photo thumbnails. Each thumbnail SHALL be a square `CachedImage` (80x80). The strip SHALL have a fixed height. The component SHALL accept `initialPhotos` (array of photos to display immediately), `fetchFn` (async function accepting `(pageNumber, batch)` returning `PhotoFeed`), and `theme`. The component SHALL use a `useEffect` to sync internal photo state when the `initialPhotos` prop updates asynchronously (e.g., when the parent fetches data after mount).
 
@@ -20,25 +18,14 @@ The `WavePhotoStrip` component SHALL render a horizontal `FlatList` of photo thu
 - **THEN** a placeholder icon SHALL be displayed (FontAwesome5 `water` icon)
 
 ### Requirement: Wave photo strip supports paginated loading
-The strip SHALL initialize `pageNumber` to `-1` so that the first `handleLoadMore` invocation fetches page 0 through `fetchFn`, establishing proper server-side batch state. `fetchFn(pageNumber, batch)` SHALL be called when `onEndReached` fires during horizontal scrolling. Fetched photos SHALL be deduplicated against existing photos by `id` (using a `Set`) before appending. When `noMoreData` is true, no further fetches SHALL occur. A small loading indicator SHALL appear at the trailing end while loading.
-
-#### Scenario: First onEndReached fetches page 0
-- **WHEN** the strip's first `onEndReached` fires (pageNumber is -1)
-- **THEN** `fetchFn` SHALL be called with `pageNumber: 0` and the component's `batch` UUID
-- **THEN** returned photos SHALL be deduplicated against `initialPhotos` by photo `id` and only new photos SHALL be appended
+**MODIFIED:** When `onEndReached` fires during horizontal scrolling and photos are successfully fetched and appended, the strip SHALL auto-scroll to the end to maintain the user in the "load more" zone.
 
 #### Scenario: Subsequent scroll triggers next page
+**MODIFIED:** 
 - **WHEN** the user scrolls the strip to the end after page 0 has loaded and `noMoreData` is false
 - **THEN** `fetchFn` SHALL be called with the next incrementing `pageNumber` (1, 2, ...)
 - **THEN** returned photos SHALL be deduplicated and appended
-
-#### Scenario: No more data stops fetching
-- **WHEN** `fetchFn` returns `noMoreData: true`
-- **THEN** subsequent `onEndReached` events SHALL NOT trigger further fetches
-
-#### Scenario: Loading indicator during fetch
-- **WHEN** a page fetch is in progress
-- **THEN** a small `ActivityIndicator` SHALL appear as the `ListFooterComponent` of the horizontal FlatList
+- **THEN** `scrollToEnd({ animated: false })` SHALL be called to reposition the user at the new end
 
 ### Requirement: Wave photo strip auto-scrolls after pagination loads
 When photos are successfully fetched and appended during horizontal pagination, the strip SHALL auto-scroll to the end using `scrollToEnd({ animated: false })` to keep the user in the "load more" zone for seamless continuous scrolling. Auto-scroll SHALL be skipped when the strip starts with 0 initial photos (first load from empty state) to avoid visual jumping.
@@ -78,3 +65,4 @@ The `WavePhotoStrip` component SHALL accept an optional `onPhotoLongPress` callb
 #### Scenario: No handlers means no Pressable wrapper
 - **WHEN** neither `onPhotoPress` nor `onPhotoLongPress` is provided
 - **THEN** thumbnails SHALL render as plain `CachedImage` elements without `Pressable` wrapping
+
