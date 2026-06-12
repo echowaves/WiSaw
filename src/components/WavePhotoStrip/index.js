@@ -28,6 +28,8 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
     setPageNumber(-1)
     setNoMoreData(false)
     stopLoading.current = false
+    userHasScrolled.current = false
+    setAutoScrollTrigger(false)
   }, [initialPhotos])
 
   useEffect(() => {
