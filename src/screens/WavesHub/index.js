@@ -35,6 +35,7 @@ import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
+import { subscribeToUploadComplete } from '../../events/uploadBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
@@ -124,6 +125,15 @@ const WavesHub = () => {
   useEffect(() => {
     const unsubscribe = subscribeToAutoGroupDone(() => {
       fetchCounts()
+    })
+    return unsubscribe
+  }, [fetchCounts])
+
+  useEffect(() => {
+    const unsubscribe = subscribeToUploadComplete((upload) => {
+      if (upload.waveUuid != null) {
+        fetchCounts()
+      }
     })
     return unsubscribe
   }, [fetchCounts])
