@@ -3,8 +3,6 @@
 
 import { Storage } from 'expo-storage'
 
-import moment from 'moment'
-
 import Toast from 'react-native-toast-message'
 
 import { gql } from '@apollo/client'
@@ -147,7 +145,7 @@ export async function getZeroMoment ({ netAvailable } = {}) {
 
 export async function requestGeoPhotos ({ pageNumber, batch, location, zeroMoment, searchTerm }) {
   const { latitude, longitude } = location.coords
-  const whenToStop = moment(zeroMoment || 0)
+  const whenToStop = new Date(zeroMoment || 0)
   try {
     const variables = {
       batch,

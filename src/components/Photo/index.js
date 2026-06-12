@@ -3,7 +3,6 @@ import { useAtom } from 'jotai'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
-import moment from 'moment'
 import {
   Alert,
   InteractionManager,
@@ -713,7 +712,7 @@ const Photo = ({
       return 'Just now' // Fallback for missing dates
     }
     try {
-      const dateTime = moment(new Date(dateString), 'YYYY-MM-DD-HH-mm-ss-SSS').format('LLL')
+      const dateTime = new Date(dateString).toLocaleString()
       return dateTime
     } catch (err) {
       if (isDevBuild && err) {
