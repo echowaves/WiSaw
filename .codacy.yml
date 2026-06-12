@@ -8,4 +8,5 @@ exclude_paths:
   - "scripts/**"
   - "migrations/**"  
   - ".roo/**"
+  - ".github/**"
 exclude_patterns:
