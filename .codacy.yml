@@ -10,3 +10,4 @@ exclude_paths:
   - ".roo/**"
   - ".github/**"
 exclude_patterns:
+  - "package-lock.json"
