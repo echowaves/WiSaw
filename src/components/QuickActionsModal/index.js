@@ -12,6 +12,7 @@ import {
 
 import * as CONST from '../../consts'
 import usePhotoActions from '../../hooks/usePhotoActions'
+import useSimpleFetch from '../../hooks/useSimpleFetch'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import isValidImageUri from '../../utils/isValidImageUri'
 import * as photoReducer from '../Photo/reducer'
@@ -30,7 +31,6 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRem
   const toastTopOffset = useToastTopOffset()
 
   const [photoDetails, setPhotoDetails] = useState(null)
-  const [loading, setLoading] = useState(false)
 
   const handleDeleted = useCallback(
     (photoId) => {
@@ -74,23 +74,25 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRem
     onRemovedFromWave: handleRemovedFromWave
   })
 
+  const { loading, execute } = useSimpleFetch(
+    async () => {
+      const details = await photoReducer.getPhotoDetails({ photoId: String(photo.id), uuid })
+      if (details) {
+        setPhotoDetails(details)
+      }
+    },
+    { autoExecute: false }
+  )
+
   useEffect(() => {
     if (visible && photo) {
       setPhotoDetails(null)
-      setLoading(true)
       const task = InteractionManager.runAfterInteractions(() => {
-        photoReducer
-          .getPhotoDetails({ photoId: String(photo.id), uuid })
-          .then((details) => {
-            if (details) {
-              setPhotoDetails(details)
-            }
-          })
-          .finally(() => setLoading(false))
+        execute()
       })
       return () => task.cancel()
     }
-  }, [visible, photo?.id, uuid])
+  }, [visible, photo?.id, uuid, execute])
 
   const styles = useMemo(() => createStyles(theme), [theme])
 

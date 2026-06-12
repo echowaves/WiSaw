@@ -99,7 +99,7 @@ const WavesHub = () => {
   // const { shouldTrigger, isReady: driftReady } = useLocationDrift()
   // const autoGroupTriggeredRef = useRef(false)
 
-  const loadingRef = useRef(false)
+  const stopLoading = useRef(false)
   const hasMountedRef = useRef(false)
   const autoGroupRunningRef = useRef(false)
 
@@ -227,8 +227,8 @@ const WavesHub = () => {
   )
 
   const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false, searchTerm) => {
-    if (loadingRef.current) return
-    loadingRef.current = true
+    if (stopLoading.current) return
+    stopLoading.current = true
     setLoading(true)
     try {
       const data = await reducer.listWaves({
@@ -257,7 +257,7 @@ const WavesHub = () => {
         message: error.message
       })
     } finally {
-      loadingRef.current = false
+      stopLoading.current = false
       setLoading(false)
       setRefreshing(false)
     }
@@ -285,7 +285,7 @@ const WavesHub = () => {
   }, [debouncedSearch])
 
 const handleRefresh = useCallback(() => {
-    loadingRef.current = false
+    stopLoading.current = false
     setRefreshing(true)
     setPageNumber(0)
     setNoMoreData(false)
@@ -297,7 +297,7 @@ const handleRefresh = useCallback(() => {
 
   useFocusEffect(
     useCallback(() => {
-      loadingRef.current = false
+      stopLoading.current = false
       handleRefresh()
       }, [handleRefresh])
    )

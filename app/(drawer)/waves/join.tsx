@@ -20,6 +20,7 @@ import * as STATE from '../../../src/state'
 import * as CONST from '../../../src/consts'
 import { joinOpenWave, joinWaveByInvite } from '../../../src/screens/Waves/reducer'
 import { getTheme } from '../../../src/theme/sharedStyles'
+import useSimpleFetch from '../../../src/hooks/useSimpleFetch'
 
 interface JoinWaveResult {
   waveUuid: string
@@ -102,24 +103,25 @@ export default function WaveJoinScreen (): React.JSX.Element {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDarkMode)
 
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [joined, setJoined] = useState(false)
 
   const isInvite = inviteTokenValue.length > 0
 
+  const { loading, execute } = useSimpleFetch(async () => {
+    const wave = isInvite
+      ? await joinWaveByInvite({ inviteToken: inviteTokenValue, uuid })
+      : await joinOpenWave({ waveUuid: waveUuidValue, uuid })
+
+    return wave as JoinWaveResult
+  }, { autoExecute: false })
+
   const handleJoin = useCallback(async () => {
     if (uuid === '') return
-    setLoading(true)
     setError('')
 
     try {
-      let wave: JoinWaveResult
-      if (isInvite) {
-        wave = (await joinWaveByInvite({ inviteToken: inviteTokenValue, uuid })) as JoinWaveResult
-      } else {
-        wave = (await joinOpenWave({ waveUuid: waveUuidValue, uuid })) as JoinWaveResult
-      }
+      const wave = await execute()
       setJoined(true)
       Toast.show({
         text1: `Joined wave: ${wave.name}`,
@@ -172,10 +174,8 @@ export default function WaveJoinScreen (): React.JSX.Element {
         message: normalized.message,
         topOffset: 60
       })
-    } finally {
-      setLoading(false)
     }
-  }, [uuid, isInvite, inviteTokenValue, waveUuidValue, router])
+  }, [uuid, isInvite, inviteTokenValue, waveUuidValue, router, execute])
 
   return (
     <>

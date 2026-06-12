@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import {
 } from '../Waves/reducer'
 import ActionMenu from '../../components/ActionMenu'
 import Toast from 'react-native-toast-message'
+import useSimpleFetch from '../../hooks/useSimpleFetch'
 
 const WaveModeration = ({ waveUuid, waveName }) => {
   const [uuid] = useAtom(STATE.uuid)
@@ -32,30 +33,24 @@ const WaveModeration = ({ waveUuid, waveName }) => {
   const theme = getTheme(isDarkMode)
 
   const [reports, setReports] = useState([])
-  const [loading, setLoading] = useState(true)
   const [menuReport, setMenuReport] = useState(null)
 
   // Identity gate: facilitators must have a nickname
   const hasIdentity = nickName && nickName.length > 0
 
-  const loadReports = useCallback(async () => {
-    setLoading(true)
-    try {
+  const { loading, execute } = useSimpleFetch(
+    async () => {
       const data = await listWaveAbuseReports({ waveUuid, uuid })
       setReports(data || [])
-    } catch (error) {
-      console.error(error)
-      showErrorToast({ title: 'Error loading reports', message: error.message })
-    } finally {
-      setLoading(false)
-    }
-  }, [waveUuid, uuid])
+    },
+    { autoExecute: false }
+  )
 
   useEffect(() => {
     if (hasIdentity) {
-      loadReports()
+      execute()
     }
-  }, [loadReports, hasIdentity])
+  }, [hasIdentity, execute])
 
   const handleDismiss = async (report) => {
     try {
@@ -108,7 +103,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
                 reason: 'Reported content'
               })
               Toast.show({ type: 'success', text1: 'User banned' })
-              loadReports()
+              execute()
             } catch (error) {
               showErrorToast({ title: 'Error', message: error.message })
             }

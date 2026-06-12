@@ -85,7 +85,7 @@ const FriendsList = () => {
   const [selectedFriendshipUuid, setSelectedFriendshipUuid] = useState(null)
   const [showShareModal, setShowShareModal] = useState(false)
   const [shareModalData, setShareModalData] = useState(null)
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
   const [menuFriend, setMenuFriend] = useState(null)
@@ -324,7 +324,7 @@ const FriendsList = () => {
   }, [uuid, setFriendsList])
 
   const handleRefresh = useCallback(async () => {
-    setIsRefreshing(true)
+    setRefreshing(true)
     setLoading(true)
     try {
       const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
@@ -335,7 +335,7 @@ const FriendsList = () => {
       // eslint-disable-next-line no-console
       console.log('Error refreshing friendships:', error)
     } finally {
-      setIsRefreshing(false)
+      setRefreshing(false)
       setLoading(false)
     }
   }, [uuid, setFriendsList])
@@ -563,7 +563,7 @@ const FriendsList = () => {
             flexGrow: 1
           }}
           showsVerticalScrollIndicator={false}
-          refreshing={isRefreshing}
+          refreshing={refreshing}
           onRefresh={handleRefresh}
           initialNumToRender={10}
           maxToRenderPerBatch={10}

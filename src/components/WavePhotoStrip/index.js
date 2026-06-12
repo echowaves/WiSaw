@@ -16,7 +16,7 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
   const [batch] = useState(() => Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(!fetchFn)
   const [loading, setLoading] = useState(false)
-  const loadingRef = useRef(false)
+  const stopLoading = useRef(false)
 
   useEffect(() => {
     if (initialPhotos.length > 0) {
@@ -25,8 +25,8 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
   }, [initialPhotos])
 
   const handleLoadMore = useCallback(async () => {
-    if (!fetchFn || noMoreData || loadingRef.current) return
-    loadingRef.current = true
+    if (!fetchFn || noMoreData || stopLoading.current) return
+    stopLoading.current = true
     setLoading(true)
     try {
       const nextPage = pageNumber + 1
@@ -44,7 +44,7 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
     } catch (err) {
       console.error('WavePhotoStrip load error:', err)
     } finally {
-      loadingRef.current = false
+      stopLoading.current = false
       setLoading(false)
     }
   }, [fetchFn, noMoreData, pageNumber, batch])

@@ -1,6 +1,6 @@
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Modal,
@@ -16,6 +16,7 @@ import showErrorToast from '../utils/showErrorToast'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
 import { createWaveInvite } from '../screens/Waves/reducer'
+import useSimpleFetch from '../hooks/useSimpleFetch'
 
 const WaveShareModal = ({
   visible,
@@ -25,11 +26,21 @@ const WaveShareModal = ({
   topOffset = 100
 }) => {
   const [shareUrl, setShareUrl] = useState('')
-  const [loading, setLoading] = useState(false)
   const [inviteExpiryHours, setInviteExpiryHours] = useState('24')
   const [inviteMaxUses, setInviteMaxUses] = useState('')
 
   const isOpen = wave?.open === true
+
+  // Store invite params so the hook can access them at execution time
+  const inviteParamsRef = useRef({ expiresAt: undefined, maxUses: undefined })
+
+  const { loading, execute } = useSimpleFetch(
+    async () => {
+      const invite = await createWaveInvite({ waveUuid: wave.waveUuid, uuid, ...inviteParamsRef.current })
+      setShareUrl(invite.deepLink)
+    },
+    { autoExecute: false }
+  )
 
   useEffect(() => {
     if (!visible || !wave) {
@@ -41,7 +52,6 @@ const WaveShareModal = ({
       setShareUrl(wave.joinUrl)
     } else if (!isOpen) {
       // For invite-only waves, generate an invite
-      setLoading(true)
       const parsedHours = Number.parseInt(inviteExpiryHours, 10)
       const parsedMaxUses = Number.parseInt(inviteMaxUses, 10)
       const expiresAt = Number.isFinite(parsedHours) && parsedHours > 0
@@ -51,21 +61,18 @@ const WaveShareModal = ({
         ? parsedMaxUses
         : undefined
 
-      createWaveInvite({ waveUuid: wave.waveUuid, uuid, expiresAt, maxUses })
-        .then((invite) => {
-          setShareUrl(invite.deepLink)
+      inviteParamsRef.current = { expiresAt, maxUses }
+
+      execute().catch((err) => {
+        console.error('Failed to create wave invite:', err)
+        showErrorToast({
+          title: 'Failed to create invite',
+          message: err.message || 'Try again later',
+          topOffset
         })
-        .catch((err) => {
-          console.error('Failed to create wave invite:', err)
-          showErrorToast({
-            title: 'Failed to create invite',
-            message: err.message || 'Try again later',
-            topOffset
-          })
-        })
-        .finally(() => setLoading(false))
+      })
     }
-  }, [visible, wave, isOpen, uuid, topOffset, inviteExpiryHours, inviteMaxUses])
+  }, [visible, wave, isOpen, uuid, topOffset, inviteExpiryHours, inviteMaxUses, execute])
 
   const handleShare = useCallback(async () => {
     if (!shareUrl) return

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import {
   listWaveBans
 } from '../Waves/reducer'
 import ActionMenu from '../../components/ActionMenu'
+import useSimpleFetch from '../../hooks/useSimpleFetch'
 
 const ROLE_CONFIG = {
   owner: { label: 'Owner', color: CONST.MAIN_COLOR, icon: 'crown' },
@@ -41,15 +42,13 @@ const WaveMembers = ({ waveUuid, waveName }) => {
   const [members, setMembers] = useState([])
   const [invites, setInvites] = useState([])
   const [bans, setBans] = useState([])
-  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('members') // members | invites | bans
 
   // Action menu
   const [menuMember, setMenuMember] = useState(null)
 
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
+  const { loading, execute } = useSimpleFetch(
+    async () => {
       const [membersData, invitesData, bansData] = await Promise.all([
         listWaveMembers({ waveUuid, uuid }),
         listWaveInvites({ waveUuid, uuid }),
@@ -58,23 +57,19 @@ const WaveMembers = ({ waveUuid, waveName }) => {
       setMembers(membersData || [])
       setInvites((invitesData || []).filter(i => i.active))
       setBans(bansData || [])
-    } catch (error) {
-      console.error(error)
-      showErrorToast({ title: 'Error loading members', message: error.message })
-    } finally {
-      setLoading(false)
-    }
-  }, [waveUuid, uuid])
+    },
+    { autoExecute: false }
+  )
 
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    execute()
+  }, [execute])
 
   const handleMakeFacilitator = async (member) => {
     try {
       await assignFacilitator({ waveUuid, targetUuid: member.uuid, uuid })
       Toast.show({ type: 'success', text1: `${member.nickName || 'User'} is now a facilitator` })
-      loadData()
+      execute()
     } catch (error) {
       showErrorToast({ title: 'Error', message: error.message })
     }
@@ -84,7 +79,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
     try {
       await removeFacilitator({ waveUuid, targetUuid: member.uuid, uuid })
       Toast.show({ type: 'success', text1: `${member.nickName || 'User'} is no longer a facilitator` })
-      loadData()
+      execute()
     } catch (error) {
       showErrorToast({ title: 'Error', message: error.message })
     }
@@ -103,7 +98,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
             try {
               await removeUserFromWave({ waveUuid, targetUuid: member.uuid, uuid })
               Toast.show({ type: 'success', text1: 'Member removed' })
-              loadData()
+              execute()
             } catch (error) {
               showErrorToast({ title: 'Error', message: error.message })
             }
@@ -126,7 +121,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
             try {
               await revokeWaveInvite({ inviteToken: invite.inviteToken, uuid })
               Toast.show({ type: 'success', text1: 'Invite revoked' })
-              loadData()
+              execute()
             } catch (error) {
               showErrorToast({ title: 'Error', message: error.message })
             }

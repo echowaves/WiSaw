@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import { getWave, updateWave } from '../Waves/reducer'
 import { groupingAtom } from '../../utils/groupingAtom'
+import useSimpleFetch from '../../hooks/useSimpleFetch'
 
 const MILES_TO_METERS = 1609
 const DEFAULT_RADIUS_MILES = 10
@@ -37,7 +38,6 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   const locationState = useAtomValue(STATE.locationAtom)
   const grouping = useAtomValue(groupingAtom)
 
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   // Settings state
@@ -63,9 +63,8 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   }, [splashDate, freezeDate])
 
   // Load current settings via getWave query
-  const loadSettings = useCallback(async () => {
-    setLoading(true)
-    try {
+  const { loading: settingsLoading, execute: loadSettings } = useSimpleFetch(
+    async () => {
       const wave = await getWave({ waveUuid, uuid })
       setIsOpen(wave.open === true)
       setIsFrozen(wave.isFrozen === true)
@@ -93,13 +92,9 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       if (wave.radius) {
         setRadiusMiles(Math.round(wave.radius / MILES_TO_METERS))
       }
-    } catch (error) {
-      console.error(error)
-      showErrorToast({ title: 'Error loading settings', message: error.message })
-    } finally {
-      setLoading(false)
-    }
-  }, [waveUuid, uuid])
+    },
+    { autoExecute: false }
+  )
 
   useEffect(() => {
     loadSettings()
@@ -290,7 +285,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     }
   }
 
-  if (loading) {
+  if (settingsLoading) {
     return (
       <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND, justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size='large' color={CONST.MAIN_COLOR} />
