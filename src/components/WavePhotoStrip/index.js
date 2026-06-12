@@ -22,6 +22,11 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
   const userHasScrolled = useRef(false)
   const [autoScrollTrigger, setAutoScrollTrigger] = useState(false)
 
+  // Sync internal photos state when initialPhotos prop changes (prevents stale state after refresh)
+  useEffect(() => {
+    setPhotos(initialPhotos)
+  }, [initialPhotos])
+
   useEffect(() => {
     if (autoScrollTrigger) {
       flatListRef.current?.scrollToEnd({ animated: false })
