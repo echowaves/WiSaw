@@ -131,22 +131,6 @@ const WavesHub = () => {
     }
   }, [uuid])
 
-  useEffect(() => {
-    const unsubscribe = subscribeToAutoGroupDone(() => {
-      fetchCounts()
-    })
-    return unsubscribe
-  }, [fetchCounts])
-
-  useEffect(() => {
-    const unsubscribe = subscribeToUploadComplete((upload) => {
-      if (upload.waveUuid != null) {
-        fetchCounts()
-      }
-    })
-    return unsubscribe
-  }, [fetchCounts])
-
   const sortOptions = [
     { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
     { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
@@ -310,6 +294,22 @@ const handleRefresh = useCallback(() => {
       handleRefresh()
       }, [handleRefresh])
    )
+
+  // Auto-group completion reloads waves list
+  useEffect(() => {
+    const unsubscribe = subscribeToAutoGroupDone(() => {
+      handleRefresh()
+    })
+    return unsubscribe
+  }, [handleRefresh])
+
+  // Photo upload completion reloads waves list
+  useEffect(() => {
+    const unsubscribe = subscribeToUploadComplete(() => {
+      handleRefresh()
+    })
+    return unsubscribe
+  }, [handleRefresh])
 
   const handleLoadMore = () => {
     if (!noMoreData && !loading) {
