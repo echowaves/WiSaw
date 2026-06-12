@@ -1,3 +1,0 @@
-engines:
-  exclude_paths:
-    - 'openspec/**'

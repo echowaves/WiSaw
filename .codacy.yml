@@ -1,0 +1,12 @@
+---
+# Exclude one-off maintenance scripts and build artifacts from analysis.
+# The scripts/ directory contains local-only utilities not deployed to production.
+# The coverage/ directory contains generated HTML reports.
+exclude_paths:
+  - "coverage/**"
+  - "openspec/**"
+  - "scripts/**"
+  - "migrations/**"  
+exclude_patterns:
+
+
