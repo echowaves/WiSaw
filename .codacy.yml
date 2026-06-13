@@ -9,5 +9,8 @@ exclude_paths:
   - "migrations/**"  
   - ".roo/**"
   - ".github/**"
+  - ".cline/**"
+  - ".clinerules/**"
+
 exclude_patterns:
   # - "**/package-lock.json"
