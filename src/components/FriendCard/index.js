@@ -12,6 +12,7 @@ const FriendCard = ({ friend, onPress, onLongPress, onPhotoPress, onPhotoLongPre
   const displayName = friend?.contact || 'Unnamed Friend'
   const isUnnamed = !friend?.contact
   const photos = friend.photos || []
+  const photoCount = friend.photosCount ?? 0
   const friendUserUuid = friend.uuid1 === uuid ? friend.uuid2 : friend.uuid1
 
   const fetchFn = useCallback(async (pageNumber, batch) => {
@@ -34,9 +35,16 @@ const FriendCard = ({ friend, onPress, onLongPress, onPhotoPress, onPhotoLongPre
       >
         <View style={styles.infoRow}>
           <View style={styles.infoTextContainer}>
-            <Text style={[styles.friendName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
-              {displayName}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={[styles.friendName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
+                {displayName}
+              </Text>
+            </View>
+            <View style={styles.metaRow}>
+              <Text style={[styles.photoCount, { color: theme.TEXT_SECONDARY }]}>
+                {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+              </Text>
+            </View>
             {isUnnamed && (
               <Text style={[styles.unnamedHint, { color: theme.TEXT_SECONDARY }]}>
                 Long-press to assign a name
@@ -83,7 +91,21 @@ const styles = StyleSheet.create({
   },
   friendName: {
     fontSize: 14,
-    fontWeight: '600'
+    fontWeight: '600',
+    flex: 1
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 2
+  },
+  photoCount: {
+    fontSize: 12
   },
   unnamedHint: {
     fontSize: 12,

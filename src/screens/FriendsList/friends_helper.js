@@ -223,6 +223,7 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
               friendshipUuid
               uuid1
               uuid2
+              photosCount
               photos {
                 id
                 thumbUrl
