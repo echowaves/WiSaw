@@ -1,0 +1,18 @@
+- [x] 1. Add `debouncedSearchRef` and `refreshTimerRef` refs, remove `refreshRunningRef`
+  - `src/screens/WavesHub/index.js` lines 111-115
+- [x] 2. Add useEffect to sync `debouncedSearchRef` with state
+  - `src/screens/WavesHub/index.js` after line 122
+- [x] 3. Remove `setRefreshing(false)` from `loadWaves` finally block
+  - `src/screens/WavesHub/index.js` line ~264
+- [x] 4. Refactor search effect to call `scheduleRefresh()` instead of `loadWaves()`
+  - `src/screens/WavesHub/index.js` lines ~271-282
+- [x] 5. Make `handleRefresh` async, await `Promise.all([loadWaves, fetchCounts])`, move `setRefreshing(false)` to end
+  - `src/screens/WavesHub/index.js` lines ~284-300
+- [x] 6. Add `scheduleRefresh` coalescing function (debounce with 300ms timer)
+  - `src/screens/WavesHub/index.js` after handleRefresh
+- [x] 7. Replace all `handleRefresh` calls in event subscriptions with `scheduleRefresh`
+  - `src/screens/WavesHub/index.js` lines ~305-330
+- [x] 8. Remove `debouncedSearch` from `handleRefresh` useCallback dependency array
+  - `src/screens/WavesHub/index.js` line ~300
+- [x] 9. Validate no compile or lint errors
+  - Run ESLint on `src/screens/WavesHub/index.js`

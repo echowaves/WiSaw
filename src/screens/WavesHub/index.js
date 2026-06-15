@@ -34,14 +34,13 @@ import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
-import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
-import { subscribeToUploadComplete } from '../../events/uploadBus'
+import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import UploadContext from '../../contexts/UploadContext'
 import usePendingAnimation from '../PhotosList/hooks/usePendingAnimation'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
-import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
+// Counts are loaded via listWaves GraphQL query
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
 // import { useLocationDrift } from '../../hooks/useLocationDrift' - DISABLED per change proposal
 // import { setLastTriggerLocation } from '../../utils/groupingAtom' - DISABLED with location drift trigger
@@ -56,9 +55,7 @@ const WavesHub = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
-  const [, setWavesCount] = useAtom(STATE.wavesCount)
   const [ungroupedCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
-  const location = useAtomValue(STATE.locationAtom)
   const grouping = useAtomValue(groupingAtom)
   const { groupingLevel } = grouping
 
@@ -112,25 +109,17 @@ const WavesHub = () => {
   const hasMountedRef = useRef(false)
   const autoGroupRunningRef = useRef(false)
   const refreshRunningRef = useRef(false)
+  const debouncedSearchRef = useRef(debouncedSearch)
 
   const theme = getTheme(isDarkMode)
 
+  // Keep debouncedSearchRef in sync without recreating handleRefresh
+  useEffect(() => {
+    debouncedSearchRef.current = debouncedSearch
+  }, [debouncedSearch])
+
   // Sort menu state
   const [headerMenuVisible, setHeaderMenuVisible] = useState(false)
-
-  const fetchCounts = useCallback(async () => {
-    if (!uuid) return
-    try {
-      const [uc, wc] = await Promise.all([
-        getUngroupedPhotosCount({ uuid }),
-        getWavesCount({ uuid })
-      ])
-      setUngroupedPhotosCount(uc)
-      setWavesCount(wc)
-    } catch (error) {
-      console.error('Failed to fetch wave counts:', error)
-    }
-  }, [uuid])
 
   const sortOptions = [
     { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
@@ -253,7 +242,6 @@ const WavesHub = () => {
     } finally {
       stopLoading.current = false
       setLoading(false)
-      setRefreshing(false)
     }
   }, [uuid, sortBy, sortDirection])
 
@@ -271,55 +259,37 @@ const WavesHub = () => {
       hasMountedRef.current = true
       return
     }
+    handleRefresh()
+  }, [debouncedSearch])
+
+  const handleRefresh = useCallback(async () => {
+    // Guard: prevent concurrent refreshes
+    if (refreshRunningRef.current) return
+
+    refreshRunningRef.current = true
+
+    stopLoading.current = false
+    setRefreshing(true)
     setPageNumber(0)
     setNoMoreData(false)
     const newBatch = Crypto.randomUUID()
     setBatch(newBatch)
-    loadWaves(0, newBatch, true, debouncedSearch || undefined)
-  }, [debouncedSearch])
 
-const handleRefresh = useCallback(async () => {
-    if (refreshRunningRef.current) return
-    refreshRunningRef.current = true
     try {
-      stopLoading.current = false
-      setRefreshing(true)
-      setPageNumber(0)
-      setNoMoreData(false)
-      const newBatch = Crypto.randomUUID()
-      setBatch(newBatch)
-      
-      await Promise.all([
-        loadWaves(0, newBatch, true, debouncedSearch || undefined),
-        fetchCounts()
-      ])
+      await loadWaves(0, newBatch, true, debouncedSearchRef.current || undefined)
     } finally {
+      setRefreshing(false)
       refreshRunningRef.current = false
     }
-  }, [loadWaves, debouncedSearch, fetchCounts])
+  }, [loadWaves])
 
+  // Reload waves on focus (includes counts in GraphQL response)
   useFocusEffect(
     useCallback(() => {
       stopLoading.current = false
       handleRefresh()
-      }, [handleRefresh])
-   )
-
-  // Auto-group completion reloads waves list
-  useEffect(() => {
-    const unsubscribe = subscribeToAutoGroupDone(() => {
-      handleRefresh()
-    })
-    return unsubscribe
-  }, [handleRefresh])
-
-  // Photo upload completion reloads waves list
-  useEffect(() => {
-    const unsubscribe = subscribeToUploadComplete(() => {
-      handleRefresh()
-    })
-    return unsubscribe
-  }, [handleRefresh])
+    }, [handleRefresh])
+  )
 
   const handleLoadMore = () => {
     if (!noMoreData && !loading) {
@@ -342,7 +312,6 @@ const handleRefresh = useCallback(async () => {
         uuid
       })
       setWaves(prev => [{ ...newWave, thumbnails: [], photos: [] }, ...prev])
-      setWavesCount(prev => (prev ?? 0) + 1)
       setModalVisible(false)
       setNewWaveName('')
       setNewWaveDescription('')
@@ -369,7 +338,6 @@ const handleRefresh = useCallback(async () => {
               const waveToDelete = waves.find(w => w.waveUuid === waveUuid)
               await reducer.deleteWave({ waveUuid, uuid })
               setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
-              setWavesCount(prev => Math.max((prev ?? 1) - 1, 0))
               setUngroupedPhotosCount(prev => (prev ?? 0) + (waveToDelete?.photosCount ?? 0))
               emitAutoGroupDone()
               Toast.show({ type: 'success', text1: 'Wave deleted' })
@@ -440,7 +408,7 @@ const handleRefresh = useCallback(async () => {
           setAutoGroupProgress({ photosGrouped: totalPhotosGrouped, wavesCreated: totalWavesCreated, photosRemaining: result.photosRemaining ?? 0 })
         }
       } while (result.hasMore)
-      
+
       if (!silent) {
         if (totalWavesCreated === 0) {
           Toast.show({ type: 'info', text1: 'No ungrouped photos found', text2: 'All your photos are already in waves' })
@@ -450,16 +418,12 @@ const handleRefresh = useCallback(async () => {
             text1: `Photos grouped successfully (${gl} level)`,
             text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
           })
-          setWavesCount(prev => (prev ?? 0) + totalWavesCreated)
         }
       }
-      
+
       setUngroupedPhotosCount(result.photosRemaining ?? 0)
-      // Task 3.1: Removed direct handleRefresh() call - only emitAutoGroupDone() triggers refresh
-      // Task 4.3: Update last trigger location after successful auto-group - DISABLED with location drift trigger
-      // if (location.status === 'ready' && location.coords) {
-      //   await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
-      // }
+      // Refresh waves on auto-group to update counts
+      emitAutoGroupDone()
     } catch (error) {
       console.error(error)
       showErrorToast({ title: 'Error auto-grouping photos', message: error.message })
@@ -469,42 +433,42 @@ const handleRefresh = useCallback(async () => {
       setAutoGrouping(false)
       emitAutoGroupDone()
     }
-  }, [uuid, location, groupingLevel, setWavesCount, setUngroupedPhotosCount, handleRefresh])
+  }, [uuid, setUngroupedPhotosCount])
 
   const handleAutoGroup = useCallback((count, eventGroupingLevel, silent = false) => {
     const gl = eventGroupingLevel || groupingLevel
-    
+
     // Silent mode: skip confirmation dialog and run directly
     if (silent) {
       runAutoGroup(count, gl, true)
       return
     }
-    
+
     // Manual mode: show confirmation dialog
     const countText = count > 0
-       ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves at ${gl} level. Continue?`
-       : `This will automatically group your ungrouped photos into waves at ${gl} level. Continue?`
+      ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves at ${gl} level. Continue?`
+      : `This will automatically group your ungrouped photos into waves at ${gl} level. Continue?`
     Alert.alert(
-       'Auto-Group Photos',
+      'Auto-Group Photos',
       countText,
-       [
+      [
         { text: 'Cancel', style: 'cancel' },
         {
-         text: 'Auto-Group',
-         onPress: async () => {
-           runAutoGroup(count, gl, false)
+          text: 'Auto-Group',
+          onPress: async () => {
+            runAutoGroup(count, gl, false)
           }
         }
-       ]
-      )
-    }, [uuid, location, groupingLevel, runAutoGroup])
+      ]
+    )
+  }, [uuid, groupingLevel, runAutoGroup])
 
-   useEffect(() => {
-     const unsubscribe = subscribeToAutoGroup((count, eventGroupingLevel, silent) => {
-       handleAutoGroup(count, eventGroupingLevel, silent)
-      })
-     return unsubscribe
-    }, [handleAutoGroup])
+  useEffect(() => {
+    const unsubscribe = subscribeToAutoGroup((count, eventGroupingLevel, silent) => {
+      handleAutoGroup(count, eventGroupingLevel, silent)
+    })
+    return unsubscribe
+  }, [handleAutoGroup])
 
   useEffect(() => {
     const unsubscribe = subscribeToAddWave(() => {
