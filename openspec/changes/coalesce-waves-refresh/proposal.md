@@ -1,26 +1,35 @@
-# Change: Coalesce Waves Screen Refresh Events
+# Change: Simplify Waves Screen Refresh Events
 
 ## Problem
 
 The Waves screen freezes during multi-batch photo uploads because `handleRefresh()` is called
-dozens of times in rapid succession by three event sources:
+dozens of times in rapid succession by multiple event sources:
 - `useFocusEffect` (on screen focus)
 - `subscribeToAutoGroupDone` (after auto-group)
 - `subscribeToUploadComplete` (after each photo upload)
 
-The current guard (`refreshRunningRef`) prevents concurrent calls but **drops events** — if 10
-uploads fire in 200ms, only 1 refresh executes and 9 are silently dropped. This means the UI
-doesn't reflect the latest state until much later.
-
-Additionally, `debouncedSearch` is a dependency of `handleRefresh`, so **every keystroke** creates
-a new `handleRefresh` function, invalidating all three event subscriptions and causing them to
-re-subscribe on every keystroke.
+The event-driven approach with timers and scheduled refreshes caused race conditions where
+the screen would freeze during navigation after multiple uploads completed.
 
 ## Goals
 
-1. Eliminate dropped refresh events during rapid upload bursts
-2. Stabilize `handleRefresh` function identity so event subscriptions don't re-fire on every keystroke
-3. Ensure UI always reflects the latest state after upload batches
+1. Simplify refresh logic to only explicit user actions
+2. Remove scheduled refreshes and event listeners that cause race conditions
+3. Ensure screen only refreshes when user explicitly navigates or pulls to refresh
+
+## Approach
+
+Remove all event-based refresh triggers from WavesHub:
+- Remove `subscribeToAutoGroupDone` listener
+- Remove scheduled refresh timers
+- Remove `debouncedSearch` dependency from `handleRefresh` (using ref instead)
+
+Refresh now only happens on:
+- Screen focus (`useFocusEffect`)
+- Pull to refresh (`onRefresh={handleRefresh}`)
+- Search change (direct `handleRefresh()` call, no debounce timer)
+
+This eliminates the freeze because there are no overlapping refresh operations.
 
 ## Non-Goals
 
