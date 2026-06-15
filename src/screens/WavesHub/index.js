@@ -111,6 +111,7 @@ const WavesHub = () => {
   const stopLoading = useRef(false)
   const hasMountedRef = useRef(false)
   const autoGroupRunningRef = useRef(false)
+  const refreshRunningRef = useRef(false)
 
   const theme = getTheme(isDarkMode)
 
@@ -277,16 +278,25 @@ const WavesHub = () => {
     loadWaves(0, newBatch, true, debouncedSearch || undefined)
   }, [debouncedSearch])
 
-const handleRefresh = useCallback(() => {
-    stopLoading.current = false
-    setRefreshing(true)
-    setPageNumber(0)
-    setNoMoreData(false)
-    const newBatch = Crypto.randomUUID()
-    setBatch(newBatch)
-    loadWaves(0, newBatch, true, debouncedSearch || undefined)
-    fetchCounts()
-   }, [loadWaves, debouncedSearch, fetchCounts])
+const handleRefresh = useCallback(async () => {
+    if (refreshRunningRef.current) return
+    refreshRunningRef.current = true
+    try {
+      stopLoading.current = false
+      setRefreshing(true)
+      setPageNumber(0)
+      setNoMoreData(false)
+      const newBatch = Crypto.randomUUID()
+      setBatch(newBatch)
+      
+      await Promise.all([
+        loadWaves(0, newBatch, true, debouncedSearch || undefined),
+        fetchCounts()
+      ])
+    } finally {
+      refreshRunningRef.current = false
+    }
+  }, [loadWaves, debouncedSearch, fetchCounts])
 
   useFocusEffect(
     useCallback(() => {
@@ -445,7 +455,7 @@ const handleRefresh = useCallback(() => {
       }
       
       setUngroupedPhotosCount(result.photosRemaining ?? 0)
-      handleRefresh()
+      // Task 3.1: Removed direct handleRefresh() call - only emitAutoGroupDone() triggers refresh
       // Task 4.3: Update last trigger location after successful auto-group - DISABLED with location drift trigger
       // if (location.status === 'ready' && location.coords) {
       //   await setLastTriggerLocation(location.coords.latitude, location.coords.longitude)
