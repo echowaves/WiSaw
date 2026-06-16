@@ -29,3 +29,19 @@ The card SHALL include a prominent button labeled "Auto Group Into Waves" with s
 #### Scenario: Card hides after auto-group completes
 - **WHEN** auto-grouping completes and `ungroupedPhotosCount` becomes 0
 - **THEN** the ungrouped card SHALL no longer be rendered
+
+#### Scenario: Card re-fetches after auto-group completes
+- **WHEN** the auto-group operation completes and `emitAutoGroupDone()` is called
+- **THEN** the UngroupedPhotosCard component SHALL have a `subscribeToAutoGroupDone()` listener registered
+- **THEN** the listener SHALL reset `fetchedRef.current = false` to allow re-fetching
+- **THEN** the listener SHALL call `requestUngroupedPhotos()` to fetch fresh ungrouped photos
+- **THEN** the thumbnails SHALL display correctly (no more empty placeholders)
+
+### Requirement: Ungrouped Photos Count Updates
+When auto-grouping completes, the ungrouped photos count SHALL update in real-time via the `ungroupedPhotosCount` atom.
+
+#### Scenario: Ungrouped count updates after auto-group
+- **WHEN** the auto-group operation completes and `emitAutoGroupDone()` is called
+- **THEN** the `ungroupedPhotosCount` atom SHALL be updated via `fetchCounts()`
+- **THEN** the UngroupedPhotosCard prop `ungroupedCount` SHALL reflect the new value
+- **THEN** the card title SHALL display the updated count (e.g., "Ungrouped Photos (5)")

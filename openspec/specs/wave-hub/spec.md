@@ -1,6 +1,21 @@
 ## Purpose
 This specification defines expected user-visible behavior, constraints, and validation scenarios for wave hub in WiSaw.
 ## Requirements
+### Requirement: Waves Badge Updates
+The system SHALL update badge counts when auto-grouping or photo uploads complete. Badge updates SHALL call only `fetchCounts()` to refresh `ungroupedPhotosCount` and `wavesCount` atoms — not `handleRefresh()` which would cause UI freezes.
+
+#### Scenario: Badge updates after auto-group completes
+- **WHEN** the auto-group operation completes and `emitAutoGroupDone()` is called
+- **THEN** the WavesHub component SHALL have a `subscribeToAutoGroupDone()` listener registered
+- **THEN** the listener SHALL call `fetchCounts()` to update `ungroupedPhotosCount` and `wavesCount` atoms
+- **THEN** the badge on the auto-group button SHALL display the updated count
+
+#### Scenario: Badge updates after upload completes
+- **WHEN** a photo upload completes and `emitUploadComplete()` is called
+- **THEN** the WavesHub component SHALL have a `subscribeToUploadComplete()` listener registered
+- **THEN** the listener SHALL call `fetchCounts()` to update `ungroupedPhotosCount` atom
+- **THEN** the badge on the auto-group button SHALL display the updated count
+
 ### Requirement: Waves List Focus Refresh
 The system SHALL re-fetch the waves list and ungrouped photo count from the API every time the Waves screen gains focus, ensuring wave names, photo counts, thumbnails, and the ungrouped badge reflect the latest server state. The refresh SHALL preserve the current sort order. The system SHALL prevent concurrent duplicate fetches using a ref-based loading guard, and SHALL skip the initial debounced-search effect on mount so that only `useFocusEffect` triggers the first load. The `useFocusEffect` callback SHALL be wrapped in `useCallback` (required by the React Navigation API to prevent infinite re-render loops), and the loading guard ref SHALL be reset to `false` at the start of each focus callback to prevent stale lock-outs from prior navigations. Thumbnail `Photo` objects (with `id` and `thumbUrl`) SHALL be obtained from the `photos` field of the `listWaves` query response, eliminating separate per-wave thumbnail queries. `WaveCard` SHALL pass `wave.photos` as `initialPhotos` to `WavePhotoStrip`, which SHALL use `CachedImage` with `cacheKey` `${photo.id}-thumb` and React `key` `photo.id`. The `handleRefresh` function (used by FlatList pull-to-refresh) SHALL perform the same state resets as the focus callback: reset `loadingRef.current` to `false`, reset `noMoreData` to `false`, and call `fetchCounts()`, so that pull-to-refresh produces identical results to gaining focus.
 

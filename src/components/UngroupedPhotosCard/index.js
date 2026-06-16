@@ -6,7 +6,7 @@ import { useAtomValue } from 'jotai'
 
 import * as CONST from '../../consts'
 import { requestUngroupedPhotos } from '../../screens/Waves/reducer'
-import { emitAutoGroup } from '../../events/autoGroupBus'
+import { emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { groupingAtom } from '../../utils/groupingAtom'
 import WavePhotoStrip from '../WavePhotoStrip'
@@ -40,6 +40,22 @@ const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
             fetchedRef.current = true
            })
            .catch(err => console.error('UngroupedPhotosCard identity-change fetch error:', err))
+        })
+      return unsubscribe
+      }, [uuid])
+
+    // Re-fetch ungrouped photos after auto-group completes
+    useEffect(() => {
+      if (!uuid) return
+      const unsubscribe = subscribeToAutoGroupDone(() => {
+        fetchedRef.current = false
+        batchRef.current = Crypto.randomUUID()
+        requestUngroupedPhotos({ uuid, pageNumber: 0, batch: batchRef.current })
+           .then(result => {
+            setInitialPhotos(result.photos || [])
+            fetchedRef.current = true
+           })
+           .catch(err => console.error('UngroupedPhotosCard auto-group fetch error:', err))
         })
       return unsubscribe
       }, [uuid])

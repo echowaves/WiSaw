@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   useWindowDimensions
 } from 'react-native'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import Toast from 'react-native-toast-message'
 import showErrorToast from '../../utils/showErrorToast'
@@ -27,6 +27,7 @@ import AppHeader from '../../components/AppHeader'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import { getUngroupedPhotosCount, getWavesCount } from '../Waves/reducer'
 import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
@@ -34,9 +35,10 @@ import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
-import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup } from '../../events/autoGroupBus'
+import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
+import { subscribeToUploadComplete } from '../../events/uploadBus'
 import UploadContext from '../../contexts/UploadContext'
 import usePendingAnimation from '../PhotosList/hooks/usePendingAnimation'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
@@ -56,6 +58,7 @@ const WavesHub = () => {
   const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
   const [ungroupedCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
+  const setWavesCount = useSetAtom(STATE.wavesCount)
   const grouping = useAtomValue(groupingAtom)
   const { groupingLevel } = grouping
 
@@ -435,6 +438,17 @@ const WavesHub = () => {
     }
   }, [uuid, setUngroupedPhotosCount])
 
+  const fetchCounts = useCallback(async () => {
+    try {
+      const ungroupedCount = await getUngroupedPhotosCount({ uuid })
+      const wavesCount = await getWavesCount({ uuid })
+      setUngroupedPhotosCount(ungroupedCount)
+      setWavesCount(wavesCount)
+    } catch (error) {
+      console.error('Error fetching counts:', error)
+    }
+  }, [uuid, setUngroupedPhotosCount, setWavesCount])
+
   const handleAutoGroup = useCallback((count, eventGroupingLevel, silent = false) => {
     const gl = eventGroupingLevel || groupingLevel
 
@@ -483,6 +497,19 @@ const WavesHub = () => {
     })
     return unsubscribe
   }, [handleRefresh])
+
+  useEffect(() => {
+    const unsubscribeAutoGroup = subscribeToAutoGroupDone(() => {
+      fetchCounts()
+    })
+    const unsubscribeUpload = subscribeToUploadComplete(() => {
+      fetchCounts()
+    })
+    return () => {
+      unsubscribeAutoGroup()
+      unsubscribeUpload()
+    }
+  }, [fetchCounts])
 
   // Auto-trigger: when location drift exceeds threshold, trigger auto-group
   // DISABLED: Location drift auto-trigger removed per change proposal.
