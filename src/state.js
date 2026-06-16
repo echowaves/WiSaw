@@ -1,4 +1,6 @@
-import { atom } from 'jotai'
+import { atom, useAtom } from 'jotai'
+import { useEffect } from 'react'
+import NetInfo from '@react-native-community/netinfo'
 
 export const uuid = atom('')
 
@@ -29,6 +31,20 @@ export const friendFeedSortDirection = atom('desc')
 export const locationAtom = atom({ status: 'pending', coords: null, accuracy: null })
 
 export const netAvailable = atom(true)
+
+// Subscribe to NetInfo changes and update the netAvailable atom
+export function useNetInfoSubscription () {
+  const [, setNetAvailable] = useAtom(netAvailable)
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const isConnected = state.isConnected && state.isInternetReachable !== false
+      setNetAvailable(isConnected)
+    })
+
+    return () => unsubscribe()
+  }, [setNetAvailable])
+}
 
 export const wavesCount = atom(null)
 

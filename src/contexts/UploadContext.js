@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import * as STATE from '../state'
 import usePhotoUploader from '../screens/PhotosList/upload/usePhotoUploader'
+import { useNetInfoSubscription } from '../state'
 
 const UploadContext = createContext({
   enqueueCapture: () => {},
@@ -20,6 +21,9 @@ export function UploadProvider ({ children }) {
   const [netAvailable] = useAtom(STATE.netAvailable)
   const insets = useSafeAreaInsets()
   const topOffset = insets.top + 10
+
+  // Subscribe to network state changes to keep netAvailable atom in sync
+  useNetInfoSubscription()
 
   const {
     pendingPhotos,
