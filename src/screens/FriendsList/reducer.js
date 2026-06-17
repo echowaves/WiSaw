@@ -1,4 +1,4 @@
-import Toast from 'react-native-toast-message'
+import { showSuccessToast, showInfoToast, showErrorToast } from '../../utils/showToast'
 
 import { gql } from '@apollo/client'
 
@@ -71,55 +71,25 @@ export async function createFriendship ({ uuid, topOffset, contactName, autoShar
         )
 
         if (result?.success) {
-          Toast.show({
-            text1: 'Friendship request shared!',
-            text2: 'Shared via system share sheet',
-            type: 'success',
-            position: 'top',
-            topOffset: 60
-          })
+          showSuccessToast('Friendship request shared!', { text2: 'Shared via system share sheet', topOffset: 60 })
         } else if (result && !result.success && !result.dismissed) {
           const message = result.reason || 'Sharing action was not successful.'
-          Toast.show({
-            text1: 'Sharing failed',
-            text2: message,
-            type: 'error',
-            position: 'top',
-            topOffset: 60
-          })
+          showErrorToast('Sharing failed', { text2: message, topOffset: 60 })
         }
       } catch (shareError) {
         const message = shareError.message || 'Unable to share friendship request'
-        Toast.show({
-          text1: 'Sharing failed',
-          text2: message,
-          type: 'error',
-          position: 'top',
-          topOffset: 60
-        })
+        showErrorToast('Sharing failed', { text2: message, topOffset: 60 })
       }
     } else {
       // Show success message for friend creation without auto-sharing
-      Toast.show({
-        text1: 'Friend added successfully!',
-        text2: 'You can now share the friendship request from the friends list',
-        type: 'success',
-        position: 'top',
-        topOffset: 60
-      })
+      showSuccessToast('Friend added successfully!', { text2: 'You can now share the friendship request from the friends list', topOffset: 60 })
     }
 
     return friendship
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('createFriendship error:', err)
-    Toast.show({
-      text1: 'Unable to create Friend',
-      text2: err.toString(),
-      type: 'error',
-      position: 'top',
-      topOffset: 60
-    })
+    showErrorToast('Unable to create Friend', { text2: err.toString(), topOffset: 60 })
     return null
   }
 }

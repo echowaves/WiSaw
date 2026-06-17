@@ -1,6 +1,6 @@
 /* global console */
 import { Share } from 'react-native'
-import Toast from 'react-native-toast-message'
+import showToast, { showSuccessToast, showErrorToast } from './showToast'
 
 /**
  * Simple sharing helper using React Native's built-in Share API for text content and links
@@ -72,24 +72,14 @@ export const shareContent = async ({
     const result = await Share.share(shareOptions)
 
     // Show success toast
-    Toast.show({
-      text1: 'Shared successfully!',
-      text2: result.action === Share.sharedAction ? 'Content shared' : 'Share dismissed',
-      type: 'success',
-      topOffset
-    })
+    showSuccessToast('Shared successfully!', { text2: result.action === Share.sharedAction ? 'Content shared' : 'Share dismissed', topOffset })
 
     return { success: true, action: result.action }
   } catch (error) {
     console.error('Sharing error:', error)
 
     // Show error toast
-    Toast.show({
-      text1: 'Sharing failed',
-      text2: error.message || 'Unable to share content',
-      type: 'error',
-      topOffset
-    })
+    showErrorToast('Sharing failed', { text2: error.message || 'Unable to share content', topOffset })
 
     return { success: false, error: error.message }
   }

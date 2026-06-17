@@ -3,12 +3,12 @@ import React from 'react'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import * as CONST from '../../../consts'
-import IdentityHeaderIcon from '../../../components/IdentityHeaderIcon'
-import BookmarksHeaderIcon from '../../../components/BookmarksHeaderIcon'
-import LinearProgress from '../../../components/ui/LinearProgress'
-import WaveHeaderIcon from '../../../components/WaveHeaderIcon'
-import FriendsHeaderIcon from '../../../components/FriendsHeaderIcon'
+import * as CONST from '../../consts'
+import IdentityHeaderIcon from '../IdentityHeaderIcon'
+import BookmarksHeaderIcon from '../BookmarksHeaderIcon'
+import LinearProgress from '../ui/LinearProgress'
+import WaveHeaderIcon from '../WaveHeaderIcon'
+import FriendsHeaderIcon from '../FriendsHeaderIcon'
 
 const PhotosListHeader = ({ theme, loading }) => {
   const headerHeight = 60

@@ -5,18 +5,12 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import WavePhotoStrip from '../WavePhotoStrip'
 import { fetchWavePhotos } from '../../screens/WaveDetail/reducer'
 import { normalizeWaveName } from '../../utils/normalizeWaveName'
-import * as CONST from '../../consts'
-
-const ROLE_CONFIG = {
-  owner: { label: 'Owner', color: CONST.MAIN_COLOR },
-  facilitator: { label: 'Facilitator', color: '#8B5CF6' },
-  contributor: { label: 'Contributor', color: '#6B7280' }
-}
+import { WAVE_ROLES } from '../../consts'
 
 const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
   const photoCount = wave.photosCount ?? 0
   const photos = wave.photos || []
-  const roleConfig = ROLE_CONFIG[wave.myRole] || ROLE_CONFIG.contributor
+  const roleConfig = WAVE_ROLES[wave.myRole] || WAVE_ROLES.contributor
 
   const fetchFn = useCallback(async (pageNumber, batch) => {
     return fetchWavePhotos({ waveUuid: wave.waveUuid, pageNumber, batch })

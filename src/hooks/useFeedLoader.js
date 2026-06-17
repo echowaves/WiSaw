@@ -1,9 +1,9 @@
 import * as Crypto from 'expo-crypto'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { createFrozenPhoto } from '../../../utils/photoListHelpers'
-import { subscribeToUploadComplete } from '../../../events/uploadBus'
-import { subscribeToPhotoDeletion } from '../../../events/photoDeletionBus'
+import { createFrozenPhoto } from '../utils/photoListHelpers'
+import { subscribeToUploadComplete } from '../events/uploadBus'
+import { subscribeToPhotoDeletion } from '../events/photoDeletionBus'
 
 let currentBatch = Crypto.randomUUID()
 

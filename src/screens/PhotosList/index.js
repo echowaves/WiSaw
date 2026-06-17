@@ -37,7 +37,7 @@ import * as friendsHelper from '../FriendsList/friends_helper'
 import * as reducer from './reducer'
 import { requestGeoPhotos } from './reducer'
 
-import QuickActionsModal from '../../components/QuickActionsModal'
+import QuickActionsModalWrapper from '../../components/QuickActionsModalWrapper'
 
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
@@ -46,20 +46,21 @@ import {
 } from '../../utils/photoListHelpers'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
-import PhotosListFooter from './components/PhotosListFooter'
-import PhotosListHeader from './components/PhotosListHeader'
+import { GEO_FEED_LAYOUT_CONFIG } from '../../consts'
+import PhotosListFooter from '../../components/PhotosListFooter'
+import PhotosListHeader from '../../components/PhotosListHeader'
 import SearchFab from '../../components/SearchFab'
 import PendingPhotosBanner from './components/PendingPhotosBanner'
 import LocationDriftBanner from './components/LocationDriftBanner'
-import PhotosListMasonry from './components/PhotosListMasonry'
+import PhotosListMasonry from '../../components/PhotosListMasonry'
 import PhotosListContext from '../../contexts/PhotosListContext'
 import UploadContext from '../../contexts/UploadContext'
 
-import useCameraCapture from './hooks/useCameraCapture'
-import usePendingAnimation from './hooks/usePendingAnimation'
-import usePhotoExpansion from './hooks/usePhotoExpansion'
-import useFeedLoader from './hooks/useFeedLoader'
-import useFeedSearch from './hooks/useFeedSearch'
+import useCameraCapture from '../../hooks/useCameraCapture'
+import usePendingAnimation from '../../hooks/usePendingAnimation'
+import usePhotoExpansion from '../../hooks/usePhotoExpansion'
+import useFeedLoader from '../../hooks/useFeedLoader'
+import useFeedSearch from '../../hooks/useFeedSearch'
 import { haversine } from '../../utils/haversine'
 
 const BACKGROUND_TASK_NAME = 'background-task'
@@ -127,28 +128,6 @@ const FOOTER_HEIGHT = 90
 // IMPORTANT: PhotosList items are frozen to prevent unauthorized mutation of width/height properties
 // by third-party libraries (like masonry layout). When creating new items (expansion, dimension updates),
 // we must always return Object.freeze() wrapped objects to maintain immutability.
-
-// Lightweight wrapper isolating longPressPhoto state from PhotosList re-renders
-const QuickActionsModalWrapper = React.memo(
-  React.forwardRef(({ setPhotosList }, ref) => {
-    const [longPressPhoto, setLongPressPhoto] = useState(null)
-
-    useImperativeHandle(ref, () => ({
-      open: (photo) => setLongPressPhoto(photo)
-    }), [])
-
-    return (
-      <QuickActionsModal
-        visible={!!longPressPhoto}
-        photo={longPressPhoto}
-        onClose={() => setLongPressPhoto(null)}
-        onPhotoDeleted={(photoId) => {
-          setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
-        }}
-      />
-    )
-  })
-)
 
 const PhotosList = ({ searchFromUrl }) => {
   const [uuid] = useAtom(STATE.uuid)
@@ -222,15 +201,7 @@ const PhotosList = ({ searchFromUrl }) => {
   } = useContext(UploadContext)
 
   // Global feed layout config - compact masonry
-  const segmentConfig = React.useMemo(() => {
-    return {
-      spacing: 5,
-      baseHeight: 100,
-      aspectRatioFallbacks: [
-        0.56, 0.67, 0.75, 1.0, 1.33, 1.5, 1.78
-      ]
-    }
-  }, [])
+  const segmentConfig = GEO_FEED_LAYOUT_CONFIG
 
   // --- Feed loader hook ---
   const {
@@ -522,7 +493,12 @@ const PhotosList = ({ searchFromUrl }) => {
             onCameraPress={checkPermissionsForPhotoTaking}
             locationReady={!!location}
           />
-          <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
+          <QuickActionsModalWrapper 
+            ref={quickActionsRef} 
+            onPhotoDeleted={(photoId) => {
+              setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+            }}
+          />
         </View>
       </PhotosListContext.Provider>
     )
@@ -749,7 +725,12 @@ const PhotosList = ({ searchFromUrl }) => {
         onCameraPress={checkPermissionsForPhotoTaking}
         locationReady={!!location}
       />
-      <QuickActionsModalWrapper ref={quickActionsRef} setPhotosList={setPhotosList} />
+      <QuickActionsModalWrapper 
+        ref={quickActionsRef} 
+        onPhotoDeleted={(photoId) => {
+          setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+        }}
+      />
     </View>
   )
 }

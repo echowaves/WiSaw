@@ -3,7 +3,7 @@
 
 import { Storage } from 'expo-storage'
 
-import Toast from 'react-native-toast-message'
+import { showErrorToast } from '../../utils/showToast'
 
 import { gql } from '@apollo/client'
 
@@ -245,12 +245,7 @@ export async function getPhotos (params) {
     }
   } catch (err7) {
     console.error({ err7 })
-    Toast.show({
-      text1: 'Error',
-      text2: `${err7}`,
-      type: 'error',
-      topOffset
-    })
+    showErrorToast('Error', { text2: `${err7}`, topOffset })
   }
   return {
     photos: [],

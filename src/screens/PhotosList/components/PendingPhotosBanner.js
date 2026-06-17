@@ -7,7 +7,8 @@ import {
 } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
-import Toast from 'react-native-toast-message'
+import showToast from '../../../utils/showToast'
+import showConfirmAlert from '../../../utils/showConfirmAlert'
 
 import LinearProgress from '../../../components/ui/LinearProgress'
 import * as CONST from '../../../consts'
@@ -34,25 +35,14 @@ const PendingPhotosBanner = ({
       activeOpacity={0.8}
       onLongPress={() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-        Alert.alert(
+        showConfirmAlert(
           'Clear Upload Queue',
           `Are you sure you want to cancel all ${pendingPhotos.length} pending upload${pendingPhotos.length === 1 ? '' : 's'}? This cannot be undone.`,
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Clear All',
-              style: 'destructive',
-              onPress: async () => {
-                await clearPendingQueue()
-                Toast.show({
-                  text1: 'Upload queue cleared',
-                  text2: 'All pending uploads have been cancelled',
-                  type: 'success',
-                  topOffset: toastTopOffset
-                })
-              }
-            }
-          ]
+          async () => {
+            await clearPendingQueue()
+            showToast('Upload queue cleared', { text2: 'All pending uploads have been cancelled', type: 'success', topOffset: toastTopOffset })
+          },
+          { destructiveText: 'Clear All' }
         )
       }}
     >

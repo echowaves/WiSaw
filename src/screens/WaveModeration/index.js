@@ -5,16 +5,17 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   ActivityIndicator
 } from 'react-native'
 import { useAtom } from 'jotai'
 import showErrorToast from '../../utils/showErrorToast'
+import { showSuccessToast } from '../../utils/showToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 
 import * as STATE from '../../state'
-import * as CONST from '../../consts'
+import { MAIN_COLOR } from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import {
   listWaveAbuseReports,
@@ -23,7 +24,6 @@ import {
   banUserFromWave
 } from '../Waves/reducer'
 import ActionMenu from '../../components/ActionMenu'
-import Toast from 'react-native-toast-message'
 import useSimpleFetch from '../../hooks/useSimpleFetch'
 
 const WaveModeration = ({ waveUuid, waveName }) => {
@@ -55,7 +55,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
   const handleDismiss = async (report) => {
     try {
       await dismissWaveReport({ reportId: report.id, uuid })
-      Toast.show({ type: 'success', text1: 'Report dismissed' })
+      showSuccessToast('Report dismissed')
       setReports(prev => prev.filter(r => r.id !== report.id))
     } catch (error) {
       showErrorToast({ title: 'Error dismissing report', message: error.message })
@@ -63,53 +63,40 @@ const WaveModeration = ({ waveUuid, waveName }) => {
   }
 
   const handleRemovePhoto = (report) => {
-    Alert.alert(
+    showConfirmAlert(
       'Remove Photo',
       'Remove this photo from the wave?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await removePhotoFromWave({ photoId: report.photoId, waveUuid, uuid })
-              Toast.show({ type: 'success', text1: 'Photo removed from wave' })
-              setReports(prev => prev.filter(r => r.id !== report.id))
-            } catch (error) {
-              showErrorToast({ title: 'Error', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          await removePhotoFromWave({ photoId: report.photoId, waveUuid, uuid })
+          showSuccessToast('Photo removed from wave')
+          setReports(prev => prev.filter(r => r.id !== report.id))
+        } catch (error) {
+          showErrorToast({ title: 'Error', message: error.message })
         }
-      ]
+      },
+      { destructiveText: 'Remove' }
     )
   }
 
   const handleBanUser = (report) => {
-    Alert.alert(
+    showConfirmAlert(
       'Ban User',
       'Ban the user who uploaded this photo from the wave?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Ban',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await banUserFromWave({
-                waveUuid,
-                targetUuid: report.uuid,
-                uuid,
-                reason: 'Reported content'
-              })
-              Toast.show({ type: 'success', text1: 'User banned' })
-              execute()
-            } catch (error) {
-              showErrorToast({ title: 'Error', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          await banUserFromWave({
+            waveUuid,
+            targetUuid: report.uuid,
+            uuid,
+            reason: 'Reported content'
+          })
+          showSuccessToast('User banned')
+          execute()
+        } catch (error) {
+          showErrorToast({ title: 'Error', message: error.message })
         }
-      ]
+      }
     )
   }
 
@@ -142,7 +129,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
     return (
       <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
         <View style={[styles.identityCard, { backgroundColor: theme.CARD_BACKGROUND }]}>
-          <MaterialCommunityIcons name='shield-lock-outline' size={48} color={CONST.MAIN_COLOR} />
+          <MaterialCommunityIcons name='shield-lock-outline' size={48} color={MAIN_COLOR} />
           <Text style={[styles.identityTitle, { color: theme.TEXT_PRIMARY }]}>
             Identity Required
           </Text>
@@ -150,7 +137,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
             Moderators must have a nickname set to ensure accountability. Set up your identity to access moderation tools.
           </Text>
           <TouchableOpacity
-            style={[styles.identityButton, { backgroundColor: CONST.MAIN_COLOR }]}
+            style={[styles.identityButton, { backgroundColor: MAIN_COLOR }]}
             onPress={() => router.push('/identity')}
           >
             <Text style={styles.identityButtonText}>Set Up Identity</Text>
@@ -163,7 +150,7 @@ const WaveModeration = ({ waveUuid, waveName }) => {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-        <ActivityIndicator size='large' color={CONST.MAIN_COLOR} />
+        <ActivityIndicator size='large' color={MAIN_COLOR} />
       </View>
     )
   }

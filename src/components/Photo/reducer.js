@@ -1,5 +1,4 @@
-import Toast from 'react-native-toast-message'
-import showErrorToast from '../../utils/showErrorToast'
+import { showSuccessToast, showErrorToast } from '../../utils/showToast'
 
 // import { CacheManager } from 'expo-cached-image'
 import { gql } from '@apollo/client'
@@ -113,11 +112,7 @@ export async function banPhoto ({ photo, uuid, topOffset }) {
       }
     })
 
-    Toast.show({
-      text1: 'Abusive Photo reported',
-      type: 'success',
-      topOffset
-    })
+    showSuccessToast('Abusive Photo reported', { topOffset })
   } catch (err3) {
     // eslint-disable-next-line no-console
     console.error({ err3 })
@@ -138,11 +133,7 @@ export async function deletePhoto ({ photo, uuid, topOffset }) {
         uuid
       }
     })
-    Toast.show({
-      text1: `${photo.video ? 'Video' : 'Photo'} deleted`,
-      type: 'success',
-      topOffset
-    })
+    showSuccessToast(`${photo.video ? 'Video' : 'Photo'} deleted`, { topOffset })
     return true
   } catch (err3) {
     // eslint-disable-next-line no-console
@@ -198,12 +189,7 @@ export async function submitComment ({ inputText, photo, uuid, topOffset }) {
     // lets update the state in the photos collection so it renders the right number of likes in the list
     await watchPhoto({ photo, uuid, topOffset })
 
-    Toast.show({
-      text1: 'Comment added',
-      type: 'success',
-      topOffset,
-      visibilityTime: 500
-    })
+    showSuccessToast('Comment added', { topOffset, visibilityTime: 500 })
 
     return { ...comment, hiddenButtons: true }
   } catch (err5) {
@@ -300,11 +286,7 @@ export async function deleteComment ({ photo, photoDetails, comment, uuid, topOf
     ).data.deleteComment
 
     // lets update the state in the photos collection so it renders the right number of likes in the list
-    Toast.show({
-      text1: 'Comment deleted',
-      type: 'success',
-      topOffset
-    })
+    showSuccessToast('Comment deleted', { topOffset })
     return {
       ...photoDetails
     }

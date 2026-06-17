@@ -1,6 +1,7 @@
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 
 import * as Haptics from 'expo-haptics'
 
@@ -9,7 +10,8 @@ import { Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, View } from '
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast, showErrorToast } from '../../utils/showToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 
 import * as STATE from '../../state'
 
@@ -91,15 +93,7 @@ const FriendsList = () => {
   const [menuFriend, setMenuFriend] = useState(null)
   const [sortMenuVisible, setSortMenuVisible] = useState(false)
   const [searchText, setSearchText] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText.trim())
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchText])
+  const debouncedSearch = useDebouncedSearch(searchText)
 
   const handleAddFriend = useCallback(() => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
@@ -182,15 +176,7 @@ const FriendsList = () => {
       setShowShareModal(true)
     } catch (error) {
       console.error('Error opening share modal:', error)
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Error',
-        text2: 'Unable to open sharing options',
-        visibilityTime: 3000,
-        autoHide: true,
-        topOffset: 60
-      })
+      showErrorToast('Error', { text2: 'Unable to open sharing options', topOffset: 60 })
     }
   }
 
@@ -201,57 +187,28 @@ const FriendsList = () => {
         friendshipUuid
       })
       if (success) {
-        Toast.show({
-          type: 'success',
-          position: 'top',
-          text1: 'Friend removed',
-          visibilityTime: 2000,
-          autoHide: true,
-          topOffset: 60
-        })
+        showSuccessToast('Friend removed', { topOffset: 60 })
         // need to re-load friendships from local storage
         const newFriendsList = await friendsHelper.getEnhancedListOfFriendships({
           uuid
         })
         setFriendsList(newFriendsList)
       } else {
-        Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: 'Error removing friend',
-          text2: 'Please try again',
-          visibilityTime: 3000,
-          autoHide: true,
-          topOffset: 60
-        })
+        showErrorToast('Error removing friend', { text2: 'Please try again', topOffset: 60 })
       }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('Error removing friend:', error)
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Error removing friend',
-        text2: 'Please try again',
-        visibilityTime: 3000,
-        autoHide: true,
-        topOffset: 60
-      })
+      showErrorToast('Error removing friend', { text2: 'Please try again', topOffset: 60 })
     }
   }
 
   const handleDeletePendingFriend = async ({ friendshipUuid, contactName }) => {
-    Alert.alert(
+    showConfirmAlert(
       'Remove Pending Friend',
       `Are you sure you want to remove the pending friendship with ${contactName}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => handleRemoveFriend({ friendshipUuid })
-        }
-      ]
+      () => handleRemoveFriend({ friendshipUuid }),
+      { destructiveText: 'Remove' }
     )
   }
 
@@ -296,15 +253,7 @@ const FriendsList = () => {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error in setContactName:', error)
-      Toast.show({
-        type: 'error',
-        position: 'top',
-        text1: 'Error saving friend name',
-        text2: 'Please try again',
-        visibilityTime: 3000,
-        autoHide: true,
-        topOffset: 60
-      })
+      showErrorToast('Error saving friend name', { text2: 'Please try again', topOffset: 60 })
     }
   }
 
@@ -443,14 +392,10 @@ const FriendsList = () => {
         label: 'Remove Friend',
         destructive: true,
         onPress: () => {
-          Alert.alert('Remove Friend', `Are you sure you want to remove ${displayName}?`, [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Remove',
-              style: 'destructive',
-              onPress: () => handleRemoveFriend({ friendshipUuid: menuFriend.friendshipUuid })
-            }
-          ])
+          showConfirmAlert('Remove Friend', `Are you sure you want to remove ${displayName}?`,
+            () => handleRemoveFriend({ friendshipUuid: menuFriend.friendshipUuid }),
+            { destructiveText: 'Remove' }
+          )
         }
       }
     ]

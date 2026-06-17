@@ -12,7 +12,7 @@ import {
   Alert
 } from 'react-native'
 import { useAtom, useAtomValue } from 'jotai'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast, showInfoToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -105,7 +105,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     try {
       await updateWave({ waveUuid, uuid, open: value })
       setIsOpen(value)
-      Toast.show({ type: 'success', text1: value ? 'Wave is now open' : 'Wave is now invite-only' })
+      showSuccessToast(value ? 'Wave is now open' : 'Wave is now invite-only')
     } catch (error) {
       showErrorToast({ title: 'Error updating setting', message: error.message })
     } finally {
@@ -119,7 +119,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       try {
         await updateWave({ waveUuid, uuid, splashDate: selectedDate.toISOString() })
         setSplashDate(selectedDate)
-        Toast.show({ type: 'success', text1: 'Splash date updated' })
+        showSuccessToast('Splash date updated')
       } catch (error) {
         showErrorToast({ title: 'Error updating splash date', message: error.message })
       } finally {
@@ -135,7 +135,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
         const result = await updateWave({ waveUuid, uuid, freezeDate: selectedDate.toISOString() })
         setFreezeDate(selectedDate)
         setIsFrozen(result.isFrozen === true)
-        Toast.show({ type: 'success', text1: 'Freeze date updated' })
+        showSuccessToast('Freeze date updated')
       } catch (error) {
         showErrorToast({ title: 'Error updating freeze date', message: error.message })
       } finally {
@@ -149,7 +149,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     try {
       await updateWave({ waveUuid, uuid, splashDate: null })
       setSplashDate(null)
-      Toast.show({ type: 'success', text1: 'Splash date cleared' })
+      showSuccessToast('Splash date cleared')
     } catch (error) {
       showErrorToast({ title: 'Error clearing splash date', message: error.message })
     } finally {
@@ -163,7 +163,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       const result = await updateWave({ waveUuid, uuid, freezeDate: null })
       setFreezeDate(null)
       setIsFrozen(result.isFrozen === true)
-      Toast.show({ type: 'success', text1: 'Freeze date cleared' })
+      showSuccessToast('Freeze date cleared')
     } catch (error) {
       showErrorToast({ title: 'Error clearing freeze date', message: error.message })
     } finally {
@@ -177,7 +177,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     try {
       await updateWave({ waveUuid, uuid, splashDate: today.toISOString() })
       setSplashDate(today)
-      Toast.show({ type: 'success', text1: 'Splash date set' })
+      showSuccessToast('Splash date set')
     } catch (error) {
       showErrorToast({ title: 'Error setting splash date', message: error.message })
     } finally {
@@ -192,7 +192,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       const result = await updateWave({ waveUuid, uuid, freezeDate: today.toISOString() })
       setFreezeDate(today)
       setIsFrozen(result.isFrozen === true)
-      Toast.show({ type: 'success', text1: 'Freeze date set' })
+      showSuccessToast('Freeze date set')
     } catch (error) {
       showErrorToast({ title: 'Error setting freeze date', message: error.message })
     } finally {
@@ -207,7 +207,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       const result = await updateWave({ waveUuid, uuid, freezeMode: mode })
       setFreezeMode(mode)
       setIsFrozen(result.isFrozen === true)
-      Toast.show({ type: 'success', text1: `Freeze mode set to ${mode === 'AUTO' ? 'Auto' : mode === 'FROZEN' ? 'Frozen' : 'Unlocked'}` })
+      showSuccessToast(`Freeze mode set to ${mode === 'AUTO' ? 'Auto' : mode === 'FROZEN' ? 'Frozen' : 'Unlocked'}`)
     } catch (error) {
       showErrorToast({ title: 'Error updating freeze mode', message: error.message })
     } finally {
@@ -231,7 +231,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       setLon(longitude)
       setLocationText(text)
       await updateWave({ waveUuid, uuid, lat: latitude, lon: longitude, radius: radiusMiles * MILES_TO_METERS })
-      Toast.show({ type: 'success', text1: 'Location updated' })
+      showSuccessToast('Location updated')
     } catch (error) {
       showErrorToast({ title: 'Error setting location', message: error.message })
     } finally {
@@ -260,7 +260,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
       setLocationText(text)
       setAddressInput('')
       await updateWave({ waveUuid, uuid, lat: latitude, lon: longitude, radius: radiusMiles * MILES_TO_METERS })
-      Toast.show({ type: 'success', text1: 'Location updated' })
+      showSuccessToast('Location updated')
     } catch (error) {
       showErrorToast({ title: 'Error geocoding address', message: error.message })
     } finally {
@@ -277,7 +277,7 @@ const WaveSettings = ({ waveUuid, waveName }) => {
     setSaving(true)
     try {
       await updateWave({ waveUuid, uuid, lat, lon, radius: value * MILES_TO_METERS })
-      Toast.show({ type: 'success', text1: `Radius set to ${value} mi` })
+      showSuccessToast(`Radius set to ${value} mi`)
     } catch (error) {
       showErrorToast({ title: 'Error updating radius', message: error.message })
     } finally {

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 
 import { Animated } from 'react-native'
 
+import { showInfoToast } from '../utils/showToast'
+
 export default function usePendingAnimation ({ pendingPhotosCount, netAvailable }) {
   const pendingPhotosAnimation = React.useRef(new Animated.Value(0)).current
   const uploadIconAnimation = React.useRef(new Animated.Value(1)).current

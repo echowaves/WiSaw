@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import Toast from 'react-native-toast-message'
+import showToast, { showSuccessToast, showErrorToast } from '../../utils/showToast'
 
 import PropTypes from 'prop-types'
 
@@ -64,26 +64,14 @@ const ConfirmFriendship = ({ route }) => {
         })
       )
 
-      Toast.show({
-        text1: 'Friendship confirmed!',
-        text2: `You are now friends with ${contactName}`,
-        type: 'success',
-        position: 'top',
-        topOffset: 60
-      })
+      showSuccessToast('Friendship confirmed!', { text2: `You are now friends with ${contactName}`, topOffset: 60 })
 
       router.dismissAll()
       router.push('/friends')
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Error confirming friendship:', err)
-      Toast.show({
-        text1: 'Unable to confirm Friendship',
-        text2: err.message || err.toString(),
-        type: 'error',
-        position: 'top',
-        topOffset: 60
-      })
+      showErrorToast('Unable to confirm Friendship', { text2: err.message || err.toString(), topOffset: 60 })
     }
   }
 

@@ -11,7 +11,7 @@ import { useAtom } from 'jotai'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 import CachedImage from 'expo-cached-image'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Crypto from 'expo-crypto'
@@ -134,10 +134,7 @@ const PhotoSelectionMode = () => {
         await addPhotoToWave({ waveUuid, photoId, uuid })
         successCount++
       }
-      Toast.show({
-        type: 'success',
-        text1: `Added ${successCount} photo${successCount !== 1 ? 's' : ''} to ${waveName}`
-      })
+      showSuccessToast(`Added ${successCount} photo${successCount !== 1 ? 's' : ''} to ${waveName}`)
       router.back()
     } catch (error) {
       console.error(error)

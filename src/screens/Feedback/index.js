@@ -16,7 +16,7 @@ import {
 
 import { gql } from '@apollo/client'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast, showErrorToast, showInfoToast } from '../../utils/showToast'
 
 import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
 import * as Haptics from 'expo-haptics'
@@ -118,20 +118,10 @@ const FeedbackScreen = () => {
       setIsFocused(false)
 
       router.back()
-      Toast.show({
-        text1: 'Thank you! 🎉',
-        text2: 'Your feedback has been submitted successfully.',
-        topOffset: toastTopOffset,
-        type: 'success'
-      })
+      showSuccessToast('Thank you! 🎉', { text2: 'Your feedback has been submitted successfully.', topOffset: toastTopOffset })
     } catch (err) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-      Toast.show({
-        text1: 'Oops! Something went wrong',
-        text2: err.toString(),
-        type: 'error',
-        topOffset: toastTopOffset
-      })
+      showErrorToast('Oops! Something went wrong', { text2: err.toString(), topOffset: toastTopOffset })
     } finally {
       setIsSubmitting(false)
     }
@@ -139,12 +129,7 @@ const FeedbackScreen = () => {
   const handleSubmit = () => {
     if (inputTextRef.current.trim().length < 10) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
-      Toast.show({
-        text1: 'More details needed',
-        text2: 'Please provide at least 10 characters of feedback.',
-        type: 'error',
-        topOffset: toastTopOffset
-      })
+      showErrorToast('More details needed', { text2: 'Please provide at least 10 characters of feedback.', topOffset: toastTopOffset })
       return
     }
     submitFeedback({ feedbackText: inputTextRef.current.trim() })

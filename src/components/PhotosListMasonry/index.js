@@ -3,11 +3,11 @@ import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
-import ExpandableThumb from '../../../components/ExpandableThumb'
-import Photo from '../../../components/Photo'
-import PhotosListContext from '../../../contexts/PhotosListContext'
-import ScrollToTopFob from '../../../components/ScrollToTopFob'
-import { validateFrozenPhotosList, COMMENT_SECTION_HEIGHT } from '../../../utils/photoListHelpers'
+import ExpandableThumb from '../ExpandableThumb'
+import Photo from '../Photo'
+import PhotosListContext from '../../contexts/PhotosListContext'
+import ScrollToTopFob from '../ScrollToTopFob'
+import { validateFrozenPhotosList, COMMENT_SECTION_HEIGHT } from '../../utils/photoListHelpers'
 
 const SCROLL_THRESHOLD = 200
 const SCROLL_DELTA_MIN = 5

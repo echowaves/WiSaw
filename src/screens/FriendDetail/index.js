@@ -1,59 +1,36 @@
-import React, { useEffect, useState, useCallback, useMemo, useImperativeHandle, useRef } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import {
   View,
   StyleSheet,
-  Alert,
   ScrollView,
   RefreshControl,
   TouchableOpacity
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
-import * as Crypto from 'expo-crypto'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as STATE from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
+import { BOOKMARK_LAYOUT_CONFIG } from '../../consts'
 import * as reducer from './reducer'
 import { saveFriendFeedSortPreferences } from '../../utils/waveStorage'
 import EmptyStateCard from '../../components/EmptyStateCard'
-import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
+import PhotosListMasonry from '../../components/PhotosListMasonry'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
-import {
-  createFrozenPhoto
-} from '../../utils/photoListHelpers'
-import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
+import { createFrozenPhoto } from '../../utils/photoListHelpers'
+import useFeedLoader from '../../hooks/useFeedLoader'
+import usePhotoExpansion from '../../hooks/usePhotoExpansion'
 import ActionMenu from '../../components/ActionMenu'
 import NamePicker from '../../components/NamePicker'
-import QuickActionsModal from '../../components/QuickActionsModal'
 import * as friendsHelper from '../FriendsList/friends_helper'
 import AppHeader from '../../components/AppHeader'
-
-// Lightweight wrapper isolating longPressPhoto state from FriendDetail re-renders
-const QuickActionsModalWrapper = React.memo(
-  React.forwardRef(({ setPhotos }, ref) => {
-    const [longPressPhoto, setLongPressPhoto] = useState(null)
-
-    useImperativeHandle(ref, () => ({
-      open: (photo) => setLongPressPhoto(photo)
-    }), [])
-
-    return (
-      <QuickActionsModal
-        visible={!!longPressPhoto}
-        photo={longPressPhoto}
-        onClose={() => setLongPressPhoto(null)}
-        onPhotoDeleted={(photoId) => {
-          setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
-        }}
-      />
-    )
-  })
-)
+import QuickActionsModalWrapper from '../../components/QuickActionsModalWrapper'
 
 const FriendDetail = () => {
   const { friendUuid, friendName: initialFriendName, friendshipUuid } = useLocalSearchParams()
@@ -65,13 +42,31 @@ const FriendDetail = () => {
   const setFriendFeedSortDirection = useSetAtom(STATE.friendFeedSortDirection)
 
   const [friendName, setFriendName] = useState(initialFriendName || 'Friend')
-  const [photos, setPhotos] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [stopLoading, setStopLoading] = useState(false)
-  const [pageNumber, setPageNumber] = useState(0)
-  const [batch, setBatch] = useState(Crypto.randomUUID())
-  const [noMoreData, setNoMoreData] = useState(false)
   const [netAvailable] = useAtom(STATE.netAvailable)
+
+  // --- Feed loader hook ---
+  const {
+    photosList,
+    setPhotosList,
+    loading,
+    stopLoading,
+    reload: feedReload,
+    handleLoadMore: feedHandleLoadMore
+  } = useFeedLoader(async (fetchParams) => {
+    const data = await reducer.fetchFriendPhotos({
+      uuid,
+      friendUuid,
+      pageNumber: fetchParams.pageNumber,
+      batch: fetchParams.batch,
+      sortBy: friendFeedSortBy,
+      sortDirection: friendFeedSortDirection
+    })
+    return {
+      photos: data.photos.map(createFrozenPhoto),
+      batch: data.batch,
+      noMoreData: data.noMoreData
+    }
+  }, { subscribeToUploads: false })
 
   // Menu state
   const [menuVisible, setMenuVisible] = useState(false)
@@ -81,13 +76,7 @@ const FriendDetail = () => {
   const toastTopOffset = useToastTopOffset()
 
   // Bookmarked-layout segment config (same as WaveDetail)
-  const segmentConfig = useMemo(() => {
-    return {
-      spacing: 8,
-      baseHeight: 200,
-      aspectRatioFallbacks: [1.0]
-    }
-  }, [])
+  const segmentConfig = BOOKMARK_LAYOUT_CONFIG
 
   const {
     masonryRef,
@@ -99,7 +88,7 @@ const FriendDetail = () => {
   const quickActionsRef = useRef(null)
 
   const removePhoto = useCallback((photoId) => {
-    setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+    setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
   }, [])
 
   const handlePhotoLongPress = useCallback((photo) => {
@@ -107,90 +96,38 @@ const FriendDetail = () => {
     quickActionsRef.current?.open(photo)
   }, [])
 
-  const loadPhotos = useCallback(async (pageNum, currentBatch, refresh = false) => {
-    if (loading) return
-    setLoading(true)
-    try {
-      const data = await reducer.fetchFriendPhotos({
-        uuid,
-        friendUuid,
-        pageNumber: pageNum,
-        batch: currentBatch,
-        sortBy: friendFeedSortBy,
-        sortDirection: friendFeedSortDirection
-      })
+  const getFetchParams = useCallback(() => ({
+    uuid,
+    netAvailable
+  }), [uuid, netAvailable])
 
-      const frozenPhotos = data.photos.map(createFrozenPhoto)
+  const reload = useCallback(async () => {
+    await feedReload(getFetchParams())
+  }, [feedReload, getFetchParams])
 
-      if (refresh) {
-        setPhotos(frozenPhotos)
-      } else {
-        setPhotos(prev => [...prev, ...frozenPhotos])
-      }
-
-      setNoMoreData(data.noMoreData)
-      setBatch(data.batch)
-      if (data.noMoreData || frozenPhotos.length === 0) {
-        setStopLoading(true)
-      }
-    } catch (error) {
-      console.error(error)
-      showErrorToast({ title: 'Error loading photos', message: error.message })
-    } finally {
-      setLoading(false)
-    }
-  }, [uuid, friendUuid, friendFeedSortBy, friendFeedSortDirection])
-
-  useEffect(() => {
-    setPageNumber(0)
-    setStopLoading(false)
-    setNoMoreData(false)
-    const newBatch = Crypto.randomUUID()
-    setBatch(newBatch)
-    loadPhotos(0, newBatch, true)
-  }, [friendUuid, friendFeedSortBy, friendFeedSortDirection])
-
-  const handleRefresh = () => {
-    setPageNumber(0)
-    setStopLoading(false)
-    const newBatch = Crypto.randomUUID()
-    setBatch(newBatch)
-    loadPhotos(0, newBatch, true)
-  }
-
-  const handleLoadMore = () => {
-    if (!noMoreData && !loading) {
-      const nextPage = pageNumber + 1
-      setPageNumber(nextPage)
-      loadPhotos(nextPage, batch)
-    }
-  }
+  const handleLoadMore = useCallback(() => {
+    feedHandleLoadMore(getFetchParams())
+  }, [feedHandleLoadMore, getFetchParams])
 
   const showHeaderMenu = () => {
     setMenuVisible(true)
   }
 
   const handleRemoveFriend = () => {
-    Alert.alert(
+    showConfirmAlert(
       'Remove Friend',
       `Are you sure you want to remove ${friendName}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await friendsHelper.deleteFriendship({ friendshipUuid })
-              Toast.show({ type: 'success', text1: 'Friend removed', topOffset: toastTopOffset })
-              router.back()
-            } catch (error) {
-              console.error(error)
-              showErrorToast({ title: 'Error removing friend', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          await friendsHelper.deleteFriendship({ friendshipUuid })
+          showSuccessToast('Friend removed', { topOffset: toastTopOffset })
+          router.back()
+        } catch (error) {
+          console.error(error)
+          showErrorToast({ title: 'Error removing friend', message: error.message })
         }
-      ]
+      },
+      { destructiveText: 'Remove' }
     )
   }
 
@@ -284,7 +221,7 @@ const FriendDetail = () => {
         loading={loading}
       />
 
-      {photos.length === 0 && !loading
+      {photosList.length === 0 && !loading
         ? (
           <ScrollView
             style={{ flex: 1 }}
@@ -292,7 +229,7 @@ const FriendDetail = () => {
             refreshControl={
               <RefreshControl
                 refreshing={loading}
-                onRefresh={handleRefresh}
+                onRefresh={reload}
               />
             }
           >
@@ -303,25 +240,25 @@ const FriendDetail = () => {
               subtitle='No shared photos from this friend yet.'
               iconColor={theme.TEXT_PRIMARY}
               actionText='Refresh'
-              onActionPress={handleRefresh}
+              onActionPress={reload}
             />
           </ScrollView>
           )
         : (
           <>
-            <InteractionHintBanner hasContent={photos?.length > 0} />
+            <InteractionHintBanner hasContent={photosList?.length > 0} />
             <PhotosListMasonry
               activeSegment={1}
-              photosList={photos}
+              photosList={photosList}
               segmentConfig={segmentConfig}
               columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
               masonryRef={masonryRef}
               uuid={uuid}
               onEndReached={handleLoadMore}
-              onRefresh={handleRefresh}
+              onRefresh={reload}
               loading={loading}
               stopLoading={stopLoading}
-              reload={handleRefresh}
+              reload={reload}
               styles={{}}
               FOOTER_HEIGHT={0}
               onPhotoLongPress={handlePhotoLongPress}
@@ -348,7 +285,12 @@ const FriendDetail = () => {
         items={headerMenuItems}
       />
 
-      <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
+      <QuickActionsModalWrapper
+        ref={quickActionsRef}
+        onPhotoDeleted={(photoId) => {
+          setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+        }}
+      />
     </View>
   )
 }

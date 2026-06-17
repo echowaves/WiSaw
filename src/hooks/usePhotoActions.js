@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react'
 import { Alert } from 'react-native'
-import Toast from 'react-native-toast-message'
-import showErrorToast from '../utils/showErrorToast'
+import { showInfoToast, showSuccessToast } from '../utils/showToast'
+import { showErrorToast } from '../utils/showToast'
+import showConfirmAlert from '../utils/showConfirmAlert'
 import { useSetAtom } from 'jotai'
 
 import * as reducer from '../components/Photo/reducer'
@@ -21,12 +22,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
 
   const handleDelete = useCallback(() => {
     if (isFrozenWaveForNonOwner && photoDetails?.waveUuid) {
-      Toast.show({
-        text1: 'Wave is frozen',
-        text2: 'Only the wave owner can delete photos in frozen waves',
-        type: 'info',
-        topOffset: toastTopOffset
-      })
+      showToast('Wave is frozen', { type: 'info', topOffset: toastTopOffset })
       return
     }
     if (photoDetails?.isPhotoWatched) {
@@ -37,42 +33,31 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       })
       return
     }
-    Alert.alert(
+    showConfirmAlert(
       'Will delete photo for everyone!',
       "This can't be undone. Are you sure? ",
-      [
-        { text: 'No', onPress: () => null, style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            const deleted = await reducer.deletePhoto({
-              photo,
-              uuid,
-              topOffset: toastTopOffset
-            })
+      async () => {
+        const deleted = await reducer.deletePhoto({
+          photo,
+          uuid,
+          topOffset: toastTopOffset
+        })
 
-            if (deleted) {
-              emitPhotoDeletion({ photoId: photo.id })
-              if (onDeleted) {
-                onDeleted(photo.id)
-              }
-            }
+        if (deleted) {
+          emitPhotoDeletion({ photoId: photo.id })
+          if (onDeleted) {
+            onDeleted(photo.id)
           }
         }
-      ],
-      { cancelable: true }
+      },
+      { destructiveText: 'Yes' }
     )
   }, [photo, photoDetails?.isPhotoWatched, photoDetails?.waveUuid, uuid, toastTopOffset, onDeleted, isFrozenWaveForNonOwner])
 
   const handleBan = useCallback(() => {
     if (photoDetails?.waveUuid) {
       if (isFrozenWaveForNonOwner) {
-        Toast.show({
-          text1: 'Wave is frozen',
-          text2: 'Reporting is disabled for frozen waves',
-          type: 'info',
-          topOffset: toastTopOffset
-        })
+        showInfoToast('Wave is frozen', { text2: 'Reporting is disabled for frozen waves', topOffset: toastTopOffset })
         return
       }
       if (isPhotoBannedByMe()) {
@@ -82,33 +67,23 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
           topOffset: toastTopOffset
         })
       } else {
-        Alert.alert(
+        showConfirmAlert(
           'Report wave content?',
           'This photo will be reviewed by moderators and automated systems. Objectionable content will be removed. Continue?',
-          [
-            { text: 'No', onPress: () => null, style: 'cancel' },
-            {
-              text: 'Yes',
-              onPress: async () => {
-                try {
-                  await reportWavePhoto({ waveUuid: photoDetails.waveUuid, photoId: photo.id, uuid })
-                  setBans((prev) => [...prev, photo.id])
-                  Toast.show({
-                    text1: 'Reported to moderators',
-                    type: 'success',
-                    topOffset: toastTopOffset
-                  })
-                } catch (err) {
-                  showErrorToast({
-                    title: 'Unable to report content',
-                    message: err,
-                    topOffset: toastTopOffset
-                  })
-                }
-              }
+          async () => {
+            try {
+              await reportWavePhoto({ waveUuid: photoDetails.waveUuid, photoId: photo.id, uuid })
+              setBans((prev) => [...prev, photo.id])
+              showToast('Reported to moderators', { type: 'success', topOffset: toastTopOffset })
+            } catch (err) {
+              showErrorToast({
+                title: 'Unable to report content',
+                message: err,
+                topOffset: toastTopOffset
+              })
             }
-          ],
-          { cancelable: true }
+          },
+          { destructiveText: 'Yes' }
         )
       }
       return
@@ -129,20 +104,14 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         topOffset: toastTopOffset
       })
     } else {
-      Alert.alert(
+      showConfirmAlert(
         'Report abusive Photo?',
         'This report will be reviewed by moderators and automated systems. Users reported 3 times will be blocked from posting new content. Are you sure?',
-        [
-          { text: 'No', onPress: () => null, style: 'cancel' },
-          {
-            text: 'Yes',
-            onPress: async () => {
-              await reducer.banPhoto({ photo, uuid, topOffset: toastTopOffset })
-              setBans((prev) => [...prev, photo.id])
-            }
-          }
-        ],
-        { cancelable: true }
+        async () => {
+          await reducer.banPhoto({ photo, uuid, topOffset: toastTopOffset })
+          setBans((prev) => [...prev, photo.id])
+        },
+        { destructiveText: 'Yes' }
       )
     }
   }, [photo, photoDetails?.isPhotoWatched, photoDetails?.waveUuid, uuid, toastTopOffset, isPhotoBannedByMe, isFrozenWaveForNonOwner])
@@ -181,11 +150,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
 
   const handleWaveButtonPress = useCallback(() => {
     if (!isOwnPhoto) {
-      Toast.show({
-        text1: 'Only your own photos can be added to waves',
-        type: 'info',
-        topOffset: toastTopOffset
-      })
+      showToast('Only your own photos can be added to waves', { type: 'info', topOffset: toastTopOffset })
       return
     }
     setWaveModalVisible(true)
@@ -205,12 +170,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
     try {
       await addPhotoToWave({ waveUuid: wave.waveUuid, photoId: photo.id, uuid })
       setUngroupedPhotosCount(prev => Math.max((prev ?? 1) - 1, 0))
-      Toast.show({
-        text1: `Added to: ${wave.name}`,
-        type: 'success',
-        topOffset: toastTopOffset,
-        visibilityTime: 1500
-      })
+      showToast(`Added to: ${wave.name}`, { type: 'success', topOffset: toastTopOffset, visibilityTime: 1500 })
     } catch (err) {
       setPhotoDetails(previousDetails)
       showErrorToast({
@@ -223,12 +183,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
 
   const handleWaveRemove = useCallback(async () => {
     if (isFrozenWaveForNonOwner && photoDetails?.waveUuid) {
-      Toast.show({
-        text1: 'Wave is frozen',
-        text2: 'Only the wave owner can remove photos from a frozen wave',
-        type: 'info',
-        topOffset: toastTopOffset
-      })
+      showToast('Wave is frozen', { type: 'info', text2: 'Only the wave owner can remove photos from a frozen wave', topOffset: toastTopOffset })
       return
     }
     setWaveModalVisible(false)
@@ -243,12 +198,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
     })
     try {
       await removePhotoFromWave({ waveUuid: previousDetails.waveUuid, photoId: photo.id, uuid })
-      Toast.show({
-        text1: 'Removed from wave',
-        type: 'success',
-        topOffset: toastTopOffset,
-        visibilityTime: 1500
-      })
+      showToast('Removed from wave', { type: 'success', topOffset: toastTopOffset, visibilityTime: 1500 })
     } catch (err) {
       setPhotoDetails(previousDetails)
       showErrorToast({
@@ -276,12 +226,7 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
       })
       await addPhotoToWave({ waveUuid: newWave.waveUuid, photoId: photo.id, uuid })
       setUngroupedPhotosCount(prev => Math.max((prev ?? 1) - 1, 0))
-      Toast.show({
-        text1: `Added to new wave: ${name}`,
-        type: 'success',
-        topOffset: toastTopOffset,
-        visibilityTime: 1500
-      })
+      showSuccessToast(`Added to new wave: ${name}`, { topOffset: toastTopOffset, visibilityTime: 1500 })
     } catch (err) {
       showErrorToast({
         title: 'Failed to create wave',

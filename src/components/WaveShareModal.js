@@ -86,13 +86,7 @@ const WaveShareModal = ({
 
       await Share.share({ message })
 
-      Toast.show({
-        type: 'success',
-        text1: 'Shared!',
-        text2: `Shared wave "${wave?.name}"`,
-        visibilityTime: 2000,
-        topOffset
-      })
+      showToast('Shared!', { text2: `Shared wave "${wave?.name}"`, type: 'success', visibilityTime: 2000, topOffset })
       onClose()
     } catch (error) {
       if (error.message !== 'User did not share') {

@@ -15,7 +15,8 @@ import {
   View
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import Toast from 'react-native-toast-message'
+import showToast from '../../utils/showToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 
 import PropTypes from 'prop-types'
 import PhotosListContext from '../../contexts/PhotosListContext'
@@ -717,11 +718,7 @@ const Photo = ({
     } catch (err) {
       if (isDevBuild && err) {
         // Optionally surface diagnosis in development builds without console usage
-        Toast.show({
-          text1: 'Invalid photo timestamp',
-          type: 'info',
-          topOffset: toastTopOffset
-        })
+        showToast('Invalid photo timestamp', { type: 'info', topOffset: toastTopOffset })
       }
       return 'Just now'
     }
@@ -784,44 +781,33 @@ const Photo = ({
           }}
           onPress={() => {
             if (photo?.waveIsFrozen && photo?.waveViewerRole !== 'owner') {
-              Toast.show({
-                text1: 'Wave is frozen',
-                text2: 'Only the wave owner can delete comments in frozen waves',
-                type: 'info',
-                topOffset: toastTopOffset
-              })
+              showToast('Wave is frozen', { text2: 'Only the wave owner can delete comments in frozen waves', type: 'info', topOffset: toastTopOffset })
               return
             }
-            Alert.alert(
+            showConfirmAlert(
               'Delete Comment?',
               "This can't be undone. Are you sure? ",
-              [
-                { text: 'No', onPress: () => null, style: 'cancel' },
-                {
-                  text: 'Yes',
-                  onPress: async () => {
-                    // update commentsCount in global reduce store
-                    await reducer.deleteComment({
-                      photo,
-                      comment,
-                      uuid,
-                      topOffset: toastTopOffset
-                    })
-                    // reload comments to re-render in the photo details screen
-                    const updatedPhotoDetails = await reducer.getPhotoDetails({
-                      photoId: photo.id,
-                      uuid
-                    })
-                    setPhotoDetails({
-                      ...photoDetails,
-                      ...updatedPhotoDetails
-                    })
-                    // Notify other mounted Photo instances via bus
-                    emitPhotoRefresh({ photoId: photo.id })
-                  }
-                }
-              ],
-              { cancelable: true }
+              async () => {
+                // update commentsCount in global reduce store
+                await reducer.deleteComment({
+                  photo,
+                  comment,
+                  uuid,
+                  topOffset: toastTopOffset
+                })
+                // reload comments to re-render in the photo details screen
+                const updatedPhotoDetails = await reducer.getPhotoDetails({
+                  photoId: photo.id,
+                  uuid
+                })
+                setPhotoDetails({
+                  ...photoDetails,
+                  ...updatedPhotoDetails
+                })
+                // Notify other mounted Photo instances via bus
+                emitPhotoRefresh({ photoId: photo.id })
+              },
+              { destructiveText: 'Yes' }
             )
           }}
           activeOpacity={0.7}
@@ -992,12 +978,7 @@ const Photo = ({
           style={[styles.addCommentButton, commentsLocked && { opacity: 0.5 }]}
           onPress={() => {
             if (commentsLocked) {
-              Toast.show({
-                text1: 'Wave is frozen',
-                text2: 'Comments are locked for frozen waves',
-                type: 'info',
-                topOffset: toastTopOffset
-              })
+              showToast('Wave is frozen', { text2: 'Comments are locked for frozen waves', type: 'info', topOffset: toastTopOffset })
               return
             }
             if (embedded) {

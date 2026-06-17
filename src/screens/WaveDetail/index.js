@@ -1,85 +1,51 @@
-import React, { useEffect, useState, useCallback, useContext, useRef, useMemo, useImperativeHandle } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useContext, useMemo } from 'react'
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Alert,
-  Animated,
-  ActivityIndicator,
-  Modal,
-  TextInput
+  Animated
 } from 'react-native'
 import { useAtom, useSetAtom } from 'jotai'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 import { router, useLocalSearchParams, useNavigation, useFocusEffect } from 'expo-router'
 import * as Haptics from 'expo-haptics'
-import * as Crypto from 'expo-crypto'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as STATE from '../../state'
-import * as CONST from '../../consts'
+import { ROLE_CONFIG, BOOKMARK_LAYOUT_CONFIG } from '../../consts'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
 import { getWave } from '../Waves/reducer'
 import { saveWaveFeedSortPreferences } from '../../utils/waveStorage'
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import EmptyStateCard from '../../components/EmptyStateCard'
-import QuickActionsModal from '../../components/QuickActionsModal'
-import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
-import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
+import PhotosListMasonry from '../../components/PhotosListMasonry'
+import PhotosListFooter from '../../components/PhotosListFooter'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 import { emitAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
-import { subscribeToPhotoDeletion } from '../../events/photoDeletionBus'
 import UploadContext from '../../contexts/UploadContext'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
 import {
   createFrozenPhoto
 } from '../../utils/photoListHelpers'
-import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
+import usePhotoExpansion from '../../hooks/usePhotoExpansion'
+import useFeedLoader from '../../hooks/useFeedLoader'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import ActionMenu from '../../components/ActionMenu'
 import PhotosListContext from '../../contexts/PhotosListContext'
 import WaveShareModal from '../../components/WaveShareModal'
 import AppHeader from '../../components/AppHeader'
-import useCameraCapture from '../PhotosList/hooks/useCameraCapture'
-import usePendingAnimation from '../PhotosList/hooks/usePendingAnimation'
+import EditWaveModal from '../../components/EditWaveModal'
+import useCameraCapture from '../../hooks/useCameraCapture'
+import usePendingAnimation from '../../hooks/usePendingAnimation'
+import QuickActionsModalWrapper from '../../components/QuickActionsModalWrapper'
 
 const FOOTER_HEIGHT = 90
-
-// Lightweight wrapper isolating longPressPhoto state from WaveDetail re-renders
-const QuickActionsModalWrapper = React.memo(
-  React.forwardRef(({ setPhotos }, ref) => {
-    const [longPressPhoto, setLongPressPhoto] = useState(null)
-
-    useImperativeHandle(ref, () => ({
-      open: (photo) => setLongPressPhoto(photo)
-    }), [])
-
-    return (
-      <QuickActionsModal
-        visible={!!longPressPhoto}
-        photo={longPressPhoto}
-        onClose={() => setLongPressPhoto(null)}
-        onPhotoDeleted={(photoId) => {
-          setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
-        }}
-        onPhotoRemovedFromWave={(photoId) => {
-          setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
-        }}
-      />
-    )
-  })
-)
-
-const ROLE_CONFIG = {
-  owner: { label: 'Owner', color: CONST.MAIN_COLOR },
-  facilitator: { label: 'Facilitator', color: '#8B5CF6' },
-  contributor: { label: 'Contributor', color: '#6B7280' }
-}
 
 const WaveDetail = () => {
   const { waveUuid, waveName: initialWaveName, myRole: initialRole, isFrozen: initialFrozen } = useLocalSearchParams()
@@ -111,13 +77,35 @@ const WaveDetail = () => {
   const roleConfig = ROLE_CONFIG[myRole] || null
 
   const [waveName, setWaveName] = useState(initialWaveName || '')
-  const [photos, setPhotos] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [stopLoading, setStopLoading] = useState(false)
-  const [pageNumber, setPageNumber] = useState(0)
-  const [batch, setBatch] = useState(Crypto.randomUUID())
-  const [noMoreData, setNoMoreData] = useState(false)
   const [netAvailable] = useAtom(STATE.netAvailable)
+
+  // --- Feed loader hook ---
+  const {
+    photosList,
+    setPhotosList,
+    loading,
+    stopLoading,
+    reload: feedReload,
+    handleLoadMore: feedHandleLoadMore
+  } = useFeedLoader(async (fetchParams) => {
+    // Transform photos to include wave-specific freeze info
+    const data = await reducer.fetchWavePhotos({
+      waveUuid,
+      pageNumber: fetchParams.pageNumber,
+      batch: fetchParams.batch,
+      sortBy: waveFeedSortBy,
+      sortDirection: waveFeedSortDirection
+    })
+    return {
+      photos: data.photos.map((item) => ({
+        ...item,
+        waveIsFrozen: Boolean(isFrozen),
+        waveViewerRole: myRole || ''
+      })),
+      batch: data.batch,
+      noMoreData: data.noMoreData
+    }
+  }, { subscribeToUploads: false })
 
   // Edit modal
   const [editModalVisible, setEditModalVisible] = useState(false)
@@ -155,11 +143,11 @@ const WaveDetail = () => {
   // Camera capture with drift check (task 8.1)
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({ enqueueCapture, toastTopOffset })
 
-  // Subscribe to upload completions — only prepend photos matching this wave
+  // Subscribe to upload completions — only prepend photos matching this wave (useFeedLoader doesn't do this for specific waves)
   useEffect(() => {
     return subscribeToUploadComplete(({ photo, waveUuid: uploadWaveUuid }) => {
       if (uploadWaveUuid === waveUuid) {
-        setPhotos((currentList) => {
+        setPhotosList((currentList) => {
           const updatedList = [createFrozenPhoto({ ...photo, waveIsFrozen: Boolean(isFrozen), waveViewerRole: myRole || '' }), ...currentList]
           const seen = new Set()
           return updatedList.filter((p) => {
@@ -170,23 +158,10 @@ const WaveDetail = () => {
         })
       }
     })
-  }, [waveUuid])
-
-  // Subscribe to cross-screen photo deletions
-  useEffect(() => {
-    return subscribeToPhotoDeletion(({ photoId }) => {
-      setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
-    })
-  }, [])
+  }, [waveUuid, isFrozen, myRole])
 
   // Bookmarked-layout segment config
-  const segmentConfig = useMemo(() => {
-    return {
-      spacing: 8,
-      baseHeight: 200,
-      aspectRatioFallbacks: [1.0]
-    }
-  }, [])
+  const segmentConfig = BOOKMARK_LAYOUT_CONFIG
 
   // Shared photo expansion hook
   const {
@@ -235,94 +210,39 @@ const WaveDetail = () => {
     }
   }, [pendingPhotos.length, netAvailable])
 
-  const loadPhotos = useCallback(async (pageNum, currentBatch, refresh = false) => {
-    if (loading) return
-    setLoading(true)
-    try {
-      const data = await reducer.fetchWavePhotos({
-        waveUuid,
-        pageNumber: pageNum,
-        batch: currentBatch,
-        sortBy: waveFeedSortBy,
-        sortDirection: waveFeedSortDirection
-      })
+  // Reload when dependencies change (waveUuid, sort preferences, freeze state)
+  const getFetchParams = useCallback(() => ({
+    uuid,
+    netAvailable
+  }), [uuid, netAvailable])
 
-      const frozenPhotos = data.photos.map((item) => createFrozenPhoto({
-        ...item,
-        waveIsFrozen: Boolean(isFrozen),
-        waveViewerRole: myRole || ''
-      }))
+  const reload = useCallback(async () => {
+    await feedReload(getFetchParams())
+  }, [feedReload, getFetchParams])
 
-      if (refresh) {
-        setPhotos(frozenPhotos)
-      } else {
-        setPhotos(prev => [...prev, ...frozenPhotos])
-      }
-
-      setNoMoreData(data.noMoreData)
-      setBatch(data.batch)
-      if (data.noMoreData || frozenPhotos.length === 0) {
-        setStopLoading(true)
-      }
-    } catch (error) {
-      console.error(error)
-      showErrorToast({ title: 'Error loading photos', message: error.message })
-    } finally {
-      setLoading(false)
-    }
-  }, [waveUuid, waveFeedSortBy, waveFeedSortDirection, isFrozen, myRole])
-
-  useEffect(() => {
-    setPageNumber(0)
-    setStopLoading(false)
-    setNoMoreData(false)
-    const newBatch = Crypto.randomUUID()
-    setBatch(newBatch)
-    loadPhotos(0, newBatch, true)
-  }, [waveUuid, waveFeedSortBy, waveFeedSortDirection])
-
-  const handleRefresh = () => {
-    setPageNumber(0)
-    setStopLoading(false)
-    const newBatch = Crypto.randomUUID()
-    setBatch(newBatch)
-    loadPhotos(0, newBatch, true)
-  }
-
-  const handleLoadMore = () => {
-    if (!noMoreData && !loading) {
-      const nextPage = pageNumber + 1
-      setPageNumber(nextPage)
-      loadPhotos(nextPage, batch)
-    }
-  }
+  const handleLoadMore = useCallback(() => {
+    feedHandleLoadMore(getFetchParams())
+  }, [feedHandleLoadMore, getFetchParams])
 
   const showHeaderMenu = () => {
     setMenuVisible(true)
   }
 
   const handleDeleteWave = () => {
-    Alert.alert(
+    showConfirmAlert(
       'Delete Wave',
       'Are you sure? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await reducer.deleteWave({ waveUuid, uuid })
-              emitAutoGroupDone()
-              Toast.show({ type: 'success', text1: 'Wave deleted' })
-              router.back()
-            } catch (error) {
-              console.error(error)
-              showErrorToast({ title: 'Error deleting wave', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          await reducer.deleteWave({ waveUuid, uuid })
+          emitAutoGroupDone()
+          showSuccessToast('Wave deleted')
+          router.back()
+        } catch (error) {
+          console.error(error)
+          showErrorToast({ title: 'Error deleting wave', message: error.message })
         }
-      ]
+      }
     )
   }
 
@@ -485,8 +405,8 @@ const WaveDetail = () => {
     </TouchableOpacity>
   )
 
-  const handleSaveEdit = async () => {
-    if (!editName.trim()) {
+  const handleSaveEdit = async ({ name }) => {
+    if (!name.trim()) {
       Alert.alert('Error', 'Wave name is required')
       return
     }
@@ -495,13 +415,13 @@ const WaveDetail = () => {
       await reducer.updateWave({
         waveUuid,
         uuid,
-        name: editName,
-        description: editDescription
+        name,
+        description: ''
       })
-      setWaveName(editName)
-      router.setParams({ waveName: editName })
+      setWaveName(name)
+      router.setParams({ waveName: name })
       setEditModalVisible(false)
-      Toast.show({ type: 'success', text1: 'Wave updated' })
+      showSuccessToast('Wave updated')
     } catch (error) {
       console.error(error)
       showErrorToast({ title: 'Error updating wave', message: error.message })
@@ -512,36 +432,30 @@ const WaveDetail = () => {
 
   const handleMergeTargetSelected = (targetWave) => {
     setMergeModalVisible(false)
-    const sourcePhotos = photos.length
-    Alert.alert(
+    const sourcePhotos = photosList.length
+    showConfirmAlert(
       `Merge "${waveName}" into "${targetWave.name}"?`,
       `${sourcePhotos} photo${sourcePhotos !== 1 ? 's' : ''} will be moved. "${waveName}" will be deleted.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Merge',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await reducer.mergeWaves({
-                targetWaveUuid: targetWave.waveUuid,
-                sourceWaveUuid: waveUuid,
-                uuid
-              })
-              Toast.show({ type: 'success', text1: `Merged into "${targetWave.name}"` })
-              router.back()
-            } catch (error) {
-              console.error(error)
-              showErrorToast({ title: 'Error merging waves', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          await reducer.mergeWaves({
+            targetWaveUuid: targetWave.waveUuid,
+            sourceWaveUuid: waveUuid,
+            uuid
+          })
+          showSuccessToast(`Merged into "${targetWave.name}"`)
+          router.back()
+        } catch (error) {
+          console.error(error)
+          showErrorToast({ title: 'Error merging waves', message: error.message })
         }
-      ]
+      },
+      { destructiveText: 'Merge' }
     )
   }
 
   const removePhoto = useCallback((photoId) => {
-    setPhotos((currentList) => currentList.filter((p) => p.id !== photoId))
+    setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
   }, [])
 
   const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
@@ -596,7 +510,7 @@ const WaveDetail = () => {
           </View>
         )}
 
-        {photos.length === 0 && !loading
+        {photosList.length === 0 && !loading
           ? (
             <EmptyStateCard
               icon='images'
@@ -610,19 +524,18 @@ const WaveDetail = () => {
             )
           : (
             <>
-              <InteractionHintBanner hasContent={photos?.length > 0} />
+              <InteractionHintBanner hasContent={photosList?.length > 0} />
               <PhotosListMasonry
                 activeSegment={1}
-                photosList={photos}
+                photosList={photosList}
                 segmentConfig={segmentConfig}
                 columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
                 masonryRef={masonryRef}
                 uuid={uuid}
                 onEndReached={handleLoadMore}
-                onRefresh={handleRefresh}
                 loading={loading}
                 stopLoading={stopLoading}
-                reload={handleRefresh}
+                reload={reload}
                 styles={{}}
                 FOOTER_HEIGHT={FOOTER_HEIGHT}
                 onPhotoLongPress={handlePhotoLongPress}
@@ -647,54 +560,28 @@ const WaveDetail = () => {
           />
         )}
 
-        <QuickActionsModalWrapper ref={quickActionsRef} setPhotos={setPhotos} />
+        <QuickActionsModalWrapper
+          ref={quickActionsRef}
+          onPhotoDeleted={(photoId) => {
+            setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+          }}
+          onPhotoRemovedFromWave={(photoId) => {
+            setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
+          }}
+        />
 
         {/* Edit Modal */}
-        <Modal
-          animationType='slide'
-          transparent
+        <EditWaveModal
+          title='Edit Wave'
           visible={editModalVisible}
-          onRequestClose={() => setEditModalVisible(false)}
-        >
-          <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
-            <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
-              <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Edit Wave</Text>
-              <TextInput
-                style={[styles.input, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-                placeholder='Wave Name'
-                placeholderTextColor={theme.TEXT_SECONDARY}
-                value={editName}
-                onChangeText={setEditName}
-              />
-              <TextInput
-                style={[styles.input, styles.textArea, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-                placeholder='Description (optional)'
-                placeholderTextColor={theme.TEXT_SECONDARY}
-                value={editDescription}
-                onChangeText={setEditDescription}
-                multiline
-                numberOfLines={3}
-              />
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
-                  onPress={() => setEditModalVisible(false)}
-                >
-                  <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY }]}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: CONST.MAIN_COLOR }]}
-                  onPress={handleSaveEdit}
-                  disabled={saving}
-                >
-                  {saving
-                    ? <ActivityIndicator color='#FFF' />
-                    : <Text style={[styles.buttonText, { color: '#FFF' }]}>Save</Text>}
-                </TouchableOpacity>
-              </View>
-            </View>
-          </KeyboardAvoidingView>
-        </Modal>
+          initialName={editName}
+          initialDescription={editDescription}
+          onCancel={() => setEditModalVisible(false)}
+          onSave={handleSaveEdit}
+          saving={saving}
+          saveLabel='Save'
+          theme={theme}
+        />
 
         {/* Merge Wave Modal */}
         <MergeWaveModal

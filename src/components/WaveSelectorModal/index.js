@@ -1,6 +1,7 @@
 /* global console */
 import { useAtom, useAtomValue } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
+import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import {
@@ -43,7 +44,7 @@ const WaveSelectorModal = ({
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
   const [searchText, setSearchText] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debouncedSearch = useDebouncedSearch(searchText)
   const [showCreateInput, setShowCreateInput] = useState(false)
   const [newWaveName, setNewWaveName] = useState('')
   const [pageNumber, setPageNumber] = useState(0)
@@ -88,14 +89,6 @@ const WaveSelectorModal = ({
     }
   }, [uuid])
 
-  // Debounce search text (300ms)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText.trim())
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchText])
-
   // When debounced search changes, reset and re-fetch
   useEffect(() => {
     if (!visible) return
@@ -114,7 +107,6 @@ const WaveSelectorModal = ({
       setBatch(newBatch)
       fetchWaves(0, newBatch, '', true)
       setSearchText('')
-      setDebouncedSearch('')
       setShowCreateInput(false)
       setNewWaveName('')
       resetCreateLocation()

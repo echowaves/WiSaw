@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import NetInfo from '@react-native-community/netinfo'
 import * as SecureStore from 'expo-secure-store'
-import Toast from 'react-native-toast-message'
+import { showErrorToast } from '../../../utils/showToast'
 
 import * as CONST from '../../../consts'
 import { emitUploadComplete } from '../../../events/uploadBus'
@@ -66,12 +66,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
 
     const activeUuid = await resolveUuid()
     if (!activeUuid) {
-      Toast.show({
-        text1: 'Upload Error',
-        text2: 'User authentication required. Please restart the app.',
-        type: 'error',
-        topOffset
-      })
+      showErrorToast('Upload Error', { text2: 'User authentication required. Please restart the app.', topOffset })
       return
     }
 

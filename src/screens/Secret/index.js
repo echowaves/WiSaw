@@ -13,9 +13,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Haptics from 'expo-haptics'
 import { Storage } from 'expo-storage'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
-import Toast from 'react-native-toast-message'
-
+import { showInfoToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 
 import { FontAwesome5 } from '@expo/vector-icons'
 
@@ -115,11 +115,9 @@ const SecretScreen = () => {
       setUuid(result.uuid)
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
-      Toast.show({
-        text1: 'Success! 🎉',
+      showInfoToast('Success! 🎉', {
         text2: nickNameEntered ? 'Your secret has been updated.' : 'Identity attached to this device.',
-        topOffset: toastTopOffset,
-        type: 'success'
+        topOffset: toastTopOffset
        })
 
       await resetFields()
@@ -210,28 +208,17 @@ const SecretScreen = () => {
   const styles = getStyles(theme)
 
   const handleReset = async () => {
-    Alert.alert(
+    showConfirmAlert(
        'Detach Identity from This Device?',
        'This removes your identity from this device only. Your nickname and secret still work — you can re-attach here or on any other device anytime, as long as you remember them.\n\nIf you forget your nickname or secret, no one can recover them — including us.',
-       [
-         { text: 'Cancel', style: 'cancel' },
-         {
-          text: 'Detach',
-          style: 'destructive',
-          onPress: async () => {
-            await reducer.resetSecret({ topOffset: toastTopOffset })
-            setNickName('')
-            await resetFields()
-            emitIdentityChange()
-            Toast.show({
-              text1: 'Identity detached',
-              text2: 'Enter your nickname and secret to re-attach',
-              topOffset: toastTopOffset
-             })
-           }
-         }
-       ],
-       { cancelable: true }
+       async () => {
+         await reducer.resetSecret({ topOffset: toastTopOffset })
+         setNickName('')
+         await resetFields()
+         emitIdentityChange()
+         showInfoToast('Identity detached', { text2: 'Enter your nickname and secret to re-attach', topOffset: toastTopOffset })
+       },
+       { destructiveText: 'Detach' }
      )
    }
 

@@ -51,6 +51,27 @@ export const SEGMENT_BACKGROUND_INACTIVE = 'transparent'
 
 export const FOOTER_COLOR = 'rgba(240,240,240,.9)'
 
+// Wave role configuration
+export const WAVE_ROLES = {
+  owner: { label: 'Owner', color: MAIN_COLOR },
+  facilitator: { label: 'Facilitator', color: '#8B5CF6' },
+  contributor: { label: 'Contributor', color: '#6B7280' }
+}
+
+// Masonry grid layout configs — bookmark screens (larger tiles, square aspect ratios)
+export const BOOKMARK_LAYOUT_CONFIG = {
+  spacing: 8,
+  baseHeight: 200,
+  aspectRatioFallbacks: [1.0]
+}
+
+// Masonry grid layout config — geo-feed (smaller tiles, varied aspect ratios)
+export const GEO_FEED_LAYOUT_CONFIG = {
+  spacing: 5,
+  baseHeight: 100,
+  aspectRatioFallbacks: [0.56, 0.67, 0.75, 1.0, 1.33, 1.5, 1.78]
+}
+
 export const TEXT_COLOR = '#555f61'
 export const PLACEHOLDER_TEXT_COLOR = '#ececec'
 export const UNFILLED_COLOR = 'rgba(200, 200, 200, 0.2)'

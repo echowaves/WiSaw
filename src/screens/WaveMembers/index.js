@@ -5,16 +5,16 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   ActivityIndicator
 } from 'react-native'
 import { useAtom } from 'jotai'
 import showErrorToast from '../../utils/showErrorToast'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast } from '../../utils/showToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as STATE from '../../state'
-import * as CONST from '../../consts'
+import { WAVE_ROLES, MAIN_COLOR } from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import {
   listWaveMembers,
@@ -29,9 +29,10 @@ import ActionMenu from '../../components/ActionMenu'
 import useSimpleFetch from '../../hooks/useSimpleFetch'
 
 const ROLE_CONFIG = {
-  owner: { label: 'Owner', color: CONST.MAIN_COLOR, icon: 'crown' },
-  facilitator: { label: 'Facilitator', color: '#8B5CF6', icon: 'shield-account' },
-  contributor: { label: 'Contributor', color: '#6B7280', icon: 'account' }
+  ...WAVE_ROLES,
+  owner: { ...WAVE_ROLES.owner, icon: 'crown' },
+  facilitator: { ...WAVE_ROLES.facilitator, icon: 'shield-account' },
+  contributor: { ...WAVE_ROLES.contributor, icon: 'account' }
 }
 
 const WaveMembers = ({ waveUuid, waveName }) => {
@@ -68,7 +69,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
   const handleMakeFacilitator = async (member) => {
     try {
       await assignFacilitator({ waveUuid, targetUuid: member.uuid, uuid })
-      Toast.show({ type: 'success', text1: `${member.nickName || 'User'} is now a facilitator` })
+      showSuccessToast(`${member.nickName || 'User'} is now a facilitator`)
       execute()
     } catch (error) {
       showErrorToast({ title: 'Error', message: error.message })
@@ -78,7 +79,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
   const handleRemoveFacilitator = async (member) => {
     try {
       await removeFacilitator({ waveUuid, targetUuid: member.uuid, uuid })
-      Toast.show({ type: 'success', text1: `${member.nickName || 'User'} is no longer a facilitator` })
+      showSuccessToast(`${member.nickName || 'User'} is no longer a facilitator`)
       execute()
     } catch (error) {
       showErrorToast({ title: 'Error', message: error.message })
@@ -86,48 +87,36 @@ const WaveMembers = ({ waveUuid, waveName }) => {
   }
 
   const handleRemoveMember = (member) => {
-    Alert.alert(
+    showConfirmAlert(
       'Remove Member',
       `Remove ${member.nickName || 'this user'} from the wave?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await removeUserFromWave({ waveUuid, targetUuid: member.uuid, uuid })
-              Toast.show({ type: 'success', text1: 'Member removed' })
-              execute()
-            } catch (error) {
-              showErrorToast({ title: 'Error', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          await removeUserFromWave({ waveUuid, targetUuid: member.uuid, uuid })
+          showSuccessToast('Member removed')
+          execute()
+        } catch (error) {
+          showErrorToast({ title: 'Error', message: error.message })
         }
-      ]
+      },
+      { destructiveText: 'Remove' }
     )
   }
 
   const handleRevokeInvite = (invite) => {
-    Alert.alert(
+    showConfirmAlert(
       'Revoke Invite',
       'This invite link will no longer work.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Revoke',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await revokeWaveInvite({ inviteToken: invite.inviteToken, uuid })
-              Toast.show({ type: 'success', text1: 'Invite revoked' })
-              execute()
-            } catch (error) {
-              showErrorToast({ title: 'Error', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          await revokeWaveInvite({ inviteToken: invite.inviteToken, uuid })
+          showSuccessToast('Invite revoked')
+          execute()
+        } catch (error) {
+          showErrorToast({ title: 'Error', message: error.message })
         }
-      ]
+      },
+      { destructiveText: 'Revoke' }
     )
   }
 
@@ -245,14 +234,14 @@ const WaveMembers = ({ waveUuid, waveName }) => {
             key={tab.key}
             style={[
               styles.tab,
-              activeTab === tab.key && { borderBottomColor: CONST.MAIN_COLOR, borderBottomWidth: 2 }
+              activeTab === tab.key && { borderBottomColor: MAIN_COLOR, borderBottomWidth: 2 }
             ]}
             onPress={() => setActiveTab(tab.key)}
           >
             <Text
               style={[
                 styles.tabLabel,
-                { color: activeTab === tab.key ? CONST.MAIN_COLOR : theme.TEXT_SECONDARY }
+                { color: activeTab === tab.key ? MAIN_COLOR : theme.TEXT_SECONDARY }
               ]}
             >
               {tab.label}
@@ -264,7 +253,7 @@ const WaveMembers = ({ waveUuid, waveName }) => {
       {loading
         ? (
           <View style={styles.centered}>
-            <ActivityIndicator size='large' color={CONST.MAIN_COLOR} />
+            <ActivityIndicator size='large' color={MAIN_COLOR} />
           </View>
           )
         : (

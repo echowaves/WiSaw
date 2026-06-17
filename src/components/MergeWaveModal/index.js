@@ -1,6 +1,7 @@
 /* global console */
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
+import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 
 import { FontAwesome5, Ionicons } from '@expo/vector-icons'
 import {
@@ -34,7 +35,7 @@ const MergeWaveModal = ({
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
   const [searchText, setSearchText] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debouncedSearch = useDebouncedSearch(searchText)
   const [pageNumber, setPageNumber] = useState(0)
   const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
@@ -68,14 +69,6 @@ const MergeWaveModal = ({
       setLoadingMore(false)
     }
   }, [uuid])
-
-  // Debounce search text (300ms)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText.trim())
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchText])
 
   // When debounced search changes, reset and re-fetch
   useEffect(() => {

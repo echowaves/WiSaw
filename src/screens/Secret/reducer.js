@@ -1,4 +1,4 @@
-import Toast from 'react-native-toast-message'
+import { showSuccessToast, showErrorToast, showInfoToast } from '../../utils/showToast'
 
 import { v4 as uuidv4 } from 'uuid'
 
@@ -65,20 +65,12 @@ export async function registerSecret ({ secret, topOffset, nickName, uuid }) {
 
     await Promise.all([storeUUID(returnedSecret.uuid), storeNickName(returnedSecret.nickName)])
 
-    Toast.show({
-      text1: 'Secret attached to this device.',
-      topOffset
-    })
+    showSuccessToast('Secret attached to this device.', { topOffset })
 
     return returnedSecret
   } catch (err9) {
     console.log({ err9 })
-    Toast.show({
-      text1: 'Unable to store Secret',
-      text2: err9.toString(),
-      type: 'error',
-      topOffset
-    })
+    showErrorToast('Unable to store Secret', { text2: err9.toString(), topOffset })
     throw err9
   }
 }
@@ -111,20 +103,12 @@ export async function updateSecret ({ nickName, oldSecret, secret, uuid, topOffs
 
     await Promise.all([storeUUID(updatedSecret.uuid), storeNickName(updatedSecret.nickName)])
 
-    Toast.show({
-      text1: 'Secret updated.',
-      topOffset
-    })
+    showSuccessToast('Secret updated.', { topOffset })
 
     return updatedSecret
   } catch (err10) {
     console.error({ err10 })
-    Toast.show({
-      text1: 'Unable to update Secret',
-      text2: err10.toString(),
-      type: 'error',
-      topOffset
-    })
+    showErrorToast('Unable to update Secret', { text2: err10.toString(), topOffset })
     throw err10
   }
 }
@@ -142,12 +126,7 @@ export async function resetSecret ({ topOffset }) {
     console.error({ err11 })
 
     // console.log({ err })
-    Toast.show({
-      text1: 'Unable to reset Secret',
-      text2: err11.toString(),
-      type: 'error',
-      topOffset
-    })
+    showErrorToast('Unable to reset Secret', { text2: err11.toString(), topOffset })
     throw err11
   }
 }
@@ -158,11 +137,7 @@ const storeUUID = async (uuid) => {
   } catch (err12) {
     console.error({ err12 })
 
-    Toast.show({
-      text1: 'Unable to store UUID',
-      text2: err12.toString(),
-      type: 'error'
-    })
+    showErrorToast('Unable to store UUID', { text2: err12.toString() })
     throw err12
   }
 }
@@ -174,12 +149,7 @@ export async function getUUID () {
   } catch (err13) {
     console.error('uuid', { err13 })
     // Show toast for UUID loading error (but don't throw to prevent app hang)
-    Toast.show({
-      text1: 'Storage Access Issue',
-      text2: 'Unable to load device ID, generating new one',
-      type: 'error',
-      visibilityTime: 3000
-    })
+    showErrorToast('Storage Access Issue', { text2: 'Unable to load device ID, generating new one', visibilityTime: 3000 })
     uuid = null
   }
   if (uuid === null) {
@@ -192,12 +162,7 @@ export async function getUUID () {
       } catch (storeError) {
         console.error('Error storing UUID:', storeError)
         // Return the generated UUID anyway, don't block app startup
-        Toast.show({
-          text1: 'Storage Warning',
-          text2: 'Device ID generated but may not persist',
-          type: 'error',
-          visibilityTime: 4000
-        })
+        showErrorToast('Storage Warning', { text2: 'Device ID generated but may not persist', visibilityTime: 4000 })
       }
     }
   }
@@ -210,11 +175,7 @@ const storeNickName = async (nickName) => {
   } catch (err14) {
     console.error('nick name', { err14 })
 
-    Toast.show({
-      text1: 'Unable to store NickName',
-      text2: err14.toString(),
-      type: 'error'
-    })
+    showErrorToast('Unable to store NickName', { text2: err14.toString() })
     throw err14
   }
 }
@@ -225,12 +186,7 @@ export async function getStoredNickName () {
     return nickName || ''
   } catch (err15) {
     console.error('nick bname', { err15 })
-    Toast.show({
-      text1: 'Nickname Loading Error',
-      text2: 'Unable to load saved nickname',
-      type: 'error',
-      visibilityTime: 3000
-    })
+    showErrorToast('Nickname Loading Error', { text2: 'Unable to load saved nickname', visibilityTime: 3000 })
   }
   return ''
 }

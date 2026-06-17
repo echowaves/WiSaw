@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { estimateExpandedHeight } from '../../../utils/photoListHelpers'
+import { estimateExpandedHeight } from '../utils/photoListHelpers'
 
 export default function usePhotoExpansion () {
   const masonryRef = useRef(null)

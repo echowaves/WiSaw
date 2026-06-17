@@ -5,10 +5,10 @@ import * as Linking from 'expo-linking'
 import * as MediaLibrary from 'expo-media-library'
 import { useAtomValue } from 'jotai'
 import { Alert } from 'react-native'
-import { showInfoToast } from '../../../utils/showToast'
+import { showInfoToast } from '../utils/showToast'
 
-import * as STATE from '../../../state'
-import { groupingAtom } from '../../../utils/groupingAtom'
+import * as STATE from '../state'
+import { groupingAtom } from '../utils/groupingAtom'
 
 export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
   const [isCameraOpening, setIsCameraOpening] = useState(false)

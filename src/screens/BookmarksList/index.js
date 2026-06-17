@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai'
-import React, { useCallback, useContext, useMemo, useState } from 'react'
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react'
 
 import {
   RefreshControl,
@@ -18,24 +18,25 @@ import { requestWatchedPhotos } from '../PhotosList/reducer'
 import AppHeader from '../../components/AppHeader'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import SearchFab from '../../components/SearchFab'
-import PhotosListMasonry from '../PhotosList/components/PhotosListMasonry'
-import PhotosListFooter from '../PhotosList/components/PhotosListFooter'
+import PhotosListMasonry from '../../components/PhotosListMasonry'
+import PhotosListFooter from '../../components/PhotosListFooter'
 import PhotosListContext from '../../contexts/PhotosListContext'
 import UploadContext from '../../contexts/UploadContext'
+import QuickActionsModalWrapper from '../../components/QuickActionsModalWrapper'
 
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import { BOOKMARK_LAYOUT_CONFIG } from '../../consts'
 import {
   validateFrozenPhotosList
 } from '../../utils/photoListHelpers'
 
-import usePhotoExpansion from '../PhotosList/hooks/usePhotoExpansion'
-import useFeedLoader from '../PhotosList/hooks/useFeedLoader'
-import useFeedSearch from '../PhotosList/hooks/useFeedSearch'
-import useCameraCapture from '../PhotosList/hooks/useCameraCapture'
+import usePhotoExpansion from '../../hooks/usePhotoExpansion'
+import useFeedLoader from '../../hooks/useFeedLoader'
+import useFeedSearch from '../../hooks/useFeedSearch'
+import useCameraCapture from '../../hooks/useCameraCapture'
 
 import * as Haptics from 'expo-haptics'
-import QuickActionsModal from '../../components/QuickActionsModal'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 
 const FOOTER_HEIGHT = 90
@@ -45,7 +46,7 @@ const BookmarksList = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
   const theme = getTheme(isDarkMode)
-    // Comment editing state for SearchFab visibility
+  // Comment editing state for SearchFab visibility
   const [isCommentEditing, setIsCommentEditing] = useState(false)
 
   const headerTitle = (
@@ -65,14 +66,7 @@ const BookmarksList = () => {
 
   const { width } = useWindowDimensions()
 
-  // Bookmarks layout config — larger tiles, square aspect ratios
-  const segmentConfig = useMemo(() => {
-    return {
-      spacing: 8,
-      baseHeight: 200,
-      aspectRatioFallbacks: [1.0]
-    }
-  }, [])
+  const segmentConfig = BOOKMARK_LAYOUT_CONFIG
 
   // --- Feed loader hook (no upload subscription) ---
   const {
@@ -129,11 +123,13 @@ const BookmarksList = () => {
     onBeforeSearch: () => {}
   })
 
+  // Quick actions ref
+  const quickActionsRef = useRef(null)
+
   // Long-press handler
-  const [longPressPhoto, setLongPressPhoto] = useState(null)
   const handlePhotoLongPress = useCallback((photo) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-    setLongPressPhoto(photo)
+    quickActionsRef.current?.open(photo)
   }, [])
 
   // Initial load
@@ -221,24 +217,22 @@ const BookmarksList = () => {
               getExpandedHeight={getExpandedHeight}
               toggleExpand={toggleExpand}
               onCommentInputToggle={setIsCommentEditing}
-              />
+            />
           </View>
           <SearchFab
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          onSubmitSearch={submitSearch}
-          onClearSearch={handleClearSearch}
-          isExpanded={isSearchExpanded}
-          setIsExpanded={setIsSearchExpanded}
-          theme={theme}
-          footerHeight={FOOTER_HEIGHT}
-          screenWidth={width}
-          isCommentEditing={isCommentEditing}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            onSubmitSearch={submitSearch}
+            onClearSearch={handleClearSearch}
+            isExpanded={isSearchExpanded}
+            setIsExpanded={setIsSearchExpanded}
+            theme={theme}
+            footerHeight={FOOTER_HEIGHT}
+            screenWidth={width}
+            isCommentEditing={isCommentEditing}
           />
-          <QuickActionsModal
-            visible={!!longPressPhoto}
-            photo={longPressPhoto}
-            onClose={() => setLongPressPhoto(null)}
+          <QuickActionsModalWrapper
+            ref={quickActionsRef}
             onPhotoDeleted={(photoId) => {
               setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
             }}
@@ -295,16 +289,16 @@ const BookmarksList = () => {
           <EmptyStateCard {...emptyStateProps} />
         </ScrollView>
         <SearchFab
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        onSubmitSearch={submitSearch}
-        onClearSearch={handleClearSearch}
-        isExpanded={isSearchExpanded}
-        setIsExpanded={setIsSearchExpanded}
-        theme={theme}
-        footerHeight={FOOTER_HEIGHT}
-        screenWidth={width}
-        isCommentEditing={isCommentEditing}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSubmitSearch={submitSearch}
+          onClearSearch={handleClearSearch}
+          isExpanded={isSearchExpanded}
+          setIsExpanded={setIsSearchExpanded}
+          theme={theme}
+          footerHeight={FOOTER_HEIGHT}
+          screenWidth={width}
+          isCommentEditing={isCommentEditing}
         />
         <PhotosListFooter
           theme={theme}
@@ -343,16 +337,16 @@ const BookmarksList = () => {
           ))}
       </ScrollView>
       <SearchFab
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      onSubmitSearch={submitSearch}
-      onClearSearch={handleClearSearch}
-      isExpanded={isSearchExpanded}
-      setIsExpanded={setIsSearchExpanded}
-      theme={theme}
-      footerHeight={FOOTER_HEIGHT}
-      screenWidth={width}
-      isCommentEditing={isCommentEditing}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onSubmitSearch={submitSearch}
+        onClearSearch={handleClearSearch}
+        isExpanded={isSearchExpanded}
+        setIsExpanded={setIsSearchExpanded}
+        theme={theme}
+        footerHeight={FOOTER_HEIGHT}
+        screenWidth={width}
+        isCommentEditing={isCommentEditing}
       />
       <PhotosListFooter
         theme={theme}

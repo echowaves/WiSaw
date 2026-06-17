@@ -8,7 +8,7 @@ import * as VideoThumbnails from 'expo-video-thumbnails'
 import { fetch } from 'expo/fetch'
 import { Image } from 'react-native'
 
-import Toast from 'react-native-toast-message'
+import { showInfoToast, showErrorToast } from '../../../utils/showToast'
 
 import { gql } from '@apollo/client'
 
@@ -271,13 +271,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
           src.move(dest)
         }
       } catch (error) {
-        Toast.show({
-          text1: 'Error processing image',
-          text2: error.message || `${error}`,
-          type: 'error',
-          visibilityTime: 4000,
-          topOffset
-        })
+        showErrorToast('Error processing image', { text2: error.message || `${error}`, visibilityTime: 4000, topOffset })
 
         const fallbackSrc = new FSFile(compressedResult.uri)
         const fallbackDest = new FSFile(localImgUrl)
@@ -292,13 +286,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
           src.move(dest)
         }
       } catch (error) {
-        Toast.show({
-          text1: 'Error processing video',
-          text2: error.message || `${error}`,
-          type: 'error',
-          visibilityTime: 4000,
-          topOffset
-        })
+        showErrorToast('Error processing video', { text2: error.message || `${error}`, visibilityTime: 4000, topOffset })
 
         const fallbackSrc = new FSFile(queuedItem.originalCameraUrl)
         const fallbackDest = new FSFile(localImgUrl)
@@ -409,12 +397,7 @@ const uploadFile = async ({
       console.error('Upload attempt %d/%d failed:', attempt, retries, { error })
 
       if (attempt === retries) {
-        Toast.show({
-          text1: 'Upload failed after retries',
-          text2: `${error}`,
-          type: 'error',
-          topOffset
-        })
+        showErrorToast('Upload failed after retries', { text2: `${error}`, topOffset })
         return null
       }
 
@@ -569,12 +552,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
     if (!item.localImgUrl) {
       try {
         if (!new FSFile(item.originalCameraUrl).exists) {
-          Toast.show({
-            text1: 'Upload skipped',
-            text2: 'Original file is missing on device.',
-            type: 'error',
-            topOffset
-          })
+          showErrorToast('Upload skipped', { text2: 'Original file is missing on device.', topOffset })
           await removeFromQueue(item)
           return null
         }
@@ -593,12 +571,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
 
     if (!isValidLocation(processedItem.location)) {
       console.error('Invalid location for upload, skipping:', processedItem.location)
-      Toast.show({
-        text1: 'Upload skipped',
-        text2: 'Photo has no valid location and cannot be uploaded.',
-        type: 'error',
-        topOffset
-      })
+      showErrorToast('Upload skipped', { text2: 'Photo has no valid location and cannot be uploaded.', topOffset })
       await removeFromQueue(item)
       return null
     }
@@ -607,12 +580,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
     if (!photo) {
       if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {
         console.error('Invalid UUID provided for photo generation:', uuid)
-        Toast.show({
-          text1: 'Upload Error',
-          text2: 'Invalid user ID. Please try again.',
-          type: 'error',
-          topOffset
-        })
+        showErrorToast('Upload Error', { text2: 'Invalid user ID. Please try again.', topOffset })
         return null
       }
 
@@ -649,24 +617,12 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
         processedItem = { ...processedItem, photo }
         await updateQueueItem(item, processedItem)
       } catch (photoGenError) {
-        Toast.show({
-          text1: 'Unable to create photo',
-          text2: photoGenError.message || `${photoGenError}`,
-          type: 'error',
-          visibilityTime: 4000,
-          topOffset,
-          onPress: () => alert(`error: ${photoGenError.message || `${photoGenError}`}`)
-        })
+        showErrorToast('Unable to create photo', { text2: photoGenError.message || `${photoGenError}`, visibilityTime: 4000, topOffset, onPress: () => alert(`error: ${photoGenError.message || `${photoGenError}`}`) })
         console.error('Photo generation failed:', photoGenError)
 
         const errorMsg = `${photoGenError}`.toLowerCase()
         if (errorMsg.includes('timeout') || errorMsg.includes('network')) {
-          Toast.show({
-            text1: 'Upload delayed',
-            text2: 'Connection issues. Will retry automatically.',
-            type: 'info',
-            topOffset
-          })
+          showInfoToast('Upload delayed', { text2: 'Connection issues. Will retry automatically.', topOffset })
         }
         return null
       }
@@ -697,34 +653,18 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
           })
         } catch (waveError) {
           console.error('Failed to add photo to wave:', waveError)
-          Toast.show({
-            text1: 'Warning',
-            text2: 'Photo uploaded but failed to add to wave.',
-            type: 'info',
-            topOffset
-          })
+          showInfoToast('Warning', { text2: 'Photo uploaded but failed to add to wave.', topOffset })
         }
       }
 
       return enrichedPhoto
     }
 
-    Toast.show({
-      text1: 'Upload is going slooooow...',
-      text2: 'Still trying to upload.',
-      visibilityTime: 500,
-      topOffset
-    })
+    showInfoToast('Upload is going slooooow...', { text2: 'Still trying to upload.', visibilityTime: 500, topOffset })
     return null
   } catch (error) {
     console.error('Complete upload process error:', error)
-    Toast.show({
-      text1: 'Complete upload process error',
-      text2: error.message || `${error}`,
-      type: 'error',
-      topOffset,
-      onPress: () => alert(`error: ${error.message || `${error}`}`)
-    })
+    showErrorToast('Complete upload process error', { text2: error.message || `${error}`, topOffset, onPress: () => alert(`error: ${error.message || `${error}`}`) })
 
     const errStr = `${error}`.toLowerCase()
     if (errStr.includes('not found') || errStr.includes('missing')) {
@@ -733,12 +673,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
       } catch (removeError) {
         console.error('Failed to remove missing item from queue', removeError)
       }
-      Toast.show({
-        text1: 'Upload removed',
-        text2: 'Local file was not found on device.',
-        type: 'error',
-        topOffset
-      })
+      showErrorToast('Upload removed', { text2: 'Local file was not found on device.', topOffset })
       return null
     }
 

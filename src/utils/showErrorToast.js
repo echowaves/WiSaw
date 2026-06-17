@@ -1,5 +1,6 @@
 import Toast from 'react-native-toast-message'
 import { errorContextAtom } from '../atoms/errorAtom'
+import showToast from './showToast'
 
 // Module-level setter - set once at app startup from _layout.tsx
 let setAtom = null
@@ -48,6 +49,7 @@ export default function showErrorToast ({
     }
   }
 
+  // Use direct Toast.show for error context (topOffset=100, longer visibility)
   Toast.show({
     text1: title,
     text2: truncatedMessage,

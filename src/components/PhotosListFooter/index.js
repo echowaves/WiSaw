@@ -6,7 +6,7 @@ import {
   useWindowDimensions
 } from 'react-native'
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
-import * as CONST from '../../../consts'
+import * as CONST from '../../consts'
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context'
 
 const FOOTER_HEIGHT = 90

@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, ScrollView } from 'react-native'
-import EmptyStateCard from '../../../components/EmptyStateCard'
+import EmptyStateCard from '../EmptyStateCard'
 
 const PhotosListEmptyState = ({
   theme,

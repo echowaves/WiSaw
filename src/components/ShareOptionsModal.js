@@ -44,15 +44,7 @@ const ShareOptionsModal = ({
       })
 
       if (result) {
-        Toast.show({
-          type: 'success',
-          position: 'top',
-          text1: 'Friendship Request Shared!',
-          text2: `Shared ${friendName}'s friendship invitation`,
-          visibilityTime: 2000,
-          autoHide: true,
-          topOffset
-        })
+        showToast('Friendship Request Shared!', { text2: `Shared ${friendName}'s friendship invitation`, type: 'success', visibilityTime: 2000, topOffset })
         onClose()
       }
     } catch (error) {

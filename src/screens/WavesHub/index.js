@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef, useContext } from 'react'
+import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 import {
   View,
   Text,
@@ -13,8 +14,9 @@ import {
 } from 'react-native'
 import { useAtom, useAtomValue } from 'jotai'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
-import Toast from 'react-native-toast-message'
+import { showSuccessToast, showInfoToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
+import showConfirmAlert from '../../utils/showConfirmAlert'
 import { router, useFocusEffect } from 'expo-router'
 import * as Crypto from 'expo-crypto'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
@@ -24,11 +26,12 @@ import * as CONST from '../../consts'
 import { SHARED_STYLES, getTheme } from '../../theme/sharedStyles'
 import { ScreenIconTitle } from '../../theme/screenIcons'
 import AppHeader from '../../components/AppHeader'
+import EditWaveModal from '../../components/EditWaveModal'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import { getUngroupedPhotosCount } from '../Waves/reducer'
-import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
+import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import WavesExplainerView from '../../components/WavesExplainerView'
@@ -40,7 +43,7 @@ import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
 import UploadContext from '../../contexts/UploadContext'
-import usePendingAnimation from '../PhotosList/hooks/usePendingAnimation'
+import usePendingAnimation from '../../hooks/usePendingAnimation'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 // Counts are loaded via listWaves GraphQL query
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
@@ -69,13 +72,12 @@ const WavesHub = () => {
   const [noMoreData, setNoMoreData] = useState(false)
 
   const [searchText, setSearchText] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const debouncedSearch = useDebouncedSearch(searchText)
   const searchInputRef = useRef(null)
 
   const [modalVisible, setModalVisible] = useState(false)
   const [newWaveName, setNewWaveName] = useState('')
   const [newWaveDescription, setNewWaveDescription] = useState('')
-  const [creating, setCreating] = useState(false)
 
   const [autoGrouping, setAutoGrouping] = useState(false)
   const [autoGroupProgress, setAutoGroupProgress] = useState({ photosGrouped: 0, wavesCreated: 0, photosRemaining: 0 })
@@ -85,7 +87,7 @@ const WavesHub = () => {
   const [editingWave, setEditingWave] = useState(null)
   const [editWaveName, setEditWaveName] = useState('')
   const [editWaveDescription, setEditWaveDescription] = useState('')
-  const [updating, setUpdating] = useState(false)
+  const [updating] = useState(false)
 
   // Merge state
   const [mergeModalVisible, setMergeModalVisible] = useState(false)
@@ -111,14 +113,8 @@ const WavesHub = () => {
   const hasMountedRef = useRef(false)
   const autoGroupRunningRef = useRef(false)
   const refreshRunningRef = useRef(false)
-  const debouncedSearchRef = useRef(debouncedSearch)
 
   const theme = getTheme(isDarkMode)
-
-  // Keep debouncedSearchRef in sync without recreating handleRefresh
-  useEffect(() => {
-    debouncedSearchRef.current = debouncedSearch
-  }, [debouncedSearch])
 
   // Sort menu state
   const [headerMenuVisible, setHeaderMenuVisible] = useState(false)
@@ -247,14 +243,6 @@ const WavesHub = () => {
     }
   }, [uuid, sortBy, sortDirection])
 
-  // Debounce search text → debouncedSearch (300ms)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText.trim())
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchText])
-
   // When debounced search changes, reset pagination and re-fetch
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -278,7 +266,7 @@ const WavesHub = () => {
     setBatch(newBatch)
 
     try {
-      await loadWaves(0, newBatch, true, debouncedSearchRef.current || undefined)
+      await loadWaves(0, newBatch, true, debouncedSearch || undefined)
     } finally {
       setRefreshing(false)
       refreshRunningRef.current = false
@@ -301,55 +289,61 @@ const WavesHub = () => {
     }
   }
 
-  const handleCreateWave = async () => {
-    if (!newWaveName.trim()) {
+  const handleSaveWave = async ({ name, description }) => {
+    if (!name.trim()) {
       Alert.alert('Error', 'Wave name is required')
       return
     }
-    setCreating(true)
+    const isEditing = !!editingWave
     try {
-      const newWave = await reducer.createWave({
-        name: newWaveName,
-        description: newWaveDescription,
-        uuid
-      })
-      setWaves(prev => [{ ...newWave, thumbnails: [], photos: [] }, ...prev])
-      setModalVisible(false)
-      setNewWaveName('')
-      setNewWaveDescription('')
-      Toast.show({ type: 'success', text1: 'Wave created' })
+      if (isEditing) {
+        const updatedWave = await reducer.updateWave({
+          waveUuid: editingWave.waveUuid,
+          uuid,
+          name,
+          description
+        })
+        setWaves(prev => prev.map(w =>
+          w.waveUuid === editingWave.waveUuid ? { ...updatedWave, thumbnails: w.thumbnails } : w
+        ))
+        setEditModalVisible(false)
+        setEditingWave(null)
+        showSuccessToast('Wave updated')
+      } else {
+        const newWave = await reducer.createWave({
+          name,
+          description: '',
+          uuid
+        })
+        setWaves(prev => [{ ...newWave, thumbnails: [], photos: [] }, ...prev])
+        setModalVisible(false)
+        setNewWaveName('')
+        setNewWaveDescription('')
+        showSuccessToast('Wave created')
+      }
     } catch (error) {
       console.error(error)
-      showErrorToast({ title: 'Error creating wave', message: error.message })
-    } finally {
-      setCreating(false)
+      showErrorToast({ title: isEditing ? 'Error updating wave' : 'Error creating wave', message: error.message })
     }
   }
 
   const handleDeleteWave = (waveUuid) => {
-    Alert.alert(
+    showConfirmAlert(
       'Delete Wave',
       'Are you sure you want to delete this wave?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const waveToDelete = waves.find(w => w.waveUuid === waveUuid)
-              await reducer.deleteWave({ waveUuid, uuid })
-              setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
-              setUngroupedPhotosCount(prev => (prev ?? 0) + (waveToDelete?.photosCount ?? 0))
-              emitAutoGroupDone()
-              Toast.show({ type: 'success', text1: 'Wave deleted' })
-            } catch (error) {
-              console.error(error)
-              showErrorToast({ title: 'Error deleting wave', message: error.message })
-            }
-          }
+      async () => {
+        try {
+          const waveToDelete = waves.find(w => w.waveUuid === waveUuid)
+          await reducer.deleteWave({ waveUuid, uuid })
+          setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
+          setUngroupedPhotosCount(prev => (prev ?? 0) + (waveToDelete?.photosCount ?? 0))
+          emitAutoGroupDone()
+          showSuccessToast('Wave deleted')
+        } catch (error) {
+          console.error(error)
+          showErrorToast({ title: 'Error deleting wave', message: error.message })
         }
-      ]
+      }
     )
   }
 
@@ -358,33 +352,6 @@ const WavesHub = () => {
     setEditWaveName(wave.name)
     setEditWaveDescription(wave.description || '')
     setEditModalVisible(true)
-  }
-
-  const handleSaveEditWave = async () => {
-    if (!editWaveName.trim()) {
-      Alert.alert('Error', 'Wave name is required')
-      return
-    }
-    setUpdating(true)
-    try {
-      const updatedWave = await reducer.updateWave({
-        waveUuid: editingWave.waveUuid,
-        uuid,
-        name: editWaveName,
-        description: editWaveDescription
-      })
-      setWaves(prev => prev.map(w =>
-        w.waveUuid === editingWave.waveUuid ? { ...updatedWave, thumbnails: w.thumbnails } : w
-      ))
-      setEditModalVisible(false)
-      setEditingWave(null)
-      Toast.show({ type: 'success', text1: 'Wave updated' })
-    } catch (error) {
-      console.error(error)
-      showErrorToast({ title: 'Error updating wave', message: error.message })
-    } finally {
-      setUpdating(false)
-    }
   }
 
   // Extracted auto-group logic for reuse between manual and silent modes
@@ -413,13 +380,9 @@ const WavesHub = () => {
 
       if (!silent) {
         if (totalWavesCreated === 0) {
-          Toast.show({ type: 'info', text1: 'No ungrouped photos found', text2: 'All your photos are already in waves' })
+          showInfoToast('No ungrouped photos found', { text2: 'All your photos are already in waves' })
         } else {
-          Toast.show({
-            type: 'success',
-            text1: `Photos grouped successfully (${gl} level)`,
-            text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}`
-          })
+          showSuccessToast(`Photos grouped successfully (${gl} level)`, { text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}` })
         }
       }
 
@@ -450,18 +413,13 @@ const WavesHub = () => {
     const countText = count > 0
       ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves at ${gl} level. Continue?`
       : `This will automatically group your ungrouped photos into waves at ${gl} level. Continue?`
-    Alert.alert(
+    showConfirmAlert(
       'Auto-Group Photos',
       countText,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Auto-Group',
-          onPress: async () => {
-            runAutoGroup(count, gl, false)
-          }
-        }
-      ]
+      async () => {
+        runAutoGroup(count, gl, false)
+      },
+      { destructiveText: 'Auto-Group' }
     )
   }, [uuid, groupingLevel, runAutoGroup])
 
@@ -530,38 +488,31 @@ const WavesHub = () => {
 
   const handleMergeTargetSelected = async (targetWave) => {
     const sourcePhotos = mergingWave?.photosCount ?? 0
-    Alert.alert(
+    showConfirmAlert(
       `Merge "${mergingWave?.name}" into "${targetWave.name}"?`,
       `${sourcePhotos} photo${sourcePhotos !== 1 ? 's' : ''} will be moved. "${mergingWave?.name}" will be deleted.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Merge',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const updatedTarget = await reducer.mergeWaves({
-                targetWaveUuid: targetWave.waveUuid,
-                sourceWaveUuid: mergingWave.waveUuid,
-                uuid
-              })
-              setWaves(prev => prev
-                .filter(w => w.waveUuid !== mergingWave.waveUuid)
-                .map(w => w.waveUuid === targetWave.waveUuid
-                  ? { ...w, ...updatedTarget, thumbnails: w.thumbnails }
-                  : w
-                )
-              )
-              Toast.show({ type: 'success', text1: 'Waves merged successfully' })
-            } catch (error) {
-              console.error(error)
-              showErrorToast({ title: 'Error merging waves', message: error.message })
-            } finally {
-              setMergingWave(null)
-            }
-          }
+      async () => {
+        try {
+          const updatedTarget = await reducer.mergeWaves({
+            targetWaveUuid: targetWave.waveUuid,
+            sourceWaveUuid: mergingWave.waveUuid,
+            uuid
+          })
+          setWaves(prev => prev
+            .filter(w => w.waveUuid !== mergingWave.waveUuid)
+            .map(w => w.waveUuid === targetWave.waveUuid
+              ? { ...w, ...updatedTarget, thumbnails: w.thumbnails }
+              : w
+            )
+          )
+          showSuccessToast('Waves merged successfully')
+        } catch (error) {
+          console.error(error)
+          showErrorToast({ title: 'Error merging waves', message: error.message })
+        } finally {
+          setMergingWave(null)
         }
-      ]
+      }
     )
   }
 
@@ -718,99 +669,22 @@ const WavesHub = () => {
         }
       />
 
-      {/* Create Wave Modal */}
-      <Modal
-        animationType='slide'
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
-          <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
-            <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Create New Wave</Text>
-            <TextInput
-              style={[styles.input, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-              placeholder='Wave Name'
-              placeholderTextColor={theme.TEXT_SECONDARY}
-              value={newWaveName}
-              onChangeText={setNewWaveName}
-            />
-            <TextInput
-              style={[styles.input, styles.textArea, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-              placeholder='Description (optional)'
-              placeholderTextColor={theme.TEXT_SECONDARY}
-              value={newWaveDescription}
-              onChangeText={setNewWaveDescription}
-              multiline
-              numberOfLines={3}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY }]}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: CONST.MAIN_COLOR }]}
-                onPress={handleCreateWave}
-                disabled={creating}
-              >
-                {creating
-                  ? <ActivityIndicator color='#FFF' />
-                  : <Text style={[styles.buttonText, { color: '#FFF' }]}>Create</Text>}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Edit Wave Modal */}
-      <Modal
-        animationType='slide'
-        transparent
-        visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <KeyboardAvoidingView style={styles.modalOverlay} behavior='padding'>
-          <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND }]}>
-            <Text style={[styles.modalTitle, { color: theme.TEXT_PRIMARY }]}>Edit Wave</Text>
-            <TextInput
-              style={[styles.input, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-              placeholder='Wave Name'
-              placeholderTextColor={theme.TEXT_SECONDARY}
-              value={editWaveName}
-              onChangeText={setEditWaveName}
-            />
-            <TextInput
-              style={[styles.input, styles.textArea, { color: theme.TEXT_PRIMARY, borderColor: theme.INTERACTIVE_BORDER }]}
-              placeholder='Description (optional)'
-              placeholderTextColor={theme.TEXT_SECONDARY}
-              value={editWaveDescription}
-              onChangeText={setEditWaveDescription}
-              multiline
-              numberOfLines={3}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}
-                onPress={() => { setEditModalVisible(false); setEditingWave(null) }}
-              >
-                <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY }]}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, { backgroundColor: CONST.MAIN_COLOR }]}
-                onPress={handleSaveEditWave}
-                disabled={updating}
-              >
-                {updating
-                  ? <ActivityIndicator color='#FFF' />
-                  : <Text style={[styles.buttonText, { color: '#FFF' }]}>Save</Text>}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {/* Create/Edit Wave Modal */}
+      <EditWaveModal
+        title={editingWave ? 'Edit Wave' : 'Create New Wave'}
+        visible={modalVisible || editModalVisible}
+        initialName={editingWave ? editWaveName : newWaveName}
+        initialDescription={editingWave ? editWaveDescription : newWaveDescription}
+        onCancel={() => {
+          setModalVisible(false)
+          setEditModalVisible(false)
+          setEditingWave(null)
+        }}
+        onSave={handleSaveWave}
+        saving={updating}
+        saveLabel={editingWave ? 'Save' : 'Create'}
+        theme={theme}
+      />
 
       {/* Auto-Group Progress Overlay */}
       <Modal

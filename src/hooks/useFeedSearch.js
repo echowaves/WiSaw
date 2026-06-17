@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Keyboard } from 'react-native'
 
-import { emitPhotoSearch, subscribeToPhotoSearch } from '../../../events/photoSearchBus'
+import { emitPhotoSearch, subscribeToPhotoSearch } from '../events/photoSearchBus'
 
 /**
  * Shared feed search hook — manages search term, FAB state,
