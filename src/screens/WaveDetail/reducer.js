@@ -11,7 +11,6 @@ export const fetchWavePhotos = async ({ waveUuid, pageNumber, batch, sortBy, sor
         query feedForWave($waveUuid: String!, $pageNumber: Int!, $batch: String!, $sortBy: String, $sortDirection: String) {
           feedForWave(waveUuid: $waveUuid, pageNumber: $pageNumber, batch: $batch, sortBy: $sortBy, sortDirection: $sortDirection) {
             photos {
-              row_number
               id
               uuid
               imgUrl

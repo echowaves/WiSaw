@@ -66,7 +66,6 @@ const FEED_BY_DATE_QUERY = gql`
       searchTerm: $searchTerm
     ) {
       photos {
-        row_number
         id
         uuid
         imgUrl
@@ -91,7 +90,6 @@ const FEED_FOR_WATCHER_QUERY = gql`
   query feedForWatcher($uuid: String!, $pageNumber: Int!, $batch: String!, $searchTerm: String) {
     feedForWatcher(uuid: $uuid, pageNumber: $pageNumber, batch: $batch, searchTerm: $searchTerm) {
       photos {
-        row_number
         id
         uuid
         imgUrl

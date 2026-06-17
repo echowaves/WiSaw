@@ -345,7 +345,6 @@ export const requestUngroupedPhotos = async ({ uuid, pageNumber, batch }) => {
         query feedForUngrouped($uuid: String!, $pageNumber: Int!, $batch: String!) {
           feedForUngrouped(uuid: $uuid, pageNumber: $pageNumber, batch: $batch) {
             photos {
-              row_number
               id
               uuid
               imgUrl

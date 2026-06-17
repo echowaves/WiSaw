@@ -9,7 +9,6 @@ export const fetchFriendPhotos = async ({ uuid, friendUuid, pageNumber, batch, s
         query feedForFriend($uuid: String!, $friendUuid: String!, $pageNumber: Int!, $batch: String!, $sortBy: String, $sortDirection: String) {
           feedForFriend(uuid: $uuid, friendUuid: $friendUuid, pageNumber: $pageNumber, batch: $batch, sortBy: $sortBy, sortDirection: $sortDirection) {
             photos {
-              row_number
               id
               uuid
               imgUrl
