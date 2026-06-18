@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import {
   View,
   StyleSheet,
@@ -104,6 +104,11 @@ const FriendDetail = () => {
   const reload = useCallback(async () => {
     await feedReload(getFetchParams())
   }, [feedReload, getFetchParams])
+
+  // Trigger initial reload on mount
+  useEffect(() => {
+    reload()
+  }, [reload])
 
   const handleLoadMore = useCallback(() => {
     feedHandleLoadMore(getFetchParams())

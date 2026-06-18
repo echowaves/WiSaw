@@ -120,7 +120,7 @@ export default function useFeedLoader (fetchFn, {
     if (!signal?.aborted) {
       setLoading(false)
     }
-  }, [pageNumber])
+  }, []) // Note: load() always receives pageOverride, so it doesn't depend on pageNumber state
 
   const reload = useCallback(async (fetchParams, searchTermOverride = null) => {
     // Cancel any in-flight reload/load chain

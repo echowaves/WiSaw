@@ -564,9 +564,11 @@ const WavesHub = () => {
     : []
 
   const handleWavePress = (wave) => {
+    console.log('handleWavePress:', { waveUuid: wave.waveUuid, waveName: wave.name, myRole: wave.myRole, isFrozen: wave.isFrozen })
     router.push({
       pathname: `/waves/${wave.waveUuid}`,
       params: {
+        waveUuid: wave.waveUuid,
         waveName: wave.name,
         myRole: wave.myRole || '',
         isFrozen: wave.isFrozen ? '1' : '0'

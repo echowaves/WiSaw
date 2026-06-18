@@ -21,15 +21,28 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
   // Only enable auto-scroll after the user physically scrolls (detected by momentum)
   const userHasScrolled = useRef(false)
   const [autoScrollTrigger, setAutoScrollTrigger] = useState(false)
+  const prevInitialPhotosRef = useRef(initialPhotos)
 
   // Sync internal photos state when initialPhotos prop changes (prevents stale state after refresh)
+  // Only reset pagination if the initialPhotos array is actually different (not just a new reference or reordering)
   useEffect(() => {
-    setPhotos(initialPhotos)
-    setPageNumber(-1)
-    setNoMoreData(false)
-    stopLoading.current = false
-    userHasScrolled.current = false
-    setAutoScrollTrigger(false)
+    // Compare by set of IDs to handle different ordering
+    const prevIds = new Set(prevInitialPhotosRef.current.map(p => p.id))
+    const currentIds = new Set(initialPhotos.map(p => p.id))
+    const isNewPhotos = initialPhotos.length === 0 || // Empty array always triggers reset
+      initialPhotos.length !== prevInitialPhotosRef.current.length ||
+      initialPhotos.some(p => !prevIds.has(p.id)) ||
+      prevInitialPhotosRef.current.some(p => !currentIds.has(p.id))
+
+    if (isNewPhotos) {
+      setPhotos(initialPhotos)
+      setPageNumber(-1)
+      setNoMoreData(false)
+      stopLoading.current = false
+      userHasScrolled.current = false
+      setAutoScrollTrigger(false)
+      prevInitialPhotosRef.current = initialPhotos
+    }
   }, [initialPhotos])
 
   useEffect(() => {

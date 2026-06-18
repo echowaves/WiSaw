@@ -227,6 +227,8 @@ const PhotosListMasonry = ({
           }
         }}
         refreshing={false}
+        // onRefresh: triggered by pull-down gesture, reloads entire list from page 0
+        // onEndReached: triggered by scrolling to bottom, loads next page
         onRefresh={() => {
           reload()
         }}

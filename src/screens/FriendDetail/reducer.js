@@ -1,4 +1,3 @@
-/* global console */
 import { gql } from '@apollo/client'
 import * as CONST from '../../consts'
 

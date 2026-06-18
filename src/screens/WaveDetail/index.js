@@ -220,6 +220,11 @@ const WaveDetail = () => {
     await feedReload(getFetchParams())
   }, [feedReload, getFetchParams])
 
+  // Trigger initial reload on mount
+  useEffect(() => {
+    reload()
+  }, [reload])
+
   const handleLoadMore = useCallback(() => {
     feedHandleLoadMore(getFetchParams())
   }, [feedHandleLoadMore, getFetchParams])

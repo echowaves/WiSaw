@@ -5,7 +5,7 @@ import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 
 import * as Haptics from 'expo-haptics'
 
-import { Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
@@ -197,8 +197,6 @@ const FriendsList = () => {
         showErrorToast('Error removing friend', { text2: 'Please try again', topOffset: 60 })
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Error removing friend:', error)
       showErrorToast('Error removing friend', { text2: 'Please try again', topOffset: 60 })
     }
   }
@@ -236,8 +234,6 @@ const FriendsList = () => {
       }
 
       // Save/update the contact name locally (for both new and existing friendships)
-      // eslint-disable-next-line no-console
-      console.log('Saving contact name "%s" for friendship %s', contactName, actualFriendshipUuid)
 
       await friendsHelper.setContactName({
         uuid,
@@ -265,8 +261,6 @@ const FriendsList = () => {
       })
       setFriendsList(newFriendsList)
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Error loading friendships:', error)
     } finally {
       setLoading(false)
     }
@@ -281,8 +275,6 @@ const FriendsList = () => {
       })
       setFriendsList(newFriendsList)
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Error refreshing friendships:', error)
     } finally {
       setRefreshing(false)
       setLoading(false)
@@ -412,6 +404,7 @@ const FriendsList = () => {
     router.push({
       pathname: `/friendships/${friendUserUuid}`,
       params: {
+        friendUuid: friendUserUuid,
         friendName: friend?.contact || 'Unnamed Friend',
         friendshipUuid: friend.friendshipUuid
       }
