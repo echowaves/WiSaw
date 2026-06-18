@@ -1,7 +1,8 @@
 # constants Specification
 
 ## Purpose
-TBD - created by archiving change consolidate-code-duplication. Update Purpose after archive.
+Consolidate shared constants (`WAVE_ROLES`, `ROLE_CONFIG`, `BOOKMARK_LAYOUT_CONFIG`, `GEO_FEED_LAYOUT_CONFIG`) into `src/consts.js` for code reuse and single source of truth.
+
 ## Requirements
 ### Requirement: ROLE_CONFIG SHALL be consolidated in src/consts.js
 
@@ -14,39 +15,73 @@ export const WAVE_ROLES = {
 }
 ```
 
-#### Scenario: WaveDetail uses WAVE_ROLES
-- **WHEN** WaveDetail needs role config
-- **THEN** it imports `WAVE_ROLES` from `src/consts.js`
+The system SHALL also add `ROLE_CONFIG` to `src/consts.js` with the extended role definitions including icons:
+```js
+export const ROLE_CONFIG = {
+  owner: { ...WAVE_ROLES.owner, icon: 'crown' },
+  facilitator: { ...WAVE_ROLES.facilitator, icon: 'shield-account' },
+  contributor: { ...WAVE_ROLES.contributor, icon: 'account' }
+}
+```
 
-#### Scenario: WaveMembers uses WAVE_ROLES with icons
+#### Scenario: WaveDetail uses ROLE_CONFIG
+- **WHEN** WaveDetail needs role config with icons
+- **THEN** it imports `ROLE_CONFIG` from `src/consts.js`
+
+#### Scenario: WaveMembers uses ROLE_CONFIG
 - **WHEN** WaveMembers needs role config with icons
-- **THEN** it spreads `WAVE_ROLES` and adds icon properties: `{ ...WAVE_ROLES, owner: { ...WAVE_ROLES.owner, icon: 'crown' }, ... }`
+- **THEN** it imports `ROLE_CONFIG` from `src/consts.js`
 
 #### Scenario: WaveCard uses WAVE_ROLES
-- **WHEN** WaveCard needs role config
-- **THEN** it imports `WAVE_ROLES` from `src/consts.js`
+- **WHEN** WaveCard needs role config without icons (only label and color)
+- **THEN** it imports `WAVE_ROLES` from `src/consts.js` and accesses properties directly
 
-### Requirement: segmentConfig constants SHALL be added to src/consts.js
+### Requirement: Layout config constants SHALL be added to src/consts.js
 
 The system SHALL add layout config constants to `src/consts.js`:
 ```js
-export const BOOKMARK_LAYOUT_CONFIG = { spacing: 8, baseHeight: 200, aspectRatioFallbacks: [1.0] }
-export const GEO_FEED_LAYOUT_CONFIG = { spacing: 5, baseHeight: 100, aspectRatioFallbacks: [0.56, 0.67, 0.75, 1.0, 1.33, 1.5, 1.78] }
+export const BOOKMARK_LAYOUT_CONFIG = {
+  spacing: 8,
+  baseHeight: 200,
+  aspectRatioFallbacks: [1.0]
+}
+
+export const GEO_FEED_LAYOUT_CONFIG = {
+  spacing: 5,
+  baseHeight: 100,
+  aspectRatioFallbacks: [0.56, 0.67, 0.75, 1.0, 1.33, 1.5, 1.78]
+}
 ```
 
 #### Scenario: WaveDetail uses BOOKMARK_LAYOUT_CONFIG
 - **WHEN** WaveDetail configures segment settings
-- **THEN** it passes `BOOKMARK_LAYOUT_CONFIG`
+- **THEN** it imports and uses `BOOKMARK_LAYOUT_CONFIG` from `src/consts.js`
 
 #### Scenario: FriendDetail uses BOOKMARK_LAYOUT_CONFIG
 - **WHEN** FriendDetail configures segment settings
-- **THEN** it passes `BOOKMARK_LAYOUT_CONFIG`
+- **THEN** it imports and uses `BOOKMARK_LAYOUT_CONFIG` from `src/consts.js`
 
 #### Scenario: BookmarksList uses BOOKMARK_LAYOUT_CONFIG
 - **WHEN** BookmarksList configures segment settings
-- **THEN** it passes `BOOKMARK_LAYOUT_CONFIG`
+- **THEN** it imports and uses `BOOKMARK_LAYOUT_CONFIG` from `src/consts.js`
 
 #### Scenario: PhotosList uses GEO_FEED_LAYOUT_CONFIG
 - **WHEN** PhotosList configures segment settings
-- **THEN** it passes `GEO_FEED_LAYOUT_CONFIG`
+- **THEN** it imports and uses `GEO_FEED_LAYOUT_CONFIG` from `src/consts.js`
+
+## Implementation Notes
+
+### Bug Fix (2026-06-18)
+The original implementation was missing `ROLE_CONFIG` export from `src/consts.js`, causing a runtime error:
+```
+TypeError: Cannot convert undefined value to object
+at WaveDetail index.js:77
+  const roleConfig = ROLE_CONFIG[myRole] || null
+```
+
+**Fix:** Added `ROLE_CONFIG` export with full role definitions including icons, and updated WaveMembers to import `ROLE_CONFIG` from `src/consts.js` instead of defining it locally.
+
+**Files affected:**
+- `src/consts.js` - Added `ROLE_CONFIG` export
+- `src/screens/WaveMembers/index.js` - Updated import to use `ROLE_CONFIG` from consts
 

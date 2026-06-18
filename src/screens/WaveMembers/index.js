@@ -14,7 +14,7 @@ import showConfirmAlert from '../../utils/showConfirmAlert'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 import * as STATE from '../../state'
-import { WAVE_ROLES, MAIN_COLOR } from '../../consts'
+import { ROLE_CONFIG, MAIN_COLOR } from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import {
   listWaveMembers,
@@ -27,13 +27,6 @@ import {
 } from '../Waves/reducer'
 import ActionMenu from '../../components/ActionMenu'
 import useSimpleFetch from '../../hooks/useSimpleFetch'
-
-const ROLE_CONFIG = {
-  ...WAVE_ROLES,
-  owner: { ...WAVE_ROLES.owner, icon: 'crown' },
-  facilitator: { ...WAVE_ROLES.facilitator, icon: 'shield-account' },
-  contributor: { ...WAVE_ROLES.contributor, icon: 'account' }
-}
 
 const WaveMembers = ({ waveUuid, waveName }) => {
   const [uuid] = useAtom(STATE.uuid)

@@ -58,6 +58,13 @@ export const WAVE_ROLES = {
   contributor: { label: 'Contributor', color: '#6B7280' }
 }
 
+// Wave role configuration with icons (for WaveMembers, WaveDetail)
+export const ROLE_CONFIG = {
+  owner: { ...WAVE_ROLES.owner, icon: 'crown' },
+  facilitator: { ...WAVE_ROLES.facilitator, icon: 'shield-account' },
+  contributor: { ...WAVE_ROLES.contributor, icon: 'account' }
+}
+
 // Masonry grid layout configs — bookmark screens (larger tiles, square aspect ratios)
 export const BOOKMARK_LAYOUT_CONFIG = {
   spacing: 8,
