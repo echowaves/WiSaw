@@ -17,6 +17,7 @@ import isValidLocation from '../../../utils/isValidLocation'
 import { autoGroupPhotos } from '../../Waves/reducer'
 import { _groupingState } from '../../../utils/groupingAtom'
 import { emitAutoGroupDone } from '../../../events/autoGroupBus'
+import { isAutoGroupRunning, setAutoGroupRunning } from '../../../events/autoGroupRunningGuard'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -435,6 +436,14 @@ export const flushUngroupedPhotos = async (uuid) => {
     // Respect user's grouping preference — skip auto-group when disabled (defensive check for undefined state)
     if (!(_groupingState && _groupingState.enabled)) return false
 
+    // Guard: prevent concurrent auto-group execution
+    if (isAutoGroupRunning()) {
+      console.log('[flushUngroupedPhotos] Auto-group already running, skipping')
+      return false
+    }
+
+    setAutoGroupRunning(true)
+
     // Run auto-group to flush ungrouped photos (loop until no more)
     let result
     let totalPhotosGrouped = 0
@@ -458,6 +467,8 @@ export const flushUngroupedPhotos = async (uuid) => {
   } catch (err) {
     console.warn('[flushUngroupedPhotos] failed:', err)
     return false
+  } finally {
+    setAutoGroupRunning(false)
   }
 }
 

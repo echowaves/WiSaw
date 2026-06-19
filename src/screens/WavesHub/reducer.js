@@ -1,5 +1,3 @@
-/* global console */
-
 export {
   listWaves,
   createWave,

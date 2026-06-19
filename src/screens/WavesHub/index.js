@@ -39,6 +39,7 @@ import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
 import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
+import { isAutoGroupRunning, setAutoGroupRunning } from '../../events/autoGroupRunningGuard'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
@@ -111,7 +112,6 @@ const WavesHub = () => {
 
   const stopLoading = useRef(false)
   const hasMountedRef = useRef(false)
-  const autoGroupRunningRef = useRef(false)
   const refreshRunningRef = useRef(false)
 
   const theme = getTheme(isDarkMode)
@@ -357,12 +357,12 @@ const WavesHub = () => {
   // Extracted auto-group logic for reuse between manual and silent modes
   const runAutoGroup = useCallback(async (count, gl, silent = false) => {
     // Guard: prevent concurrent auto-group execution (causes UI freeze)
-    if (autoGroupRunningRef.current) {
+    if (isAutoGroupRunning()) {
       console.log(`[WAVES-HUB] Auto-group already running (${silent ? 'silent' : 'manual'}), skipping duplicate trigger`)
       return
     }
 
-    autoGroupRunningRef.current = true
+    setAutoGroupRunning(true)
     setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0, photosRemaining: 0 })
     setAutoGrouping(true)
     let totalPhotosGrouped = 0
@@ -387,14 +387,12 @@ const WavesHub = () => {
       }
 
       setUngroupedPhotosCount(result.photosRemaining ?? 0)
-      // Refresh waves on auto-group to update counts
-      emitAutoGroupDone()
     } catch (error) {
       console.error(error)
       showErrorToast({ title: 'Error auto-grouping photos', message: error.message })
       if (totalWavesCreated > 0) handleRefresh()
     } finally {
-      autoGroupRunningRef.current = false
+      setAutoGroupRunning(false)
       setAutoGrouping(false)
       emitAutoGroupDone()
     }
@@ -446,8 +444,12 @@ const WavesHub = () => {
 
   useEffect(() => {
     const unsubscribeAutoGroup = subscribeToAutoGroupDone(() => {
-      // Auto-group already updated ungrouped count; just refresh waves list
-      handleRefresh()
+      // Auto-group already updated ungrouped count; refresh badge immediately
+      getUngroupedPhotosCount({ uuid }).then(c => setUngroupedPhotosCount(c))
+      // Optional: debounced full waves refresh for consistency
+      setTimeout(() => {
+        handleRefresh()
+      }, 500)
     })
     const unsubscribeUpload = subscribeToUploadComplete(() => {
       // Light update: only refresh ungrouped count badge
