@@ -28,7 +28,8 @@ export const friendFeedSortBy = atom('createdAt')
 
 export const friendFeedSortDirection = atom('desc')
 
-export const locationAtom = atom({ status: 'pending', coords: null, accuracy: null })
+// Location status values: pending, ready, denied, timeout, unavailable
+export const locationAtom = atom({ status: 'pending', coords: null, accuracy: null, lastUpdate: null, initStage: 0 })
 
 export const netAvailable = atom(true)
 

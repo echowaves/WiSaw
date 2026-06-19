@@ -53,9 +53,9 @@ export default function useLocationProvider () {
         try {
           const sub = await Location.watchPositionAsync(
             {
-              accuracy: Location.Accuracy.Balanced,
-              distanceInterval: 100,
-              timeInterval: 60000
+              accuracy: Location.Accuracy.Coarse,
+              distanceInterval: 1000,
+              timeInterval: 300000
             },
             (loc) => {
               setLocationReady(loc.coords, loc.coords.accuracy, 'Phase3')
@@ -111,9 +111,9 @@ export default function useLocationProvider () {
       try {
         const sub = await Location.watchPositionAsync(
           {
-            accuracy: Location.Accuracy.High,
-            distanceInterval: 0,
-            timeInterval: 1000
+            accuracy: Location.Accuracy.Coarse,
+            distanceInterval: 500,
+            timeInterval: 120000
           },
           (loc) => {
             setLocationReady(loc.coords, loc.coords.accuracy, 'Phase2')

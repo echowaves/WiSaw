@@ -102,3 +102,66 @@ The hook SHALL log phase transitions and watcher callbacks to the console when `
 #### Scenario: Watcher callback logging
 - **WHEN** `__DEV__` is true and a Phase 2 or Phase 3 watcher callback fires
 - **THEN** a console log SHALL be emitted with the fix accuracy, coordinates, and whether the fix was accepted or rejected by the gate
+
+### Requirement: Fast-seed Timeout (MODIFIED)
+The system SHALL enforce a 5 second timeout on `Location.getLastKnownPositionAsync()` to prevent indefinite blocking during app startup on fresh device boot.
+
+#### Scenario: Fast-seed timeout behavior (MODIFIED)
+- **WHEN** `Location.getLastKnownPositionAsync()` is called during Phase 1
+- **THEN** the call SHALL be wrapped in a 5 second timeout using `Promise.race()`
+- **THEN** if the call completes within 5 seconds with a valid position, the atom SHALL be set to `{ status: 'ready', ... }`
+- **THEN** if the call times out (5 seconds elapsed), the system SHALL proceed to Phase 2 without using the last-known position
+- **THEN** a dev log SHALL be emitted: `[Location] Phase 1 timeout: no last known position available`
+
+### Requirement: Phase 3 Watcher Setup Timeout (MODIFIED)
+The system SHALL enforce a 10 second timeout on `Location.watchPositionAsync()` during Phase 3 setup with retry logic.
+
+#### Scenario: Phase 3 setup timeout (MODIFIED)
+- **WHEN** `Location.watchPositionAsync()` is called during Phase 3
+- **THEN** the call SHALL be wrapped in a 10 second timeout using `Promise.race()`
+- **THEN** if the call succeeds within 10 seconds, the watcher SHALL be started successfully
+- **THEN** if the call times out (10 seconds elapsed), the system SHALL retry up to 3 times with 5 second delays
+- **THEN** if all 3 retries are exhausted, the system SHALL set the atom to `{ status: 'unavailable', coords: null, accuracy: null }`
+- **THEN** a dev log SHALL be emitted for each timeout: `[Location] Phase 3 setup timeout, attempt <n>/3`
+
+### Requirement: Watchdog Mechanism (NEW)
+The system SHALL include a watchdog mechanism to detect when the Phase 3 watcher stops receiving location updates and automatically restart it.
+
+#### Scenario: Watchdog detects no updates (NEW)
+- **WHEN** the Phase 3 watcher is active and receiving callbacks
+- **THEN** the system SHALL record the timestamp of each successful callback
+- **THEN** every 15 seconds, the system SHALL check if more than 30 seconds have passed since the last callback
+- **THEN** if no updates have been received for 30+ seconds, the system SHALL restart the Phase 3 watcher
+- **THEN** the restart SHALL follow the same retry logic (up to 3 retries with 5 second delays)
+- **THEN** a dev log SHALL be emitted: `[Location] Watchdog: restarting watcher after no updates for 30+ seconds`
+
+#### Scenario: Watchdog does not apply to Phase 2 (NEW)
+- **WHEN** the Phase 2 watcher is active
+- **THEN** the watchdog mechanism SHALL NOT apply
+- **THEN** Phase 2 timeout (60 seconds) is the only timeout mechanism for this phase
+
+### Requirement: Global Initialization Timeout (NEW)
+The total location initialization process SHALL have a maximum 15 second timeout to prevent indefinite hanging.
+
+#### Scenario: Global initialization timeout (NEW)
+- **WHEN** the location provider starts initialization
+- **THEN** a global 15 second timeout SHALL be started
+- **THEN** if all initialization phases complete within 15 seconds, the system SHALL proceed normally
+- **THEN** if 15 seconds elapse before location is ready, the system SHALL set the atom to `{ status: 'timeout', coords: null, accuracy: null }`
+- **THEN** the Phase 2 and Phase 3 watchers SHALL continue running in the background to eventually obtain a location fix
+- **THEN** a dev log SHALL be emitted: `[Location] Global initialization timeout: proceeding with watchers`
+
+### Requirement: Status Transition Logging (NEW)
+The system SHALL log status transitions for debugging purposes.
+
+#### Scenario: Status transition logging (NEW)
+- **WHEN** the status property of `locationAtom` changes
+- **THEN** a console log SHALL be emitted with format: `[Location] Status change: <oldStatus> → <newStatus>`
+
+### Requirement: Invalid Transition Handling (NEW)
+Invalid status transitions SHALL be ignored with a dev log message.
+
+#### Scenario: Invalid transition ignored (NEW)
+- **WHEN** an invalid status transition is attempted
+- **THEN** the atom SHALL NOT be updated
+- **THEN** a dev log SHALL be emitted: `[Location] Invalid status transition ignored: <from> → <to>`
