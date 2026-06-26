@@ -8,25 +8,6 @@ import base64 from 'react-native-base64'
 import { SubscriptionClient } from 'subscriptions-transport-ws'
 import { v4 as uuid4 } from 'uuid'
 
-const { API_URI, REALTIME_API_URI, API_KEY } = Constants.expoConfig.extra
-
-// eslint-disable-next-line camelcase
-const HOST = API_URI.replace('https://', '').replace('/graphql', '')
-
-// eslint-disable-next-line camelcase
-const api_header = {
-  host: HOST,
-  'x-api-key': API_KEY
-}
-
-// eslint-disable-next-line camelcase
-const header_encode = (obj) => base64.encode(JSON.stringify(obj))
-
-// eslint-disable-next-line camelcase
-const connection_url = `${REALTIME_API_URI}?header=${header_encode(
-  api_header
-)}&payload=${header_encode({})}`
-
 class UUIDOperationIdSubscriptionClient extends SubscriptionClient {
   generateOperationId () {
     // AppSync recommends using UUIDs for Subscription IDs but SubscriptionClient uses an incrementing number
@@ -47,7 +28,7 @@ class UUIDOperationIdSubscriptionClient extends SubscriptionClient {
 }
 
 // appSyncGraphQLOperationAdapter.js
-const createAppSyncGraphQLOperationAdapter = () => ({
+const createAppSyncGraphQLOperationAdapter = (apiHeader) => ({
   applyMiddleware: async (options, next) => {
     // AppSync expects GraphQL operation to be defined as a JSON-encoded object in a "data" property
     // eslint-disable-next-line no-param-reassign
@@ -59,7 +40,7 @@ const createAppSyncGraphQLOperationAdapter = () => ({
 
     // AppSync only permits authorized operations
     // eslint-disable-next-line no-param-reassign
-    options.extensions = { authorization: api_header }
+    options.extensions = { authorization: apiHeader }
 
     // AppSync does not care about these properties
     // eslint-disable-next-line no-param-reassign
@@ -72,18 +53,49 @@ const createAppSyncGraphQLOperationAdapter = () => ({
   }
 })
 
-// Create the direct subscription client
-const directSubscriptionClient = new UUIDOperationIdSubscriptionClient(
-  connection_url,
-  {
-    timeout: 5 * 60 * 1000,
-    reconnect: true,
-    lazy: true,
-    // eslint-disable-next-line no-console
-    connectionCallback: (err) => console.log('🔌 WebSocket connectionCallback', err ? 'ERR' : 'OK', err || '')
-  }
-).use([createAppSyncGraphQLOperationAdapter()])
+// Lazily create the subscription client
+let _client = null
 
-// Use CommonJS export for Metro bundler compatibility
-module.exports = directSubscriptionClient
-module.exports.default = directSubscriptionClient
+function buildConnectionUrl (apiHeader) {
+  const header_encode = (obj) => base64.encode(JSON.stringify(obj))
+  // eslint-disable-next-line camelcase
+  const { API_URI, REALTIME_API_URI } = Constants.expoConfig.extra
+  // eslint-disable-next-line camelcase
+  const HOST = API_URI.replace('https://', '').replace('/graphql', '')
+  // eslint-disable-next-line camelcase
+  const api_header = {
+    host: HOST,
+    'x-api-key': apiHeader
+  }
+  // eslint-disable-next-line camelcase
+  return `${REALTIME_API_URI}?header=${header_encode(api_header)}&payload=${header_encode({})}`
+}
+
+export function getClient () {
+  if (!_client) {
+    const { API_KEY } = Constants.expoConfig.extra
+    const connection_url = buildConnectionUrl(API_KEY)
+
+    _client = new UUIDOperationIdSubscriptionClient(
+      connection_url,
+      {
+        timeout: 5 * 60 * 1000,
+        reconnect: true,
+        lazy: true,
+        // eslint-disable-next-line no-console
+        connectionCallback: (err) => console.log('🔌 WebSocket connectionCallback', err ? 'ERR' : 'OK', err || '')
+      }
+    ).use([createAppSyncGraphQLOperationAdapter(API_KEY)])
+  }
+  return _client
+}
+
+// Default export is a proxy that lazily gets the client
+const directSubscriptionClient = new Proxy({}, {
+  get (target, prop) {
+    const client = getClient()
+    return client[prop]
+  }
+})
+
+export default directSubscriptionClient
