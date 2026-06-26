@@ -3,7 +3,6 @@ export {
   createWave,
   updateWave,
   deleteWave,
-  autoGroupPhotos,
   addPhotoToWave,
   removePhotoFromWave,
   getUngroupedPhotosCount,

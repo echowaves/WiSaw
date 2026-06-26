@@ -8,15 +8,12 @@ import * as CONST from '../../../consts'
 import { emitUploadComplete } from '../../../events/uploadBus'
 import {
   clearQueue,
-  flushUngroupedPhotos,
   getQueue,
   initPendingUploads,
   processCompleteUpload,
   queueFileForUpload,
   removeFromQueue
 } from './photoUploadService'
-import { _groupingState } from '../../../utils/groupingAtom'
-import { emitAutoGroupSilent } from '../../../events/autoGroupBus'
 
 const RETRY_DELAY_MS = 750
 
@@ -128,20 +125,6 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
       processingRef.current = false
       setIsUploading(false)
 
-      // Schedule flush after 5s if we processed uploads in this cycle
-      if (needsFlushRef.current && _groupingState && _groupingState.enabled) {
-        needsFlushRef.current = false
-        setTimeout(async () => {
-          try {
-            const result = await flushUngroupedPhotos(activeUuid)
-            if (result && result !== false) {
-              emitAutoGroupSilent(result.photosGrouped, _groupingState.groupingLevel)
-            }
-          } catch {
-            // Ignore flush errors
-          }
-        }, 5000)
-      }
     }
   }, [cleanupRetry, netAvailable, resolveUuid, syncQueueFromStorage, topOffset])
 

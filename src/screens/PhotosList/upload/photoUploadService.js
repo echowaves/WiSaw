@@ -14,10 +14,6 @@ import { gql } from '@apollo/client'
 
 import * as CONST from '../../../consts'
 import isValidLocation from '../../../utils/isValidLocation'
-import { autoGroupPhotos } from '../../Waves/reducer'
-import { _groupingState } from '../../../utils/groupingAtom'
-import { emitAutoGroupDone } from '../../../events/autoGroupBus'
-import { isAutoGroupRunning, setAutoGroupRunning } from '../../../events/autoGroupRunningGuard'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -424,52 +420,6 @@ export const generateWaveName = (lat, lon) => {
   const year = date.getFullYear()
 
   return `${Math.abs(lat).toFixed(2)}°${latDir} ${Math.abs(lon).toFixed(2)}°${lonDir} - ${month} ${day}, ${year}`
-}
-
-/**
- * Flush pending ungrouped photos by calling autoGroupPhotosIntoWaves.
- */
-export const flushUngroupedPhotos = async (uuid) => {
-  try {
-    if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') return false
-
-    // Respect user's grouping preference — skip auto-group when disabled (defensive check for undefined state)
-    if (!(_groupingState && _groupingState.enabled)) return false
-
-    // Guard: prevent concurrent auto-group execution
-    if (isAutoGroupRunning()) {
-      console.log('[flushUngroupedPhotos] Auto-group already running, skipping')
-      return false
-    }
-
-    setAutoGroupRunning(true)
-
-    // Run auto-group to flush ungrouped photos (loop until no more)
-    let result
-    let totalPhotosGrouped = 0
-    let totalWavesCreated = 0
-    do {
-      result = await autoGroupPhotos({ uuid: uuid.trim(), groupingLevel: _groupingState.groupingLevel || 'CITY' })
-      if (result.photosGrouped > 0) {
-        totalPhotosGrouped += result.photosGrouped
-        totalWavesCreated += result.wavesCreated ?? 0
-      }
-    } while (result?.hasMore)
-
-    // Emit completion event to trigger badge updates
-    emitAutoGroupDone()
-
-    return {
-      wavesCreated: totalWavesCreated,
-      photosGrouped: totalPhotosGrouped,
-      photosRemaining: result?.photosRemaining ?? 0
-    }
-  } catch (err) {
-    console.warn('[flushUngroupedPhotos] failed:', err)
-    return false
-  } finally {
-    setAutoGroupRunning(false)
-  }
 }
 
 export const uploadItem = async ({ item }) => {
