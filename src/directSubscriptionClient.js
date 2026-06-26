@@ -84,4 +84,6 @@ const directSubscriptionClient = new UUIDOperationIdSubscriptionClient(
   }
 ).use([createAppSyncGraphQLOperationAdapter()])
 
-export default directSubscriptionClient
+// Use CommonJS export for Metro bundler compatibility
+module.exports = directSubscriptionClient
+module.exports.default = directSubscriptionClient

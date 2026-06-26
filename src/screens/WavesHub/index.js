@@ -42,7 +42,8 @@ import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGr
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
-import directSubscriptionClient from '../../directSubscriptionClient'
+// eslint-disable-next-line camelcase
+const directSubscriptionClient = require('../../directSubscriptionClient').default || require('../../directSubscriptionClient')
 import { gql } from '@apollo/client'
 import UploadContext from '../../contexts/UploadContext'
 import usePendingAnimation from '../../hooks/usePendingAnimation'
