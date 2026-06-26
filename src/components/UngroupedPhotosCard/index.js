@@ -43,7 +43,7 @@ const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
     }, [uuid])
 
   return (
-     <View style={[styles.card, { backgroundColor: 'rgba(234, 94, 61, 0.1)', borderColor: '#EA5E3D']}>
+     <View style={[styles.card, { backgroundColor: 'rgba(234, 94, 61, 0.1)', borderColor: '#EA5E3D' }]}>
         <View style={styles.header}>
           <FontAwesome5 name='images' size={18} color='#EA5E3D' />
           <Text style={[styles.title, { color: theme.TEXT_PRIMARY }]}>

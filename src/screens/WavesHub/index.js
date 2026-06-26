@@ -13,7 +13,7 @@ import {
   useWindowDimensions
 } from 'react-native'
 import { useAtom, useAtomValue } from 'jotai'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { showSuccessToast, showInfoToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
 import showConfirmAlert from '../../utils/showConfirmAlert'
@@ -42,7 +42,7 @@ import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGr
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
-import directSubscriptionClient from '../../../directSubscriptionClient'
+import directSubscriptionClient from '../../directSubscriptionClient'
 import { gql } from '@apollo/client'
 import UploadContext from '../../contexts/UploadContext'
 import usePendingAnimation from '../../hooks/usePendingAnimation'
@@ -354,8 +354,8 @@ const WavesHub = () => {
       }
     `
 
-    const unsubscribe = directSubscriptionClient.subscribe(
-      { query: PHOTO_UPLOAD_COMPLETE_SUBSCRIPTION },
+    const observable = directSubscriptionClient.subscribe({ query: PHOTO_UPLOAD_COMPLETE_SUBSCRIPTION })
+    const subscription = observable.subscribe(
       (result) => {
         console.log('[WAVES-HUB] Photo upload + auto-grouping complete:', result)
         // Refresh the entire waves feed when notification is received
@@ -369,7 +369,7 @@ const WavesHub = () => {
     })
 
     return () => {
-      unsubscribe()
+      subscription.unsubscribe()
       unsubscribeUpload()
     }
   }, [handleRefresh, uuid, setUngroupedPhotosCount])
