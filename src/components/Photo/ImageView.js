@@ -12,8 +12,11 @@ import isValidImageUri from '../../utils/isValidImageUri'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
+const TAP_DEBOUNCE_MS = 1000
+
 const ImageView = ({ photo, containerWidth, embedded = true }) => {
   const scale = useRef(new Animated.Value(1)).current
+  const lastTapTime = useRef(0)
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const { width: screenWidth } = useWindowDimensions()
@@ -27,19 +30,25 @@ const ImageView = ({ photo, containerWidth, embedded = true }) => {
   const imageHeight =
     photo && photo.width && photo.height ? (photo.height * imageWidth) / photo.width : 300 // Fallback height if dimensions not available
 
-  const onPinchEvent = (event) => {
-    router.push({
-      pathname: '/pinch',
-      params: { photo: JSON.stringify(photo) }
-    })
-  }
-
   const onSingleTapEvent = (event) => {
     if (event.nativeEvent.state === State.ACTIVE) {
-      router.push({
-        pathname: '/pinch',
-        params: { photo: JSON.stringify(photo) }
-      })
+      const now = Date.now()
+      const elapsed = now - lastTapTime.current
+      if (global.__DEV__) {
+        console.log('[ImageView] Tap - elapsed:', elapsed, 'ms, lastTapTime:', lastTapTime.current)
+      }
+      if (elapsed > TAP_DEBOUNCE_MS) {
+        if (global.__DEV__) {
+          console.log('[ImageView] Navigating to /pinch')
+        }
+        lastTapTime.current = now
+        router.push({
+          pathname: '/pinch',
+          params: { photo: JSON.stringify(photo) }
+        })
+      } else if (global.__DEV__) {
+        console.log('[ImageView] Ignored (debounce active)')
+      }
     }
   }
 
