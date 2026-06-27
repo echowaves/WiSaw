@@ -186,34 +186,6 @@ export const deleteWave = async ({ waveUuid, uuid }) => {
   }
 }
 
-export const autoGroupPhotos = async ({ uuid, groupingLevel }) => {
-  try {
-    const response = await CONST.gqlClient.mutate({
-      mutation: gql`
-        mutation autoGroupPhotosIntoWaves($uuid: String!, $groupingLevel: GroupingLevel!) {
-          autoGroupPhotosIntoWaves(uuid: $uuid, groupingLevel: $groupingLevel) {
-            waveUuid
-            name
-            photosGrouped
-            photosRemaining
-            hasMore
-            isNewWave
-            wavesCreated
-           }
-          }
-        `,
-      variables: {
-        uuid,
-        groupingLevel: groupingLevel || 'CITY'
-       }
-     })
-    return response.data.autoGroupPhotosIntoWaves
-   } catch (err) {
-    console.error({ err })
-    throw err
-   }
- }
-
 export const addPhotoToWave = async ({ waveUuid, photoId, uuid }) => {
   try {
     const response = await CONST.gqlClient.mutate({

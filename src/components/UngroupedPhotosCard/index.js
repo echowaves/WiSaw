@@ -1,19 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import { FontAwesome5 } from '@expo/vector-icons'
 import * as Crypto from 'expo-crypto'
-import { useAtomValue } from 'jotai'
 
-import * as CONST from '../../consts'
 import { requestUngroupedPhotos } from '../../screens/Waves/reducer'
-import { emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
-import { groupingAtom } from '../../utils/groupingAtom'
 import WavePhotoStrip from '../WavePhotoStrip'
 
 const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
-  const grouping = useAtomValue(groupingAtom)
-  const { groupingLevel } = grouping
   const [initialPhotos, setInitialPhotos] = useState([])
   const batchRef = useRef(Crypto.randomUUID())
   const fetchedRef = useRef(false)
@@ -44,30 +38,14 @@ const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
       return unsubscribe
       }, [uuid])
 
-    // Re-fetch ungrouped photos after auto-group completes
-    useEffect(() => {
-      if (!uuid) return
-      const unsubscribe = subscribeToAutoGroupDone(() => {
-        fetchedRef.current = false
-        batchRef.current = Crypto.randomUUID()
-        requestUngroupedPhotos({ uuid, pageNumber: 0, batch: batchRef.current })
-           .then(result => {
-            setInitialPhotos(result.photos || [])
-            fetchedRef.current = true
-           })
-           .catch(err => console.error('UngroupedPhotosCard auto-group fetch error:', err))
-        })
-      return unsubscribe
-      }, [uuid])
-
   const fetchFn = useCallback(async (pageNumber, batch) => {
     return requestUngroupedPhotos({ uuid, pageNumber, batch })
     }, [uuid])
 
   return (
-     <View style={[styles.card, { backgroundColor: `${CONST.MAIN_COLOR}1A`, borderColor: CONST.MAIN_COLOR }]}>
+     <View style={[styles.card, { backgroundColor: 'rgba(234, 94, 61, 0.1)', borderColor: '#EA5E3D' }]}>
         <View style={styles.header}>
-          <FontAwesome5 name='images' size={18} color={CONST.MAIN_COLOR} />
+          <FontAwesome5 name='images' size={18} color='#EA5E3D' />
           <Text style={[styles.title, { color: theme.TEXT_PRIMARY }]}>
            Ungrouped Photos ({ungroupedCount})
           </Text>
@@ -79,17 +57,12 @@ const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
          theme={theme}
         />
 
-        <TouchableOpacity
-         style={styles.button}
-         onPress={() => emitAutoGroup(ungroupedCount, groupingLevel)}
-         activeOpacity={0.8}
-         >
-          <FontAwesome5 name='magic' size={16} color='white' style={{ marginRight: 8 }} />
-          <View>
-            <Text style={styles.buttonTitle}>Auto Group Into Waves</Text>
-            <Text style={styles.buttonSubtitle}>You can fine-tune waves later</Text>
-          </View>
-        </TouchableOpacity>
+        <View style={styles.infoBox}>
+          <FontAwesome5 name='info-circle' size={14} color={theme.TEXT_SECONDARY} style={{ marginRight: 6 }} />
+          <Text style={styles.infoText}>
+            Photos will be automatically grouped into waves when you upload new photos.
+          </Text>
+        </View>
       </View>
     )
  }
@@ -114,24 +87,18 @@ const styles = StyleSheet.create({
      fontWeight: '700',
      marginLeft: 8
      },
-   button: {
+   infoBox: {
      flexDirection: 'row',
      alignItems: 'center',
-     backgroundColor: CONST.MAIN_COLOR,
-     borderRadius: 12,
-     paddingVertical: 12,
-     paddingHorizontal: 16,
-     marginTop: 12
+     marginTop: 12,
+     padding: 10,
+     borderRadius: 8,
+     backgroundColor: 'rgba(0,0,0,0.03)'
      },
-   buttonTitle: {
-     color: 'white',
-     fontSize: 15,
-     fontWeight: '600'
-     },
-   buttonSubtitle: {
-     color: 'rgba(255,255,255,0.8)',
+   infoText: {
+     flex: 1,
      fontSize: 12,
-     marginTop: 2
+     color: 'rgba(0,0,0,0.5)'
      }
  })
 

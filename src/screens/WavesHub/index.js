@@ -38,19 +38,19 @@ import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
 import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
-import { subscribeToAutoGroup, emitAutoGroupDone, emitAutoGroup, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
-import { isAutoGroupRunning, setAutoGroupRunning } from '../../events/autoGroupRunningGuard'
+import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
+import { gql } from '@apollo/client'
 import UploadContext from '../../contexts/UploadContext'
+import subscriptionClient from '../../subscriptionClientWs'
 import usePendingAnimation from '../../hooks/usePendingAnimation'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 // Counts are loaded via listWaves GraphQL query
 import { saveWaveSortPreferences } from '../../utils/waveStorage'
 // import { useLocationDrift } from '../../hooks/useLocationDrift' - DISABLED per change proposal
 // import { setLastTriggerLocation } from '../../utils/groupingAtom' - DISABLED with location drift trigger
-import { groupingAtom } from '../../utils/groupingAtom'
 
 const WavesHub = () => {
   const insets = useSafeAreaInsets()
@@ -62,8 +62,6 @@ const WavesHub = () => {
   const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
   const [ungroupedCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
-  const grouping = useAtomValue(groupingAtom)
-  const { groupingLevel } = grouping
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -79,9 +77,6 @@ const WavesHub = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [newWaveName, setNewWaveName] = useState('')
   const [newWaveDescription, setNewWaveDescription] = useState('')
-
-  const [autoGrouping, setAutoGrouping] = useState(false)
-  const [autoGroupProgress, setAutoGroupProgress] = useState({ photosGrouped: 0, wavesCreated: 0, photosRemaining: 0 })
 
   // Edit modal state
   const [editModalVisible, setEditModalVisible] = useState(false)
@@ -144,29 +139,6 @@ const WavesHub = () => {
 
   const headerRightSlot = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-      {/* Grouping Settings Button */}
-      <TouchableOpacity
-        onPress={() => router.push('/grouping-settings')}
-        style={[
-          SHARED_STYLES.interactive.headerButton,
-          {
-            backgroundColor: theme.INTERACTIVE_BACKGROUND,
-            borderWidth: 1,
-            borderColor: theme.INTERACTIVE_BORDER,
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: 10,
-            paddingVertical: 8,
-            gap: 4
-          }
-        ]}
-      >
-        <MaterialCommunityIcons
-          name='map-plus'
-          size={18}
-          color={theme.TEXT_PRIMARY}
-        />
-      </TouchableOpacity>
       {/* Kebab Menu */}
       <TouchableOpacity
         onPress={() => setHeaderMenuVisible(true)}
@@ -354,80 +326,6 @@ const WavesHub = () => {
     setEditModalVisible(true)
   }
 
-  // Extracted auto-group logic for reuse between manual and silent modes
-  const runAutoGroup = useCallback(async (count, gl, silent = false) => {
-    // Guard: prevent concurrent auto-group execution (causes UI freeze)
-    if (isAutoGroupRunning()) {
-      console.log(`[WAVES-HUB] Auto-group already running (${silent ? 'silent' : 'manual'}), skipping duplicate trigger`)
-      return
-    }
-
-    setAutoGroupRunning(true)
-    setAutoGroupProgress({ photosGrouped: 0, wavesCreated: 0, photosRemaining: 0 })
-    setAutoGrouping(true)
-    let totalPhotosGrouped = 0
-    let totalWavesCreated = 0
-    try {
-      let result
-      do {
-        result = await reducer.autoGroupPhotos({ uuid, groupingLevel: gl })
-        if (result.photosGrouped > 0) {
-          totalPhotosGrouped += result.photosGrouped
-          totalWavesCreated += result.wavesCreated ?? 0
-          setAutoGroupProgress({ photosGrouped: totalPhotosGrouped, wavesCreated: totalWavesCreated, photosRemaining: result.photosRemaining ?? 0 })
-        }
-      } while (result.hasMore)
-
-      if (!silent) {
-        if (totalWavesCreated === 0) {
-          showInfoToast('No ungrouped photos found', { text2: 'All your photos are already in waves' })
-        } else {
-          showSuccessToast(`Photos grouped successfully (${gl} level)`, { text2: `Created ${totalWavesCreated} wave${totalWavesCreated !== 1 ? 's' : ''} with ${totalPhotosGrouped} photo${totalPhotosGrouped !== 1 ? 's' : ''}` })
-        }
-      }
-
-      setUngroupedPhotosCount(result.photosRemaining ?? 0)
-    } catch (error) {
-      console.error(error)
-      showErrorToast({ title: 'Error auto-grouping photos', message: error.message })
-      if (totalWavesCreated > 0) handleRefresh()
-    } finally {
-      setAutoGroupRunning(false)
-      setAutoGrouping(false)
-      emitAutoGroupDone()
-    }
-  }, [uuid, setUngroupedPhotosCount])
-
-  const handleAutoGroup = useCallback((count, eventGroupingLevel, silent = false) => {
-    const gl = eventGroupingLevel || groupingLevel
-
-    // Silent mode: skip confirmation dialog and run directly
-    if (silent) {
-      runAutoGroup(count, gl, true)
-      return
-    }
-
-    // Manual mode: show confirmation dialog
-    const countText = count > 0
-      ? `You have ${count} ungrouped photo${count !== 1 ? 's' : ''}. This will automatically group them into waves at ${gl} level. Continue?`
-      : `This will automatically group your ungrouped photos into waves at ${gl} level. Continue?`
-    showConfirmAlert(
-      'Auto-Group Photos',
-      countText,
-      async () => {
-        runAutoGroup(count, gl, false)
-      },
-      { destructiveText: 'Auto-Group' }
-    )
-  }, [uuid, groupingLevel, runAutoGroup])
-
-  useEffect(() => {
-    const unsubscribe = subscribeToAutoGroup((count, eventGroupingLevel, silent) => {
-      handleAutoGroup(count, eventGroupingLevel, silent)
-    })
-    return unsubscribe
-  }, [handleAutoGroup])
-
   useEffect(() => {
     const unsubscribe = subscribeToAddWave(() => {
       setModalVisible(true)
@@ -442,6 +340,40 @@ const WavesHub = () => {
     return unsubscribe
   }, [handleRefresh])
 
+  // Subscribe to photo upload + auto-grouping complete notification from server
+  useEffect(() => {
+    if (!uuid) return
+
+    const PHOTO_UPLOAD_COMPLETE_SUBSCRIPTION = gql`
+      subscription OnPhotoUploadComplete {
+        onPhotoUploadComplete {
+          photoId
+          waveUuid
+          photosGrouped
+        }
+      }
+    `
+
+    const observable = subscriptionClient.subscribe({ query: PHOTO_UPLOAD_COMPLETE_SUBSCRIPTION })
+    const subscription = observable.subscribe(
+      (result) => {
+        console.log('[WAVES-HUB] Photo upload + auto-grouping complete:', result)
+        // Refresh the entire waves feed when notification is received
+        handleRefresh()
+      }
+    )
+
+    // Also subscribe to upload complete for ungrouped count badge update
+    const unsubscribeUpload = subscribeToUploadComplete(() => {
+      getUngroupedPhotosCount({ uuid }).then(c => setUngroupedPhotosCount(c))
+    })
+
+    return () => {
+      subscription.unsubscribe()
+      unsubscribeUpload()
+    }
+  }, [handleRefresh, uuid, setUngroupedPhotosCount])
+
   useEffect(() => {
     const unsubscribeAutoGroup = subscribeToAutoGroupDone(() => {
       // Auto-group already updated ungrouped count; refresh badge immediately
@@ -451,13 +383,8 @@ const WavesHub = () => {
         handleRefresh()
       }, 500)
     })
-    const unsubscribeUpload = subscribeToUploadComplete(() => {
-      // Light update: only refresh ungrouped count badge
-      getUngroupedPhotosCount({ uuid }).then(c => setUngroupedPhotosCount(c))
-    })
     return () => {
       unsubscribeAutoGroup()
-      unsubscribeUpload()
     }
   }, [handleRefresh, uuid, setUngroupedPhotosCount])
 
@@ -665,7 +592,10 @@ const WavesHub = () => {
                 <WavesExplainerView
                   theme={theme}
                   ungroupedCount={ungroupedCount}
-                  onAutoGroup={() => emitAutoGroup(ungroupedCount)}
+                  onAutoGroup={() => {
+                    // Auto-group is now server-side only; triggered after upload completes
+                    handleRefresh()
+                  }}
                   onNavigateHome={() => router.navigate('/')}
                 />
                 )
@@ -689,36 +619,6 @@ const WavesHub = () => {
         saveLabel={editingWave ? 'Save' : 'Create'}
         theme={theme}
       />
-
-      {/* Auto-Group Progress Overlay */}
-      <Modal
-        animationType='fade'
-        transparent
-        visible={autoGrouping}
-        onRequestClose={() => {}}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.CARD_BACKGROUND, alignItems: 'center' }]}>
-            <ActivityIndicator size='large' color={CONST.MAIN_COLOR} style={{ marginBottom: 16 }} />
-            <Text style={[styles.modalTitle, { marginBottom: 8 }]}>Auto-Grouping Photos...</Text>
-            {autoGroupProgress.photosGrouped > 0 && (
-              <>
-                <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 16, marginBottom: 4 }}>
-                  {autoGroupProgress.photosGrouped} photo{autoGroupProgress.photosGrouped !== 1 ? 's' : ''} grouped
-                </Text>
-                <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 16 }}>
-                  {autoGroupProgress.wavesCreated} wave{autoGroupProgress.wavesCreated !== 1 ? 's' : ''} created
-                </Text>
-                {autoGroupProgress.photosRemaining > 0 && (
-                  <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 14, marginTop: 4 }}>
-                    {autoGroupProgress.photosRemaining} remaining
-                  </Text>
-                )}
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
 
       {/* Merge Wave Modal */}
       <MergeWaveModal

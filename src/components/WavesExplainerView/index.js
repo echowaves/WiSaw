@@ -15,12 +15,12 @@ const UNGROUPED_CARDS = [
   {
     icon: 'images',
     title: 'Photos Ready to Organize',
-    body: 'You have photos that aren\'t in any wave yet. They can be automatically sorted into waves based on when and where they were taken.'
+    body: 'You have photos that aren\'t in any wave yet. They will be automatically sorted into waves when you upload new photos.'
   },
   {
     icon: 'magic',
-    title: 'Auto Group Does the Work',
-    body: 'Tap the button below and the system will analyze your photos and group them into waves automatically. You can always reorganize later.'
+    title: 'Auto Grouping is Automatic',
+    body: 'Photos are automatically grouped into waves based on when and where they were taken. No manual action needed — just take your photos and the system does the rest.'
   }
 ]
 
@@ -28,7 +28,7 @@ const NO_PHOTOS_CARDS = [
   {
     icon: 'camera',
     title: 'Start by Taking Photos',
-    body: 'Take photos and they will be ready to group into waves later. Each photo captures a time and location that helps organize them.'
+    body: 'Take photos and they will be automatically grouped into waves. Each photo captures a time and location that helps organize them.'
   },
   {
     icon: 'layer-group',
@@ -37,7 +37,7 @@ const NO_PHOTOS_CARDS = [
   }
 ]
 
-const WavesExplainerView = ({ theme, ungroupedCount, onAutoGroup, onNavigateHome }) => {
+const WavesExplainerView = ({ theme, ungroupedCount, onNavigateHome }) => {
   const hasUngrouped = ungroupedCount > 0
   const variantCards = hasUngrouped ? UNGROUPED_CARDS : NO_PHOTOS_CARDS
   const cards = [...SHARED_CARDS, ...variantCards]
@@ -72,10 +72,10 @@ const WavesExplainerView = ({ theme, ungroupedCount, onAutoGroup, onNavigateHome
       ))}
 
       <Button
-        title={hasUngrouped ? `Auto Group ${ungroupedCount} Photo${ungroupedCount !== 1 ? 's' : ''}` : 'Take a Photo'}
+        title={hasUngrouped ? `Refresh Waves (${ungroupedCount} ungrouped)` : 'Take a Photo'}
         icon={
           <FontAwesome5
-            name={hasUngrouped ? 'magic' : 'camera'}
+            name={hasUngrouped ? 'sync' : 'camera'}
             size={18}
             color='white'
             style={{ marginRight: 8 }}
@@ -84,7 +84,7 @@ const WavesExplainerView = ({ theme, ungroupedCount, onAutoGroup, onNavigateHome
         size='lg'
         buttonStyle={styles.button}
         titleStyle={styles.buttonTitle}
-        onPress={hasUngrouped ? onAutoGroup : onNavigateHome}
+        onPress={hasUngrouped ? onNavigateHome : onNavigateHome}
       />
     </ScrollView>
   )

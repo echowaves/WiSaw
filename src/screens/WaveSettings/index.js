@@ -24,7 +24,6 @@ import * as STATE from '../../state'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import { getWave, updateWave } from '../Waves/reducer'
-import { groupingAtom } from '../../utils/groupingAtom'
 import useSimpleFetch from '../../hooks/useSimpleFetch'
 
 const MILES_TO_METERS = 1609
@@ -36,7 +35,6 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const theme = getTheme(isDarkMode)
   const locationState = useAtomValue(STATE.locationAtom)
-  const grouping = useAtomValue(groupingAtom)
 
   const [saving, setSaving] = useState(false)
 
@@ -515,25 +513,6 @@ const WaveSettings = ({ waveUuid, waveName }) => {
         )}
       </View>
 
-      {/* Grouping Settings Link */}
-      <View style={[styles.section, { backgroundColor: theme.CARD_BACKGROUND }]}>
-        <TouchableOpacity
-          style={styles.groupingSettingsButton}
-          onPress={() => router.push('/grouping-settings')}
-        >
-          <View style={styles.rowLabel}>
-            <MaterialCommunityIcons name='map-plus' size={20} color={theme.INTERACTIVE_PRIMARY} />
-            <View style={styles.labelText}>
-              <Text style={[styles.settingTitle, { color: theme.TEXT_PRIMARY }]}>Auto-Group Settings</Text>
-              <Text style={[styles.settingDescription, { color: theme.TEXT_SECONDARY }]}>
-                Grouping Level: {grouping.groupingLevel || 'CITY'} · {grouping.enabled ? 'Enabled' : 'Disabled'}
-              </Text>
-            </View>
-            <MaterialCommunityIcons name='chevron-right' size={20} color={theme.TEXT_SECONDARY} />
-          </View>
-        </TouchableOpacity>
-      </View>
-
       {saving && (
         <View style={styles.savingOverlay}>
           <ActivityIndicator size='small' color={CONST.MAIN_COLOR} />
@@ -670,11 +649,6 @@ const styles = StyleSheet.create({
   radiusSlider: {
     width: '100%',
     height: 36
-  },
-  groupingSettingsButton: {
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: 'rgba(234, 94, 61, 0.05)'
   },
   savingOverlay: {
     position: 'absolute',
