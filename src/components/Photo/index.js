@@ -45,6 +45,8 @@ import { subscribeToPhotoRefresh, emitPhotoRefresh } from '../../events/photoRef
 
 import ImageView from './ImageView'
 
+const maxStringLength = 140
+
 const VideoSection = ({ photo, screenWidth, screenHeight, isDevBuild, imageCardContainerStyle, embedded }) => {
   const videoPlayer = useVideoPlayer(photo.videoUrl, (player) => {
     player.loop = true
@@ -361,6 +363,12 @@ const createStyles = (theme) =>
       color: theme.TEXT_PRIMARY,
       fontSize: 14,
       paddingVertical: 4
+    },
+    commentCount: {
+      color: theme.TEXT_SECONDARY,
+      fontSize: 12,
+      fontWeight: '500',
+      paddingHorizontal: 4
     },
     // Enhanced AI recognition cards
     aiRecognitionContainer: {
@@ -902,8 +910,9 @@ const Photo = ({
               style={styles.inlineCommentInput}
               placeholder='Add a comment...'
               placeholderTextColor={theme.TEXT_SECONDARY}
+              maxLength={maxStringLength}
               value={commentInputText}
-              onChangeText={setCommentInputText}
+              onChangeText={(value) => setCommentInputText(value.slice(0, maxStringLength))}
               autoFocus
               returnKeyType='send'
               onSubmitEditing={async () => {
@@ -960,6 +969,7 @@ const Photo = ({
                 })
               }}
             />
+            <Text style={styles.commentCount}>{maxStringLength - commentInputText.length}</Text>
             <TouchableOpacity
               onPress={() => { /* blur from this tap triggers onBlur submit */ }}
               activeOpacity={0.7}
