@@ -42,9 +42,9 @@ import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGr
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
-const directSubscriptionClient = require('../../directSubscriptionClient')
 import { gql } from '@apollo/client'
 import UploadContext from '../../contexts/UploadContext'
+import subscriptionClient from '../../subscriptionClientWs'
 import usePendingAnimation from '../../hooks/usePendingAnimation'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 // Counts are loaded via listWaves GraphQL query
@@ -354,7 +354,7 @@ const WavesHub = () => {
       }
     `
 
-    const observable = directSubscriptionClient.subscribe({ query: PHOTO_UPLOAD_COMPLETE_SUBSCRIPTION })
+    const observable = subscriptionClient.subscribe({ query: PHOTO_UPLOAD_COMPLETE_SUBSCRIPTION })
     const subscription = observable.subscribe(
       (result) => {
         console.log('[WAVES-HUB] Photo upload + auto-grouping complete:', result)
