@@ -11,36 +11,16 @@ const SHARED_CARDS = [
   }
 ]
 
-const UNGROUPED_CARDS = [
-  {
-    icon: 'images',
-    title: 'Photos Ready to Organize',
-    body: 'You have photos that aren\'t in any wave yet. They will be automatically sorted into waves when you upload new photos.'
-  },
-  {
-    icon: 'magic',
-    title: 'Auto Grouping is Automatic',
-    body: 'Photos are automatically grouped into waves based on when and where they were taken. No manual action needed — just take your photos and the system does the rest.'
-  }
-]
-
 const NO_PHOTOS_CARDS = [
   {
     icon: 'camera',
-    title: 'Start by Taking Photos',
-    body: 'Take photos and they will be automatically grouped into waves. Each photo captures a time and location that helps organize them.'
-  },
-  {
-    icon: 'layer-group',
-    title: 'Two Ways to Add Photos',
-    body: 'Shoot directly into a wave from the camera, or take photos first and add them to waves later — whatever works best for you.'
+    title: 'Photos Are Automatically Organized',
+    body: 'Take photos and they\'ll be automatically placed into a wave based on when and where they were taken — no manual setup needed.'
   }
 ]
 
-const WavesExplainerView = ({ theme, ungroupedCount, onNavigateHome }) => {
-  const hasUngrouped = ungroupedCount > 0
-  const variantCards = hasUngrouped ? UNGROUPED_CARDS : NO_PHOTOS_CARDS
-  const cards = [...SHARED_CARDS, ...variantCards]
+const WavesExplainerView = ({ theme, onNavigateHome }) => {
+  const cards = [...SHARED_CARDS, ...NO_PHOTOS_CARDS]
   const styles = getStyles(theme)
 
   return (
@@ -55,9 +35,7 @@ const WavesExplainerView = ({ theme, ungroupedCount, onNavigateHome }) => {
         </View>
         <Text style={styles.title}>Organize Your Photos</Text>
         <Text style={styles.subtitle}>
-          {hasUngrouped
-            ? `You have ${ungroupedCount} photo${ungroupedCount !== 1 ? 's' : ''} ready to organize into waves.`
-            : 'Take photos to start building your wave collection.'}
+          Your first photos will be automatically organized into a new wave.
         </Text>
       </View>
 
@@ -72,10 +50,10 @@ const WavesExplainerView = ({ theme, ungroupedCount, onNavigateHome }) => {
       ))}
 
       <Button
-        title={hasUngrouped ? `Refresh Waves (${ungroupedCount} ungrouped)` : 'Take a Photo'}
+        title='Take a Photo'
         icon={
           <FontAwesome5
-            name={hasUngrouped ? 'sync' : 'camera'}
+            name='camera'
             size={18}
             color='white'
             style={{ marginRight: 8 }}
@@ -84,7 +62,7 @@ const WavesExplainerView = ({ theme, ungroupedCount, onNavigateHome }) => {
         size='lg'
         buttonStyle={styles.button}
         titleStyle={styles.buttonTitle}
-        onPress={hasUngrouped ? onNavigateHome : onNavigateHome}
+        onPress={onNavigateHome}
       />
     </ScrollView>
   )

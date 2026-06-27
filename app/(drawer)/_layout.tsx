@@ -256,29 +256,15 @@ function FriendsDrawerIcon ({ color, size, focused }) {
   )
 }
 
-// Inline component for waves drawer item — show red dot when ungrouped photos exist
+// Inline component for waves drawer item
 function WavesDrawerIcon ({ color, size, focused }) {
-  const [ungroupedCount] = useAtom(STATE.ungroupedPhotosCount)
   const [wavesCount] = useAtom(STATE.wavesCount)
-  const hasActivity = (wavesCount != null && wavesCount > 0) || (ungroupedCount != null && ungroupedCount > 0)
+  const hasActivity = wavesCount != null && wavesCount > 0
   const iconColor = hasActivity && !focused ? CONST.MAIN_COLOR : color
-  const showBadge = ungroupedCount != null && ungroupedCount > 0
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <FontAwesome5 name={SCREEN_HEADER_ICONS.waves.name} size={22} color={iconColor} />
-      {showBadge && (
-        <View style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: 8,
-          height: 8,
-          borderRadius: 4,
-          backgroundColor: '#FF3B30'
-        }}
-        />
-      )}
     </View>
   )
 }

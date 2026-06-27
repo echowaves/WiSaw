@@ -30,13 +30,11 @@ import EditWaveModal from '../../components/EditWaveModal'
 import * as reducer from './reducer'
 import WaveCard from '../../components/WaveCard'
 import EmptyStateCard from '../../components/EmptyStateCard'
-import { getUngroupedPhotosCount } from '../Waves/reducer'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
-import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
 import WaveShareModal from '../../components/WaveShareModal'
 import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
@@ -61,7 +59,6 @@ const WavesHub = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
   const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
-  const [ungroupedCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
 
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
@@ -158,23 +155,6 @@ const WavesHub = () => {
           size={22}
           color={theme.TEXT_PRIMARY}
         />
-        {(ungroupedCount ?? 0) > 0 && (
-          <View
-            style={{
-              backgroundColor: '#FF3B30',
-              borderRadius: 10,
-              height: 20,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingHorizontal: 6,
-              marginLeft: 4
-            }}
-          >
-            <Text style={{ color: '#FFFFFF', fontSize: 11, fontWeight: 'bold' }}>
-              {(ungroupedCount ?? 0) > 99 ? '99+' : ungroupedCount}
-            </Text>
-          </View>
-        )}
       </TouchableOpacity>
     </View>
   )
@@ -308,7 +288,7 @@ const WavesHub = () => {
           const waveToDelete = waves.find(w => w.waveUuid === waveUuid)
           await reducer.deleteWave({ waveUuid, uuid })
           setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
-          setUngroupedPhotosCount(prev => (prev ?? 0) + (waveToDelete?.photosCount ?? 0))
+          // Note: ungrouped count tracking removed - server handles auto-grouping
           emitAutoGroupDone()
           showSuccessToast('Wave deleted')
         } catch (error) {
@@ -363,22 +343,20 @@ const WavesHub = () => {
       }
     )
 
-    // Also subscribe to upload complete for ungrouped count badge update
+    // Subscribe to upload complete for waves feed refresh
     const unsubscribeUpload = subscribeToUploadComplete(() => {
-      getUngroupedPhotosCount({ uuid }).then(c => setUngroupedPhotosCount(c))
+      handleRefresh()
     })
 
     return () => {
       subscription.unsubscribe()
       unsubscribeUpload()
     }
-  }, [handleRefresh, uuid, setUngroupedPhotosCount])
+  }, [handleRefresh, uuid])
 
   useEffect(() => {
     const unsubscribeAutoGroup = subscribeToAutoGroupDone(() => {
-      // Auto-group already updated ungrouped count; refresh badge immediately
-      getUngroupedPhotosCount({ uuid }).then(c => setUngroupedPhotosCount(c))
-      // Optional: debounced full waves refresh for consistency
+      // Auto-group completed; refresh waves feed for consistency
       setTimeout(() => {
         handleRefresh()
       }, 500)
@@ -386,18 +364,11 @@ const WavesHub = () => {
     return () => {
       unsubscribeAutoGroup()
     }
-  }, [handleRefresh, uuid, setUngroupedPhotosCount])
+  }, [handleRefresh])
 
   // Auto-trigger: when location drift exceeds threshold, trigger auto-group
   // DISABLED: Location drift auto-trigger removed per change proposal.
   // Auto-grouping now only occurs after upload completes or via manual triggers.
-  // useEffect(() => {
-  //   if (!grouping.enabled) return // Task 7.2: defense-in-depth guard
-  //   if (!driftReady || !shouldTrigger || autoGroupTriggeredRef.current) return
-  //   if (ungroupedCount === 0) return
-  //   autoGroupTriggeredRef.current = true
-  //   handleAutoGroup(ungroupedCount)
-  // }, [driftReady, shouldTrigger, ungroupedCount, grouping.enabled])
 
   // Reset trigger flag when app goes to background
   // DISABLED: No longer needed since location drift auto-trigger is disabled.
@@ -571,11 +542,7 @@ const WavesHub = () => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          ungroupedCount > 0
-            ? <UngroupedPhotosCard ungroupedCount={ungroupedCount} uuid={uuid} theme={theme} />
-            : null
-        }
+        ListHeaderComponent={null}
         ListEmptyComponent={
           !loading && (
             searchText.length > 0
@@ -591,11 +558,6 @@ const WavesHub = () => {
               : (
                 <WavesExplainerView
                   theme={theme}
-                  ungroupedCount={ungroupedCount}
-                  onAutoGroup={() => {
-                    // Auto-group is now server-side only; triggered after upload completes
-                    handleRefresh()
-                  }}
                   onNavigateHome={() => router.navigate('/')}
                 />
                 )

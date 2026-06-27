@@ -1,19 +1,17 @@
 import React, { useEffect } from 'react'
-import { TouchableOpacity, View, StyleSheet } from 'react-native'
+import { TouchableOpacity, StyleSheet } from 'react-native'
 import { useAtom } from 'jotai'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { router } from 'expo-router'
 
-import * as CONST from '../../consts'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
-import { getWavesCount, getUngroupedPhotosCount, getBookmarksCount } from '../../screens/Waves/reducer'
+import { getWavesCount, getBookmarksCount } from '../../screens/Waves/reducer'
 import { subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 
 const WaveHeaderIcon = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [wavesCount, setWavesCount] = useAtom(STATE.wavesCount)
-  const [ungroupedPhotosCount, setUngroupedPhotosCount] = useAtom(STATE.ungroupedPhotosCount)
   const [, setBookmarksCount] = useAtom(STATE.bookmarksCount)
   const [uuid] = useAtom(STATE.uuid)
   const theme = getTheme(isDarkMode)
@@ -23,12 +21,10 @@ const WaveHeaderIcon = () => {
     let cancelled = false
     Promise.all([
       getWavesCount({ uuid }),
-      getUngroupedPhotosCount({ uuid }),
       getBookmarksCount({ uuid })
-    ]).then(([wc, uc, bc]) => {
+    ]).then(([wc, bc]) => {
       if (cancelled) return
       setWavesCount(wc)
-      setUngroupedPhotosCount(uc)
       setBookmarksCount(bc)
     }).catch(err => console.error('WaveHeaderIcon fetch:', err))
     return () => { cancelled = true }
@@ -40,22 +36,19 @@ const WaveHeaderIcon = () => {
       let cancelled = false
       Promise.all([
         getWavesCount({ uuid }),
-        getUngroupedPhotosCount({ uuid }),
         getBookmarksCount({ uuid })
-      ]).then(([wc, uc, bc]) => {
+      ]).then(([wc, bc]) => {
         if (cancelled) return
         setWavesCount(wc)
-        setUngroupedPhotosCount(uc)
         setBookmarksCount(bc)
       }).catch(err => console.error('WaveHeaderIcon fetch:', err))
       return () => { cancelled = true }
     })
     return unsubscribeDone
-  }, [uuid, setWavesCount, setUngroupedPhotosCount, setBookmarksCount])
+  }, [uuid, setWavesCount, setBookmarksCount])
 
-  const hasActivity = (wavesCount !== null && wavesCount > 0) || (ungroupedPhotosCount !== null && ungroupedPhotosCount > 0)
-  const iconColor = hasActivity ? CONST.MAIN_COLOR : theme.TEXT_SECONDARY
-  const showBadge = ungroupedPhotosCount !== null && ungroupedPhotosCount > 0
+  const hasWaves = wavesCount !== null && wavesCount > 0
+  const iconColor = hasWaves ? '#EA5E3D' : '#8E8E93'
 
   const handlePress = () => {
     router.navigate('/waves')
@@ -68,9 +61,6 @@ const WaveHeaderIcon = () => {
       activeOpacity={0.7}
     >
       <FontAwesome5 name='water' size={22} color={iconColor} />
-      {showBadge && (
-        <View style={[styles.badge, { borderColor: theme.HEADER_BACKGROUND }]} />
-      )}
     </TouchableOpacity>
   )
 }
@@ -81,16 +71,6 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center'
-  },
-  badge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#FF3B30',
-    borderWidth: 2
   }
 })
 
