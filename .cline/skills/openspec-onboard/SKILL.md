@@ -6,10 +6,12 @@ compatibility: Requires openspec CLI.
 metadata:
   author: openspec
   version: "1.0"
-  generatedBy: "1.3.1"
+  generatedBy: "1.5.0"
 ---
 
 Guide the user through their first complete OpenSpec workflow cycle. This is a teaching experience—you'll do real work in their codebase while explaining each step.
+
+**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`). Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
 ---
 
@@ -167,7 +169,7 @@ Now let's create a change to hold our work.
 ```
 ## Creating a Change
 
-A "change" in OpenSpec is a container for all the thinking and planning around a piece of work. It lives in `openspec/changes/<name>/` and holds your artifacts—proposal, specs, design, tasks.
+A "change" in OpenSpec is a container for all the thinking and planning around a piece of work. It lives at the `changeRoot` reported by `openspec status --change "<name>" --json` and holds your artifacts—proposal, specs, design, tasks.
 
 Let me create one for our task.
 ```
@@ -179,11 +181,11 @@ openspec new change "<derived-name>"
 
 **SHOW:**
 ```
-Created: `openspec/changes/<name>/`
+Created: <changeRoot from status JSON>
 
 The folder structure:
 ```
-openspec/changes/<name>/
+<changeRoot>/
 ├── proposal.md    ← Why we're doing this (empty, we'll fill it)
 ├── design.md      ← How we'll build it (empty)
 ├── specs/         ← Detailed requirements (empty)
@@ -245,7 +247,7 @@ After approval, save the proposal:
 ```bash
 openspec instructions proposal --change "<name>" --json
 ```
-Then write the content to `openspec/changes/<name>/proposal.md`.
+Then write the content to the `resolvedOutputPath` from `openspec instructions proposal --change "<name>" --json`.
 
 ```
 Proposal saved. This is your "why" document—you can always come back and refine it as understanding evolves.
@@ -266,12 +268,10 @@ Specs define **what** we're building in precise, testable terms. They use a requ
 For a small task like this, we might only need one spec file.
 ```
 
-**DO:** Create the spec file:
+**DO:** Resolve where the spec file should be created:
 ```bash
-# Unix/macOS
-mkdir -p openspec/changes/<name>/specs/<capability-name>
-# Windows (PowerShell)
-# New-Item -ItemType Directory -Force -Path "openspec/changes/<name>/specs/<capability-name>"
+openspec instructions specs --change "<name>" --json
+# Use resolvedOutputPath from the JSON. If it is a glob, choose the concrete file path using the schema instruction and the change's context.
 ```
 
 Draft the spec content:
@@ -298,7 +298,7 @@ Here's the spec:
 This format—WHEN/THEN/AND—makes requirements testable. You can literally read them as test cases.
 ```
 
-Save to `openspec/changes/<name>/specs/<capability>/spec.md`.
+Save to the concrete file path chosen from `resolvedOutputPath`.
 
 ---
 
@@ -343,7 +343,7 @@ Here's the design:
 For a small task, this captures the key decisions without over-engineering.
 ```
 
-Save to `openspec/changes/<name>/design.md`.
+Save to the `resolvedOutputPath` from `openspec instructions design --change "<name>" --json`.
 
 ---
 
@@ -381,7 +381,7 @@ Each checkbox becomes a unit of work in the apply phase. Ready to implement?
 
 **PAUSE** - Wait for user to confirm they're ready to implement.
 
-Save to `openspec/changes/<name>/tasks.md`.
+Save to the `resolvedOutputPath` from `openspec instructions tasks --change "<name>" --json`.
 
 ---
 
@@ -425,7 +425,7 @@ The change is implemented! One more step—let's archive it.
 ```
 ## Archiving
 
-When a change is complete, we archive it. This moves it from `openspec/changes/` to `openspec/changes/archive/YYYY-MM-DD-<name>/`.
+When a change is complete, we archive it. The archive path is derived from `planningHome.changesDir` and the date.
 
 Archived changes become your project's decision history—you can always find them later to understand why something was built a certain way.
 ```
@@ -437,7 +437,7 @@ openspec archive "<name>"
 
 **SHOW:**
 ```
-Archived to: `openspec/changes/archive/YYYY-MM-DD-<name>/`
+Archived to: `<planningHome.changesDir>/archive/YYYY-MM-DD-<name>/`
 
 The change is now part of your project's history. The code is in your codebase, the decision record is preserved.
 ```
@@ -500,7 +500,7 @@ Try `/opsx:propose` on something you actually want to build. You've got the rhyt
 If the user says they need to stop, want to pause, or seem disengaged:
 
 ```
-No problem! Your change is saved at `openspec/changes/<name>/`.
+No problem! Your change is saved at the `changeRoot` reported by `openspec status --change "<name>" --json`.
 
 To pick up where we left off later:
 - `/opsx:continue <name>` - Resume artifact creation
