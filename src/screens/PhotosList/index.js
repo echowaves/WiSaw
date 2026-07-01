@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useEffect, useImperativeHandle, useMemo
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
 import { router, useNavigation } from 'expo-router'
+import * as Location from 'expo-location'
 import * as Notifications from '../../utils/notifications'
 
 import * as BackgroundTask from 'expo-background-task'
@@ -138,6 +139,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const toastTopOffset = useToastTopOffset()
 
   const [netAvailable] = useAtom(STATE.netAvailable)
+  const setLocation = useSetAtom(STATE.locationAtom)
 
   const [locationState] = useAtom(STATE.locationAtom)
   const location = locationState.status === 'ready' ? { coords: locationState.coords } : null
@@ -372,6 +374,26 @@ const PhotosList = ({ searchFromUrl }) => {
     }
   }, [locationState.status])
 
+  // Force-refresh handler: check GPS and refresh the feed
+  const handleTryAgain = useCallback(async () => {
+    try {
+      const freshLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced
+      })
+      setLocation({
+        status: 'ready',
+        coords: {
+          latitude: freshLocation.coords.latitude,
+          longitude: freshLocation.coords.longitude
+        },
+        accuracy: freshLocation.coords.accuracy
+      })
+    } catch (e) {
+      if (__DEV__) console.warn('[PhotosList] Force GPS check failed:', e?.message)
+    }
+    reload()
+  }, [reload, setLocation])
+
   /// //////////////////////////////////////////////////////////////////////////
   // here where the rendering starts
   /// //////////////////////////////////////////////////////////////////////////
@@ -412,9 +434,9 @@ const PhotosList = ({ searchFromUrl }) => {
             icon='wifi-off'
             iconType='MaterialIcons'
             title='No Internet Connection'
-            subtitle="You can still take photos offline. They'll be uploaded automatically when you're back online."
+            subtitle="You can take photos when your location is determined. They'll be uploaded automatically when you're back online."
             actionText='Try Again'
-            onActionPress={reload}
+            onActionPress={handleTryAgain}
           />
         </ScrollView>
         <PhotosListFooter
