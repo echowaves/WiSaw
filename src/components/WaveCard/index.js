@@ -17,13 +17,10 @@ const WaveCard = ({ wave, onPress, onLongPress, theme, selectMode, selected, onT
     return fetchWavePhotos({ waveUuid: wave.waveUuid, pageNumber, batch })
   }, [wave.waveUuid])
 
-  // In selection mode, tap toggles selection (only for owner waves)
+  // In selection mode, tapping the card does nothing - only checkbox toggles selection
+  // In browse mode, tap navigates to wave detail
   const handlePress = () => {
-    if (selectMode) {
-      if (isOwner && onToggleSelection) {
-        onToggleSelection(wave.waveUuid)
-      }
-    } else {
+    if (!selectMode) {
       onPress(wave)
     }
   }
@@ -37,7 +34,11 @@ const WaveCard = ({ wave, onPress, onLongPress, theme, selectMode, selected, onT
 
   return (
     <View
-      style={[styles.card, { backgroundColor: theme.CARD_BACKGROUND }, selected && styles.selectedCard]}
+      style={[
+        styles.card,
+        { backgroundColor: theme.CARD_BACKGROUND },
+        selected && styles.selectedCard
+      ]}
     >
       <WavePhotoStrip
         initialPhotos={photos}
@@ -52,6 +53,19 @@ const WaveCard = ({ wave, onPress, onLongPress, theme, selectMode, selected, onT
         style={styles.infoContainer}
       >
         <View style={styles.infoRow}>
+          {selectMode && (
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation()
+                if (isOwner && onToggleSelection) {
+                  onToggleSelection(wave.waveUuid)
+                }
+              }}
+              style={styles.selectionIndicator}
+            >
+              {selected ? <Ionicons name='checkmark' size={16} color='#007AFF' /> : <Ionicons name='square-outline' size={18} color='#007AFF' />}
+            </TouchableOpacity>
+          )}
           <View style={styles.infoTextContainer}>
             <View style={styles.nameRow}>
               <Text style={[styles.waveName, { color: theme.TEXT_PRIMARY }]} numberOfLines={1} ellipsizeMode='tail'>
@@ -79,30 +93,17 @@ const WaveCard = ({ wave, onPress, onLongPress, theme, selectMode, selected, onT
               )}
             </View>
           </View>
-          {selectMode
-            ? (
-                <View style={[styles.selectionIndicator, { borderColor: selected ? '#007AFF' : 'transparent' }]}>
-                  {selected && <Ionicons name='checkmark' size={16} color='#FFFFFF' />}
-                </View>
-              )
-            : (
-                <TouchableOpacity
-                  onPress={(e) => { e.stopPropagation(); onLongPress(wave) }}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  style={styles.menuButton}
-                >
-                  <Ionicons name='ellipsis-vertical' size={18} color={theme.TEXT_SECONDARY} />
-                </TouchableOpacity>
-              )}
+          {!selectMode && (
+            <TouchableOpacity
+              onPress={(e) => { e.stopPropagation(); onLongPress(wave) }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.menuButton}
+            >
+              <Ionicons name='ellipsis-vertical' size={18} color={theme.TEXT_SECONDARY} />
+            </TouchableOpacity>
+          )}
         </View>
       </Pressable>
-      {selected && (
-        <View style={styles.selectionOverlay}>
-          <View style={[styles.checkBadge, { backgroundColor: '#007AFF' }]}>
-            <Ionicons name='checkmark' size={20} color='#FFFFFF' />
-          </View>
-        </View>
-      )}
     </View>
   )
 }
@@ -165,6 +166,9 @@ const styles = StyleSheet.create({
   selectedCard: {
     borderWidth: 2,
     borderColor: '#007AFF'
+  },
+  cardRelative: {
+    position: 'relative'
   },
   selectionIndicator: {
     width: 22,
