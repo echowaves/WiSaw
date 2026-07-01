@@ -4,7 +4,7 @@ This specification defines expected user-visible behavior, constraints, and vali
 ## Requirements
 
 ### Requirement: User can merge one wave into another
-The system SHALL allow the user to merge a source wave into a target wave. All photos from the source wave SHALL be moved to the target wave, and the source wave SHALL be deleted.
+The system SHALL allow the user to merge a source wave into a target wave. All photos from the source wave SHALL be moved to the target wave, and the source wave SHALL be deleted. The `mergeWaves` mutation SHALL accept `sourceWaveUuids` as an array of strings, enabling both single-wave and multi-wave merge flows.
 
 #### Scenario: Successful merge from WavesHub context menu
 - **WHEN** the user long-presses a wave card (or taps its ⋮ icon) and selects "Merge Into Another Wave..."
@@ -20,7 +20,7 @@ The system SHALL allow the user to merge a source wave into a target wave. All p
 
 #### Scenario: User confirms the merge
 - **WHEN** the user taps "Merge" in the confirmation alert
-- **THEN** the system SHALL call the `mergeWaves` mutation with `targetWaveUuid`, `sourceWaveUuid`, and `uuid`
+- **THEN** the system SHALL call the `mergeWaves` mutation with `targetWaveUuid`, `sourceWaveUuids` as an array containing the source wave UUID, and `uuid`
 - **THEN** the system SHALL show a success toast ("Waves merged successfully")
 
 #### Scenario: Merge fails with API error
