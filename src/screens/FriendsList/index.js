@@ -18,6 +18,7 @@ import * as STATE from '../../state'
 import ActionMenu from '../../components/ActionMenu'
 import AppHeader from '../../components/AppHeader'
 import EmptyStateCard from '../../components/EmptyStateCard'
+import SortOrderPicker from '../../components/SortOrderPicker'
 import FriendCard from '../../components/FriendCard'
 import FriendsExplainerView from '../../components/FriendsExplainerView'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
@@ -91,7 +92,7 @@ const FriendsList = () => {
   const [loading, setLoading] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
   const [menuFriend, setMenuFriend] = useState(null)
-  const [sortMenuVisible, setSortMenuVisible] = useState(false)
+  const [sortPickerVisible, setSortPickerVisible] = useState(false)
   const [searchText, setSearchText] = useState('')
   const debouncedSearch = useDebouncedSearch(searchText)
 
@@ -101,21 +102,15 @@ const FriendsList = () => {
   }, [])
 
   const sortOptions = [
-    { label: 'Alphabetical A-Z', sortBy: 'alphabetical', sortDirection: 'asc', icon: 'sort-alphabetical-ascending' },
-    { label: 'Alphabetical Z-A', sortBy: 'alphabetical', sortDirection: 'desc', icon: 'sort-alphabetical-descending' },
-    { label: 'Recently Added', sortBy: 'recentlyAdded', sortDirection: 'desc', icon: 'sort-descending' }
+    { key: 'az', label: 'A-Z', sortBy: 'alphabetical', sortDirection: 'asc' },
+    { key: 'za', label: 'Z-A', sortBy: 'alphabetical', sortDirection: 'desc' },
+    { key: 'recent', label: 'Recent', sortBy: 'recentlyAdded', sortDirection: 'desc' }
   ]
 
-  const sortMenuItems = sortOptions.map((opt, i) => ({
-    key: `sort-${i}`,
-    icon: opt.icon,
-    label: opt.label,
-    checked: opt.sortBy === sortBy && opt.sortDirection === sortDirection,
-    onPress: () => {
-      setSortBy(opt.sortBy)
-      setSortDirection(opt.sortDirection)
-    }
-  }))
+  const handleSortChange = ({ sortBy: newSortBy, sortDirection: newSortDir }) => {
+    setSortBy(newSortBy)
+    setSortDirection(newSortDir)
+  }
 
   const headerRightSlot = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -137,7 +132,9 @@ const FriendsList = () => {
         />
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={() => setSortMenuVisible(true)}
+        onPress={() => {
+          setSortPickerVisible(true)
+        }}
         style={[
           SHARED_STYLES.interactive.headerButton,
           {
@@ -148,7 +145,7 @@ const FriendsList = () => {
         ]}
       >
         <MaterialCommunityIcons
-          name='dots-vertical'
+          name='sort'
           size={22}
           color={theme.TEXT_PRIMARY}
         />
@@ -485,6 +482,16 @@ const FriendsList = () => {
           title={menuFriend?.contact || 'Unnamed Friend'}
           items={menuItems}
         />
+        <SortOrderPicker
+          visible={sortPickerVisible}
+          onClose={() => setSortPickerVisible(false)}
+          mode="segmented"
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          options={sortOptions}
+          onSortChange={handleSortChange}
+          isDarkMode={isDarkMode}
+        />
 
         <InteractionHintBanner
           hasContent={hasAnyFriends}
@@ -577,11 +584,6 @@ const FriendsList = () => {
           </KeyboardStickyView>
         )}
       </View>
-      <ActionMenu
-        visible={sortMenuVisible}
-        onClose={() => setSortMenuVisible(false)}
-        items={sortMenuItems}
-      />
     </View>
   )
 }

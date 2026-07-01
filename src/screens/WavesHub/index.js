@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
-  Modal,
   Alert,
   ActivityIndicator,
   useWindowDimensions
@@ -35,6 +34,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
+import SortOrderPicker from '../../components/SortOrderPicker'
 import WaveShareModal from '../../components/WaveShareModal'
 import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
@@ -112,31 +112,21 @@ const WavesHub = () => {
 
   const theme = getTheme(isDarkMode)
 
-  // Sort menu state
-  const [headerMenuVisible, setHeaderMenuVisible] = useState(false)
+  // Sort picker state
+  const [sortPickerVisible, setSortPickerVisible] = useState(false)
 
   const sortOptions = [
-    { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
-    { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
-    { label: 'Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc', icon: 'sort-descending' },
-    { label: 'Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc', icon: 'sort-ascending' }
+    { key: 'updated', label: 'Updated', sortBy: 'updatedAt' },
+    { key: 'created', label: 'Created', sortBy: 'createdAt' }
   ]
 
-  const headerMenuItems = [
-    ...sortOptions.map((opt, i) => ({
-      key: `sort-${i}`,
-      icon: opt.icon,
-      label: opt.label,
-      checked: opt.sortBy === sortBy && opt.sortDirection === sortDirection,
-      onPress: () => {
-        if (opt.sortBy !== sortBy || opt.sortDirection !== sortDirection) {
-          setSortBy(opt.sortBy)
-          setSortDirection(opt.sortDirection)
-          saveWaveSortPreferences({ sortBy: opt.sortBy, sortDirection: opt.sortDirection })
-        }
-      }
-    }))
-  ]
+  const handleSortChange = ({ sortBy: newSortBy, sortDirection: newSortDir }) => {
+    if (newSortBy !== sortBy || newSortDir !== sortDirection) {
+      setSortBy(newSortBy)
+      setSortDirection(newSortDir)
+      saveWaveSortPreferences({ sortBy: newSortBy, sortDirection: newSortDir })
+    }
+  }
 
   const toggleWaveSelection = (waveUuid) => {
     setSelectedWaveUuids(prev => {
@@ -248,7 +238,7 @@ const WavesHub = () => {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setHeaderMenuVisible(true)}
+            onPress={() => setSortPickerVisible(true)}
             style={[
               SHARED_STYLES.interactive.headerButton,
               {
@@ -261,7 +251,7 @@ const WavesHub = () => {
             ]}
           >
             <MaterialCommunityIcons
-              name='dots-vertical'
+              name='sort'
               size={22}
               color={theme.TEXT_PRIMARY}
             />
@@ -719,10 +709,15 @@ const WavesHub = () => {
         uuid={uuid}
       />
 
-      <ActionMenu
-        visible={headerMenuVisible}
-        onClose={() => setHeaderMenuVisible(false)}
-        items={headerMenuItems}
+      <SortOrderPicker
+        visible={sortPickerVisible}
+        onClose={() => setSortPickerVisible(false)}
+        mode="arrows"
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        options={sortOptions}
+        onSortChange={handleSortChange}
+        isDarkMode={isDarkMode}
       />
 
       {/* Floating Combine Action Bar */}
