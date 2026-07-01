@@ -1,8 +1,8 @@
 {
   "name": "wisaw",
   "version": "7.5.7",
-  "buildNumber": "678",
-  "versionCode": 678,
+  "buildNumber": "679",
+  "versionCode": 679,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",

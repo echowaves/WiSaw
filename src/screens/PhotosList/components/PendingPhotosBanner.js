@@ -25,10 +25,44 @@ const PendingPhotosBanner = ({
 }) => {
   if (pendingPhotos.length === 0) return null
 
+  // Tasks 1.1-1.3: Count image and video items separately
+  const imageCount = pendingPhotos.filter(item => item.type === 'image').length
+  const videoCount = pendingPhotos.filter(item => item.type === 'video').length
+
+  // Task 1.2: formatItemCount helper for singular/plural formatting
+  const formatItemCount = (count, singular, plural) => {
+    if (count === 0) return null
+    return `${count} ${count === 1 ? singular : plural}`
+  }
+
+  // Task 1.3: Build itemCountLabel combining photo and video counts
+  const itemCounts = [
+    formatItemCount(imageCount, 'photo', 'photos'),
+    formatItemCount(videoCount, 'video', 'videos')
+  ].filter(Boolean)
+
+  const itemCountLabel = itemCounts.length > 0
+    ? itemCounts.join(', ')
+    : `${pendingPhotos.length} item${pendingPhotos.length === 1 ? '' : 's'}`
+
   let uploadStatusLabel = 'waiting to upload'
   if (netAvailable) {
     uploadStatusLabel = isUploading ? 'uploading' : 'ready to upload'
   }
+
+  // Task 1.5: Dynamic icon selection
+  let uploadIconName = 'cloud-upload' // default for mixed
+  if (imageCount === 0 && videoCount > 0) {
+    uploadIconName = 'videocam'
+  } else if (imageCount > 0 && videoCount === 0) {
+    uploadIconName = 'photo'
+  }
+
+  // Task 1.6: Build breakdown string for confirm alert
+  const clearBreakdown = [
+    formatItemCount(imageCount, 'photo', 'photos'),
+    formatItemCount(videoCount, 'video', 'videos')
+  ].filter(Boolean).join(' and ') || `${pendingPhotos.length} item${pendingPhotos.length === 1 ? '' : 's'}`
 
   return (
     <TouchableOpacity
@@ -37,7 +71,7 @@ const PendingPhotosBanner = ({
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         showConfirmAlert(
           'Clear Upload Queue',
-          `Are you sure you want to cancel all ${pendingPhotos.length} pending upload${pendingPhotos.length === 1 ? '' : 's'}? This cannot be undone.`,
+          `Are you sure you want to cancel all ${clearBreakdown}? This cannot be undone.${clearBreakdown !== pendingPhotos.length.toString() ? '' : ''}`,
           async () => {
             await clearPendingQueue()
             showToast('Upload queue cleared', { text2: 'All pending uploads have been cancelled', type: 'success', topOffset: toastTopOffset })
@@ -89,8 +123,9 @@ const PendingPhotosBanner = ({
             ]
           }}
         >
+          {/* Task 1.5: Use dynamic icon */}
           <MaterialIcons
-            name='cloud-upload'
+            name={uploadIconName}
             size={24}
             color={netAvailable ? theme.INTERACTIVE_PRIMARY : theme.TEXT_DISABLED}
             style={{ marginRight: 12 }}
@@ -106,7 +141,8 @@ const PendingPhotosBanner = ({
               opacity: pendingPhotosAnimation
             }}
           >
-            {pendingPhotos.length} {pendingPhotos.length === 1 ? 'photo' : 'photos'}{' '}
+            {/* Task 1.4: Use itemCountLabel instead of generic count */}
+            {itemCountLabel}{' '}
             {uploadStatusLabel}
           </Animated.Text>
         </View>
