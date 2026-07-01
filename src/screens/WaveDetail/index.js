@@ -445,7 +445,7 @@ const WaveDetail = () => {
         try {
           await reducer.mergeWaves({
             targetWaveUuid: targetWave.waveUuid,
-            sourceWaveUuid: waveUuid,
+            sourceWaveUuids: [waveUuid],
             uuid
           })
           showSuccessToast(`Merged into "${targetWave.name}"`)

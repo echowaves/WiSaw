@@ -86,6 +86,10 @@ const WavesHub = () => {
   const [mergeModalVisible, setMergeModalVisible] = useState(false)
   const [mergingWave, setMergingWave] = useState(null)
 
+  // Selection mode state
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedWaveUuids, setSelectedWaveUuids] = useState(new Set())
+
   // Context menu state
   const [contextMenuWave, setContextMenuWave] = useState(null)
 
@@ -134,30 +138,136 @@ const WavesHub = () => {
     }))
   ]
 
-  const headerRightSlot = (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-      {/* Kebab Menu */}
-      <TouchableOpacity
-        onPress={() => setHeaderMenuVisible(true)}
-        style={[
-          SHARED_STYLES.interactive.headerButton,
-          {
-            backgroundColor: theme.INTERACTIVE_BACKGROUND,
-            borderWidth: 1,
-            borderColor: theme.INTERACTIVE_BORDER,
-            flexDirection: 'row',
-            alignItems: 'center'
-          }
-        ]}
-      >
-        <MaterialCommunityIcons
-          name='dots-vertical'
-          size={22}
-          color={theme.TEXT_PRIMARY}
-        />
-      </TouchableOpacity>
-    </View>
-  )
+  const toggleWaveSelection = (waveUuid) => {
+    setSelectedWaveUuids(prev => {
+      const next = new Set(prev)
+      if (next.has(waveUuid)) {
+        next.delete(waveUuid)
+      } else {
+        next.add(waveUuid)
+      }
+      return next
+    })
+  }
+
+  const exitSelectionMode = () => {
+    setSelectMode(false)
+    setSelectedWaveUuids(new Set())
+  }
+
+  const getTargetWave = (selectedWaves) => {
+    return selectedWaves.reduce((a, b) => {
+      if (a.photosCount > b.photosCount) return a
+      if (b.photosCount > a.photosCount) return b
+      return new Date(a.updatedAt) > new Date(b.updatedAt) ? a : b
+    })
+  }
+
+  const handleCombine = () => {
+    const selectedWaves = waves.filter(w => selectedWaveUuids.has(w.waveUuid))
+    if (selectedWaves.length < 2) return
+
+    const target = getTargetWave(selectedWaves)
+    const sources = selectedWaves.filter(w => w.waveUuid !== target.waveUuid)
+    const totalSourcePhotos = sources.reduce((sum, w) => sum + (w.photosCount || 0), 0)
+
+    showConfirmAlert(
+      `Merge ${sources.length + 1} waves?`,
+      `All photos will be merged into "${target.name}". ${totalSourcePhotos} photo${totalSourcePhotos !== 1 ? 's' : ''} will be moved. ${sources.length} wave${sources.length !== 1 ? 's' : ''} will be deleted.`,
+      async () => {
+        try {
+          const sourceUuids = sources.map(w => w.waveUuid)
+          const updatedTarget = await reducer.mergeWaves({
+            targetWaveUuid: target.waveUuid,
+            sourceWaveUuids: sourceUuids,
+            uuid
+          })
+          const sourceUuidSet = new Set(sourceUuids)
+          setWaves(prev => prev
+            .filter(w => !sourceUuidSet.has(w.waveUuid))
+            .map(w => w.waveUuid === target.waveUuid
+              ? { ...w, ...updatedTarget, thumbnails: w.thumbnails }
+              : w
+            )
+          )
+          exitSelectionMode()
+          showSuccessToast('Waves merged successfully')
+        } catch (error) {
+          console.error(error)
+          showErrorToast({ title: 'Error merging waves', message: error.message })
+        }
+      }
+    )
+  }
+
+  const headerTitle = selectMode
+    ? (
+        <Text style={{ color: theme.TEXT_PRIMARY, fontSize: 16, fontWeight: '600' }}>
+          Count: {selectedWaveUuids.size}
+        </Text>
+      )
+    : <ScreenIconTitle screenKey='waves' />
+
+  const headerRightSlot = selectMode
+    ? (
+        <TouchableOpacity
+          onPress={exitSelectionMode}
+          style={[
+            SHARED_STYLES.interactive.headerButton,
+            {
+              backgroundColor: theme.INTERACTIVE_BACKGROUND,
+              borderWidth: 1,
+              borderColor: theme.INTERACTIVE_BORDER,
+              flexDirection: 'row',
+              alignItems: 'center'
+            }
+          ]}
+        >
+          <Text style={{ color: '#007AFF', fontSize: 16, fontWeight: '600' }}>
+            Deselect
+          </Text>
+        </TouchableOpacity>
+      )
+    : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity
+            onPress={() => setSelectMode(true)}
+            style={[
+              SHARED_STYLES.interactive.headerButton,
+              {
+                backgroundColor: theme.INTERACTIVE_BACKGROUND,
+                borderWidth: 1,
+                borderColor: theme.INTERACTIVE_BORDER,
+                flexDirection: 'row',
+                alignItems: 'center'
+              }
+            ]}
+          >
+            <Text style={{ color: theme.TEXT_PRIMARY, fontSize: 14, fontWeight: '600' }}>
+              Select
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setHeaderMenuVisible(true)}
+            style={[
+              SHARED_STYLES.interactive.headerButton,
+              {
+                backgroundColor: theme.INTERACTIVE_BACKGROUND,
+                borderWidth: 1,
+                borderColor: theme.INTERACTIVE_BORDER,
+                flexDirection: 'row',
+                alignItems: 'center'
+              }
+            ]}
+          >
+            <MaterialCommunityIcons
+              name='dots-vertical'
+              size={22}
+              color={theme.TEXT_PRIMARY}
+            />
+          </TouchableOpacity>
+        </View>
+      )
 
   const loadWaves = useCallback(async (pageNum, currentBatch, refresh = false, searchTerm) => {
     if (stopLoading.current) return
@@ -395,7 +505,7 @@ const WavesHub = () => {
         try {
           const updatedTarget = await reducer.mergeWaves({
             targetWaveUuid: targetWave.waveUuid,
-            sourceWaveUuid: mergingWave.waveUuid,
+            sourceWaveUuids: [mergingWave.waveUuid],
             uuid
           })
           setWaves(prev => prev
@@ -478,14 +588,18 @@ const WavesHub = () => {
 
   const filteredWaves = waves
 
+  const selectionCount = selectedWaveUuids.size
+
   const renderItem = ({ item, index }) => {
-    // Add an empty spacer for odd-count last item to keep grid alignment
     return (
       <WaveCard
         wave={item}
         onPress={handleWavePress}
         onLongPress={showWaveContextMenu}
         theme={theme}
+        selectMode={selectMode}
+        selected={selectedWaveUuids.has(item.waveUuid)}
+        onToggleSelection={toggleWaveSelection}
       />
     )
   }
@@ -514,7 +628,7 @@ const WavesHub = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
       <AppHeader
-        title={<ScreenIconTitle screenKey='waves' />}
+        title={headerTitle}
         onBack={() => router.back()}
         rightSlot={headerRightSlot}
         loading={loading}
@@ -610,6 +724,28 @@ const WavesHub = () => {
         onClose={() => setHeaderMenuVisible(false)}
         items={headerMenuItems}
       />
+
+      {/* Floating Combine Action Bar */}
+      {selectMode && selectionCount > 0 && (
+        <View style={[styles.combineBar, { backgroundColor: theme.CARD_BACKGROUND, borderTopColor: theme.INTERACTIVE_BORDER }]}>
+          <TouchableOpacity
+            onPress={handleCombine}
+            style={[
+              styles.combineButton,
+              {
+                opacity: selectionCount >= 2 ? 1 : 0.4,
+                backgroundColor: '#007AFF'
+              }
+            ]}
+            disabled={selectionCount < 2}
+          >
+            <MaterialCommunityIcons name='call-merge' size={20} color='#FFFFFF' />
+            <Text style={styles.combineButtonText}>
+              Combine ({selectionCount})
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Search bar - bottom floating */}
       {(waves.length > 0 || searchText.length > 0) && (
@@ -723,6 +859,32 @@ const styles = StyleSheet.create({
   buttonText: {
     fontWeight: '600',
     fontSize: 16
+  },
+  combineBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    zIndex: 100
+  },
+  combineButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 28
+  },
+  combineButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600'
   }
 })
 

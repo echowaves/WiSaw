@@ -7,29 +7,48 @@ import { fetchWavePhotos } from '../../screens/WaveDetail/reducer'
 import { normalizeWaveName } from '../../utils/normalizeWaveName'
 import { WAVE_ROLES } from '../../consts'
 
-const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
+const WaveCard = ({ wave, onPress, onLongPress, theme, selectMode, selected, onToggleSelection }) => {
   const photoCount = wave.photosCount ?? 0
   const photos = wave.photos || []
   const roleConfig = WAVE_ROLES[wave.myRole] || WAVE_ROLES.contributor
+  const isOwner = wave.myRole === 'owner'
 
   const fetchFn = useCallback(async (pageNumber, batch) => {
     return fetchWavePhotos({ waveUuid: wave.waveUuid, pageNumber, batch })
   }, [wave.waveUuid])
 
+  // In selection mode, tap toggles selection (only for owner waves)
+  const handlePress = () => {
+    if (selectMode) {
+      if (isOwner && onToggleSelection) {
+        onToggleSelection(wave.waveUuid)
+      }
+    } else {
+      onPress(wave)
+    }
+  }
+
+  // In selection mode, disable long-press context menu
+  const handleLongPress = () => {
+    if (!selectMode) {
+      onLongPress(wave)
+    }
+  }
+
   return (
     <View
-      style={[styles.card, { backgroundColor: theme.CARD_BACKGROUND }]}
+      style={[styles.card, { backgroundColor: theme.CARD_BACKGROUND }, selected && styles.selectedCard]}
     >
       <WavePhotoStrip
         initialPhotos={photos}
         fetchFn={fetchFn}
         theme={theme}
-        onPhotoPress={() => onPress(wave)}
-        onPhotoLongPress={() => onLongPress(wave)}
+        onPhotoPress={handlePress}
+        onPhotoLongPress={handleLongPress}
       />
       <Pressable
-        onPress={() => onPress(wave)}
-        onLongPress={() => onLongPress(wave)}
+        onPress={handlePress}
+        onLongPress={handleLongPress}
         style={styles.infoContainer}
       >
         <View style={styles.infoRow}>
@@ -60,15 +79,30 @@ const WaveCard = ({ wave, onPress, onLongPress, theme }) => {
               )}
             </View>
           </View>
-          <TouchableOpacity
-            onPress={(e) => { e.stopPropagation(); onLongPress(wave) }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            style={styles.menuButton}
-          >
-            <Ionicons name='ellipsis-vertical' size={18} color={theme.TEXT_SECONDARY} />
-          </TouchableOpacity>
+          {selectMode
+            ? (
+                <View style={[styles.selectionIndicator, { borderColor: selected ? '#007AFF' : 'transparent' }]}>
+                  {selected && <Ionicons name='checkmark' size={16} color='#FFFFFF' />}
+                </View>
+              )
+            : (
+                <TouchableOpacity
+                  onPress={(e) => { e.stopPropagation(); onLongPress(wave) }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={styles.menuButton}
+                >
+                  <Ionicons name='ellipsis-vertical' size={18} color={theme.TEXT_SECONDARY} />
+                </TouchableOpacity>
+              )}
         </View>
       </Pressable>
+      {selected && (
+        <View style={styles.selectionOverlay}>
+          <View style={[styles.checkBadge, { backgroundColor: '#007AFF' }]}>
+            <Ionicons name='checkmark' size={20} color='#FFFFFF' />
+          </View>
+        </View>
+      )}
     </View>
   )
 }
@@ -127,6 +161,31 @@ const styles = StyleSheet.create({
   roleBadgeText: {
     fontSize: 10,
     fontWeight: '600'
+  },
+  selectedCard: {
+    borderWidth: 2,
+    borderColor: '#007AFF'
+  },
+  selectionIndicator: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  selectionOverlay: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 10
+  },
+  checkBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })
 
