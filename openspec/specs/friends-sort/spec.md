@@ -1,28 +1,55 @@
-# Friends Sort Specification (Updated)
+# Friends Sort Specification
 
 ## Purpose
-Friends list is sorted by `createdAt` (friendship creation date) in descending order — newest first. Pending friends are always pinned to the top.
+This specification defines expected user-visible behavior, constraints, and validation scenarios for friends list sort in WiSaw.
 
 ## Requirements
 
-### Requirement: Friends list sort order
-The friends list SHALL be sorted by `createdAt` (friendship creation date) in descending order — newest friendships first.
+### Requirement: Friends list sort options
+The friends screen SHALL provide sort options accessible via a header button that opens a SortOrderPicker in arrows mode. Available sort options SHALL be: Alphabetical A-Z and Recently Added.
+
+#### Scenario: User selects A-Z sort
+- **WHEN** the user opens the SortOrderPicker and selects A-Z
+- **THEN** the friends list SHALL reorder confirmed friends alphabetically A-Z (ascending)
+- **THEN** the A-Z option SHALL display an up arrow (▲) indicating ascending order
+
+#### Scenario: User toggles A-Z to Z-A
+- **WHEN** the user taps the A-Z option while ascending is active
+- **THEN** the friends list SHALL reorder confirmed friends alphabetically Z-A (descending)
+- **THEN** the A-Z option SHALL display a down arrow (▼) indicating descending order
+
+#### Scenario: User selects Recent sort
+- **WHEN** the user opens the SortOrderPicker and selects Recent
+- **THEN** the friends list SHALL reorder confirmed friends by `updatedAt` newest first
+- **THEN** the Recent option SHALL display an up arrow (▲) indicating newest-first
+
+#### Scenario: User toggles Recent direction
+- **WHEN** the user taps the Recent option while newest-first is active
+- **THEN** the friends list SHALL reorder confirmed friends by `updatedAt` oldest first
+- **THEN** the Recent option SHALL display a down arrow (▼) indicating oldest-first
 
 #### Scenario: Default sort order
-- **WHEN** the friends list loads
-- **THEN** confirmed friends SHALL appear sorted by `createdAt` descending (newest first)
-- **THEN** pending friends SHALL remain pinned at the top of the list
+- **WHEN** the user has not changed the sort in the current session
+- **THEN** the friends list SHALL default to A-Z sort with ascending direction (▲)
 
-#### Scenario: No sort picker
-The friends screen SHALL NOT provide a sort picker button or SortOrderPicker modal. The sort order is fixed and cannot be changed by the user.
+#### Scenario: Sort state resets on app restart
+- **WHEN** the app restarts
+- **THEN** the sort selection SHALL reset to the default (A-Z, ascending)
 
-### Requirement: Pending friends pinned to top
-Pending friends SHALL always appear at the top of the friends list as a group, regardless of the selected sort option. Only confirmed friends SHALL be affected by sort selection.
+#### Scenario: Sort uses updatedAt field
+- **WHEN** the Recent sort option is active
+- **THEN** the friends list SHALL be sorted by the `updatedAt` field, not `createdAt`
 
-#### Scenario: Pending friends with fixed sort
-- **WHEN** the friends list loads and has both pending and confirmed friends
-- **THEN** all pending friends SHALL appear at the top of the list
-- **THEN** confirmed friends SHALL appear below, sorted by `createdAt` descending
+### Requirement: Friends sort state management
+Sort state SHALL be managed via Jotai atoms (`friendsSortBy` and `friendsSortDirection`), following the same pattern as waves sort state.
 
-### Requirement: No sort state management
-Sort state SHALL NOT be managed via Jotai atoms. The sort order is fixed and does not need to be stored or persisted.
+#### Scenario: Sort state stored in Jotai atoms
+- **WHEN** the user changes the sort option
+- **THEN** the `friendsSortBy` and `friendsSortDirection` Jotai atoms SHALL update
+- **THEN** the FriendsList component SHALL re-render with the new sort order
+
+#### Scenario: friendsSortBy atom values
+- **WHEN** the user selects A-Z sort
+- **THEN** `friendsSortBy` SHALL be `'alphabetical'`
+- **WHEN** the user selects Recent sort
+- **THEN** `friendsSortBy` SHALL be `'updatedAt'`
