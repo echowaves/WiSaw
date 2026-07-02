@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useContext, useMemo } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useContext } from 'react'
 import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 import {
   View,
@@ -534,14 +534,6 @@ const WavesHub = () => {
     })
   }
 
-  const filteredWaves = useMemo(() => {
-    return [...waves].sort((a, b) => {
-      const dateA = a?.createdAt ? new Date(a.createdAt).getTime() : 0
-      const dateB = b?.createdAt ? new Date(b.createdAt).getTime() : 0
-      return dateB - dateA
-    })
-  }, [waves])
-
   const selectionCount = selectedWaveUuids.size
 
   const renderItem = ({ item, index }) => {
@@ -600,7 +592,7 @@ const WavesHub = () => {
       <InteractionHintBanner hasContent={waves.length > 0} />
 
       <FlatList
-        data={filteredWaves}
+        data={waves}
         renderItem={renderItem}
         keyExtractor={item => item.waveUuid}
         numColumns={numColumns}
