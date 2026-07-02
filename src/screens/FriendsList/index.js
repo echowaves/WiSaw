@@ -18,7 +18,6 @@ import * as STATE from '../../state'
 import ActionMenu from '../../components/ActionMenu'
 import AppHeader from '../../components/AppHeader'
 import EmptyStateCard from '../../components/EmptyStateCard'
-import SortOrderPicker from '../../components/SortOrderPicker'
 import FriendCard from '../../components/FriendCard'
 import FriendsExplainerView from '../../components/FriendsExplainerView'
 import InteractionHintBanner from '../../components/ui/InteractionHintBanner'
@@ -36,9 +35,6 @@ const FriendsList = () => {
   const [isDarkMode] = useAtom(STATE.isDarkMode)
   const [friendsList, setFriendsList] = useAtom(STATE.friendsList)
   const [netAvailable] = useAtom(STATE.netAvailable)
-  const [sortBy, setSortBy] = useAtom(STATE.friendsSortBy)
-  const [sortDirection, setSortDirection] = useAtom(STATE.friendsSortDirection)
-
   const theme = getTheme(isDarkMode)
   const insets = useSafeAreaInsets()
   const searchInputRef = useRef(null)
@@ -92,7 +88,6 @@ const FriendsList = () => {
   const [loading, setLoading] = useState(false)
   const [menuVisible, setMenuVisible] = useState(false)
   const [menuFriend, setMenuFriend] = useState(null)
-  const [sortPickerVisible, setSortPickerVisible] = useState(false)
   const [searchText, setSearchText] = useState('')
   const debouncedSearch = useDebouncedSearch(searchText)
 
@@ -100,16 +95,6 @@ const FriendsList = () => {
     setSelectedFriendshipUuid(null) // make sure we are adding a new friend
     setShowNamePicker(true)
   }, [])
-
-  const sortOptions = [
-    { key: 'az', label: 'A-Z', sortBy: 'alphabetical', sortDirection: 'asc' },
-    { key: 'recent', label: 'Recent', sortBy: 'updatedAt', sortDirection: 'desc' }
-  ]
-
-  const handleSortChange = ({ sortBy: newSortBy, sortDirection: newSortDir }) => {
-    setSortBy(newSortBy)
-    setSortDirection(newSortDir)
-  }
 
   const headerRightSlot = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -127,25 +112,6 @@ const FriendsList = () => {
         <FontAwesome5
           name='plus'
           size={18}
-          color={theme.TEXT_PRIMARY}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => {
-          setSortPickerVisible(true)
-        }}
-        style={[
-          SHARED_STYLES.interactive.headerButton,
-          {
-            backgroundColor: theme.INTERACTIVE_BACKGROUND,
-            borderWidth: 1,
-            borderColor: theme.INTERACTIVE_BORDER
-          }
-        ]}
-      >
-        <MaterialCommunityIcons
-          name='sort'
-          size={22}
           color={theme.TEXT_PRIMARY}
         />
       </TouchableOpacity>
@@ -308,26 +274,15 @@ const FriendsList = () => {
     const pending = list.filter((f) => f.uuid2 === null)
     const confirmed = list.filter((f) => f.uuid2 !== null)
 
-    // Sort confirmed friends
+    // Sort confirmed friends by createdAt desc (newest first)
     const sorted = [...confirmed].sort((a, b) => {
-      const dir = sortDirection === 'asc' ? 1 : -1
-      switch (sortBy) {
-        case 'alphabetical': {
-          const nameA = (a?.contact || 'Unnamed Friend').toLowerCase()
-          const nameB = (b?.contact || 'Unnamed Friend').toLowerCase()
-          return dir * nameA.localeCompare(nameB)
-        }
-        case 'updatedAt':
-        default: {
-          const dateA = a?.photos?.[0]?.updatedAt ? new Date(a.photos[0].updatedAt).getTime() : 0
-          const dateB = b?.photos?.[0]?.updatedAt ? new Date(b.photos[0].updatedAt).getTime() : 0
-          return dir * (dateB - dateA)
-        }
-      }
+      const dateA = a?.createdAt ? new Date(a.createdAt).getTime() : 0
+      const dateB = b?.createdAt ? new Date(b.createdAt).getTime() : 0
+      return dateB - dateA
     })
 
     return { pending, confirmed: sorted }
-  }, [friendsList, debouncedSearch, sortBy, sortDirection])
+  }, [friendsList, debouncedSearch])
 
   const pendingFriends = sortedAndFilteredFriends.pending
   const confirmedFriends = sortedAndFilteredFriends.confirmed
@@ -481,17 +436,6 @@ const FriendsList = () => {
           title={menuFriend?.contact || 'Unnamed Friend'}
           items={menuItems}
         />
-        <SortOrderPicker
-          visible={sortPickerVisible}
-          onClose={() => setSortPickerVisible(false)}
-          mode="arrows"
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          options={sortOptions}
-          onSortChange={handleSortChange}
-          isDarkMode={isDarkMode}
-        />
-
         <InteractionHintBanner
           hasContent={hasAnyFriends}
           hintText='Long-press a friend for options, or tap ⋮'

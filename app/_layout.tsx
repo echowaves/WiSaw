@@ -30,7 +30,7 @@ import {
   loadThemePreference,
   subscribeToSystemTheme
 } from '../src/utils/themeStorage'
-import { loadWaveSortPreferences, loadWaveFeedSortPreferences, loadFriendFeedSortPreferences } from '../src/utils/waveStorage'
+// waveSortBy, waveSortDirection, waveFeedSortBy, waveFeedSortDirection, friendFeedSortBy, friendFeedSortDirection atoms removed — sort is fixed to createdAt desc
 import { hydrateGroupingAtom, groupingAtom } from '../src/utils/groupingAtom'
 import { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
 import { errorContextAtom } from '../src/atoms/errorAtom'
@@ -55,12 +55,6 @@ export default function RootLayout (): JSX.Element {
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
    )
-  const [, setWaveSortBy] = useAtom(STATE.waveSortBy)
-  const [, setWaveSortDirection] = useAtom(STATE.waveSortDirection)
-  const [, setWaveFeedSortBy] = useAtom(STATE.waveFeedSortBy)
-  const [, setWaveFeedSortDirection] = useAtom(STATE.waveFeedSortDirection)
-  const [, setFriendFeedSortBy] = useAtom(STATE.friendFeedSortBy)
-  const [, setFriendFeedSortDirection] = useAtom(STATE.friendFeedSortDirection)
   const setGrouping = useSetAtom(groupingAtom)
   const setAtomSet = useSetAtom(errorContextAtom)
   useEffect(() => {
@@ -191,18 +185,12 @@ export default function RootLayout (): JSX.Element {
           nickNameResult,
           themePreferenceResult,
           followSystemResult,
-          waveSortResult,
-          waveFeedSortResult,
-          friendFeedSortResult,
           groupingResult
          ] = await Promise.allSettled([
           SecretReducer.getUUID(),
           SecretReducer.getStoredNickName(),
           loadThemePreference(),
           loadFollowSystemPreference(),
-          loadWaveSortPreferences(),
-          loadWaveFeedSortPreferences(),
-          loadFriendFeedSortPreferences(),
           hydrateGroupingAtom()
          ])
 
@@ -218,23 +206,7 @@ export default function RootLayout (): JSX.Element {
         const themePreference = !!getResolvedValue(themePreferenceResult, false)
         setIsDarkMode(followSystem ? getSystemTheme() : themePreference)
 
-        const waveSortPrefs = getResolvedValue(waveSortResult, null)
-        if (waveSortPrefs) {
-          setWaveSortBy(waveSortPrefs.sortBy)
-          setWaveSortDirection(waveSortPrefs.sortDirection)
-        }
-
-        const waveFeedSortPrefs = getResolvedValue(waveFeedSortResult, null)
-        if (waveFeedSortPrefs) {
-          setWaveFeedSortBy(waveFeedSortPrefs.sortBy)
-          setWaveFeedSortDirection(waveFeedSortPrefs.sortDirection)
-        }
-
-        const friendFeedSortPrefs = getResolvedValue(friendFeedSortResult, null)
-        if (friendFeedSortPrefs) {
-          setFriendFeedSortBy(friendFeedSortPrefs.sortBy)
-          setFriendFeedSortDirection(friendFeedSortPrefs.sortDirection)
-         }
+        // waveSortBy, waveSortDirection, waveFeedSortBy, waveFeedSortDirection, friendFeedSortBy, friendFeedSortDirection atoms removed — sort is fixed to createdAt desc
 
         const groupingSettings = getResolvedValue(groupingResult, null)
         if (groupingSettings) {
@@ -257,7 +229,7 @@ export default function RootLayout (): JSX.Element {
     return () => {
       isCancelled = true
     }
-  }, [setFollowSystemTheme, setIsDarkMode, setNickName, setUuid, setWaveSortBy, setWaveSortDirection])
+  }, [setFollowSystemTheme, setIsDarkMode, setNickName, setUuid])
 
   // Subscribe to system theme changes
   useEffect(() => {

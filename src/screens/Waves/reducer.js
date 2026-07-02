@@ -2,17 +2,15 @@
 import { gql } from '@apollo/client'
 import * as CONST from '../../consts'
 
-export const listWaves = async ({ pageNumber, batch, uuid, sortBy, sortDirection, searchTerm }) => {
+export const listWaves = async ({ pageNumber, batch, uuid, searchTerm }) => {
   try {
     const variables = { pageNumber, batch, uuid }
-    if (sortBy) variables.sortBy = sortBy
-    if (sortDirection) variables.sortDirection = sortDirection
     if (searchTerm) variables.searchTerm = searchTerm
 
     const response = await CONST.gqlClient.query({
       query: gql`
-        query listWaves($pageNumber: Int!, $batch: String!, $uuid: String!, $sortBy: String, $sortDirection: String, $searchTerm: String) {
-          listWaves(pageNumber: $pageNumber, batch: $batch, uuid: $uuid, sortBy: $sortBy, sortDirection: $sortDirection, searchTerm: $searchTerm) {
+        query listWaves($pageNumber: Int!, $batch: String!, $uuid: String!, $searchTerm: String) {
+          listWaves(pageNumber: $pageNumber, batch: $batch, uuid: $uuid, searchTerm: $searchTerm) {
             waves {
               waveUuid
               name

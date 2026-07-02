@@ -18,7 +18,7 @@ import * as STATE from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import { BOOKMARK_LAYOUT_CONFIG } from '../../consts'
 import * as reducer from './reducer'
-import { saveFriendFeedSortPreferences } from '../../utils/waveStorage'
+
 import EmptyStateCard from '../../components/EmptyStateCard'
 import PhotosListMasonry from '../../components/PhotosListMasonry'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
@@ -36,11 +36,6 @@ const FriendDetail = () => {
   const { friendUuid, friendName: initialFriendName, friendshipUuid } = useLocalSearchParams()
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [friendFeedSortBy] = useAtom(STATE.friendFeedSortBy)
-  const [friendFeedSortDirection] = useAtom(STATE.friendFeedSortDirection)
-  const setFriendFeedSortBy = useSetAtom(STATE.friendFeedSortBy)
-  const setFriendFeedSortDirection = useSetAtom(STATE.friendFeedSortDirection)
-
   const [friendName, setFriendName] = useState(initialFriendName || 'Friend')
   const [netAvailable] = useAtom(STATE.netAvailable)
 
@@ -57,9 +52,7 @@ const FriendDetail = () => {
       uuid,
       friendUuid,
       pageNumber: fetchParams.pageNumber,
-      batch: fetchParams.batch,
-      sortBy: friendFeedSortBy,
-      sortDirection: friendFeedSortDirection
+      batch: fetchParams.batch
     })
     return {
       photos: data.photos.map(createFrozenPhoto),
@@ -142,13 +135,6 @@ const FriendDetail = () => {
     router.setParams({ friendName: contactName })
   }
 
-  const feedSortOptions = [
-    { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
-    { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
-    { label: 'Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc', icon: 'sort-descending' },
-    { label: 'Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc', icon: 'sort-ascending' }
-  ]
-
   const headerMenuItems = [
     {
       key: 'edit-name',
@@ -164,20 +150,7 @@ const FriendDetail = () => {
       destructive: true,
       onPress: handleRemoveFriend
     },
-    'separator',
-    ...feedSortOptions.map((opt, i) => ({
-      key: `feed-sort-${i}`,
-      icon: opt.icon,
-      label: opt.label,
-      checked: opt.sortBy === friendFeedSortBy && opt.sortDirection === friendFeedSortDirection,
-      onPress: () => {
-        if (opt.sortBy !== friendFeedSortBy || opt.sortDirection !== friendFeedSortDirection) {
-          setFriendFeedSortBy(opt.sortBy)
-          setFriendFeedSortDirection(opt.sortDirection)
-          saveFriendFeedSortPreferences({ sortBy: opt.sortBy, sortDirection: opt.sortDirection })
-        }
-      }
-    }))
+    'separator'
   ]
 
   const headerRightSlot = (

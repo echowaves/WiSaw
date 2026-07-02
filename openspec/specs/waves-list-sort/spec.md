@@ -1,5 +1,7 @@
-## Purpose
-This specification defines expected user-visible behavior, constraints, and validation scenarios for waves list sort in WiSaw.
+> **RETIRED** — Sort options removed in change `remove-sort-selector-waves-friends`. Sort is now fixed to `createdAt` desc with no user-selectable options.
+>
+> ## Purpose
+> This specification defines expected user-visible behavior, constraints, and validation scenarios for waves list sort in WiSaw.
 
 ## Requirements
 

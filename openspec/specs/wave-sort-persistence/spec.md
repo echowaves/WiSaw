@@ -1,5 +1,7 @@
-## Purpose
-This specification defines expected user-visible behavior, constraints, and validation scenarios for wave sort persistence in WiSaw.
+> **RETIRED** — Sort persistence removed in change `remove-sort-selector-waves-friends`. Sort is now fixed to `createdAt` desc with no user-selectable options and no persistence.
+>
+> ## Purpose
+> This specification defines expected user-visible behavior, constraints, and validation scenarios for wave sort persistence in WiSaw.
 
 ## Requirements
 

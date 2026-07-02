@@ -1,12 +1,12 @@
 import { gql } from '@apollo/client'
 import * as CONST from '../../consts'
 
-export const fetchFriendPhotos = async ({ uuid, friendUuid, pageNumber, batch, sortBy, sortDirection }) => {
+export const fetchFriendPhotos = async ({ uuid, friendUuid, pageNumber, batch }) => {
   try {
     const response = await CONST.gqlClient.query({
       query: gql`
-        query feedForFriend($uuid: String!, $friendUuid: String!, $pageNumber: Int!, $batch: String!, $sortBy: String, $sortDirection: String) {
-          feedForFriend(uuid: $uuid, friendUuid: $friendUuid, pageNumber: $pageNumber, batch: $batch, sortBy: $sortBy, sortDirection: $sortDirection) {
+        query feedForFriend($uuid: String!, $friendUuid: String!, $pageNumber: Int!, $batch: String!) {
+          feedForFriend(uuid: $uuid, friendUuid: $friendUuid, pageNumber: $pageNumber, batch: $batch) {
             photos {
               id
               uuid
@@ -30,9 +30,7 @@ export const fetchFriendPhotos = async ({ uuid, friendUuid, pageNumber, batch, s
         uuid,
         friendUuid,
         pageNumber,
-        batch,
-        sortBy,
-        sortDirection
+        batch
       }
     })
     return {

@@ -20,7 +20,7 @@ import { ROLE_CONFIG, BOOKMARK_LAYOUT_CONFIG } from '../../consts'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'
 import * as reducer from './reducer'
 import { getWave } from '../Waves/reducer'
-import { saveWaveFeedSortPreferences } from '../../utils/waveStorage'
+
 import EmptyStateCard from '../../components/EmptyStateCard'
 import PhotosListMasonry from '../../components/PhotosListMasonry'
 import PhotosListFooter from '../../components/PhotosListFooter'
@@ -51,10 +51,6 @@ const WaveDetail = () => {
   const { waveUuid, waveName: initialWaveName, myRole: initialRole, isFrozen: initialFrozen } = useLocalSearchParams()
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [waveFeedSortBy] = useAtom(STATE.waveFeedSortBy)
-  const [waveFeedSortDirection] = useAtom(STATE.waveFeedSortDirection)
-  const setWaveFeedSortBy = useSetAtom(STATE.waveFeedSortBy)
-  const setWaveFeedSortDirection = useSetAtom(STATE.waveFeedSortDirection)
   const navigation = useNavigation()
 
   const [isFrozen, setIsFrozen] = useState(initialFrozen === '1')
@@ -92,9 +88,7 @@ const WaveDetail = () => {
     const data = await reducer.fetchWavePhotos({
       waveUuid,
       pageNumber: fetchParams.pageNumber,
-      batch: fetchParams.batch,
-      sortBy: waveFeedSortBy,
-      sortDirection: waveFeedSortDirection
+      batch: fetchParams.batch
     })
     return {
       photos: data.photos.map((item) => ({
@@ -251,13 +245,6 @@ const WaveDetail = () => {
     )
   }
 
-  const feedSortOptions = [
-    { label: 'Updated, Newest First', sortBy: 'updatedAt', sortDirection: 'desc', icon: 'sort-descending' },
-    { label: 'Updated, Oldest First', sortBy: 'updatedAt', sortDirection: 'asc', icon: 'sort-ascending' },
-    { label: 'Created, Newest First', sortBy: 'createdAt', sortDirection: 'desc', icon: 'sort-descending' },
-    { label: 'Created, Oldest First', sortBy: 'createdAt', sortDirection: 'asc', icon: 'sort-ascending' }
-  ]
-
   const isFacilitator = myRole === 'facilitator'
   const canManage = isOwner || isFacilitator
 
@@ -345,20 +332,7 @@ const WaveDetail = () => {
           onPress: handleDeleteWave
         }]
       : []),
-    'separator',
-    ...feedSortOptions.map((opt, i) => ({
-      key: `feed-sort-${i}`,
-      icon: opt.icon,
-      label: opt.label,
-      checked: opt.sortBy === waveFeedSortBy && opt.sortDirection === waveFeedSortDirection,
-      onPress: () => {
-        if (opt.sortBy !== waveFeedSortBy || opt.sortDirection !== waveFeedSortDirection) {
-          setWaveFeedSortBy(opt.sortBy)
-          setWaveFeedSortDirection(opt.sortDirection)
-          saveWaveFeedSortPreferences({ sortBy: opt.sortBy, sortDirection: opt.sortDirection })
-        }
-      }
-    }))
+    'separator'
   ]
 
   const headerTitle = (

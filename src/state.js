@@ -12,22 +12,6 @@ export const isDarkMode = atom(false)
 
 export const followSystemTheme = atom(false)
 
-export const waveSortBy = atom('name')
-
-export const waveSortDirection = atom('asc')
-
-export const friendsSortBy = atom('alphabetical')
-
-export const friendsSortDirection = atom('asc')
-
-export const waveFeedSortBy = atom('createdAt')
-
-export const waveFeedSortDirection = atom('desc')
-
-export const friendFeedSortBy = atom('createdAt')
-
-export const friendFeedSortDirection = atom('desc')
-
 // Location status values: pending, ready, denied, timeout, unavailable
 export const locationAtom = atom({ status: 'pending', coords: null, accuracy: null, lastUpdate: null, initStage: 0 })
 

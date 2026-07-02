@@ -34,7 +34,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MergeWaveModal from '../../components/MergeWaveModal'
 import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
-import SortOrderPicker from '../../components/SortOrderPicker'
 import WaveShareModal from '../../components/WaveShareModal'
 import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
@@ -56,9 +55,6 @@ const WavesHub = () => {
 
   const [uuid] = useAtom(STATE.uuid)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
-  const [sortBy, setSortBy] = useAtom(STATE.waveSortBy)
-  const [sortDirection, setSortDirection] = useAtom(STATE.waveSortDirection)
-
   const [waves, setWaves] = useState([])
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -110,21 +106,6 @@ const WavesHub = () => {
   const refreshRunningRef = useRef(false)
 
   const theme = getTheme(isDarkMode)
-
-  // Sort picker state
-  const [sortPickerVisible, setSortPickerVisible] = useState(false)
-
-  const sortOptions = [
-    { key: 'az', label: 'A-Z', sortBy: 'name', sortDirection: 'asc' },
-    { key: 'recent', label: 'Recent', sortBy: 'recentPhoto', sortDirection: 'desc' }
-  ]
-
-  const handleSortChange = ({ sortBy: newSortBy, sortDirection: newSortDir }) => {
-    if (newSortBy !== sortBy || newSortDir !== sortDirection) {
-      setSortBy(newSortBy)
-      setSortDirection(newSortDir)
-    }
-  }
 
   const toggleWaveSelection = (waveUuid) => {
     setSelectedWaveUuids(prev => {
@@ -235,25 +216,6 @@ const WavesHub = () => {
               Select
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setSortPickerVisible(true)}
-            style={[
-              SHARED_STYLES.interactive.headerButton,
-              {
-                backgroundColor: theme.INTERACTIVE_BACKGROUND,
-                borderWidth: 1,
-                borderColor: theme.INTERACTIVE_BORDER,
-                flexDirection: 'row',
-                alignItems: 'center'
-              }
-            ]}
-          >
-            <MaterialCommunityIcons
-              name='sort'
-              size={22}
-              color={theme.TEXT_PRIMARY}
-            />
-          </TouchableOpacity>
         </View>
       )
 
@@ -266,8 +228,6 @@ const WavesHub = () => {
         pageNumber: pageNum,
         batch: currentBatch,
         uuid,
-        sortBy,
-        sortDirection,
         searchTerm
       })
 
@@ -291,7 +251,7 @@ const WavesHub = () => {
       stopLoading.current = false
       setLoading(false)
     }
-  }, [uuid, sortBy, sortDirection])
+  }, [uuid])
 
   // When debounced search changes, reset pagination and re-fetch
   useEffect(() => {
@@ -575,24 +535,12 @@ const WavesHub = () => {
   }
 
   const filteredWaves = useMemo(() => {
-    // When sorting by recentPhoto, the backend already returns correctly ordered results
-    // — skip client-side re-sort to preserve pagination-aware backend ordering
-    if (sortBy === 'recentPhoto') {
-      return waves
-    }
-    const dir = sortDirection === 'asc' ? 1 : -1
     return [...waves].sort((a, b) => {
-      if (sortBy === 'name') {
-        const nameA = (a?.name || '').toLowerCase()
-        const nameB = (b?.name || '').toLowerCase()
-        return dir * nameA.localeCompare(nameB)
-      }
-      // fallback: sort by updatedAt
-      const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0
-      const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0
-      return dir * (dateB - dateA)
+      const dateA = a?.createdAt ? new Date(a.createdAt).getTime() : 0
+      const dateB = b?.createdAt ? new Date(b.createdAt).getTime() : 0
+      return dateB - dateA
     })
-  }, [waves, sortBy, sortDirection])
+  }, [waves])
 
   const selectionCount = selectedWaveUuids.size
 
@@ -723,17 +671,6 @@ const WavesHub = () => {
         onClose={() => setShareModalWave(null)}
         wave={shareModalWave}
         uuid={uuid}
-      />
-
-      <SortOrderPicker
-        visible={sortPickerVisible}
-        onClose={() => setSortPickerVisible(false)}
-        mode="arrows"
-        sortBy={sortBy}
-        sortDirection={sortDirection}
-        options={sortOptions}
-        onSortChange={handleSortChange}
-        isDarkMode={isDarkMode}
       />
 
       {/* Floating Combine Action Bar */}
