@@ -116,7 +116,7 @@ const WavesHub = () => {
 
   const sortOptions = [
     { key: 'az', label: 'A-Z', sortBy: 'name', sortDirection: 'asc' },
-    { key: 'recent', label: 'Recent', sortBy: 'updatedAt', sortDirection: 'desc' }
+    { key: 'recent', label: 'Recent', sortBy: 'recentPhoto', sortDirection: 'desc' }
   ]
 
   const handleSortChange = ({ sortBy: newSortBy, sortDirection: newSortDir }) => {
@@ -575,6 +575,11 @@ const WavesHub = () => {
   }
 
   const filteredWaves = useMemo(() => {
+    // When sorting by recentPhoto, the backend already returns correctly ordered results
+    // — skip client-side re-sort to preserve pagination-aware backend ordering
+    if (sortBy === 'recentPhoto') {
+      return waves
+    }
     const dir = sortDirection === 'asc' ? 1 : -1
     return [...waves].sort((a, b) => {
       if (sortBy === 'name') {
@@ -582,7 +587,7 @@ const WavesHub = () => {
         const nameB = (b?.name || '').toLowerCase()
         return dir * nameA.localeCompare(nameB)
       }
-      // sortBy === 'updatedAt'
+      // fallback: sort by updatedAt
       const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0
       const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0
       return dir * (dateB - dateA)

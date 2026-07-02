@@ -319,8 +319,8 @@ const FriendsList = () => {
         }
         case 'updatedAt':
         default: {
-          const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0
-          const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0
+          const dateA = a?.photos?.[0]?.updatedAt ? new Date(a.photos[0].updatedAt).getTime() : 0
+          const dateB = b?.photos?.[0]?.updatedAt ? new Date(b.photos[0].updatedAt).getTime() : 0
           return dir * (dateB - dateA)
         }
       }
