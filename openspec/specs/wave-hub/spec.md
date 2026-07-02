@@ -1,6 +1,21 @@
 ## Purpose
 This specification defines expected user-visible behavior, constraints, and validation scenarios for wave hub in WiSaw.
 ## Requirements
+### Requirement: Search State Synchronization
+
+**GIVEN** the user is viewing the Waves Hub screen
+**WHEN** the user types in the search input
+**THEN** the debounced search value SHALL be correctly passed to the `listWaves` GraphQL query
+**AND** `handleRefresh` SHALL use the current `debouncedSearch` value (not a stale closure value)
+**AND** the React `useCallback` for `handleRefresh` SHALL include `debouncedSearch` in its dependency array
+
+### Requirement: No Stale Closures
+
+**GIVEN** the user types a search query and the debounced value updates
+**WHEN** the `useEffect` that depends on `debouncedSearch` fires and calls `handleRefresh`
+**THEN** `handleRefresh` SHALL read the **current** value of `debouncedSearch` from its closure
+**AND** `handleRefresh` SHALL NOT capture a stale initial value
+
 ### Requirement: Waves Badge Updates
 The system SHALL update badge counts and refresh the waves list when auto-grouping completes. For upload completions, the system SHALL only update the ungrouped photo count badge. Auto-group SHALL call `handleRefresh()` to reload the waves list (showing newly grouped photos), while upload SHALL call only `getUngroupedPhotosCount()` for a lightweight badge update.
 
