@@ -281,7 +281,7 @@ const WavesHub = () => {
       setRefreshing(false)
       refreshRunningRef.current = false
     }
-  }, [loadWaves])
+  }, [loadWaves, debouncedSearch])
 
   // Reload waves on focus (includes counts in GraphQL response)
   useFocusEffect(
