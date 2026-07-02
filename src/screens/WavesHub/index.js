@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, useContext } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useContext, useMemo } from 'react'
 import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 import {
   View,
@@ -46,7 +46,6 @@ import subscriptionClient from '../../subscriptionClientWs'
 import usePendingAnimation from '../../hooks/usePendingAnimation'
 import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 // Counts are loaded via listWaves GraphQL query
-import { saveWaveSortPreferences } from '../../utils/waveStorage'
 // import { useLocationDrift } from '../../hooks/useLocationDrift' - DISABLED per change proposal
 // import { setLastTriggerLocation } from '../../utils/groupingAtom' - DISABLED with location drift trigger
 
@@ -116,15 +115,14 @@ const WavesHub = () => {
   const [sortPickerVisible, setSortPickerVisible] = useState(false)
 
   const sortOptions = [
-    { key: 'updated', label: 'Updated', sortBy: 'updatedAt' },
-    { key: 'created', label: 'Created', sortBy: 'createdAt' }
+    { key: 'az', label: 'A-Z', sortBy: 'name', sortDirection: 'asc' },
+    { key: 'recent', label: 'Recent', sortBy: 'updatedAt', sortDirection: 'desc' }
   ]
 
   const handleSortChange = ({ sortBy: newSortBy, sortDirection: newSortDir }) => {
     if (newSortBy !== sortBy || newSortDir !== sortDirection) {
       setSortBy(newSortBy)
       setSortDirection(newSortDir)
-      saveWaveSortPreferences({ sortBy: newSortBy, sortDirection: newSortDir })
     }
   }
 
@@ -576,7 +574,20 @@ const WavesHub = () => {
     })
   }
 
-  const filteredWaves = waves
+  const filteredWaves = useMemo(() => {
+    const dir = sortDirection === 'asc' ? 1 : -1
+    return [...waves].sort((a, b) => {
+      if (sortBy === 'name') {
+        const nameA = (a?.name || '').toLowerCase()
+        const nameB = (b?.name || '').toLowerCase()
+        return dir * nameA.localeCompare(nameB)
+      }
+      // sortBy === 'updatedAt'
+      const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0
+      const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0
+      return dir * (dateB - dateA)
+    })
+  }, [waves, sortBy, sortDirection])
 
   const selectionCount = selectedWaveUuids.size
 

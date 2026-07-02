@@ -12,13 +12,13 @@ export const isDarkMode = atom(false)
 
 export const followSystemTheme = atom(false)
 
-export const waveSortBy = atom('updatedAt')
+export const waveSortBy = atom('name')
 
-export const waveSortDirection = atom('desc')
+export const waveSortDirection = atom('asc')
 
-export const friendsSortBy = atom('recentlyAdded')
+export const friendsSortBy = atom('alphabetical')
 
-export const friendsSortDirection = atom('desc')
+export const friendsSortDirection = atom('asc')
 
 export const waveFeedSortBy = atom('createdAt')
 

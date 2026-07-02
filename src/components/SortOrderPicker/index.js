@@ -73,11 +73,11 @@ const SortOrderPicker = ({
 
     if (mode === 'arrows') {
       const oSortBy = opt.sortBy || sortBy
-      const oDir = opt.sortDirection || sortDirection
-      const currentDir = oDir === 'asc' ? 'asc' : 'desc'
+      const fieldActive = sortBy === oSortBy
+      // Use the ACTUAL current direction (from props), not the option's default direction
+      const currentDir = sortDirection === 'asc' ? 'asc' : 'desc'
       const arrowIcon = currentDir === 'asc' ? 'chevron-up' : 'chevron-down'
-      const activeForThisField = sortBy === oSortBy
-      const borderColor = activeForThisField ? '#007AFF' : (isDarkMode ? '#3A3A3C' : '#D1D1D6')
+      const borderColor = fieldActive ? '#007AFF' : (isDarkMode ? '#3A3A3C' : '#D1D1D6')
 
       return (
         <TouchableOpacity
@@ -88,7 +88,7 @@ const SortOrderPicker = ({
           }}
           style={[
             styles.arrowCell,
-            activeForThisField && styles.arrowCellActive,
+            fieldActive && styles.arrowCellActive,
             { borderColor }
           ]}
           activeOpacity={0.7}
@@ -96,7 +96,7 @@ const SortOrderPicker = ({
           <Text
             style={[
               styles.arrowCellLabel,
-              activeForThisField && styles.arrowCellLabelActive
+              fieldActive && styles.arrowCellLabelActive
             ]}
           >
             {opt.label}
@@ -104,7 +104,7 @@ const SortOrderPicker = ({
           <Ionicons
             name={arrowIcon}
             size={22}
-            color={activeForThisField ? '#007AFF' : (isDarkMode ? '#8E8E93' : '#8E8E93')}
+            color={fieldActive ? '#007AFF' : (isDarkMode ? '#8E8E93' : '#8E8E93')}
           />
         </TouchableOpacity>
       )

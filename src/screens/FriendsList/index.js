@@ -103,8 +103,7 @@ const FriendsList = () => {
 
   const sortOptions = [
     { key: 'az', label: 'A-Z', sortBy: 'alphabetical', sortDirection: 'asc' },
-    { key: 'za', label: 'Z-A', sortBy: 'alphabetical', sortDirection: 'desc' },
-    { key: 'recent', label: 'Recent', sortBy: 'recentlyAdded', sortDirection: 'desc' }
+    { key: 'recent', label: 'Recent', sortBy: 'updatedAt', sortDirection: 'desc' }
   ]
 
   const handleSortChange = ({ sortBy: newSortBy, sortDirection: newSortDir }) => {
@@ -318,10 +317,10 @@ const FriendsList = () => {
           const nameB = (b?.contact || 'Unnamed Friend').toLowerCase()
           return dir * nameA.localeCompare(nameB)
         }
-        case 'recentlyAdded':
+        case 'updatedAt':
         default: {
-          const dateA = a?.createdAt ? new Date(a.createdAt).getTime() : 0
-          const dateB = b?.createdAt ? new Date(b.createdAt).getTime() : 0
+          const dateA = a?.updatedAt ? new Date(a.updatedAt).getTime() : 0
+          const dateB = b?.updatedAt ? new Date(b.updatedAt).getTime() : 0
           return dir * (dateB - dateA)
         }
       }
@@ -485,7 +484,7 @@ const FriendsList = () => {
         <SortOrderPicker
           visible={sortPickerVisible}
           onClose={() => setSortPickerVisible(false)}
-          mode="segmented"
+          mode="arrows"
           sortBy={sortBy}
           sortDirection={sortDirection}
           options={sortOptions}
