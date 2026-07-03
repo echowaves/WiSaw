@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFrozenPhoto } from '../utils/photoListHelpers'
 import { subscribeToUploadComplete } from '../events/uploadBus'
 import { subscribeToPhotoDeletion } from '../events/photoDeletionBus'
+import { subscribeToPhotoRefresh } from '../events/photoRefreshBus'
 
 let currentBatch = Crypto.randomUUID()
 
@@ -55,6 +56,35 @@ export default function useFeedLoader (fetchFn, {
       setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
     })
   }, [])
+
+  // Subscribe to photo refresh events (always)
+  // When a comment is added/deleted, fetch updated photo data
+  useEffect(() => {
+    return subscribeToPhotoRefresh(({ photoId }) => {
+      // Import here to avoid circular dependency
+      import('../components/Photo/reducer.js').then(({ getPhotoDetails }) => {
+        const uuid = photosList.find(p => p.id === photoId)?.uuid
+        if (uuid) {
+          getPhotoDetails({ photoId, uuid }).then((updated) => {
+            if (updated) {
+              setPhotosList((currentList) =>
+                currentList.map((p) =>
+                  p.id === photoId
+                    ? {
+                        ...p,
+                        commentsCount: updated.comments?.length || 0,
+                        watchersCount: updated.watchersCount || 0,
+                        lastComment: updated.comments?.[0]?.comment || null
+                      }
+                    : p
+                )
+              )
+            }
+          })
+        }
+      })
+    })
+  }, [photosList])
 
   const load = useCallback(async (fetchParams, searchTermOverride = null, signal = null, pageOverride = null) => {
     setLoading(true)

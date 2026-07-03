@@ -191,6 +191,8 @@ export async function submitComment ({ inputText, photo, uuid, topOffset }) {
 
     showSuccessToast('Comment added', { topOffset, visibilityTime: 500 })
 
+    // Already emits emitPhotoRefresh in Photo/index.js
+
     return { ...comment, hiddenButtons: true }
   } catch (err5) {
     console.error({ err5 }) // eslint-disable-line
@@ -287,6 +289,7 @@ export async function deleteComment ({ photo, photoDetails, comment, uuid, topOf
 
     // lets update the state in the photos collection so it renders the right number of likes in the list
     showSuccessToast('Comment deleted', { topOffset })
+    // Already emits emitPhotoRefresh in Photo/index.js
     return {
       ...photoDetails
     }
