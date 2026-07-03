@@ -75,3 +75,4 @@ If the user says something like "explore this and fix the bug" or "let's look at
 - **Image caching**: Always use `expo-cached-image`
 - **Key-value storage**: Always use `expo-storage`
 - **Security**: `.env` must never be committed. Secrets must never be hardcoded.
+- **Backend restriction**: Never modify code in `/Users/dmitry/hacks/wisaw/Wisaw.cdk`. The backend is a separate repo with its own deployment cycle. If a change requires backend modifications, generate a copy-paste-ready prompt for the backend workspace instead of editing files directly.
