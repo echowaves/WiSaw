@@ -29,10 +29,21 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
     // Compare by set of IDs to handle different ordering
     const prevIds = new Set(prevInitialPhotosRef.current.map(p => p.id))
     const currentIds = new Set(initialPhotos.map(p => p.id))
-    const isNewPhotos = initialPhotos.length === 0 || // Empty array always triggers reset
+
+    // Check 1: Check if IDs changed (new/removed photos)
+    let isNewPhotos = initialPhotos.length === 0 || // Empty array always triggers reset
       initialPhotos.length !== prevInitialPhotosRef.current.length ||
       initialPhotos.some(p => !prevIds.has(p.id)) ||
       prevInitialPhotosRef.current.some(p => !currentIds.has(p.id))
+
+    // Check 2: Also check if timestamps changed (reordered photos)
+    if (!isNewPhotos && prevInitialPhotosRef.current.length > 0) {
+      const prevMap = new Map(prevInitialPhotosRef.current.map(p => [p.id, p.updatedAt]))
+      isNewPhotos = initialPhotos.some(p => {
+        const prevTs = prevMap.get(p.id)
+        return prevTs && prevTs !== p.updatedAt
+      })
+    }
 
     if (isNewPhotos) {
       setPhotos(initialPhotos)

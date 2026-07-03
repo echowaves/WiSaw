@@ -31,6 +31,7 @@ export const listWaves = async ({ pageNumber, batch, uuid, searchTerm }) => {
               photos {
                 id
                 thumbUrl
+                updatedAt
               }
             }
             batch

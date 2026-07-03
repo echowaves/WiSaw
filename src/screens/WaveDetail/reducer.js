@@ -20,6 +20,7 @@ export const fetchWavePhotos = async ({ waveUuid, pageNumber, batch }) => {
               watchersCount
               lastComment
               createdAt
+              updatedAt
               width
               height
             }
