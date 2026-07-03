@@ -246,3 +246,9 @@ All main implementation tasks completed:
 - ✅ Task 1: `listWaves` query updated
 - ✅ Task 2: `WavePhotoStrip` comparison logic updated
 - ✅ Task 3: `feedForWave` query updated
+
+## Change Archived ✅
+
+**Archived as:** `2026-07-03-wave-photo-sorting-consistency`
+
+**Status:** All tasks complete and change archived on 2026-07-03.
