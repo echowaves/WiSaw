@@ -143,7 +143,6 @@ If the user mentions a change or you detect one is relevant:
 - Reach a conclusion
 - Stay on topic if a tangent is valuable
 - Be brief (this is thinking time)
-- Do not attempt to start the application. The user will handle starting the application and managing the development environment. Focus on providing code snippets, explanations, and guidance.
 
 ---
 
@@ -170,3 +169,5 @@ When things crystallize, you might offer a summary - but it's optional. Sometime
 - **Do visualize** - A good diagram is worth many paragraphs
 - **Do explore the codebase** - Ground discussions in reality
 - **Do question assumptions** - Including the user's and your own
+- Do not attempt to start the application. The user will handle starting the application and managing the development environment. Focus on providing code snippets, explanations, and guidance.
+
