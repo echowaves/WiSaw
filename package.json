@@ -1,15 +1,15 @@
 {
   "name": "wisaw",
   "version": "7.5.7",
-  "buildNumber": "689",
-  "versionCode": 689,
+  "buildNumber": "692",
+  "versionCode": 692,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",
   "scripts": {
     "start": "npx expo start --dev-client",
     "build-ios-for-simulator": "rm -rf ios && npx expo prebuild -p ios && xcodebuild -workspace ios/WiSaw.xcworkspace -scheme WiSaw -sdk iphonesimulator -configuration Debug build && xcrun simctl install booted $(find ~/Library/Developer/Xcode/DerivedData/WiSaw-*/Build/Products/Debug-iphonesimulator -name 'WiSaw.app' -maxdepth 1)",
-    "build-android-for-simulator": "rm -rf android && npx expo run:android",
+    "build-android-for-simulator": "rm -rf android && npx expo prebuild -p android && node scripts/fix-gradle-version.js && npx expo run:android",
     "build:android-for-device": "eas build -p android --profile development",
     "build:ios-for-device": "eas build -p ios --profile development",
     "build:ios-for-device-locally": "npx expo run:ios --device",

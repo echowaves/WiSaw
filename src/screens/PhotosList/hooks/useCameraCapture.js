@@ -5,7 +5,7 @@ import * as Linking from 'expo-linking'
 import * as MediaLibrary from 'expo-media-library'
 import { useAtomValue } from 'jotai'
 import { Alert } from 'react-native'
-import { showInfoToast } from '../../../utils/showToast'
+import { showInfoToast, showErrorToast } from '../../../utils/showToast'
 
 import * as STATE from '../../../state'
 import { groupingAtom } from '../../../utils/groupingAtom'
@@ -41,20 +41,28 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
   }
 
   const takePhoto = async ({ cameraType, waveUuid }) => {
+    console.log('[takePhoto] Starting camera flow, cameraType:', cameraType)
     let cameraReturn
-    if (cameraType === 'camera') {
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ['images'],
-        quality: 1.0,
-        exif: true
-      })
-    } else {
-      cameraReturn = await ImagePicker.launchCameraAsync({
-        mediaTypes: ['videos'],
-        videoMaxDuration: 5,
-        quality: 1.0,
-        exif: true
-      })
+    try {
+      if (cameraType === 'camera') {
+        cameraReturn = await ImagePicker.launchCameraAsync({
+          mediaTypes: ['images'],
+          quality: 1.0,
+          exif: true
+        })
+      } else {
+        cameraReturn = await ImagePicker.launchCameraAsync({
+          mediaTypes: ['videos'],
+          videoMaxDuration: 5,
+          quality: 1.0,
+          exif: true
+        })
+      }
+      console.log('[takePhoto] Camera returned:', cameraReturn)
+    } catch (error) {
+      console.error('[takePhoto] Camera launch error:', error)
+      showErrorToast('Camera Error', { text2: `${error}`, topOffset })
+      return
     }
 
     if (cameraReturn.canceled === false) {
@@ -62,7 +70,13 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
         showInfoToast('Waiting for location...', { text2: 'Please wait until GPS coordinates are available.', topOffset: toastTopOffset })
         return
       }
-      await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
+      try {
+        await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
+        console.log('[takePhoto] Saved to library:', cameraReturn.assets[0].uri)
+      } catch (error) {
+        console.error('[takePhoto] Save to library error:', error)
+        // Continue anyway - the file might still be accessible from the temp URI
+      }
 
       const captureArgs = {
         cameraImgUrl: cameraReturn.assets[0].uri,
@@ -71,20 +85,41 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
         waveUuid
       }
 
+      console.log('[takePhoto] Calling enqueueCapture with:', captureArgs)
       // Grouping disabled: upload as ungrouped (no waveUuid)
       if (!grouping.enabled) {
-        await enqueueCapture({ ...captureArgs })
+        try {
+          await enqueueCapture({ ...captureArgs })
+          console.log('[takePhoto] enqueueCapture completed')
+        } catch (error) {
+          console.error('[takePhoto] enqueueCapture error:', error)
+          showErrorToast('Upload Error', { text2: `${error}`, topOffset })
+        }
         return
       }
 
       // Grouping enabled + offline: enqueue without waveUuid (decide at upload time)
       if (!netAvailable) {
-        await enqueueCapture({ ...captureArgs })
+        try {
+          await enqueueCapture({ ...captureArgs })
+          console.log('[takePhoto] enqueueCapture completed (offline)')
+        } catch (error) {
+          console.error('[takePhoto] enqueueCapture error (offline):', error)
+          showErrorToast('Upload Error', { text2: `${error}`, topOffset })
+        }
         return
       }
 
       // Grouping enabled + online: enqueue without waveUuid (wave assignment happens at upload time)
-      await enqueueCapture({ ...captureArgs })
+      try {
+        await enqueueCapture({ ...captureArgs })
+        console.log('[takePhoto] enqueueCapture completed (online)')
+      } catch (error) {
+        console.error('[takePhoto] enqueueCapture error (online):', error)
+        showErrorToast('Upload Error', { text2: `${error}`, topOffset })
+      }
+    } else {
+      console.log('[takePhoto] Camera was canceled')
     }
   }
 

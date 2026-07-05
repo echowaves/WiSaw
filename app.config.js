@@ -34,7 +34,10 @@ module.exports = {
             flipper: false // Disable Flipper for better performance
           }
         }
-      ]
+      ],
+      // Gradle wrapper plugin disabled - manually fixing Gradle version below
+      // './scripts/gradle-wrapper-properties-plugin',
+      // '8.10.2'
     ],
     extra: {
       eas: { projectId: 'd1624159-fed7-42bf-b11b-7ea8f38a8dee' },

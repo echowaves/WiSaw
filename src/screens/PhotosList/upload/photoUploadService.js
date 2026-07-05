@@ -11,11 +11,61 @@ import { Image } from 'react-native'
 import { showInfoToast, showErrorToast } from '../../../utils/showToast'
 
 import { gql } from '@apollo/client'
+import { v4 as uuidv4 } from 'uuid'
 
 import * as CONST from '../../../consts'
 import isValidLocation from '../../../utils/isValidLocation'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+
+
+/**
+ * Query a photo by its ID, verifying ownership via device uuid.
+ * Returns null if not found, not owned by the caller, or on network error.
+ *
+ * @param {string} photoId - The photo's UUID (primary key)
+ * @param {string} uuid - The device identifier (must match photo's owner)
+ * @returns {Promise<object|null>} PhotoDetails or null
+ */
+export const getPhotoById = async (photoId, uuid) => {
+  try {
+    if (!photoId || !uuid) {
+      console.warn('getPhotoById called with missing photoId or uuid')
+      return null
+    }
+
+    const timeoutMs = 10_000
+    const result = await withTimeout(
+      CONST.gqlClient.query({
+        query: gql`
+          query getPhotoById($photoId: String!, $uuid: String!) {
+            getPhotoById(photoId: $photoId, uuid: $uuid) {
+              active
+              commentsCount
+              watchersCount
+              createdAt
+              id
+              imgUrl
+              thumbUrl
+              location
+              updatedAt
+              uuid
+              video
+            }
+          }
+        `,
+        variables: { photoId, uuid }
+      }),
+      timeoutMs,
+      'Get photo by ID query'
+    )
+    return result.data.getPhotoById || null
+  } catch (error) {
+    console.error('getPhotoById error:', error)
+    return null
+  }
+}
 
 /**
  * Utility: Wrap a promise with a timeout to prevent hanging uploads
@@ -318,10 +368,14 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
 
 export const queueFileForUpload = async ({ cameraImgUrl, type, location, waveUuid }) => {
   try {
+    console.log('[queueFileForUpload] Starting, cameraImgUrl:', cameraImgUrl)
     const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
     const localCacheKey = localImageName.split('.')[0]
+    const photoId = uuidv4()
+    console.log('[queueFileForUpload] Generated photoId:', photoId)
 
     const image = {
+      photoId,
       originalCameraUrl: cameraImgUrl,
       localImageName,
       type,
@@ -330,9 +384,12 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location, waveUui
       waveUuid
     }
 
+    console.log('[queueFileForUpload] Adding to queue:', image)
     await addToQueue(image)
+    console.log('[queueFileForUpload] Added to queue successfully')
   } catch (error) {
-    console.error('Error queueing file for upload', error)
+    console.error('[queueFileForUpload] Error queueing file:', error)
+    throw error
   }
 }
 
@@ -424,9 +481,12 @@ export const generateWaveName = (lat, lon) => {
 
 export const uploadItem = async ({ item }) => {
   try {
+    // Use photoId if available (stable across retries), fallback to photo.id
+    const assetPhotoId = item.photoId || item.photo?.id
+
     if (item.type === 'video') {
       const videoResponse = await uploadFile({
-        assetKey: `${item.photo.id}.mov`,
+        assetKey: `${assetPhotoId}.mov`,
         contentType: 'video/mov',
         assetUri: item.localVideoUrl
       })
@@ -440,7 +500,7 @@ export const uploadItem = async ({ item }) => {
     }
 
     const response = await uploadFile({
-      assetKey: `${item.photo.id}.upload`,
+      assetKey: `${assetPhotoId}.upload`,
       contentType: 'image/jpeg',
       assetUri: item.localImgUrl
     })
@@ -454,8 +514,11 @@ export const uploadItem = async ({ item }) => {
   }
 }
 
-export const generatePhoto = async ({ uuid, lat, lon, video }) => {
+export const generatePhoto = async ({ photoId, uuid, lat, lon, video }) => {
   try {
+    if (!photoId) {
+      throw new Error('photoId is required for photo creation')
+    }
     if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {
       throw new Error(`Invalid UUID provided: "${uuid}". UUID cannot be empty.`)
     }
@@ -466,8 +529,8 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
       await withTimeout(
         CONST.gqlClient.mutate({
           mutation: gql`
-            mutation createPhoto($lat: Float!, $lon: Float!, $uuid: String!, $video: Boolean) {
-              createPhoto(lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
+            mutation createPhoto($photoId: String!, $lat: Float!, $lon: Float!, $uuid: String!, $video: Boolean) {
+              createPhoto(photoId: $photoId, lat: $lat, lon: $lon, uuid: $uuid, video: $video) {
                 active
                 commentsCount
                 watchersCount
@@ -483,6 +546,7 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
             }
           `,
           variables: {
+            photoId,
             uuid,
             lat,
             lon,
@@ -510,6 +574,8 @@ export const generatePhoto = async ({ uuid, lat, lon, video }) => {
 export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAvailable = true }) => {
   try {
     let processedItem = item
+
+    // Step 1: Process queued file (compress, generate thumbnails) — local operation only
     if (!item.localImgUrl) {
       try {
         if (!new FSFile(item.originalCameraUrl).exists) {
@@ -537,9 +603,49 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
       return null
     }
 
+    // Step 2: Get photoId and uuid for state detection
+    const photoId = processedItem.photoId
+    const deviceUuid = uuid?.trim()
+
+    if (!photoId) {
+      console.error('photoId missing from queue item:', processedItem.localImageName)
+      return null
+    }
+
+    // Step 3: Three-state photo detection (ACTIVE / INACTIVE / MISSING)
+    let existingPhoto = null
+    try {
+      existingPhoto = await getPhotoById(photoId, deviceUuid)
+    } catch (getError) {
+      // Network error: treat as "missing" and proceed to create
+      console.warn('getPhotoById failed, proceeding to create:', getError.message)
+    }
+
+    if (existingPhoto && existingPhoto.active) {
+      // State ACTIVE: photo exists, is active, AND is owned by the calling device
+      // Skip upload entirely, remove from queue, return existing photo
+      console.log('[upload] Photo already active, skipping:', photoId)
+      try {
+        await removeFromQueue(item)
+      } catch (removeError) {
+        console.error('Failed to remove active photo from queue:', removeError)
+      }
+      return existingPhoto
+    }
+
+    if (existingPhoto && !existingPhoto.active) {
+      // State INACTIVE: photo exists but S3 upload failed
+      // Skip createPhoto, proceed directly to S3 upload
+      console.log('[upload] Photo exists but inactive, uploading S3 only:', photoId)
+      const enrichedExisting = await ensurePhotoDimensions(existingPhoto, processedItem)
+      processedItem = { ...processedItem, photo: enrichedExisting, photoId }
+      await updateQueueItem(item, processedItem)
+    }
+
+    // Step 4: Create photo if not exists (State MISSING)
     let { photo } = processedItem
     if (!photo) {
-      if (!uuid || typeof uuid !== 'string' || uuid.trim() === '') {
+      if (!deviceUuid) {
         console.error('Invalid UUID provided for photo generation:', uuid)
         showErrorToast('Upload Error', { text2: 'Invalid user ID. Please try again.', topOffset })
         return null
@@ -547,12 +653,14 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
 
       try {
         photo = await generatePhoto({
-          uuid: uuid.trim(),
+          photoId,
+          uuid: deviceUuid,
           lat: processedItem.location.coords.latitude,
           lon: processedItem.location.coords.longitude,
           video: processedItem?.type === 'video'
         })
 
+        // Cache thumbnails
         try {
           CacheManager.addToCache({
             file: processedItem.localThumbUrl,
@@ -575,7 +683,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
           }
         }
 
-        processedItem = { ...processedItem, photo }
+        processedItem = { ...processedItem, photo, photoId }
         await updateQueueItem(item, processedItem)
       } catch (photoGenError) {
         showErrorToast('Unable to create photo', { text2: photoGenError.message || `${photoGenError}`, visibilityTime: 4000, topOffset, onPress: () => alert(`error: ${photoGenError.message || `${photoGenError}`}`) })
@@ -589,6 +697,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
       }
     }
 
+    // Step 5: Upload S3 files
     const { responseData } = await uploadItem({ item: processedItem })
 
     if (responseData?.status === 200) {
@@ -597,7 +706,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
         processedItem = { ...processedItem, photo: enrichedPhoto }
       }
 
-      // Add to wave if waveUuid was provided at capture time (e.g., from wave detail screen)
+      // Add to wave if waveUuid was provided at capture time
       if (processedItem.waveUuid) {
         try {
           await CONST.gqlClient.mutate({
@@ -609,7 +718,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
             variables: {
               waveUuid: processedItem.waveUuid,
               photoId: photo.id,
-              uuid: uuid.trim()
+              uuid: deviceUuid
             }
           })
         } catch (waveError) {

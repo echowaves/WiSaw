@@ -195,13 +195,29 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
 
   const enqueueCapture = useCallback(
     async ({ cameraImgUrl, type, location, waveUuid }) => {
-      await queueFileForUpload({ cameraImgUrl, type, location, waveUuid })
-      await syncQueueFromStorage()
+      console.log('[enqueueCapture] Starting, netAvailable:', netAvailable)
+      try {
+        await queueFileForUpload({ cameraImgUrl, type, location, waveUuid })
+        console.log('[enqueueCapture] queueFileForUpload completed')
+      } catch (error) {
+        console.error('[enqueueCapture] queueFileForUpload failed:', error)
+        throw error
+      }
+      try {
+        await syncQueueFromStorage()
+        console.log('[enqueueCapture] syncQueueFromStorage completed')
+      } catch (error) {
+        console.error('[enqueueCapture] syncQueueFromStorage failed:', error)
+        throw error
+      }
       if (netAvailable) {
         // process queue in background
         processQueue().catch((error) => {
-          console.error('Failed to process upload queue', error)
+          console.error('[enqueueCapture] Failed to process upload queue', error)
         })
+        console.log('[enqueueCapture] processQueue scheduled')
+      } else {
+        console.log('[enqueueCapture] Skipping processQueue - no network')
       }
     },
     [netAvailable, processQueue, syncQueueFromStorage]
