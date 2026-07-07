@@ -12,9 +12,9 @@ import { useFonts } from 'expo-font'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import * as Linking from 'expo-linking'
 import { router, Stack, useRootNavigationState } from 'expo-router'
-import { useAtom, useSetAtom } from 'jotai'
-import { useCallback, useEffect, useRef } from 'react'
-import { StatusBar } from 'react-native'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Platform, StatusBar } from 'react-native'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast, { BaseToast } from 'react-native-toast-message'
@@ -34,6 +34,11 @@ import {
 import { hydrateGroupingAtom, groupingAtom } from '../src/utils/groupingAtom'
 import { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
 import { errorContextAtom } from '../src/atoms/errorAtom'
+import { gql } from '@apollo/client'
+import { gqlClient } from '../src/consts'
+import appConfig from '../app.config.js'
+import { compareSemver } from '../src/utils/semver'
+import ForceUpdateModal from '../src/components/ForceUpdateModal'
 
 // Custom error toast component with 2-line message and tap support
 const ErrorToastWithTap = (props: any) => (
@@ -57,9 +62,90 @@ export default function RootLayout (): JSX.Element {
    )
   const setGrouping = useSetAtom(groupingAtom)
   const setAtomSet = useSetAtom(errorContextAtom)
+  const netAvailable = useAtomValue(STATE.netAvailable)
   useEffect(() => {
     setAtomSetter(setAtomSet)
   }, [setAtomSet])
+
+  // Force update check state
+  const [showForceUpdate, setShowForceUpdate] = useState(false)
+  const [forceUpdateTrigger, setForceUpdateTrigger] = useState<'build' | 'version' | 'both'>('build')
+  const [forceUpdateMessage, setForceUpdateMessage] = useState<string | undefined>(undefined)
+
+  // Check device build/version against backend AppConfig
+  useEffect(() => {
+    const checkBuildVersion = async () => {
+      try {
+        // Skip if no network
+        if (!netAvailable) {
+          return
+        }
+
+        // Fetch AppConfig from backend
+        const response = await gqlClient.query({
+          query: gql`
+            query GetAppConfig {
+              appConfig {
+                minAppBuild
+                minAppVersion
+                message
+              }
+            }
+          `,
+          fetchPolicy: 'network-only'
+        })
+
+        const appConfigData = response.data?.appConfig
+        if (!appConfigData) {
+          return
+        }
+
+        const minBuild = appConfigData.minAppBuild ?? 0
+        const minVersion = appConfigData.minAppVersion ?? '0.0.0'
+
+        // Read device build number (platform-appropriate)
+        const deviceBuild = Platform.select({
+          ios: String(appConfig.expo.ios.buildNumber),
+          android: String(appConfig.expo.android.versionCode),
+          default: String(appConfig.expo.ios.buildNumber)
+        }) ?? '0'
+
+        // Read device version
+        const deviceVersion = appConfig.expo.version ?? '0.0.0'
+
+        // Compare thresholds
+        const buildBelow = parseInt(deviceBuild, 10) < minBuild
+        const versionBelow = compareSemver(deviceVersion, minVersion) < 0
+
+        if (!buildBelow && !versionBelow) {
+          return
+        }
+
+        // Determine which threshold triggered
+        let trigger: 'build' | 'version' | 'both'
+        if (buildBelow && versionBelow) {
+          trigger = 'both'
+        } else if (buildBelow) {
+          trigger = 'build'
+        } else {
+          trigger = 'version'
+        }
+
+        // Use backend message if provided, else fallback
+        const backendMessage = appConfigData.message
+        if (backendMessage && backendMessage.trim().length > 0) {
+          setForceUpdateMessage(backendMessage)
+        }
+
+        setForceUpdateTrigger(trigger)
+        setShowForceUpdate(true)
+      } catch (error) {
+        // GraphQL error — skip check gracefully
+      }
+    }
+
+    checkBuildVersion()
+  }, [])
 
   const hasProcessedInitialUrlRef = useRef(false)
   const rootNavigationState = useRootNavigationState()
@@ -309,6 +395,12 @@ export default function RootLayout (): JSX.Element {
         </KeyboardProvider>
          <Toast config={{ error: ErrorToastWithTap }} />
         <ErrorDetailModal />
+        {showForceUpdate && (
+          <ForceUpdateModal
+            message={forceUpdateMessage}
+            triggerType={forceUpdateTrigger}
+          />
+        )}
       </SafeAreaProvider>
     </GestureHandlerRootView>
   )
