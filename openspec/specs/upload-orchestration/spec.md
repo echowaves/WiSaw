@@ -113,24 +113,22 @@ The UploadContext SHALL read `STATE.netAvailable` via `useAtom` instead of creat
 - **THEN** upload queue processing SHALL still be gated on `netAvailable` as before
 
 ### Requirement: WavesHub consumes UploadContext for upload progress UI
-WavesHub SHALL consume `UploadContext` to access `pendingPhotos`, `isUploading`, and `clearPendingQueue` for rendering upload progress. WavesHub SHALL use the `usePendingAnimation` hook to derive `pendingPhotosAnimation` and `uploadIconAnimation` for consistent entrance and pulse animations.
 
-#### Scenario: WavesHub consumes UploadContext
+WavesHub SHALL consume `UploadContext` for `enqueueCapture` (camera button). Upload progress UI SHALL be handled by the global `GlobalUploadBanner` — WavesHub SHALL NOT render `PendingPhotosBanner` or call `usePendingAnimation`.
+
+#### Scenario: WavesHub consumes UploadContext for camera only
 - **WHEN** the WavesHub screen mounts
-- **THEN** the system SHALL call `useContext(UploadContext)` to access `pendingPhotos`, `isUploading`, and `clearPendingQueue`
-- **THEN** no other screen besides PhotosList, WaveDetail, and WavesHub SHALL consume UploadContext
+- **THEN** the system SHALL call `useContext(UploadContext)` to access `enqueueCapture`
+- **THEN** WavesHub SHALL NOT import or render `PendingPhotosBanner`
+- **THEN** WavesHub SHALL NOT call `usePendingAnimation`
 
-#### Scenario: WavesHub uses usePendingAnimation hook
-- **WHEN** the WavesHub screen renders
-- **THEN** it SHALL call `usePendingAnimation({ pendingPhotosCount: pendingPhotos.length, netAvailable })`
-- **THEN** it SHALL pass `pendingPhotosAnimation` and `uploadIconAnimation` to `PendingPhotosBanner`
+#### Scenario: Global banner shows upload status on WavesHub
+- **WHEN** `pendingPhotos.length > 0` and WavesHub is the active drawer screen
+- **THEN** the `GlobalUploadBanner` SHALL be visible (mounted at drawer level, independent of WavesHub)
+- **THEN** WavesHub SHALL read `bannerHeightAtom` and apply padding above its AppHeader
 
-#### Scenario: WavesHub renders PendingPhotosBanner when uploads pending
-- **WHEN** `pendingPhotos.length > 0`
-- **THEN** WavesHub SHALL render `PendingPhotosBanner` between the `AppHeader` and `InteractionHintBanner`
-- **THEN** the banner SHALL show the upload count, status label, and `LinearProgress` bar
-
-#### Scenario: WavesHub hides PendingPhotosBanner when no uploads pending
-- **WHEN** `pendingPhotos.length === 0`
-- **THEN** `PendingPhotosBanner` SHALL return null and take no space
+#### Scenario: WavesHub ignores pending photos for layout
+- **WHEN** pending uploads exist
+- **THEN** WavesHub SHALL NOT adjust its layout for the upload banner
+- **THEN** the global banner handles all upload indicator rendering
 
