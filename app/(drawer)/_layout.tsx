@@ -11,6 +11,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
 import { UploadProvider } from '../../src/contexts/UploadContext'
+import GlobalUploadBanner from '../../src/components/GlobalUploadBanner'
 import * as STATE from '../../src/state'
 import { getTheme } from '../../src/theme/sharedStyles'
 import { SCREEN_HEADER_ICONS } from '../../src/theme/screenIcons'
@@ -302,105 +303,108 @@ export default function DrawerLayout () {
 
   return (
     <UploadProvider>
-      <Drawer
-        screenOptions={{
-          headerShown: false,
-          drawerStyle: {
-            backgroundColor: theme.BACKGROUND,
-            width: 280
-          },
-          drawerActiveTintColor: 'white',
-          drawerActiveBackgroundColor: CONST.MAIN_COLOR,
-          drawerInactiveTintColor: isDark ? '#BBB' : '#666',
-          drawerItemStyle: {
-            borderRadius: 12,
-            marginVertical: 4,
-            marginHorizontal: 8,
-            paddingHorizontal: 12
-          },
-          drawerLabelStyle: {
-            fontSize: 16,
-            fontWeight: '600',
-            marginLeft: -10,
-            textTransform: 'capitalize'
-          },
-          // Performance optimizations
-          swipeEnabled: true,
-          swipeEdgeWidth: 20,
-          drawerType: 'front',
-          overlayColor: 'rgba(0, 0, 0, 0.5)'
-        }}
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-      >
-        <Drawer.Screen
-          name='(tabs)'
-          options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesome5 name='home' size={22} color={color} />
-            ),
-            drawerLabel: 'Home',
-            title: 'Home'
-          }}
-        />
-        <Drawer.Screen
-          name='identity'
-          options={{
-            drawerIcon: (props) => <IdentityDrawerIcon {...props} />,
-            drawerLabel: (props) => <IdentityDrawerLabel {...props} />,
-            title: 'Identity',
+      <View style={{ flex: 1 }}>
+        <GlobalUploadBanner />
+        <Drawer
+          screenOptions={{
             headerShown: false,
-            drawerItemStyle: offlineItemStyle
+            drawerStyle: {
+              backgroundColor: theme.BACKGROUND,
+              width: 280
+            },
+            drawerActiveTintColor: 'white',
+            drawerActiveBackgroundColor: CONST.MAIN_COLOR,
+            drawerInactiveTintColor: isDark ? '#BBB' : '#666',
+            drawerItemStyle: {
+              borderRadius: 12,
+              marginVertical: 4,
+              marginHorizontal: 8,
+              paddingHorizontal: 12
+            },
+            drawerLabelStyle: {
+              fontSize: 16,
+              fontWeight: '600',
+              marginLeft: -10,
+              textTransform: 'capitalize'
+            },
+            // Performance optimizations
+            swipeEnabled: true,
+            swipeEdgeWidth: 20,
+            drawerType: 'front',
+            overlayColor: 'rgba(0, 0, 0, 0.5)'
           }}
-          listeners={offlineScreenListeners}
-        />
-        <Drawer.Screen
-          name='bookmarks'
-          options={{
-            drawerIcon: (props) => <BookmarksDrawerIcon {...props} />,
-            drawerLabel: 'Bookmarks',
-            title: 'Bookmarks',
-            headerShown: false,
-            drawerItemStyle: offlineItemStyle
-          }}
-          listeners={offlineScreenListeners}
-        />
-        <Drawer.Screen
-          name='friends'
-          options={{
-            drawerIcon: (props) => <FriendsDrawerIcon {...props} />,
-            drawerLabel: 'Friends',
-            title: 'Friends',
-            headerShown: false,
-            drawerItemStyle: offlineItemStyle
-          }}
-          listeners={offlineScreenListeners}
-        />
-        <Drawer.Screen
-          name='waves'
-          options={{
-            drawerIcon: (props) => <WavesDrawerIcon {...props} />,
-            drawerLabel: 'Waves',
-            title: 'Waves',
-            headerShown: false,
-            drawerItemStyle: offlineItemStyle
-          }}
-          listeners={offlineScreenListeners}
-        />
-        <Drawer.Screen
-          name='feedback'
-          options={{
-            drawerIcon: ({ color, size }) => (
-              <MaterialIcons name={SCREEN_HEADER_ICONS.feedback.name} size={22} color={color} />
-            ),
-            drawerLabel: 'Feedback',
-            title: 'Feedback',
-            headerShown: false,
-            drawerItemStyle: offlineItemStyle
-          }}
-          listeners={offlineScreenListeners}
-        />
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
+          <Drawer.Screen
+            name='(tabs)'
+            options={{
+              drawerIcon: ({ color, size }) => (
+                <FontAwesome5 name='home' size={22} color={color} />
+              ),
+              drawerLabel: 'Home',
+              title: 'Home'
+            }}
+          />
+          <Drawer.Screen
+            name='identity'
+            options={{
+              drawerIcon: (props) => <IdentityDrawerIcon {...props} />,
+              drawerLabel: (props) => <IdentityDrawerLabel {...props} />,
+              title: 'Identity',
+              headerShown: false,
+              drawerItemStyle: offlineItemStyle
+            }}
+            listeners={offlineScreenListeners}
+          />
+          <Drawer.Screen
+            name='bookmarks'
+            options={{
+              drawerIcon: (props) => <BookmarksDrawerIcon {...props} />,
+              drawerLabel: 'Bookmarks',
+              title: 'Bookmarks',
+              headerShown: false,
+              drawerItemStyle: offlineItemStyle
+            }}
+            listeners={offlineScreenListeners}
+          />
+          <Drawer.Screen
+            name='friends'
+            options={{
+              drawerIcon: (props) => <FriendsDrawerIcon {...props} />,
+              drawerLabel: 'Friends',
+              title: 'Friends',
+              headerShown: false,
+              drawerItemStyle: offlineItemStyle
+            }}
+            listeners={offlineScreenListeners}
+          />
+          <Drawer.Screen
+            name='waves'
+            options={{
+              drawerIcon: (props) => <WavesDrawerIcon {...props} />,
+              drawerLabel: 'Waves',
+              title: 'Waves',
+              headerShown: false,
+              drawerItemStyle: offlineItemStyle
+            }}
+            listeners={offlineScreenListeners}
+          />
+          <Drawer.Screen
+            name='feedback'
+            options={{
+              drawerIcon: ({ color, size }) => (
+                <MaterialIcons name={SCREEN_HEADER_ICONS.feedback.name} size={22} color={color} />
+              ),
+              drawerLabel: 'Feedback',
+              title: 'Feedback',
+              headerShown: false,
+              drawerItemStyle: offlineItemStyle
+            }}
+            listeners={offlineScreenListeners}
+          />
 
-      </Drawer>
+        </Drawer>
+      </View>
     </UploadProvider>
   )
 }

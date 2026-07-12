@@ -1,5 +1,5 @@
 import { router } from 'expo-router'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 
@@ -381,16 +381,19 @@ const FriendsList = () => {
 
   const hasAnyFriends = friendsList && friendsList.length > 0
   const isSearching = searchText.length > 0
+  const bannerHeight = useAtomValue(STATE.bannerHeightAtom)
 
   if (!netAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader
-          title={<ScreenIconTitle screenKey='friends' />}
-          onBack={() => router.replace('/')}
-          rightSlot={headerRightSlot}
-          loading={loading}
-        />
+        <View style={{ paddingTop: bannerHeight }}>
+          <AppHeader
+            title={<ScreenIconTitle screenKey='friends' />}
+            onBack={() => router.replace('/')}
+            rightSlot={headerRightSlot}
+            loading={loading}
+          />
+        </View>
         <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
           <EmptyStateCard
             icon='wifi-off'
@@ -405,12 +408,14 @@ const FriendsList = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-      <AppHeader
-        title={<ScreenIconTitle screenKey='friends' />}
-        onBack={() => router.replace('/')}
-        rightSlot={headerRightSlot}
-        loading={loading}
-      />
+      <View style={{ paddingTop: bannerHeight }}>
+        <AppHeader
+          title={<ScreenIconTitle screenKey='friends' />}
+          onBack={() => router.replace('/')}
+          rightSlot={headerRightSlot}
+          loading={loading}
+        />
+      </View>
       <View style={styles.container}>
         <NamePicker
           show={showNamePicker}

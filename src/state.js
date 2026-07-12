@@ -37,4 +37,7 @@ export const ungroupedPhotosCount = atom(null)
 
 export const bookmarksCount = atom(null)
 
+// Global upload banner height for screen padding coordination
+export const bannerHeightAtom = atom(0)
+
 export { hydrateGroupingAtom } from './utils/groupingAtom'

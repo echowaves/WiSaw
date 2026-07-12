@@ -58,6 +58,7 @@ const BookmarksList = () => {
 
   const navigation = useNavigation()
   const locationState = useAtomValue(STATE.locationAtom)
+  const bannerHeight = useAtomValue(STATE.bannerHeightAtom)
   const { enqueueCapture } = useContext(UploadContext)
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({
     enqueueCapture,
@@ -157,7 +158,9 @@ const BookmarksList = () => {
   if (!netAvailable) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+        <View style={{ paddingTop: bannerHeight }}>
+          <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+        </View>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -193,7 +196,9 @@ const BookmarksList = () => {
     return (
       <PhotosListContext.Provider value={photosListContextValue}>
         <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-          <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+          <View style={{ paddingTop: bannerHeight }}>
+            <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+          </View>
           <View style={{ flex: 1, backgroundColor: theme.INTERACTIVE_BACKGROUND }}>
             <PhotosListMasonry
               activeSegment={1}
@@ -270,7 +275,9 @@ const BookmarksList = () => {
 
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-        <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+        <View style={{ paddingTop: bannerHeight }}>
+          <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+        </View>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -315,7 +322,9 @@ const BookmarksList = () => {
   // Loading state
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
-      <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+      <View style={{ paddingTop: bannerHeight }}>
+        <AppHeader title={headerTitle} onBack={handleBack} loading={loading} />
+      </View>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{

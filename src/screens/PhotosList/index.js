@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
 import { useFocusEffect, useIsFocused } from '@react-navigation/native'
@@ -41,6 +41,7 @@ import { requestGeoPhotos } from './reducer'
 import QuickActionsModalWrapper from '../../components/QuickActionsModalWrapper'
 
 import * as STATE from '../../state'
+import { bannerHeightAtom } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 import {
   validateFrozenPhotosList
@@ -51,14 +52,12 @@ import { GEO_FEED_LAYOUT_CONFIG } from '../../consts'
 import PhotosListFooter from '../../components/PhotosListFooter'
 import PhotosListHeader from '../../components/PhotosListHeader'
 import SearchFab from '../../components/SearchFab'
-import PendingPhotosBanner from './components/PendingPhotosBanner'
 import LocationDriftBanner from './components/LocationDriftBanner'
 import PhotosListMasonry from '../../components/PhotosListMasonry'
 import PhotosListContext from '../../contexts/PhotosListContext'
 import UploadContext from '../../contexts/UploadContext'
 
 import useCameraCapture from '../../hooks/useCameraCapture'
-import usePendingAnimation from '../../hooks/usePendingAnimation'
 import usePhotoExpansion from '../../hooks/usePhotoExpansion'
 import useFeedLoader from '../../hooks/useFeedLoader'
 import useFeedSearch from '../../hooks/useFeedSearch'
@@ -285,14 +284,11 @@ const PhotosList = ({ searchFromUrl }) => {
     onBeforeSearch: () => {}
   })
 
+  const bannerHeight = useAtomValue(bannerHeightAtom)
+
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({
     enqueueCapture,
     toastTopOffset
-  })
-
-  const { pendingPhotosAnimation, uploadIconAnimation } = usePendingAnimation({
-    pendingPhotosCount: pendingPhotos.length,
-    netAvailable
   })
 
   // Long-press handler — open quick-actions modal
@@ -399,10 +395,12 @@ const PhotosList = ({ searchFromUrl }) => {
   /// //////////////////////////////////////////////////////////////////////////
 
   const renderHeader = () => (
-    <PhotosListHeader
-      theme={theme}
-      loading={loading}
-    />
+    <View style={{ paddingTop: bannerHeight }}>
+      <PhotosListHeader
+        theme={theme}
+        loading={loading}
+      />
+    </View>
   )
 
   const photosListContextValue = useMemo(() => ({ removePhoto }), [removePhoto])
@@ -411,16 +409,6 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderHeader()}
-        <PendingPhotosBanner
-          theme={theme}
-          pendingPhotos={pendingPhotos}
-          netAvailable={netAvailable}
-          isUploading={isUploading}
-          clearPendingQueue={clearPendingQueue}
-          toastTopOffset={toastTopOffset}
-          pendingPhotosAnimation={pendingPhotosAnimation}
-          uploadIconAnimation={uploadIconAnimation}
-        />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -456,16 +444,6 @@ const PhotosList = ({ searchFromUrl }) => {
       <PhotosListContext.Provider value={photosListContextValue}>
         <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
           {renderHeader()}
-          <PendingPhotosBanner
-            theme={theme}
-            pendingPhotos={pendingPhotos}
-            netAvailable={netAvailable}
-            isUploading={isUploading}
-            clearPendingQueue={clearPendingQueue}
-            toastTopOffset={toastTopOffset}
-            pendingPhotosAnimation={pendingPhotosAnimation}
-            uploadIconAnimation={uploadIconAnimation}
-          />
           {showDriftBanner && (
             <LocationDriftBanner theme={theme} onPress={() => reload()} />
           )}
@@ -554,16 +532,6 @@ const PhotosList = ({ searchFromUrl }) => {
             <Text style={{ color: theme.STATUS_ERROR, fontSize: 14, textAlign: 'center' }}>Location access is needed to show nearby photos — tap to open Settings</Text>
           </TouchableOpacity>
         )}
-        <PendingPhotosBanner
-          theme={theme}
-          pendingPhotos={pendingPhotos}
-          netAvailable={netAvailable}
-          isUploading={isUploading}
-          clearPendingQueue={clearPendingQueue}
-          toastTopOffset={toastTopOffset}
-          pendingPhotosAnimation={pendingPhotosAnimation}
-          uploadIconAnimation={uploadIconAnimation}
-        />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -644,16 +612,6 @@ const PhotosList = ({ searchFromUrl }) => {
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
         {renderHeader()}
-        <PendingPhotosBanner
-          theme={theme}
-          pendingPhotos={pendingPhotos}
-          netAvailable={netAvailable}
-          isUploading={isUploading}
-          clearPendingQueue={clearPendingQueue}
-          toastTopOffset={toastTopOffset}
-          pendingPhotosAnimation={pendingPhotosAnimation}
-          uploadIconAnimation={uploadIconAnimation}
-        />
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -698,16 +656,6 @@ const PhotosList = ({ searchFromUrl }) => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
       {renderHeader()}
-      <PendingPhotosBanner
-        theme={theme}
-        pendingPhotos={pendingPhotos}
-        netAvailable={netAvailable}
-        isUploading={isUploading}
-        clearPendingQueue={clearPendingQueue}
-        toastTopOffset={toastTopOffset}
-        pendingPhotosAnimation={pendingPhotosAnimation}
-        uploadIconAnimation={uploadIconAnimation}
-      />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{

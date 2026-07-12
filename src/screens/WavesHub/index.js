@@ -42,8 +42,6 @@ import { subscribeToUploadComplete } from '../../events/uploadBus'
 import { gql } from '@apollo/client'
 import UploadContext from '../../contexts/UploadContext'
 import subscriptionClient from '../../subscriptionClientWs'
-import usePendingAnimation from '../../hooks/usePendingAnimation'
-import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 // Counts are loaded via listWaves GraphQL query
 // import { useLocationDrift } from '../../hooks/useLocationDrift' - DISABLED per change proposal
 // import { setLastTriggerLocation } from '../../utils/groupingAtom' - DISABLED with location drift trigger
@@ -92,10 +90,9 @@ const WavesHub = () => {
   const [shareModalWave, setShareModalWave] = useState(null)
 
   // Upload context
-  const { pendingPhotos, isUploading, clearPendingQueue } = useContext(UploadContext)
-  const toastTopOffset = insets.top + 10
+  const { enqueueCapture } = useContext(UploadContext)
   const [netAvailable] = useAtom(STATE.netAvailable)
-  const { pendingPhotosAnimation, uploadIconAnimation } = usePendingAnimation({ pendingPhotosCount: pendingPhotos.length, netAvailable })
+  const bannerHeight = useAtomValue(STATE.bannerHeightAtom)
 
   // Auto-group location drift detection - DISABLED per change proposal
   // const { shouldTrigger, isReady: driftReady } = useLocationDrift()
@@ -553,12 +550,14 @@ const WavesHub = () => {
   if (!netAvailable) {
     return (
       <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-        <AppHeader
-          title={<ScreenIconTitle screenKey='waves' />}
-          onBack={() => router.back()}
-          rightSlot={headerRightSlot}
-          loading={loading}
-        />
+        <View style={{ paddingTop: bannerHeight }}>
+          <AppHeader
+            title={<ScreenIconTitle screenKey='waves' />}
+            onBack={() => router.back()}
+            rightSlot={headerRightSlot}
+            loading={loading}
+          />
+        </View>
         <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
           <EmptyStateCard
             icon='wifi-off'
@@ -573,22 +572,14 @@ const WavesHub = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-      <AppHeader
-        title={headerTitle}
-        onBack={() => router.back()}
-        rightSlot={headerRightSlot}
-        loading={loading}
-      />
-      <PendingPhotosBanner
-        theme={theme}
-        pendingPhotos={pendingPhotos}
-        netAvailable={netAvailable}
-        isUploading={isUploading}
-        clearPendingQueue={clearPendingQueue}
-        toastTopOffset={toastTopOffset}
-        pendingPhotosAnimation={pendingPhotosAnimation}
-        uploadIconAnimation={uploadIconAnimation}
-      />
+      <View style={{ paddingTop: bannerHeight }}>
+        <AppHeader
+          title={headerTitle}
+          onBack={() => router.back()}
+          rightSlot={headerRightSlot}
+          loading={loading}
+        />
+      </View>
       <InteractionHintBanner hasContent={waves.length > 0} />
 
       <FlatList

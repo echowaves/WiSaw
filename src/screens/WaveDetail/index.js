@@ -7,7 +7,7 @@ import {
   Alert,
   Animated
 } from 'react-native'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { showSuccessToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
 import showConfirmAlert from '../../utils/showConfirmAlert'
@@ -24,7 +24,6 @@ import { getWave } from '../Waves/reducer'
 import EmptyStateCard from '../../components/EmptyStateCard'
 import PhotosListMasonry from '../../components/PhotosListMasonry'
 import PhotosListFooter from '../../components/PhotosListFooter'
-import PendingPhotosBanner from '../PhotosList/components/PendingPhotosBanner'
 import { emitAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
 import UploadContext from '../../contexts/UploadContext'
@@ -42,7 +41,6 @@ import WaveShareModal from '../../components/WaveShareModal'
 import AppHeader from '../../components/AppHeader'
 import EditWaveModal from '../../components/EditWaveModal'
 import useCameraCapture from '../../hooks/useCameraCapture'
-import usePendingAnimation from '../../hooks/usePendingAnimation'
 import QuickActionsModalWrapper from '../../components/QuickActionsModalWrapper'
 
 const FOOTER_HEIGHT = 90
@@ -74,6 +72,7 @@ const WaveDetail = () => {
 
   const [waveName, setWaveName] = useState(initialWaveName || '')
   const [netAvailable] = useAtom(STATE.netAvailable)
+  const bannerHeight = useAtomValue(STATE.bannerHeightAtom)
 
   // --- Feed loader hook ---
   const {
@@ -130,9 +129,6 @@ const WaveDetail = () => {
     enqueueCapture,
     clearPendingQueue
   } = useContext(UploadContext)
-
-  // Pending photos animation
-  const { pendingPhotosAnimation, uploadIconAnimation } = usePendingAnimation({ pendingPhotosCount: pendingPhotos.length, netAvailable })
 
   // Camera capture with drift check (task 8.1)
   const { isCameraOpening, checkPermissionsForPhotoTaking } = useCameraCapture({ enqueueCapture, toastTopOffset })
@@ -442,12 +438,14 @@ const WaveDetail = () => {
   if (!netAvailable) {
     return (
       <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-        <AppHeader
-          title={headerTitle}
-          onBack={() => router.back()}
-          rightSlot={headerRightSlot}
-          loading={loading}
-        />
+        <View style={{ paddingTop: bannerHeight }}>
+          <AppHeader
+            title={headerTitle}
+            onBack={() => router.back()}
+            rightSlot={headerRightSlot}
+            loading={loading}
+          />
+        </View>
         <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20 }}>
           <EmptyStateCard
             icon='wifi-off'
@@ -463,22 +461,14 @@ const WaveDetail = () => {
   return (
     <PhotosListContext.Provider value={photosListContextValue}>
       <View style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-        <AppHeader
-          title={headerTitle}
-          onBack={() => router.back()}
-          rightSlot={headerRightSlot}
-          loading={loading}
-        />
-        <PendingPhotosBanner
-          theme={theme}
-          pendingPhotos={pendingPhotos}
-          netAvailable={netAvailable}
-          isUploading={isUploading}
-          clearPendingQueue={clearPendingQueue}
-          toastTopOffset={toastTopOffset}
-          pendingPhotosAnimation={pendingPhotosAnimation}
-          uploadIconAnimation={uploadIconAnimation}
-        />
+        <View style={{ paddingTop: bannerHeight }}>
+          <AppHeader
+            title={headerTitle}
+            onBack={() => router.back()}
+            rightSlot={headerRightSlot}
+            loading={loading}
+          />
+        </View>
 
         {isFrozen && (
           <View style={styles.frozenBanner}>
