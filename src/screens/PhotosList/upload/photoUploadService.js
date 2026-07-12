@@ -145,7 +145,9 @@ const ensurePhotoDimensions = async (photo, processedItem) => {
     return photo
   }
 
-  const candidateUris = [processedItem?.localImgUrl, processedItem?.localThumbUrl, processedItem?.originalCameraUrl]
+  // Prefer original camera file dimensions over compressed derivatives.
+  // The compressed file may have slightly different dimensions due to resize rounding.
+  const candidateUris = [processedItem?.originalCameraUrl, processedItem?.localImgUrl, processedItem?.localThumbUrl]
 
   for (const uri of candidateUris) {
     // eslint-disable-next-line no-await-in-loop
