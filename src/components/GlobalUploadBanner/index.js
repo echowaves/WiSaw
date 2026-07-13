@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { MaterialIcons } from '@expo/vector-icons'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import * as Haptics from 'expo-haptics'
 import {
   Animated,
@@ -19,7 +19,8 @@ import showToast from '../../utils/showToast'
 import LinearProgress from '../ui/LinearProgress'
 
 const GlobalUploadBanner = () => {
-  const { pendingPhotos, netAvailable, isUploading, clearPendingQueue } = React.useContext(UploadContext)
+  const { pendingPhotos, isUploading, clearPendingQueue } = React.useContext(UploadContext)
+  const netAvailable = useAtomValue(STATE.netAvailable)
   const [isDark] = useAtom(STATE.isDarkMode)
   const setBannerHeight = useSetAtom(STATE.bannerHeightAtom)
   const insets = useSafeAreaInsets()
