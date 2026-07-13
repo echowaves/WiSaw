@@ -11,7 +11,7 @@ import {
   useWindowDimensions,
   View
 } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
@@ -178,126 +178,128 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
 
   return (
     <Modal animationType='slide' transparent={false} visible={show} presentationStyle='fullScreen'>
-      <View style={styles.container}>
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={theme.HEADER_BACKGROUND}
-          translucent={false}
-        />
+      <SafeAreaProvider>
+        <View style={styles.container}>
+          <StatusBar
+            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={theme.HEADER_BACKGROUND}
+            translucent={false}
+          />
 
-        {/* Use AppHeader for consistency */}
-        <AppHeader
-          onBack={handleCancel}
-          title={
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <FontAwesome5
-                name={friendshipUuid ? 'edit' : 'user-plus'}
-                size={18}
-                color={theme.TEXT_PRIMARY}
-                style={{ marginRight: 8 }}
-              />
-              <Text style={styles.headerTitle}>
-                {friendshipUuid ? 'Edit Friend Name' : 'Add Friend'}
-              </Text>
-            </View>
-          }
-          rightSlot={
-            <TouchableOpacity
-              onPress={handleSave}
-              disabled={!inputText.trim() || isSaving}
-              style={[
-                SHARED_STYLES.interactive.headerButton,
-                { opacity: inputText.trim() && !isSaving ? 1 : 0.6 }
-              ]}
-            >
-              <Ionicons
-                name='checkmark'
-                size={24}
-                color={inputText.trim() && !isSaving ? theme.TEXT_PRIMARY : theme.TEXT_DISABLED}
-              />
-            </TouchableOpacity>
-          }
-        />
-
-        <KeyboardAwareScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
-          keyboardShouldPersistTaps='handled'
-          showsVerticalScrollIndicator={false}
-          contentInsetAdjustmentBehavior='automatic'
-          bottomOffset={20}
-        >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View>
-              {/* Icon */}
-              <View style={styles.iconContainer}>
-                <FontAwesome5 name='users' size={32} color={theme.TEXT_PRIMARY} />
-              </View>
-
-              {/* Title and Subtitle */}
-              <Text style={styles.titleText}>
-                {friendshipUuid ? "Update your friend's name" : "What's your friend's name?"}
-              </Text>
-              <Text style={styles.subtitleText}>
-                {headerText ||
-                  'Give your friend a memorable name so you can easily find them later.'}
-              </Text>
-
-              {/* Input Field */}
-              <View style={styles.inputContainer}>
-                <TextInput
-                  placeholder="Enter friend's name..."
-                  placeholderTextColor={theme.TEXT_SECONDARY}
-                  autoFocus
-                  style={styles.textInput}
-                  maxLength={50}
-                  onChangeText={(inputValue) => {
-                    setInputText(inputValue.slice(0, 50))
-                  }}
-                  value={inputText}
-                  returnKeyType='done'
-                  onSubmitEditing={handleSave}
+          {/* Use AppHeader for consistency */}
+          <AppHeader
+            onBack={handleCancel}
+            title={
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <FontAwesome5
+                  name={friendshipUuid ? 'edit' : 'user-plus'}
+                  size={18}
+                  color={theme.TEXT_PRIMARY}
+                  style={{ marginRight: 8 }}
                 />
-                <Text style={styles.characterCount}>{50 - inputText.length}</Text>
+                <Text style={styles.headerTitle}>
+                  {friendshipUuid ? 'Edit Friend Name' : 'Add Friend'}
+                </Text>
               </View>
+            }
+            rightSlot={
+              <TouchableOpacity
+                onPress={handleSave}
+                disabled={!inputText.trim() || isSaving}
+                style={[
+                  SHARED_STYLES.interactive.headerButton,
+                  { opacity: inputText.trim() && !isSaving ? 1 : 0.6 }
+                ]}
+              >
+                <Ionicons
+                  name='checkmark'
+                  size={24}
+                  color={inputText.trim() && !isSaving ? theme.TEXT_PRIMARY : theme.TEXT_DISABLED}
+                />
+              </TouchableOpacity>
+            }
+          />
 
-              {/* Action Buttons */}
-              <View style={styles.buttonContainer}>
-                <Button
-                  title={(() => {
-                    if (isSaving) {
-                      return friendshipUuid ? 'Updating...' : 'Adding...'
+          <KeyboardAwareScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
+            keyboardShouldPersistTaps='handled'
+            showsVerticalScrollIndicator={false}
+            contentInsetAdjustmentBehavior='automatic'
+            bottomOffset={20}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View>
+                {/* Icon */}
+                <View style={styles.iconContainer}>
+                  <FontAwesome5 name='users' size={32} color={theme.TEXT_PRIMARY} />
+                </View>
+
+                {/* Title and Subtitle */}
+                <Text style={styles.titleText}>
+                  {friendshipUuid ? "Update your friend's name" : "What's your friend's name?"}
+                </Text>
+                <Text style={styles.subtitleText}>
+                  {headerText ||
+                    'Give your friend a memorable name so you can easily find them later.'}
+                </Text>
+
+                {/* Input Field */}
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    placeholder="Enter friend's name..."
+                    placeholderTextColor={theme.TEXT_SECONDARY}
+                    autoFocus
+                    style={styles.textInput}
+                    maxLength={50}
+                    onChangeText={(inputValue) => {
+                      setInputText(inputValue.slice(0, 50))
+                    }}
+                    value={inputText}
+                    returnKeyType='done'
+                    onSubmitEditing={handleSave}
+                  />
+                  <Text style={styles.characterCount}>{50 - inputText.length}</Text>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.buttonContainer}>
+                  <Button
+                    title={(() => {
+                      if (isSaving) {
+                        return friendshipUuid ? 'Updating...' : 'Adding...'
+                      }
+                      return friendshipUuid ? 'Update Friend' : 'Save Friend'
+                    })()}
+                    icon={
+                      <FontAwesome5
+                        name={friendshipUuid ? 'edit' : 'user-plus'}
+                        size={16}
+                        color='white'
+                        style={{ marginRight: 8 }}
+                      />
                     }
-                    return friendshipUuid ? 'Update Friend' : 'Save Friend'
-                  })()}
-                  icon={
-                    <FontAwesome5
-                      name={friendshipUuid ? 'edit' : 'user-plus'}
-                      size={16}
-                      color='white'
-                      style={{ marginRight: 8 }}
-                    />
-                  }
-                  size='lg'
-                  buttonStyle={[styles.saveButton, { marginBottom: 12 }]}
-                  titleStyle={styles.saveButtonTitle}
-                  onPress={handleSave}
-                  disabled={!inputText.trim() || isSaving}
-                  loading={isSaving}
-                />
+                    size='lg'
+                    buttonStyle={[styles.saveButton, { marginBottom: 12 }]}
+                    titleStyle={styles.saveButtonTitle}
+                    onPress={handleSave}
+                    disabled={!inputText.trim() || isSaving}
+                    loading={isSaving}
+                  />
 
-                <Button
-                  title='Cancel'
-                  size='lg'
-                  buttonStyle={styles.cancelButton}
-                  titleStyle={styles.cancelButtonTitle}
-                  onPress={handleCancel}
-                />
+                  <Button
+                    title='Cancel'
+                    size='lg'
+                    buttonStyle={styles.cancelButton}
+                    titleStyle={styles.cancelButtonTitle}
+                    onPress={handleCancel}
+                  />
+                </View>
               </View>
-            </View>
-          </TouchableWithoutFeedback>
-        </KeyboardAwareScrollView>
-      </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAwareScrollView>
+        </View>
+      </SafeAreaProvider>
     </Modal>
   )
 }
