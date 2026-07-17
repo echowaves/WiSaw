@@ -38,10 +38,10 @@ The PhotosList screen SHALL pass columns `{ 402: 3, 440: 4, 834: 7, 1024: 9, def
 - **THEN** it SHALL pass the feed column profile as the `columns` prop
 
 ### Requirement: Comment-screen column profile
-The BookmarksList, WaveDetail, and FriendDetail screens SHALL pass columns `{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }` to `PhotosListMasonry`, targeting approximately 140-190px column width to accommodate comment sections below thumbnails.
+The PhotosList, WaveDetail, and FriendDetail screens SHALL pass columns `{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }` to `PhotosListMasonry`, targeting approximately 140-190px column width to accommodate comment sections below thumbnails.
 
-#### Scenario: BookmarksList passes comment columns config
-- **WHEN** the BookmarksList screen renders `PhotosListMasonry`
+#### Scenario: PhotosList passes comment columns config
+- **WHEN** the PhotosList screen renders `PhotosListMasonry`
 - **THEN** it SHALL pass the comment-screen column profile as the `columns` prop
 
 #### Scenario: WaveDetail passes comment columns config

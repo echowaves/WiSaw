@@ -6,7 +6,7 @@ Below-photo comment section on thumbnails in the bookmarked segment, using mason
 ## Requirements
 
 ### Requirement: Comment section below thumbnail in bookmarked segment
-Photo thumbnails in the bookmarked segment (segment 1 of PhotosList, all of BookmarksList) SHALL display a comment section below the image when the photo has comments, watchers, or a last comment. The section SHALL have a fixed height of 44 pixels, a theme-aware background (`theme.CARD_BACKGROUND`), and bottom border radius matching the thumbnail (20px).
+Photo thumbnails in the PhotosList (both geo and bookmarks modes, always activeSegment 1) SHALL display a comment section below the image when the photo has comments, watchers, or a last comment. The section SHALL have a fixed height of 44 pixels, a theme-aware background (`theme.CARD_BACKGROUND`), and bottom border radius matching the thumbnail (20px).
 
 #### Scenario: Thumbnail with comments shows comment section
 - **WHEN** a photo in the bookmarked segment has `commentsCount > 0` OR `lastComment` is non-empty OR `watchersCount > 0`

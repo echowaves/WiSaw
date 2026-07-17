@@ -1,4 +1,4 @@
-import { FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import {
   DrawerContentScrollView,
   DrawerItemList
@@ -231,19 +231,6 @@ function IdentityDrawerIcon ({ color, size, focused }) {
   )
 }
 
-// Inline component for bookmarks drawer item — show MAIN_COLOR when user has bookmarks
-function BookmarksDrawerIcon ({ color, size, focused }) {
-  const [bookmarksCount] = useAtom(STATE.bookmarksCount)
-  const hasBookmarks = bookmarksCount != null && bookmarksCount > 0
-  const iconColor = hasBookmarks && !focused ? CONST.MAIN_COLOR : color
-
-  return (
-    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <Ionicons name='bookmark' size={22} color={iconColor} />
-    </View>
-  )
-}
-
 // Inline component for friends drawer item — show MAIN_COLOR when user has friends
 function FriendsDrawerIcon ({ color, size, focused }) {
   const [friendsList] = useAtom(STATE.friendsList)
@@ -351,17 +338,6 @@ export default function DrawerLayout () {
               drawerIcon: (props) => <IdentityDrawerIcon {...props} />,
               drawerLabel: (props) => <IdentityDrawerLabel {...props} />,
               title: 'Identity',
-              headerShown: false,
-              drawerItemStyle: offlineItemStyle
-            }}
-            listeners={offlineScreenListeners}
-          />
-          <Drawer.Screen
-            name='bookmarks'
-            options={{
-              drawerIcon: (props) => <BookmarksDrawerIcon {...props} />,
-              drawerLabel: 'Bookmarks',
-              title: 'Bookmarks',
               headerShown: false,
               drawerItemStyle: offlineItemStyle
             }}

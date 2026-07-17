@@ -82,14 +82,14 @@ The `GlobalUploadBanner` SHALL compute its own toast top offset for toast notifi
 
 ### Requirement: All drawer screens consume bannerHeightAtom
 
-All drawer screens (PhotosList, WaveDetail, WavesHub, BookmarksList, FriendsList) SHALL consume `bannerHeightAtom` and apply it as top padding.
+All drawer screens (PhotosList, WaveDetail, WavesHub, FriendsList) SHALL consume `bannerHeightAtom` and apply it as top padding.
 
 #### Scenario: Existing screens add banner padding
 - **WHEN** PhotosList, WaveDetail, or WavesHub renders
 - **THEN** it SHALL read `bannerHeightAtom` and apply it as padding above the AppHeader
 
 #### Scenario: Previously missing screens add banner padding
-- **WHEN** BookmarksList or FriendsList renders
+- **WHEN** FriendsList renders
 - **THEN** it SHALL read `bannerHeightAtom` and apply it as padding above the AppHeader
 
 ### Requirement: Per-screen banner rendering is removed

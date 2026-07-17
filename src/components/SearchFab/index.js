@@ -43,12 +43,12 @@ const SearchFab = ({
     wasExpanded.current = isExpanded
   }, [isExpanded])
 
-  // Animated bar that expands behind the FAB
+  // Animated bar that expands behind the FAB (right-aligned)
   const barStyle = useAnimatedStyle(() => ({
     width: interpolate(progress.value, [0, 1], [FAB_SIZE, expandedWidth]),
     opacity: interpolate(progress.value, [0, 0.3], [0, 1]),
-    paddingLeft: interpolate(progress.value, [0, 1], [FAB_SIZE + 4, 16]),
-    paddingRight: interpolate(progress.value, [0, 1], [16, FAB_SIZE + 4])
+    paddingLeft: interpolate(progress.value, [0, 1], [16, FAB_SIZE + 4]),
+    paddingRight: interpolate(progress.value, [0, 1], [FAB_SIZE + 4, 16])
   }))
 
   // Input fades/slides in only when bar is mostly expanded
@@ -64,9 +64,11 @@ const SearchFab = ({
       : withSpring(1, { damping: 15, stiffness: 120 })
   }))
 
-  // FAB button slides from left to right when expanding
+  // FAB button slides from right to left when expanding
+  // Collapsed (flex-end, right edge): translateX = 0
+  // Expanded (moves to left edge of bar): translateX = -(expandedWidth - FAB_SIZE)
   const fabPositionStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(progress.value, [0, 1], [0, expandedWidth - FAB_SIZE]) }]
+    transform: [{ translateX: interpolate(progress.value, [0, 1], [0, -(expandedWidth - FAB_SIZE)]) }]
   }))
 
   // Slide the whole FAB up when keyboard is visible
@@ -170,12 +172,12 @@ const styles = StyleSheet.create({
     height: FAB_SIZE,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'flex-end',
     zIndex: 10
   },
   bar: {
     position: 'absolute',
-    left: 0,
+    right: 0,
     height: FAB_SIZE,
     borderRadius: 28,
     flexDirection: 'row',

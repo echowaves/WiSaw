@@ -5,7 +5,7 @@ TBD - created by archiving change consolidate-code-duplication. Update Purpose a
 ## Requirements
 ### Requirement: useFeedLoader hook SHALL handle pagination for any photo listing screen
 
-The system SHALL provide a `useFeedLoader()` hook in `src/hooks/useFeedLoader.js` that accepts a `fetchFn` parameter and manages all pagination state, loading states, and subscription handling. The hook SHALL be usable by PhotosList, BookmarksList, WaveDetail, and FriendDetail.
+The system SHALL provide a `useFeedLoader()` hook in `src/hooks/useFeedLoader.js` that accepts a `fetchFn` parameter and manages all pagination state, loading states, and subscription handling. The hook SHALL be usable by PhotosList, WaveDetail, and FriendDetail.
 
 #### Scenario: Initial photo load
 - **WHEN** a screen calls `useFeedLoader({ fetchFn: fetchWavePhotos, batch: 20 })`

@@ -19,9 +19,9 @@ The pinch view back button SHALL dismiss the modal and return the user to the sc
 - **WHEN** user taps a photo on the home PhotosList and then presses the back button in the pinch view
 - **THEN** the user SHALL be returned to the home PhotosList
 
-#### Scenario: Back from pinch after opening from bookmarks
-- **WHEN** user taps a photo on the BookmarksList and then presses the back button in the pinch view
-- **THEN** the user SHALL be returned to the BookmarksList
+#### Scenario: Back from pinch after opening from bookmarks mode
+- **WHEN** user taps a photo on the PhotosList in bookmarks mode and then presses the back button in the pinch view
+- **THEN** the user SHALL be returned to the PhotosList in bookmarks mode
 
 #### Scenario: Back from pinch after opening from wave detail
 - **WHEN** user taps a photo on a WaveDetail screen and then presses the back button in the pinch view

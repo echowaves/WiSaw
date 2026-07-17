@@ -22,11 +22,11 @@ The AppHeader component SHALL accept an optional `loading` boolean prop. When `l
 - **WHEN** `loading` prop is omitted
 - **THEN** AppHeader SHALL behave identically to its current implementation with no visual or layout changes
 
-### Requirement: BookmarksList shows loading progress
-The BookmarksList screen SHALL pass its `loading` state to AppHeader so that users see a progress bar during data fetching.
+### Requirement: PhotosList in bookmarks mode shows loading progress
+The PhotosList screen SHALL pass its `loading` state to AppHeader in all modes (geo and bookmarks) so that users see a progress bar during data fetching.
 
 #### Scenario: Initial bookmarks load
-- **WHEN** the BookmarksList screen mounts and begins fetching watched photos
+- **WHEN** the PhotosList screen in bookmarks mode mounts and begins fetching watched photos
 - **THEN** a LinearProgress bar SHALL appear in the AppHeader
 
 #### Scenario: Bookmarks load complete

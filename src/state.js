@@ -37,6 +37,9 @@ export const ungroupedPhotosCount = atom(null)
 
 export const bookmarksCount = atom(null)
 
+// Feed mode toggle: false = geo feed, true = bookmarks feed
+export const isBookmarksMode = atom(false)
+
 // Global upload banner height for screen padding coordination
 export const bannerHeightAtom = atom(0)
 

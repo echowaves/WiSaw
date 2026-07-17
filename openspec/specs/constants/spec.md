@@ -61,13 +61,9 @@ export const GEO_FEED_LAYOUT_CONFIG = {
 - **WHEN** FriendDetail configures segment settings
 - **THEN** it imports and uses `BOOKMARK_LAYOUT_CONFIG` from `src/consts.js`
 
-#### Scenario: BookmarksList uses BOOKMARK_LAYOUT_CONFIG
-- **WHEN** BookmarksList configures segment settings
-- **THEN** it imports and uses `BOOKMARK_LAYOUT_CONFIG` from `src/consts.js`
-
-#### Scenario: PhotosList uses GEO_FEED_LAYOUT_CONFIG
+#### Scenario: PhotosList uses BOOKMARK_LAYOUT_CONFIG
 - **WHEN** PhotosList configures segment settings
-- **THEN** it imports and uses `GEO_FEED_LAYOUT_CONFIG` from `src/consts.js`
+- **THEN** it imports and uses `BOOKMARK_LAYOUT_CONFIG` from `src/consts.js`
 
 ## Implementation Notes
 

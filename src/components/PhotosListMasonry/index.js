@@ -13,7 +13,7 @@ const SCROLL_THRESHOLD = 200
 const SCROLL_DELTA_MIN = 5
 const INACTIVITY_TIMEOUT = 3000
 
-const FEED_COLUMNS = { 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }
+const FEED_COLUMNS = { 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }
 
 const PhotosListMasonry = ({
   activeSegment,

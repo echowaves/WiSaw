@@ -25,7 +25,7 @@ The SearchFab component SHALL hide (fade out with opacity transition) when the `
 
 ### Requirement: Parent screen manages comment editing state
 
-The parent screen (PhotosList or BookmarksList) SHALL manage an `isCommentEditing` boolean state and pass it to SearchFab as a prop. The screen SHALL provide an `onCommentInputToggle` callback to child Photo components.
+The parent screen (PhotosList) SHALL manage an `isCommentEditing` boolean state and pass it to SearchFab as a prop. The screen SHALL provide an `onCommentInputToggle` callback to child Photo components.
 
 #### Scenario: Screen initializes with editing state false
 

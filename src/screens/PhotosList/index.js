@@ -36,7 +36,7 @@ import useToastTopOffset from '../../hooks/useToastTopOffset'
 import * as friendsHelper from '../FriendsList/friends_helper'
 
 import * as reducer from './reducer'
-import { requestGeoPhotos } from './reducer'
+import { requestGeoPhotos, requestWatchedPhotos } from './reducer'
 
 import QuickActionsModalWrapper from '../../components/QuickActionsModalWrapper'
 
@@ -48,10 +48,11 @@ import {
 } from '../../utils/photoListHelpers'
 
 import EmptyStateCard from '../../components/EmptyStateCard'
-import { GEO_FEED_LAYOUT_CONFIG } from '../../consts'
+import { BOOKMARK_LAYOUT_CONFIG } from '../../consts'
 import PhotosListFooter from '../../components/PhotosListFooter'
 import PhotosListHeader from '../../components/PhotosListHeader'
 import SearchFab from '../../components/SearchFab'
+import FeedModeToggleFAB from '../../components/FeedModeToggleFAB'
 import LocationDriftBanner from './components/LocationDriftBanner'
 import PhotosListMasonry from '../../components/PhotosListMasonry'
 import PhotosListContext from '../../contexts/PhotosListContext'
@@ -133,6 +134,7 @@ const PhotosList = ({ searchFromUrl }) => {
   const [uuid] = useAtom(STATE.uuid)
   const [, setFriendsList] = useAtom(STATE.friendsList)
   const [isDarkMode] = useAtom(STATE.isDarkMode)
+  const [isBookmarksMode, setIsBookmarksMode] = useAtom(STATE.isBookmarksMode)
   const setUngroupedPhotosCount = useSetAtom(STATE.ungroupedPhotosCount)
 
   const toastTopOffset = useToastTopOffset()
@@ -201,10 +203,11 @@ const PhotosList = ({ searchFromUrl }) => {
     processQueue: processPendingQueue
   } = useContext(UploadContext)
 
-  // Global feed layout config - compact masonry
-  const segmentConfig = GEO_FEED_LAYOUT_CONFIG
+  // Unified feed layout config - bookmark style (larger tiles, square, comments)
+  const segmentConfig = BOOKMARK_LAYOUT_CONFIG
 
   // --- Feed loader hook ---
+  const fetchFn = isBookmarksMode ? requestWatchedPhotos : requestGeoPhotos
   const {
     photosList,
     setPhotosList,
@@ -214,7 +217,7 @@ const PhotosList = ({ searchFromUrl }) => {
     handleLoadMore: feedHandleLoadMore,
     removePhoto,
     abort: abortFeed
-  } = useFeedLoader(requestGeoPhotos, {
+  } = useFeedLoader(fetchFn, {
     subscribeToUploads: true,
     setUngroupedPhotosCount
   })
@@ -234,12 +237,12 @@ const PhotosList = ({ searchFromUrl }) => {
   }), [uuid, location, zeroMoment, netAvailable])
 
   const reload = useCallback(async (searchTermOverride = null) => {
-    // Skip reload when location is not yet available — the locationState.status
+    // Skip geo reload when location is not yet available — the locationState.status
     // effect will trigger reload once location permission resolves
-    if (!location) return
+    if (!location && !isBookmarksMode) return
 
-    // Snapshot current location for drift comparison
-    if (locationState.coords) {
+    // Snapshot current location for drift comparison (geo mode only)
+    if (locationState.coords && !isBookmarksMode) {
       feedLocationRef.current = locationState.coords
       setFeedLocationVersion(v => v + 1)
     }
@@ -253,7 +256,7 @@ const PhotosList = ({ searchFromUrl }) => {
     }
 
     await feedReload(getFetchParams(), searchTermOverride)
-  }, [feedReload, getFetchParams, locationState.coords, refreshPendingQueue, processPendingQueue, uuid, setFriendsList])
+  }, [feedReload, getFetchParams, locationState.coords, refreshPendingQueue, processPendingQueue, uuid, setFriendsList, isBookmarksMode, location])
 
   const handleLoadMore = useCallback(() => {
     feedHandleLoadMore(getFetchParams())
@@ -298,6 +301,13 @@ const PhotosList = ({ searchFromUrl }) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     quickActionsRef.current?.open(photo)
   }, [])
+
+  // Reload feed when mode toggle changes
+  useEffect(() => {
+    if (netAvailable && uuid) {
+      reload()
+    }
+  }, [isBookmarksMode])
   // Identity change triggers reload
   useEffect(() => {
     const unsubscribe = subscribeToIdentityChange(() => {
@@ -439,21 +449,21 @@ const PhotosList = ({ searchFromUrl }) => {
     )
   }
 
-  if (isTandcAccepted && location && photosList?.length > 0) {
+  if (isTandcAccepted && (location || isBookmarksMode) && photosList?.length > 0) {
     return (
       <PhotosListContext.Provider value={photosListContextValue}>
         <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
           {renderHeader()}
-          {showDriftBanner && (
+          {showDriftBanner && !isBookmarksMode && (
             <LocationDriftBanner theme={theme} onPress={() => reload()} />
           )}
           <View style={styles.container}>
             <InteractionHintBanner hasContent={photosList?.length > 0} />
             <PhotosListMasonry
-              activeSegment={0}
+              activeSegment={1}
               photosList={photosList}
               segmentConfig={segmentConfig}
-              columns={{ 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }}
+              columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
               masonryRef={masonryRef}
               searchTerm={searchTerm}
               uuid={uuid}
@@ -473,6 +483,11 @@ const PhotosList = ({ searchFromUrl }) => {
               onCommentInputToggle={setIsCommentEditing}
             />
           </View>
+          <FeedModeToggleFAB
+            footerHeight={FOOTER_HEIGHT}
+            theme={theme}
+            onPress={() => reload()}
+          />
           <SearchFab
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -493,8 +508,8 @@ const PhotosList = ({ searchFromUrl }) => {
             onCameraPress={checkPermissionsForPhotoTaking}
             locationReady={!!location}
           />
-          <QuickActionsModalWrapper 
-            ref={quickActionsRef} 
+          <QuickActionsModalWrapper
+            ref={quickActionsRef}
             onPhotoDeleted={(photoId) => {
               setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
             }}
@@ -574,7 +589,7 @@ const PhotosList = ({ searchFromUrl }) => {
               icon='location-off'
               iconType='MaterialIcons'
               title='Location Unavailable'
-              subtitle="We couldn't determine your location. Try the Bookmarks screen from the menu or use Search to browse photos."
+              subtitle="We couldn't determine your location. Use Search to browse photos or toggle to your bookmarks."
             />
           )}
         </ScrollView>
@@ -599,15 +614,25 @@ const PhotosList = ({ searchFromUrl }) => {
           actionText: 'Clear Search',
           onActionPress: handleClearSearch
         }
-      : {
-          icon: 'globe',
-          title: 'No Photos in Your Area',
-          subtitle: "Be the first to share a moment! Take a photo and let others discover what's happening around you.",
-          actionText: 'Refresh',
-          onActionPress: () => reload(),
-          secondaryActionText: 'Take a Photo',
-          onSecondaryActionPress: () => checkPermissionsForPhotoTaking({ cameraType: 'camera' })
-        }
+      : isBookmarksMode
+        ? {
+            icon: 'bookmark',
+            title: 'No Bookmarks Yet',
+            subtitle: 'Start building your collection! Bookmark content you love.',
+            actionText: 'Discover Content',
+            onActionPress: () => {
+              setIsBookmarksMode(false)
+            }
+          }
+        : {
+            icon: 'globe',
+            title: 'No Photos in Your Area',
+            subtitle: "Be the first to share a moment! Take a photo and let others discover what's happening around you.",
+            actionText: 'Refresh',
+            onActionPress: () => reload(),
+            secondaryActionText: 'Take a Photo',
+            onSecondaryActionPress: () => checkPermissionsForPhotoTaking({ cameraType: 'camera' })
+          }
 
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
@@ -629,6 +654,11 @@ const PhotosList = ({ searchFromUrl }) => {
         >
           <EmptyStateCard {...emptyStateProps} />
         </ScrollView>
+        <FeedModeToggleFAB
+          footerHeight={FOOTER_HEIGHT}
+          theme={theme}
+          onPress={() => reload()}
+        />
         <SearchFab
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -676,6 +706,11 @@ const PhotosList = ({ searchFromUrl }) => {
             />
           ))}
       </ScrollView>
+      <FeedModeToggleFAB
+        footerHeight={FOOTER_HEIGHT}
+        theme={theme}
+        onPress={() => reload()}
+      />
       <SearchFab
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -695,8 +730,8 @@ const PhotosList = ({ searchFromUrl }) => {
         onCameraPress={checkPermissionsForPhotoTaking}
         locationReady={!!location}
       />
-      <QuickActionsModalWrapper 
-        ref={quickActionsRef} 
+      <QuickActionsModalWrapper
+        ref={quickActionsRef}
         onPhotoDeleted={(photoId) => {
           setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
         }}

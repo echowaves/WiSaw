@@ -65,18 +65,11 @@ export const ROLE_CONFIG = {
   contributor: { ...WAVE_ROLES.contributor, icon: 'account' }
 }
 
-// Masonry grid layout configs — bookmark screens (larger tiles, square aspect ratios)
+// Masonry grid layout config — unified feed (larger tiles, square aspect ratios, comments)
 export const BOOKMARK_LAYOUT_CONFIG = {
   spacing: 8,
   baseHeight: 200,
   aspectRatioFallbacks: [1.0]
-}
-
-// Masonry grid layout config — geo-feed (smaller tiles, varied aspect ratios)
-export const GEO_FEED_LAYOUT_CONFIG = {
-  spacing: 5,
-  baseHeight: 100,
-  aspectRatioFallbacks: [0.56, 0.67, 0.75, 1.0, 1.33, 1.5, 1.78]
 }
 
 export const TEXT_COLOR = '#555f61'
