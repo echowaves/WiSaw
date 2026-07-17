@@ -3,6 +3,11 @@ import { Ionicons } from '@expo/vector-icons'
 import { useAtom } from 'jotai'
 import React from 'react'
 import { Pressable, StyleSheet } from 'react-native'
+import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller'
+import Animated, {
+  useAnimatedStyle,
+  interpolate
+} from 'react-native-reanimated'
 
 import * as STATE from '../../state'
 
@@ -15,6 +20,15 @@ const FeedModeToggleFAB = ({
   onPress
 }) => {
   const [isBookmarksMode, setIsBookmarksMode] = useAtom(STATE.isBookmarksMode)
+  const { height: kbHeight } = useReanimatedKeyboardAnimation()
+
+  const keyboardStyle = useAnimatedStyle(() => {
+    const kbOpen = kbHeight.value < 0 ? 1 : 0
+    return {
+      bottom: interpolate(kbOpen, [0, 1], [footerHeight + HORIZONTAL_MARGIN, 8]),
+      transform: [{ translateY: kbHeight.value }]
+    }
+  })
 
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
@@ -23,29 +37,38 @@ const FeedModeToggleFAB = ({
   }
 
   return (
-    <Pressable
-      onPress={handlePress}
+    <Animated.View
       style={[
-        styles.fabButton,
-        {
-          backgroundColor: theme.INTERACTIVE_PRIMARY,
-          bottom: footerHeight + FAB_SIZE + 12 + HORIZONTAL_MARGIN
-        }
+        styles.wrapper,
+        keyboardStyle
       ]}
     >
-      <Ionicons
-        name={isBookmarksMode ? 'bookmark-outline' : 'globe-outline'}
-        size={22}
-        color='white'
-      />
-    </Pressable>
+      <Pressable
+        onPress={handlePress}
+        style={[
+          styles.fabButton,
+          {
+            backgroundColor: theme.INTERACTIVE_PRIMARY
+          }
+        ]}
+      >
+        <Ionicons
+          name={isBookmarksMode ? 'bookmark-outline' : 'globe-outline'}
+          size={22}
+          color='white'
+        />
+      </Pressable>
+    </Animated.View>
   )
 }
 
 const styles = StyleSheet.create({
-  fabButton: {
+  wrapper: {
     position: 'absolute',
-    right: HORIZONTAL_MARGIN,
+    left: HORIZONTAL_MARGIN,
+    zIndex: 11
+  },
+  fabButton: {
     width: FAB_SIZE,
     height: FAB_SIZE,
     borderRadius: 28,
@@ -55,8 +78,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 6,
-    zIndex: 11
+    shadowRadius: 6
   }
 })
 

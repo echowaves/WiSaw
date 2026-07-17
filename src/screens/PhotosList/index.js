@@ -302,12 +302,12 @@ const PhotosList = ({ searchFromUrl }) => {
     quickActionsRef.current?.open(photo)
   }, [])
 
-  // Reload feed when mode toggle changes
+  // Reload feed when mode toggle changes — pass current search term so results re-query
   useEffect(() => {
     if (netAvailable && uuid) {
-      reload()
+      reload(searchTerm)
     }
-  }, [isBookmarksMode])
+  }, [isBookmarksMode, searchTerm])
   // Identity change triggers reload
   useEffect(() => {
     const unsubscribe = subscribeToIdentityChange(() => {
@@ -486,7 +486,6 @@ const PhotosList = ({ searchFromUrl }) => {
           <FeedModeToggleFAB
             footerHeight={FOOTER_HEIGHT}
             theme={theme}
-            onPress={() => reload()}
           />
           <SearchFab
             searchTerm={searchTerm}
@@ -657,7 +656,6 @@ const PhotosList = ({ searchFromUrl }) => {
         <FeedModeToggleFAB
           footerHeight={FOOTER_HEIGHT}
           theme={theme}
-          onPress={() => reload()}
         />
         <SearchFab
           searchTerm={searchTerm}
