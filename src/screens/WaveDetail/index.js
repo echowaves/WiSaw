@@ -4,8 +4,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
-  Animated
+  Alert
 } from 'react-native'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { showSuccessToast } from '../../utils/showToast'
@@ -124,7 +123,6 @@ const WaveDetail = () => {
 
   // Upload handler
   const {
-    pendingPhotos,
     isUploading,
     enqueueCapture,
     clearPendingQueue
@@ -168,37 +166,6 @@ const WaveDetail = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
     quickActionsRef.current?.open(photo)
   }, [])
-
-  // Pending photos animation
-  useEffect(() => {
-    if (pendingPhotos.length > 0) {
-      Animated.spring(pendingPhotosAnimation, {
-        toValue: 1,
-        useNativeDriver: true
-      }).start()
-    } else {
-      Animated.timing(pendingPhotosAnimation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true
-      }).start()
-    }
-
-    if (pendingPhotos.length > 0 && netAvailable) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(uploadIconAnimation, {
-            toValue: 0.3, duration: 800, useNativeDriver: true
-          }),
-          Animated.timing(uploadIconAnimation, {
-            toValue: 1, duration: 800, useNativeDriver: true
-          })
-        ])
-      ).start()
-    } else {
-      uploadIconAnimation.setValue(1)
-    }
-  }, [pendingPhotos.length, netAvailable])
 
   // Reload when dependencies change (waveUuid, sort preferences, freeze state)
   const getFetchParams = useCallback(() => ({
