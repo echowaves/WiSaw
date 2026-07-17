@@ -84,6 +84,8 @@ The `load()` function SHALL accept explicit override parameters `(segmentOverrid
 
 Both `feedByDate` and `feedForWatcher` GraphQL queries SHALL include `nextPage` in their response fields. The `load()` function SHALL read `{ photos, batch, noMoreData, nextPage }` from `getPhotos()`. When search is active and a page returns empty photos but `noMoreData` is false, `load()` SHALL auto-page by recursively calling itself with `nextPage` as the page override. When photos are returned and `nextPage` is provided, `pageNumber` SHALL be updated to `nextPage` so subsequent `handleLoadMore` starts from the correct offset. The auto-page recursion SHALL check `signal.aborted` before each recursive call to respect cancellation.
 
+**CRITICAL**: The feed SHALL NOT reload or submit a search query when the user types in the search input. The `searchTerm` state update from `onChangeText` SHALL only update the text field. A search query SHALL be submitted ONLY when the user explicitly presses the send button (FAB icon when expanded) or when an external trigger fires (AI tag click, deep link). No `useEffect` in the PhotosList screen SHALL have `searchTerm` as a dependency for triggering a feed reload.
+
 #### Scenario: Search on Global segment
 - **WHEN** the user submits a search term while on the Global segment (segment 0)
 - **THEN** `feedByDate` SHALL be called with the geo parameters AND `searchTerm: <term>`
@@ -97,6 +99,18 @@ Both `feedByDate` and `feedForWatcher` GraphQL queries SHALL include `nextPage` 
 - **THEN** the backend SHALL filter watched photos by the search term
 - **THEN** results SHALL display in the Starred segment's masonry layout (larger tiles with comments overlay)
 - **THEN** the layout SHALL NOT change from the non-search Starred view
+
+#### Scenario: Typing in search input does not trigger search
+- **WHEN** the user types characters in the search input
+- **THEN** the `searchTerm` state SHALL update to reflect the current text
+- **THEN** NO API call SHALL be made
+- **THEN** the feed SHALL NOT reload
+- **THEN** the masonry layout SHALL NOT change
+
+#### Scenario: Send button triggers search
+- **WHEN** the user presses the send button (FAB icon) after typing
+- **THEN** the search SHALL be submitted with the current `searchTerm`
+- **THEN** the feed SHALL reload with search results
 
 #### Scenario: Search term of any length
 - **WHEN** the user types any number of characters in the search input

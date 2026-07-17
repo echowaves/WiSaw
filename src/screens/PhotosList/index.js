@@ -309,7 +309,7 @@ const PhotosList = ({ searchFromUrl }) => {
     if (netAvailable && uuid) {
       reload(searchTerm)
     }
-  }, [isBookmarksMode, searchTerm])
+  }, [isBookmarksMode]) // searchTerm intentionally omitted — only react to mode change, not keystrokes
   // Identity change triggers reload
   useEffect(() => {
     const unsubscribe = subscribeToIdentityChange(() => {
