@@ -4,7 +4,7 @@ This specification defines expected user-visible behavior, constraints, and vali
 ## Requirements
 
 ### Requirement: Search FAB renders on photo feed
-The system SHALL render a floating action button (FAB) with a magnifying glass icon in the bottom-left corner of the PhotosList screen, positioned above the footer. The FAB SHALL be visible on both the Global and Starred segments when search is not active.
+The system SHALL render a floating action button (FAB) with a magnifying glass icon in the bottom-left corner of the PhotosList screen, positioned above the footer. The FAB SHALL be visible on both the Global and Bookmarks modes when search is not active.
 
 #### Scenario: FAB visible on Global segment
 - **WHEN** the user is viewing the Global segment (segment 0)
@@ -12,8 +12,8 @@ The system SHALL render a floating action button (FAB) with a magnifying glass i
 - **THEN** the FAB SHALL be positioned `FOOTER_HEIGHT + 16` pixels from the bottom of the screen and 16 pixels from the left edge
 - **THEN** the FAB SHALL have a `zIndex` of 10, floating above the masonry content
 
-#### Scenario: FAB visible on Starred segment
-- **WHEN** the user is viewing the Starred segment (segment 1)
+#### Scenario: FAB visible on Bookmarks mode
+- **WHEN** the user is viewing the Bookmarks mode (segment 1)
 - **THEN** the same FAB SHALL be visible with identical positioning
 
 #### Scenario: FAB hidden when no content context
@@ -87,12 +87,12 @@ Both `feedByDate` and `feedForWatcher` GraphQL queries SHALL include `nextPage` 
 - **THEN** results SHALL display in the Global segment's masonry layout (compact tiles, no comments overlay)
 - **THEN** the layout SHALL NOT change from the non-search Global view
 
-#### Scenario: Search on Starred segment
-- **WHEN** the user submits a search term while on the Starred segment (segment 1)
+#### Scenario: Search on Bookmarks mode
+- **WHEN** the user submits a search term while on the Bookmarks mode (segment 1)
 - **THEN** `feedForWatcher` SHALL be called with the watcher parameters AND `searchTerm: <term>`
 - **THEN** the backend SHALL filter watched photos by the search term
-- **THEN** results SHALL display in the Starred segment's masonry layout (larger tiles with comments overlay)
-- **THEN** the layout SHALL NOT change from the non-search Starred view
+- **THEN** results SHALL display in the Bookmarks mode's masonry layout (larger tiles with comments overlay)
+- **THEN** the layout SHALL NOT change from the non-search Bookmarks view
 
 #### Scenario: Search term of any length
 - **WHEN** the user types any number of characters in the search input

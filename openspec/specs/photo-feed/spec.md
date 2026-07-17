@@ -64,7 +64,7 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 Removed behavior note: PhotosList search bar keyboard handling has been replaced by the SearchFab component, which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
 
 ### Requirement: Photo viewing interaction
-The photo feed SHALL display photos in a column masonry grid with responsive column counts based on screen width. The PhotosList screen SHALL pass a feed column profile (`{ 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }`) to `PhotosListMasonry` via the `columns` prop. When a user taps a thumbnail, the photo SHALL expand inline to full grid width showing the complete Photo detail view inside a unified card, instead of navigating to a modal route. The expanded view SHALL render the photo first, followed by action buttons, then photo info, comments, and AI recognitions.
+The photo feed SHALL display photos in a column masonry grid with responsive column counts based on screen width. The PhotosList screen SHALL pass a comment-screen column profile (`{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }`) to `PhotosListMasonry` via the `columns` prop, regardless of the active feed mode (geo or bookmarks). The feed SHALL use `BOOKMARK_LAYOUT_CONFIG` for layout parameters (spacing, tile height, aspect ratios). Comment sections SHALL always be shown on thumbnails when applicable (when photos have comments, watchers, or last comment), regardless of the active feed mode. When a user taps a thumbnail, the photo SHALL expand inline to full grid width showing the complete Photo detail view inside a unified card, instead of navigating to a modal route. The expanded view SHALL render the photo first, followed by action buttons, then photo info, comments, and AI recognitions.
 
 #### Scenario: Tap photo in feed
 - **WHEN** user taps a photo thumbnail in the main feed
@@ -78,9 +78,18 @@ The photo feed SHALL display photos in a column masonry grid with responsive col
 - **WHEN** a photo is expanded and then collapsed
 - **THEN** the feed scroll position remains near the collapsed thumbnail's position
 
-#### Scenario: Feed uses responsive columns
+#### Scenario: Feed uses comment-screen columns
 - **WHEN** the PhotosList screen renders `PhotosListMasonry`
-- **THEN** it SHALL pass `columns={{ 402: 3, 440: 4, 834: 7, 1024: 9, default: 12 }}` to the masonry component
+- **THEN** it SHALL pass `columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}` to the masonry component
+
+#### Scenario: Feed uses bookmark layout config
+- **WHEN** the PhotosList screen renders `PhotosListMasonry`
+- **THEN** it SHALL pass `BOOKMARK_LAYOUT_CONFIG` as the `segmentConfig` prop (spacing: 8, baseHeight: 200, aspectRatioFallbacks: [1.0])
+
+#### Scenario: Comments always shown on thumbnails
+- **WHEN** a photo in the feed has comments, watchers, or a last comment
+- **THEN** the comment section SHALL be rendered below the thumbnail regardless of the active feed mode (geo or bookmarks)
+- **THEN** `activeSegment` SHALL always be `1` for masonry rendering purposes to enable comment sections
 
 ### Requirement: Photo feed state management
 The PhotosList screen SHALL use `useFeedLoader` hook for photo array state management instead of inline `useState` and manual event subscriptions. The hook SHALL handle photo freezing, deduplication, pagination, abort control, upload subscriptions, and deletion subscriptions. Upload state (`pendingPhotos`, `isUploading`, `enqueueCapture`, `clearPendingQueue`) SHALL be consumed from `UploadContext`. The screen SHALL provide a `PhotosListContext` with the `removePhoto` function returned by `useFeedLoader`.
