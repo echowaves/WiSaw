@@ -36,7 +36,7 @@ The system SHALL animate the FAB into an inline search bar when tapped. When col
 - **THEN** the TextInput SHALL receive focus and the keyboard SHALL open
 - **THEN** the TextInput SHALL only auto-focus on the collapsed-to-expanded transition, not on subsequent re-renders while already expanded
 - **THEN** the FAB SHALL slide up to sit just above the keyboard (8px gap) using `useReanimatedKeyboardAnimation` from `react-native-keyboard-controller`
-- **THEN** the masonry layout SHALL NOT resize when the keyboard opens — photos may scroll under the keyboard
+- **THEN** the masonry layout SHALL adjust its bottom padding to account for the keyboard height so photos do not flow under the keyboard
 
 #### Scenario: Clear button visibility
 - **WHEN** the search bar is expanded and the input text is empty
@@ -51,9 +51,9 @@ The system SHALL animate the FAB into an inline search bar when tapped. When col
 - **THEN** the search bar SHALL remain expanded
 
 #### Scenario: User presses keyboard return key
-- **WHEN** the user presses the return/search key on the keyboard while the search bar is focused
-- **THEN** the keyboard SHALL be dismissed via `Keyboard.dismiss()`
-- **THEN** `reload(activeSegment, searchTerm)` SHALL be called, passing the current search term explicitly
+- **WHEN** the user presses the return/done key on the keyboard while the search bar is focused
+- **THEN** the keyboard SHALL be dismissed
+- **THEN** the search SHALL NOT be submitted
 - **THEN** the search bar SHALL remain expanded showing the search term
 - **THEN** the TextInput SHALL NOT regain focus on subsequent re-renders
 

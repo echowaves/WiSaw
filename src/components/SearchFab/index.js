@@ -127,11 +127,9 @@ const SearchFab = ({
             value={searchTerm}
             onChangeText={setSearchTerm}
             onSubmitEditing={() => {
-              if (searchTerm.length < 3) return
               Keyboard.dismiss()
-              onSubmitSearch()
             }}
-            returnKeyType='search'
+            returnKeyType='done'
             style={[styles.input, { color: theme.TEXT_PRIMARY }]}
           />
           {isExpanded && (

@@ -181,6 +181,8 @@ const PhotosList = ({ searchFromUrl }) => {
   const [locationDismissed, setLocationDismissed] = useState(false)
   // Comment editing state for SearchFab visibility
   const [isCommentEditing, setIsCommentEditing] = useState(false)
+  // Keyboard height tracking for dynamic masonry padding
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
 
   const DRIFT_THRESHOLD = 500 // meters
   const showDriftBanner = useMemo(() => {
@@ -374,6 +376,25 @@ const PhotosList = ({ searchFromUrl }) => {
     })()
   }, [])
 
+  // Track keyboard height for dynamic masonry bottom padding
+  useEffect(() => {
+    const showHandler = (e) => setKeyboardHeight(e.endCoordinates.height)
+    const hideHandler = () => setKeyboardHeight(0)
+
+    // iOS fires Will events, Android fires Did events
+    const willShow = Keyboard.addListener('keyboardWillShow', showHandler)
+    const willHide = Keyboard.addListener('keyboardWillHide', hideHandler)
+    const didShow = Keyboard.addListener('keyboardDidShow', showHandler)
+    const didHide = Keyboard.addListener('keyboardDidHide', hideHandler)
+
+    return () => {
+      willShow.remove()
+      willHide.remove()
+      didShow.remove()
+      didHide.remove()
+    }
+  }, [])
+
   useEffect(() => {
     if (locationState.status === 'ready') {
       reload()
@@ -474,7 +495,7 @@ const PhotosList = ({ searchFromUrl }) => {
               reload={reload}
               styles={styles}
               FOOTER_HEIGHT={FOOTER_HEIGHT}
-              contentPaddingBottom={FOOTER_HEIGHT + 56 + 32}
+              contentPaddingBottom={FOOTER_HEIGHT + 56 + 32 + keyboardHeight}
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
               removePhoto={removePhoto}

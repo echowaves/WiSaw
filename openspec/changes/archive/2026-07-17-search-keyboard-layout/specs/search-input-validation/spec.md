@@ -1,9 +1,7 @@
-## Purpose
-This specification defines expected user-visible behavior, constraints, and validation scenarios for search input validation in WiSaw.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Minimum search term length for submission
+
 The SearchFab send button SHALL be disabled when the search term contains fewer than 3 characters. The system SHALL prevent search submission through the FAB press when the minimum length is not met. Search is submitted exclusively by tapping the FAB send button — the keyboard return key SHALL NOT trigger a search submission.
 
 #### Scenario: Send button disabled with short input
