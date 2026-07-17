@@ -32,6 +32,7 @@ const PhotosListMasonry = ({
   reload,
   styles,
   FOOTER_HEIGHT,
+  contentPaddingBottom,
   onPhotoLongPress,
   theme,
   removePhoto,
@@ -244,7 +245,7 @@ const PhotosListMasonry = ({
         }}
         contentContainerStyle={{
           paddingTop: 5,
-          paddingBottom: FOOTER_HEIGHT + 20
+          paddingBottom: contentPaddingBottom ?? FOOTER_HEIGHT + 20
         }}
         showsVerticalScrollIndicator={false}
       />

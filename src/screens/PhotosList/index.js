@@ -474,6 +474,7 @@ const PhotosList = ({ searchFromUrl }) => {
               reload={reload}
               styles={styles}
               FOOTER_HEIGHT={FOOTER_HEIGHT}
+              contentPaddingBottom={FOOTER_HEIGHT + 56 + 32}
               onPhotoLongPress={handlePhotoLongPress}
               theme={theme}
               removePhoto={removePhoto}
