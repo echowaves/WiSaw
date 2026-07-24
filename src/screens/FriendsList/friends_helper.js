@@ -227,6 +227,7 @@ const getRemoteListOfFriendships = async ({ uuid }) => {
               photos {
                 id
                 thumbUrl
+                updatedAt
               }
             }
           }

@@ -274,11 +274,19 @@ const FriendsList = () => {
     const pending = list.filter((f) => f.uuid2 === null)
     const confirmed = list.filter((f) => f.uuid2 !== null)
 
-    // Sort confirmed friends by createdAt desc (newest first)
+    // Sort confirmed friends by most recent photo updatedAt desc (newest first)
+    // Fallback to friendship createdAt when no photos or no updatedAt available
+    const getLatestActivityTime = (friendship) => {
+      if (friendship?.photos?.[0]?.updatedAt) {
+        return new Date(friendship.photos[0].updatedAt).getTime()
+      }
+      if (friendship?.createdAt) {
+        return new Date(friendship.createdAt).getTime()
+      }
+      return 0
+    }
     const sorted = [...confirmed].sort((a, b) => {
-      const dateA = a?.createdAt ? new Date(a.createdAt).getTime() : 0
-      const dateB = b?.createdAt ? new Date(b.createdAt).getTime() : 0
-      return dateB - dateA
+      return getLatestActivityTime(b) - getLatestActivityTime(a)
     })
 
     return { pending, confirmed: sorted }
