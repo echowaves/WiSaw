@@ -88,7 +88,6 @@ const MergeWaveModal = ({
       setBatch(newBatch)
       fetchWaves(0, newBatch, '', true)
       setSearchText('')
-      setDebouncedSearch('')
     }
   }, [visible, fetchWaves])
 

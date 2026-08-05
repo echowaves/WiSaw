@@ -186,3 +186,31 @@ When a photo finishes uploading — whether to a specific wave or to the ungroup
 - **THEN** WavesHub SHALL call `handleRefresh()`
 - **THEN** the ungrouped photos count SHALL update and the ungrouped photo card SHALL show the new photo
 
+### Requirement: OnPhotoUploadComplete Subscription Works Without Errors
+The system SHALL establish a WebSocket subscription to `OnPhotoUploadComplete` using a raw WebSocket connection (not the Apollo Client link system), emitting to the existing `uploadBus` event bus when a photo upload complete notification is received.
+
+#### Scenario: Subscription connects without errors
+- **GIVEN** the WavesHub screen is mounted and user has a valid `uuid`
+- **WHEN** a WebSocket subscription to `OnPhotoUploadComplete` is established
+- **THEN** the subscription SHALL connect to AppSync's real-time API without throwing `.pipe is not a function` errors
+- **AND** the subscription SHALL use a raw WebSocket connection (not Apollo Client link system)
+- **AND** the subscription SHALL emit to the existing `uploadBus` event bus when a photo upload complete notification is received
+
+### Requirement: Cross-Device Photo Upload Notification
+The system SHALL call `emitUploadComplete` on the `uploadBus` when the `OnPhotoUploadComplete` subscription receives a notification from another device, ensuring existing listeners (WavesHub, WaveDetail, useFeedLoader) receive the notification and trigger refresh.
+
+#### Scenario: Cross-device upload notification
+- **GIVEN** another device uploads a photo to the same wave
+- **WHEN** the `OnPhotoUploadComplete` subscription receives the notification
+- **THEN** the `emitUploadComplete` function SHALL be called on the `uploadBus`
+- **AND** existing listeners (WavesHub, WaveDetail, useFeedLoader) SHALL receive the notification and trigger refresh
+
+### Requirement: Subscription Lifecycle Management
+The system SHALL manage the WebSocket subscription lifecycle lazily: creating it on component mount, cleaning it up on unmount, and automatically reconnecting on transient disconnects.
+
+#### Scenario: Subscription creation and cleanup
+- **GIVEN** the WavesHub component mounts
+- **WHEN** the component mounts, a WebSocket subscription SHALL be created lazily
+- **WHEN** the component unmounts, the WebSocket subscription SHALL be cleaned up
+- **AND** the subscription SHALL automatically reconnect on transient disconnects
+

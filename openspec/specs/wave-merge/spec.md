@@ -73,3 +73,13 @@ The MergeWaveModal SHALL use keyboard avoidance from `react-native-keyboard-cont
 #### Scenario: Searching waves to merge with keyboard open
 - **WHEN** a user taps the search input in the merge wave modal
 - **THEN** the modal content SHALL reposition so the search input and wave list remain usable above the keyboard
+
+### Requirement: Modal Open Without Crash
+The system SHALL ensure the MergeWaveModal opens without throwing a ReferenceError when clearing its search state on mount.
+
+#### Scenario: Modal Open Without Crash
+- **GIVEN** the user opens the MergeWaveModal
+- **WHEN** the modal's `useEffect` fires on `visible` change
+- **THEN** the modal SHALL clear the search text without throwing a ReferenceError
+- **AND** `setSearchText('')` SHALL be the only mechanism for clearing search state
+- **AND** the component SHALL NOT call `setDebouncedSearch` (which does not exist)

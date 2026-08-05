@@ -1,8 +1,8 @@
 {
   "name": "wisaw",
   "version": "7.5.7",
-  "buildNumber": "720",
-  "versionCode": 720,
+  "buildNumber": "721",
+  "versionCode": 721,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",
@@ -84,7 +84,6 @@
     "react-native-worklets": "0.7.2",
     "react-qr-code": "2.0.18",
     "react-timer-mixin": "0.13.4",
-    "subscriptions-transport-ws": "0.11.0",
     "typescript": "5.9.2",
     "uuid": "13.0.0"
   },
