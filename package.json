@@ -85,7 +85,7 @@
     "react-qr-code": "2.0.18",
     "react-timer-mixin": "0.13.4",
     "typescript": "5.9.2",
-    "uuid": "13.0.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
