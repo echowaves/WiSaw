@@ -1,12 +1,21 @@
 import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
 import {
-  DrawerContentScrollView,
-  DrawerItemList
-} from '@react-navigation/drawer'
-import { Drawer } from 'expo-router/drawer'
+  Drawer,
+  type DrawerContentComponentProps,
+  type DrawerNavigationOptions
+} from 'expo-router/drawer'
 import { useAtom } from 'jotai'
 import React from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  type ColorValue
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import appConfig from '../../app.config.js'
 import * as CONST from '../../src/consts'
@@ -26,8 +35,13 @@ import {
 const APP_VERSION = appConfig.expo.version
 const BUILD_NUMBER = appConfig.expo.ios.buildNumber
 
-// Create dynamic styles function
-const createStyles = (isDark) => {
+const DRAWER_SPACING = 12
+const THEME_MODES = ['light', 'dark', 'system'] as const
+type ThemeMode = (typeof THEME_MODES)[number]
+
+type StylesShape = ReturnType<typeof StyleSheet.create>
+
+const createStyles = (isDark: boolean): StylesShape => {
   const theme = getTheme(isDark)
 
   return StyleSheet.create({
@@ -74,20 +88,110 @@ const createStyles = (isDark) => {
       color: CONST.MAIN_COLOR,
       marginBottom: 4
     },
-
+    drawerRowContainer: {
+      borderCurve: 'continuous',
+      overflow: 'hidden'
+    },
+    drawerRowWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 11,
+      paddingStart: 16,
+      paddingEnd: 24,
+      borderCurve: 'continuous'
+    },
+    drawerRowLabel: {
+      marginEnd: 12,
+      marginVertical: 4,
+      flex: 1
+    },
+    drawerRowLabelText: {
+      lineHeight: 24,
+      textAlignVertical: 'center'
+    }
   })
 }
 
+// Custom drawer row replicating the former @react-navigation/drawer DrawerItem
+// visuals. The app sets explicit active/inactive tints + active background in the
+// Drawer screenOptions, so no theme lookup is required here.
+interface DrawerRowProps {
+  focused: boolean
+  options: DrawerNavigationOptions
+  onPress: () => void
+  styles: StylesShape
+}
+
+const DrawerRow = ({
+  focused,
+  options,
+  onPress,
+  styles
+}: DrawerRowProps): React.JSX.Element => {
+  const {
+    drawerLabel,
+    drawerIcon,
+    drawerLabelStyle,
+    drawerItemStyle
+  } = options
+  const label = drawerLabel
+  const icon = drawerIcon
+  const color = focused
+    ? (options.drawerActiveTintColor ?? 'transparent')
+    : (options.drawerInactiveTintColor ?? 'transparent')
+  const backgroundColor = focused
+    ? (options.drawerActiveBackgroundColor ?? 'transparent')
+    : (options.drawerInactiveBackgroundColor ?? 'transparent')
+  const borderRadius = StyleSheet.flatten(drawerItemStyle)?.borderRadius ?? 12
+  const hasIcon = typeof icon === 'function'
+  const iconNode = hasIcon
+    ? icon({ size: 24, focused, color })
+    : null
+  const labelIsString = typeof label === 'string'
+  const labelIsFn = typeof label === 'function'
+
+  return (
+    <View
+      collapsable={false}
+      style={[styles.drawerRowContainer, { borderRadius, backgroundColor }, drawerItemStyle]}
+    >
+      <Pressable
+        onPress={onPress}
+        accessibilityRole='button'
+        accessibilityState={{ selected: focused }}
+      >
+        <View style={[styles.drawerRowWrapper, { borderRadius }]}>
+          {iconNode}
+          <View style={[styles.drawerRowLabel, { marginStart: hasIcon ? 12 : 0 }]}>
+            {labelIsString
+              ? (
+                <Text
+                  numberOfLines={1}
+                  style={[styles.drawerRowLabelText, { color }, drawerLabelStyle]}
+                >
+                  {label}
+                </Text>
+                )
+              : (labelIsFn ? label({ color, focused }) : null)}
+          </View>
+        </View>
+      </Pressable>
+    </View>
+  )
+}
+
 // Custom Drawer Content with Theme Switcher and Version Information
-function CustomDrawerContent (props) {
+const CustomDrawerContent = (props: DrawerContentComponentProps): React.JSX.Element => {
+  const { state, navigation, descriptors } = props
   const [isDark, setIsDark] = useAtom(STATE.isDarkMode)
   const [followSystemTheme, setFollowSystemTheme] = useAtom(
     STATE.followSystemTheme
   )
   const styles = createStyles(isDark)
   const theme = getTheme(isDark)
+  const insets = useSafeAreaInsets()
 
-  const handleThemeChange = async (themeMode) => {
+  const handleThemeChange = async (themeMode: ThemeMode): Promise<void> => {
     switch (themeMode) {
       case 'light':
         setIsDark(false)
@@ -109,12 +213,12 @@ function CustomDrawerContent (props) {
     }
   }
 
-  const getCurrentThemeMode = () => {
+  const getCurrentThemeMode = (): ThemeMode => {
     if (followSystemTheme) return 'system'
     return isDark ? 'dark' : 'light'
   }
 
-  const getThemeIcon = (mode) => {
+  const getThemeIcon = (mode: ThemeMode): string => {
     switch (mode) {
       case 'light':
         return 'sun'
@@ -125,7 +229,7 @@ function CustomDrawerContent (props) {
     }
   }
 
-  const getThemeLabel = (mode) => {
+  const getThemeLabel = (mode: ThemeMode): string => {
     switch (mode) {
       case 'light':
         return 'Light Mode'
@@ -136,11 +240,49 @@ function CustomDrawerContent (props) {
     }
   }
 
+  const focusedRouteKey = state.routes[state.index].key
+  const focusedOptions = descriptors[focusedRouteKey].options
+
+  const handleItemPress = (routeName: string, routeKey: string, focused: boolean): void => {
+    const event = navigation.emit({
+      type: 'drawerItemPress',
+      target: routeKey,
+      canPreventDefault: true
+    })
+    if (!event.defaultPrevented) {
+      if (focused) {
+        navigation.closeDrawer()
+      } else {
+        // The drawer auto-closes on route change (DrawerRouter)
+        navigation.navigate(routeName)
+      }
+    }
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.BACKGROUND }}>
-      <DrawerContentScrollView {...props}>
-        <DrawerItemList {...props} />
-      </DrawerContentScrollView>
+      <ScrollView
+        contentContainerStyle={[
+          {
+            paddingTop: DRAWER_SPACING + insets.top,
+            paddingBottom: DRAWER_SPACING + insets.bottom,
+            paddingStart: DRAWER_SPACING + insets.left,
+            paddingEnd: DRAWER_SPACING + insets.right
+          },
+          focusedOptions.drawerContentContainerStyle
+        ]}
+        style={[{ flex: 1 }, focusedOptions.drawerContentStyle]}
+      >
+        {state.routes.map((route, i) => (
+          <DrawerRow
+            key={route.key}
+            focused={i === state.index}
+            options={descriptors[route.key].options}
+            onPress={() => handleItemPress(route.name, route.key, i === state.index)}
+            styles={styles}
+          />
+        ))}
+      </ScrollView>
 
       {/* Theme Switcher */}
       <View style={styles.themeContainer}>
@@ -153,10 +295,10 @@ function CustomDrawerContent (props) {
           Theme
         </Text>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          {['light', 'dark', 'system'].map((mode) => (
+          {THEME_MODES.map((mode) => (
             <TouchableOpacity
               key={mode}
-              onPress={async () => await handleThemeChange(mode)}
+              onPress={() => { void handleThemeChange(mode) }}
               style={[
                 styles.themeButton,
                 {
@@ -206,8 +348,19 @@ function CustomDrawerContent (props) {
   )
 }
 
+interface IconProps {
+  color: ColorValue
+  size: number
+  focused: boolean
+}
+
+interface LabelProps {
+  color: ColorValue
+  focused: boolean
+}
+
 // Inline components for identity drawer item — read nickName atom for dynamic icon/label
-function IdentityDrawerIcon ({ color, size, focused }) {
+const IdentityDrawerIcon = ({ color, size, focused }: IconProps): React.JSX.Element => {
   const [nickName] = useAtom(STATE.nickName)
   const hasIdentity = nickName !== ''
   const iconColor = hasIdentity && !focused ? CONST.MAIN_COLOR : color
@@ -232,9 +385,9 @@ function IdentityDrawerIcon ({ color, size, focused }) {
 }
 
 // Inline component for friends drawer item — show MAIN_COLOR when user has friends
-function FriendsDrawerIcon ({ color, size, focused }) {
+const FriendsDrawerIcon = ({ color, size, focused }: IconProps): React.JSX.Element => {
   const [friendsList] = useAtom(STATE.friendsList)
-  const hasFriends = friendsList && friendsList.length > 0
+  const hasFriends = (Array.isArray(friendsList) ? friendsList : []).length > 0
   const iconColor = hasFriends && !focused ? CONST.MAIN_COLOR : color
 
   return (
@@ -245,9 +398,9 @@ function FriendsDrawerIcon ({ color, size, focused }) {
 }
 
 // Inline component for waves drawer item
-function WavesDrawerIcon ({ color, size, focused }) {
+const WavesDrawerIcon = ({ color, size, focused }: IconProps): React.JSX.Element => {
   const [wavesCount] = useAtom(STATE.wavesCount)
-  const hasActivity = wavesCount != null && wavesCount > 0
+  const hasActivity = (typeof wavesCount === 'number' ? wavesCount : 0) > 0
   const iconColor = hasActivity && !focused ? CONST.MAIN_COLOR : color
 
   return (
@@ -257,7 +410,7 @@ function WavesDrawerIcon ({ color, size, focused }) {
   )
 }
 
-function IdentityDrawerLabel ({ color, focused }) {
+const IdentityDrawerLabel = ({ color, focused }: LabelProps): React.JSX.Element => {
   const [nickName] = useAtom(STATE.nickName)
   const hasIdentity = nickName !== ''
 
@@ -276,7 +429,7 @@ function IdentityDrawerLabel ({ color, focused }) {
   )
 }
 
-export default function DrawerLayout () {
+export default function DrawerLayout (): React.JSX.Element {
   const [isDark] = useAtom(STATE.isDarkMode)
   const [netAvailable] = useAtom(STATE.netAvailable)
   const theme = getTheme(isDark)
@@ -378,10 +531,8 @@ export default function DrawerLayout () {
             }}
             listeners={offlineScreenListeners}
           />
-
         </Drawer>
       </View>
     </UploadProvider>
   )
 }
-

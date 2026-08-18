@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation } from 'expo-router/react-navigation'
 import { Keyboard, StatusBar, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native'
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'

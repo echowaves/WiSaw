@@ -1,5 +1,6 @@
 {
   "extends": "./node_modules/ts-standard/eslintrc.json",
+  "ignorePatterns": ["src/zxcvbn.js"],
   "parserOptions": {
     "project": "./tsconfig.json"
   }

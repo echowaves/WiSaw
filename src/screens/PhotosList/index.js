@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import React, { useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 
-import { useFocusEffect, useIsFocused } from '@react-navigation/native'
+import { useFocusEffect, useIsFocused } from 'expo-router/react-navigation'
 import { router, useNavigation } from 'expo-router'
 import * as Location from 'expo-location'
 import * as Notifications from '../../utils/notifications'

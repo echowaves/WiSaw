@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation } from 'expo-router/react-navigation'
 import { router, useFocusEffect } from 'expo-router'
 import { useAtom } from 'jotai'
 import React, { useCallback, useEffect, useState } from 'react'

@@ -14,6 +14,7 @@ module.exports = {
       'expo-secure-store',
       'expo-router',
       'expo-audio',
+      'expo-asset',
       'expo-background-task',
       'expo-font',
       'expo-video',
@@ -23,14 +24,14 @@ module.exports = {
         {
           android: {
             // compileSdkVersion: 34,
-            targetSdkVersion: 35,
+            targetSdkVersion: 36,
             // buildToolsVersion: '34.0.0',
             // kotlinVersion: '2.0.0',
             enableProguardInReleaseBuilds: true,
             enableShrinkResourcesInReleaseBuilds: true
           },
           ios: {
-            // deploymentTarget: '16.0'
+            deploymentTarget: '16.4', // SDK 56 minimum deployment target
             flipper: false // Disable Flipper for better performance
           }
         }

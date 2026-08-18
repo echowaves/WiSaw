@@ -317,14 +317,14 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
             console.warn('Could not delete temp compressed file:', deleteErr)
           }
         } else {
-          src.move(dest)
+          await src.move(dest)
         }
       } catch (error) {
         showErrorToast('Error processing image', { text2: error.message || `${error}`, visibilityTime: 4000, topOffset })
 
         const fallbackSrc = new FSFile(compressedResult.uri)
         const fallbackDest = new FSFile(localImgUrl)
-        fallbackSrc.move(fallbackDest)
+        await fallbackSrc.move(fallbackDest)
       }
     } else {
       try {
@@ -332,14 +332,14 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
         const dest = new FSFile(CONST.PENDING_UPLOADS_FOLDER, queuedItem.localImageName)
 
         if (!dest.exists) {
-          src.move(dest)
+          await src.move(dest)
         }
       } catch (error) {
         showErrorToast('Error processing video', { text2: error.message || `${error}`, visibilityTime: 4000, topOffset })
 
         const fallbackSrc = new FSFile(queuedItem.originalCameraUrl)
         const fallbackDest = new FSFile(localImgUrl)
-        fallbackSrc.move(fallbackDest)
+        await fallbackSrc.move(fallbackDest)
       }
     }
 
