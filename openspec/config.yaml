@@ -1,9 +1,9 @@
 schema: spec-driven
 
 context: |
-  Tech stack: React Native 0.81.5, Expo 54.0.25, Expo Router 6.0.15, React 19.1.0
-  State management: Jotai 2.15.0 (atomic state)
-  API: Apollo Client 4.0.2, GraphQL 16.8.1 with WebSocket subscriptions
+  Tech stack: React Native 0.86.2, Expo 57.0.14, Expo Router 57.0.14, React 19.2.3
+  State management: Jotai 2.20.2 (atomic state)
+  API: Apollo Client 4.2.12, GraphQL 17.0.2 with WebSocket subscriptions
   Storage: expo-secure-store for sensitive data
   Platforms: iOS, Android, Web
   Domain: Location-based anonymous social photo sharing app (WiSaw)
@@ -13,6 +13,7 @@ context: |
   Dependencies: Always use exact versions in package.json (no ^ or ~ prefixes)
   Package manager: npm
   Backend repo: /Users/dmitry/hacks/wisaw/Wisaw.cdk (absolute path, sibling to this workspace
+  Version Control: never perform any version control operations (git add, commit, push, etc.) in this workspace. The user will handle version control outside of this workspace.
 
 
 rules:
