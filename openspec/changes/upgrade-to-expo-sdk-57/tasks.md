@@ -23,11 +23,11 @@
 
 ## 3. Phase 2 — Hop to SDK 57 (the easy hop)
 
-- [ ] 3.1 Run `npx expo install expo@^57.0.0 --fix` and verify the resolved `expo` version is ≥ 57.0.9 (Hermes v1 memory-regression fix) and `react-native` is 0.86.2
-- [ ] 3.2 Re-run gates: `npx expo-doctor@latest`, `npx ts-standard`, and local dev-client builds (iOS + Android)
-- [ ] 3.3 Gate: regression pass — focus on memory behavior (reanimated-heavy screens: photo pinch/zoom, waves hub, masonry feed) and startup; confirm no Hermes memory growth
-- [ ] 3.4 Build new dev clients via EAS (`npm run build:ios-for-device`, `npm run build:android-for-device`) and smoke-test the installed dev builds
-- [ ] 3.5 Commit Phase 2 as a single revertable commit
+- [x] 3.1 Run `npx expo install expo@^57.0.0 --fix` and verify the resolved `expo` version is ≥ 57.0.9 (Hermes v1 memory-regression fix) and `react-native` is 0.86.2 — resolved expo 57.0.14 (≥ 57.0.9 ✓), react-native 0.86.2 ✓, react 19.2.3, expo-router ~57.0.14, reanimated 4.5.1, worklets 0.10.1, typescript stayed 5.9.2; `expo` pin normalized to `~57.0.14` per repo tilde convention; added `expo-splash-screen` + `expo-status-bar` config plugins (SDK 57 requirement, dynamic config)
+- [x] 3.2 Re-run gates: `npx expo-doctor@latest` (21/21 passed, exit 0 — Hermes V1 regression cleared by expo 57.0.14), `npx ts-standard` (675 errors, identical set to hop-1 baseline — zero new; only diff is a pre-existing `app.config.js` comma-dangle shifting 37→40 due to added plugin lines), local dev-client builds: **iOS PASSED** (`build-ios-for-simulator` exit 0 on Xcode 27 — SDK 57 prebuilts build under Swift 6.4 where SDK 56's didn't) and **Android PASSED** (`BUILD SUCCESSFUL in 1m 59s`, APK installed + app running on Pixel_5_API_36; required `JAVA_TOOL_OPTIONS="-Xmx6g -XX:MaxMetaspaceSize=2g"` to clear a KSP Metaspace OOM at RN 0.86's larger dep graph, plus JDK 17)
+- [ ] 3.3 Gate: regression pass — focus on memory behavior (reanimated-heavy screens: photo pinch/zoom, waves hub, masonry feed) and startup; confirm no Hermes memory growth — DEFERRED (user decision 2026-08-18): covered by the 4.6 full walk-through on the final SDK-57 + Phase-3 dependency set, avoiding a duplicate manual pass
+- [ ] 3.4 Build new dev clients via EAS (`npm run build:ios-for-device`, `npm run build:android-for-device`) and smoke-test the installed dev builds — DEFERRED (user decision 2026-08-18): cut once after Phase 3 lands (Phase 3 bumps native deps, so a Hop-2-only binary would be superseded; one build pair then covers 3.4 + 4.6 smoke test). EAS auth verified working (owner on echowaves)
+- [x] 3.5 Commit Phase 2 as a single revertable commit — see git log
 
 ## 4. Phase 3 — Dependency sweep and cleanup
 
