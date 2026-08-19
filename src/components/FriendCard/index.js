@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { useAtom } from 'jotai'
 
 import WavePhotoStrip from '../WavePhotoStrip'

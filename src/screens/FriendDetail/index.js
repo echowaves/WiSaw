@@ -12,7 +12,7 @@ import showErrorToast from '../../utils/showErrorToast'
 import showConfirmAlert from '../../utils/showConfirmAlert'
 import { router, useLocalSearchParams } from 'expo-router'
 import * as Haptics from 'expo-haptics'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons'
 
 import * as STATE from '../../state'
 import { getTheme, SHARED_STYLES } from '../../theme/sharedStyles'

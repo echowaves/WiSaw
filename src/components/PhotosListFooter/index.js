@@ -5,7 +5,8 @@ import {
   StyleSheet,
   useWindowDimensions
 } from 'react-native'
-import { FontAwesome, FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import * as CONST from '../../consts'
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context'
 
@@ -127,7 +128,7 @@ const PhotosListFooter = ({
             }}
             disabled={cameraDisabled}
           >
-            <FontAwesome5 name='video' color='white' size={24} />
+            <FontAwesome5 name='video' iconStyle='solid' color='white' size={24} />
           </TouchableOpacity>
 
           {/* Photo Capture Button - Main Action */}
@@ -157,7 +158,7 @@ const PhotosListFooter = ({
             }}
             disabled={cameraDisabled}
           >
-            <FontAwesome5 name='camera' color='white' size={28} />
+            <FontAwesome5 name='camera' iconStyle='solid' color='white' size={28} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>

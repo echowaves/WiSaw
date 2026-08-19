@@ -1,7 +1,7 @@
 import React from 'react'
 import { TouchableOpacity, StyleSheet } from 'react-native'
 import { useAtom } from 'jotai'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { router } from 'expo-router'
 
 import * as CONST from '../../consts'

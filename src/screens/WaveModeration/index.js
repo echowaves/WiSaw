@@ -11,7 +11,7 @@ import { useAtom } from 'jotai'
 import showErrorToast from '../../utils/showErrorToast'
 import { showSuccessToast } from '../../utils/showToast'
 import showConfirmAlert from '../../utils/showConfirmAlert'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons'
 import { router } from 'expo-router'
 
 import * as STATE from '../../state'

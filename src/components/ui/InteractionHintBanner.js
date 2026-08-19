@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { Storage } from 'expo-storage'
 
 export default function InteractionHintBanner ({ hasContent, hintText = 'Tap and hold for options or tap ⋮' }) {

@@ -1,7 +1,8 @@
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import * as CONST from '../../../consts'
+import { fa5IconStyle } from '../../../utils/fa5IconStyle'
 
 const ActionRow = ({ icon, label, onPress, destructive, theme }) => {
   const accentColor = destructive ? '#FF9500' : CONST.MAIN_COLOR
@@ -39,10 +40,10 @@ const ActionRow = ({ icon, label, onPress, destructive, theme }) => {
   return (
     <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.iconContainer}>
-        <FontAwesome5 name={icon} size={16} color={accentColor} />
+        <FontAwesome5 name={icon} iconStyle={fa5IconStyle(icon)} size={16} color={accentColor} />
       </View>
       <Text style={styles.label}>{label}</Text>
-      <FontAwesome5 name='chevron-right' size={14} color={theme.TEXT_SECONDARY} style={styles.chevron} />
+      <FontAwesome5 name='chevron-right' iconStyle='solid' size={14} color={theme.TEXT_SECONDARY} style={styles.chevron} />
     </TouchableOpacity>
   )
 }

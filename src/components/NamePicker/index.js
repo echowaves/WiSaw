@@ -15,7 +15,8 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 
-import { FontAwesome5, Ionicons } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import * as Haptics from 'expo-haptics'
 
 import { useAtom } from 'jotai'
@@ -23,6 +24,7 @@ import PropTypes from 'prop-types'
 
 import { isDarkMode as isDarkModeAtom } from '../../state'
 import { getTheme, getThemedStyles, SHARED_STYLES } from '../../theme/sharedStyles'
+import { fa5IconStyle } from '../../utils/fa5IconStyle'
 import AppHeader from '../AppHeader'
 import Button from '../ui/Button'
 
@@ -193,6 +195,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <FontAwesome5
                   name={friendshipUuid ? 'edit' : 'user-plus'}
+                  iconStyle={fa5IconStyle(friendshipUuid ? 'edit' : 'user-plus')}
                   size={18}
                   color={theme.TEXT_PRIMARY}
                   style={{ marginRight: 8 }}
@@ -232,7 +235,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
               <View>
                 {/* Icon */}
                 <View style={styles.iconContainer}>
-                  <FontAwesome5 name='users' size={32} color={theme.TEXT_PRIMARY} />
+                  <FontAwesome5 name='users' iconStyle='solid' size={32} color={theme.TEXT_PRIMARY} />
                 </View>
 
                 {/* Title and Subtitle */}
@@ -274,6 +277,7 @@ const NamePicker = ({ show, setShow, setContactName, headerText, friendshipUuid 
                     icon={
                       <FontAwesome5
                         name={friendshipUuid ? 'edit' : 'user-plus'}
+                        iconStyle={fa5IconStyle(friendshipUuid ? 'edit' : 'user-plus')}
                         size={16}
                         color='white'
                         style={{ marginRight: 8 }}

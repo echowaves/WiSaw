@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import * as Crypto from 'expo-crypto'
 
 import { requestUngroupedPhotos } from '../../screens/Waves/reducer'
@@ -45,7 +45,7 @@ const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
   return (
      <View style={[styles.card, { backgroundColor: 'rgba(234, 94, 61, 0.1)', borderColor: '#EA5E3D' }]}>
         <View style={styles.header}>
-          <FontAwesome5 name='images' size={18} color='#EA5E3D' />
+          <FontAwesome5 name='images' iconStyle='regular' size={18} color='#EA5E3D' />
           <Text style={[styles.title, { color: theme.TEXT_PRIMARY }]}>
            Ungrouped Photos ({ungroupedCount})
           </Text>
@@ -58,7 +58,7 @@ const UngroupedPhotosCard = ({ ungroupedCount, uuid, theme }) => {
         />
 
         <View style={styles.infoBox}>
-          <FontAwesome5 name='info-circle' size={14} color={theme.TEXT_SECONDARY} style={{ marginRight: 6 }} />
+          <FontAwesome5 name='info-circle' iconStyle='solid' size={14} color={theme.TEXT_SECONDARY} style={{ marginRight: 6 }} />
           <Text style={styles.infoText}>
             Photos will be automatically grouped into waves when you upload new photos.
           </Text>

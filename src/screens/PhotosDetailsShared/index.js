@@ -5,7 +5,7 @@ import { router } from 'expo-router'
 
 import PropTypes from 'prop-types'
 
-import { AntDesign } from '@expo/vector-icons'
+import AntDesign from '@react-native-vector-icons/ant-design'
 
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 

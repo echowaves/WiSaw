@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { FontAwesome5, Ionicons } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import Ionicons from '@react-native-vector-icons/ionicons'
 
 import * as CONST from '../../consts'
 
@@ -10,7 +11,7 @@ const PendingFriendsCard = ({ pendingFriends, onRemind, onLongPress, theme }) =>
   return (
     <View style={[styles.card, { backgroundColor: `${CONST.MAIN_COLOR}1A`, borderColor: CONST.MAIN_COLOR }]}>
       <View style={styles.header}>
-        <FontAwesome5 name='clock' size={18} color={CONST.MAIN_COLOR} />
+        <FontAwesome5 name='clock' iconStyle='regular' size={18} color={CONST.MAIN_COLOR} />
         <Text style={[styles.title, { color: theme.TEXT_PRIMARY }]}>
           Pending Friends ({pendingFriends.length})
         </Text>
@@ -42,7 +43,7 @@ const PendingFriendsCard = ({ pendingFriends, onRemind, onLongPress, theme }) =>
                 onPress={() => onRemind(friend)}
                 activeOpacity={0.8}
               >
-                <FontAwesome5 name='share' size={14} color='white' style={{ marginRight: 6 }} />
+                <FontAwesome5 name='share' iconStyle='solid' size={14} color='white' style={{ marginRight: 6 }} />
                 <Text style={styles.remindText}>Share</Text>
               </TouchableOpacity>
               <TouchableOpacity

@@ -17,9 +17,10 @@ import { showInfoToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
 import showConfirmAlert from '../../utils/showConfirmAlert'
 
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 
 import zxcvbn from '../../zxcvbn'
+import { fa5IconStyle } from '../../utils/fa5IconStyle'
 
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
@@ -305,8 +306,7 @@ const SecretScreen = () => {
                        title={isSubmitting ? 'Updating...' : 'Update Secret'}
                        icon={
                           <FontAwesome5
-                           name={isSubmitting ? 'hourglass' : 'edit'}
-                           size={18}
+                           name={isSubmitting ? 'hourglass' : 'edit'}                            iconStyle='regular'                           size={18}
                            color='white'
                            style={{ marginRight: 8 }}
                            />
@@ -364,7 +364,7 @@ const SecretScreen = () => {
             <View>
               <View style={styles.creationHeader}>
                 <View style={styles.creationIconContainer}>
-                  <FontAwesome5 name='user-shield' size={40} color='#EA5E3D' />
+                  <FontAwesome5 name='user-shield' iconStyle='solid' size={40} color='#EA5E3D' />
                 </View>
                 <Text style={styles.creationTitle}>Attach Identity to This Device</Text>
                 <Text style={styles.creationSubtitle}>
@@ -414,8 +414,7 @@ const SecretScreen = () => {
                title={isSubmitting ? 'Attaching...' : 'Attach Identity'}
                icon={
                   <FontAwesome5
-                   name={isSubmitting ? 'hourglass' : 'link'}
-                   size={18}
+                   name={isSubmitting ? 'hourglass' : 'link'}                    iconStyle={fa5IconStyle(isSubmitting ? 'hourglass' : 'link')}                   size={18}
                    color='white'
                    style={{ marginRight: 8 }}
                    />

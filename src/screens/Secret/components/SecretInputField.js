@@ -1,8 +1,9 @@
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import Input from '../../../components/ui/Input'
 import * as CONST from '../../../consts'
+import { fa5IconStyle } from '../../../utils/fa5IconStyle'
 
 const SecretInputField = ({
   placeholder,
@@ -39,10 +40,11 @@ const SecretInputField = ({
           'data-lpignore': 'true'
         }}
         secureTextEntry={!showPassword}
-        leftIcon={<FontAwesome5 name={leftIconName} size={20} color={CONST.MAIN_COLOR} />}
+        leftIcon={<FontAwesome5 name={leftIconName} iconStyle={fa5IconStyle(leftIconName)} size={20} color={CONST.MAIN_COLOR} />}
         rightIcon={
           <FontAwesome5
             name={showPassword ? 'eye-slash' : 'eye'}
+            iconStyle='regular'
             size={20}
             color={theme.TEXT_SECONDARY}
             onPress={() => setShowPassword(!showPassword)}

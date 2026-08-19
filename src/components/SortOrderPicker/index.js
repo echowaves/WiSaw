@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 
 /**
  * SortOrderPicker — segmented pill toggle, 2x2 grid, or arrow-toggle in a bottom-sheet modal.

@@ -18,7 +18,9 @@ import { gql } from '@apollo/client'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { showSuccessToast, showErrorToast, showInfoToast } from '../../utils/showToast'
 
-import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import * as Haptics from 'expo-haptics'
 
 import AppHeader from '../../components/AppHeader'
@@ -417,7 +419,7 @@ const FeedbackScreen = () => {
               {/* Header Card */}
               <View style={styles.headerCard}>
                 <View style={styles.iconContainer}>
-                  <FontAwesome5 name='comments' size={32} color={CONST.MAIN_COLOR} />
+                  <FontAwesome5 name='comments' iconStyle='regular' size={32} color={CONST.MAIN_COLOR} />
                 </View>
                 <Text style={styles.title}>We'd Love Your Feedback!</Text>
                 <Text style={styles.subtitle}>
@@ -468,7 +470,7 @@ const FeedbackScreen = () => {
                     <Ionicons name='hourglass' size={20} color='white' />
                     )
                   : (
-                    <FontAwesome5 name='paper-plane' size={18} color='white' />
+                    <FontAwesome5 name='paper-plane' iconStyle='regular' size={18} color='white' />
                     )}
                 <Text style={styles.submitButtonText}>
                   {isSubmitting ? 'Sending...' : 'Send Feedback'}

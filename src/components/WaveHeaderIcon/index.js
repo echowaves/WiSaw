@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { TouchableOpacity, StyleSheet } from 'react-native'
 import { useAtom } from 'jotai'
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import { router } from 'expo-router'
 
 import * as STATE from '../../state'
@@ -60,7 +60,7 @@ const WaveHeaderIcon = () => {
       style={styles.container}
       activeOpacity={0.7}
     >
-      <FontAwesome5 name='water' size={22} color={iconColor} />
+      <FontAwesome5 name='water' iconStyle='solid' size={22} color={iconColor} />
     </TouchableOpacity>
   )
 }

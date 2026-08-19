@@ -1,8 +1,11 @@
-import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import MaterialIcons from '@react-native-vector-icons/material-icons'
 import { useAtom } from 'jotai'
 import { StyleSheet, Text, View } from 'react-native'
 import { isDarkMode } from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
+import { fa5IconStyle } from '../../utils/fa5IconStyle'
 import Button from '../ui/Button'
 
 const createStyles = (theme) =>
@@ -123,7 +126,9 @@ const EmptyStateCard = ({
   } else if (iconType === 'FontAwesome5') {
     IconComponent = FontAwesome5
   }
-
+  // v13 FA5 requires an explicit iconStyle; FontAwesome/MaterialIcons have no such prop.
+  const iconStyleProps =
+    iconType === 'FontAwesome5' ? { iconStyle: fa5IconStyle(icon) } : {}
   // Use theme color as default if no iconColor is provided
   const finalIconColor = iconColor || theme.TEXT_PRIMARY
 
@@ -131,7 +136,13 @@ const EmptyStateCard = ({
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.iconContainer}>
-          <IconComponent name={icon} size={64} color={finalIconColor} style={styles.icon} />
+          <IconComponent
+            name={icon}
+            {...iconStyleProps}
+            size={64}
+            color={finalIconColor}
+            style={styles.icon}
+          />
         </View>
 
         <Text style={styles.title}>{title}</Text>

@@ -2,7 +2,8 @@ import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import {
   Alert,
   InteractionManager,

@@ -10,7 +10,7 @@ import {
   View
 } from 'react-native'
 
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view'
 
 import CachedImage from 'expo-cached-image'

@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react'
 import { View, Text, TouchableOpacity, Pressable, StyleSheet } from 'react-native'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons'
 
 import WavePhotoStrip from '../WavePhotoStrip'
 import { fetchWavePhotos } from '../../screens/WaveDetail/reducer'

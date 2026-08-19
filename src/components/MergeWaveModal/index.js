@@ -3,7 +3,8 @@ import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import useDebouncedSearch from '../../hooks/useDebouncedSearch'
 
-import { FontAwesome5, Ionicons } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import {
   ActivityIndicator,
   FlatList,
@@ -112,6 +113,7 @@ const MergeWaveModal = ({
       <View style={styles.waveItemContent}>
         <FontAwesome5
           name='water'
+          iconStyle='solid'
           size={16}
           color={theme.TEXT_SECONDARY}
         />
@@ -189,7 +191,7 @@ const MergeWaveModal = ({
                 ListFooterComponent={loadingMore ? <ActivityIndicator style={{ padding: 10 }} color={CONST.MAIN_COLOR} /> : null}
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>
-                    <FontAwesome5 name='water' size={32} color={theme.TEXT_SECONDARY} />
+                    <FontAwesome5 name='water' iconStyle='solid' size={32} color={theme.TEXT_SECONDARY} />
                     <Text style={styles.emptyText}>No waves found</Text>
                   </View>
                 }

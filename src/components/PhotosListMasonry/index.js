@@ -1,7 +1,7 @@
 /* global __DEV__ */
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { TouchableOpacity, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 import ExpandableThumb from '../ExpandableThumb'
 import Photo from '../Photo'

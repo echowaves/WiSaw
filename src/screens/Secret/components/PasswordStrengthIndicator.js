@@ -1,6 +1,7 @@
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { fa5IconStyle } from '../../../utils/fa5IconStyle'
 
 const strengthValues = [0, 25, 50, 75, 100]
 const strengthColors = ['#FF6B6B', '#FF9500', '#FFD93D', '#4FC3F7', '#50E3C2']
@@ -55,7 +56,7 @@ const PasswordStrengthIndicator = ({ strength, theme, errorMessage }) => {
   return (
     <View style={styles.strengthContainer}>
       <View style={styles.strengthHeader}>
-        <FontAwesome5 name={strengthIcons[strength]} size={16} color={strengthColors[strength]} />
+        <FontAwesome5 name={strengthIcons[strength]} iconStyle={fa5IconStyle(strengthIcons[strength])} size={16} color={strengthColors[strength]} />
         <Text style={[styles.strengthText, { color: strengthColors[strength] }]}>
           {strengthLabels[strength]}
         </Text>

@@ -1,4 +1,5 @@
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons'
 import * as Haptics from 'expo-haptics'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
@@ -112,7 +113,7 @@ const WaveShareModal = ({
               onPress={onClose}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <FontAwesome5 name='times' size={18} color='#666' />
+              <FontAwesome5 name='times' iconStyle='solid' size={18} color='#666' />
             </TouchableOpacity>
           </View>
 
@@ -180,7 +181,7 @@ const WaveShareModal = ({
                         )
                       : (
                         <View style={styles.qrPlaceholder}>
-                          <FontAwesome5 name='qrcode' size={40} color='#ccc' />
+                          <FontAwesome5 name='qrcode' iconStyle='solid' size={40} color='#ccc' />
                           <Text style={styles.placeholderText}>Generating QR Code...</Text>
                         </View>
                         )}
@@ -202,7 +203,7 @@ const WaveShareModal = ({
                 disabled={!shareUrl || loading}
               >
                 <View style={[styles.optionIcon, { backgroundColor: CONST.MAIN_COLOR }]}>
-                  <FontAwesome5 name='share-alt' size={18} color='white' />
+                  <FontAwesome5 name='share-alt' iconStyle='solid' size={18} color='white' />
                 </View>
                 <View style={styles.optionContent}>
                   <Text style={styles.optionTitle}>
@@ -212,7 +213,7 @@ const WaveShareModal = ({
                     Send via text, email, or messaging app
                   </Text>
                 </View>
-                <FontAwesome5 name='chevron-right' size={14} color='#ccc' />
+                <FontAwesome5 name='chevron-right' iconStyle='solid' size={14} color='#ccc' />
               </TouchableOpacity>
             </View>
           </View>

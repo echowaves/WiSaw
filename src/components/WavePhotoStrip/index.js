@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { View, FlatList, ActivityIndicator, Pressable, StyleSheet } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import CachedImage from 'expo-cached-image'
 import * as Crypto from 'expo-crypto'
 
@@ -95,7 +95,7 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
   if (photos.length === 0 && !fetchFn) {
     return (
       <View style={[styles.placeholder, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
-        <FontAwesome5 name='water' size={32} color={theme.TEXT_SECONDARY} />
+        <FontAwesome5 name='water' iconStyle='solid' size={32} color={theme.TEXT_SECONDARY} />
       </View>
     )
   }

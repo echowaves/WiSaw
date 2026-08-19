@@ -1,4 +1,5 @@
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'

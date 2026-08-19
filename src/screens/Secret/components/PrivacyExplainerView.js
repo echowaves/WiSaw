@@ -1,7 +1,8 @@
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import React from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import Button from '../../../components/ui/Button'
+import { fa5IconStyle } from '../../../utils/fa5IconStyle'
 
 const CARDS = [
   {
@@ -32,7 +33,7 @@ const PrivacyExplainerView = ({ theme, onDismiss }) => {
     >
       <View style={styles.header}>
         <View style={styles.iconCircle}>
-          <FontAwesome5 name='user-shield' size={36} color='#EA5E3D' />
+          <FontAwesome5 name='user-shield' iconStyle='solid' size={36} color='#EA5E3D' />
         </View>
         <Text style={styles.title}>Privacy by Design</Text>
         <Text style={styles.subtitle}>
@@ -43,7 +44,7 @@ const PrivacyExplainerView = ({ theme, onDismiss }) => {
       {CARDS.map((card) => (
         <View key={card.icon} style={styles.card}>
           <View style={styles.cardIconRow}>
-            <FontAwesome5 name={card.icon} size={18} color='#EA5E3D' />
+            <FontAwesome5 name={card.icon} iconStyle={fa5IconStyle(card.icon)} size={18} color='#EA5E3D' />
             <Text style={styles.cardTitle}>{card.title}</Text>
           </View>
           <Text style={styles.cardBody}>{card.body}</Text>
@@ -55,6 +56,7 @@ const PrivacyExplainerView = ({ theme, onDismiss }) => {
         icon={
           <FontAwesome5
             name='check'
+            iconStyle='solid'
             size={18}
             color='white'
             style={{ marginRight: 8 }}

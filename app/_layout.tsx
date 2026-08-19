@@ -1,14 +1,6 @@
 import 'react-native-get-random-values' // Must be imported before uuid
 
-import {
-  AntDesign,
-  FontAwesome,
-  FontAwesome5,
-  Ionicons,
-  MaterialIcons
-} from '@expo/vector-icons'
 import NetInfo from '@react-native-community/netinfo'
-import { useFonts } from 'expo-font'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import * as Linking from 'expo-linking'
 import { router, Stack, useRootNavigationState } from 'expo-router'
@@ -163,15 +155,6 @@ export default function RootLayout (): JSX.Element {
     })
     return () => unsubscribe()
   }, [setNetAvailable])
-
-  // Load vector icon fonts
-  const [fontsLoaded, fontError] = useFonts({
-    ...FontAwesome.font,
-    ...FontAwesome5.font,
-    ...MaterialIcons.font,
-    ...Ionicons.font,
-    ...AntDesign.font
-  })
 
   // Navigate to deep link target
   const navigateToDeepLink = useCallback(async (linkData: any) => {

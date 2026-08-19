@@ -1,10 +1,13 @@
-import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import MaterialIcons from '@react-native-vector-icons/material-icons'
 import { useAtom } from 'jotai'
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import * as CONST from '../consts'
 import * as STATE from '../state'
+import { fa5IconStyle } from '../utils/fa5IconStyle'
 import { getTheme } from './sharedStyles'
 
 export const SCREEN_HEADER_ICONS = {
@@ -28,6 +31,8 @@ export function ScreenIconTitle({ screenKey, size = 18 }: ScreenIconTitleProps) 
 
   const config = SCREEN_HEADER_ICONS[screenKey]
   const IconComponent = config.library
+  // v13 FA5 requires an explicit iconStyle; FontAwesome/MaterialIcons have no such prop.
+  const isFontAwesome5 = IconComponent === FontAwesome5
 
   const isIdentity = screenKey === 'identity'
   const hasIdentity = isIdentity && nickName !== ''
@@ -36,7 +41,12 @@ export function ScreenIconTitle({ screenKey, size = 18 }: ScreenIconTitleProps) 
   return (
     <View style={styles.container}>
       <View>
-        <IconComponent name={config.name as any} size={size} color={iconColor} />
+        <IconComponent
+          name={config.name as any}
+          {...(isFontAwesome5 ? ({ iconStyle: fa5IconStyle(config.name as string) } as any) : {})}
+          size={size}
+          color={iconColor}
+        />
         {isIdentity && !hasIdentity && (
           <View style={styles.badge} />
         )}

@@ -1,4 +1,4 @@
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import * as Haptics from 'expo-haptics'
 import React, { useEffect, useState } from 'react'
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -69,14 +69,14 @@ const ShareOptionsModal = ({
               onPress={onClose}
               hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             >
-              <FontAwesome5 name='times' size={18} color='#666' />
+              <FontAwesome5 name='times' iconStyle='solid' size={18} color='#666' />
             </TouchableOpacity>
           </View>
 
           <View style={styles.contentContainer}>
             {/* Friend Info */}
             <View style={styles.friendInfo}>
-              <FontAwesome5 name='user-circle' size={32} color={CONST.MAIN_COLOR} />
+              <FontAwesome5 name='user-circle' iconStyle='regular' size={32} color={CONST.MAIN_COLOR} />
               <Text style={styles.friendName}>{friendName || 'Unknown Friend'}</Text>
               <Text style={styles.description}>Share this friendship invitation</Text>
             </View>
@@ -98,7 +98,7 @@ const ShareOptionsModal = ({
                       )
                     : (
                       <View style={styles.qrPlaceholder}>
-                        <FontAwesome5 name='qrcode' size={40} color='#ccc' />
+                        <FontAwesome5 name='qrcode' iconStyle='solid' size={40} color='#ccc' />
                         <Text style={styles.placeholderText}>Generating QR Code...</Text>
                       </View>
                       )}
@@ -119,7 +119,7 @@ const ShareOptionsModal = ({
                 activeOpacity={0.7}
               >
                 <View style={[styles.optionIcon, { backgroundColor: '#ff6b35' }]}>
-                  <FontAwesome5 name='share-alt' size={18} color='white' />
+                  <FontAwesome5 name='share-alt' iconStyle='solid' size={18} color='white' />
                 </View>
                 <View style={styles.optionContent}>
                   <Text style={styles.optionTitle}>Share Invitation</Text>
@@ -127,7 +127,7 @@ const ShareOptionsModal = ({
                     Send friendship invitation via text/message
                   </Text>
                 </View>
-                <FontAwesome5 name='chevron-right' size={14} color='#ccc' />
+                <FontAwesome5 name='chevron-right' iconStyle='solid' size={14} color='#ccc' />
               </TouchableOpacity>
             </View>
 

@@ -8,7 +8,7 @@ import {
   useWindowDimensions
 } from 'react-native'
 import { useAtom } from 'jotai'
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import { ExpoMasonryLayout } from 'expo-masonry-layout'
 import CachedImage from 'expo-cached-image'
 import { showSuccessToast } from '../../utils/showToast'
@@ -176,7 +176,7 @@ const PhotoSelectionMode = () => {
         {isSelected && (
           <View style={styles.selectedOverlay}>
             <View style={styles.checkCircle}>
-              <FontAwesome5 name='check' size={14} color='#FFF' />
+              <FontAwesome5 name='check' iconStyle='solid' size={14} color='#FFF' />
             </View>
           </View>
         )}

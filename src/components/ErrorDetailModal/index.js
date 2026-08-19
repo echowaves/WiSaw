@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { useAtom } from 'jotai'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {

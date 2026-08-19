@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useAtom } from 'jotai'
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import { router } from 'expo-router'
+import { fa5IconStyle } from '../../utils/fa5IconStyle'
 
 import * as CONST from '../../consts'
 import * as STATE from '../../state'
@@ -46,6 +47,7 @@ const IdentityHeaderIcon = () => {
       >
         <FontAwesome5
           name='user-secret'
+          iconStyle='solid'
           size={22}
           color={hasIdentity ? CONST.MAIN_COLOR : theme.TEXT_SECONDARY}
         />
@@ -70,6 +72,7 @@ const IdentityHeaderIcon = () => {
               >
                 <FontAwesome5
                   name={hasIdentity ? 'user-secret' : 'user-plus'}
+                  iconStyle={fa5IconStyle(hasIdentity ? 'user-secret' : 'user-plus')}
                   size={16}
                   color={hasIdentity ? CONST.MAIN_COLOR : theme.TEXT_SECONDARY}
                   style={styles.popoverIcon}
@@ -79,7 +82,7 @@ const IdentityHeaderIcon = () => {
                 >
                   {hasIdentity ? nickName : 'Set Up Identity'}
                 </Text>
-                <FontAwesome5 name='chevron-right' size={12} color={theme.TEXT_SECONDARY} />
+                <FontAwesome5 name='chevron-right' iconStyle='solid' size={12} color={theme.TEXT_SECONDARY} />
               </TouchableOpacity>
             </View>
           </View>

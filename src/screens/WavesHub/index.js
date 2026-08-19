@@ -12,7 +12,8 @@ import {
   useWindowDimensions
 } from 'react-native'
 import { useAtom, useAtomValue } from 'jotai'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons'
 import { showSuccessToast, showInfoToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
 import showConfirmAlert from '../../utils/showConfirmAlert'

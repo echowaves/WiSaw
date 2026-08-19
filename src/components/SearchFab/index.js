@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import { Pressable, TextInput, Keyboard, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller'
 import Animated, {
   useSharedValue,

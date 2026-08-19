@@ -1,4 +1,6 @@
-import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import showErrorToast from '../../utils/showErrorToast'
 
@@ -122,6 +124,7 @@ const PhotoActionButtons = ({
       >
         <FontAwesome5
           name='water'
+          iconStyle='solid'
           color={isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED}
           size={16}
         />

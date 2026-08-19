@@ -1,4 +1,7 @@
-import { FontAwesome, FontAwesome5, MaterialIcons } from '@expo/vector-icons'
+import FontAwesome from '@react-native-vector-icons/fontawesome'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import MaterialIcons from '@react-native-vector-icons/material-icons'
+import { fa5IconStyle } from '../../src/utils/fa5IconStyle'
 import {
   Drawer,
   type DrawerContentComponentProps,
@@ -218,7 +221,7 @@ const CustomDrawerContent = (props: DrawerContentComponentProps): React.JSX.Elem
     return isDark ? 'dark' : 'light'
   }
 
-  const getThemeIcon = (mode: ThemeMode): string => {
+  const getThemeIcon = (mode: ThemeMode): 'sun' | 'moon' | 'mobile-alt' => {
     switch (mode) {
       case 'light':
         return 'sun'
@@ -313,6 +316,9 @@ const CustomDrawerContent = (props: DrawerContentComponentProps): React.JSX.Elem
             >
               <FontAwesome5
                 name={getThemeIcon(mode)}
+                // name is a union spanning regular (sun/moon) and solid (mobile-alt);
+                // fa5IconStyle resolves the per-glyph style at runtime.
+                iconStyle={fa5IconStyle(getThemeIcon(mode)) as any}
                 size={16}
                 color={
                   getCurrentThemeMode() === mode ? '#FFFFFF' : CONST.MAIN_COLOR
@@ -392,7 +398,7 @@ const FriendsDrawerIcon = ({ color, size, focused }: IconProps): React.JSX.Eleme
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <FontAwesome5 name={SCREEN_HEADER_ICONS.friends.name} size={22} color={iconColor} />
+      <FontAwesome5 name={SCREEN_HEADER_ICONS.friends.name} iconStyle='solid' size={22} color={iconColor} />
     </View>
   )
 }
@@ -405,7 +411,7 @@ const WavesDrawerIcon = ({ color, size, focused }: IconProps): React.JSX.Element
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <FontAwesome5 name={SCREEN_HEADER_ICONS.waves.name} size={22} color={iconColor} />
+      <FontAwesome5 name={SCREEN_HEADER_ICONS.waves.name} iconStyle='solid' size={22} color={iconColor} />
     </View>
   )
 }
@@ -479,7 +485,7 @@ export default function DrawerLayout (): React.JSX.Element {
             name='(tabs)'
             options={{
               drawerIcon: ({ color, size }) => (
-                <FontAwesome5 name='home' size={22} color={color} />
+                <FontAwesome5 name='home' iconStyle='solid' size={22} color={color} />
               ),
               drawerLabel: 'Home',
               title: 'Home'

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { MaterialIcons } from '@expo/vector-icons'
+import MaterialIcons from '@react-native-vector-icons/material-icons'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import * as Haptics from 'expo-haptics'
 import {

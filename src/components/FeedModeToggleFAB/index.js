@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 import { useAtom } from 'jotai'
 import React from 'react'
 import { Pressable, StyleSheet } from 'react-native'

@@ -1,4 +1,4 @@
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -33,7 +33,7 @@ const PrivacyNoticeCard = ({ theme }) => {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <FontAwesome5 name='lock' size={16} color='#50E3C2' />
+        <FontAwesome5 name='lock' iconStyle='solid' size={16} color='#50E3C2' />
         <Text style={styles.title}>Your Privacy is Protected</Text>
       </View>
       <Text style={styles.text}>

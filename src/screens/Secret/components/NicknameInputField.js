@@ -1,4 +1,4 @@
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import Input from '../../../components/ui/Input'
@@ -24,6 +24,7 @@ const NicknameInputField = ({ value, onChangeText, disabled, theme, errorMessage
         leftIcon={
           <FontAwesome5
             name='user'
+            iconStyle='regular'
             size={20}
             color={disabled ? theme.TEXT_DISABLED : CONST.MAIN_COLOR}
           />

@@ -1,7 +1,8 @@
 import React from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
 import Button from '../ui/Button'
+import { fa5IconStyle } from '../../utils/fa5IconStyle'
 
 const CARDS = [
   {
@@ -37,7 +38,7 @@ const FriendsExplainerView = ({ theme, onAddFriend }) => {
     >
       <View style={styles.header}>
         <View style={styles.iconCircle}>
-          <FontAwesome5 name='user-friends' size={36} color='#EA5E3D' />
+          <FontAwesome5 name='user-friends' iconStyle='solid' size={36} color='#EA5E3D' />
         </View>
         <Text style={styles.title}>Connect with Friends</Text>
         <Text style={styles.subtitle}>
@@ -48,7 +49,7 @@ const FriendsExplainerView = ({ theme, onAddFriend }) => {
       {CARDS.map((card) => (
         <View key={card.icon} style={styles.card}>
           <View style={styles.cardIconRow}>
-            <FontAwesome5 name={card.icon} size={18} color='#EA5E3D' />
+            <FontAwesome5 name={card.icon} iconStyle={fa5IconStyle(card.icon)} size={18} color='#EA5E3D' />
             <Text style={styles.cardTitle}>{card.title}</Text>
           </View>
           <Text style={styles.cardBody}>{card.body}</Text>
@@ -60,6 +61,7 @@ const FriendsExplainerView = ({ theme, onAddFriend }) => {
         icon={
           <FontAwesome5
             name='plus'
+            iconStyle='solid'
             size={18}
             color='white'
             style={{ marginRight: 8 }}

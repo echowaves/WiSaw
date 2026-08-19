@@ -6,7 +6,7 @@ import Animated, {
   withSpring,
   withTiming
 } from 'react-native-reanimated'
-import { Ionicons } from '@expo/vector-icons'
+import Ionicons from '@react-native-vector-icons/ionicons'
 
 const FOB_SIZE = 40
 

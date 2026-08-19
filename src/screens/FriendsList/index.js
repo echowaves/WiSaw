@@ -7,7 +7,9 @@ import * as Haptics from 'expo-haptics'
 
 import { FlatList, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 
-import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import FontAwesome5 from '@react-native-vector-icons/fontawesome5'
+import Ionicons from '@react-native-vector-icons/ionicons'
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { showSuccessToast, showErrorToast } from '../../utils/showToast'
@@ -111,6 +113,7 @@ const FriendsList = () => {
       >
         <FontAwesome5
           name='plus'
+          iconStyle='solid'
           size={18}
           color={theme.TEXT_PRIMARY}
         />
