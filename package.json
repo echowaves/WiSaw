@@ -13,8 +13,8 @@
   },
   "scripts": {
     "start": "npx expo start --dev-client",
-    "run:ios": "npx expo run:ios",
     "build-ios-for-simulator": "rm -rf ios && npx expo prebuild -p ios && xcodebuild -workspace ios/WiSaw.xcworkspace -scheme WiSaw -sdk iphonesimulator -configuration Debug build && xcrun simctl install booted $(find ~/Library/Developer/Xcode/DerivedData/WiSaw-*/Build/Products/Debug-iphonesimulator -name 'WiSaw.app' -maxdepth 1)",
+    "run:ios": "npx expo run:ios",
     "build-android-for-simulator": "rm -rf android && npx expo prebuild -p android && node scripts/fix-gradle-version.js && npx expo run:android",
     "build:android-for-device": "eas build -p android --profile development",
     "build:ios-for-device": "eas build -p ios --profile development",
@@ -81,6 +81,7 @@
     "expo-video-thumbnails": "~57.0.1",
     "graphql": "17.0.2",
     "jotai": "2.20.2",
+    "lodash": "4.17.21",
     "prop-types": "15.8.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
