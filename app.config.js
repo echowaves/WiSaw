@@ -21,6 +21,8 @@ module.exports = {
       'expo-status-bar',
       'expo-video',
       '@react-native-community/datetimepicker',
+      // iOS 27 SDK requires the UIKit scene lifecycle (expo/expo#46664)
+      './plugins/with-ios-scene-lifecycle',
       [
         'expo-build-properties',
         {
