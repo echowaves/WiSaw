@@ -29,7 +29,7 @@ module.exports = {
           android: {
             compileSdkVersion: 36,
             targetSdkVersion: 36,
-            // buildToolsVersion: '34.0.0',
+            buildToolsVersion: '36.0.0',
             // kotlinVersion: '2.0.0',
             enableProguardInReleaseBuilds: true,
             enableShrinkResourcesInReleaseBuilds: true
