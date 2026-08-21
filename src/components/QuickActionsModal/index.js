@@ -1,9 +1,9 @@
+/* global requestIdleCallback:readonly, cancelIdleCallback:readonly */
 import CachedImage from 'expo-cached-image'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
-  InteractionManager,
   Modal,
   StyleSheet,
   TouchableOpacity,
@@ -87,10 +87,10 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRem
   useEffect(() => {
     if (visible && photo) {
       setPhotoDetails(null)
-      const task = InteractionManager.runAfterInteractions(() => {
+      const handle = requestIdleCallback(() => {
         execute()
       })
-      return () => task.cancel()
+      return () => cancelIdleCallback(handle)
     }
   }, [visible, photo?.id, uuid, execute])
 

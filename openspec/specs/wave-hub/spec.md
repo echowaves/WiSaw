@@ -186,33 +186,22 @@ When a photo finishes uploading — whether to a specific wave or to the ungroup
 - **THEN** WavesHub SHALL call `handleRefresh()`
 - **THEN** the ungrouped photos count SHALL update and the ungrouped photo card SHALL show the new photo
 
-### Requirement: OnPhotoUploadComplete Subscription Works Without Errors
-The system SHALL establish a WebSocket subscription to `OnPhotoUploadComplete` using a raw WebSocket connection (not the Apollo Client link system), emitting to the existing `uploadBus` event bus when a photo upload complete notification is received.
+### Requirement: WavesHub does not maintain an AppSync real-time connection
+The WavesHub screen SHALL NOT open or manage an AppSync real-time WebSocket connection. Feed and badge refresh on upload completion SHALL be driven solely by the local `uploadBus` (`subscribeToUploadComplete`) and by the existing mount/focus refresh paths.
 
-#### Scenario: Subscription connects without errors
-- **GIVEN** the WavesHub screen is mounted and user has a valid `uuid`
-- **WHEN** a WebSocket subscription to `OnPhotoUploadComplete` is established
-- **THEN** the subscription SHALL connect to AppSync's real-time API without throwing `.pipe is not a function` errors
-- **AND** the subscription SHALL use a raw WebSocket connection (not Apollo Client link system)
-- **AND** the subscription SHALL emit to the existing `uploadBus` event bus when a photo upload complete notification is received
+#### Scenario: No WebSocket connection on mount
+- **WHEN** the WavesHub screen mounts with a valid `uuid`
+- **THEN** no AppSync real-time WebSocket connection is opened
+- **AND** no reconnect/backoff timers related to an AppSync subscription are scheduled
 
-### Requirement: Cross-Device Photo Upload Notification
-The system SHALL call `emitUploadComplete` on the `uploadBus` when the `OnPhotoUploadComplete` subscription receives a notification from another device, ensuring existing listeners (WavesHub, WaveDetail, useFeedLoader) receive the notification and trigger refresh.
+#### Scenario: Same-device upload still refreshes the waves list
+- **WHEN** a photo upload completes on this device and `emitUploadComplete` fires on the `uploadBus`
+- **THEN** WavesHub SHALL refresh the waves list and ungrouped photo count via its `uploadBus` subscription (behavior unchanged from prior bus-based requirements)
 
-#### Scenario: Cross-device upload notification
-- **GIVEN** another device uploads a photo to the same wave
-- **WHEN** the `OnPhotoUploadComplete` subscription receives the notification
-- **THEN** the `emitUploadComplete` function SHALL be called on the `uploadBus`
-- **AND** existing listeners (WavesHub, WaveDetail, useFeedLoader) SHALL receive the notification and trigger refresh
-
-### Requirement: Subscription Lifecycle Management
-The system SHALL manage the WebSocket subscription lifecycle lazily: creating it on component mount, cleaning it up on unmount, and automatically reconnecting on transient disconnects.
-
-#### Scenario: Subscription creation and cleanup
-- **GIVEN** the WavesHub component mounts
-- **WHEN** the component mounts, a WebSocket subscription SHALL be created lazily
-- **WHEN** the component unmounts, the WebSocket subscription SHALL be cleaned up
-- **AND** the subscription SHALL automatically reconnect on transient disconnects
+#### Scenario: Cross-device upload appears on next refresh
+- **WHEN** another device uploads a photo to a wave visible to this user
+- **THEN** no real-time event is delivered to this client
+- **AND** the new photo SHALL appear on the next waves-list refresh (mount or focus)
 
 ### Requirement: Waves Hub renders ungrouped-photos first section
 The Waves Hub SHALL render an `UngroupedPhotosCard` as the `ListHeaderComponent` of the waves FlatList whenever `getUngroupedPhotosCount({ uuid })` returns a value greater than 0, and SHALL omit the card when the count is 0 or null. The card SHALL appear above all wave cards regardless of the FlatList column count.

@@ -43,7 +43,6 @@ import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
 import UploadContext from '../../contexts/UploadContext'
-import { subscribeToPhotoUploadComplete } from '../../services/appsyncSubscription'
 // Counts are loaded via listWaves GraphQL query
 // import { useLocationDrift } from '../../hooks/useLocationDrift' - DISABLED per change proposal
 // import { setLastTriggerLocation } from '../../utils/groupingAtom' - DISABLED with location drift trigger
@@ -400,20 +399,16 @@ const WavesHub = () => {
     return unsubscribe
   }, [handleRefresh])
 
-  // Subscribe to photo upload + auto-grouping complete notification from server
+  // Subscribe to upload complete for waves feed refresh (local event bus)
   useEffect(() => {
     if (!uuid) return
 
-    const unsubscribeWs = subscribeToPhotoUploadComplete()
-
-    // Subscribe to upload complete for waves feed refresh (local event bus)
     const unsubscribeUpload = subscribeToUploadComplete(() => {
       handleRefresh()
       fetchUngroupedCount()
     })
 
     return () => {
-      unsubscribeWs()
       unsubscribeUpload()
     }
   }, [handleRefresh, uuid])

@@ -1,3 +1,4 @@
+/* global requestIdleCallback:readonly, cancelIdleCallback:readonly */
 import { router } from 'expo-router'
 import { useAtom } from 'jotai'
 import { useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -6,7 +7,6 @@ import FontAwesome from '@react-native-vector-icons/fontawesome'
 import Ionicons from '@react-native-vector-icons/ionicons'
 import {
   Alert,
-  InteractionManager,
   Keyboard,
   StyleSheet,
   Text,
@@ -670,7 +670,7 @@ const Photo = ({
   useEffect(() => {
     componentIsMounted.current = true
 
-    const task = InteractionManager.runAfterInteractions(async () => {
+    const handle = requestIdleCallback(async () => {
       if (componentIsMounted.current) {
         const loadedPhotoDetails = await reducer.getPhotoDetails({
           photoId: photo?.id,
@@ -690,7 +690,7 @@ const Photo = ({
 
     return () => {
       componentIsMounted.current = false
-      task.cancel()
+      cancelIdleCallback(handle)
     }
   }, [photo?.id, uuid, refreshKey, internalRefreshKey])
 
