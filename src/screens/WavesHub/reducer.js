@@ -6,5 +6,6 @@ export {
   addPhotoToWave,
   removePhotoFromWave,
   getUngroupedPhotosCount,
-  mergeWaves
+  mergeWaves,
+  autoGroupPhotosIntoWaves
 } from '../Waves/reducer'

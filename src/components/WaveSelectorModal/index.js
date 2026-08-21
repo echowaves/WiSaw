@@ -37,8 +37,13 @@ const WaveSelectorModal = ({
   onRemoveFromWave,
   onCreateWave,
   currentWaveUuid,
-  uuid
+  uuid,
+  createMode
 }) => {
+  // createMode (from the UngroupedPhotosCard "Create a wave" action) pre-expands
+  // the create input. Both handlers are always passed so tapping a wave in the
+  // list remains safe in either mode.
+  const isCreateMode = !!createMode
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
   const locationState = useAtomValue(locationAtom)
@@ -109,11 +114,11 @@ const WaveSelectorModal = ({
       setBatch(newBatch)
       fetchWaves(0, newBatch, '', true)
       setSearchText('')
-      setShowCreateInput(false)
+      setShowCreateInput(isCreateMode)
       setNewWaveName('')
       resetCreateLocation()
     }
-  }, [visible, fetchWaves])
+  }, [visible, fetchWaves, isCreateMode])
 
   const handleLoadMore = () => {
     if (!noMoreData && !loading && !loadingMore) {
@@ -358,7 +363,7 @@ const WaveSelectorModal = ({
                 )}
               </>
               )
-            : (
+            : !isCreateMode ? null : (
               <TouchableOpacity
                 style={styles.createNewButton}
                 onPress={() => setShowCreateInput(true)}

@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import { useAtom, useAtomValue } from 'jotai'
 import Ionicons from '@react-native-vector-icons/ionicons'
+import { groupingAtom } from '../../utils/groupingAtom'
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons'
 import { showSuccessToast, showInfoToast } from '../../utils/showToast'
 import showErrorToast from '../../utils/showErrorToast'
@@ -36,7 +37,8 @@ import MergeWaveModal from '../../components/MergeWaveModal'
 import WavesExplainerView from '../../components/WavesExplainerView'
 import ActionMenu from '../../components/ActionMenu'
 import WaveShareModal from '../../components/WaveShareModal'
-import { emitAutoGroupDone, subscribeToAutoGroupDone } from '../../events/autoGroupBus'
+import UngroupedPhotosCard from '../../components/UngroupedPhotosCard'
+import { subscribeToAutoGroupDone } from '../../events/autoGroupBus'
 import { subscribeToAddWave } from '../../events/waveAddBus'
 import { subscribeToIdentityChange } from '../../events/identityChangeBus'
 import { subscribeToUploadComplete } from '../../events/uploadBus'
@@ -59,6 +61,9 @@ const WavesHub = () => {
   const [pageNumber, setPageNumber] = useState(0)
   const [batch, setBatch] = useState(Crypto.randomUUID())
   const [noMoreData, setNoMoreData] = useState(false)
+
+  // Ungrouped-photos card section
+  const [ungroupedCount, setUngroupedCount] = useState(0)
 
   const [searchText, setSearchText] = useState('')
   const debouncedSearch = useDebouncedSearch(searchText)
@@ -103,6 +108,18 @@ const WavesHub = () => {
   const refreshRunningRef = useRef(false)
 
   const theme = getTheme(isDarkMode)
+  const [grouping] = useAtom(groupingAtom)
+  const groupingLevel = grouping?.groupingLevel || 'CITY'
+
+  const fetchUngroupedCount = useCallback(async () => {
+    if (!uuid) return
+    try {
+      const count = await reducer.getUngroupedPhotosCount({ uuid })
+      setUngroupedCount(typeof count === 'number' ? count : 0)
+    } catch (err) {
+      console.error('fetchUngroupedCount error:', err)
+    }
+  }, [uuid])
 
   const toggleWaveSelection = (waveUuid) => {
     setSelectedWaveUuids(prev => {
@@ -285,8 +302,14 @@ const WavesHub = () => {
     useCallback(() => {
       stopLoading.current = false
       handleRefresh()
-    }, [handleRefresh])
+      fetchUngroupedCount()
+    }, [handleRefresh, fetchUngroupedCount])
   )
+
+  // Load ungrouped count on mount
+  useEffect(() => {
+    fetchUngroupedCount()
+  }, [fetchUngroupedCount])
 
   const handleLoadMore = () => {
     if (!noMoreData && !loading) {
@@ -343,8 +366,10 @@ const WavesHub = () => {
           const waveToDelete = waves.find(w => w.waveUuid === waveUuid)
           await reducer.deleteWave({ waveUuid, uuid })
           setWaves(prev => prev.filter(w => w.waveUuid !== waveUuid))
-          // Note: ungrouped count tracking removed - server handles auto-grouping
-          emitAutoGroupDone()
+          // The deleted wave's photos re-enter the ungrouped pool — refresh count.
+          // (No emitAutoGroupDone: that bus event was for the removed server-side
+          //  auto-group flow; fetchUngroupedCount handles the count directly.)
+          await fetchUngroupedCount()
           showSuccessToast('Wave deleted')
         } catch (error) {
           console.error(error)
@@ -384,6 +409,7 @@ const WavesHub = () => {
     // Subscribe to upload complete for waves feed refresh (local event bus)
     const unsubscribeUpload = subscribeToUploadComplete(() => {
       handleRefresh()
+      fetchUngroupedCount()
     })
 
     return () => {
@@ -394,9 +420,10 @@ const WavesHub = () => {
 
   useEffect(() => {
     const unsubscribeAutoGroup = subscribeToAutoGroupDone(() => {
-      // Auto-group completed; refresh waves feed for consistency
+      // Auto-group completed; refresh waves feed + ungrouped count for consistency
       setTimeout(() => {
         handleRefresh()
+        fetchUngroupedCount()
       }, 500)
     })
     return () => {
@@ -576,7 +603,17 @@ const WavesHub = () => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={null}
+        ListHeaderComponent={ungroupedCount > 0
+          ? (
+              <UngroupedPhotosCard
+                ungroupedCount={ungroupedCount}
+                uuid={uuid}
+                theme={theme}
+                groupingLevel={groupingLevel}
+                onGroupingComplete={fetchUngroupedCount}
+              />
+            )
+          : null}
         ListEmptyComponent={
           !loading && (
             searchText.length > 0

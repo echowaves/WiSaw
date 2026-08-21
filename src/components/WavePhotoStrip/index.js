@@ -10,7 +10,7 @@ const isValidImageUri = (uri) => {
   return uri && typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))
 }
 
-const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPhotoLongPress }) => {
+const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPhotoLongPress, selectionMode, selected = new Set(), onPhotoToggle }) => {
   const [photos, setPhotos] = useState(initialPhotos)
   const [pageNumber, setPageNumber] = useState(-1)
   const [batch] = useState(() => Crypto.randomUUID())
@@ -112,6 +112,24 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
         resizeMode='cover'
       />
     )
+    // Selection mode: render a checkbox overlay and route taps through onPhotoToggle
+    if (selectionMode && onPhotoToggle) {
+      const isSelected = selected.has(item.id)
+      const checkboxIcon = isSelected
+        ? 'check-square'
+        : 'square-o'
+      return (
+        <Pressable
+          onPress={() => onPhotoToggle(item.id)}
+          style={styles.selectionWrap}
+        >
+          {image}
+          <View style={styles.checkBadge}>
+            <FontAwesome5 name={checkboxIcon} iconStyle='solid' size={18} color='#FFFFFF' />
+          </View>
+        </Pressable>
+      )
+    }
     if (onPhotoPress || onPhotoLongPress) {
       return (
         <Pressable
@@ -153,6 +171,23 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 8,
     marginRight: 6
+  },
+  selectionWrap: {
+    position: 'relative',
+    width: 80,
+    height: 80,
+    marginRight: 6
+  },
+  checkBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#007AFF',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   stripContent: {
     paddingHorizontal: 4

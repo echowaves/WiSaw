@@ -227,6 +227,44 @@ export const removePhotoFromWave = async ({ waveUuid, photoId, uuid }) => {
   }
 }
 
+export const autoGroupPhotosIntoWaves = async ({ uuid, groupingLevel }) => {
+  // The server processes at most one wave per call and returns hasMore so the
+  // client can keep going until the whole ungrouped pool is clustered. We loop
+  // here so callers get a single "group everything" entry point.
+  const total = { wavesCreated: 0, photosGrouped: 0, photosRemaining: 0, hasMore: false }
+  try {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const result = await CONST.gqlClient.mutate({
+        mutation: gql`
+          mutation autoGroupPhotosIntoWaves($uuid: String!, $groupingLevel: GroupingLevel!) {
+            autoGroupPhotosIntoWaves(uuid: $uuid, groupingLevel: $groupingLevel) {
+              waveUuid
+              name
+              photosGrouped
+              photosRemaining
+              hasMore
+              wavesCreated
+            }
+          }
+        `,
+        variables: { uuid, groupingLevel },
+        fetchPolicy: 'network-only'
+      })
+      const batch = result.data.autoGroupPhotosIntoWaves
+      total.wavesCreated += batch.wavesCreated || 0
+      total.photosGrouped += batch.photosGrouped || 0
+      total.photosRemaining = batch.photosRemaining || 0
+      total.hasMore = !!batch.hasMore
+      if (!total.hasMore || batch.photosGrouped === 0) break
+    }
+    return total
+  } catch (err) {
+    console.error({ err })
+    throw err
+  }
+}
+
 export const mergeWaves = async ({ targetWaveUuid, sourceWaveUuids, uuid, name, description }) => {
   try {
     const variables = {
