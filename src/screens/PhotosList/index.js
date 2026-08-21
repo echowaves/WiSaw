@@ -269,7 +269,8 @@ const PhotosList = ({ searchFromUrl }) => {
     masonryRef,
     expandedItemIds,
     getExpandedHeight,
-    toggleExpand
+    toggleExpand,
+    collapseExpanded
   } = usePhotoExpansion()
 
   // --- Feed search hook ---
@@ -286,7 +287,7 @@ const PhotosList = ({ searchFromUrl }) => {
     onSearch: (term) => reload(term),
     onClear: () => reload(''),
     searchFromUrl,
-    onBeforeSearch: () => {}
+    onBeforeSearch: collapseExpanded
   })
 
   const bannerHeight = useAtomValue(bannerHeightAtom)

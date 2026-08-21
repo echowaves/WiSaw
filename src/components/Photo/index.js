@@ -1043,6 +1043,31 @@ const Photo = ({
       : []
     const moderationLabels = parsedMetaData.ModerationLabels
 
+    // Tag chips are tappable only when a search trigger is available (feed context).
+    // In other contexts they render as plain, non-interactive chips.
+    const tagSearchEnabled = typeof onTriggerSearch === 'function'
+
+    const renderSearchableChip = (key, name, confidence) => {
+      const chipStyle = [styles.aiTag, { opacity: Math.min(confidence / 100 + 0.3, 1) }]
+      const chipContent = (
+        <Text style={styles.aiTagText}>
+          {name} {Math.round(confidence)}%
+        </Text>
+      )
+      if (!tagSearchEnabled) {
+        return (
+          <View key={key} style={chipStyle}>
+            {chipContent}
+          </View>
+        )
+      }
+      return (
+        <TouchableOpacity key={key} style={chipStyle} onPress={() => onTriggerSearch(name)} activeOpacity={0.7}>
+          {chipContent}
+        </TouchableOpacity>
+      )
+    }
+
     return (
       <View style={styles.aiRecognitionContainer}>
         {labels?.length > 0 && (
@@ -1091,22 +1116,9 @@ const Photo = ({
             </TouchableOpacity>
             {!aiTagsCollapsed && (
               <View style={styles.aiTagsContainer}>
-                {labels.map((label) => (
-                  <TouchableOpacity
-                    key={label.Name}
-                    style={[styles.aiTag, { opacity: Math.min(label.Confidence / 100 + 0.3, 1) }]}
-                    onPress={() => {
-                      if (typeof onTriggerSearch === 'function') {
-                        onTriggerSearch(label.Name)
-                      }
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.aiTagText}>
-                      {label.Name} {Math.round(label.Confidence)}%
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {labels.map((label) =>
+                  renderSearchableChip(label.Name, label.Name, label.Confidence)
+                )}
               </View>
             )}
           </View>
@@ -1156,22 +1168,9 @@ const Photo = ({
             </TouchableOpacity>
             {!aiTextCollapsed && (
               <View style={styles.aiTagsContainer}>
-                {textDetections.map((text) => (
-                  <TouchableOpacity
-                    key={text.Id}
-                    style={[styles.aiTag, { opacity: Math.min(text.Confidence / 100 + 0.3, 1) }]}
-                    onPress={() => {
-                      if (typeof onTriggerSearch === 'function') {
-                        onTriggerSearch(text.DetectedText)
-                      }
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.aiTagText}>
-                      {text.DetectedText} {Math.round(text.Confidence)}%
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {textDetections.map((text) =>
+                  renderSearchableChip(text.Id, text.DetectedText, text.Confidence)
+                )}
               </View>
             )}
           </View>
@@ -1224,23 +1223,17 @@ const Photo = ({
             {!aiModerationCollapsed && (
               <View style={styles.aiTagsContainer}>
                 {moderationLabels.map((label) => (
-                  <TouchableOpacity
+                  <View
                     key={label.Name}
                     style={[
                       styles.aiModerationTag,
                       { opacity: Math.min(label.Confidence / 100 + 0.3, 1) }
                     ]}
-                    onPress={() => {
-                      if (typeof onTriggerSearch === 'function') {
-                        onTriggerSearch(label.Name)
-                      }
-                    }}
-                    activeOpacity={0.7}
                   >
                     <Text style={styles.aiModerationTagText}>
                       {label.Name} {Math.round(label.Confidence)}%
                     </Text>
-                  </TouchableOpacity>
+                  </View>
                 ))}
               </View>
             )}

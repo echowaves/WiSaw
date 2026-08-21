@@ -20,10 +20,15 @@ export default function usePhotoExpansion () {
     })
   }, [])
 
+  const collapseExpanded = useCallback(() => {
+    setExpandedPhotoId(null)
+  }, [])
+
   return {
     expandedItemIds,
     getExpandedHeight,
     toggleExpand,
+    collapseExpanded,
     masonryRef
   }
 }

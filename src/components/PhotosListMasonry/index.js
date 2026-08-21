@@ -130,11 +130,12 @@ const PhotosListMasonry = ({
                 <Ionicons name='close' size={20} color='white' />
               </TouchableOpacity>
               <Photo
-               photo={originalPhoto}
-               embedded
-               containerWidth={dimensions.width}
-               onCommentInputToggle={onCommentInputToggle}
-               onRequestEnsureVisible={({ y, height, keyboardTop }) => {
+                photo={originalPhoto}
+                embedded
+                containerWidth={dimensions.width}
+                onTriggerSearch={onTriggerSearch}
+                onCommentInputToggle={onCommentInputToggle}
+                onRequestEnsureVisible={({ y, height, keyboardTop }) => {
                   if (!masonryRef?.current || !containerViewRef?.current) return
                   try {
                     containerViewRef.current.measureInWindow((mx, my, mw, mh) => {
@@ -181,7 +182,9 @@ const PhotosListMasonry = ({
       toggleExpand,
       onPhotoLongPress,
       removePhotoContext,
-      photosById
+      photosById,
+      onTriggerSearch,
+      onCommentInputToggle
     ]
   )
 

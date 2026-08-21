@@ -14,7 +14,6 @@ import { gql } from '@apollo/client'
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import AppHeader from '../../components/AppHeader'
 import Photo from '../../components/Photo'
-import { emitPhotoSearch } from '../../events/photoSearchBus'
 
 import * as CONST from '../../consts'
 import { isDarkMode, netAvailable as netAvailableAtom } from '../../state'
@@ -144,7 +143,6 @@ const PhotosDetailsShared = ({ route }) => {
             key={item.id}
             refreshKey={refreshKey}
             embedded={false}
-            onTriggerSearch={emitPhotoSearch}
           />
         </ScrollView>
       </View>
