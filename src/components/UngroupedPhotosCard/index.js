@@ -177,8 +177,7 @@ const UngroupedPhotosCard = ({
             <TouchableOpacity onPress={enterSelectionMode} style={styles.selectAllButton}>
               <Text style={{ color: '#007AFF', fontWeight: '600' }}>Select photos</Text>
             </TouchableOpacity>
-            )
-        }
+            )}
       </View>
 
       {/* Selection toolbar */}
@@ -202,18 +201,8 @@ const UngroupedPhotosCard = ({
         onPhotoToggle={togglePhoto}
       />
 
-      {/* Action bar: Auto-Group always enabled; manual gated by selection */}
+      {/* Manual grouping actions: gated on selection */}
       <View style={styles.actionBar}>
-        <TouchableOpacity
-          onPress={handleAutoGroup}
-          disabled={autoGrouping}
-          style={[styles.autoGroupButton, { backgroundColor: '#EA5E3D' }]}
-        >
-          {autoGrouping
-            ? <ActivityIndicator color='#FFFFFF' />
-            : <Text style={styles.autoGroupText}>Auto-Group everything</Text>}
-        </TouchableOpacity>
-
         <TouchableOpacity
           onPress={openCreateWave}
           disabled={!canManualGroup || manualGrouping}
@@ -241,10 +230,22 @@ const UngroupedPhotosCard = ({
         </TouchableOpacity>
       </View>
 
-      <View style={styles.infoBox}>
-        <FontAwesome5 name='info-circle' iconStyle='solid' size={14} color={theme.TEXT_SECONDARY} style={{ marginRight: 6 }} />
-        <Text style={styles.infoText}>
-          Photos are auto-grouped into waves when you upload new ones. Group the rest manually here.
+      {/* Auto-Group action: own row at the bottom with inline explanation */}
+      <View style={styles.autoGroupRow}>
+        <TouchableOpacity
+          onPress={handleAutoGroup}
+          disabled={autoGrouping}
+          style={[styles.autoGroupButton, { backgroundColor: '#EA5E3D' }]}
+        >
+          {autoGrouping
+            ? <ActivityIndicator color='#FFFFFF' />
+            : <Text style={styles.autoGroupText}>Auto-Group everything</Text>}
+        </TouchableOpacity>
+        <Text
+          numberOfLines={3}
+          style={[styles.autoGroupExplanation, { color: theme.TEXT_SECONDARY }]}
+        >
+          Automatically groups all ungrouped photos into waves based on location.
         </Text>
       </View>
 
@@ -307,6 +308,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     gap: 8
   },
+  autoGroupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 8
+  },
   autoGroupButton: {
     flex: 1,
     borderRadius: 8,
@@ -317,24 +324,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600'
   },
+  autoGroupExplanation: {
+    flexShrink: 1,
+    fontSize: 12,
+    lineHeight: 16
+  },
   manualButton: {
     flex: 1,
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center'
-  },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.03)'
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 12,
-    color: 'rgba(0,0,0,0.5)'
   }
 })
 

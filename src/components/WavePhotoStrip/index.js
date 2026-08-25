@@ -115,18 +115,23 @@ const WavePhotoStrip = ({ initialPhotos = [], fetchFn, theme, onPhotoPress, onPh
     // Selection mode: render a checkbox overlay and route taps through onPhotoToggle
     if (selectionMode && onPhotoToggle) {
       const isSelected = selected.has(item.id)
-      const checkboxIcon = isSelected
-        ? 'check-square'
-        : 'square-o'
       return (
         <Pressable
           onPress={() => onPhotoToggle(item.id)}
           style={styles.selectionWrap}
         >
           {image}
-          <View style={styles.checkBadge}>
-            <FontAwesome5 name={checkboxIcon} iconStyle='solid' size={18} color='#FFFFFF' />
-          </View>
+          {isSelected
+            ? (
+              <View style={[styles.checkBadge, styles.checkBadgeSelected]}>
+                <FontAwesome5 name='check-square' iconStyle='solid' size={18} color='#FFFFFF' />
+              </View>
+              )
+            : (
+              <View style={[styles.checkBadge, styles.checkBadgeUnchecked]}>
+                <FontAwesome5 name='square' iconStyle='regular' size={18} color='#FFFFFF' />
+              </View>
+              )}
         </Pressable>
       )
     }
@@ -185,9 +190,16 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 4,
-    backgroundColor: '#007AFF',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  checkBadgeSelected: {
+    backgroundColor: '#007AFF'
+  },
+  checkBadgeUnchecked: {
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderWidth: 2,
+    borderColor: '#007AFF'
   },
   stripContent: {
     paddingHorizontal: 4

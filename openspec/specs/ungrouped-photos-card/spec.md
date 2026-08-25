@@ -18,24 +18,20 @@ The `UngroupedPhotosCard` component SHALL render a visually distinct card contai
 - **THEN** the border SHALL be dashed style
 - **THEN** the card SHALL be visually distinguishable from regular wave cards
 
-### Requirement: Ungrouped photos card provides auto-group CTA
-The card SHALL include a prominent button labeled "Auto Group Into Waves" with subtitle text "You can fine-tune waves later". Pressing the button SHALL trigger `emitAutoGroup(ungroupedCount)`.
+### Requirement: Ungrouped photos card auto-group action
+The `UngroupedPhotosCard` SHALL include an "Auto-Group everything" action. Pressing it SHALL trigger server-side auto-grouping via the `autoGroupPhotosIntoWaves` mutation, which clusters the *entire* ungrouped pool server-side and ignores the current per-photo selection. The action SHALL be laid out on its own dedicated row at the very bottom of the card, separate from the manual grouping actions ("Create a wave", "Add to an existing wave"), and SHALL be accompanied by inline explanation text on the same row that describes what the action does (automatically groups all ungrouped photos into waves).
 
-#### Scenario: Auto-group button press
-- **WHEN** the user presses the "Auto Group Into Waves" button
-- **THEN** `emitAutoGroup(ungroupedCount)` SHALL be called
-- **THEN** the existing auto-group confirmation dialog and progress flow SHALL execute
+#### Scenario: Auto-group action placement
+- **WHEN** the ungrouped photos card is rendered
+- **THEN** "Auto-Group everything" SHALL occupy its own full-width row at the bottom of the card
+- **THEN** it SHALL NOT share its row with "Create a wave" or "Add to an existing wave"
+- **THEN** explanation text describing that all ungrouped photos will be grouped into waves SHALL be shown alongside the button on the same row
 
-#### Scenario: Card hides after auto-group completes
-- **WHEN** auto-grouping completes and `ungroupedPhotosCount` becomes 0
-- **THEN** the ungrouped card SHALL no longer be rendered
-
-#### Scenario: Card re-fetches after auto-group completes
-- **WHEN** the auto-group operation completes and `emitAutoGroupDone()` is called
-- **THEN** the UngroupedPhotosCard component SHALL have a `subscribeToAutoGroupDone()` listener registered
-- **THEN** the listener SHALL reset `fetchedRef.current = false` to allow re-fetching
-- **THEN** the listener SHALL call `requestUngroupedPhotos()` to fetch fresh ungrouped photos
-- **THEN** the thumbnails SHALL display correctly (no more empty placeholders)
+#### Scenario: Auto-group everything
+- **WHEN** the user presses "Auto-Group everything"
+- **THEN** `autoGroupPhotosIntoWaves(uuid, groupingLevel)` SHALL be called server-side
+- **THEN** the server SHALL group all ungrouped photos for the user
+- **THEN** after the operation completes, the ungrouped count SHALL drop to 0 and the card SHALL be hidden
 
 ### Requirement: Ungrouped Photos Count Updates
 When auto-grouping completes, the ungrouped photos count SHALL update in real-time via the `ungroupedPhotosCount` atom.
@@ -59,15 +55,6 @@ The `UngroupedPhotosCard` SHALL support entering a selection mode in which each 
 - **THEN** that photo SHALL be added to or removed from the selection
 - **THEN** tapping "Select All" SHALL select every ungrouped photo currently shown
 - **THEN** tapping "Cancel" SHALL exit selection mode and clear the selection
-
-### Requirement: Ungrouped photos card auto-group action
-The `UngroupedPhotosCard` SHALL include an "Auto-Group everything" action. Pressing it SHALL trigger server-side auto-grouping via the `autoGroupPhotosIntoWaves` mutation, which clusters the *entire* ungrouped pool server-side and ignores the current per-photo selection.
-
-#### Scenario: Auto-group everything
-- **WHEN** the user presses "Auto-Group everything"
-- **THEN** `autoGroupPhotosIntoWaves(uuid, groupingLevel)` SHALL be called server-side
-- **THEN** the server SHALL group all ungrouped photos for the user
-- **THEN** after the operation completes, the ungrouped count SHALL drop to 0 and the card SHALL be hidden
 
 ### Requirement: Ungrouped photos card manual grouping actions
 The `UngroupedPhotosCard` SHALL include a "Create a wave" action and an "Add to an existing wave" action. These actions SHALL only be enabled when the user has selected at least one photo. Pressing "Create a wave" SHALL open the `WaveSelectorModal` in create mode; pressing "Add to an existing wave" SHALL open the `WaveSelectorModal` for selecting an existing wave. Either action SHALL call `addPhotoToWave` once per selected photo.
