@@ -1,22 +1,4 @@
-## Purpose
-This specification defines expected user-visible behavior, constraints, and validation scenarios for ungrouped photos card in WiSaw.
-
-## Requirements
-
-### Requirement: Ungrouped photos card displays ungrouped photos
-The `UngroupedPhotosCard` component SHALL render a visually distinct card containing a `WavePhotoStrip` that loads photos via `requestUngroupedPhotos`. The card SHALL display the title "Ungrouped Photos" with the count, and SHALL have an accent background (MAIN_COLOR at 10% opacity) with a dashed border to distinguish it from regular wave cards.
-
-#### Scenario: Card renders with ungrouped photos
-- **WHEN** `UngroupedPhotosCard` mounts with `ungroupedCount > 0`
-- **THEN** the card SHALL display "Ungrouped Photos (N)" as the title
-- **THEN** a `WavePhotoStrip` SHALL be rendered with `fetchFn` set to `requestUngroupedPhotos`
-- **THEN** the strip SHALL immediately fetch page 0 on mount
-
-#### Scenario: Card visual distinction
-- **WHEN** the ungrouped card is rendered
-- **THEN** the background SHALL use `MAIN_COLOR` at 10% opacity
-- **THEN** the border SHALL be dashed style
-- **THEN** the card SHALL be visually distinguishable from regular wave cards
+## MODIFIED Requirements
 
 ### Requirement: Ungrouped photos card auto-group action
 The `UngroupedPhotosCard` SHALL include an "Auto-Group everything" action. Pressing it SHALL trigger server-side auto-grouping via the `autoGroupPhotosIntoWaves` mutation, which clusters the *entire* ungrouped pool server-side and ignores the current per-photo selection. The action SHALL be laid out on its own dedicated row at the very bottom of the card, separate from the manual grouping actions ("Create a wave", "Add to an existing wave"), and SHALL be accompanied by inline explanation text on the same row that describes what the action does (automatically groups all ungrouped photos into waves). The action SHALL be enabled only when no photos are selected and SHALL be disabled while auto-grouping is in progress. The action SHALL remain visible in the card's layout while disabled (dimmed, not hidden).
@@ -39,15 +21,6 @@ The `UngroupedPhotosCard` SHALL include an "Auto-Group everything" action. Press
 - **THEN** "Auto-Group everything" SHALL be disabled
 - **THEN** it SHALL remain visible with a dimmed disabled appearance
 - **THEN** pressing it SHALL NOT trigger the auto-group mutation
-
-### Requirement: Ungrouped Photos Count Updates
-When auto-grouping completes, the ungrouped photos count SHALL update in real-time via the `ungroupedPhotosCount` atom.
-
-#### Scenario: Ungrouped count updates after auto-group
-- **WHEN** the auto-group operation completes and `emitAutoGroupDone()` is called
-- **THEN** the `ungroupedPhotosCount` atom SHALL be updated via `fetchCounts()`
-- **THEN** the UngroupedPhotosCard prop `ungroupedCount` SHALL reflect the new value
-- **THEN** the card title SHALL display the updated count (e.g., "Ungrouped Photos (5)")
 
 ### Requirement: Ungrouped photos card selection mode
 The `UngroupedPhotosCard` SHALL support entering a selection mode in which each photo in the `WavePhotoStrip` shows a checkbox overlay and can be individually toggled. A toolbar SHALL show a "Select All" control, the current selected count, and a "Cancel" control. Selecting one or more photos SHALL unlock the "Create a wave" and "Add to an existing wave" actions and SHALL disable "Auto-Group everything". With zero photos selected, "Auto-Group everything" SHALL be enabled unless auto-grouping is in progress.

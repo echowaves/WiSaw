@@ -98,6 +98,7 @@ const UngroupedPhotosCard = ({
   }
 
   const canManualGroup = selectedIds.size > 0
+  const canAutoGroup = selectedIds.size === 0
 
   // ---- Manual grouping: loop addPhotoToWave over selected IDs ----
   const groupSelectedIntoWave = async (waveUuid) => {
@@ -137,6 +138,8 @@ const UngroupedPhotosCard = ({
 
   // ---- Auto-group everything (whole pool) ----
   const handleAutoGroup = () => {
+    // Defense in depth: never confirm/mutate while any photos are selected.
+    if (!canAutoGroup || autoGrouping) return
     showConfirmAlert(
       'Auto-Group Everything',
       `You have ${ungroupedCount} ungrouped photos. This will automatically group them all into waves. Continue?`,
@@ -230,16 +233,21 @@ const UngroupedPhotosCard = ({
         </TouchableOpacity>
       </View>
 
-      {/* Auto-Group action: own row at the bottom with inline explanation */}
+      {/* Auto-Group action: own row at the bottom with inline explanation.
+          The button is always rendered and stays visible; while photos are
+          selected it is disabled and dimmed (never hidden from the layout). */}
       <View style={styles.autoGroupRow}>
         <TouchableOpacity
           onPress={handleAutoGroup}
-          disabled={autoGrouping}
-          style={[styles.autoGroupButton, { backgroundColor: '#EA5E3D' }]}
+          disabled={!canAutoGroup || autoGrouping}
+          style={[styles.autoGroupButton, {
+            backgroundColor: '#EA5E3D',
+            opacity: canAutoGroup ? 1 : 0.5
+          }]}
         >
           {autoGrouping
             ? <ActivityIndicator color='#FFFFFF' />
-            : <Text style={styles.autoGroupText}>Auto-Group everything</Text>}
+            : <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>Auto-Group everything</Text>}
         </TouchableOpacity>
         <Text
           numberOfLines={3}
@@ -320,12 +328,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center'
   },
-  autoGroupText: {
-    color: '#FFFFFF',
-    fontWeight: '600'
-  },
+  // flex: 1 (not just flexShrink) is required: an auto-basis Text is measured
+  // at the full row width, which collapses the flex:1 button to zero width.
   autoGroupExplanation: {
-    flexShrink: 1,
+    flex: 1,
     fontSize: 12,
     lineHeight: 16
   },
