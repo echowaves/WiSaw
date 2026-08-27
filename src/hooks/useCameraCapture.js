@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import * as ImagePicker from 'expo-image-picker'
 import * as Linking from 'expo-linking'
-import * as MediaLibrary from 'expo-media-library'
+import { Asset } from 'expo-media-library'
 import { useAtomValue } from 'jotai'
 import { Alert } from 'react-native'
 import { showInfoToast, showErrorToast } from '../utils/showToast'
@@ -61,7 +61,7 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
       console.log('[takePhoto] Camera returned:', cameraReturn)
     } catch (error) {
       console.error('[takePhoto] Camera launch error:', error)
-      showErrorToast('Camera Error', { text2: `${error}`, topOffset })
+      showErrorToast('Camera Error', { text2: `${error}`, topOffset: toastTopOffset })
       return
     }
 
@@ -71,7 +71,7 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
         return
       }
       try {
-        await MediaLibrary.saveToLibraryAsync(cameraReturn.assets[0].uri)
+        await Asset.create(cameraReturn.assets[0].uri)
         console.log('[takePhoto] Saved to library:', cameraReturn.assets[0].uri)
       } catch (error) {
         console.error('[takePhoto] Save to library error:', error)
@@ -93,7 +93,7 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
           console.log('[takePhoto] enqueueCapture completed')
         } catch (error) {
           console.error('[takePhoto] enqueueCapture error:', error)
-          showErrorToast('Upload Error', { text2: `${error}`, topOffset })
+          showErrorToast('Upload Error', { text2: `${error}`, topOffset: toastTopOffset })
         }
         return
       }
@@ -105,7 +105,7 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
           console.log('[takePhoto] enqueueCapture completed (offline)')
         } catch (error) {
           console.error('[takePhoto] enqueueCapture error (offline):', error)
-          showErrorToast('Upload Error', { text2: `${error}`, topOffset })
+          showErrorToast('Upload Error', { text2: `${error}`, topOffset: toastTopOffset })
         }
         return
       }
@@ -116,7 +116,7 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
         console.log('[takePhoto] enqueueCapture completed (online)')
       } catch (error) {
         console.error('[takePhoto] enqueueCapture error (online):', error)
-        showErrorToast('Upload Error', { text2: `${error}`, topOffset })
+        showErrorToast('Upload Error', { text2: `${error}`, topOffset: toastTopOffset })
       }
     } else {
       console.log('[takePhoto] Camera was canceled')
