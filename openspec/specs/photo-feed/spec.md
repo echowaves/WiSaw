@@ -64,7 +64,7 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 Removed behavior note: PhotosList search bar keyboard handling has been replaced by the SearchFab component, which uses absolute positioning and `useReanimatedKeyboardAnimation` instead of `KeyboardStickyView`. The search segment (segment 2) no longer exists. Search input is now handled by `SearchFab` (see `search-fab` capability).
 
 ### Requirement: Photo viewing interaction
-The photo feed SHALL display photos in a column masonry grid with responsive column counts based on screen width. The PhotosList screen SHALL pass a comment-screen column profile (`{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }`) to `PhotosListMasonry` via the `columns` prop, regardless of the active feed mode (geo or bookmarks). The feed SHALL use `BOOKMARK_LAYOUT_CONFIG` for layout parameters (spacing, tile height, aspect ratios). Comment sections SHALL always be shown on thumbnails when applicable (when photos have comments, watchers, or last comment), regardless of the active feed mode. When a user taps a thumbnail, the photo SHALL expand inline to full grid width showing the complete Photo detail view inside a unified card, instead of navigating to a modal route. The expanded view SHALL render the photo first, followed by action buttons, then photo info, comments, and AI recognitions.
+The photo feed SHALL display photos in a column masonry grid with responsive column counts based on screen width. The PhotosList screen SHALL pass a comment-screen column profile (`{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }`) to `PhotosListMasonry` via the `columns` prop, regardless of the active feed mode (geo or bookmarks). The feed SHALL use `BOOKMARK_LAYOUT_CONFIG` for layout parameters (spacing, tile height, aspect ratios), and `PhotosListMasonry` SHALL pass the segment config's `aspectRatioFallbacks` through to the masonry library so that photos without valid dimensions render with the configured fallback ratio instead of a library-default id-seeded ratio. Comment sections SHALL always be shown on thumbnails when applicable (when photos have comments, watchers, or last comment), regardless of the active feed mode. When a user taps a thumbnail, the photo SHALL expand inline to full grid width showing the complete Photo detail view inside a unified card, instead of navigating to a modal route. The expanded view SHALL render the photo first, followed by action buttons, then photo info, comments, and AI recognitions.
 
 #### Scenario: Tap photo in feed
 - **WHEN** user taps a photo thumbnail in the main feed
@@ -85,6 +85,12 @@ The photo feed SHALL display photos in a column masonry grid with responsive col
 #### Scenario: Feed uses bookmark layout config
 - **WHEN** the PhotosList screen renders `PhotosListMasonry`
 - **THEN** it SHALL pass `BOOKMARK_LAYOUT_CONFIG` as the `segmentConfig` prop (spacing: 8, baseHeight: 200, aspectRatioFallbacks: [1.0])
+
+#### Scenario: Masonry passes configured aspect ratio fallbacks
+- **WHEN** `PhotosListMasonry` renders `ExpoMasonryLayout`
+- **THEN** it SHALL pass `segmentConfig.aspectRatioFallbacks` as the `aspectRatioFallbacks` prop
+- **WHEN** a photo in the feed has missing or non-positive `width`/`height`
+- **THEN** its tile SHALL use the configured fallback ratio (1.0 for the feed) rather than a library-default id-seeded ratio
 
 #### Scenario: Comments always shown on thumbnails
 - **WHEN** a photo in the feed has comments, watchers, or a last comment

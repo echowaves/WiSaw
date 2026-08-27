@@ -1,4 +1,4 @@
-/* global console:readonly, setTimeout:readonly, clearTimeout:readonly, alert:readonly */
+/* global console:readonly, setTimeout:readonly, clearTimeout:readonly, alert:readonly, __DEV__:readonly */
 
 import { CacheManager } from 'expo-cached-image'
 import { File as FSFile } from 'expo-file-system'
@@ -45,6 +45,7 @@ export const getPhotoById = async (photoId, uuid) => {
               commentsCount
               watchersCount
               createdAt
+              height
               id
               imgUrl
               thumbUrl
@@ -52,6 +53,7 @@ export const getPhotoById = async (photoId, uuid) => {
               updatedAt
               uuid
               video
+              width
             }
           }
         `,
@@ -214,9 +216,25 @@ const genLocalThumbs = async (image) => {
 export const removeFromQueue = async (imageToRemove) => {
   try {
     const pendingImagesBefore = await readQueue()
+    const photoId = imageToRemove?.photoId
+
+    if (!photoId) {
+      if (__DEV__) {
+        console.warn('[queue] removeFromQueue called without photoId, no item removed', imageToRemove)
+      }
+      return
+    }
+
+    // Match by stable photoId — the stored entry may be an enriched version
+    // (localImgUrl/localThumbUrl/photo added during processing), so whole-object
+    // JSON equality would silently fail to match.
     const pendingImagesAfter = pendingImagesBefore.filter(
-      (imageInTheQueue) => JSON.stringify(imageInTheQueue) !== JSON.stringify(imageToRemove)
+      (imageInTheQueue) => imageInTheQueue.photoId !== photoId
     )
+
+    if (pendingImagesAfter.length === pendingImagesBefore.length && __DEV__) {
+      console.warn(`[queue] removeFromQueue: no queue entry matched photoId ${photoId}`)
+    }
 
     await writeQueue(pendingImagesAfter)
   } catch (error) {
@@ -283,9 +301,27 @@ export const addToQueue = async (image) => {
 export const updateQueueItem = async (originalItem, updatedItem) => {
   try {
     const pendingImages = await readQueue()
-    const updatedQueue = pendingImages.map((item) =>
-      JSON.stringify(item) === JSON.stringify(originalItem) ? updatedItem : item
-    )
+    const photoId = originalItem?.photoId
+
+    if (!photoId) {
+      if (__DEV__) {
+        console.warn('[queue] updateQueueItem called without photoId, item not updated', originalItem)
+      }
+      return
+    }
+
+    // Match by stable photoId for the same reason removeFromQueue does: the
+    // stored entry may already be an enriched version of originalItem.
+    let matched = false
+    const updatedQueue = pendingImages.map((item) => {
+      if (item.photoId !== photoId) return item
+      matched = true
+      return updatedItem
+    })
+
+    if (!matched && __DEV__) {
+      console.warn(`[queue] updateQueueItem: no queue entry matched photoId ${photoId}`)
+    }
 
     await writeQueue(updatedQueue)
   } catch (error) {

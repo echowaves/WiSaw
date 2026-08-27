@@ -205,6 +205,7 @@ const PhotosListMasonry = ({
         columns={columns}
         renderItem={renderMasonryItem}
         spacing={segmentConfig.spacing}
+        aspectRatioFallbacks={segmentConfig.aspectRatioFallbacks}
         getExtraHeight={getExtraHeight}
         expandedItemIds={expandedItemIds}
         getExpandedHeight={getExpandedHeight}

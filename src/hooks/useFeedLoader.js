@@ -9,6 +9,14 @@ import { subscribeToPhotoRefresh } from '../events/photoRefreshBus'
 let currentBatch = Crypto.randomUUID()
 
 /**
+ * True when a photo carries usable dimensions (finite, positive numbers).
+ * @param {object} photo
+ * @returns {boolean}
+ */
+const hasValidDimensions = (photo) =>
+  Number.isFinite(photo?.width) && Number.isFinite(photo.height) && photo.width > 0 && photo.height > 0
+
+/**
  * Shared feed loading hook — manages photo list state, pagination,
  * abort control, freeze/dedup, and event subscriptions.
  *
@@ -36,6 +44,13 @@ export default function useFeedLoader (fetchFn, {
     if (!subscribeToUploads) return
     return subscribeToUploadComplete(({ photo, waveUuid }) => {
       setPhotosList((currentList) => {
+        // A dimensionless incoming photo must not evict an existing entry with
+        // the same id that has valid dimensions — keep the dimensioned entry.
+        const existingEntry = currentList.find((p) => p.id === photo.id)
+        if (existingEntry && hasValidDimensions(existingEntry) && !hasValidDimensions(photo)) {
+          return currentList
+        }
+
         const updatedList = [createFrozenPhoto(photo), ...currentList]
         const seen = new Set()
         return updatedList.filter((p) => {

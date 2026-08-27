@@ -80,6 +80,23 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
   }, [cleanupRetry, netAvailable])
 
   const processQueue = useCallback(async () => {
+    // Re-entrancy guard: a queue pass is already in flight. Do not interleave
+    // a second processing loop. Re-read the queue so an enqueue that landed
+    // after the in-flight pass's final queue read still gets picked up.
+    if (processingRef.current) {
+      const pendingQueue = await getQueue()
+      if (pendingQueue.length > 0) {
+        scheduleRetry(RETRY_DELAY_MS)
+      }
+      return
+    }
+
+    // Acquire the lock synchronously, before the first await, so concurrent
+    // invocations (capture enqueue, network recovery, screen refresh) cannot
+    // both pass the guard above and interleave.
+    processingRef.current = true
+    setIsUploading(true)
+
     // Task 2.1: Wrap entire function in try/catch to always release processingRef
     try {
       const activeUuid = await resolveUuid()
@@ -87,9 +104,6 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
         showErrorToast('Upload Error', { text2: 'User authentication required. Please restart the app.', topOffset })
         return
       }
-
-      processingRef.current = true
-      setIsUploading(true)
 
       let queue = await syncQueueFromStorage()
       needsFlushRef.current = queue.length > 0
