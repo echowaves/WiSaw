@@ -34,132 +34,138 @@ const PhotoActionButtons = ({
 
   return (
     <View style={styles.actionButtonsContainer}>
-      {/* Report/Ban button */}
-      <TouchableOpacity
-        style={[
-          styles.actionButton,
-          isBannedOrBookmarked && styles.actionButtonDisabled
-        ]}
-        onPress={() => {
-          if (photoDetails?.isPhotoWatched) {
-            showErrorToast({
-              title: "Can't report bookmarked photo",
-              message: 'Remove bookmark first',
-              topOffset: toastTopOffset
-            })
-          } else {
-            onBan()
-          }
-        }}
-        activeOpacity={0.7}
-        delayPressIn={0}
-        delayPressOut={0}
-      >
-        <FontAwesome
-          name='ban'
-          color={isBannedOrBookmarked ? theme.TEXT_DISABLED : theme.STATUS_CAUTION}
-          size={18}
-        />
-      </TouchableOpacity>
+      <View style={styles.actionButtonRow}>
+        {/* Report/Ban button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            isBannedOrBookmarked && styles.actionButtonDisabled
+          ]}
+          onPress={() => {
+            if (photoDetails?.isPhotoWatched) {
+              showErrorToast({
+                title: "Can't report bookmarked photo",
+                message: 'Remove bookmark first',
+                topOffset: toastTopOffset
+              })
+            } else {
+              onBan()
+            }
+          }}
+          activeOpacity={0.7}
+          delayPressIn={0}
+          delayPressOut={0}
+        >
+          <FontAwesome
+            name='ban'
+            color={isBannedOrBookmarked ? theme.TEXT_DISABLED : theme.STATUS_CAUTION}
+            size={18}
+          />
+        </TouchableOpacity>
 
-      {/* Delete button */}
-      <TouchableOpacity
-        style={[
-          styles.actionButton,
-          (photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched) &&
-            styles.actionButtonDisabled
-        ]}
-        onPress={() => {
-          if (photoDetails?.isPhotoWatched) {
-            showErrorToast({
-              title: "Can't delete bookmarked photo",
-              message: 'Remove bookmark first',
-              topOffset: toastTopOffset
-            })
-          } else {
-            onDelete()
-          }
-        }}
-        activeOpacity={0.7}
-        delayPressIn={0}
-        delayPressOut={0}
-      >
-        <FontAwesome
-          name='trash'
-          color={
-            photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched
-              ? theme.TEXT_DISABLED
-              : theme.STATUS_ERROR
-          }
-          size={18}
-        />
-      </TouchableOpacity>
+        {/* Delete button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            (photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched) &&
+              styles.actionButtonDisabled
+          ]}
+          onPress={() => {
+            if (photoDetails?.isPhotoWatched) {
+              showErrorToast({
+                title: "Can't delete bookmarked photo",
+                message: 'Remove bookmark first',
+                topOffset: toastTopOffset
+              })
+            } else {
+              onDelete()
+            }
+          }}
+          activeOpacity={0.7}
+          delayPressIn={0}
+          delayPressOut={0}
+        >
+          <FontAwesome
+            name='trash'
+            color={
+              photoDetails?.isPhotoWatched === undefined || photoDetails?.isPhotoWatched
+                ? theme.TEXT_DISABLED
+                : theme.STATUS_ERROR
+            }
+            size={18}
+          />
+        </TouchableOpacity>
 
-      {/* Bookmark button */}
-      <TouchableOpacity
-        style={[styles.actionButton, isBookmarkStatusUnknown && styles.actionButtonDisabled]}
-        onPress={() => onFlipWatch()}
-        activeOpacity={0.7}
-        delayPressIn={0}
-        delayPressOut={0}
-        disabled={isBookmarkStatusUnknown}
-      >
-        <Ionicons
-          name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
-          color={bookmarkAccentColor}
-          size={18}
-        />
-      </TouchableOpacity>
+        {/* Bookmark button */}
+        <TouchableOpacity
+          style={[styles.actionButton, isBookmarkStatusUnknown && styles.actionButtonDisabled]}
+          onPress={() => onFlipWatch()}
+          activeOpacity={0.7}
+          delayPressIn={0}
+          delayPressOut={0}
+          disabled={isBookmarkStatusUnknown}
+        >
+          <Ionicons
+            name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
+            color={bookmarkAccentColor}
+            size={18}
+          />
+        </TouchableOpacity>
 
-      {/* Wave button */}
-      <TouchableOpacity
-        style={[
-          styles.actionButton,
-          !isOwnPhoto && styles.actionButtonDisabled
-        ]}
-        onPress={onWavePress}
-        activeOpacity={0.7}
-        delayPressIn={0}
-        delayPressOut={0}
-      >
-        <FontAwesome5
-          name='water'
-          iconStyle='solid'
-          color={isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED}
-          size={16}
-        />
-        {isOwnPhoto && (
-          <Text
-            numberOfLines={1}
-            style={[styles.actionButtonText, { color: '#4FC3F7' }]}
-          >
-            {photoDetails?.waveName || 'Add to Wave'}
-          </Text>
-        )}
-      </TouchableOpacity>
+        {/* Share button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            photoDetails?.isPhotoWatched === undefined && styles.actionButtonDisabled
+          ]}
+          onPress={onShare}
+          activeOpacity={0.7}
+          delayPressIn={0}
+          delayPressOut={0}
+          disabled={photoDetails?.isPhotoWatched === undefined}
+        >
+          <Ionicons
+            name='share-outline'
+            color={
+              photoDetails?.isPhotoWatched === undefined
+                ? theme.TEXT_DISABLED
+                : theme.STATUS_SUCCESS
+            }
+            size={18}
+          />
+        </TouchableOpacity>
+      </View>
 
-      {/* Share button */}
-      <TouchableOpacity
-        style={[
-          styles.actionButton,
-          photoDetails?.isPhotoWatched === undefined && styles.actionButtonDisabled
-        ]}
-        onPress={onShare}
-        activeOpacity={0.7}
-        delayPressIn={0}
-        delayPressOut={0}
-        disabled={photoDetails?.isPhotoWatched === undefined}
-      >
-        <Ionicons
-          name='share-outline'
-          color={
-            photoDetails?.isPhotoWatched === undefined
-              ? theme.TEXT_DISABLED
-              : theme.STATUS_SUCCESS
-          }
-          size={18}
-        />
-      </TouchableOpacity>
+      {/* Wave button — last element, always on its own line */}
+      <View style={styles.waveButtonRow}>
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            styles.waveButton,
+            !isOwnPhoto && styles.actionButtonDisabled
+          ]}
+          onPress={onWavePress}
+          activeOpacity={0.7}
+          delayPressIn={0}
+          delayPressOut={0}
+        >
+          <FontAwesome5
+            name='water'
+            iconStyle='solid'
+            color={isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED}
+            size={16}
+          />
+          {isOwnPhoto && (
+            <Text
+              numberOfLines={1}
+              ellipsizeMode='tail'
+              style={[styles.actionButtonText, { color: '#4FC3F7' }]}
+            >
+              {photoDetails?.waveName || 'Add to Wave'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -167,12 +173,21 @@ const PhotoActionButtons = ({
 const createStyles = (theme) =>
   StyleSheet.create({
     actionButtonsContainer: {
+      flexDirection: 'column',
+      gap: 8,
+      paddingHorizontal: 2
+    },
+    actionButtonRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 8,
-      paddingHorizontal: 2
+      gap: 8
+    },
+    waveButtonRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center'
     },
     actionButton: {
       backgroundColor: `${theme.STATUS_SUCCESS}15`,
@@ -196,21 +211,23 @@ const createStyles = (theme) =>
       height: 32,
       gap: 2
     },
+    waveButton: {
+      width: 120
+    },
     actionButtonDisabled: {
       backgroundColor: theme.BACKGROUND,
       borderColor: theme.BORDER_LIGHT,
       opacity: 0.5,
       shadowOpacity: 0.1,
-      elevation: 1,
-      minWidth: 32,
-      borderRadius: 16
+      elevation: 1
     },
     actionButtonText: {
       color: theme.STATUS_SUCCESS,
       fontSize: 13,
       fontWeight: '600',
       textAlign: 'center',
-      letterSpacing: 0.3
+      letterSpacing: 0.3,
+      flexShrink: 1
     }
   })
 
