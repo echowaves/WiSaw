@@ -1,13 +1,13 @@
 /* global requestIdleCallback:readonly, cancelIdleCallback:readonly */
 import CachedImage from 'expo-cached-image'
+import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
   Modal,
   StyleSheet,
-  TouchableOpacity,
-  View
+  TouchableOpacity
 } from 'react-native'
 
 import * as CONST from '../../consts'
@@ -24,7 +24,7 @@ import CloseButton from '../ui/CloseButton'
 import PhotoActionButtons from '../PhotoActionButtons'
 import WaveSelectorModal from '../WaveSelectorModal'
 
-const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRemovedFromWave }) => {
+const QuickActionsModal = ({ visible, photo, onClose, onPhotoSelect, onPhotoDeleted, onPhotoRemovedFromWave }) => {
   const [darkMode] = useAtom(STATE.isDarkMode)
   const theme = getTheme(darkMode)
   const [uuid] = useAtom(STATE.uuid)
@@ -96,6 +96,12 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRem
 
   const styles = useMemo(() => createStyles(theme), [theme])
 
+  const handlePreviewPress = useCallback(() => {
+    if (!onPhotoSelect) return
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    onPhotoSelect(photo)
+  }, [onPhotoSelect, photo])
+
   return (
     <Modal
       visible={visible}
@@ -111,7 +117,7 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRem
         >
           <TouchableOpacity activeOpacity={1} style={styles.content}>
             <CloseButton onPress={onClose} />
-            <View style={styles.thumbnailContainer}>
+            <TouchableOpacity style={styles.thumbnailContainer} activeOpacity={0.85} onPress={handlePreviewPress}>
               {isValidImageUri(photo.imgUrl) && (
                 <CachedImage
                   source={{ uri: photo.imgUrl }}
@@ -143,7 +149,7 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoDeleted, onPhotoRem
                     style={{ flex: 1, justifyContent: 'center' }}
                   />
                   )}
-            </View>
+            </TouchableOpacity>
 
             {loading && (
               <ActivityIndicator

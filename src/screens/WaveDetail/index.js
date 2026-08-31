@@ -167,6 +167,12 @@ const WaveDetail = () => {
     quickActionsRef.current?.open(photo)
   }, [])
 
+  // Tap on the quick-actions preview image: close overlay, expand the photo inline
+  const handlePreviewSelect = useCallback((photo) => {
+    if (!photosList.some((p) => p.id === photo.id)) return
+    toggleExpand(photo.id)
+  }, [photosList, toggleExpand])
+
   // Reload when dependencies change (waveUuid, sort preferences, freeze state)
   const getFetchParams = useCallback(() => ({
     uuid,
@@ -498,6 +504,7 @@ const WaveDetail = () => {
 
         <QuickActionsModalWrapper
           ref={quickActionsRef}
+          onPhotoSelect={handlePreviewSelect}
           onPhotoDeleted={(photoId) => {
             setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
           }}

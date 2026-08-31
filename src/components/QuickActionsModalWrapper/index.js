@@ -2,7 +2,7 @@ import React, { useState, forwardRef, useImperativeHandle, memo } from 'react'
 import QuickActionsModal from '../QuickActionsModal'
 
 const QuickActionsModalWrapper = memo(
-  forwardRef(({ onPhotoDeleted, onPhotoRemovedFromWave }, ref) => {
+  forwardRef(({ onPhotoSelect, onPhotoDeleted, onPhotoRemovedFromWave }, ref) => {
     const [longPressPhoto, setLongPressPhoto] = useState(null)
 
     useImperativeHandle(ref, () => ({
@@ -14,6 +14,10 @@ const QuickActionsModalWrapper = memo(
         visible={!!longPressPhoto}
         photo={longPressPhoto}
         onClose={() => setLongPressPhoto(null)}
+        onPhotoSelect={(photo) => {
+          setLongPressPhoto(null)
+          if (onPhotoSelect) onPhotoSelect(photo)
+        }}
         onPhotoDeleted={(photoId) => {
           setLongPressPhoto(null)
           if (onPhotoDeleted) onPhotoDeleted(photoId)

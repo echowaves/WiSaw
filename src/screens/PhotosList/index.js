@@ -305,6 +305,12 @@ const PhotosList = ({ searchFromUrl }) => {
     quickActionsRef.current?.open(photo)
   }, [])
 
+  // Tap on the quick-actions preview image: close overlay, expand the photo inline
+  const handlePreviewSelect = useCallback((photo) => {
+    if (!photosList.some((p) => p.id === photo.id)) return
+    toggleExpand(photo.id)
+  }, [photosList, toggleExpand])
+
   // Reload feed when mode toggle changes — pass current search term so results re-query
   useEffect(() => {
     if (netAvailable && uuid) {
@@ -532,6 +538,7 @@ const PhotosList = ({ searchFromUrl }) => {
           />
           <QuickActionsModalWrapper
             ref={quickActionsRef}
+            onPhotoSelect={handlePreviewSelect}
             onPhotoDeleted={(photoId) => {
               setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
             }}
@@ -753,6 +760,7 @@ const PhotosList = ({ searchFromUrl }) => {
       />
       <QuickActionsModalWrapper
         ref={quickActionsRef}
+        onPhotoSelect={handlePreviewSelect}
         onPhotoDeleted={(photoId) => {
           setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
         }}

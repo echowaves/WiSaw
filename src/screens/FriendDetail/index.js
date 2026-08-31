@@ -89,6 +89,12 @@ const FriendDetail = () => {
     quickActionsRef.current?.open(photo)
   }, [])
 
+  // Tap on the quick-actions preview image: close overlay, expand the photo inline
+  const handlePreviewSelect = useCallback((photo) => {
+    if (!photosList.some((p) => p.id === photo.id)) return
+    toggleExpand(photo.id)
+  }, [photosList, toggleExpand])
+
   const getFetchParams = useCallback(() => ({
     uuid,
     netAvailable
@@ -265,6 +271,7 @@ const FriendDetail = () => {
 
       <QuickActionsModalWrapper
         ref={quickActionsRef}
+        onPhotoSelect={handlePreviewSelect}
         onPhotoDeleted={(photoId) => {
           setPhotosList((currentList) => currentList.filter((p) => p.id !== photoId))
         }}
