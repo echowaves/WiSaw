@@ -1,7 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Alert } from 'react-native'
-import { showInfoToast, showSuccessToast } from '../utils/showToast'
-import { showErrorToast } from '../utils/showToast'
+import showToast, { showInfoToast, showSuccessToast, showErrorToast } from '../utils/showToast'
 import showConfirmAlert from '../utils/showConfirmAlert'
 import { useSetAtom } from 'jotai'
 
@@ -94,9 +92,9 @@ const usePhotoActions = ({ photo, photoDetails, setPhotoDetails, uuid, toastTopO
         title: "Can't report bookmarked photo",
         message: 'Remove bookmark first',
         topOffset: toastTopOffset
-       })
+      })
       return
-     }
+    }
     if (isPhotoBannedByMe()) {
       showErrorToast({
         title: 'Looks like you already Reported this Photo',
