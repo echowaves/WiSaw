@@ -11,3 +11,9 @@
 - [x] 2.4 Verify add-to-wave and remove-from-wave success toasts render on own photos
 - [x] 2.5 Run `npm run lint` project-wide to surface any other files with the same missing-import pattern (report if found; do not fix out-of-scope files without approval)
   - Found: `src/components/ShareOptionsModal.js:47` and `src/components/WaveShareModal.js:90` — same missing `showToast` default import (latent crashes)
+
+## 3. Fix sibling modals (approved scope expansion)
+
+- [x] 3.1 In `src/components/ShareOptionsModal.js`, add `import showToast from '../utils/showToast'`
+- [x] 3.2 In `src/components/WaveShareModal.js`, add `import showToast from '../utils/showToast'`
+- [x] 3.3 Run `npx ts-standard` on both files — confirm no `no-undef` errors

@@ -5,6 +5,7 @@ import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import Toast from 'react-native-toast-message'
 import { useAtom } from 'jotai'
 import showErrorToast from '../utils/showErrorToast'
+import showToast from '../utils/showToast'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
 import * as friendsHelper from '../screens/FriendsList/friends_helper'

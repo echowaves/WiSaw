@@ -6,7 +6,8 @@ Tapping the Wave button on a non-own photo crashes the app with `ReferenceError:
 
 - `usePhotoActions` toast calls SHALL work: the `showToast` default import from `src/utils/showToast.js` is added (merged into the existing import statements to also resolve the duplicate-import lint errors).
 - Tapping Wave on a non-own photo SHALL show the info toast "Only your own photos can be added to waves" without crashing (behavior already specced for the quick-actions modal; now also guaranteed in the expanded photo view).
-- `src/hooks/usePhotoActions.js` SHALL pass `ts-standard` lint cleanly (removes pre-existing unused `Alert` import and indentation errors in the same file).
+- Two sibling files with the identical latent crash (found by project-wide lint during implementation) SHALL receive the same fix: `src/components/ShareOptionsModal.js` (friendship share success toast) and `src/components/WaveShareModal.js` (wave share success toast).
+- The three fixed files SHALL pass `ts-standard` lint for `no-undef` (usePhotoActions additionally: removes pre-existing unused `Alert` import, duplicate imports, and indentation errors).
 
 ## Capabilities
 
@@ -21,5 +22,7 @@ Tapping the Wave button on a non-own photo crashes the app with `ReferenceError:
 ## Impact
 
 - `src/hooks/usePhotoActions.js` — import statements and two indentation fixes; no behavior changes beyond toasts actually appearing.
+- `src/components/ShareOptionsModal.js` — add `showToast` default import; friendship-share success toast will now render.
+- `src/components/WaveShareModal.js` — add `showToast` default import; wave-share success toast will now render.
 - Consumers: `src/components/Photo/index.js` (expanded view) and `src/components/QuickActionsModal/index.js` (preview overlay) — both share the hook, so one fix covers both.
 - No API, dependency, or backend impact.

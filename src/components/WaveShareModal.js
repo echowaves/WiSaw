@@ -14,6 +14,7 @@ import {
 } from 'react-native'
 import Toast from 'react-native-toast-message'
 import showErrorToast from '../utils/showErrorToast'
+import showToast from '../utils/showToast'
 import QRCode from 'react-qr-code'
 import * as CONST from '../consts'
 import { createWaveInvite } from '../screens/Waves/reducer'

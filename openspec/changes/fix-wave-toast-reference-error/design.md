@@ -26,7 +26,10 @@ Remove the unused `Alert` import; fix the two indentation errors at lines ~97/99
 **3. No hook consumer changes.**
 `Photo/index.js` and `QuickActionsModal/index.js` both consume `usePhotoActions`; fixing the hook fixes both views.
 
+**4. Include the two sibling modal files (scope expansion, user-approved).**
+Project-wide lint (`npm run lint`) during implementation found the identical bug in `ShareOptionsModal.js:47` (friendship share success) and `WaveShareModal.js:90` (wave share success). Both import `showErrorToast` from the separate `utils/showErrorToast.js` but call bare `showToast`. Fix: add `import showToast from '../utils/showToast'` to each (kept as a separate line — these files import only the error util from the toast family, so no merge needed). User approved folding them into this change.
+
 ## Risks / Trade-offs
 
-- [Other files may have the same missing-default-import pattern] → `ts-standard` catches `no-undef` project-wide; a full `npm run lint` run during verification surfaces any siblings. If more files fail, surface and scope rather than silently expanding.
+- [More files with the same pattern found later] → `npm run lint` is the standing net; remaining project-wide no-undef hits are `__DEV__` globals (2 files) and missing jest env in a test file — different class, out of scope.
 - [Behavior change: success toasts will now actually appear] → Intended; previously these paths crashed mid-flow.
