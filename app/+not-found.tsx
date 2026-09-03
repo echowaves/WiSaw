@@ -2,8 +2,10 @@ import { router, useRootNavigationState } from 'expo-router'
 import { useEffect } from 'react'
 import { View } from 'react-native'
 
-// This component catches unmatched routes (like deep link URLs that don't match file structure)
-// and redirects to home. Our deep link handler in _layout.tsx will then process the URL properly.
+// Catch-all for URLs that match no route in the app/ file structure.
+// Valid deep links resolve natively via the redirect routes
+// (app/photos/[photoId], app/friends/[friendshipUuid], app/wave/join/...,
+// app/wave/invite/...), so this screen only sees malformed/unmatched URLs.
 export default function NotFound () {
   const rootNavigationState = useRootNavigationState()
 

@@ -2,10 +2,9 @@ import 'react-native-get-random-values' // Must be imported before uuid
 
 import NetInfo from '@react-native-community/netinfo'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import * as Linking from 'expo-linking'
-import { router, Stack, useRootNavigationState } from 'expo-router'
+import { Stack } from 'expo-router'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Platform, StatusBar } from 'react-native'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -14,7 +13,6 @@ import Toast, { BaseToast } from 'react-native-toast-message'
 import useLocationProvider from '../src/hooks/useLocationProvider'
 import * as SecretReducer from '../src/screens/Secret/reducer'
 import * as STATE from '../src/state'
-import { parseDeepLink } from '../src/utils/linkingHelper'
 import ErrorDetailModal from '../src/components/ErrorDetailModal'
 import {
   getSystemTheme,
@@ -24,7 +22,7 @@ import {
 } from '../src/utils/themeStorage'
 // waveSortBy, waveSortDirection, waveFeedSortBy, waveFeedSortDirection, friendFeedSortBy, friendFeedSortDirection atoms removed — sort is fixed to createdAt desc
 import { hydrateGroupingAtom, groupingAtom } from '../src/utils/groupingAtom'
-import showErrorToast, { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
+import { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
 import { errorContextAtom } from '../src/atoms/errorAtom'
 import { gql } from '@apollo/client'
 import { gqlClient } from '../src/consts'
@@ -139,9 +137,6 @@ export default function RootLayout (): JSX.Element {
     checkBuildVersion()
   }, [])
 
-  const hasProcessedInitialUrlRef = useRef(false)
-  const rootNavigationState = useRootNavigationState()
-
   // Initialize global location provider (permission, watcher, atom)
   useLocationProvider()
 
@@ -156,81 +151,12 @@ export default function RootLayout (): JSX.Element {
     return () => unsubscribe()
   }, [setNetAvailable])
 
-  // Navigate to deep link target
-  const navigateToDeepLink = useCallback(async (linkData: any) => {
-    try {
-      // Reset navigation stack to ensure clean state
-      router.dismissAll()
-
-      switch (linkData.type) {
-        case 'photo':
-          console.log('Navigating to shared photo:', linkData.photoId)
-          router.replace('/')
-          setTimeout(() => {
-            router.push(`/shared/${linkData.photoId}`)
-          }, 100)
-          break
-
-        case 'friend':
-          console.log(
-            'Navigating to friend confirmation:',
-            linkData.friendshipUuid
-          )
-          router.replace('/')
-          setTimeout(() => {
-            router.push(`/confirm-friendship/${linkData.friendshipUuid}`)
-          }, 100)
-          break
-
-        case 'wave-join':
-          console.log('Navigating to wave join:', linkData.waveUuid)
-          router.replace('/')
-          setTimeout(() => {
-            router.push({ pathname: '/waves/join', params: { waveUuid: linkData.waveUuid } })
-          }, 100)
-          break
-
-        case 'wave-invite':
-          console.log('Navigating to wave invite join:', linkData.inviteToken)
-          router.replace('/')
-          setTimeout(() => {
-            router.push({ pathname: '/waves/join', params: { inviteToken: linkData.inviteToken } })
-          }, 100)
-          break
-
-        default:
-          console.log('Unknown link type, navigating to home')
-          router.replace('/')
-      }
-    } catch (error) {
-      console.error('Error during navigation:', error)
-      router.replace('/')
-      showErrorToast({
-        title: 'Navigation Error',
-        message: 'Unable to navigate to requested content',
-        topOffset: 60,
-        visibilityTime: 4000
-      })
-    }
-  }, [])
-
-  // Handle deep link - simplified to always navigate immediately
-  const handleDeepLink = useCallback(
-    (url: string) => {
-      console.log('Deep link received:', url)
-      const linkData = parseDeepLink(url)
-
-      if (!linkData) {
-        console.log('Invalid deep link format')
-        return
-      }
-
-      // Always navigate immediately - both cold and warm starts are handled the same
-      console.log('Navigating to deep link:', linkData.type)
-      navigateToDeepLink(linkData)
-    },
-    [navigateToDeepLink]
-  )
+  // Deep links (cold AND warm) are handled natively by expo-router via the
+  // trampoline routes under app/ (photos/[photoId], friends/[friendshipUuid],
+  // wave/join/[waveUuid], wave/invite/[inviteToken]). Each trampoline resets
+  // the stack to home and pushes the target on top, so back always returns
+  // to the landing screen. No manual Linking listener is required here —
+  // expo-router's internal useLinking already subscribes to URL events.
 
   // Initialize app state
   useEffect(() => {
@@ -320,42 +246,6 @@ export default function RootLayout (): JSX.Element {
     // Explicitly return undefined when not following system theme
     return undefined
   }, [followSystemTheme, setIsDarkMode])
-
-  // Handle deep linking setup - wait for navigation to be ready
-  useEffect(() => {
-    // Only proceed if navigation is ready
-    if (!rootNavigationState?.key) {
-      console.log('Navigation not ready yet, waiting...')
-      return
-    }
-
-    console.log('Navigation is ready')
-
-    // Get initial URL only once (cold start)
-    if (!hasProcessedInitialUrlRef.current) {
-      hasProcessedInitialUrlRef.current = true
-
-      Linking.getInitialURL()
-        .then((url) => {
-          if (url) {
-            console.log('Initial URL detected (cold start):', url)
-            // Small delay to ensure router is fully ready
-            setTimeout(() => {
-              handleDeepLink(url)
-            }, 100)
-          }
-        })
-        .catch(console.error)
-    }
-
-    // Listen for URL changes while app is running (warm start)
-    const subscription = Linking.addEventListener('url', (event) => {
-      console.log('URL event received (warm start):', event.url)
-      handleDeepLink(event.url)
-    })
-
-    return () => subscription?.remove()
-  }, [handleDeepLink, rootNavigationState?.key])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
