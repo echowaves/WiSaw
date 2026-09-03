@@ -280,6 +280,37 @@ export const clearQueue = async () => {
   }
 }
 
+/**
+ * Best-effort deletion of a queue item's local artifacts (compressed image,
+ * generated thumbnail, video, and the original camera temp file).
+ * Each file is deleted independently; a failure (e.g., file already gone)
+ * is logged and never re-thrown.
+ *
+ * @param {object} item - Queue item carrying local file URLs
+ */
+export const deleteLocalArtifacts = (item) => {
+  if (!item) {
+    return
+  }
+
+  const uris = [item.localImgUrl, item.localThumbUrl, item.originalCameraUrl]
+  if (item.localVideoUrl && item.localVideoUrl !== item.localImgUrl) {
+    uris.push(item.localVideoUrl)
+  }
+
+  for (const uri of uris) {
+    if (!uri) {
+      continue
+    }
+    try {
+      new FSFile(uri).delete()
+    } catch (error) {
+      // Local cleanup is best-effort; the file may already be gone.
+      console.log('Skipped local artifact deletion for %s', uri, error)
+    }
+  }
+}
+
 export const getQueue = async () => {
   try {
     return await readQueue()
@@ -815,7 +846,7 @@ export const initPendingUploads = async () => {
       }
     }
   } catch (error) {
+    // Log only: the stored queue must survive a transient read failure.
     console.error('initPendingUploads error', error)
-    await writeQueue([])
   }
 }

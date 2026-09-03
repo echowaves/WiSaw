@@ -8,6 +8,7 @@ import * as CONST from '../../../consts'
 import { emitUploadComplete } from '../../../events/uploadBus'
 import {
   clearQueue,
+  deleteLocalArtifacts,
   getQueue,
   initPendingUploads,
   processCompleteUpload,
@@ -132,6 +133,8 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
             consecutiveFailuresRef.current = 0
             // eslint-disable-next-line no-await-in-loop
             await removeFromQueue(currentItem)
+            // Best-effort: reclaim local files; failures are logged, never fatal.
+            deleteLocalArtifacts(currentItem)
             // eslint-disable-next-line no-await-in-loop
             await syncQueueFromStorage()
             emitUploadComplete({ photo: uploadedPhoto, waveUuid: currentItem.waveUuid })

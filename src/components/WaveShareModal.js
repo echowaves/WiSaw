@@ -20,6 +20,27 @@ import * as CONST from '../consts'
 import { createWaveInvite } from '../screens/Waves/reducer'
 import useSimpleFetch from '../hooks/useSimpleFetch'
 
+const normalizeHours = (text) => {
+  const parsed = Number.parseInt(text, 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+}
+
+const normalizeMaxUses = (text) => {
+  const parsed = Number.parseInt(text, 10)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+}
+
+const buildApiParams = (expiryText, maxUsesText) => {
+  const hours = normalizeHours(expiryText)
+  const maxUses = normalizeMaxUses(maxUsesText)
+  return {
+    expiresAt: hours !== null
+      ? new Date(Date.now() + hours * 60 * 60 * 1000).toISOString()
+      : undefined,
+    maxUses: maxUses ?? undefined
+  }
+}
+
 const WaveShareModal = ({
   visible,
   onClose,
@@ -30,11 +51,27 @@ const WaveShareModal = ({
   const [shareUrl, setShareUrl] = useState('')
   const [inviteExpiryHours, setInviteExpiryHours] = useState('24')
   const [inviteMaxUses, setInviteMaxUses] = useState('')
+  // Normalized invite options committed to the live invite (null = unlimited)
+  const [committedParams, setCommittedParams] = useState({ hours: 24, maxUses: null })
 
   const isOpen = wave?.open === true
 
   // Store invite params so the hook can access them at execution time
   const inviteParamsRef = useRef({ expiresAt: undefined, maxUses: undefined })
+  // Mirrors the raw text state so the open-effect can read current values
+  // without depending on them (keystrokes must not re-trigger the invite)
+  const inviteExpiryHoursRef = useRef('24')
+  const inviteMaxUsesRef = useRef('')
+
+  const handleExpiryChange = useCallback((text) => {
+    setInviteExpiryHours(text)
+    inviteExpiryHoursRef.current = text
+  }, [])
+
+  const handleMaxUsesChange = useCallback((text) => {
+    setInviteMaxUses(text)
+    inviteMaxUsesRef.current = text
+  }, [])
 
   const { loading, execute } = useSimpleFetch(
     async () => {
@@ -44,6 +81,14 @@ const WaveShareModal = ({
     { autoExecute: false }
   )
 
+  // Committed options vs. current field values — gates the Regenerate button
+  const currentParams = {
+    hours: normalizeHours(inviteExpiryHours),
+    maxUses: normalizeMaxUses(inviteMaxUses)
+  }
+  const inviteDirty = !isOpen &&
+    (currentParams.hours !== committedParams.hours || currentParams.maxUses !== committedParams.maxUses)
+
   useEffect(() => {
     if (!visible || !wave) {
       setShareUrl('')
@@ -52,29 +97,44 @@ const WaveShareModal = ({
 
     if (isOpen && wave.joinUrl) {
       setShareUrl(wave.joinUrl)
-    } else if (!isOpen) {
-      // For invite-only waves, generate an invite
-      const parsedHours = Number.parseInt(inviteExpiryHours, 10)
-      const parsedMaxUses = Number.parseInt(inviteMaxUses, 10)
-      const expiresAt = Number.isFinite(parsedHours) && parsedHours > 0
-        ? new Date(Date.now() + parsedHours * 60 * 60 * 1000).toISOString()
-        : undefined
-      const maxUses = Number.isFinite(parsedMaxUses) && parsedMaxUses > 0
-        ? parsedMaxUses
-        : undefined
-
-      inviteParamsRef.current = { expiresAt, maxUses }
-
-      execute().catch((err) => {
-        console.error('Failed to create wave invite:', err)
-        showErrorToast({
-          title: 'Failed to create invite',
-          message: err.message || 'Try again later',
-          topOffset
-        })
-      })
+      return
     }
-  }, [visible, wave, isOpen, uuid, topOffset, inviteExpiryHours, inviteMaxUses, execute])
+
+    // Invite-only: create the invite exactly once when the modal opens,
+    // committing the current option values. Keystrokes do not re-trigger;
+    // only the explicit "Regenerate Invite" action does.
+    inviteParamsRef.current = buildApiParams(inviteExpiryHoursRef.current, inviteMaxUsesRef.current)
+    setCommittedParams({
+      hours: normalizeHours(inviteExpiryHoursRef.current),
+      maxUses: normalizeMaxUses(inviteMaxUsesRef.current)
+    })
+
+    execute().catch((err) => {
+      console.error('Failed to create wave invite:', err)
+      showErrorToast({
+        title: 'Failed to create invite',
+        message: err.message || 'Try again later',
+        topOffset
+      })
+    })
+  }, [visible, wave, isOpen, uuid, topOffset, execute])
+
+  const handleRegenerateInvite = useCallback(() => {
+    inviteParamsRef.current = buildApiParams(inviteExpiryHours, inviteMaxUses)
+    setCommittedParams({
+      hours: normalizeHours(inviteExpiryHours),
+      maxUses: normalizeMaxUses(inviteMaxUses)
+    })
+
+    execute().catch((err) => {
+      console.error('Failed to regenerate wave invite:', err)
+      showErrorToast({
+        title: 'Failed to create invite',
+        message: err.message || 'Try again later',
+        topOffset
+      })
+    })
+  }, [inviteExpiryHours, inviteMaxUses, execute, topOffset])
 
   const handleShare = useCallback(async () => {
     if (!shareUrl) return
@@ -137,7 +197,7 @@ const WaveShareModal = ({
                     <TextInput
                       style={styles.input}
                       value={inviteExpiryHours}
-                      onChangeText={setInviteExpiryHours}
+                      onChangeText={handleExpiryChange}
                       keyboardType='number-pad'
                       placeholder='24'
                       placeholderTextColor='#999'
@@ -148,13 +208,24 @@ const WaveShareModal = ({
                     <TextInput
                       style={styles.input}
                       value={inviteMaxUses}
-                      onChangeText={setInviteMaxUses}
+                      onChangeText={handleMaxUsesChange}
                       keyboardType='number-pad'
                       placeholder='Unlimited'
                       placeholderTextColor='#999'
                     />
                   </View>
                 </View>
+                {inviteDirty && (
+                  <TouchableOpacity
+                    style={[styles.regenerateButton, loading && styles.disabledButton]}
+                    onPress={handleRegenerateInvite}
+                    disabled={loading}
+                    activeOpacity={0.7}
+                  >
+                    <MaterialCommunityIcons name='refresh' size={16} color='white' />
+                    <Text style={styles.regenerateButtonLabel}>Regenerate Invite</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
 
@@ -348,6 +419,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     backgroundColor: '#fff'
+  },
+  regenerateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: CONST.MAIN_COLOR,
+    borderRadius: 10,
+    paddingVertical: 10,
+    marginTop: 10
+  },
+  regenerateButtonLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'white'
   },
   optionButton: {
     flexDirection: 'row',

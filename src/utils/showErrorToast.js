@@ -25,7 +25,7 @@ export const getCurrentOnPress = () => {
 export default function showErrorToast ({
   title,
   message,
-  stack,
+  stack = null,
   topOffset = 100,
   visibilityTime = 8000
 }) {

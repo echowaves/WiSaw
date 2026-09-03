@@ -24,7 +24,7 @@ import {
 } from '../src/utils/themeStorage'
 // waveSortBy, waveSortDirection, waveFeedSortBy, waveFeedSortDirection, friendFeedSortBy, friendFeedSortDirection atoms removed — sort is fixed to createdAt desc
 import { hydrateGroupingAtom, groupingAtom } from '../src/utils/groupingAtom'
-import { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
+import showErrorToast, { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
 import { errorContextAtom } from '../src/atoms/errorAtom'
 import { gql } from '@apollo/client'
 import { gqlClient } from '../src/consts'

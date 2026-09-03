@@ -8,13 +8,10 @@ import { Alert } from 'react-native'
 import { showInfoToast, showErrorToast } from '../utils/showToast'
 
 import * as STATE from '../state'
-import { groupingAtom } from '../utils/groupingAtom'
 
 export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
   const [isCameraOpening, setIsCameraOpening] = useState(false)
   const locationState = useAtomValue(STATE.locationAtom)
-  const netAvailable = useAtomValue(STATE.netAvailable)
-  const grouping = useAtomValue(groupingAtom)
 
   async function checkPermission ({
     permissionFunction,
@@ -86,36 +83,13 @@ export default function useCameraCapture ({ enqueueCapture, toastTopOffset }) {
       }
 
       console.log('[takePhoto] Calling enqueueCapture with:', captureArgs)
-      // Grouping disabled: upload as ungrouped (no waveUuid)
-      if (!grouping.enabled) {
-        try {
-          await enqueueCapture({ ...captureArgs })
-          console.log('[takePhoto] enqueueCapture completed')
-        } catch (error) {
-          console.error('[takePhoto] enqueueCapture error:', error)
-          showErrorToast('Upload Error', { text2: `${error}`, topOffset: toastTopOffset })
-        }
-        return
-      }
-
-      // Grouping enabled + offline: enqueue without waveUuid (decide at upload time)
-      if (!netAvailable) {
-        try {
-          await enqueueCapture({ ...captureArgs })
-          console.log('[takePhoto] enqueueCapture completed (offline)')
-        } catch (error) {
-          console.error('[takePhoto] enqueueCapture error (offline):', error)
-          showErrorToast('Upload Error', { text2: `${error}`, topOffset: toastTopOffset })
-        }
-        return
-      }
-
-      // Grouping enabled + online: enqueue without waveUuid (wave assignment happens at upload time)
+      // waveUuid (when provided by the screen) is propagated in captureArgs in
+      // every grouping state — grouping/offline no longer strips it.
       try {
         await enqueueCapture({ ...captureArgs })
-        console.log('[takePhoto] enqueueCapture completed (online)')
+        console.log('[takePhoto] enqueueCapture completed')
       } catch (error) {
-        console.error('[takePhoto] enqueueCapture error (online):', error)
+        console.error('[takePhoto] enqueueCapture error:', error)
         showErrorToast('Upload Error', { text2: `${error}`, topOffset: toastTopOffset })
       }
     } else {
