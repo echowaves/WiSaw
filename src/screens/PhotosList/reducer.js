@@ -3,8 +3,6 @@
 
 import { Storage } from 'expo-storage'
 
-import { showErrorToast } from '../../utils/showToast'
-
 import { gql } from '@apollo/client'
 
 import * as CONST from '../../consts'
@@ -166,10 +164,13 @@ export async function requestGeoPhotos ({ pageNumber, batch, location, zeroMomen
   } catch (err) {
     console.error({ err })
   }
+  // Transient API/network error: do NOT signal end-of-data. The caller keeps
+  // the existing list and leaves pagination open so the next scroll/refresh retries.
   return {
     photos: [],
     batch,
-    noMoreData: true
+    noMoreData: false,
+    error: true
   }
 }
 
@@ -195,60 +196,13 @@ export async function requestWatchedPhotos ({ uuid, pageNumber, batch, searchTer
   } catch (err5) {
     console.error({ err5 })
   }
+  // Transient API/network error: do NOT signal end-of-data. The caller keeps
+  // the existing list and leaves pagination open so the next scroll/refresh retries.
   return {
     photos: [],
     batch,
-    noMoreData: true
-  }
-}
-
-export async function getPhotos (params) {
-  const {
-    uuid,
-    zeroMoment,
-    location,
-    netAvailable,
-    searchTerm,
-    topOffset = 100,
-    activeSegment,
-    batch,
-    pageNumber
-  } = params
-
-  if ((!location && activeSegment === 0) || netAvailable === false) {
-    return {
-      photos: [],
-      batch,
-      noMoreData: true
-    }
-  }
-
-  try {
-    const requestParams = {
-      pageNumber,
-      batch,
-      location,
-      zeroMoment,
-      uuid,
-      searchTerm
-    }
-
-    switch (activeSegment) {
-      case 0:
-        return await requestGeoPhotos(requestParams)
-      case 1:
-        return await requestWatchedPhotos(requestParams)
-      default:
-        break
-    }
-  } catch (err7) {
-    console.error({ err7 })
-    showErrorToast('Error', { text2: `${err7}`, topOffset })
-  }
-  return {
-    photos: [],
-    batch,
-    noMoreData: true
+    noMoreData: false,
+    error: true
   }
 }
 

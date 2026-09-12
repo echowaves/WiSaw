@@ -54,6 +54,12 @@ const WaveShareModal = ({
   // Normalized invite options committed to the live invite (null = unlimited)
   const [committedParams, setCommittedParams] = useState({ hours: 24, maxUses: null })
 
+  // Stable identity + the only wave fields the open-effect gates on. Keying the
+  // effect on waveUuid (a string) instead of the wave object means a parent
+  // re-render that builds a fresh wave object for the same wave does NOT
+  // re-trigger createWaveInvite.
+  const waveUuid = wave?.waveUuid
+  const waveJoinUrl = wave?.joinUrl
   const isOpen = wave?.open === true
 
   // Store invite params so the hook can access them at execution time
@@ -90,13 +96,13 @@ const WaveShareModal = ({
     (currentParams.hours !== committedParams.hours || currentParams.maxUses !== committedParams.maxUses)
 
   useEffect(() => {
-    if (!visible || !wave) {
+    if (!visible || !waveUuid) {
       setShareUrl('')
       return
     }
 
-    if (isOpen && wave.joinUrl) {
-      setShareUrl(wave.joinUrl)
+    if (isOpen && waveJoinUrl) {
+      setShareUrl(waveJoinUrl)
       return
     }
 
@@ -117,7 +123,7 @@ const WaveShareModal = ({
         topOffset
       })
     })
-  }, [visible, wave, isOpen, uuid, topOffset, execute])
+  }, [visible, waveUuid, waveJoinUrl, isOpen, uuid, topOffset, execute])
 
   const handleRegenerateInvite = useCallback(() => {
     inviteParamsRef.current = buildApiParams(inviteExpiryHours, inviteMaxUses)

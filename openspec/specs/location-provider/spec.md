@@ -20,16 +20,21 @@ The system SHALL provide a global Jotai atom `locationAtom` in `src/state.js` th
 - **THEN** the atom SHALL be set to `{ status: 'denied', coords: null, accuracy: null }`
 
 ### Requirement: Location Provider Hook
-The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationProvider.js` that manages location permission, fast-seed, 3-phase watcher lifecycle, and accuracy-gated atom updates. It SHALL be called once from the root `_layout.tsx`. The permission request SHALL handle Mac Catalyst where `requestForegroundPermissionsAsync` hangs by falling back to `getForegroundPermissionsAsync` with a timeout.
+The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationProvider.js` that manages location permission, fast-seed, 3-phase watcher lifecycle, and accuracy-gated atom updates. It SHALL be called once from the root `_layout.tsx`. The permission request SHALL handle Mac Catalyst where `requestForegroundPermissionsAsync` hangs by falling back to `getForegroundPermissionsAsync` with a timeout. If BOTH the initial request and the fallback `getForegroundPermissionsAsync` call time out, the hook SHALL NOT assume `'granted'`; it SHALL resolve the permission status to `'unknown'` and SHALL re-check the permission on the next trigger (e.g., the next foreground transition or an explicit re-request) rather than proceeding as if location were available.
 
 #### Scenario: App startup permission request
 - **WHEN** `useLocationProvider` is called on app mount
 - **THEN** it SHALL call `Location.requestForegroundPermissionsAsync()` with a ~5 second timeout via `Promise.race`
 - **THEN** if the call resolves within the timeout, use the returned status
 - **THEN** if the call times out (Mac Catalyst), it SHALL fall back to `Location.getForegroundPermissionsAsync()` with the same timeout
-- **THEN** if the fallback also times out, it SHALL assume `'granted'`
+- **THEN** if the fallback also times out, it SHALL set the permission status to `'unknown'` and SHALL NOT proceed as granted
 - **THEN** if permission is granted, it SHALL proceed to fast-seed and watcher setup
 - **THEN** if permission is denied, it SHALL set the atom to `{ status: 'denied', coords: null, accuracy: null }`
+
+#### Scenario: Unknown permission is re-checked
+- **WHEN** the permission status resolved to `'unknown'` due to a timeout
+- **THEN** on the next foreground transition or explicit re-request, the hook SHALL re-run the permission check
+- **THEN** once a definitive status (granted or denied) is obtained, the hook SHALL proceed or deny accordingly
 
 #### Scenario: Fast-seed with last known position
 - **WHEN** permission is granted

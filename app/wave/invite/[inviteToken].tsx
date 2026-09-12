@@ -17,7 +17,9 @@ export default function WaveInviteDeepLinkTrampoline (): React.JSX.Element {
       return
     }
 
-    console.log('Deep link trampoline: navigating to wave invite join', inviteToken)
+    // Redact the invite token in logs — a full token grants access to a private
+    // wave, so only a short prefix + length is emitted (secure-logging rule).
+    console.log('Deep link trampoline: navigating to wave invite join %s', `${inviteToken.slice(0, 4)}… (len ${inviteToken.length})`)
     router.dismissAll()
     router.replace('/')
     // Small delay lets the reset settle before pushing the join screen.

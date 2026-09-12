@@ -6,8 +6,6 @@ import { subscribeToUploadComplete } from '../events/uploadBus'
 import { subscribeToPhotoDeletion } from '../events/photoDeletionBus'
 import { subscribeToPhotoRefresh } from '../events/photoRefreshBus'
 
-let currentBatch = Crypto.randomUUID()
-
 /**
  * True when a photo carries usable dimensions (finite, positive numbers).
  * @param {object} photo
@@ -37,6 +35,9 @@ export default function useFeedLoader (fetchFn, {
   const abortControllerRef = useRef(null)
   const searchTermRef = useRef('')
   const fetchFnRef = useRef(fetchFn)
+  // Per-instance batch token: each mounted feed instance gets its own token so
+  // a reload in one instance cannot invalidate another instance's in-flight loads.
+  const batchRef = useRef(Crypto.randomUUID())
   fetchFnRef.current = fetchFn
 
   // Subscribe to upload completions (opt-in)
@@ -107,16 +108,23 @@ export default function useFeedLoader (fetchFn, {
     const effectiveSearchTerm = searchTermOverride !== null ? searchTermOverride : (fetchParams.searchTerm || '')
     const effectivePage = pageOverride !== null ? pageOverride : pageNumber
 
-    const { photos, batch, noMoreData, nextPage } = await fetchFnRef.current({
+    const { photos, batch, noMoreData, nextPage, error } = await fetchFnRef.current({
       ...fetchParams,
       searchTerm: effectiveSearchTerm,
-      batch: currentBatch,
+      batch: batchRef.current,
       pageNumber: effectivePage
     })
 
     if (signal?.aborted) return
 
-    if (batch === currentBatch) {
+    // Transient fetch error: preserve the list, leave stopLoading false so the
+    // next scroll/refresh retries the page. Do not count this as an empty response.
+    if (error) {
+      if (!signal?.aborted) setLoading(false)
+      return
+    }
+
+    if (batch === batchRef.current) {
       if (!photos || photos.length === 0) {
         if (noMoreData) {
           setStopLoading(true)
@@ -174,7 +182,7 @@ export default function useFeedLoader (fetchFn, {
     abortControllerRef.current = controller
     const { signal } = controller
 
-    currentBatch = Crypto.randomUUID()
+    batchRef.current = Crypto.randomUUID()
 
     searchTermRef.current = searchTermOverride ?? ''
     setStopLoading(false)

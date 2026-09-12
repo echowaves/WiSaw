@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import * as Linking from 'expo-linking'
 import * as Location from 'expo-location'
 import { useSetAtom } from 'jotai'
-import { Alert } from 'react-native'
+import { Alert, AppState } from 'react-native'
 
 import * as STATE from '../state'
 
@@ -138,32 +138,45 @@ export default function useLocationProvider () {
       }
     }
 
-    async function start () {
-      // 1. Request permission — with timeout fallback for Mac Catalyst
-      //    requestForegroundPermissionsAsync hangs on Mac Catalyst,
-      //    so fall back to getForegroundPermissionsAsync (check-only)
-      let permStatus = null
+    // Resolve the foreground location permission with a timeout fallback for
+    // Mac Catalyst (requestForegroundPermissionsAsync hangs there). Returns one
+    // of: 'granted', 'denied', 'unknown', or a platform-specific status. When
+    // BOTH the request and the check-only fallback time out we return 'unknown'
+    // — never an optimistic 'granted' — so callers can re-check later instead
+    // of starting watchers that would fail or serve stale data.
+    async function resolvePermission () {
+      let result = null
       try {
-        const result = await Promise.race([
+        result = await Promise.race([
           Location.requestForegroundPermissionsAsync(),
           new Promise((resolve) => setTimeout(() => resolve(null), PERM_TIMEOUT_MS))
         ])
-        if (result) {
-          permStatus = result.status
-        } else {
-          // requestForeground hung (Mac Catalyst) — try check-only version
-          const checkResult = await Promise.race([
-            Location.getForegroundPermissionsAsync(),
-            new Promise((resolve) => setTimeout(() => resolve(null), PERM_TIMEOUT_MS))
-          ])
-          permStatus = checkResult ? checkResult.status : 'granted'
-        }
       } catch (e) {
-        permStatus = 'denied'
+        return 'denied'
       }
+      if (result) return result.status
+
+      // requestForeground hung (Mac Catalyst) — try check-only version
+      let checkResult = null
+      try {
+        checkResult = await Promise.race([
+          Location.getForegroundPermissionsAsync(),
+          new Promise((resolve) => setTimeout(() => resolve(null), PERM_TIMEOUT_MS))
+        ])
+      } catch (e) {
+        return 'denied'
+      }
+      if (checkResult) return checkResult.status
+
+      // Both calls timed out — status is unknown, not granted.
+      return 'unknown'
+    }
+
+    async function checkAndStart () {
+      const permStatus = await resolvePermission()
       if (cancelled) return
 
-      if (permStatus !== 'granted') {
+      if (permStatus !== 'granted' && permStatus !== 'unknown') {
         setLocation({ status: 'denied', coords: null, accuracy: null })
         Alert.alert(
           'Location Access',
@@ -173,7 +186,15 @@ export default function useLocationProvider () {
         return
       }
 
-      // 2. Phase 1: Fast-seed with last known position
+      if (permStatus === 'unknown') {
+        // Permission check timed out (Mac Catalyst hang). Do NOT assume granted:
+        // skip fast-seed/watcher setup and re-check the next time the app is active.
+        permUnknown = true
+        if (__DEV__) console.log('[Location] permission status unknown (timeout) — will re-check on foreground')
+        return
+      }
+
+      // Phase 1: Fast-seed with last known position
       try {
         const lastKnown = await Location.getLastKnownPositionAsync()
         if (!cancelled && lastKnown) {
@@ -193,14 +214,27 @@ export default function useLocationProvider () {
         // Non-fatal: watcher will provide position
       }
 
-      // 3. Phase 2: High-accuracy refinement
+      // Phase 2: High-accuracy refinement
       await startPhase2()
     }
 
-    start()
+    // True once the initial permission check timed out to 'unknown'; lets the
+    // AppState listener below re-check instead of assuming granted.
+    let permUnknown = false
+
+    checkAndStart()
+
+    // If the permission check timed out to 'unknown', re-check when the app
+    // becomes active again (covers the Mac Catalyst hang resolving later).
+    const appStateSub = AppState.addEventListener('change', (state) => {
+      if (!cancelled && permUnknown && state === 'active') {
+        checkAndStart()
+      }
+    })
 
     return () => {
       cancelled = true
+      appStateSub.remove()
       if (retryTimeout) clearTimeout(retryTimeout)
       if (refineTimer) clearTimeout(refineTimer)
       if (watcherRef.current) {

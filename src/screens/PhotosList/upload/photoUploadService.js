@@ -570,7 +570,9 @@ export const uploadItem = async ({ item }) => {
 
     const response = await uploadFile({
       assetKey: `${assetPhotoId}.upload`,
-      contentType: 'image/jpeg',
+      // The local image is encoded as WebP (ImageManipulator.SaveFormat.WEBP),
+      // so the uploaded object's content type must be WebP, not JPEG.
+      contentType: 'image/webp',
       assetUri: item.localImgUrl
     })
 

@@ -186,6 +186,30 @@ module.exports = {
         },
         {
           action: 'VIEW',
+          autoVerify: true,
+          data: [
+            {
+              scheme: 'https',
+              host: 'link.wisaw.com',
+              pathPrefix: '/wave/join'
+            }
+          ],
+          category: ['BROWSABLE', 'DEFAULT']
+        },
+        {
+          action: 'VIEW',
+          autoVerify: true,
+          data: [
+            {
+              scheme: 'https',
+              host: 'link.wisaw.com',
+              pathPrefix: '/wave/invite'
+            }
+          ],
+          category: ['BROWSABLE', 'DEFAULT']
+        },
+        {
+          action: 'VIEW',
           data: [{ scheme: 'wisaw' }],
           category: ['BROWSABLE', 'DEFAULT']
         }

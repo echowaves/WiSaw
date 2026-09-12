@@ -926,7 +926,8 @@ const Photo = ({
                   inputText: text,
                   uuid,
                   photo,
-                  topOffset: toastTopOffset
+                  topOffset: toastTopOffset,
+                  isPhotoWatched: photoDetails?.isPhotoWatched
                 })
                 if (newComment) {
                   const updatedPhotoDetails = await reducer.getPhotoDetails({
@@ -956,7 +957,8 @@ const Photo = ({
                   inputText: text,
                   uuid,
                   photo,
-                  topOffset: toastTopOffset
+                  topOffset: toastTopOffset,
+                  isPhotoWatched: photoDetails?.isPhotoWatched
                 }).then((newComment) => {
                   if (newComment) {
                     reducer.getPhotoDetails({ photoId: photo.id, uuid })

@@ -163,7 +163,7 @@ export async function sharePhoto ({ photo, photoDetails, topOffset }) {
   return null
 }
 
-export async function submitComment ({ inputText, photo, uuid, topOffset }) {
+export async function submitComment ({ inputText, photo, uuid, topOffset, isPhotoWatched = false }) {
   try {
     const comment = (
       await CONST.gqlClient.mutate({
@@ -186,8 +186,11 @@ export async function submitComment ({ inputText, photo, uuid, topOffset }) {
       })
     ).data.createComment
 
-    // lets update the state in the photos collection so it renders the right number of likes in the list
-    await watchPhoto({ photo, uuid, topOffset })
+    // Bookmark the photo only when it is not already watched, so commenting on
+    // an already-bookmarked photo does not re-fire the watchPhoto mutation.
+    if (!isPhotoWatched) {
+      await watchPhoto({ photo, uuid, topOffset })
+    }
 
     showSuccessToast('Comment added', { topOffset, visibilityTime: 500 })
 
@@ -233,7 +236,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
       },
     })
 
-    const { recognitions, isPhotoWatched, waveName, waveUuid } = response.data.getPhotoDetails
+    const { recognitions, isPhotoWatched, watchersCount, waveName, waveUuid } = response.data.getPhotoDetails
 
     const comments = response.data.getPhotoDetails.comments.map((comment) => ({
       ...comment,
@@ -243,6 +246,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
       comments,
       recognitions,
       isPhotoWatched,
+      watchersCount: watchersCount ?? 0,
       waveName: waveName || null,
       waveUuid: waveUuid || null
     }
