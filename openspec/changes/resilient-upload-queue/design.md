@@ -54,9 +54,11 @@ The `processQueue` loop, **before** calling `processCompleteUpload` for `queue[0
 
 ### D3: Enqueue copies the capture into `PENDING_UPLOADS_FOLDER`
 
-`queueFileForUpload` generates the `photoId` first, then copies the camera temp file to `PENDING_UPLOADS_FOLDER/<photoId><ext>` (extension taken from the source URI) and persists the queue entry with `originalCameraUrl` pointing at the **stable path**. The copy is `FSFile.copy()` — not move — because the camera/media-library flows may still reference the temp URI.
+`queueFileForUpload` generates the `photoId` first, then copies the camera temp file to `PENDING_UPLOADS_FOLDER/<photoId>.src` — a fixed, deterministic name — and persists the queue entry with `originalCameraUrl` pointing at the **stable path**. The copy is `FSFile.copy()` — not move — because the camera/media-library flows may still reference the temp URI. The name is deliberately NOT derived from the source URI: the Android `content://` URI carries no extension, and nothing in the pipeline keys off the source filename (`ImageManipulator`/`VideoThumbnails` detect format from content; today's Android path already stores extensionless `localImageName`s). The `<photoId>.src` name cannot collide with `localImageName` (UUID vs camera basename / MediaStore ID).
 
-- **Why copy at enqueue**: the OS can evict temp files at any time; the pipeline's first step (compression) reads the source file, so the source must be durable before it can be needed.
+- **Why copy at enqueue**: the OS can evict temp files at any time (aggressively on Android OEM devices); the pipeline's first step (compression) reads the source file, so the source must be durable before it can be needed.
+- **Cross-platform source**: the source URI is a real temp path on iOS but a MediaStore `content://` URI on Android. `File.copy()` handles both; path-style checks (`.exists`) must never be run on the raw camera URI — only on the stable destination. Existence checks reuse the existing `ensureFileExists` helper (try/catch, returns false on any error) — safe on both platforms.
+- **No platform branching**: the fixed `<photoId>.src` name, `File.copy()` source handling, `Paths.document`, and `AppState` are all identical on iOS and Android — the implementation contains zero `Platform.OS` checks.
 - **Failure semantics**: if the copy throws (disk full etc.), `queueFileForUpload` rethrows *before* `addToQueue` runs, so no entry with a dead path is ever persisted. `enqueueCapture`'s existing catch surfaces the error; `useCameraCapture` shows its existing error toast. The user can re-capture.
 - **Lifecycle**: `deleteLocalArtifacts` (post-success) and `clearQueue` (user clear) already delete the local URLs; they additionally delete the stable original path. The media-library copy is a separate user-owned file and is never touched.
 - `processQueuedFile` still moves its compressed output into `PENDING_UPLOADS_FOLDER/<localImageName>` as today.
@@ -73,6 +75,32 @@ The 60s interval stays. For items with `lastFailedAt` older than 5 minutes it no
 ### D6: Banner surfaces unrecoverable items
 
 `GlobalUploadBanner` already counts `pendingPhotos`; unrecoverable items are included in that count (they remain queue entries). The status label appends a compact suffix when `pendingPhotos.some(p => p.unrecoverable)` — e.g., "2 photos · 1 cannot be uploaded". Long-press clear is unchanged and clears them (spec: user is the only deleter).
+
+## Platform Consistency (iOS / Android)
+
+Verified against the installed SDKs (`expo-file-system ~57.0.4`, `expo-image-picker ~57.0.11`) and the project's permission configs.
+
+| Design piece | iOS | Android | Notes |
+|---|---|---|---|
+| `File.copy()` (D3) | ✓ | ✓ | `NativeFileSystemFile.copy()` exists in both; `overwrite` defaults `false` |
+| `Paths.document` stable folder | ✓ | ✓ | App sandbox on both platforms |
+| `new FSFile(uri).exists` (D2) | ✓ | ✓ | Only ever called on the *stable* `file://` path, never on the raw camera URI |
+| `AppState` `active` re-drive (D4) | ✓ | ✓ | Fires on both; re-entrancy guard absorbs duplicate transitions |
+| expo-storage queue + write lock (D1) | ✓ | ✓ | Pure JS / same native API both platforms |
+| `createPhoto` idempotency (resume) | ✓ | ✓ | Backend, platform-agnostic |
+
+**Key platform difference — the camera temp URI scheme:**
+
+```
+  expo-image-picker asset.uri:
+    iOS     →  file:///var/mobile/.../tmp/IMG_....jpg   (real path, OS-evictable)
+    Android →  content://media/external/images/media/N   (MediaStore content URI)
+```
+
+- `File.copy()` accepts `content://` sources, so D3 works unchanged on Android.
+- `FSFile.exists` / path-style operations are **not** reliable on `content://` URIs. Because D3 rewrites `originalCameraUrl` to the stable document-dir path *before the queue entry is persisted*, the D2 existence check and `processQueuedFile` always operate on real `file://` paths by the time they run. The copy must stay in the foreground capture flow (it is — back-to-back with `Asset.create` in `takePhoto`), because Android OEM battery managers can clear app temp/cache faster than iOS; doing the copy in the same JS turn as capture closes that window.
+
+**Permissions** (the capture flow both platforms depend on) are already configured: iOS `NSCameraUsageDescription` + `NSPhotoLibraryAddUsageDescription` (`ios/WiSaw/Info.plist`); Android `CAMERA`, `READ_MEDIA_IMAGES/VIDEO/AUDIO/VISUAL_USER_SELECTED`, `WRITE_EXTERNAL_STORAGE (maxSdk 32)` (`AndroidManifest.xml`). No new permission is introduced by this change (no background mode).
 
 ## Risks / Trade-offs
 
