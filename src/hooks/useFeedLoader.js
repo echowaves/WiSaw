@@ -89,7 +89,9 @@ export default function useFeedLoader (fetchFn, {
                     ? {
                         ...p,
                         commentsCount: updated.comments?.length || 0,
-                        watchersCount: updated.watchersCount || 0,
+                        // Keep the feed snapshot count when the details response
+                        // omits watchersCount (pre-`PhotoDetails.watchersCount`)
+                        watchersCount: updated.watchersCount ?? p.watchersCount ?? 0,
                         lastComment: updated.comments?.[0]?.comment || null
                       }
                     : p

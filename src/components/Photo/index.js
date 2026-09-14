@@ -741,7 +741,7 @@ const Photo = ({
     })
 
     const commentsCount = photoDetails?.comments?.length || 0
-    const watchersCount = photoDetails?.watchersCount || 0
+    const watchersCount = photoDetails?.watchersCount ?? photo?.watchersCount ?? 0
 
     return (
       <View style={embedded ? styles.photoInfoCardFlat : styles.photoInfoCard}>

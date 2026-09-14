@@ -225,6 +225,7 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
               metaData
             }
             isPhotoWatched
+            watchersCount
             waveName
             waveUuid
           }
@@ -246,7 +247,9 @@ export const getPhotoDetails = async ({ photoId, uuid }) => {
       comments,
       recognitions,
       isPhotoWatched,
-      watchersCount: watchersCount ?? 0,
+      // Backend returns Int! (always a number); returned as-is so the
+      // expanded card's `?? photo?.watchersCount` fallback is a safety net only.
+      watchersCount,
       waveName: waveName || null,
       waveUuid: waveUuid || null
     }

@@ -1,4 +1,5 @@
 /* global requestIdleCallback:readonly, cancelIdleCallback:readonly */
+import Ionicons from '@react-native-vector-icons/ionicons'
 import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
@@ -7,13 +8,16 @@ import {
   ActivityIndicator,
   Modal,
   StyleSheet,
-  TouchableOpacity
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native'
 
 import * as CONST from '../../consts'
 import usePhotoActions from '../../hooks/usePhotoActions'
 import useSimpleFetch from '../../hooks/useSimpleFetch'
 import useToastTopOffset from '../../hooks/useToastTopOffset'
+import * as friendsHelper from '../../screens/FriendsList/friends_helper'
 import isValidImageUri from '../../utils/isValidImageUri'
 import * as photoReducer from '../Photo/reducer'
 import * as sharingHelper from '../../utils/simpleSharingHelper'
@@ -29,8 +33,19 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoSelect, onPhotoDele
   const theme = getTheme(darkMode)
   const [uuid] = useAtom(STATE.uuid)
   const toastTopOffset = useToastTopOffset()
+  const [friendsList] = useAtom(STATE.friendsList)
 
   const [photoDetails, setPhotoDetails] = useState(null)
+
+  const authorName = friendsHelper.getLocalContactName({
+    uuid,
+    friendUuid: photo?.uuid,
+    friendsList
+  })
+
+  // Live value from photoDetails (set on details load and optimistically by
+  // handleFlipWatch on bookmark toggle); fall back to the feed snapshot.
+  const watchersCount = photoDetails?.watchersCount ?? photo?.watchersCount ?? 0
 
   const handleDeleted = useCallback(
     (photoId) => {
@@ -151,6 +166,18 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoSelect, onPhotoDele
                   )}
             </TouchableOpacity>
 
+            <View style={styles.infoRow}>
+              <Text style={styles.authorName} numberOfLines={1} ellipsizeMode='tail'>
+                {authorName}
+              </Text>
+              {watchersCount > 0 && (
+                <View style={styles.watchersStat}>
+                  <Ionicons name='bookmark' size={12} color='#FFD700' />
+                  <Text style={styles.watchersText}>{watchersCount}</Text>
+                </View>
+              )}
+            </View>
+
             {loading && (
               <ActivityIndicator
                 size='small'
@@ -222,6 +249,29 @@ const createStyles = (theme) =>
       left: 0,
       width: '100%',
       height: '100%'
+    },
+    infoRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 8
+    },
+    authorName: {
+      flexShrink: 1,
+      color: theme.TEXT_SECONDARY,
+      fontSize: 13,
+      fontWeight: '500'
+    },
+    watchersStat: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      flexShrink: 0
+    },
+    watchersText: {
+      color: theme.TEXT_SECONDARY,
+      fontSize: 13,
+      fontWeight: '500'
     },
     spinner: {
       marginVertical: 4
