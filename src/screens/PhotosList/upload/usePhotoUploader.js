@@ -2,18 +2,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import NetInfo from '@react-native-community/netinfo'
 import * as SecureStore from 'expo-secure-store'
-import { showErrorToast, showInfoToast } from '../../../utils/showToast'
+import { AppState } from 'react-native'
 
 import * as CONST from '../../../consts'
 import { emitUploadComplete } from '../../../events/uploadBus'
+import isValidLocation from '../../../utils/isValidLocation'
+import { showErrorToast, showInfoToast } from '../../../utils/showToast'
 import {
   clearQueue,
   deleteLocalArtifacts,
+  ensureFileExists,
   getQueue,
   initPendingUploads,
   processCompleteUpload,
   queueFileForUpload,
-  removeFromQueue,
   updateQueueItem
 } from './photoUploadService'
 
@@ -102,7 +104,10 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
     try {
       const activeUuid = await resolveUuid()
       if (!activeUuid) {
-        showErrorToast('Upload Error', { text2: 'User authentication required. Please restart the app.', topOffset })
+        // UUID has not hydrated yet (e.g., cold start). Wait silently — the
+        // mount effect re-fires once `uuid` becomes available and re-drives
+        // processing. The queue stays intact; no "restart the app" toast.
+        console.log('[processQueue] Device UUID not available yet; waiting for identity to hydrate')
         return
       }
 
@@ -112,6 +117,69 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
       try {
         while (queue.length > 0) {
           const currentItem = queue[0]
+
+          // Unrecoverable pre-checks: classify the item before attempting the
+          // upload cycle. A skip never increments consecutive failures, never
+          // schedules a retry, and never removes the item — it stays in the
+          // queue (and the banner) until the user clears it. Because the loop
+          // continues past flagged items, recoverable items behind them upload
+          // in the same pass (no head-of-line blocking).
+          if (currentItem.unrecoverable) {
+            // Classified on an earlier pass; the classification is durable. The
+            // item stays in the persisted queue (and the banner) until the
+            // user clears it — advance this pass past it.
+            queue = queue.slice(1)
+            continue
+          }
+
+          // File check — the file(s) the pipeline needs for the item's current
+          // stage, always the stable pending-uploads paths (never the raw
+          // camera URI): unprocessed → originalCameraUrl; processed image →
+          // localImgUrl; processed video → localImgUrl + localVideoUrl.
+          let requiredFileUris
+          if (!currentItem.localImgUrl) {
+            requiredFileUris = [currentItem.originalCameraUrl]
+          } else if (currentItem.type === 'video') {
+            requiredFileUris = [currentItem.localImgUrl, currentItem.localVideoUrl]
+          } else {
+            requiredFileUris = [currentItem.localImgUrl]
+          }
+
+          let fileMissing = false
+          for (const fileUri of requiredFileUris) {
+            if (!fileUri) {
+              fileMissing = true
+              break
+            }
+            // eslint-disable-next-line no-await-in-loop
+            if (!(await ensureFileExists(fileUri))) {
+              fileMissing = true
+              break
+            }
+          }
+
+          if (fileMissing) {
+            console.warn(`[processQueue] Item ${currentItem.localImageName || currentItem.photoId} has no local file on disk; marking unrecoverable`, currentItem)
+            // eslint-disable-next-line no-await-in-loop
+            await updateQueueItem(currentItem, { ...currentItem, unrecoverable: true, unrecoverableReason: 'missing-file' })
+            // The item remains in the persisted queue; advance this pass past it.
+            // eslint-disable-next-line no-await-in-loop
+            queue = (await syncQueueFromStorage()).slice(1)
+            continue
+          }
+
+          // Location check — coordinates are a capture-time snapshot and can
+          // never become valid, so an invalid location is permanently
+          // unrecoverable.
+          if (!isValidLocation(currentItem.location)) {
+            console.warn(`[processQueue] Item ${currentItem.localImageName || currentItem.photoId} has no valid location; marking unrecoverable`, currentItem.location)
+            // eslint-disable-next-line no-await-in-loop
+            await updateQueueItem(currentItem, { ...currentItem, unrecoverable: true, unrecoverableReason: 'invalid-location' })
+            // The item remains in the persisted queue; advance this pass past it.
+            // eslint-disable-next-line no-await-in-loop
+            queue = (await syncQueueFromStorage()).slice(1)
+            continue
+          }
 
           // eslint-disable-next-line no-await-in-loop
           const netState = await NetInfo.fetch()
@@ -129,10 +197,9 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
           })
 
           if (uploadedPhoto) {
-            // Upload succeeded: reset consecutive failure counter
+            // Upload succeeded (processCompleteUpload removed the confirmed
+            // entry from the queue). Reset the consecutive failure counter.
             consecutiveFailuresRef.current = 0
-            // eslint-disable-next-line no-await-in-loop
-            await removeFromQueue(currentItem)
             // Best-effort: reclaim local files; failures are logged, never fatal.
             deleteLocalArtifacts(currentItem)
             // eslint-disable-next-line no-await-in-loop
@@ -182,12 +249,16 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
           queue = await syncQueueFromStorage()
         }
 
-        // Post-loop: schedule retry for remaining items (non-failed)
+        // Post-loop: schedule retry for remaining recoverable items.
+        // Unrecoverable items are skipped on every pass and never retried —
+        // a queue containing only unrecoverable items must not loop on a
+        // 2s retry timer.
+        const recoverableRemaining = queue.filter((item) => !item.unrecoverable).length
         if (netAvailable) {
-          if (queue.length > 0 && !retryTimeoutRef.current) {
+          if (recoverableRemaining > 0 && !retryTimeoutRef.current) {
             scheduleRetry(RETRY_DELAY_MS)
           }
-          if (queue.length === 0) {
+          if (recoverableRemaining === 0) {
             cleanupRetry()
           }
         }
@@ -249,7 +320,11 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
     await syncQueueFromStorage()
   }, [syncQueueFromStorage])
 
-  // Task 5: Periodic health-check for stuck items
+  // Periodic health check for stuck items: an item whose last failure is
+  // older than the stuck threshold may have lost its in-memory retry timer
+  // (e.g., the app was suspended or killed). Log a warning and re-drive the
+  // queue if the network is available. Items are NEVER removed here — the
+  // only deletions are confirmed success and the user clearing the queue.
   useEffect(() => {
     const healthCheck = setInterval(async () => {
       try {
@@ -258,18 +333,17 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
 
         const now = Date.now()
         const stuckItems = queue.filter(item => {
-          // Items are stuck if they have retry tracking and are older than the stuck threshold
-          if (!item.lastFailedAt) return false
+          // Unrecoverable items are skipped by design and never had a retry
+          // timer to lose, so they are not "stuck".
+          if (!item.lastFailedAt || item.unrecoverable) return false
           return (now - item.lastFailedAt) > STUCK_ITEM_AGE_MS
         })
 
         if (stuckItems.length > 0) {
-          console.warn(`Health check: found ${stuckItems.length} stuck items, removing them`)
-          for (const stuckItem of stuckItems) {
-            await removeFromQueue(stuckItem)
+          console.warn(`Health check: ${stuckItems.length} item(s) last failed more than ${STUCK_ITEM_AGE_MS / 60000} min ago and are still pending; re-driving queue`)
+          if (netAvailable) {
+            processQueueRef.current?.()
           }
-          await syncQueueFromStorage()
-          consecutiveFailuresRef.current = 0
         }
       } catch (error) {
         console.error('Health check error:', error)
@@ -277,11 +351,11 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
     }, HEALTH_CHECK_INTERVAL_MS)
 
     return () => {
-      // Task 5.5: Clean up interval on unmount
+      // Clean up interval on unmount
       clearInterval(healthCheck)
       healthCheckIntervalRef.current = null
     }
-  }, [syncQueueFromStorage])
+  }, [netAvailable])
 
   useEffect(() => {
     initPendingUploads()
@@ -291,11 +365,28 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
     return cleanupRetry
   }, [cleanupRetry, syncQueueFromStorage])
 
+  // Initial processing pass. Depends on uuid so that a cold start with a
+  // pending queue re-fires once identity hydrates (processQueue returns
+  // silently while uuid is empty instead of toasting "restart the app").
   useEffect(() => {
-    if (netAvailable) {
+    if (netAvailable && uuid) {
       processQueue()
     }
-  }, [netAvailable, processQueue])
+  }, [netAvailable, uuid, processQueue])
+
+  // Foreground re-drive: suspension/kill loses the in-memory retry timer, so
+  // resume processing whenever the app becomes active. The processingRef
+  // re-entrancy guard makes repeated active transitions (notifications,
+  // interruptions) no-ops; an empty queue makes this a cheap read.
+  useEffect(() => {
+    const onAppStateChange = (status) => {
+      if (status === 'active') {
+        processQueueRef.current?.()
+      }
+    }
+    const subscription = AppState.addEventListener('change', onAppStateChange)
+    return () => subscription.remove()
+  }, [])
 
   useEffect(() => {
     processQueueRef.current = processQueue

@@ -52,6 +52,14 @@ const GlobalUploadBanner = () => {
     ? itemCounts.join(', ')
     : `${pendingPhotos.length} item${pendingPhotos.length === 1 ? '' : 's'}`
 
+  // Unrecoverable items (missing file / invalid location) are already part of
+  // the pendingPhotos counts above — they are not double counted here. The
+  // suffix only adds visibility; the user clears them via long-press.
+  const unrecoverableCount = pendingPhotos.filter(item => item.unrecoverable).length
+  const unrecoverableSuffix = unrecoverableCount > 0
+    ? ` · ${unrecoverableCount} cannot be uploaded`
+    : ''
+
   // Upload status label
   let uploadStatusLabel = 'waiting to upload'
   if (netAvailable) {
@@ -223,7 +231,7 @@ const GlobalUploadBanner = () => {
               opacity: pendingPhotosAnimation
             }}
           >
-            {itemCountLabel} {uploadStatusLabel}
+            {itemCountLabel} {uploadStatusLabel}{unrecoverableSuffix}
           </Animated.Text>
         </View>
         {netAvailable && (

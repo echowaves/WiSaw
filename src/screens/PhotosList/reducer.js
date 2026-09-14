@@ -9,15 +9,12 @@ import * as CONST from '../../consts'
 
 export {
   addToQueue,
-  clearQueue,
   ensureFileExists,
   generatePhoto,
   getQueue,
   initPendingUploads,
-  processCompleteUpload,
   processQueuedFile,
   queueFileForUpload,
-  removeFromQueue,
   updateQueueItem,
   uploadItem
 } from './upload/photoUploadService'

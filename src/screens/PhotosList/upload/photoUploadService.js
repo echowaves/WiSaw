@@ -122,6 +122,20 @@ const readQueue = async () => {
 const writeQueue = async (queue) =>
   Storage.setItem({ key: CONST.PENDING_UPLOADS_KEY, value: queue })
 
+// Single-writer lock for queue read-modify-write operations.
+// expo-storage has no compare-and-swap or transactions, so concurrent
+// mutations (a processing pass updating an item while a new capture enqueues)
+// could interleave their reads and writes and cull an entry. Every mutation
+// funnels through this promise chain; each operation re-reads the queue after
+// acquiring the lock, mutates, and writes. The catch on the chain keeps it
+// usable after a failed operation so the lock never deadlocks.
+let queueWriteLock = Promise.resolve()
+const withQueueWriteLock = (operation) => {
+  const run = queueWriteLock.then(operation, operation)
+  queueWriteLock = run.catch(() => {})
+  return run
+}
+
 const getImageDimensionsAsync = async (uri) => {
   if (!uri || typeof uri !== 'string') {
     return null
@@ -213,82 +227,45 @@ const genLocalThumbs = async (image) => {
   }
 }
 
-export const removeFromQueue = async (imageToRemove) => {
-  try {
-    const pendingImagesBefore = await readQueue()
-    const photoId = imageToRemove?.photoId
+export const removeFromQueue = (imageToRemove) =>
+  withQueueWriteLock(async () => {
+    try {
+      // Re-read under the lock: another mutation may have landed since the
+      // caller last observed the queue.
+      const pendingImagesBefore = await readQueue()
+      const photoId = imageToRemove?.photoId
 
-    if (!photoId) {
-      if (__DEV__) {
-        console.warn('[queue] removeFromQueue called without photoId, no item removed', imageToRemove)
+      if (!photoId) {
+        if (__DEV__) {
+          console.warn('[queue] removeFromQueue called without photoId, no item removed', imageToRemove)
+        }
+        return
       }
-      return
-    }
 
-    // Match by stable photoId — the stored entry may be an enriched version
-    // (localImgUrl/localThumbUrl/photo added during processing), so whole-object
-    // JSON equality would silently fail to match.
-    const pendingImagesAfter = pendingImagesBefore.filter(
-      (imageInTheQueue) => imageInTheQueue.photoId !== photoId
-    )
+      // Match by stable photoId — the stored entry may be an enriched version
+      // (localImgUrl/localThumbUrl/photo added during processing), so whole-object
+      // JSON equality would silently fail to match.
+      const pendingImagesAfter = pendingImagesBefore.filter(
+        (imageInTheQueue) => imageInTheQueue.photoId !== photoId
+      )
 
-    if (pendingImagesAfter.length === pendingImagesBefore.length && __DEV__) {
-      console.warn(`[queue] removeFromQueue: no queue entry matched photoId ${photoId}`)
-    }
-
-    await writeQueue(pendingImagesAfter)
-  } catch (error) {
-    console.error('Error removing item from queue', error)
-  }
-}
-
-export const clearQueue = async () => {
-  try {
-    const currentQueue = await readQueue()
-
-    for (const item of currentQueue) {
-      try {
-        if (item.localImgUrl) {
-          try {
-            new FSFile(item.localImgUrl).delete()
-          } catch (error) {
-            // Local cleanup is best-effort; ignore filesystem errors
-          }
-        }
-        if (item.localThumbUrl) {
-          try {
-            new FSFile(item.localThumbUrl).delete()
-          } catch (error) {
-            // Local cleanup is best-effort; ignore filesystem errors
-          }
-        }
-        if (item.localVideoUrl) {
-          try {
-            new FSFile(item.localVideoUrl).delete()
-          } catch (error) {
-            // Local cleanup is best-effort; ignore filesystem errors
-          }
-        }
-      } catch (fileDeleteError) {
-        console.error('Error deleting queued file', fileDeleteError)
+      if (pendingImagesAfter.length === pendingImagesBefore.length && __DEV__) {
+        console.warn(`[queue] removeFromQueue: no queue entry matched photoId ${photoId}`)
       }
+
+      await writeQueue(pendingImagesAfter)
+    } catch (error) {
+      console.error('Error removing item from queue', error)
     }
+  })
 
-    await writeQueue([])
-  } catch (error) {
-    console.error('Error clearing queue', error)
-  }
-}
-
-/**
- * Best-effort deletion of a queue item's local artifacts (compressed image,
- * generated thumbnail, video, and the original camera temp file).
- * Each file is deleted independently; a failure (e.g., file already gone)
- * is logged and never re-thrown.
- *
- * @param {object} item - Queue item carrying local file URLs
- */
-export const deleteLocalArtifacts = (item) => {
+// Best-effort deletion of a queue item's local files: the compressed image,
+// generated thumbnail, video, and the stable original copy in the
+// pending-uploads folder. Each file is deleted independently; a failure
+// (e.g., file already gone) is logged and never re-thrown.
+//
+// @param {object} item - Queue item carrying local file URLs
+const deleteItemLocalFiles = (item) => {
   if (!item) {
     return
   }
@@ -311,6 +288,33 @@ export const deleteLocalArtifacts = (item) => {
   }
 }
 
+export const clearQueue = () =>
+  withQueueWriteLock(async () => {
+    try {
+      // Re-read under the lock so we delete files for the current entries.
+      const currentQueue = await readQueue()
+
+      for (const item of currentQueue) {
+        deleteItemLocalFiles(item)
+      }
+
+      await writeQueue([])
+    } catch (error) {
+      console.error('Error clearing queue', error)
+    }
+  })
+
+/**
+ * Best-effort deletion of a queue item's local artifacts (compressed image,
+ * generated thumbnail, video, and the stable original file in the
+ * pending-uploads folder).
+ *
+ * @param {object} item - Queue item carrying local file URLs
+ */
+export const deleteLocalArtifacts = (item) => {
+  deleteItemLocalFiles(item)
+}
+
 export const getQueue = async () => {
   try {
     return await readQueue()
@@ -320,45 +324,50 @@ export const getQueue = async () => {
   }
 }
 
-export const addToQueue = async (image) => {
-  try {
-    const pendingImages = await readQueue()
-    await writeQueue([...pendingImages, image])
-  } catch (error) {
-    console.error('Error adding item to queue', error)
-  }
-}
+export const addToQueue = (image) =>
+  withQueueWriteLock(async () => {
+    try {
+      // Re-read under the lock so a concurrent update/remove/clear that
+      // landed between the caller's last read and now is not clobbered.
+      const pendingImages = await readQueue()
+      await writeQueue([...pendingImages, image])
+    } catch (error) {
+      console.error('Error adding item to queue', error)
+    }
+  })
 
-export const updateQueueItem = async (originalItem, updatedItem) => {
-  try {
-    const pendingImages = await readQueue()
-    const photoId = originalItem?.photoId
+export const updateQueueItem = (originalItem, updatedItem) =>
+  withQueueWriteLock(async () => {
+    try {
+      // Re-read under the lock for the same reason addToQueue does.
+      const pendingImages = await readQueue()
+      const photoId = originalItem?.photoId
 
-    if (!photoId) {
-      if (__DEV__) {
-        console.warn('[queue] updateQueueItem called without photoId, item not updated', originalItem)
+      if (!photoId) {
+        if (__DEV__) {
+          console.warn('[queue] updateQueueItem called without photoId, item not updated', originalItem)
+        }
+        return
       }
-      return
+
+      // Match by stable photoId for the same reason removeFromQueue does: the
+      // stored entry may already be an enriched version of originalItem.
+      let matched = false
+      const updatedQueue = pendingImages.map((item) => {
+        if (item.photoId !== photoId) return item
+        matched = true
+        return updatedItem
+      })
+
+      if (!matched && __DEV__) {
+        console.warn(`[queue] updateQueueItem: no queue entry matched photoId ${photoId}`)
+      }
+
+      await writeQueue(updatedQueue)
+    } catch (error) {
+      console.error('Error updating queue item', error)
     }
-
-    // Match by stable photoId for the same reason removeFromQueue does: the
-    // stored entry may already be an enriched version of originalItem.
-    let matched = false
-    const updatedQueue = pendingImages.map((item) => {
-      if (item.photoId !== photoId) return item
-      matched = true
-      return updatedItem
-    })
-
-    if (!matched && __DEV__) {
-      console.warn(`[queue] updateQueueItem: no queue entry matched photoId ${photoId}`)
-    }
-
-    await writeQueue(updatedQueue)
-  } catch (error) {
-    console.error('Error updating queue item', error)
-  }
-}
+  })
 
 export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
   try {
@@ -438,14 +447,30 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
 export const queueFileForUpload = async ({ cameraImgUrl, type, location, waveUuid }) => {
   try {
     console.log('[queueFileForUpload] Starting, cameraImgUrl:', cameraImgUrl)
-    const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
-    const localCacheKey = localImageName.split('.')[0]
     const photoId = uuidv4()
     console.log('[queueFileForUpload] Generated photoId:', photoId)
 
+    // Copy the capture into the pending-uploads folder BEFORE persisting the
+    // queue entry. The OS can evict camera temp files at any time (aggressively
+    // on Android), so the pipeline must reference a durable path. The name is a
+    // fixed <photoId>.src — deliberately NOT parsed from the source URI, which
+    // carries no extension on Android (content:// MediaStore URIs).
+    // File.copy() handles both the iOS temp file:// path and the Android
+    // content:// URI. Path-style ops (.exists etc.) are never run on the raw
+    // camera URI — only on the stable destination.
+    await ensurePendingUploadsFolder()
+    const stableOriginalFile = new FSFile(CONST.PENDING_UPLOADS_FOLDER, `${photoId}.src`)
+    await new FSFile(cameraImgUrl).copy(stableOriginalFile, { overwrite: true })
+
+    // The queue entry keeps its historical localImageName shape (basename of
+    // the source URI, possibly extensionless on Android); the pipeline keys
+    // off photoId, not this name.
+    const localImageName = cameraImgUrl.substr(cameraImgUrl.lastIndexOf('/') + 1)
+    const localCacheKey = localImageName.split('.')[0]
+
     const image = {
       photoId,
-      originalCameraUrl: cameraImgUrl,
+      originalCameraUrl: stableOriginalFile.uri,
       localImageName,
       type,
       location,
@@ -457,6 +482,9 @@ export const queueFileForUpload = async ({ cameraImgUrl, type, location, waveUui
     await addToQueue(image)
     console.log('[queueFileForUpload] Added to queue successfully')
   } catch (error) {
+    // Rethow before addToQueue ran (or after it failed) so no entry with a
+    // dead path is ever persisted. The caller (enqueueCapture → useCameraCapture)
+    // surfaces the error to the user; the capture can be retried.
     console.error('[queueFileForUpload] Error queueing file:', error)
     throw error
   }
@@ -648,14 +676,13 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
 
     // Step 1: Process queued file (compress, generate thumbnails) — local operation only
     if (!item.localImgUrl) {
-      try {
-        if (!new FSFile(item.originalCameraUrl).exists) {
-          showErrorToast('Upload skipped', { text2: 'Original file is missing on device.', topOffset })
-          await removeFromQueue(item)
-          return null
-        }
-      } catch (error) {
-        await removeFromQueue(item)
+      // Defensive fallback: the processing loop pre-checks file existence and
+      // marks missing files unrecoverable. This only fires on a race (e.g.,
+      // the file disappeared between the pre-check and now, or the queue was
+      // cleared mid-pass). Never delete the queue entry — return null and let
+      // the loop classify the item on its next pass.
+      if (!(await ensureFileExists(item.originalCameraUrl))) {
+        console.error('Original file missing; item left in queue for the loop to classify:', item.localImageName)
         return null
       }
 
@@ -668,9 +695,9 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
     }
 
     if (!isValidLocation(processedItem.location)) {
-      console.error('Invalid location for upload, skipping:', processedItem.location)
-      showErrorToast('Upload skipped', { text2: 'Photo has no valid location and cannot be uploaded.', topOffset })
-      await removeFromQueue(item)
+      // Defensive fallback for the loop's pre-check; the entry is never
+      // deleted here — the loop classifies it as unrecoverable.
+      console.error('Invalid location for upload; item left in queue for the loop to classify:', processedItem.location)
       return null
     }
 
@@ -777,6 +804,13 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
         processedItem = { ...processedItem, photo: enrichedPhoto }
       }
 
+      // Confirmed success: this is the one legitimate automatic removal.
+      try {
+        await removeFromQueue(item)
+      } catch (removeError) {
+        console.error('Failed to remove successfully uploaded photo from queue:', removeError)
+      }
+
       // Add to wave if waveUuid was provided at capture time
       if (processedItem.waveUuid) {
         try {
@@ -807,17 +841,9 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
     console.error('Complete upload process error:', error)
     showErrorToast('Complete upload process error', { text2: error.message || `${error}`, topOffset, onPress: () => alert(`error: ${error.message || `${error}`}`) })
 
-    const errStr = `${error}`.toLowerCase()
-    if (errStr.includes('not found') || errStr.includes('missing')) {
-      try {
-        await removeFromQueue(item)
-      } catch (removeError) {
-        console.error('Failed to remove missing item from queue', removeError)
-      }
-      showErrorToast('Upload removed', { text2: 'Local file was not found on device.', topOffset })
-      return null
-    }
-
+    // Never delete the queue entry based on an error message — transient
+    // server/network errors can mention "not found" or "missing". The loop
+    // re-checks the actual file and classifies the item on the next pass.
     return null
   }
 }
