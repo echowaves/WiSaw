@@ -11,9 +11,14 @@ const UploadContext = createContext({
   enqueueCapture: () => {},
   pendingPhotos: [],
   isUploading: false,
+  isPaused: false,
+  activeUploadId: null,
   clearPendingQueue: () => {},
   refreshPendingQueue: () => {},
-  processQueue: () => {}
+  processQueue: () => {},
+  pauseUploads: () => {},
+  resumeUploads: () => {},
+  removePendingItem: () => {}
 })
 
 export function UploadProvider ({ children }) {
@@ -28,10 +33,15 @@ export function UploadProvider ({ children }) {
   const {
     pendingPhotos,
     isUploading,
+    isPaused,
+    activeUploadId,
     enqueueCapture,
     clearPendingQueue,
     refreshPendingQueue,
-    processQueue
+    processQueue,
+    pauseUploads,
+    resumeUploads,
+    removePendingItem
   } = usePhotoUploader({
     uuid,
     setUuid,
@@ -43,10 +53,15 @@ export function UploadProvider ({ children }) {
     enqueueCapture,
     pendingPhotos,
     isUploading,
+    isPaused,
+    activeUploadId,
     clearPendingQueue,
     refreshPendingQueue,
-    processQueue
-  }), [enqueueCapture, pendingPhotos, isUploading, clearPendingQueue, refreshPendingQueue, processQueue])
+    processQueue,
+    pauseUploads,
+    resumeUploads,
+    removePendingItem
+  }), [enqueueCapture, pendingPhotos, isUploading, isPaused, activeUploadId, clearPendingQueue, refreshPendingQueue, processQueue, pauseUploads, resumeUploads, removePendingItem])
 
   return (
     <UploadContext.Provider value={value}>

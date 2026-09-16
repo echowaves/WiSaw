@@ -193,3 +193,224 @@ describe('processQueue head-of-line blocking (task 3.2)', () => {
     act(() => { renderer.unmount() })
   })
 })
+
+describe('upload queue pause / resume / removal (upload-queue-management)', () => {
+  // A harness that captures the hook's return object so tests can call the
+  // new pause/resume/remove API directly.
+  let captured = null
+  const renderHookWithCapture = () => {
+    captured = null
+    const setUuid = jest.fn()
+    const Harness = () => {
+      captured = usePhotoUploader({ uuid: 'device-uuid', setUuid, topOffset: 0, netAvailable: true })
+      return null
+    }
+    let renderer
+    act(() => {
+      renderer = TestRenderer.create(React.createElement(Harness))
+    })
+    return renderer
+  }
+
+  // A deferred processCompleteUpload: each call returns a promise the test
+  // resolves manually, so the loop is observably suspended inside the
+  // in-flight await and can be released at a controlled moment.
+  let releaseUpload
+  const installDeferredUpload = (resultFor) => {
+    service.processCompleteUpload.mockImplementation(({ item }) => {
+      global.__uploadTestState.uploadCalls.push(item.photoId)
+      return new Promise((resolve) => {
+        releaseUpload = () => resolve(resultFor(item))
+      })
+    })
+  }
+
+  it('1.1 pauseUploads with no pass in flight sets isPaused and clears any scheduled retry timer', async () => {
+    // An item that fails uploads so the pass schedules a backoff retry and
+    // leaves a pending timer.
+    global.__uploadTestState.queue.push(makeItem('a'))
+    global.__uploadTestState.existingFiles.add('file:///pending/a.src')
+    service.processCompleteUpload.mockImplementation(async () => null)
+
+    const renderer = renderHookWithCapture()
+    await act(async () => { await sleep(30) })
+    // The failed pass ran and scheduled a backoff retry timer.
+    expect(service.processCompleteUpload).toHaveBeenCalledTimes(1)
+
+    act(() => { captured.pauseUploads() })
+    expect(captured.isPaused).toBe(true)
+
+    // The scheduled retry must not fire while paused: the item stays in the
+    // queue and no further pass runs.
+    const callsAfterPause = service.processCompleteUpload.mock.calls.length
+    await act(async () => { await sleep(40) })
+    expect(service.processCompleteUpload.mock.calls.length).toBe(callsAfterPause)
+    expect(global.__uploadTestState.queue.map((i) => i.photoId)).toEqual(['a'])
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('1.2 resumeUploads re-drives processQueue when the queue is non-empty and network is up', async () => {
+    global.__uploadTestState.queue.push(makeItem('a'))
+    global.__uploadTestState.existingFiles.add('file:///pending/a.src')
+    // Mirror the real service: a confirmed success removes the entry.
+    installDeferredUpload((item) => {
+      global.__uploadTestState.queue = global.__uploadTestState.queue.filter((i) => i.photoId !== item.photoId)
+      return { id: item.photoId }
+    })
+
+    const renderer = renderHookWithCapture()
+    await act(async () => { await sleep(10) })
+    // The loop is suspended in the in-flight await; pause it.
+    expect(global.__uploadTestState.uploadCalls).toEqual(['a'])
+    act(() => { captured.pauseUploads() })
+    releaseUpload()
+    await act(async () => { await sleep(30) })
+    // The in-flight item settled (removed on success); nothing else ran.
+    expect(global.__uploadTestState.queue).toHaveLength(0)
+    expect(captured.isPaused).toBe(true)
+
+    // Re-queue an item, then resume: the loop must re-drive and pick it up.
+    global.__uploadTestState.queue.push(makeItem('b'))
+    global.__uploadTestState.existingFiles.add('file:///pending/b.src')
+    await act(async () => { await captured.resumeUploads() })
+    await act(async () => { await sleep(10) })
+    expect(global.__uploadTestState.uploadCalls).toEqual(['a', 'b'])
+    expect(captured.isPaused).toBe(false)
+    releaseUpload()
+    await act(async () => { await sleep(30) })
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('1.2 resumeUploads with an empty queue does not start processing', async () => {
+    const renderer = renderHookWithCapture()
+    await act(async () => { await sleep(10) })
+    act(() => { captured.pauseUploads() })
+    await act(async () => { await captured.resumeUploads() })
+    await act(async () => { await sleep(20) })
+    expect(captured.isPaused).toBe(false)
+    expect(service.processCompleteUpload).not.toHaveBeenCalled()
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('1.3 automatic re-drive paths are gated while paused', async () => {
+    global.__uploadTestState.queue.push(makeItem('a'))
+    global.__uploadTestState.existingFiles.add('file:///pending/a.src')
+    installDeferredUpload((item) => {
+      global.__uploadTestState.queue = global.__uploadTestState.queue.filter((i) => i.photoId !== item.photoId)
+      return { id: item.photoId }
+    })
+
+    const renderer = renderHookWithCapture()
+    await act(async () => { await sleep(10) })
+    act(() => { captured.pauseUploads() })
+    releaseUpload()
+    await act(async () => { await sleep(20) })
+
+    // AppState 'active' re-drive must be a no-op while paused.
+    act(() => {
+      global.__uploadTestState.appStateListeners.forEach((listener) => listener('active'))
+    })
+    await act(async () => { await sleep(20) })
+    // The queue is empty (item uploaded); a re-drive would be a cheap no-op
+    // pass, so assert via the gate directly: re-queue and confirm the
+    // AppState path does NOT pick it up while paused.
+    global.__uploadTestState.queue.push(makeItem('c'))
+    global.__uploadTestState.existingFiles.add('file:///pending/c.src')
+    act(() => {
+      global.__uploadTestState.appStateListeners.forEach((listener) => listener('active'))
+    })
+    await act(async () => { await sleep(20) })
+    expect(global.__uploadTestState.uploadCalls).not.toContain('c')
+
+    // Unpause and confirm the same path now re-drives (sanity check).
+    await act(async () => { await captured.resumeUploads() })
+    await act(async () => { await sleep(10) })
+    expect(global.__uploadTestState.uploadCalls).toContain('c')
+    releaseUpload()
+    await act(async () => { await sleep(20) })
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('1.4 a pause set while an item is in flight stops the loop before the next item', async () => {
+    global.__uploadTestState.queue.push(makeItem('a'), makeItem('b'))
+    global.__uploadTestState.existingFiles.add('file:///pending/a.src')
+    global.__uploadTestState.existingFiles.add('file:///pending/b.src')
+    // The deferred success removes the item from the queue, mirroring the
+    // real service's confirmed-success path.
+    installDeferredUpload((item) => {
+      global.__uploadTestState.queue = global.__uploadTestState.queue.filter((i) => i.photoId !== item.photoId)
+      return { id: item.photoId }
+    })
+
+    const renderer = renderHookWithCapture()
+    await act(async () => { await sleep(10) })
+    // The loop is suspended inside processCompleteUpload for item 'a'.
+    expect(global.__uploadTestState.uploadCalls).toEqual(['a'])
+
+    act(() => { captured.pauseUploads() })
+    // Release the in-flight await: the current item settles, then the loop
+    // must break instead of starting 'b'.
+    releaseUpload()
+    await act(async () => { await sleep(30) })
+
+    expect(global.__uploadTestState.uploadCalls).toEqual(['a'])
+    expect(global.__uploadTestState.queue.map((i) => i.photoId)).toEqual(['b'])
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('1.5 activeUploadId tracks the in-flight item and clears after settle', async () => {
+    global.__uploadTestState.queue.push(makeItem('a'))
+    global.__uploadTestState.existingFiles.add('file:///pending/a.src')
+    installDeferredUpload((item) => {
+      global.__uploadTestState.queue = global.__uploadTestState.queue.filter((i) => i.photoId !== item.photoId)
+      return { id: item.photoId }
+    })
+
+    const renderer = renderHookWithCapture()
+    await act(async () => { await sleep(10) })
+    expect(captured.activeUploadId).toBe('a')
+
+    releaseUpload()
+    await act(async () => { await sleep(30) })
+    expect(captured.activeUploadId).toBe(null)
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('1.6 removePendingItem removes the item, deletes its artifacts, and re-syncs state', async () => {
+    const item = makeItem('a')
+    global.__uploadTestState.queue.push(item)
+    service.removeFromQueue.mockImplementation(async (toRemove) => {
+      global.__uploadTestState.queue = global.__uploadTestState.queue.filter((i) => i.photoId !== toRemove?.photoId)
+    })
+
+    const renderer = renderHookWithCapture()
+    await act(async () => { await sleep(10) })
+    expect(captured.pendingPhotos.map((i) => i.photoId)).toEqual(['a'])
+
+    await act(async () => { await captured.removePendingItem(item) })
+
+    expect(service.removeFromQueue).toHaveBeenCalledWith(item)
+    expect(service.deleteLocalArtifacts).toHaveBeenCalledWith(item)
+    expect(global.__uploadTestState.queue).toHaveLength(0)
+    expect(captured.pendingPhotos).toHaveLength(0)
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('1.7 the hook returns all five new values', () => {
+    const renderer = renderHookWithCapture()
+    expect(captured.isPaused).toBe(false)
+    expect(captured.activeUploadId).toBe(null)
+    expect(typeof captured.pauseUploads).toBe('function')
+    expect(typeof captured.resumeUploads).toBe('function')
+    expect(typeof captured.removePendingItem).toBe('function')
+
+    act(() => { renderer.unmount() })
+  })
+})

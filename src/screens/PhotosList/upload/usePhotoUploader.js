@@ -16,6 +16,7 @@ import {
   initPendingUploads,
   processCompleteUpload,
   queueFileForUpload,
+  removeFromQueue,
   updateQueueItem
 } from './photoUploadService'
 
@@ -45,6 +46,12 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
   const consecutiveFailuresRef = useRef(0)
   // Task 5: Health check interval ref
   const healthCheckIntervalRef = useRef(null)
+  // User-initiated pause: ref is authoritative for the loop/re-drive paths
+  // (they must not re-create on state change); isPaused drives the UI only.
+  const pausedRef = useRef(false)
+  const [isPaused, setIsPaused] = useState(false)
+  // photoId of the item currently inside processCompleteUpload, or null.
+  const [activeUploadId, setActiveUploadId] = useState(null)
 
   const syncQueueFromStorage = useCallback(async () => {
     const queue = await getQueue()
@@ -73,7 +80,8 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
 
   const scheduleRetry = useCallback((delayMs) => {
     cleanupRetry()
-    if (!netAvailable) return
+    // A paused queue never schedules a retry: resuming re-drives explicitly.
+    if (!netAvailable || pausedRef.current) return
     retryTimeoutRef.current = setTimeout(() => {
       retryTimeoutRef.current = null
       if (processQueueRef.current) {
@@ -116,6 +124,11 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
 
       try {
         while (queue.length > 0) {
+          // Stop-before-next-item: a pause set during the in-flight transfer
+          // takes effect here, after the current item settles.
+          if (pausedRef.current) {
+            break
+          }
           const currentItem = queue[0]
 
           // Unrecoverable pre-checks: classify the item before attempting the
@@ -188,13 +201,21 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
             break
           }
 
-          // eslint-disable-next-line no-await-in-loop
-          const uploadedPhoto = await processCompleteUpload({
-            item: currentItem,
-            uuid: activeUuid,
-            topOffset,
-            netAvailable
-          })
+          // Expose the in-flight item to the queue modal (dimmed, not
+          // selectable). Cleared in finally on both success and failure.
+          setActiveUploadId(currentItem.photoId)
+          let uploadedPhoto
+          try {
+            // eslint-disable-next-line no-await-in-loop
+            uploadedPhoto = await processCompleteUpload({
+              item: currentItem,
+              uuid: activeUuid,
+              topOffset,
+              netAvailable
+            })
+          } finally {
+            setActiveUploadId(null)
+          }
 
           if (uploadedPhoto) {
             // Upload succeeded (processCompleteUpload removed the confirmed
@@ -254,7 +275,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
         // a queue containing only unrecoverable items must not loop on a
         // 2s retry timer.
         const recoverableRemaining = queue.filter((item) => !item.unrecoverable).length
-        if (netAvailable) {
+        if (netAvailable && !pausedRef.current) {
           if (recoverableRemaining > 0 && !retryTimeoutRef.current) {
             scheduleRetry(RETRY_DELAY_MS)
           }
@@ -316,6 +337,29 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
     await syncQueueFromStorage()
   }, [syncQueueFromStorage])
 
+  const pauseUploads = useCallback(() => {
+    pausedRef.current = true
+    setIsPaused(true)
+    // Cancel any pending retry timer; the in-flight transfer is untouched and
+    // settles on its own (the loop breaks before the next item).
+    cleanupRetry()
+  }, [cleanupRetry])
+
+  const resumeUploads = useCallback(async () => {
+    pausedRef.current = false
+    setIsPaused(false)
+    const queue = await getQueue()
+    if (queue.length > 0 && netAvailable) {
+      processQueue()
+    }
+  }, [netAvailable, processQueue])
+
+  const removePendingItem = useCallback(async (item) => {
+    await removeFromQueue(item)
+    deleteLocalArtifacts(item)
+    await syncQueueFromStorage()
+  }, [syncQueueFromStorage])
+
   const refreshPendingQueue = useCallback(async () => {
     await syncQueueFromStorage()
   }, [syncQueueFromStorage])
@@ -341,7 +385,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
 
         if (stuckItems.length > 0) {
           console.warn(`Health check: ${stuckItems.length} item(s) last failed more than ${STUCK_ITEM_AGE_MS / 60000} min ago and are still pending; re-driving queue`)
-          if (netAvailable) {
+          if (netAvailable && !pausedRef.current) {
             processQueueRef.current?.()
           }
         }
@@ -369,7 +413,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
   // pending queue re-fires once identity hydrates (processQueue returns
   // silently while uuid is empty instead of toasting "restart the app").
   useEffect(() => {
-    if (netAvailable && uuid) {
+    if (netAvailable && uuid && !pausedRef.current) {
       processQueue()
     }
   }, [netAvailable, uuid, processQueue])
@@ -380,7 +424,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
   // interruptions) no-ops; an empty queue makes this a cheap read.
   useEffect(() => {
     const onAppStateChange = (status) => {
-      if (status === 'active') {
+      if (status === 'active' && !pausedRef.current) {
         processQueueRef.current?.()
       }
     }
@@ -397,10 +441,15 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
   return {
     pendingPhotos,
     isUploading,
+    isPaused,
+    activeUploadId,
     enqueueCapture,
     clearPendingQueue,
     refreshPendingQueue,
-    processQueue
+    processQueue,
+    pauseUploads,
+    resumeUploads,
+    removePendingItem
   }
 }
 

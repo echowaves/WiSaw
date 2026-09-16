@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import MaterialIcons from '@react-native-vector-icons/material-icons'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import * as Haptics from 'expo-haptics'
 import {
   Animated,
   TouchableOpacity,
@@ -14,18 +13,27 @@ import UploadContext from '../../contexts/UploadContext'
 import * as CONST from '../../consts'
 import { getTheme } from '../../theme/sharedStyles'
 import * as STATE from '../../state'
-import showConfirmAlert from '../../utils/showConfirmAlert'
-import showToast from '../../utils/showToast'
+import UploadQueueModal from '../UploadQueueModal'
 import LinearProgress from '../ui/LinearProgress'
 
 const GlobalUploadBanner = () => {
-  const { pendingPhotos, isUploading, clearPendingQueue } = React.useContext(UploadContext)
+  const {
+    pendingPhotos,
+    isUploading,
+    isPaused,
+    activeUploadId,
+    clearPendingQueue,
+    pauseUploads,
+    resumeUploads,
+    removePendingItem
+  } = React.useContext(UploadContext)
   const netAvailable = useAtomValue(STATE.netAvailable)
   const [isDark] = useAtom(STATE.isDarkMode)
   const setBannerHeight = useSetAtom(STATE.bannerHeightAtom)
   const insets = useSafeAreaInsets()
   const theme = getTheme(isDark)
   const [bannerHeightInternal, setBannerHeightInternal] = useState(0)
+  const [queueModalVisible, setQueueModalVisible] = useState(false)
 
   // Animation values
   const pendingPhotosAnimation = useRef(new Animated.Value(0)).current
@@ -60,40 +68,29 @@ const GlobalUploadBanner = () => {
     ? ` · ${unrecoverableCount} cannot be uploaded`
     : ''
 
-  // Upload status label
+  // Upload status label. A user-initiated pause takes precedence over the
+  // network/upload-derived labels.
   let uploadStatusLabel = 'waiting to upload'
   if (netAvailable) {
-    uploadStatusLabel = isUploading ? 'uploading' : 'ready to upload'
+    uploadStatusLabel = isPaused ? 'paused' : (isUploading ? 'uploading' : 'ready to upload')
   }
 
-  // Dynamic icon selection
+  // Dynamic icon selection. Paused state swaps in a static pause icon.
   let uploadIconName = 'cloud-upload'
-  if (imageCount === 0 && videoCount > 0) {
+  if (isPaused) {
+    uploadIconName = 'pause-circle'
+  } else if (imageCount === 0 && videoCount > 0) {
     uploadIconName = 'videocam'
   } else if (imageCount > 0 && videoCount === 0) {
     uploadIconName = 'photo'
   }
 
-  // Breakdown string for clear confirmation
-  const clearBreakdown = [
-    formatItemCount(imageCount, 'photo', 'photos'),
-    formatItemCount(videoCount, 'video', 'videos')
-  ].filter(Boolean).join(' and ') || `${pendingPhotos.length} item${pendingPhotos.length === 1 ? '' : 's'}`
-
-  // Clear queue handler with toast offset below banner
-  const handleClearQueue = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-    const toastTopOffset = insets.top + bannerHeightInternal + 10
-    showConfirmAlert(
-      'Clear Upload Queue',
-      `Are you sure you want to cancel all ${clearBreakdown}? This cannot be undone.`,
-      async () => {
-        await clearPendingQueue()
-        showToast('Upload queue cleared', { text2: 'All pending uploads have been cancelled', type: 'success', topOffset: toastTopOffset })
-      },
-      { destructiveText: 'Clear All' }
-    )
-  }, [clearBreakdown, clearPendingQueue, bannerHeightInternal, insets.top])
+  // Both entry points (3-dots tap and long-press) share one handler: pause
+  // the queue immediately, then open the queue management modal.
+  const handleManageQueue = useCallback(() => {
+    pauseUploads()
+    setQueueModalVisible(true)
+  }, [pauseUploads])
 
   // Animation effects
   useEffect(() => {
@@ -118,7 +115,9 @@ const GlobalUploadBanner = () => {
   }, [pendingPhotos.length, previousPendingCount, pendingPhotosAnimation])
 
   useEffect(() => {
-    if (pendingPhotos.length > 0 && netAvailable) {
+    // The pulse is the "working" affordance; it stops while the queue is
+    // paused (the pause icon is static) or offline.
+    if (pendingPhotos.length > 0 && netAvailable && !isPaused) {
       // Start pulsing icon animation when uploading
       const pulseAnimation = Animated.loop(
         Animated.sequence([
@@ -142,7 +141,7 @@ const GlobalUploadBanner = () => {
       }
     }
     uploadIconAnimation.setValue(1)
-  }, [pendingPhotos.length, netAvailable, uploadIconAnimation])
+  }, [pendingPhotos.length, netAvailable, isPaused, uploadIconAnimation])
 
   // Measure height and publish to atom
   const handleLayout = useCallback((event) => {
@@ -160,10 +159,12 @@ const GlobalUploadBanner = () => {
 
   if (pendingPhotos.length === 0) return null
 
+  const toastTopOffset = insets.top + bannerHeightInternal + 10
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
-      onLongPress={handleClearQueue}
+      onLongPress={handleManageQueue}
       style={[
         {
           position: 'absolute',
@@ -171,10 +172,10 @@ const GlobalUploadBanner = () => {
           right: 0,
           top: insets.top,
           zIndex: 999,
-          alignItems: 'center',
+          alignItems: 'center'
         }
       ]}
-      pointerEvents="box-none"
+      pointerEvents='box-none'
     >
       <Animated.View
         onLayout={handleLayout}
@@ -234,6 +235,13 @@ const GlobalUploadBanner = () => {
             {itemCountLabel} {uploadStatusLabel}{unrecoverableSuffix}
           </Animated.Text>
         </View>
+        <TouchableOpacity
+          onPress={handleManageQueue}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={{ marginLeft: 8, padding: 4 }}
+        >
+          <MaterialIcons name='more-vert' size={22} color={theme.TEXT_PRIMARY} />
+        </TouchableOpacity>
         {netAvailable && (
           <View
             style={{
@@ -244,7 +252,9 @@ const GlobalUploadBanner = () => {
               height: 3,
               borderBottomLeftRadius: 12,
               borderBottomRightRadius: 12,
-              overflow: 'hidden'
+              overflow: 'hidden',
+              // The strip is the "working" indicator; dim it while paused.
+              opacity: isPaused ? 0.3 : 1
             }}
           >
             <LinearProgress
@@ -257,6 +267,16 @@ const GlobalUploadBanner = () => {
           </View>
         )}
       </Animated.View>
+      <UploadQueueModal
+        visible={queueModalVisible}
+        pendingPhotos={pendingPhotos}
+        activeUploadId={activeUploadId}
+        clearPendingQueue={clearPendingQueue}
+        removePendingItem={removePendingItem}
+        resumeUploads={resumeUploads}
+        toastTopOffset={toastTopOffset}
+        onClose={() => setQueueModalVisible(false)}
+      />
     </TouchableOpacity>
   )
 }
