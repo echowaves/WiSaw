@@ -27,12 +27,13 @@ The system SHALL provide an `UploadProvider` component that owns the single `use
 
 #### Scenario: Provider exposes upload context
 - **WHEN** a descendant screen needs upload functionality
-- **THEN** it SHALL consume `UploadContext` to access `enqueueCapture`, `pendingPhotos`, `isUploading`, and `clearPendingQueue`
+- **THEN** it SHALL consume `UploadContext` to access `enqueueCapture`, `pendingPhotos`, `isUploading`, `clearPendingQueue`, `isPaused`, `activeUploadId`, `pauseUploads`, `resumeUploads`, and `removePendingItem`
 
 #### Scenario: Provider tracks network availability
 - **WHEN** the device network state changes
 - **THEN** the provider SHALL update its `netAvailable` state via a `NetInfo` listener
 - **THEN** the uploader SHALL react to connectivity changes (retry on reconnect)
+- **THEN** a network recovery SHALL NOT re-drive the queue while `isPaused` is `true`
 
 ### Requirement: Upload hook emits to bus instead of callback
 The `usePhotoUploader` hook SHALL emit upload completions to the upload bus instead of calling an `onPhotoUploaded` callback parameter. The hook SHALL read `waveUuid` from the current queue item and include it in the emitted event.
