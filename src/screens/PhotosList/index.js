@@ -559,6 +559,7 @@ const PhotosList = ({ searchFromUrl }) => {
   if (!location) {
     const isPending = locationState.status === 'pending'
     const isDenied = locationState.status === 'denied'
+    const isTimeout = locationState.status === 'timeout'
     const isUnavailable = locationState.status === 'unavailable'
     return (
       <View style={{ flex: 1, backgroundColor: theme.HEADER_BACKGROUND }}>
@@ -566,6 +567,11 @@ const PhotosList = ({ searchFromUrl }) => {
         {isPending && (
           <View style={{ backgroundColor: theme.CARD_BACKGROUND, paddingVertical: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: theme.BORDER_LIGHT }}>
             <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 14, textAlign: 'center' }}>Obtaining your location...</Text>
+          </View>
+        )}
+        {isTimeout && (
+          <View style={{ backgroundColor: theme.CARD_BACKGROUND, paddingVertical: 8, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: theme.BORDER_LIGHT }}>
+            <Text style={{ color: theme.TEXT_SECONDARY, fontSize: 14, textAlign: 'center' }}>Still finding your location...</Text>
           </View>
         )}
         {isDenied && (
@@ -591,6 +597,14 @@ const PhotosList = ({ searchFromUrl }) => {
               iconType='MaterialIcons'
               title='Finding Your Location'
               subtitle="We're finding your location so we can show nearby photos."
+            />
+          )}
+          {isTimeout && (
+            <EmptyStateCard
+              icon='location-on'
+              iconType='MaterialIcons'
+              title='Finding Your Location'
+              subtitle='This is taking longer than usual. We will keep looking in the background and nearby photos will appear automatically once we find you.'
             />
           )}
           {isDenied && !locationDismissed && (
@@ -619,6 +633,8 @@ const PhotosList = ({ searchFromUrl }) => {
               iconType='MaterialIcons'
               title='Location Unavailable'
               subtitle="We couldn't determine your location. Use Search to browse photos or toggle to your bookmarks."
+              actionText='Open Settings'
+              onActionPress={() => Linking.openSettings()}
             />
           )}
         </ScrollView>

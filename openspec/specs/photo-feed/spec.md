@@ -147,8 +147,6 @@ The photos feed SHALL apply sufficient bottom padding to scroll content so that 
 - **WHEN** the PhotosList component unmounts
 - **THEN** the identity-change listener SHALL be unsubscribed
 
-## REMOVED Requirements
-
 ### Requirement: PhotosList reads global network atom
 The PhotosList screen SHALL read `STATE.netAvailable` via `useAtom` instead of using the local `useNetworkStatus` hook. The `useNetworkStatus` hook file SHALL be deleted.
 
@@ -212,15 +210,6 @@ The `PhotosListFooter` SafeAreaView wrapper SHALL be constrained to `edges={['bo
 - **THEN** the SafeAreaView SHALL apply bottom safe area padding
 - **THEN** footer buttons SHALL remain visible above the home indicator
 
-## REMOVED Requirements
-
-### Requirement: Drawer menu button badge for upload target wave
-The system SHALL **Reason**: The upload target concept is being removed entirely. The nav menu button no longer needs to indicate upload target status.
-**Migration**: No migration needed. The nav menu button becomes a plain drawer opener.
-
-#### Scenario: Requirement is exercised
-- **WHEN** the relevant action occurs
-- **THEN** the system SHALL satisfy this requirement
 ### Requirement: Masonry component tracks scroll direction for FOB
 The `PhotosListMasonry` component SHALL internally track scroll direction by comparing consecutive `contentOffset.y` values. It SHALL maintain a `prevScrollY` ref and a `showFob` state. The existing `onScroll` callback from the parent SHALL continue to be forwarded without modification.
 
