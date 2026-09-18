@@ -27,9 +27,9 @@ The `locationAtom` SHALL support the following status values: `pending`, `ready`
 - **THEN** if a location fix is obtained after timeout, the status SHALL transition from 'timeout' to 'ready'
 
 #### Scenario: Unavailable status (NEW)
-- **WHEN** location services are disabled at the system level OR the watcher fails after all retries
+- **WHEN** location services are disabled at the system level OR the first-fix watchdog restart budget (3 attempts) is exhausted without a fix
 - **THEN** the atom SHALL have value `{ status: 'unavailable', coords: null, accuracy: null }`
-- **THEN** the system SHALL NOT attempt to restart watchers
+- **THEN** the watchdog SHALL stop until the next foreground re-initialization
 - **THEN** UI SHOULD show clear message that location is unavailable
 
 ### Requirement: Valid Status Transitions
@@ -45,12 +45,12 @@ The location atom SHALL only allow specific status transitions to ensure predict
 
 #### Scenario: Valid transitions from timeout
 - **WHEN** status is `timeout`
-- **THEN** valid transitions are: `timeout` → `ready` (location fix obtained), `timeout` → `denied` (permission revoked), `timeout` → `unavailable` (services disabled)
+- **THEN** valid transitions are: `timeout` → `ready` (location fix obtained), `timeout` → `denied` (permission revoked), `timeout` → `unavailable` (watchdog budget exhausted while still initializing)
 
 #### Scenario: Valid transitions from unavailable
 - **WHEN** status is `unavailable`
-- **THEN** valid transitions are: `unavailable` → `ready` (services re-enabled, location fix obtained)
-- **NOTE:** `unavailable` → `denied` is NOT a valid transition (permission and services availability are separate)
+- **THEN** valid transitions are: `unavailable` → `ready` (services re-enabled, location fix obtained via foreground re-initialization), `unavailable` → `denied` (permission re-check on foreground re-initialization reports denial)
+- **NOTE:** `unavailable` → `timeout` is NOT a valid transition (the global initialization timeout has already elapsed; only a fix or a denial can change the state)
 
 #### Scenario: Invalid transitions are ignored
 - **WHEN** an invalid status transition is attempted
@@ -78,13 +78,14 @@ Screens using location SHALL handle all five status values appropriately.
 
 #### Scenario: Timeout status UI
 - **WHEN** `locationAtom.status === 'timeout'`
-- **THEN** UI SHALL show message indicating location is still initializing in background
+- **THEN** UI SHALL show a message indicating location is still being found in the background
+- **THEN** the UI SHALL NOT render an empty screen without any explanatory state
 - **THEN** UI MAY offer option to retry or check settings
 
 #### Scenario: Unavailable status UI
 - **WHEN** `locationAtom.status === 'unavailable'`
 - **THEN** UI SHALL show clear message that location services are unavailable
-- **THEN** UI SHALL provide option to check location settings
+- **THEN** UI SHALL provide an option to open device location settings
 
 #### Scenario: Denied status UI
 - **WHEN** `locationAtom.status === 'denied'`

@@ -20,7 +20,7 @@ The system SHALL provide a global Jotai atom `locationAtom` in `src/state.js` th
 - **THEN** the atom SHALL be set to `{ status: 'denied', coords: null, accuracy: null }`
 
 ### Requirement: Location Provider Hook
-The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationProvider.js` that manages location permission, fast-seed, 3-phase watcher lifecycle, and accuracy-gated atom updates. It SHALL be called once from the root `_layout.tsx`. The permission request SHALL handle Mac Catalyst where `requestForegroundPermissionsAsync` hangs by falling back to `getForegroundPermissionsAsync` with a timeout. If BOTH the initial request and the fallback `getForegroundPermissionsAsync` call time out, the hook SHALL NOT assume `'granted'`; it SHALL resolve the permission status to `'unknown'` and SHALL re-check the permission on the next trigger (e.g., the next foreground transition or an explicit re-request) rather than proceeding as if location were available.
+The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationProvider.js` that manages location permission, fast-seed, 3-phase watcher lifecycle, and accuracy-gated atom updates. It SHALL be called once from the root `_layout.tsx`. The permission request SHALL handle Mac Catalyst where `requestForegroundPermissionsAsync` hangs by falling back to `getForegroundPermissionsAsync` with a timeout. If BOTH the initial request and the fallback `getForegroundPermissionsAsync` call time out, the hook SHALL NOT assume `'granted'`; it SHALL resolve the permission status to `'unknown'` and SHALL re-check the permission on a repeating ~15 second timer AND on the next foreground transition, rather than proceeding as if location were available.
 
 #### Scenario: App startup permission request
 - **WHEN** `useLocationProvider` is called on app mount
@@ -33,8 +33,10 @@ The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationP
 
 #### Scenario: Unknown permission is re-checked
 - **WHEN** the permission status resolved to `'unknown'` due to a timeout
-- **THEN** on the next foreground transition or explicit re-request, the hook SHALL re-run the permission check
-- **THEN** once a definitive status (granted or denied) is obtained, the hook SHALL proceed or deny accordingly
+- **THEN** the hook SHALL re-run the permission check every ~15 seconds while the status remains `'unknown'`, regardless of foreground transitions
+- **THEN** the hook SHALL ALSO re-run the permission check on the next foreground transition
+- **THEN** once a definitive status (granted or denied) is obtained, the hook SHALL stop re-checking and SHALL proceed or deny accordingly
+- **THEN** the re-check timer SHALL be cleared when a definitive status is obtained or on unmount
 
 #### Scenario: Fast-seed with last known position
 - **WHEN** permission is granted
@@ -44,15 +46,15 @@ The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationP
 
 #### Scenario: Phase 2 refinement watcher
 - **WHEN** permission is granted and fast-seed is complete
-- **THEN** the hook SHALL start a watcher with `Accuracy.High`, `distanceInterval: 0`, `timeInterval: 1000`
+- **THEN** the hook SHALL start a watcher with `Accuracy.Coarse`, `distanceInterval: 500`, `timeInterval: 120000`
 - **THEN** on each callback, the hook SHALL compare the new fix's accuracy against the stored accuracy
 - **THEN** the atom SHALL only be updated if the new accuracy is less than or equal to the stored accuracy (lower = better)
-- **THEN** Phase 2 SHALL end when accuracy drops below 50 meters OR 30 seconds have elapsed
+- **THEN** Phase 2 SHALL end when accuracy drops below 50 meters OR 60 seconds have elapsed
 - **THEN** the Phase 2 watcher SHALL be removed and Phase 3 SHALL be started
 
 #### Scenario: Phase 3 maintenance watcher
 - **WHEN** Phase 2 ends (accuracy threshold met or timeout)
-- **THEN** the hook SHALL start a watcher with `Accuracy.Balanced`, `distanceInterval: 100`, `timeInterval: 60000`
+- **THEN** the hook SHALL start a watcher with `Accuracy.Coarse`, `distanceInterval: 1000`, `timeInterval: 300000`
 - **THEN** on each callback, the atom SHALL only be updated if the new accuracy is less than or equal to the stored accuracy
 
 #### Scenario: Accuracy-gated updates prevent regression
@@ -64,12 +66,12 @@ The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationP
 - **WHEN** `Location.watchPositionAsync` throws an error
 - **THEN** the hook SHALL wait 5 seconds and retry
 - **THEN** the hook SHALL retry up to 3 times total
-- **THEN** if all retries are exhausted, the atom SHALL remain in its current state
+- **THEN** if all retries are exhausted and the atom still has no fix, the atom SHALL be set to `{ status: 'unavailable', coords: null, accuracy: null }`
 
 #### Scenario: Watcher cleanup on unmount
 - **WHEN** the root layout unmounts (app closing)
 - **THEN** all active watcher subscriptions (Phase 2 or Phase 3) SHALL be removed to prevent memory leaks
-- **THEN** any pending Phase 2 timeout SHALL be cleared
+- **THEN** any pending Phase 2 timeout, watchdog interval, and permission re-check timer SHALL be cleared
 
 #### Scenario: Phase 2 transition executes exactly once
 - **WHEN** Phase 2 watcher callbacks or the timeout trigger `transitionToPhase3()`
@@ -85,7 +87,7 @@ The system SHALL provide a `useLocationProvider` hook at `src/hooks/useLocationP
 #### Scenario: Phase 3 transition resets accuracy gate
 - **WHEN** Phase 2 ends and the hook transitions to Phase 3
 - **THEN** `storedAccuracyRef` SHALL be reset to `Infinity` before the Phase 3 watcher is started
-- **THEN** Phase 3 Balanced-accuracy fixes SHALL be accepted immediately, regardless of the accuracy achieved during Phase 2
+- **THEN** Phase 3 Coarse-accuracy fixes SHALL be accepted immediately, regardless of the accuracy achieved during Phase 2
 
 ### Requirement: Permission Denied UI
 The system SHALL show distinct UI when location permission is denied, prompting the user to enable location access. The alert SHALL include both an "Open Settings" button (for iOS) and text instructions for macOS (System Settings → Privacy & Security → Location Services), since the same app binary runs on both platforms via Mac Catalyst.
@@ -107,43 +109,6 @@ The hook SHALL log phase transitions and watcher callbacks to the console when `
 #### Scenario: Watcher callback logging
 - **WHEN** `__DEV__` is true and a Phase 2 or Phase 3 watcher callback fires
 - **THEN** a console log SHALL be emitted with the fix accuracy, coordinates, and whether the fix was accepted or rejected by the gate
-
-### Requirement: Fast-seed Timeout (MODIFIED)
-The system SHALL enforce a 5 second timeout on `Location.getLastKnownPositionAsync()` to prevent indefinite blocking during app startup on fresh device boot.
-
-#### Scenario: Fast-seed timeout behavior (MODIFIED)
-- **WHEN** `Location.getLastKnownPositionAsync()` is called during Phase 1
-- **THEN** the call SHALL be wrapped in a 5 second timeout using `Promise.race()`
-- **THEN** if the call completes within 5 seconds with a valid position, the atom SHALL be set to `{ status: 'ready', ... }`
-- **THEN** if the call times out (5 seconds elapsed), the system SHALL proceed to Phase 2 without using the last-known position
-- **THEN** a dev log SHALL be emitted: `[Location] Phase 1 timeout: no last known position available`
-
-### Requirement: Phase 3 Watcher Setup Timeout (MODIFIED)
-The system SHALL enforce a 10 second timeout on `Location.watchPositionAsync()` during Phase 3 setup with retry logic.
-
-#### Scenario: Phase 3 setup timeout (MODIFIED)
-- **WHEN** `Location.watchPositionAsync()` is called during Phase 3
-- **THEN** the call SHALL be wrapped in a 10 second timeout using `Promise.race()`
-- **THEN** if the call succeeds within 10 seconds, the watcher SHALL be started successfully
-- **THEN** if the call times out (10 seconds elapsed), the system SHALL retry up to 3 times with 5 second delays
-- **THEN** if all 3 retries are exhausted, the system SHALL set the atom to `{ status: 'unavailable', coords: null, accuracy: null }`
-- **THEN** a dev log SHALL be emitted for each timeout: `[Location] Phase 3 setup timeout, attempt <n>/3`
-
-### Requirement: Watchdog Mechanism (NEW)
-The system SHALL include a watchdog mechanism to detect when the Phase 3 watcher stops receiving location updates and automatically restart it.
-
-#### Scenario: Watchdog detects no updates (NEW)
-- **WHEN** the Phase 3 watcher is active and receiving callbacks
-- **THEN** the system SHALL record the timestamp of each successful callback
-- **THEN** every 15 seconds, the system SHALL check if more than 30 seconds have passed since the last callback
-- **THEN** if no updates have been received for 30+ seconds, the system SHALL restart the Phase 3 watcher
-- **THEN** the restart SHALL follow the same retry logic (up to 3 retries with 5 second delays)
-- **THEN** a dev log SHALL be emitted: `[Location] Watchdog: restarting watcher after no updates for 30+ seconds`
-
-#### Scenario: Watchdog does not apply to Phase 2 (NEW)
-- **WHEN** the Phase 2 watcher is active
-- **THEN** the watchdog mechanism SHALL NOT apply
-- **THEN** Phase 2 timeout (60 seconds) is the only timeout mechanism for this phase
 
 ### Requirement: Global Initialization Timeout (NEW)
 The total location initialization process SHALL have a maximum 15 second timeout to prevent indefinite hanging.
@@ -170,3 +135,69 @@ Invalid status transitions SHALL be ignored with a dev log message.
 - **WHEN** an invalid status transition is attempted
 - **THEN** the atom SHALL NOT be updated
 - **THEN** a dev log SHALL be emitted: `[Location] Invalid status transition ignored: <from> → <to>`
+
+### Requirement: First-fix watchdog
+The system SHALL detect the case where a watcher is registered but no location fix ever arrives (cold GPS after device reboot, wedged native location service, OS-reported location failure). The watchdog applies to the Phase 3 maintenance watcher only: while the atom has no fix (`status` is not `ready`) and the Phase 3 watcher is active, a watchdog SHALL check every ~15 seconds whether 30+ seconds have passed since the current watcher was registered. If so, the watchdog SHALL restart the Phase 3 watcher (removing the current subscription and re-registering it). Phase 2 is NOT watchdog-monitored — its 60-second timeout always transitions to Phase 3, so it cannot be stuck. The watchdog SHALL allow at most 3 restart attempts in total; when exhausted, the atom SHALL be set to `{ status: 'unavailable', coords: null, accuracy: null }` and the watchdog SHALL stop. When a fix is accepted (atom becomes `ready`), the watchdog SHALL disarm and never restart a watcher again — in maintenance mode a stationary user legitimately produces no updates (Phase 3 distance/time intervals are 1000 m / 300 s).
+
+#### Scenario: No fix arrives while a watcher is registered
+- **WHEN** the Phase 3 watcher is active, the atom status is `pending` or `timeout`, and 30+ seconds have passed since the current watcher was registered without any fix
+- **THEN** the watchdog SHALL remove the current watcher subscription and re-register the Phase 3 watcher
+- **THEN** a dev log SHALL be emitted: `[Location] Watchdog: no fix after 30+ seconds, restarting watcher (attempt <n>/3)`
+
+#### Scenario: Watchdog does not monitor Phase 2
+- **WHEN** the Phase 2 refinement watcher is active and no fix has arrived
+- **THEN** the watchdog SHALL NOT restart the Phase 2 watcher
+- **THEN** the Phase 2 60-second timeout remains the only guard; on expiry the provider transitions to Phase 3 where the watchdog applies
+
+#### Scenario: Watchdog restarts exhausted
+- **WHEN** the watchdog has restarted the watcher 3 times and still no fix has arrived
+- **THEN** the atom SHALL be set to `{ status: 'unavailable', coords: null, accuracy: null }`
+- **THEN** the watchdog SHALL stop checking
+- **THEN** a dev log SHALL be emitted: `[Location] Watchdog: no fix after 3 restarts — marking location unavailable`
+
+#### Scenario: Watchdog disarms after first fix
+- **WHEN** a location fix is accepted and the atom status becomes `ready`
+- **THEN** the watchdog SHALL stop checking
+- **THEN** no subsequent 30+ second gaps in maintenance-mode updates SHALL trigger a watcher restart
+
+#### Scenario: Watchdog does not double-restart a healthy start
+- **WHEN** a fix arrives within 30 seconds of watcher registration (the normal case)
+- **THEN** the watchdog SHALL have performed zero restarts
+- **THEN** initialization behavior SHALL be identical to the current behavior
+
+### Requirement: Watcher error surfacing
+The hook SHALL register an error handler with every `Location.watchPositionAsync` call so that OS-reported location failures (e.g. CoreLocation `locationUnavailable`/`kCLErrorDomain` errors, FusedLocationProvider failures) are received by the app instead of being dropped. An error received while the atom has no fix SHALL be treated as a watchdog failure: it SHALL immediately trigger a watcher restart (counting against the same 3-attempt budget) rather than waiting for the next 30-second no-fix window. An error received while the atom is `ready` SHALL be logged in dev mode but SHALL NOT change the atom status.
+
+#### Scenario: OS reports location failure while awaiting first fix
+- **WHEN** the active watcher's error handler fires while the atom status is not `ready`
+- **THEN** the hook SHALL remove the current watcher and restart the same phase's watcher, counting against the 3-attempt watchdog budget
+- **THEN** a dev log SHALL be emitted: `[Location] Watcher error while awaiting fix: <reason>`
+
+#### Scenario: OS reports location failure after fix acquired
+- **WHEN** the active watcher's error handler fires while the atom status is `ready`
+- **THEN** the atom SHALL NOT be modified
+- **THEN** a dev log SHALL be emitted with the failure reason
+
+### Requirement: Foreground re-initialization
+The hook SHALL re-run the full initialization sequence (permission check, fast-seed, Phase 2) when the app transitions to the `active` foreground state AND the current atom status is `timeout`, `unavailable`, or `denied`. This removes the "restart the app" workaround after the user enables location services in Settings (the primary denial-recovery flow is deny → Settings → enable → return to app), and recovers from a transiently wedged location service.
+
+#### Scenario: App foregrounded after denied
+- **WHEN** AppState transitions to `active` and the atom status is `denied`
+- **THEN** the hook SHALL re-run the permission check (a non-prompting re-check on iOS/Android once permission has been decided)
+- **THEN** if the permission is now granted, the hook SHALL proceed to fast-seed and watcher setup and the atom SHALL transition to `ready` once a fix arrives
+- **THEN** if the permission is still denied, the atom SHALL remain `denied` and the existing denied UI SHALL be re-shown
+
+#### Scenario: App foregrounded after timeout
+- **WHEN** AppState transitions to `active` and the atom status is `timeout`
+- **THEN** the hook SHALL re-run the permission check and, if granted, fast-seed and watcher setup
+- **THEN** if a fix is obtained, the atom SHALL transition to `ready` and the feed SHALL reload via the existing `status === 'ready'` effect
+
+#### Scenario: App foregrounded after unavailable
+- **WHEN** AppState transitions to `active` and the atom status is `unavailable`
+- **THEN** the hook SHALL re-run the permission check and, if granted, fast-seed and watcher setup with a fresh watchdog budget
+- **THEN** if no fix is obtained, the atom SHALL remain `unavailable` and the watchdog SHALL again be allowed 3 restart attempts
+
+#### Scenario: Foreground while already ready
+- **WHEN** AppState transitions to `active` and the atom status is `ready`
+- **THEN** the hook SHALL NOT restart the watcher or re-run initialization
+- **THEN** the existing maintenance watcher SHALL continue unchanged

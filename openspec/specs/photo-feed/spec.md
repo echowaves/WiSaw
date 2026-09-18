@@ -4,7 +4,7 @@ This specification defines expected user-visible behavior, constraints, and vali
 ## Requirements
 
 ### Requirement: Location-Based Feed Filtering
-The system SHALL filter the Global feed to show only photos taken near the user's current GPS location, reading coordinates from the global `locationAtom`. After auto-grouping, newly wave-assigned photos SHALL continue to appear in the Global feed as before; wave assignment does not remove photos from the location-based feed. The feed query SHALL NOT accept a wave filtering parameter. The feed SHALL show appropriate UI states while location is pending or denied. The feed SHALL NOT automatically reload when coordinates change; instead, the user SHALL be notified via a drift banner and must manually trigger a reload.
+The system SHALL filter the Global feed to show only photos taken near the user's current GPS location, reading coordinates from the global `locationAtom`. After auto-grouping, newly wave-assigned photos SHALL continue to appear in the Global feed as before; wave assignment does not remove the location-based feed. The feed query SHALL NOT accept a wave filtering parameter. The feed SHALL show appropriate UI states while location is pending, denied, timed out, or unavailable. The feed SHALL NOT automatically reload when coordinates change; instead, the user SHALL be notified via a drift banner and must manually trigger a reload.
 
 #### Scenario: User has location permission granted
 - **WHEN** `locationAtom.status` is `ready` and the feed is fetched
@@ -17,6 +17,21 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 - **THEN** the feed content area SHALL show an empty state card with message "We're finding your location so we can show nearby photos"
 - **THEN** the feed SHALL NOT call the geo query (no coordinates available)
 - **THEN** when the atom transitions to `ready`, the feed SHALL automatically load once and snapshot `feedLocationRef`
+
+#### Scenario: Location initialization timed out
+- **WHEN** `locationAtom.status` is `timeout`
+- **THEN** the feed SHALL display a banner at the top indicating location is still being found, e.g. "Still finding your location..."
+- **THEN** the feed content area SHALL show an empty state card indicating the app is still looking for location in the background, e.g. title "Finding Your Location" with subtitle explaining location is taking longer than usual and nearby photos will appear automatically once found
+- **THEN** the card SHALL NOT require any user action (no buttons) — the provider keeps working in the background
+- **THEN** the feed SHALL NOT call the geo query (no coordinates available)
+- **THEN** when the atom later transitions to `ready`, the feed SHALL automatically load once and snapshot `feedLocationRef`
+
+#### Scenario: Location unavailable
+- **WHEN** `locationAtom.status` is `unavailable`
+- **THEN** the feed content area SHALL show an empty state card with the `location-off` icon, title "Location Unavailable", and a message that location could not be determined
+- **THEN** the card SHALL include a primary action button labeled "Open Settings" that calls `Linking.openSettings()`
+- **THEN** the feed SHALL NOT call the geo query
+- **THEN** if the atom later transitions to `ready` (e.g. via foreground re-initialization after the user enables location), the feed SHALL automatically load once
 
 #### Scenario: Location permission denied
 - **WHEN** `locationAtom.status` is `denied`
@@ -37,12 +52,12 @@ The system SHALL filter the Global feed to show only photos taken near the user'
 - **WHEN** `load()` is called from `reload()`, `submitSearch()`, `handleClearSearch()`, or `handleLoadMore()`
 - **THEN** `load()` SHALL be called via `useFeedLoader` which accepts explicit override parameters to prevent stale React state closures
 - **THEN** `reload()` SHALL always pass page 0 explicitly
-- **THEN** `handleLoadMore()` SHALL compute the new page and pass it explicitly
+- **THEN** `handleLoadMore()` SHALL compute the next page and pass it explicitly
 - **THEN** search interactions SHALL delegate to `useFeedSearch` which calls `reload()` with the appropriate search term
 
 #### Scenario: Photos remain in feed after auto-grouping
 - **WHEN** photos are assigned to waves via auto-grouping
-- **THEN** those photos SHALL still appear in the Global feed based on location proximity
+- **THEN** they SHALL still appear in the Global feed based on location proximity
 
 #### Scenario: Location drift shows banner instead of auto-reload
 - **WHEN** the `locationAtom` coords change during normal use
