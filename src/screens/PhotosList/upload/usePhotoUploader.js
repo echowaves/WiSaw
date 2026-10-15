@@ -16,6 +16,7 @@ import {
   initPendingUploads,
   processCompleteUpload,
   queueFileForUpload,
+  recoverStagedVideo,
   removeFromQueue,
   updateQueueItem
 } from './photoUploadService'
@@ -129,7 +130,14 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
           if (pausedRef.current) {
             break
           }
-          const currentItem = queue[0]
+          let currentItem = queue[0]
+
+          // A video may have been moved to its deterministic staging path
+          // before the app stopped. Reconcile that state before treating an
+          // earlier missing-file classification as permanent.
+          if (currentItem.type === 'video') {
+            currentItem = await recoverStagedVideo(currentItem)
+          }
 
           // Unrecoverable pre-checks: classify the item before attempting the
           // upload cycle. A skip never increments consecutive failures, never
@@ -150,7 +158,9 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
           // camera URI): unprocessed → originalCameraUrl; processed image →
           // localImgUrl; processed video → localImgUrl + localVideoUrl.
           let requiredFileUris
-          if (!currentItem.localImgUrl) {
+          if (currentItem.type === 'video' && !currentItem.localImgUrl) {
+            requiredFileUris = [currentItem.localVideoUrl || currentItem.originalCameraUrl]
+          } else if (!currentItem.localImgUrl) {
             requiredFileUris = [currentItem.originalCameraUrl]
           } else if (currentItem.type === 'video') {
             requiredFileUris = [currentItem.localImgUrl, currentItem.localVideoUrl]

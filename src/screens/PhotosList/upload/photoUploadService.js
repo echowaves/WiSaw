@@ -18,8 +18,6 @@ import isValidLocation from '../../../utils/isValidLocation'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-
-
 /**
  * Query a photo by its ID, verifying ownership via device uuid.
  * Returns null if not found, not owned by the caller, or on network error.
@@ -338,42 +336,85 @@ export const addToQueue = (image) =>
 
 export const updateQueueItem = (originalItem, updatedItem) =>
   withQueueWriteLock(async () => {
-    try {
-      // Re-read under the lock for the same reason addToQueue does.
-      const pendingImages = await readQueue()
-      const photoId = originalItem?.photoId
+    // Re-read under the lock for the same reason addToQueue does.
+    const pendingImages = await readQueue()
+    const photoId = originalItem?.photoId
 
-      if (!photoId) {
-        if (__DEV__) {
-          console.warn('[queue] updateQueueItem called without photoId, item not updated', originalItem)
-        }
-        return
-      }
-
-      // Match by stable photoId for the same reason removeFromQueue does: the
-      // stored entry may already be an enriched version of originalItem.
-      let matched = false
-      const updatedQueue = pendingImages.map((item) => {
-        if (item.photoId !== photoId) return item
-        matched = true
-        return updatedItem
-      })
-
-      if (!matched && __DEV__) {
-        console.warn(`[queue] updateQueueItem: no queue entry matched photoId ${photoId}`)
-      }
-
-      await writeQueue(updatedQueue)
-    } catch (error) {
-      console.error('Error updating queue item', error)
+    if (!photoId) {
+      throw new Error('Cannot update upload queue item without photoId')
     }
+
+    // Match by stable photoId for the same reason removeFromQueue does: the
+    // stored entry may already be an enriched version of originalItem.
+    let matched = false
+    const updatedQueue = pendingImages.map((item) => {
+      if (item.photoId !== photoId) return item
+      matched = true
+      return updatedItem
+    })
+
+    if (!matched) {
+      throw new Error(`Cannot update upload queue item ${photoId}: item is no longer queued`)
+    }
+
+    await writeQueue(updatedQueue)
   })
+
+export const getStagedVideoUri = (item) => {
+  if (!item?.localImageName) {
+    return null
+  }
+
+  return new FSFile(CONST.PENDING_UPLOADS_FOLDER, item.localImageName).uri
+}
+
+export const recoverStagedVideo = async (item) => {
+  if (item?.type !== 'video') {
+    return item
+  }
+
+  const stagedVideoUri = getStagedVideoUri(item)
+  const stagedVideoExists = stagedVideoUri && await ensureFileExists(stagedVideoUri)
+  const savedVideoExists = item.localVideoUrl && await ensureFileExists(item.localVideoUrl)
+  const originalVideoExists = item.originalCameraUrl && await ensureFileExists(item.originalCameraUrl)
+  const videoUri = stagedVideoExists ? stagedVideoUri : savedVideoExists ? item.localVideoUrl : null
+  const videoExists = Boolean(videoUri || originalVideoExists)
+
+  if (!videoExists) {
+    return item
+  }
+
+  const imageExists = item.localImgUrl && await ensureFileExists(item.localImgUrl)
+  const thumbnailExists = item.localThumbUrl && await ensureFileExists(item.localThumbUrl)
+  const updatedItem = { ...item }
+
+  if (videoUri && updatedItem.localVideoUrl !== videoUri) {
+    updatedItem.localVideoUrl = videoUri
+  }
+  if ((!imageExists || !thumbnailExists) && (item.localImgUrl || item.localThumbUrl)) {
+    updatedItem.localImgUrl = undefined
+    updatedItem.localThumbUrl = undefined
+  }
+  if (updatedItem.unrecoverable && updatedItem.unrecoverableReason === 'missing-file') {
+    updatedItem.unrecoverable = false
+    delete updatedItem.unrecoverableReason
+  }
+
+  const changed = Object.keys(updatedItem).some((key) => updatedItem[key] !== item[key]) ||
+    Object.keys(item).some((key) => !(key in updatedItem))
+  if (changed) {
+    await updateQueueItem(item, updatedItem)
+  }
+
+  return updatedItem
+}
 
 export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
   try {
     await ensurePendingUploadsFolder()
 
     const localImgUrl = new FSFile(CONST.PENDING_UPLOADS_FOLDER, queuedItem.localImageName).uri
+    let processedImage
 
     if (queuedItem.type === 'image') {
       const compressedResult = await ImageManipulator.manipulateAsync(
@@ -403,28 +444,43 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
         await fallbackSrc.move(fallbackDest)
       }
     } else {
-      try {
-        const src = new FSFile(queuedItem.originalCameraUrl)
-        const dest = new FSFile(CONST.PENDING_UPLOADS_FOLDER, queuedItem.localImageName)
+      const stagedVideoUri = getStagedVideoUri(queuedItem)
+      const stagedVideo = stagedVideoUri && new FSFile(stagedVideoUri)
+      if (!stagedVideoUri) {
+        throw new Error('Unable to determine the staged video path')
+      }
 
-        if (!dest.exists) {
-          await src.move(dest)
+      if (!stagedVideo.exists) {
+        if (!(await ensureFileExists(queuedItem.originalCameraUrl))) {
+          throw new Error('Original video file is missing and no staged video was found')
         }
-      } catch (error) {
-        showErrorToast('Error processing video', { text2: error.message || `${error}`, visibilityTime: 4000, topOffset })
+        await new FSFile(queuedItem.originalCameraUrl).move(stagedVideo)
+      }
 
-        const fallbackSrc = new FSFile(queuedItem.originalCameraUrl)
-        const fallbackDest = new FSFile(localImgUrl)
-        await fallbackSrc.move(fallbackDest)
+      const stagedItem = {
+        ...queuedItem,
+        localVideoUrl: stagedVideoUri,
+        localImgUrl: undefined,
+        localThumbUrl: undefined
+      }
+      await updateQueueItem(queuedItem, stagedItem)
+      processedImage = { ...stagedItem, localImgUrl: stagedVideoUri }
+    }
+
+    if (!processedImage) {
+      processedImage = {
+        ...queuedItem,
+        localImgUrl
       }
     }
 
-    const processedImage = {
-      ...queuedItem,
-      localImgUrl
-    }
-
     const thumbEnhancedImage = await genLocalThumbs(processedImage)
+    if (queuedItem.type === 'video') {
+      if (!thumbEnhancedImage?.localImgUrl || !thumbEnhancedImage?.localThumbUrl || !thumbEnhancedImage?.localVideoUrl) {
+        throw new Error('Unable to generate local video thumbnails')
+      }
+      await updateQueueItem(queuedItem, thumbEnhancedImage)
+    }
 
     try {
       await CacheManager.addToCache({
@@ -672,21 +728,27 @@ export const generatePhoto = async ({ photoId, uuid, lat, lon, video }) => {
 
 export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAvailable = true }) => {
   try {
-    let processedItem = item
+    let processedItem = item?.type === 'video' ? await recoverStagedVideo(item) : item
 
     // Step 1: Process queued file (compress, generate thumbnails) — local operation only
-    if (!item.localImgUrl) {
+    if (!processedItem.localImgUrl) {
       // Defensive fallback: the processing loop pre-checks file existence and
       // marks missing files unrecoverable. This only fires on a race (e.g.,
       // the file disappeared between the pre-check and now, or the queue was
       // cleared mid-pass). Never delete the queue entry — return null and let
       // the loop classify the item on its next pass.
-      if (!(await ensureFileExists(item.originalCameraUrl))) {
+      const videoSourceUri = processedItem.type === 'video'
+        ? processedItem.localVideoUrl || getStagedVideoUri(processedItem)
+        : null
+      const hasVideoSource = processedItem.type === 'video' && (
+        await ensureFileExists(videoSourceUri) || await ensureFileExists(processedItem.originalCameraUrl)
+      )
+      if (processedItem.type === 'video' ? !hasVideoSource : !(await ensureFileExists(processedItem.originalCameraUrl))) {
         console.error('Original file missing; item left in queue for the loop to classify:', item.localImageName)
         return null
       }
 
-      processedItem = await processQueuedFile({ queuedItem: item, topOffset })
+      processedItem = await processQueuedFile({ queuedItem: processedItem, topOffset })
     }
 
     if (!processedItem) {

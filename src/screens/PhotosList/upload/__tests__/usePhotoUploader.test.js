@@ -63,6 +63,21 @@ jest.mock('../photoUploadService', () => ({
     if (idx !== -1) q[idx] = updatedItem
   }),
   ensureFileExists: jest.fn(async (uri) => global.__uploadTestState.existingFiles.has(uri)),
+  recoverStagedVideo: jest.fn(async (item) => {
+    if (item?.type !== 'video') return item
+    const stagedUri = `file:///pending/${item.localImageName}`
+    if (!global.__uploadTestState.existingFiles.has(stagedUri)) return item
+    const recoveredItem = {
+      ...item,
+      localVideoUrl: stagedUri,
+      unrecoverable: false
+    }
+    delete recoveredItem.unrecoverableReason
+    const queue = global.__uploadTestState.queue
+    const index = queue.findIndex((entry) => entry.photoId === item.photoId)
+    if (index !== -1) queue[index] = recoveredItem
+    return recoveredItem
+  }),
   processCompleteUpload: jest.fn(async ({ item }) => {
     const q = global.__uploadTestState.queue
     global.__uploadTestState.uploadCalls.push(item.photoId)
@@ -164,6 +179,51 @@ describe('processQueue unrecoverable skip (task 3.1)', () => {
     expect(global.__uploadTestState.queue).toHaveLength(1)
     expect(global.__uploadTestState.queue[0].photoId).toBe('a')
     expect(global.__uploadTestState.queue[0].unrecoverableReason).toBe('invalid-location')
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('recovers a staged video previously marked missing and uploads it', async () => {
+    global.__uploadTestState.queue.push(makeItem('a', {
+      type: 'video',
+      localImageName: 'a.mov',
+      unrecoverable: true,
+      unrecoverableReason: 'missing-file'
+    }))
+    global.__uploadTestState.existingFiles.add('file:///pending/a.mov')
+
+    const renderer = renderHook()
+    await act(async () => { await sleep(30) })
+
+    expect(service.recoverStagedVideo).toHaveBeenCalledWith(expect.objectContaining({
+      photoId: 'a',
+      unrecoverable: true
+    }))
+    expect(global.__uploadTestState.uploadCalls).toEqual(['a'])
+    expect(global.__uploadTestState.queue).toHaveLength(0)
+
+    act(() => { renderer.unmount() })
+  })
+
+  it('marks a video missing only when neither the original nor staged file exists', async () => {
+    const item = makeItem('a', {
+      type: 'video',
+      localImageName: 'a.mov',
+      originalCameraUrl: 'file:///pending/a.src'
+    })
+    global.__uploadTestState.queue.push(item)
+
+    const renderer = renderHook()
+    await act(async () => { await sleep(30) })
+
+    expect(service.recoverStagedVideo).toHaveBeenCalledWith(item)
+    expect(global.__uploadTestState.queue).toHaveLength(1)
+    expect(global.__uploadTestState.queue[0]).toMatchObject({
+      photoId: 'a',
+      unrecoverable: true,
+      unrecoverableReason: 'missing-file'
+    })
+    expect(global.__uploadTestState.uploadCalls).toEqual([])
 
     act(() => { renderer.unmount() })
   })
