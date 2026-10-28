@@ -1,6 +1,9 @@
 // Import version from package.json and shared build number
 const { version, buildNumber, versionCode } = require('./package.json')
 
+// Dark field sampled from the WiSaw logo; splash and adaptive icon sit on it.
+const BRAND_FIELD = '#01122D'
+
 module.exports = {
   expo: {
     owner: 'echowaves',
@@ -91,7 +94,7 @@ module.exports = {
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
-        backgroundColor: '#FFFFFF'
+        backgroundColor: BRAND_FIELD
       },
       package: 'com.echowaves.wisaw',
       versionCode,
@@ -234,7 +237,7 @@ module.exports = {
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',
-      backgroundColor: '#ffffff',
+      backgroundColor: BRAND_FIELD,
       hideAsync: true // Let Expo handle splash screen hiding automatically
     },
     orientation: 'portrait',

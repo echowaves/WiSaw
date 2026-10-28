@@ -10,17 +10,20 @@ import {
 import { useAtom } from 'jotai'
 import React from 'react'
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  type ColorValue
+  type ColorValue,
+  type ImageStyle
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import appConfig from '../../app.config.js'
+import logoMark from '../../assets/brand/wisaw-mark.png'
 import * as CONST from '../../src/consts'
 import { UploadProvider } from '../../src/contexts/UploadContext'
 import GlobalUploadBanner from '../../src/components/GlobalUploadBanner'
@@ -43,6 +46,10 @@ const THEME_MODES = ['light', 'dark', 'system'] as const
 type ThemeMode = (typeof THEME_MODES)[number]
 
 type StylesShape = ReturnType<typeof StyleSheet.create>
+
+// Typed explicitly so it satisfies ImageStyle; the themed styles object widens
+// every entry to ViewStyle | TextStyle | ImageStyle, which <Image> rejects.
+const logoMarkStyle: ImageStyle = { width: 56, height: 56, marginBottom: 10 }
 
 const createStyles = (isDark: boolean): StylesShape => {
   const theme = getTheme(isDark)
@@ -346,6 +353,12 @@ const CustomDrawerContent = (props: DrawerContentComponentProps): React.JSX.Elem
 
       {/* Version Info */}
       <View style={styles.versionContainer}>
+        <Image
+          source={logoMark}
+          style={logoMarkStyle}
+          accessible
+          accessibilityLabel='WiSaw logo'
+        />
         <Text style={styles.appName}>WiSaw</Text>
         <Text style={styles.versionText}>Version {APP_VERSION}</Text>
         <Text style={styles.versionText}>Build {BUILD_NUMBER}</Text>

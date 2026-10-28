@@ -2,6 +2,7 @@ import Ionicons from '@react-native-vector-icons/ionicons'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,6 +11,7 @@ import {
 } from 'react-native'
 import { EdgeInsets, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import logoMark from '../../../assets/brand/wisaw-mark.png'
 import * as STATE from '../../state'
 import { getTheme } from '../../theme/sharedStyles'
 
@@ -52,11 +54,11 @@ export default function TandCModal ({
       >
         <View style={styles.card}>
           <View style={styles.heroSection}>
-            <Ionicons
-              name='shield-checkmark'
-              size={48}
-              color={theme.INTERACTIVE_PRIMARY}
-              style={styles.heroIcon}
+            <Image
+              source={logoMark}
+              style={styles.heroLogo}
+              accessible
+              accessibilityLabel='WiSaw logo'
             />
             <Text style={styles.title}>WiSaw Terms of Use</Text>
             <Text style={styles.subtitle}>{TANDC_DESCRIPTION}</Text>
@@ -139,8 +141,10 @@ const createStyles = (theme: ThemeShape, insets: EdgeInsets) =>
       alignItems: 'center',
       marginBottom: 28
     },
-    heroIcon: {
-      marginBottom: 4
+    heroLogo: {
+      width: 72,
+      height: 72,
+      marginBottom: 8
     },
     title: {
       color: theme.TEXT_PRIMARY,
