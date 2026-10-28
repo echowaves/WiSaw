@@ -4,7 +4,6 @@
 # The coverage/ directory contains generated HTML reports.
 exclude_paths:
   - "coverage/**"
-  - "openspec/**"
   - "scripts/**"
   - "migrations/**"  
   - ".roo/**"
