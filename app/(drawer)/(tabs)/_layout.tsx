@@ -5,7 +5,7 @@ import { getDefaultScreenOptions } from '../../../src/utils/navigationStyles'
 
 export default function TabsLayout () {
   return (
-    <Stack screenOptions={getDefaultScreenOptions()}>
+    <Stack id='tabs' screenOptions={getDefaultScreenOptions()}>
       <Stack.Screen
         name='index'
         options={{

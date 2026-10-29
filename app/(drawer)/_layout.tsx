@@ -465,6 +465,7 @@ export default function DrawerLayout (): React.JSX.Element {
       <View style={{ flex: 1 }}>
         <GlobalUploadBanner />
         <Drawer
+          id='drawer'
           screenOptions={{
             headerShown: false,
             drawerStyle: {

@@ -24,21 +24,22 @@ module.exports = {
       'expo-status-bar',
       'expo-video',
       '@react-native-community/datetimepicker',
-      // iOS 27 SDK requires the UIKit scene lifecycle (expo/expo#46664)
-      './plugins/with-ios-scene-lifecycle',
+      // The UIKit scene lifecycle that the iOS 27 SDK requires is now part of the
+      // SDK 58 prebuild template (Expo ships SceneDelegate), so the
+      // plugins/with-ios-scene-lifecycle workaround was removed.
       [
         'expo-build-properties',
         {
           android: {
-            compileSdkVersion: 36,
+            // RN 0.88 (SDK 58) compiles against API 37 and targets 36
+            compileSdkVersion: 37,
             targetSdkVersion: 36,
-            buildToolsVersion: '36.0.0',
-            // kotlinVersion: '2.0.0',
+            buildToolsVersion: '37.0.0',
             enableProguardInReleaseBuilds: true,
             enableShrinkResourcesInReleaseBuilds: true
           },
           ios: {
-            deploymentTarget: '16.4', // SDK 56 minimum deployment target
+            deploymentTarget: '16.4', // above RN 0.88's minimum of 15.1
             flipper: false // Disable Flipper for better performance
           }
         }

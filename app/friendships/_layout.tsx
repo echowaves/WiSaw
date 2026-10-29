@@ -3,7 +3,7 @@ import { getDefaultScreenOptions } from '../../src/utils/navigationStyles'
 
 export default function FriendshipsLayout () {
   return (
-    <Stack screenOptions={getDefaultScreenOptions()}>
+    <Stack id='friendships' screenOptions={getDefaultScreenOptions()}>
       <Stack.Screen
         name='name'
         options={{

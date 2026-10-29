@@ -15,3 +15,10 @@ Items noticed while working that are deliberately out of scope for the current c
 - **What:** `assets/adaptive-icon.png` is the artwork full-bleed (identical to `assets/icon.png`), so the outermost bright pixel of the mark sits at r = 0.39 of the canvas — inside every standard launcher mask, but outside Google's conservative 66dp-of-108dp safe zone. Padding it instead produces a visible rounded-square seam because the artwork ships its own dark tile and corner vignette.
 - **Why deferred:** the clean fix is a designer-supplied adaptive foreground (mark on a flat field with no baked-in tile). Doing it mechanically in ImageMagick looked worse than full-bleed.
 - **Suggested first step:** ask for an "adaptive" export from whoever produced `wisaw_logo.png`; if one arrives, drop it in as `assets/adaptive-icon.png` and keep `BRAND_FIELD` as `backgroundColor`.
+
+## `androidStatusBar` styling is a no-op under RN 0.88 edge-to-edge
+
+- **Raised:** 2026-10-28, during `plan-dependency-upgrade-expo-sdk-58`.
+- **What:** `app.config.js` still sets `android.androidStatusBar` to `{ barStyle: 'dark-content', backgroundColor: '#FFFFFF', translucent: false }`. React Native 0.88 makes edge-to-edge mandatory on Android, so the system no longer lets the app paint the status-bar background; only the icon style has any effect, and even that is now driven from JS (`expo-status-bar`).
+- **Why deferred:** removing or reworking it changes nothing testable without a device, and the white field it used to force may still matter visually on older Android versions the build supports. Out of scope for a dependency bump, which must not change behaviour.
+- **Suggested first step:** on a device running Android 15+, check the status bar over the feed and drawer; if the theme already handles insets via `react-native-safe-area-context`, delete the `androidStatusBar` block and rely on `<StatusBar style={…} />` in `app/_layout.tsx`.

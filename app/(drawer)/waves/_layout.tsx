@@ -3,7 +3,7 @@ import { getDefaultScreenOptions } from '../../../src/utils/navigationStyles'
 
 export default function WavesLayout () {
   return (
-    <Stack screenOptions={getDefaultScreenOptions()}>
+    <Stack id='waves' screenOptions={getDefaultScreenOptions()}>
       <Stack.Screen
         name='index'
         options={{

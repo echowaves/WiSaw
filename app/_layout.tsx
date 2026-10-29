@@ -3,9 +3,10 @@ import 'react-native-get-random-values' // Must be imported before uuid
 import NetInfo from '@react-native-community/netinfo'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { Stack } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
-import { Platform, StatusBar } from 'react-native'
+import { Platform } from 'react-native'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import Toast, { BaseToast } from 'react-native-toast-message'
@@ -250,13 +251,12 @@ export default function RootLayout (): JSX.Element {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor='transparent'
-          translucent={false}
-        />
+        {/* RN 0.88 makes edge-to-edge mandatory and drops backgroundColor/translucent,
+            so only the content style is set here. */}
+        <StatusBar style={isDarkMode ? 'light' : 'dark'} />
         <KeyboardProvider statusBarTranslucent>
           <Stack
+            id='root'
             screenOptions={{
               headerShown: false
             }}

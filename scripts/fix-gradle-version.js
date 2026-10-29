@@ -1,10 +1,12 @@
 /**
- * Fix Gradle version to use Java 11 compatible version
+ * Pin the Gradle wrapper version of the prebuilt android/ project.
+ * Defaults to the Gradle version shipped by the Expo SDK 58 bare template,
+ * which React Native 0.88 / AGP 9 require.
  */
 const fs = require('fs');
 const path = require('path');
 
-const gradleVersion = process.argv[2] || '8.13';
+const gradleVersion = process.argv[2] || '9.4.1';
 const androidProjectDir = path.join(__dirname, '..', 'android');
 
 const gradleWrapperPropertiesPath = path.join(
