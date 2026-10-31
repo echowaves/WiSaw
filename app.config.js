@@ -16,7 +16,11 @@ module.exports = {
       // Branch removed - using native deep linking instead
       'expo-secure-store',
       'expo-router',
-      'expo-audio',
+      // No background media playback in this app, so expo-audio's AudioControlsService
+      // (foregroundServiceType="mediaPlayback") stays unregistered. That also drops the
+      // FOREGROUND_SERVICE_MEDIA_PLAYBACK permission and would drop the iOS 'audio' background
+      // mode too — that one is declared explicitly in ios.infoPlist below.
+      ['expo-audio', { enableBackgroundPlayback: false }],
       'expo-asset',
       'expo-background-task',
       'expo-font',
@@ -68,7 +72,10 @@ module.exports = {
       buildNumber,
       supportsTablet: true,
       infoPlist: {
-        UIBackgroundModes: ['processing'],
+        // iOS: 'audio' is required for video Picture-in-Picture (see Photo's
+        // allowsPictureInPicture). It used to arrive incidentally from expo-audio's background
+        // playback; now that that is off, declare it here so PiP keeps working on iOS.
+        UIBackgroundModes: ['processing', 'audio'],
         BGTaskSchedulerPermittedIdentifiers: ['background-task'],
         NSCameraUsageDescription:
           'This will allow you to take photos with WiSaw app. When you take a photo with WiSaw, it will be stored in your photo album on your device and will be shared with other near-by users of the app. Any user who finds content objectionable or abusive will be able to remove it permanently, so that no one will be able to see it any more.',
@@ -104,6 +111,11 @@ module.exports = {
         'SYSTEM_ALERT_WINDOW',
         'ACCESS_COARSE_LOCATION',
         'ACCESS_FINE_LOCATION',
+        // Kept from the previous manifest: expo-audio injected this while background playback
+        // was on. expo-location declares foregroundServiceType="location" services and relies on
+        // the app to declare the base permission, so it stays rather than shrinking surface
+        // beyond what was asked for.
+        'FOREGROUND_SERVICE',
         'CAMERA',
         'WRITE_EXTERNAL_STORAGE',
         'READ_EXTERNAL_STORAGE',
