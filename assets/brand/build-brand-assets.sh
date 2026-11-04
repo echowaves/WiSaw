@@ -6,7 +6,7 @@
 #   adaptive-icon.png Android adaptive foreground, same artwork
 #   splash.png        splash emblem centred on transparent canvas
 #   favicon.png       web favicon
-#   wisaw-mark.png    circular emblem used by in-app <Image> branding
+#   wisaw-mark.png    soft-edged tile badge used by in-app <Image> branding
 #
 # Requires ImageMagick 7. Run from the repo root:
 #   bash assets/brand/build-brand-assets.sh
@@ -21,16 +21,16 @@ trap 'rm -rf "$WORK"' EXIT
 MASK="$WORK/mask.png"
 EMBLEM="$WORK/emblem.png"
 
-# Circular emblem: the mark and its dot, feathered so no artwork edge shows.
+# Soft-edged badge: the whole tile, its alpha feathered to nothing just inside
+# the artwork's own rounded corners so small-size uses (splash emblem, favicon,
+# in-app mark) blend into any background instead of showing a hard box seam.
 # The feather mask must be written out as a matte-free grayscale file first --
 # an inline gradient carries an opaque matte, which CopyOpacity then copies as
 # "fully opaque" and ImageMagick discards the alpha channel entirely.
-# The mask is an opaque core (r=420 covers the mark and its dot) feathered out
-# over the last ~90px, so the emblem keeps full colour where the mark is.
-magick -size 1000x1000 xc:black -fill white -draw "circle 500,500 500,80" \
-  -alpha off -blur 0x50 "$MASK"
-magick "$M" -gravity NorthWest -crop 1000x1000+127+31 +repage \
-  "$MASK" -compose CopyOpacity -composite -depth 8 "$EMBLEM"
+magick -size 1254x1254 xc:black \
+  -fill white -draw "roundrectangle 36,36 1217,1217 190,190" \
+  -alpha off -blur 0x38 "$MASK"
+magick "$M" "$MASK" -compose CopyOpacity -composite -depth 8 "$EMBLEM"
 
 # App icon and Android adaptive foreground: artwork full-bleed, opaque.
 magick "$M" -resize 1024x1024 -background black -flatten -alpha off -depth 8 "$A/icon.png"
