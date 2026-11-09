@@ -294,9 +294,9 @@ const WaveSettings = ({ waveUuid, waveName }) => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.INTERACTIVE_BACKGROUND }]}>
       {isFrozen && (
-        <View style={styles.frozenNotice}>
-          <MaterialCommunityIcons name='snowflake' size={16} color='#60A5FA' />
-          <Text style={styles.frozenNoticeText}>
+        <View style={[styles.frozenNotice, { backgroundColor: theme.STATUS_INFO_BACKGROUND }]}>
+          <MaterialCommunityIcons name='snowflake' size={16} color={theme.STATUS_INFO} />
+          <Text style={[styles.frozenNoticeText, { color: theme.STATUS_INFO }]}>
             Wave is frozen. Change freeze mode or set a future freeze date to unfreeze.
           </Text>
         </View>

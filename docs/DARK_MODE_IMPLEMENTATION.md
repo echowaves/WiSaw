@@ -119,6 +119,37 @@ The StatusBar automatically adapts:
 - ✅ Preferences persist across app restarts
 - ✅ All updated screens maintain functionality
 
+## 🚦 Contrast Gate (November 2026)
+
+`scripts/theme-contrast-audit.js` measures whether any text or icon can actually be seen on the surface it is painted on, in both modes. It parses every file under `app/` and `src/` with Babel, walks the real JSX ancestor chain for each foreground (`style.color`, `placeholderTextColor`, and `color` / `tintColor` / `iconColor` props), collects `backgroundColor` from theme sheets and inline literals, composites translucent layers over the mode's root background, and scores the worst case with WCAG relative luminance.
+
+```bash
+npm run audit:theme         # CI gate — exits non-zero only on INVISIBLE findings
+npm run audit:theme:report  # full report, including advisory classes
+node scripts/theme-contrast-audit.js --explain src/screens/Feedback/index.js:439
+```
+
+### What blocks a build, and what does not
+
+| Class | Meaning | Gates? |
+| --- | --- | --- |
+| `INVISIBLE` | contrast below 1.6:1 against the resolved surface — text effectively cannot be read, or a token exists in only one of the two tables so it resolves to `undefined` and falls back to a platform default | ✅ yes |
+| `low` | readable but below WCAG AA (4.5:1 body, 3:1 large) | advisory |
+| `hardcoded` | a literal text colour in a file that otherwise uses theme tokens — it will not follow the mode | advisory |
+| `island` | a component with no theme usage at all — dark mode never reaches it | advisory |
+
+`low`, `hardcoded` and `island` stay advisory on purpose: WCAG exempts disabled controls, white-on-brand (`#EA5E3D`) is an existing brand decision, and a gate that blocks on 200 pre-existing advisories gets switched off rather than fixed. They are tracked as migration work instead.
+
+### Rules the resolver encodes
+
+- **Token parity** — `LIGHT_THEME` and `DARK_THEME` must expose identical keys. A token added to one table is an invisible-text bug in the other mode, so parity failures are `INVISIBLE`.
+- **Custom-component boundary** — when a foreground is passed as a prop into a capitalised component (`<Button icon={<Icon color='…'/>} />`), the audit skips it: the host paints that surface, not the caller's ancestors.
+- **Media overlays** — files listed in `MEDIA_OVERLAY_FILES` sit on user imagery rather than theme surfaces, so they are exempt from both the pairing audit and the hardcoded-text check.
+
+### New tokens added by this pass
+
+`TEXT_PLACEHOLDER`, `TEXT_ON_PRIMARY`, `STATUS_PENDING_{,_BACKGROUND,_TEXT}`, `STATUS_INFO{,_BACKGROUND}`, `ACCENT_SECONDARY{,_BACKGROUND,_BORDER}`, `TEXT_LINK{,_BACKGROUND}` — defined in **both** tables in [sharedStyles.js](../src/theme/sharedStyles.js). Use `theme.TEXT_LINK` for action labels and links instead of the system blue `#007AFF`, which drops to 2.8:1 on dark surfaces.
+
 ## 🔮 Future Enhancements
 
 The foundation is now in place for:

@@ -1,8 +1,8 @@
 {
   "name": "wisaw",
   "version": "7.6.3",
-  "buildNumber": "745",
-  "versionCode": 745,
+  "buildNumber": "746",
+  "versionCode": 746,
   "author": "Echowaves Corp.",
   "license": "MIT",
   "main": "expo-router/entry",
@@ -26,7 +26,9 @@
     "build": "source .env && node scripts/sync-eas-env.js && eas build",
     "publish:prod": "source .env && eas update --branch production",
     "lint": "npx ts-standard",
-    "lint:fix": "npx ts-standard --fix"
+    "lint:fix": "npx ts-standard --fix",
+    "audit:theme": "node scripts/theme-contrast-audit.js --gate",
+    "audit:theme:report": "node scripts/theme-contrast-audit.js"
   },
   "expo": {
     "install": {

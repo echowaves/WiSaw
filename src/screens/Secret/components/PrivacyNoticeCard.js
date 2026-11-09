@@ -5,11 +5,11 @@ import { StyleSheet, Text, View } from 'react-native'
 const PrivacyNoticeCard = ({ theme }) => {
   const styles = StyleSheet.create({
     card: {
-      backgroundColor: 'rgba(80, 227, 194, 0.08)',
+      backgroundColor: theme.ACCENT_SECONDARY_BACKGROUND,
       borderRadius: 12,
       padding: 16,
       borderWidth: 1,
-      borderColor: 'rgba(80, 227, 194, 0.2)',
+      borderColor: theme.ACCENT_SECONDARY_BORDER,
       marginBottom: 20
     },
     header: {
@@ -18,7 +18,7 @@ const PrivacyNoticeCard = ({ theme }) => {
       marginBottom: 8
     },
     title: {
-      color: '#50E3C2',
+      color: theme.ACCENT_SECONDARY,
       fontSize: 16,
       fontWeight: '600',
       marginLeft: 8
@@ -33,7 +33,7 @@ const PrivacyNoticeCard = ({ theme }) => {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <FontAwesome5 name='lock' iconStyle='solid' size={16} color='#50E3C2' />
+        <FontAwesome5 name='lock' iconStyle='solid' size={16} color={theme.ACCENT_SECONDARY} />
         <Text style={styles.title}>Your Privacy is Protected</Text>
       </View>
       <Text style={styles.text}>

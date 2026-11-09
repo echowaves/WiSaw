@@ -21,6 +21,9 @@ export const LIGHT_THEME = {
   BACKGROUND: CONST.BG_COLOR, // '#ffffff'
   TEXT_PRIMARY: CONST.TEXT_COLOR, // '#555f61'
   TEXT_SECONDARY: 'rgba(85, 95, 97, 0.7)',
+  TEXT_PLACEHOLDER: 'rgba(85, 95, 97, 0.85)',
+  // Labels drawn on a solid brand fill (MAIN_COLOR), which never changes with the mode
+  TEXT_ON_PRIMARY: '#FFFFFF',
 
   // Card and container styles
   CARD_BACKGROUND: 'rgba(255, 255, 255, 0.95)',
@@ -42,32 +45,45 @@ export const LIGHT_THEME = {
   INTERACTIVE_SECONDARY: 'rgba(234, 94, 61, 0.1)',
 
   // Disabled states
-  TEXT_DISABLED: 'rgba(85, 95, 97, 0.4)',
+  TEXT_DISABLED: 'rgba(85, 95, 97, 0.72)',
   BACKGROUND_DISABLED: 'rgba(85, 95, 97, 0.05)',
   BORDER_DISABLED: 'rgba(85, 95, 97, 0.15)',
 
-  // Status indicators
-  STATUS_SUCCESS: '#4FC3F7',
-  STATUS_EDIT: '#34C759',
-  STATUS_WARNING: '#FFD700',
-  STATUS_ERROR: '#FF4757',
-  STATUS_CAUTION: '#FF9500',
+  // Status indicators — light-mode variants are dark enough to carry text and icons (WCAG AA on every surface)
+  STATUS_SUCCESS: '#0B72A8',
+  STATUS_EDIT: '#15803D',
+  STATUS_WARNING: '#8A6100',
+  STATUS_ERROR: '#C81E33',
+  STATUS_CAUTION: '#C2410C',
 
   // Status indicator backgrounds (transparent variants)
-  STATUS_ERROR_BACKGROUND: 'rgba(255, 71, 87, 0.15)',
-  STATUS_ERROR_BORDER: 'rgba(255, 71, 87, 0.3)',
-  STATUS_SUCCESS_BACKGROUND: 'rgba(79, 195, 247, 0.15)',
-  STATUS_SUCCESS_BORDER: 'rgba(79, 195, 247, 0.3)',
+  STATUS_ERROR_BACKGROUND: 'rgba(200, 30, 51, 0.12)',
+  STATUS_ERROR_BORDER: 'rgba(200, 30, 51, 0.3)',
+  STATUS_SUCCESS_BACKGROUND: 'rgba(11, 114, 168, 0.12)',
+  STATUS_SUCCESS_BORDER: 'rgba(11, 114, 168, 0.3)',
+  STATUS_PENDING_BACKGROUND: '#FEF3C7',
+  STATUS_PENDING_TEXT: '#B45309',
+  STATUS_INFO: '#1D4ED8',
+  STATUS_INFO_BACKGROUND: 'rgba(29, 78, 216, 0.1)',
+
+  // Secondary accent (privacy / identity surfaces). Must carry text on its own tint.
+  ACCENT_SECONDARY: '#0F766E',
+  ACCENT_SECONDARY_BACKGROUND: 'rgba(15, 118, 110, 0.1)',
+  ACCENT_SECONDARY_BORDER: 'rgba(15, 118, 110, 0.25)',
+
+  // Interactive text (links, selection actions) — must clear AA on tinted surfaces
+  TEXT_LINK: '#0B6FE0',
+  TEXT_LINK_BACKGROUND: 'rgba(11, 111, 224, 0.1)',
 
   // Input and form styles
   inputFooterBackground: 'rgba(248, 249, 250, 0.8)',
 
   // Help and info styles
-  helpCardBackground: 'rgba(79, 195, 247, 0.1)',
-  helpCardBorder: 'rgba(79, 195, 247, 0.2)',
+  helpCardBackground: 'rgba(11, 114, 168, 0.08)',
+  helpCardBorder: 'rgba(11, 114, 168, 0.25)',
 
-  // Disabled button state
-  disabledBackground: CONST.SECONDARY_COLOR,
+  // Disabled button state — light grey that still carries muted text
+  disabledBackground: '#E9EBEC',
 
   // Aliases for theme consistency
   interactiveBackground: 'rgba(234, 94, 61, 0.1)'
@@ -79,6 +95,9 @@ export const DARK_THEME = {
   BACKGROUND: '#121212',
   TEXT_PRIMARY: '#FFFFFF',
   TEXT_SECONDARY: 'rgba(255, 255, 255, 0.7)',
+  TEXT_PLACEHOLDER: 'rgba(255, 255, 255, 0.5)',
+  // Labels drawn on a solid brand fill (MAIN_COLOR), which never changes with the mode
+  TEXT_ON_PRIMARY: '#FFFFFF',
 
   // Card and container styles
   CARD_BACKGROUND: '#1E1E1E',
@@ -116,6 +135,19 @@ export const DARK_THEME = {
   STATUS_ERROR_BORDER: 'rgba(255, 107, 125, 0.4)',
   STATUS_SUCCESS_BACKGROUND: 'rgba(93, 211, 253, 0.2)',
   STATUS_SUCCESS_BORDER: 'rgba(93, 211, 253, 0.4)',
+  STATUS_PENDING_BACKGROUND: 'rgba(254, 243, 199, 0.18)',
+  STATUS_PENDING_TEXT: '#FBBF24',
+  STATUS_INFO: '#60A5FA',
+  STATUS_INFO_BACKGROUND: 'rgba(96, 165, 250, 0.18)',
+
+  // Secondary accent (privacy / identity surfaces)
+  ACCENT_SECONDARY: '#50E3C2',
+  ACCENT_SECONDARY_BACKGROUND: 'rgba(80, 227, 194, 0.12)',
+  ACCENT_SECONDARY_BORDER: 'rgba(80, 227, 194, 0.3)',
+
+  // Interactive text (links, selection actions)
+  TEXT_LINK: '#7CC3FF',
+  TEXT_LINK_BACKGROUND: 'rgba(124, 195, 255, 0.14)',
 
   // Input and form styles
   inputFooterBackground: 'rgba(40, 40, 40, 0.8)',

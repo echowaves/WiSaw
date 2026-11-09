@@ -93,7 +93,7 @@ const EditWaveModal = ({
               disabled={saving}
             >
               {saving
-                ? <ActivityIndicator color='#FFF' />
+                ? <ActivityIndicator color={theme.TEXT_PRIMARY || '#000'} />
                 : <Text style={[styles.buttonText, { color: theme.TEXT_PRIMARY || '#000' }]}>{saveLabel}</Text>}
             </TouchableOpacity>
           </View>

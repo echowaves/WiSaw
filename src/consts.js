@@ -73,6 +73,8 @@ export const BOOKMARK_LAYOUT_CONFIG = {
 }
 
 export const TEXT_COLOR = '#555f61'
+// Deprecated: near-white on light surfaces and near-black-on-dark never both work.
+// Use `theme.TEXT_PLACEHOLDER` from `getTheme(isDark)` instead — it is tuned per mode.
 export const PLACEHOLDER_TEXT_COLOR = '#ececec'
 export const UNFILLED_COLOR = 'rgba(200, 200, 200, 0.2)'
 export const TRANSPARENT_BUTTON_COLOR = 'rgba(200, 200, 200, 0.8)'

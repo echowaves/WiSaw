@@ -152,14 +152,14 @@ const PhotoActionButtons = ({
           <FontAwesome5
             name='water'
             iconStyle='solid'
-            color={isOwnPhoto ? '#4FC3F7' : theme.TEXT_DISABLED}
+            color={isOwnPhoto ? theme.STATUS_INFO : theme.TEXT_DISABLED}
             size={16}
           />
           {isOwnPhoto && (
             <Text
               numberOfLines={1}
               ellipsizeMode='tail'
-              style={[styles.actionButtonText, { color: '#4FC3F7' }]}
+              style={[styles.actionButtonText, { color: theme.STATUS_INFO }]}
             >
               {photoDetails?.waveName || 'Add to Wave'}
             </Text>

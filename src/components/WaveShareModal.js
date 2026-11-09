@@ -259,7 +259,7 @@ const WaveShareModal = ({
                         )
                       : (
                         <View style={styles.qrPlaceholder}>
-                          <FontAwesome5 name='qrcode' iconStyle='solid' size={40} color='#ccc' />
+                          <FontAwesome5 name='qrcode' iconStyle='solid' size={40} color={CONST.TEXT_COLOR} />
                           <Text style={styles.placeholderText}>Generating QR Code...</Text>
                         </View>
                         )}
@@ -291,7 +291,7 @@ const WaveShareModal = ({
                     Send via text, email, or messaging app
                   </Text>
                 </View>
-                <FontAwesome5 name='chevron-right' iconStyle='solid' size={14} color='#ccc' />
+                <FontAwesome5 name='chevron-right' iconStyle='solid' size={14} color={CONST.TEXT_COLOR} />
               </TouchableOpacity>
             </View>
           </View>

@@ -4,7 +4,9 @@ import { StyleSheet, Text, View } from 'react-native'
 import { fa5IconStyle } from '../../../utils/fa5IconStyle'
 
 const strengthValues = [0, 25, 50, 75, 100]
-const strengthColors = ['#FF6B6B', '#FF9500', '#FFD93D', '#4FC3F7', '#50E3C2']
+// Token names rather than literals: the same red→teal severity ramp has to stay
+// readable in both modes, and the fixed pastels fall below 3:1 on light surfaces.
+const strengthColorTokens = ['STATUS_ERROR', 'STATUS_CAUTION', 'STATUS_WARNING', 'TEXT_LINK', 'ACCENT_SECONDARY']
 const strengthLabels = [
   'Too weak - easily guessed',
   'Weak - needs improvement',
@@ -21,6 +23,7 @@ const strengthIcons = [
 ]
 
 const PasswordStrengthIndicator = ({ strength, theme, errorMessage }) => {
+  const strengthColor = theme[strengthColorTokens[strength]] ?? theme.TEXT_PRIMARY
   const styles = StyleSheet.create({
     strengthContainer: {
       marginTop: 8,
@@ -47,7 +50,7 @@ const PasswordStrengthIndicator = ({ strength, theme, errorMessage }) => {
       borderRadius: 4
     },
     errorText: {
-      color: '#FF6B6B',
+      color: theme.STATUS_ERROR,
       fontSize: 12,
       marginTop: 4
     }
@@ -56,8 +59,8 @@ const PasswordStrengthIndicator = ({ strength, theme, errorMessage }) => {
   return (
     <View style={styles.strengthContainer}>
       <View style={styles.strengthHeader}>
-        <FontAwesome5 name={strengthIcons[strength]} iconStyle={fa5IconStyle(strengthIcons[strength])} size={16} color={strengthColors[strength]} />
-        <Text style={[styles.strengthText, { color: strengthColors[strength] }]}>
+        <FontAwesome5 name={strengthIcons[strength]} iconStyle={fa5IconStyle(strengthIcons[strength])} size={16} color={strengthColor} />
+        <Text style={[styles.strengthText, { color: strengthColor }]}>
           {strengthLabels[strength]}
         </Text>
       </View>
@@ -67,7 +70,7 @@ const PasswordStrengthIndicator = ({ strength, theme, errorMessage }) => {
             styles.strengthFill,
             {
               width: `${strengthValues[strength]}%`,
-              backgroundColor: strengthColors[strength]
+              backgroundColor: strengthColor
             }
           ]}
         />

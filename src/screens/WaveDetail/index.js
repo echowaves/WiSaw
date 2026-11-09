@@ -311,7 +311,7 @@ const WaveDetail = () => {
           <MaterialCommunityIcons
             name='snowflake'
             size={16}
-            color='#60A5FA'
+            color={theme.STATUS_INFO}
             style={{ marginRight: 4 }}
           />
         )}
@@ -444,9 +444,9 @@ const WaveDetail = () => {
         </View>
 
         {isFrozen && (
-          <View style={styles.frozenBanner}>
-            <MaterialCommunityIcons name='snowflake' size={16} color='#60A5FA' />
-            <Text style={styles.frozenBannerText}>
+          <View style={[styles.frozenBanner, { backgroundColor: theme.STATUS_INFO_BACKGROUND }]}>
+            <MaterialCommunityIcons name='snowflake' size={16} color={theme.STATUS_INFO} />
+            <Text style={[styles.frozenBannerText, { color: theme.STATUS_INFO }]}>
               This wave is frozen — no new photos, edits, or deletions allowed
             </Text>
           </View>

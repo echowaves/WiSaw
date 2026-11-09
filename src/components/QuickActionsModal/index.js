@@ -172,7 +172,7 @@ const QuickActionsModal = ({ visible, photo, onClose, onPhotoSelect, onPhotoDele
               </Text>
               {watchersCount > 0 && (
                 <View style={styles.watchersStat}>
-                  <Ionicons name='bookmark' size={12} color='#FFD700' />
+                  <Ionicons name='bookmark' size={12} color={theme.STATUS_WARNING} />
                   <Text style={styles.watchersText}>{watchersCount}</Text>
                 </View>
               )}

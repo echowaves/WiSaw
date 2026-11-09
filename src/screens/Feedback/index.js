@@ -139,10 +139,13 @@ const FeedbackScreen = () => {
 
   const getCharacterCountColor = () => {
     const remaining = maxStringLength - inputText.length
-    if (remaining < 100) return '#FF6B6B' // Red when very few characters left
-    if (remaining < 300) return '#FFD93D' // Yellow when getting low
+    if (remaining < 100) return theme.STATUS_ERROR // Red when very few characters left
+    if (remaining < 300) return theme.STATUS_WARNING // Yellow when getting low
     return CONST.TEXT_COLOR // Use the app's standard text color
   }
+
+  const submitDisabled = isSubmitting || inputText.trim().length < 10
+  const submitContentColor = submitDisabled ? theme.TEXT_DISABLED : theme.TEXT_ON_PRIMARY
 
   const getInputBorderColor = () => {
     if (isFocused) return CONST.MAIN_COLOR
@@ -344,7 +347,6 @@ const FeedbackScreen = () => {
       marginBottom: 20
     },
     submitButtonText: {
-      color: 'white',
       fontSize: 18,
       fontWeight: '600',
       marginLeft: 8
@@ -359,7 +361,7 @@ const FeedbackScreen = () => {
     helpTitle: {
       fontSize: 16,
       fontWeight: '600',
-      color: '#4FC3F7',
+      color: theme.STATUS_SUCCESS,
       marginBottom: 8
     },
     helpText: {
@@ -434,7 +436,7 @@ const FeedbackScreen = () => {
                   multiline
                   numberOfLines={8}
                   placeholder="Tell us what's on your mind... What features would you like to see? Any bugs to report? How can we make WiSaw better for you?"
-                  placeholderTextColor={CONST.PLACEHOLDER_TEXT_COLOR}
+                  placeholderTextColor={theme.TEXT_PLACEHOLDER}
                   maxLength={maxStringLength}
                   style={styles.textInput}
                   onChangeText={(inputValue) => {
@@ -457,22 +459,19 @@ const FeedbackScreen = () => {
 
               {/* Submit Button */}
               <TouchableOpacity
-                style={[
-                  styles.submitButton,
-                  (isSubmitting || inputText.trim().length < 10) && styles.submitButtonDisabled
-                ]}
+                style={[styles.submitButton, submitDisabled && styles.submitButtonDisabled]}
                 onPress={handleSubmit}
-                disabled={isSubmitting || inputText.trim().length < 10}
+                disabled={submitDisabled}
                 activeOpacity={0.8}
               >
                 {isSubmitting
                   ? (
-                    <Ionicons name='hourglass' size={20} color='white' />
+                    <Ionicons name='hourglass' size={20} color={submitContentColor} />
                     )
                   : (
-                    <FontAwesome5 name='paper-plane' iconStyle='regular' size={18} color='white' />
+                    <FontAwesome5 name='paper-plane' iconStyle='regular' size={18} color={submitContentColor} />
                     )}
-                <Text style={styles.submitButtonText}>
+                <Text style={[styles.submitButtonText, { color: submitContentColor }]}>
                   {isSubmitting ? 'Sending...' : 'Send Feedback'}
                 </Text>
               </TouchableOpacity>
@@ -482,28 +481,28 @@ const FeedbackScreen = () => {
                 <Text style={styles.helpTitle}>💡 What to include in your feedback:</Text>
 
                 <View style={styles.bulletPoint}>
-                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={{ color: theme.STATUS_SUCCESS }}>•</Text>
                   <Text style={styles.bulletText}>
                     Bug reports with steps to reproduce the issue
                   </Text>
                 </View>
 
                 <View style={styles.bulletPoint}>
-                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={{ color: theme.STATUS_SUCCESS }}>•</Text>
                   <Text style={styles.bulletText}>
                     Feature requests and improvement suggestions
                   </Text>
                 </View>
 
                 <View style={styles.bulletPoint}>
-                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={{ color: theme.STATUS_SUCCESS }}>•</Text>
                   <Text style={styles.bulletText}>
                     General thoughts about your WiSaw experience
                   </Text>
                 </View>
 
                 <View style={styles.bulletPoint}>
-                  <Text style={{ color: '#4FC3F7' }}>•</Text>
+                  <Text style={{ color: theme.STATUS_SUCCESS }}>•</Text>
                   <Text style={styles.bulletText}>UI/UX feedback and usability improvements</Text>
                 </View>
               </View>

@@ -173,12 +173,12 @@ const UngroupedPhotosCard = ({
         {selectionMode
           ? (
             <TouchableOpacity onPress={exitSelectionMode} style={styles.cancelButton}>
-              <Text style={{ color: '#007AFF', fontWeight: '600' }}>Cancel</Text>
+              <Text style={{ color: theme.TEXT_LINK, fontWeight: '600' }}>Cancel</Text>
             </TouchableOpacity>
             )
           : (
             <TouchableOpacity onPress={enterSelectionMode} style={styles.selectAllButton}>
-              <Text style={{ color: '#007AFF', fontWeight: '600' }}>Select photos</Text>
+              <Text style={{ color: theme.TEXT_LINK, fontWeight: '600' }}>Select photos</Text>
             </TouchableOpacity>
             )}
       </View>
@@ -187,7 +187,7 @@ const UngroupedPhotosCard = ({
       {selectionMode && (
         <View style={styles.toolbar}>
           <TouchableOpacity onPress={selectAll} style={styles.toolbarItem}>
-            <Text style={{ color: '#007AFF', fontWeight: '600' }}>Select All</Text>
+            <Text style={{ color: theme.TEXT_LINK, fontWeight: '600' }}>Select All</Text>
           </TouchableOpacity>
           <Text style={[styles.toolbarCount, { color: theme.TEXT_SECONDARY }]}>
             {selectionCount} selected
@@ -214,7 +214,7 @@ const UngroupedPhotosCard = ({
             opacity: canManualGroup ? 1 : 0.5
           }]}
         >
-          <Text style={{ color: canManualGroup ? '#007AFF' : theme.TEXT_SECONDARY, fontWeight: '600' }}>
+          <Text style={{ color: canManualGroup ? theme.TEXT_LINK : theme.TEXT_SECONDARY, fontWeight: '600' }}>
             Create a wave
           </Text>
         </TouchableOpacity>
@@ -227,7 +227,7 @@ const UngroupedPhotosCard = ({
             opacity: canManualGroup ? 1 : 0.5
           }]}
         >
-          <Text style={{ color: canManualGroup ? '#007AFF' : theme.TEXT_SECONDARY, fontWeight: '600' }}>
+          <Text style={{ color: canManualGroup ? theme.TEXT_LINK : theme.TEXT_SECONDARY, fontWeight: '600' }}>
             Add to existing wave
           </Text>
         </TouchableOpacity>

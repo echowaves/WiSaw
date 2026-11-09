@@ -38,7 +38,7 @@ const IdentityProfileCard = ({ nickName, theme }) => {
     statusBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: 'rgba(80, 227, 194, 0.1)',
+      backgroundColor: theme.ACCENT_SECONDARY_BACKGROUND,
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 12
@@ -47,13 +47,13 @@ const IdentityProfileCard = ({ nickName, theme }) => {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: '#50E3C2',
+      backgroundColor: theme.ACCENT_SECONDARY,
       marginRight: 8
     },
     statusText: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#50E3C2'
+      color: theme.ACCENT_SECONDARY
     }
   })
 

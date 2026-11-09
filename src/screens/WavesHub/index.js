@@ -205,7 +205,7 @@ const WavesHub = () => {
             }
           ]}
         >
-          <Text style={{ color: '#007AFF', fontSize: 16, fontWeight: '600' }}>
+          <Text style={{ color: theme.TEXT_LINK, fontSize: 16, fontWeight: '600' }}>
             Deselect
           </Text>
         </TouchableOpacity>
