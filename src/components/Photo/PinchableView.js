@@ -35,13 +35,6 @@ const createStyles = (theme) =>
       marginHorizontal: 8,
       borderWidth: 1,
       borderColor: 'rgba(255, 255, 255, 0.2)',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
       elevation: 5
     },
     headerIcon: {

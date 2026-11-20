@@ -1325,13 +1325,6 @@ const Photo = ({
               marginVertical: 0,
               height: 4,
               borderRadius: 2,
-              shadowColor: '#4FC3F7',
-              shadowOffset: {
-                width: 0,
-                height: 2
-              },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
               elevation: 5
             }
           ]}

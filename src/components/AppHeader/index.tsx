@@ -78,13 +78,6 @@ export default function AppHeader({
       marginHorizontal: 8,
       borderWidth: 1,
       borderColor: theme.INTERACTIVE_BORDER,
-      shadowColor: theme.CARD_SHADOW,
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
       elevation: 4
     }
   })

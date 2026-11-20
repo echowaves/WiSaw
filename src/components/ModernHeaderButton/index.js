@@ -15,13 +15,6 @@ const styles = StyleSheet.create({
     borderColor: CONST.HEADER_BORDER_COLOR,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: CONST.HEADER_SHADOW_COLOR,
-    shadowOffset: {
-      width: 0,
-      height: 1
-    },
-    shadowOpacity: 1,
-    shadowRadius: 2,
     elevation: 2
   }
 })

@@ -41,6 +41,7 @@ const ModalInputText = ({ route }) => {
         backgroundColor: currentTheme.BACKGROUND
       },
       photoContainer: {
+        backgroundColor: currentTheme.CARD_BACKGROUND,
         alignSelf: 'center',
         marginBottom: 20,
         borderRadius: 16,

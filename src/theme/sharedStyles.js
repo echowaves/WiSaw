@@ -26,7 +26,7 @@ export const LIGHT_THEME = {
   TEXT_ON_PRIMARY: '#FFFFFF',
 
   // Card and container styles
-  CARD_BACKGROUND: 'rgba(255, 255, 255, 0.95)',
+  CARD_BACKGROUND: '#FFFFFF',
   CARD_BORDER: 'rgba(0, 0, 0, 0.06)',
   CARD_SHADOW: 'rgba(0, 0, 0, 0.25)',
   SURFACE: 'rgba(255, 255, 255, 0.98)',
@@ -157,7 +157,7 @@ export const DARK_THEME = {
   helpCardBorder: 'rgba(93, 211, 253, 0.3)',
 
   // Disabled button state
-  disabledBackground: 'rgba(255, 255, 255, 0.1)',
+  disabledBackground: '#2A2A2A',
 
   // Aliases for theme consistency
   interactiveBackground: 'rgba(234, 94, 61, 0.15)'
@@ -428,13 +428,6 @@ export const SHARED_INTERACTIVE = {
     marginHorizontal: 8,
     borderWidth: 1,
     borderColor: THEME.INTERACTIVE_BORDER,
-    shadowColor: THEME.CARD_SHADOW,
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
     elevation: 4
   },
 
