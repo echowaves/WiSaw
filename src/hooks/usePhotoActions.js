@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
-import showToast, { showInfoToast, showSuccessToast, showErrorToast } from '../utils/showToast'
+import showToast, { showInfoToast, showSuccessToast } from '../utils/showToast'
+import showErrorToast from '../utils/showErrorToast'
 import showConfirmAlert from '../utils/showConfirmAlert'
 import { useSetAtom } from 'jotai'
 

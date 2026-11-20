@@ -1,4 +1,5 @@
-import { showSuccessToast, showErrorToast } from '../../utils/showToast'
+import { showSuccessToast } from '../../utils/showToast'
+import showErrorToast from '../../utils/showErrorToast'
 
 // import { CacheManager } from 'expo-cached-image'
 import { gql } from '@apollo/client'

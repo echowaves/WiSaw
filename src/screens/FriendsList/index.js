@@ -141,7 +141,7 @@ const FriendsList = () => {
       setShowShareModal(true)
     } catch (error) {
       console.error('Error opening share modal:', error)
-      showErrorToast('Error', { text2: 'Unable to open sharing options', topOffset: 60 })
+      showErrorToast('Unable to open sharing options', { err: error, topOffset: 60 })
     }
   }
 
@@ -159,10 +159,12 @@ const FriendsList = () => {
         })
         setFriendsList(newFriendsList)
       } else {
-        showErrorToast('Error removing friend', { text2: 'Please try again', topOffset: 60 })
+        // The helper resolved without throwing, so there is no error object —
+        // the reason has to come from what actually happened.
+        showErrorToast('Error removing friend', { text2: 'The removal was not confirmed by the server.', topOffset: 60 })
       }
     } catch (error) {
-      showErrorToast('Error removing friend', { text2: 'Please try again', topOffset: 60 })
+      showErrorToast('Error removing friend', { text2: 'Please try again', err: error, topOffset: 60 })
     }
   }
 
@@ -214,7 +216,7 @@ const FriendsList = () => {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error in setContactName:', error)
-      showErrorToast('Error saving friend name', { text2: 'Please try again', topOffset: 60 })
+      showErrorToast('Error saving friend name', { text2: 'Please try again', err: error, topOffset: 60 })
     }
   }
 

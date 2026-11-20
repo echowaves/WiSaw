@@ -4,7 +4,7 @@ import NetInfo from '@react-native-community/netinfo'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { getDefaultStore, useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { Platform } from 'react-native'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
@@ -23,7 +23,6 @@ import {
 } from '../src/utils/themeStorage'
 // waveSortBy, waveSortDirection, waveFeedSortBy, waveFeedSortDirection, friendFeedSortBy, friendFeedSortDirection atoms removed — sort is fixed to createdAt desc
 import { hydrateGroupingAtom, groupingAtom } from '../src/utils/groupingAtom'
-import { setAtomSetter, getCurrentOnPress } from '../src/utils/showErrorToast'
 import { errorContextAtom } from '../src/atoms/errorAtom'
 import { gql } from '@apollo/client'
 import { gqlClient } from '../src/consts'
@@ -31,17 +30,42 @@ import appConfig from '../app.config.js'
 import { compareSemver } from '../src/utils/semver'
 import ForceUpdateModal from '../src/components/ForceUpdateModal'
 
-// Custom error toast component with 2-line message and tap support
-const ErrorToastWithTap = (props: any) => (
-  <BaseToast
-     {...props}
-    text2NumberOfLines={2}
-    onPress={() => {
-      const cb = getCurrentOnPress()
-      if (cb) cb()
-      }}
+const LONG_PRESS_DELAY_MS = 450
+
+type ErrorDetail = { title?: string, message?: string, stack?: string | null }
+
+/**
+ * Opens the error bottom sheet for one specific toast. The detail is read from
+ * that toast's own payload, so two errors shown back to back can never open
+ * each other's detail — which is what the previous module-level callback did.
+ */
+function openErrorDetail (detail?: ErrorDetail | null): void {
+  if (!detail?.message) return
+  getDefaultStore().set(errorContextAtom, {
+    visible: true,
+    title: detail.title ?? '',
+    message: detail.message,
+    stack: detail.stack ?? null
+  })
+}
+
+// Toasts are invoked as plain functions by react-native-toast-message, so this
+// stays hook-free and reaches the store directly. `touchableContainerProps` is
+// spread last onto BaseToast's TouchableOpacity, which is how long press is
+// added without forking the library.
+const DetailToast = ({ props, ...rest }: any) => {
+  const reveal = () => openErrorDetail(props?.detail)
+  return (
+    <BaseToast
+      {...rest}
+      text2NumberOfLines={2}
+      onPress={reveal}
+      touchableContainerProps={{ onLongPress: reveal, delayLongPress: LONG_PRESS_DELAY_MS }}
     />
-)
+  )
+}
+
+const toastConfig = { success: DetailToast, error: DetailToast, info: DetailToast }
 
 
 export default function RootLayout (): JSX.Element {
@@ -52,11 +76,7 @@ export default function RootLayout (): JSX.Element {
     STATE.followSystemTheme
    )
   const setGrouping = useSetAtom(groupingAtom)
-  const setAtomSet = useSetAtom(errorContextAtom)
   const netAvailable = useAtomValue(STATE.netAvailable)
-  useEffect(() => {
-    setAtomSetter(setAtomSet)
-  }, [setAtomSet])
 
   // Force update check state
   const [showForceUpdate, setShowForceUpdate] = useState(false)
@@ -266,7 +286,7 @@ export default function RootLayout (): JSX.Element {
             <Stack.Screen name='modal-input' options={{ presentation: 'modal', headerShown: false }} />
           </Stack>
         </KeyboardProvider>
-         <Toast config={{ error: ErrorToastWithTap }} />
+         <Toast config={toastConfig} />
         <ErrorDetailModal />
         {showForceUpdate && (
           <ForceUpdateModal

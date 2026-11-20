@@ -203,12 +203,14 @@ export async function requestWatchedPhotos ({ uuid, pageNumber, batch, searchTer
   }
 }
 
+// Returns the failure alongside the flag so the caller's toast can state why
+// saving the choice failed instead of guessing.
 export function acceptTandC () {
   try {
     Storage.setItem({ key: IS_TANDC_ACCEPTED_KEY, value: 'true' })
-    return true
+    return { accepted: true }
   } catch (err8) {
     console.error({ err8 })
-    return false
+    return { accepted: false, error: err8 }
   }
 }

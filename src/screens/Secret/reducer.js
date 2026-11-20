@@ -149,7 +149,7 @@ export async function getUUID () {
   } catch (err13) {
     console.error('uuid', { err13 })
     // Show toast for UUID loading error (but don't throw to prevent app hang)
-    showErrorToast('Storage Access Issue', { text2: 'Unable to load device ID, generating new one', visibilityTime: 3000 })
+    showErrorToast('Storage Access Issue', { text2: 'Unable to load device ID, generating new one', err: err13, visibilityTime: 3000 })
     uuid = null
   }
   if (uuid === null) {
@@ -162,7 +162,7 @@ export async function getUUID () {
       } catch (storeError) {
         console.error('Error storing UUID:', storeError)
         // Return the generated UUID anyway, don't block app startup
-        showErrorToast('Storage Warning', { text2: 'Device ID generated but may not persist', visibilityTime: 4000 })
+        showErrorToast('Storage Warning', { text2: 'Device ID generated but may not persist', err: storeError, visibilityTime: 4000 })
       }
     }
   }
@@ -186,7 +186,7 @@ export async function getStoredNickName () {
     return nickName || ''
   } catch (err15) {
     console.error('nick bname', { err15 })
-    showErrorToast('Nickname Loading Error', { text2: 'Unable to load saved nickname', visibilityTime: 3000 })
+    showErrorToast('Nickname Loading Error', { text2: 'Unable to load saved nickname', err: err15, visibilityTime: 3000 })
   }
   return ''
 }

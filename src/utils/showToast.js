@@ -1,4 +1,5 @@
 import Toast from 'react-native-toast-message'
+import showError from './showErrorToast'
 
 /**
  * Standardized toast notification utility.
@@ -11,6 +12,9 @@ import Toast from 'react-native-toast-message'
  *   showToast({ type: 'info', text1: 'All clear', text2: '12 photos grouped', visibilityTime: 3000 })
  *
  * Defaults: position='top', topOffset=60, visibilityTime=2000, autoHide=true
+ *
+ * `type: 'error'` is delegated to ./showErrorToast, which guarantees a reason
+ * and attaches the long-press detail (full message + stack when available).
  */
 const DEFAULTS = {
   position: 'top',
@@ -24,13 +28,22 @@ const ERROR_DEFAULTS = {
 }
 
 export default function showToast (messageOrOptions, options = {}) {
+  const asObject = typeof messageOrOptions === 'object' && messageOrOptions !== null
+  const type = (asObject ? messageOrOptions.type : undefined) || options.type
+  if (type === 'error') {
+    // Every failure toast goes through showError so the reason is guaranteed
+    // and the detail payload is attached to this toast rather than shared state.
+    const source = asObject ? { ...messageOrOptions, ...options } : { title: messageOrOptions, ...options }
+    showError({ topOffset: DEFAULTS.topOffset, visibilityTime: ERROR_DEFAULTS.visibilityTime, ...source })
+    return
+  }
+
   let config
 
   if (typeof messageOrOptions === 'string') {
     // showToast('message') or showToast('message', { type, text2, topOffset, ... })
     config = {
       ...DEFAULTS,
-      ...(options.type === 'error' ? ERROR_DEFAULTS : {}),
       ...options,
       text1: messageOrOptions
     }
@@ -38,9 +51,8 @@ export default function showToast (messageOrOptions, options = {}) {
     // showToast({ type, text1, text2, ... })
     config = {
       ...DEFAULTS,
-      ...(messageOrOptions.type === 'error' ? ERROR_DEFAULTS : {}),
       ...messageOrOptions,
-      text1: messageOrOptions.text1 || messageOrOptions.text2 || 'Notification'
+      text1: messageOrOptions.text1 || messageOrOptions.text2 || 'Heads up'
     }
   }
 

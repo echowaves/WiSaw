@@ -28,12 +28,13 @@ export default function TandCModalScreen () {
   )
 
   const handleAccept = useCallback(() => {
-    const accepted = reducer.acceptTandC()
+    const result = reducer.acceptTandC()
 
-    if (!accepted) {
+    if (!result.accepted) {
       showErrorToast({
-        title: 'Something went wrong',
+        title: 'Unable to save your choice',
         message: 'Please try again in a moment.',
+        err: result.error,
         topOffset: toastTopOffset
       })
     }

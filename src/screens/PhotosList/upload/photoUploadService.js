@@ -437,7 +437,7 @@ export const processQueuedFile = async ({ queuedItem, topOffset = 100 }) => {
           await src.move(dest)
         }
       } catch (error) {
-        showErrorToast('Error processing image', { text2: error.message || `${error}`, visibilityTime: 4000, topOffset })
+        showErrorToast('Error processing image', { text2: error.message || `${error}`, err: error, visibilityTime: 4000, topOffset })
 
         const fallbackSrc = new FSFile(compressedResult.uri)
         const fallbackDest = new FSFile(localImgUrl)
@@ -604,7 +604,7 @@ const uploadFile = async ({
       console.error('Upload attempt %d/%d failed:', attempt, retries, { error })
 
       if (attempt === retries) {
-        showErrorToast('Upload failed after retries', { text2: `${error}`, topOffset })
+        showErrorToast('Upload failed after retries', { text2: `${error}`, err: error, topOffset })
         return null
       }
 
@@ -846,7 +846,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
         processedItem = { ...processedItem, photo, photoId }
         await updateQueueItem(item, processedItem)
       } catch (photoGenError) {
-        showErrorToast('Unable to create photo', { text2: photoGenError.message || `${photoGenError}`, visibilityTime: 4000, topOffset, onPress: () => alert(`error: ${photoGenError.message || `${photoGenError}`}`) })
+        showErrorToast('Unable to create photo', { text2: photoGenError.message || `${photoGenError}`, err: photoGenError, visibilityTime: 4000, topOffset })
         console.error('Photo generation failed:', photoGenError)
 
         const errorMsg = `${photoGenError}`.toLowerCase()
@@ -901,7 +901,7 @@ export const processCompleteUpload = async ({ item, uuid, topOffset = 100, netAv
     return null
   } catch (error) {
     console.error('Complete upload process error:', error)
-    showErrorToast('Complete upload process error', { text2: error.message || `${error}`, topOffset, onPress: () => alert(`error: ${error.message || `${error}`}`) })
+    showErrorToast('Complete upload process error', { text2: error.message || `${error}`, err: error, topOffset })
 
     // Never delete the queue entry based on an error message — transient
     // server/network errors can mention "not found" or "missing". The loop

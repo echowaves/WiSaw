@@ -301,7 +301,7 @@ const usePhotoUploader = ({ uuid, setUuid, topOffset, netAvailable }) => {
     } catch (error) {
       // Task 2.3: Catch block — log and schedule recovery retry
       console.error('processQueue error:', error)
-      showErrorToast('Upload error', { text2: 'Some uploads may be stuck. Retrying...', topOffset })
+      showErrorToast('Upload error', { text2: 'Some uploads may be stuck. Retrying...', err: error, topOffset })
       if (netAvailable) {
         scheduleRetry(3000)
       }

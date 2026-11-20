@@ -79,7 +79,7 @@ export const shareContent = async ({
     console.error('Sharing error:', error)
 
     // Show error toast
-    showErrorToast('Sharing failed', { text2: error.message || 'Unable to share content', topOffset })
+    showErrorToast('Sharing failed', { text2: error.message || 'Unable to share content', err: error, topOffset })
 
     return { success: false, error: error.message }
   }

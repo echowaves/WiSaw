@@ -10,7 +10,7 @@ export const saveThemePreference = async (isDark) => {
     await Storage.setItem({ key: THEME_KEY, value: isDark ? 'dark' : 'light' })
   } catch (error) {
     console.error('Failed to save theme preference:', error)
-    showErrorToast('Theme Save Error', { text2: 'Unable to save theme preference', visibilityTime: 3000 })
+    showErrorToast('Theme Save Error', { text2: 'Unable to save theme preference', err: error, visibilityTime: 3000 })
   }
 }
 
@@ -20,7 +20,7 @@ export const loadThemePreference = async () => {
     return theme === 'dark'
   } catch (error) {
     console.error('Failed to load theme preference:', error)
-    showErrorToast('Theme Loading Error', { text2: 'Using default light theme', visibilityTime: 3000 })
+    showErrorToast('Theme Loading Error', { text2: 'Using default light theme', err: error, visibilityTime: 3000 })
     return false // Default to light mode
   }
 }
@@ -30,7 +30,7 @@ export const saveFollowSystemPreference = async (followSystem) => {
     await Storage.setItem({ key: FOLLOW_SYSTEM_KEY, value: followSystem ? 'true' : 'false' })
   } catch (error) {
     console.error('Failed to save follow system preference:', error)
-    showErrorToast('Settings Save Error', { text2: 'Unable to save system theme preference', visibilityTime: 3000 })
+    showErrorToast('Settings Save Error', { text2: 'Unable to save system theme preference', err: error, visibilityTime: 3000 })
   }
 }
 
@@ -40,7 +40,7 @@ export const loadFollowSystemPreference = async () => {
     return followSystem === 'true'
   } catch (error) {
     console.error('Failed to load follow system preference:', error)
-    showErrorToast('Theme Settings Error', { text2: 'Unable to load system theme preference', visibilityTime: 3000 })
+    showErrorToast('Theme Settings Error', { text2: 'Unable to load system theme preference', err: error, visibilityTime: 3000 })
     return false // Default to manual control
   }
 }
@@ -66,7 +66,7 @@ export const subscribeToSystemTheme = (callback) => {
     return subscription
   } catch (error) {
     console.error('Failed to subscribe to system theme:', error)
-    showErrorToast('Theme Sync Error', { text2: 'Unable to sync with system theme', visibilityTime: 3000 })
+    showErrorToast('Theme Sync Error', { text2: 'Unable to sync with system theme', err: error, visibilityTime: 3000 })
     return null
   }
 }
