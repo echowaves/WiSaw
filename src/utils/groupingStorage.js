@@ -21,7 +21,8 @@ const DEFAULTS = {
  */
 export async function loadGroupingSettings () {
   try {
-    const result = await AsyncStorage.multiGet([
+    // v3 returns a key→value record with null for absent keys (was [key, value][] pairs)
+    const stored = await AsyncStorage.getMany([
       STORAGE_KEYS.ENABLED,
       STORAGE_KEYS.GROUPING_LEVEL,
       STORAGE_KEYS.OLD_GROUPING_LEVEL,
@@ -30,17 +31,10 @@ export async function loadGroupingSettings () {
       STORAGE_KEYS.LAST_TRIGGER_TS
     ])
 
-    const enabled = result.find(r => r[0] === STORAGE_KEYS.ENABLED)
-    const groupingLevel = result.find(r => r[0] === STORAGE_KEYS.GROUPING_LEVEL)
-    const oldGroupingLevel = result.find(r => r[0] === STORAGE_KEYS.OLD_GROUPING_LEVEL)
-    const lastTriggerLat = result.find(r => r[0] === STORAGE_KEYS.LAST_TRIGGER_LAT)
-    const lastTriggerLon = result.find(r => r[0] === STORAGE_KEYS.LAST_TRIGGER_LON)
-    const lastTriggerTs = result.find(r => r[0] === STORAGE_KEYS.LAST_TRIGGER_TS)
-
     // Migration: read from old key if new key not set, then write to new key and delete old
-    let level = groupingLevel?.[1]
-    if (!level && oldGroupingLevel?.[1]) {
-      level = oldGroupingLevel[1]
+    let level = stored[STORAGE_KEYS.GROUPING_LEVEL]
+    if (!level && stored[STORAGE_KEYS.OLD_GROUPING_LEVEL]) {
+      level = stored[STORAGE_KEYS.OLD_GROUPING_LEVEL]
       try {
         await AsyncStorage.setItem(STORAGE_KEYS.GROUPING_LEVEL, level)
         await AsyncStorage.removeItem(STORAGE_KEYS.OLD_GROUPING_LEVEL)
@@ -50,11 +44,11 @@ export async function loadGroupingSettings () {
     }
 
     return {
-      enabled: enabled?.[1] !== 'false',
+      enabled: stored[STORAGE_KEYS.ENABLED] !== 'false',
       groupingLevel: level || DEFAULTS.GROUPING_LEVEL,
-      lastTriggerLat: lastTriggerLat?.[1] ? parseFloat(lastTriggerLat[1]) : null,
-      lastTriggerLon: lastTriggerLon?.[1] ? parseFloat(lastTriggerLon[1]) : null,
-      lastTriggerTs: lastTriggerTs?.[1] ? parseInt(lastTriggerTs[1], 10) : null
+      lastTriggerLat: stored[STORAGE_KEYS.LAST_TRIGGER_LAT] ? parseFloat(stored[STORAGE_KEYS.LAST_TRIGGER_LAT]) : null,
+      lastTriggerLon: stored[STORAGE_KEYS.LAST_TRIGGER_LON] ? parseFloat(stored[STORAGE_KEYS.LAST_TRIGGER_LON]) : null,
+      lastTriggerTs: stored[STORAGE_KEYS.LAST_TRIGGER_TS] ? parseInt(stored[STORAGE_KEYS.LAST_TRIGGER_TS], 10) : null
     }
   } catch (error) {
     console.warn('[groupingStorage] Failed to load settings:', error)
@@ -99,10 +93,10 @@ export async function saveGroupingLevel (groupingLevel) {
  */
 export async function saveLastTriggerLocation (lat, lon) {
   try {
-    await AsyncStorage.multiSet([
-      [STORAGE_KEYS.LAST_TRIGGER_LAT, String(lat)],
-      [STORAGE_KEYS.LAST_TRIGGER_LON, String(lon)]
-    ])
+    await AsyncStorage.setMany({
+      [STORAGE_KEYS.LAST_TRIGGER_LAT]: String(lat),
+      [STORAGE_KEYS.LAST_TRIGGER_LON]: String(lon)
+    })
   } catch (error) {
     console.warn('[groupingStorage] Failed to save last trigger location:', error)
   }
