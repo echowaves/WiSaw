@@ -13,10 +13,17 @@
   },
   "scripts": {
     "start": "npx expo start --dev-client",
+    "ios": "sh scripts/dev-env.sh node scripts/run-ios.js",
+    "ios:install": "node scripts/install-sim-app.js",
+    "android": "sh scripts/dev-env.sh npx expo run:android",
+    "start:ios": "sh scripts/dev-env.sh npx expo start --dev-client --ios",
+    "start:android": "sh scripts/dev-env.sh npx expo start --dev-client --android",
     "build": "source .env && node scripts/sync-eas-env.js && eas build",
     "publish:prod": "source .env && eas update --branch production",
     "lint": "npx ts-standard",
     "lint:fix": "npx ts-standard --fix",
+    "clear": "npx react-native-clean-project --keep-node-modules --keep-brew --keep-pods",
+    "reset:simulator": "xcrun simctl shutdown all && xcrun simctl erase all",
     "audit:theme": "node scripts/theme-contrast-audit.js --gate",
     "audit:theme:report": "node scripts/theme-contrast-audit.js"
   },

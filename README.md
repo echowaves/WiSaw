@@ -134,6 +134,8 @@ WiSaw/
 - Expo CLI
 - iOS Simulator (for iOS development)
 - Android Studio/Emulator (for Android development)
+- JDK 17+ for local Android builds (`brew install openjdk@21`) — Gradle 9 will not start
+  on the Java 8 that macOS used to ship, and macOS itself has no runtime any more.
 
 ### Installation
 
@@ -171,20 +173,36 @@ WiSaw/
 # Start Expo development server
 npm start
 
-# Run on iOS simulator
+# Build the dev client, launch it, and copy the build onto every booted simulator
 npm run ios
-
-# Run on Android emulator
 npm run android
 
+# Build onto one specific simulator instead of Expo's pick (any expo run:ios flag works)
+npm run ios -- --device "iPhone 17 Pro"
+
+# Push the newest existing build onto every booted simulator, without rebuilding
+npm run ios:install
+
+# Dev server only — boot the simulator/emulator against an already-built dev client
+npm run start:ios
+npm run start:android
+```
+
+`ios`, `android`, `start:ios` and `start:android` all go through `scripts/dev-env.sh`,
+which loads `.env` (app.config.js reads the API endpoints out of `process.env`) and points
+`JAVA_HOME` at a JDK 17+ for Gradle.
+
+```bash
 # Build for production
 npm run build
 
 # Deploy to production
 npm run publish:prod
 
-# Clear cache and reset
+# Clear React Native / Metro / Watchman / CocoaPods caches (keeps node_modules)
 npm run clear
+
+# Shut down and erase every iOS simulator — wipes their app data
 npm run reset:simulator
 ```
 
