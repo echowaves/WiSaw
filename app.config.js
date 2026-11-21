@@ -64,7 +64,29 @@ module.exports = {
         /* iOS mods... */
       },
       android: {
-        /* Android mods... */
+        // Play infers required hardware features from the portrait orientation lock and from
+        // NetInfo's WifiManager use, which blocks Phone/Tablet/Desktop/Android XR installs.
+        // Declaring both optional keeps the portrait lock and NetInfo while restoring availability.
+        manifest: (config) => {
+          const OPTIONAL_FEATURES = [
+            'android.hardware.screen.portrait',
+            'android.hardware.wifi'
+          ]
+          const manifest = config.modResults.manifest
+          const features = manifest['uses-feature'] || []
+          OPTIONAL_FEATURES.forEach((name) => {
+            const existing = features.find(
+              (feature) => feature.$ && feature.$['android:name'] === name
+            )
+            if (existing) {
+              existing.$['android:required'] = 'false'
+            } else {
+              features.push({ $: { 'android:name': name, 'android:required': 'false' } })
+            }
+          })
+          manifest['uses-feature'] = features
+          return config
+        }
       }
     },
     ios: {
