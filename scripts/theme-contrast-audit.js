@@ -131,7 +131,8 @@ function loadThemeTokens () {
 
 const SURFACE_NAMES = ['BACKGROUND', 'CARD_BACKGROUND', 'SURFACE', 'HEADER_BACKGROUND', 'INTERACTIVE_BACKGROUND',
   'STATUS_ERROR_BACKGROUND', 'STATUS_SUCCESS_BACKGROUND', 'STATUS_PENDING_BACKGROUND', 'helpCardBackground',
-  'inputFooterBackground', 'disabledBackground', 'interactiveBackground']
+  'inputFooterBackground', 'disabledBackground', 'interactiveBackground',
+  'CHIP_SUCCESS_FILL', 'CHIP_ERROR_FILL']
 
 // Translucent surfaces are flattened over the mode's own BACKGROUND, which is opaque in both modes.
 function surfacesFor (tokens) {

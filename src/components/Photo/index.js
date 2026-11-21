@@ -314,7 +314,7 @@ const createStyles = (theme) =>
       alignItems: 'center'
     },
     addCommentButton: {
-      backgroundColor: `${theme.STATUS_SUCCESS}15`,
+      backgroundColor: theme.CHIP_SUCCESS_FILL,
       borderRadius: 25,
       paddingHorizontal: 8,
       paddingVertical: 6,
@@ -435,7 +435,7 @@ const createStyles = (theme) =>
       gap: 6
     },
     aiTag: {
-      backgroundColor: `${theme.STATUS_SUCCESS}15`,
+      backgroundColor: theme.CHIP_SUCCESS_FILL,
       borderRadius: 20,
       paddingHorizontal: 10,
       paddingVertical: 5,
@@ -456,7 +456,7 @@ const createStyles = (theme) =>
       fontWeight: '600'
     },
     aiModerationTag: {
-      backgroundColor: `${theme.STATUS_ERROR}15`,
+      backgroundColor: theme.CHIP_ERROR_FILL,
       borderRadius: 20,
       paddingHorizontal: 10,
       paddingVertical: 5,

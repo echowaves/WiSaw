@@ -41,7 +41,9 @@ const ModalInputText = ({ route }) => {
         backgroundColor: currentTheme.BACKGROUND
       },
       photoContainer: {
-        backgroundColor: currentTheme.CARD_BACKGROUND,
+        // BACKGROUND, not CARD_BACKGROUND: the container renders bare while the
+        // thumb is missing or loading, and this keeps those pixels unchanged.
+        backgroundColor: currentTheme.BACKGROUND,
         alignSelf: 'center',
         marginBottom: 20,
         borderRadius: 16,

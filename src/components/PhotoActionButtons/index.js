@@ -190,7 +190,7 @@ const createStyles = (theme) =>
       alignItems: 'center'
     },
     actionButton: {
-      backgroundColor: `${theme.STATUS_SUCCESS}15`,
+      backgroundColor: theme.CHIP_SUCCESS_FILL,
       borderRadius: 20,
       paddingHorizontal: 3,
       paddingVertical: 2,

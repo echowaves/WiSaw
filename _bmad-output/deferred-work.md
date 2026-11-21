@@ -49,3 +49,10 @@ Items noticed while working that are deliberately out of scope for the current c
 - **What:** instruction files state React Native 0.81.5 / Expo 54.0.25, while `package.json` at `e7611a86` is React Native 0.88.1 / Expo ~58.0.21 with `targetSdkVersion: 36`. Plugin behaviour differs between those majors, so guidance read from AGENTS.md can be wrong for the tree it describes.
 - **Why deferred:** editing agent instruction files is out of scope for a permission change and belongs to `bmad-project-context`.
 - **Suggested first step:** run the project-context adoption pass so the pinned versions, and any version-dependent rules, match the current lockfile.
+
+## Secret's disabled submit keeps shadow props over a 5%-alpha fill
+
+- **Raised:** 2026-11-21, during `plan-ios-shadow-opaque-backgrounds` (review triage row 8; source plan `_bmad-output/plan-ios-shadow-opaque-backgrounds.md`).
+- **What:** `src/screens/Secret/styles.js:74-83` merges `submitButtonDisabled` over `submitButton`, inheriting `shadowColor: CONST.MAIN_COLOR` and `shadowRadius: 8`, while setting `backgroundColor: theme.BACKGROUND_DISABLED` — `rgba(85,95,97,.05)` light / `rgba(255,255,255,.05)` dark (`src/theme/sharedStyles.js:49,123`). It violates the invariant "a shadow lives only on an opaque fill" and stays silent today only because the merged style also sets `shadowOpacity: 0`.
+- **Why deferred:** pre-existing, untouched by that plan, and any change to that opacity would re-trigger Fabric's shadow advice.
+- **Suggested first step:** render Secret with the submit disabled on an iOS build — if no advice logs, drop the inherited `shadowColor`/`shadowOffset`/`shadowRadius` from `submitButtonDisabled` explicitly rather than relying on `shadowOpacity: 0`.

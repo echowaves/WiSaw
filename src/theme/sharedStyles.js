@@ -29,7 +29,10 @@ export const LIGHT_THEME = {
   CARD_BACKGROUND: '#FFFFFF',
   CARD_BORDER: 'rgba(0, 0, 0, 0.06)',
   CARD_SHADOW: 'rgba(0, 0, 0, 0.25)',
-  SURFACE: 'rgba(255, 255, 255, 0.98)',
+  // Opaque by requirement: views that paint this and keep a shadow (the photo
+  // action card) only get Fabric's cheap shadowPath above 0.999 alpha, so the
+  // old .98 made them rasterise their shadow and log advice on every redraw.
+  SURFACE: '#FFFFFF',
   BORDER_LIGHT: 'rgba(0, 0, 0, 0.08)',
 
   // Header styles
@@ -65,6 +68,12 @@ export const LIGHT_THEME = {
   STATUS_PENDING_TEXT: '#B45309',
   STATUS_INFO: '#1D4ED8',
   STATUS_INFO_BACKGROUND: 'rgba(29, 78, 216, 0.1)',
+
+  // Opaque fills for shadowed status chips. iOS Fabric only builds an efficient
+  // shadowPath when the shadowed view's own background is opaque, so these are
+  // the exact composite of STATUS_* at 8% alpha (hex 15) over CARD_BACKGROUND.
+  CHIP_SUCCESS_FILL: '#EBF3F8',
+  CHIP_ERROR_FILL: '#FAECEE',
 
   // Secondary accent (privacy / identity surfaces). Must carry text on its own tint.
   ACCENT_SECONDARY: '#0F766E',
@@ -139,6 +148,11 @@ export const DARK_THEME = {
   STATUS_PENDING_TEXT: '#FBBF24',
   STATUS_INFO: '#60A5FA',
   STATUS_INFO_BACKGROUND: 'rgba(96, 165, 250, 0.18)',
+
+  // Opaque fills for shadowed status chips — see the note in LIGHT_THEME. Exact
+  // composite of STATUS_* at 8% alpha (hex 15) over this mode's CARD_BACKGROUND.
+  CHIP_SUCCESS_FILL: '#232D30',
+  CHIP_ERROR_FILL: '#312426',
 
   // Secondary accent (privacy / identity surfaces)
   ACCENT_SECONDARY: '#50E3C2',
