@@ -4,7 +4,7 @@ import CachedImage from 'expo-cached-image'
 import * as Haptics from 'expo-haptics'
 import { useAtom } from 'jotai'
 import PropTypes from 'prop-types'
-import React, { useCallback, useRef } from 'react'
+import React, { memo, useCallback, useRef } from 'react'
 import {
   Animated,
   StyleSheet,
@@ -17,7 +17,7 @@ import { getTheme } from '../../theme/sharedStyles'
 import isValidImageUri from '../../utils/isValidImageUri'
 import { COMMENT_SECTION_HEIGHT } from '../../utils/photoListHelpers'
 
-const ExpandableThumb = ({
+const ExpandableThumb = memo(function ExpandableThumb ({
   thumbWidth = null,
   thumbHeight = null,
   index,
@@ -27,7 +27,7 @@ const ExpandableThumb = ({
   extraHeight = 0,
   onPress,
   onLongPress
-}) => {
+}) {
   const [isDark] = useAtom(isDarkMode)
   const theme = getTheme(isDark)
 
@@ -234,7 +234,7 @@ const ExpandableThumb = ({
       </TouchableOpacity>
     </View>
   )
-}
+})
 
 const commentStyles = StyleSheet.create({
   commentStatItem: {

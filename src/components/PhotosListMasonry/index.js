@@ -103,6 +103,12 @@ const PhotosListMasonry = ({
     return 0
   }, [activeSegment])
 
+  // Stable handler: ExpandableThumb invokes onPress(item), so one callback serves every cell
+  // and React.memo on the thumb can actually skip re-renders.
+  const handleThumbPress = useCallback((photo) => {
+    toggleExpand(photo?.id ?? photo)
+  }, [toggleExpand])
+
   // Render function for individual masonry items
   const renderMasonryItem = useCallback(
     ({ item, index, dimensions, extraHeight, isExpanded }) => {
@@ -172,7 +178,7 @@ const PhotosListMasonry = ({
           activeSegment={activeSegment}
           showComments={shouldShowComments}
           extraHeight={extraHeight || 0}
-          onPress={() => toggleExpand(item.id)}
+          onPress={handleThumbPress}
           onLongPress={onPhotoLongPress}
         />
       )
@@ -180,6 +186,7 @@ const PhotosListMasonry = ({
     [
       activeSegment,
       toggleExpand,
+      handleThumbPress,
       onPhotoLongPress,
       removePhotoContext,
       photosById,
@@ -240,7 +247,9 @@ const PhotosListMasonry = ({
         scrollEventThrottle={16}
         initialNumToRender={30}
         maxToRenderPerBatch={30}
-        windowSize={99}
+        // Render window in viewport lengths, total. The library bands at 300px, so 15 keeps
+        // ~7 screens of buffer each way; anything near the content height disables virtualisation.
+        windowSize={15}
         removeClippedSubviews={false}
         updateCellsBatchingPeriod={16}
         style={{

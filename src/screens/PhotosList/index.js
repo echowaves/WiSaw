@@ -491,7 +491,6 @@ const PhotosList = ({ searchFromUrl }) => {
               activeSegment={1}
               photosList={photosList}
               segmentConfig={segmentConfig}
-              columns={{ 402: 2, 440: 3, 834: 5, 1024: 7, default: 9 }}
               masonryRef={masonryRef}
               searchTerm={searchTerm}
               uuid={uuid}
